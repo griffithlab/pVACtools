@@ -10,7 +10,7 @@ use vars qw($opt_i $opt_f $opt_o $opt_c $opt_b);
 getopts('i:f:o:c:b:');
 
 
-if(! $opt_f || ! $opt_i || ! $opt_o || ! $opt_c || ! $opt_b){
+if(! $opt_f || ! $opt_i || ! $opt_o){
 
    print "Usage: $0\n";
    print "-i <input list of variants>\n";
