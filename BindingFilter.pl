@@ -66,10 +66,10 @@ if(! -e $variant_file){
        if(defined($variants{"header"})){
 		open(OUT,">$output_file") || die "Can't open $output_file for writing.\n";	
             print OUT join("\t",($variants{"header"},
-                                     "GeneName","MutationEffect","HLAallele","PeptideLength",
-                                     'SubPeptidePosition','MT Score',
-                                     'WT Score','MT Epitope Seq',
-                                     'WT Epitope Seq','Fold Change')) . "\n";
+                                     "GeneName","HLAallele","PeptideLength",
+                                     'SubPeptidePosition','MTScore',
+                                     'WTScore','MTEpitopeSeq',
+                                     'WTEpitopeSeq','FoldChange')) . "\n";
         }
 
     # read in the netMHC predictions and filter
@@ -185,7 +185,7 @@ foreach my $mode (sort keys %prediction) {
                         my $key = join("\t",$gene,$$entry->{point_mutation});
                         if(defined($variants{$key})){                            
                             print OUT join("\t", ($variants{$key},
-                                                      $gene,$$entry->{point_mutation},$$entry->{allele},
+                                                      $gene,$$entry->{allele},
                                                       $$entry->{length},$$entry->{sub_peptide_position},$$entry->{mt_score},
                                                       $$entry->{wt_score},$$entry->{mt_epitope_seq},
                                                       $$entry->{wt_epitope_seq},$$entry->{fold_change})) . "\n";
