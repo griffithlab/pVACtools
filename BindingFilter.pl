@@ -203,3 +203,25 @@ foreach my $mode (sort keys %prediction) {
 close (OUT);
 close (IFH);
 
+__END__
+
+OUTPUT FILE : 
+1	chromosome_name
+2	start
+3	stop
+4	reference
+5	variant
+6	gene_name
+7	transcript_name
+8	amino_acid_change
+9	ensembl_gene_id
+10	wildtype_amino_acid_sequence
+11	GeneName
+12	HLAallele
+13	PeptideLength
+14	SubPeptidePosition
+15	MTScore
+16	WTScore
+17	MTEpitopeSeq
+18	WTEpitopeSeq
+19	FoldChange
