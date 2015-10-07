@@ -1,3 +1,5 @@
+#!/usr/bin/env perl
+
 # FOR NETMHC3.4 : Parses output from NetMHC3.4 for MHC Class I epitope prediction; Uses a special key file that could be generated using GenerateFastaKey.pl --help.The parsed TSV file contains predictions for only those epitopes that contain the mutant SNV
 
 use strict;

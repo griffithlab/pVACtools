@@ -1,3 +1,5 @@
+#!/usr/bin/env perl
+
 # Based on myParseReportsTopGenesTopAlleleStringent_4.pl by TWYLIE (Feb 2012)
 #Takes in a FOF with parsed NetMHC files for different allele-length combinations and outputs best candidates per gene based on binding affinity.
 use strict;
