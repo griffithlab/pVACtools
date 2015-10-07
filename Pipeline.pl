@@ -12,7 +12,7 @@ sub usage { "Usage: $0
 \t --sample-name Name of Sample ; will be used as prefix for output files
 \t --netmhc-path Path to local NetMHC3.4 installation
 \t --allele Allele name to predict epitope prediction. Multiple alleles can be specified using a comma-separated list. For a list of available alleles, use: netMHC -A 
-\t --fasta-length length of the peptide sequences in FASTA file ; deafult 21
+\t --fasta-length length of the peptide sequences in FASTA file ; default 21
 \t --epitope-length length of subpeptides(epitopes) to predict ; Multiple lengths can be specified using a comma-separated list
 \t --binding-cutoff ; report only epitopes where the mutant allele has ic50 binding scores below this value ; default 500
 \t --min-fc ; Minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default 
