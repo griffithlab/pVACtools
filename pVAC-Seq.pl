@@ -76,7 +76,6 @@ if(! -d $output_dir || ! -w $output_dir || ! -e $output_dir){
 my $fasta_file = $sample_name.'_'.$peptide_sequence_length.'.fa';
 my $fasta_key_file = $sample_name.'_'.$peptide_sequence_length.'.key';
 
-#$output_dir = s/" "/"\ "/g;
 
 ### Generate Variant FASTA Seq ###
 my $fa_cmd = "perl bin/GenerateVariantSequences.pl -i $input_file  -o  $output_dir/$fasta_file -l $peptide_sequence_length";
