@@ -83,11 +83,11 @@ my $fasta_key_file = $sample_name.'_'.$peptide_sequence_length.'.key';
 
 
 ### Generate Variant FASTA Seq ###
-system ("perl GenerateVariantSequences.pl -i ".$input_file." -o ".$fasta_file." -l ". $peptide_sequence_length);
+system ("perl bin/GenerateVariantSequences.pl -i ".$input_file." -o ".$fasta_file." -l ". $peptide_sequence_length);
 
 
 ### Generate FASTA Key File ###
-system ("perl GenerateFastaKey.pl -i ".$fasta_file." -o ".$fasta_key_file);
+system ("perl bin/GenerateFastaKey.pl -i ".$fasta_file." -o ".$fasta_key_file);
 
 
 
@@ -129,7 +129,7 @@ foreach my $epl (@epitope_len)
 	{
 		my $net_out = $sample_name.'.'.$a.'.'.$epl.'.netmhc.xls';
 		my $net_parsed = $sample_name.'.'.$a.'.'.$epl.'.netmhc.parsed';
-		system ("perl ParseOutputNetmhc.pl -i ".$net_out." -o ".$net_parsed." -k ".$fasta_key_file);
+		system ("perl bin/ParseOutputNetmhc.pl -i ".$net_out." -o ".$net_parsed." -k ".$fasta_key_file);
 		print $fh $net_parsed ."\n";
 	}
 
@@ -137,7 +137,7 @@ foreach my $epl (@epitope_len)
 close $fh;	
 
 ## Binding Filters ##
-my $b_cmd = "perl BindingFilter.pl -i $input_file -f $fof -o $output_file -c $minimum_fold_change -b $binding_threshold";
+my $b_cmd = "perl bin/BindingFilter.pl -i $input_file -f $fof -o $output_file -c $minimum_fold_change -b $binding_threshold";
 system ($b_cmd);
 
 
