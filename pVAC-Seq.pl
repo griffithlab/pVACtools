@@ -19,12 +19,12 @@ sub usage { "Usage: $0
 \t --output-dir DIRNAME ; Output directory for writing all result files
 "}
 
-my $input_file='';
+my $input_file;
 my $output_dir;
-my $netmhc_path='';
+my $netmhc_path;
 my $binding_threshold = 500;
 my $minimum_fold_change = 0;
-my $sample_name ='';
+my $sample_name;
 my @allele;
 my @epitope_len;
 my $peptide_sequence_length = 21;
@@ -112,7 +112,9 @@ foreach my $epl (@epitope_len)
 		if (grep {$_ eq $a} @allele_arr ) {
 			my $net_out = $sample_name.'.'.$a.'.'.$epl.'.netmhc.xls';
 			print "\n#RUNNING NETMHC ON ALLELE $a AND EPITOPE LENGTH $epl\n";
-	 		my $tmp = `$netmhc_path -a $a -l $epl $fasta_file -x $output_dir/$net_out`;
+			my $netmhc_cmd = '$netmhc_path -a $a -l $epl $output_dir/$fasta_file -x $output_dir/$net_out';
+	 		my $tmp = `$netmhc_path -a $a -l $epl $output_dir/$fasta_file -x $output_dir/$net_out`;
+
 		}	
 		else
 		{
@@ -125,16 +127,16 @@ foreach my $epl (@epitope_len)
 
 
 ### Parse NETMHC results and create FOF with file names ## 
-my $fof = $sample_name.'.fof';
+my $fof = $output_dir.'/'.$sample_name.'.fof';
 open(my $fh, '>', $fof) or die "Could not open file '$fof'";
 
 foreach my $epl (@epitope_len)
 {
 	foreach my $a (@allele)
 	{
-		my $net_out = $sample_name.'.'.$a.'.'.$epl.'.netmhc.xls';
-		my $net_parsed = $sample_name.'.'.$a.'.'.$epl.'.netmhc.parsed';
-		my $parse_cmd = "perl bin/ParseOutputNetmhc.pl -i $net_out  -o $output_dir/$net_parsed  -k $output_dir/$fasta_key_file";
+		my $net_out =$output_dir.'/'. $sample_name.'.'.$a.'.'.$epl.'.netmhc.xls';
+		my $net_parsed = $output_dir.'/'.$sample_name.'.'.$a.'.'.$epl.'.netmhc.parsed';
+		my $parse_cmd = "perl bin/ParseOutputNetmhc.pl -i $net_out  -o $net_parsed  -k $output_dir/$fasta_key_file";
 		print "\n#PARSING NETMHC OUTPUT:";
 		my $stderr_c = `$parse_cmd`;
 		if ($stderr_c =~ /^Usage/) {die "ERROR: Parsing NETMHC output";}
