@@ -3,8 +3,11 @@ A cancer immunotherapy pipeline for the identification of **p**ersonalized **V**
 
 ## License
 This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0">NPOSL-3.0</a>.
-
-## Inputs for pVAC-Seq.pl :
+## Pipeline Overview
+![alt text][overview]
+[overview]:
+https://github.com/jhundal/src/blob/master/bin/images/pvacseq-code.jpg
+## Inputs for pVAC-Seq.pl
 
 1. <b>NetMHC installation path: </b>Since we use NetMHC to predict binding affinities, it is one of the major pre-requisites to run pVAC-Seq.pl.
   Please download NetMHC using appropriate licensing. Download and installation instructions are provided on the website:
