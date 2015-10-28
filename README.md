@@ -7,16 +7,26 @@ This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0
 ![alt text][overview]
 [overview]:
 https://github.com/jhundal/src/blob/master/bin/images/pvacseq-code.jpg
+
+## Installation Instructions
+1. <b>Clone pVAC-Seq git repository: </b>
+        Type the following command on your Terminal(for Mac and Linux users) or the command prompt (for Windows users):
+          `git clone git@github.com:griffithlab/pVAC-Seq.git`
+        For more information, follow instructions for cloning a git repo :               https://help.github.com/articles/cloning-a-repository/
+2. <b> Install NetMHC </b> :
+        Since we use NetMHC to predict binding affinities, it is one of the major pre-requisites to run pVAC-Seq.pl.
+        Please download NetMHC using appropriate licensing. Download and installation instructions are provided on the website:
+        http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?netMHC
+
+      Also note that there might be a minor bug in the NetMHC package, which can be fixed as follows :
+      http://www.cbs.dtu.dk/services/NetMHC/correct_bug.php
+  
+      Once NetMHC is properly installed and tested, pVAC-Seq.pl expects the path to the installtion directory.
+
+
 ## Inputs for pVAC-Seq.pl
 
-1. <b>NetMHC installation path: </b>Since we use NetMHC to predict binding affinities, it is one of the major pre-requisites to run pVAC-Seq.pl.
-  Please download NetMHC using appropriate licensing. Download and installation instructions are provided on the website:
-http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?netMHC
-
-  Also note that there might be a minor bug in the NetMHC package, which can be fixed as follows :
-http://www.cbs.dtu.dk/services/NetMHC/correct_bug.php
-  
-  Once NetMHC is properly installed and tested, pVAC-Seq.pl expects the path to the installtion directory.
+1. <b>NetMHC installation path: </b> Provide path to the NetMHC installation directory (please see above for installation instructions)
 
 2. <b>TSV file of annotated variants</b>: The program expects an annotated file of variants in tab-separated format. Any choice of aligner or variant caller can be used. The following columns are expected as part of the TSV file (in the same order) along with the header row:
 
