@@ -9,7 +9,6 @@ This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0
 https://github.com/jhundal/src/blob/master/bin/images/pvacseq-code.jpg
 
 ## Installation Instructions
-###Install pVAC-Seq
 pVAC-Seq could either be used via cloning the git repo or by downloading the tarball.
 We strongly recommend the users to access it via git repo since updates are pushed before they make it to the stable release.
 
@@ -34,7 +33,8 @@ We strongly recommend the users to access it via git repo since updates are push
  * Change/Add/Adjust the perl shebang line of each .pl and .sh script in the bin/ folder as needed
 
 
-###<b> Install NetMHC </b>:
+##Pre-requisites
+###<b>Install NetMHC </b>:
 
 Since we use NetMHC to predict binding affinities, it is one of the major pre-requisites to run pVAC-Seq.pl.
 Please download NetMHC using appropriate licensing. Download and installation instructions are provided on the website:
