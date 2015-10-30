@@ -15,8 +15,9 @@ We strongly recommend the users to access it via git repo since updates are push
 
  1. <b> OPTION 1 : Clone pVAC-Seq git repository: </b>
         Type the following command on your Terminal(for Mac and Linux users) or the command prompt (for Windows users):
-          `git clone git@github.com:griffithlab/pVAC-Seq.git  ` 
-        For more information, follow instructions for cloning a git repo :                               https://help.github.com/articles/cloning-a-repository/
+   `git clone git@github.com:griffithlab/pVAC-Seq.git  ` 
+  
+ For more information, follow instructions for cloning a git repo :                               				  https://help.github.com/articles/cloning-a-repository/
 
  2. <b> OPTION 2 : Download and decompress the tar ball</b>: 
 
@@ -33,7 +34,7 @@ We strongly recommend the users to access it via git repo since updates are push
  * Change/Add/Adjust the perl shebang line of each .pl and .sh script in the bin/ folder as needed
 
 
-###<b> Install NetMHC </b> :
+###<b> Install NetMHC </b>:
 
 Since we use NetMHC to predict binding affinities, it is one of the major pre-requisites to run pVAC-Seq.pl.
 Please download NetMHC using appropriate licensing. Download and installation instructions are provided on the website:
