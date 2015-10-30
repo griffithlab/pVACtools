@@ -34,7 +34,7 @@ We strongly recommend the users to access it via git repo since updates are push
 
 
 ##Pre-requisites
-###<b>Install NetMHC </b>:
+###<b>NetMHC </b>
 
 Since we use NetMHC to predict binding affinities, it is one of the major pre-requisites to run pVAC-Seq.pl.
 Please download NetMHC using appropriate licensing. Download and installation instructions are provided on the website:
