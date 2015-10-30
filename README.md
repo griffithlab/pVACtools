@@ -9,19 +9,40 @@ This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0
 https://github.com/jhundal/src/blob/master/bin/images/pvacseq-code.jpg
 
 ## Installation Instructions
-1. <b>Clone pVAC-Seq git repository: </b>
-        Type the following command on your Terminal(for Mac and Linux users) or the command prompt (for Windows users):
-          `git clone git@github.com:griffithlab/pVAC-Seq.git`
-        For more information, follow instructions for cloning a git repo :               https://help.github.com/articles/cloning-a-repository/
-2. <b> Install NetMHC </b> :
-        Since we use NetMHC to predict binding affinities, it is one of the major pre-requisites to run pVAC-Seq.pl.
-        Please download NetMHC using appropriate licensing. Download and installation instructions are provided on the website:
-        http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?netMHC
+###Install pVAC-Seq
+pVAC-Seq could either be used via cloning the git repo or by downloading the tarball.
+We strongly recommend the users to access it via git repo since updates are pushed before they make it to the stable release.
 
-      Also note that there might be a minor bug in the NetMHC package, which can be fixed as follows :
-      http://www.cbs.dtu.dk/services/NetMHC/correct_bug.php
-  
-      Once NetMHC is properly installed and tested, pVAC-Seq.pl expects the path to the installtion directory.
+ 1. <b> OPTION 1 : Clone pVAC-Seq git repository: </b>
+        Type the following command on your Terminal(for Mac and Linux users) or the command prompt (for Windows users):
+          `git clone git@github.com:griffithlab/pVAC-Seq.git  ` 
+        For more information, follow instructions for cloning a git repo :                               https://help.github.com/articles/cloning-a-repository/
+
+ 2. <b> OPTION 2 : Download and decompress the tar ball</b>: 
+
+ * `gunzip pVAC-Seq-1.0.0-beta.tar.gz`
+ * `tar -xzf pVAC-Seq-1.0.0-beta.tar.gz`
+ * Make sure you see the following directories:
+ 
+                        LICENSE
+                        README.md
+                        bin/
+                        pVAC-Seq.pl
+                        test_data/`
+
+ * Change/Add/Adjust the perl shebang line of each .pl and .sh script in the bin/ folder as needed
+
+
+###<b> Install NetMHC </b> :
+
+Since we use NetMHC to predict binding affinities, it is one of the major pre-requisites to run pVAC-Seq.pl.
+Please download NetMHC using appropriate licensing. Download and installation instructions are provided on the website:
+  http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?netMHC
+
+   Also note that there might be a minor bug in the NetMHC package, which can be fixed as follows :
+	 http://www.cbs.dtu.dk/services/NetMHC/correct_bug.php
+	 
+  Once NetMHC is properly installed and tested, pVAC-Seq.pl expects the path to the installtion directory.
 
 
 ## Inputs for pVAC-Seq.pl
