@@ -30,7 +30,7 @@ We strongly recommend the users to access it via git repo since updates are push
                         pVAC-Seq.pl
                         test_data/`
 
- * Change/Add/Adjust the perl shebang line of each .pl and .sh script in the bin/ folder as needed
+ * Adjust the perl shebang line of each .pl and .sh script in the bin/ folder as needed
  * Execute(run) pVAC-Seq pipeline by typing the following command and providing necessary inputs :
  
  	`./pVAC-Seq.pl`
