@@ -20,6 +20,7 @@ We strongly recommend the users to access it via git repo since updates are push
 
  2. <b> OPTION 2 : Download and decompress the tar ball</b>: 
 
+ * `wget https://github.com/griffithlab/pVAC-Seq/archive/1.0.0-beta.tar.gz -O pVAC-Seq-1.0.0-beta.tar.gz` 
  * `gunzip pVAC-Seq-1.0.0-beta.tar.gz`
  * `tar -xzf pVAC-Seq-1.0.0-beta.tar.gz`
  * Make sure you see the following directories:
@@ -30,7 +31,7 @@ We strongly recommend the users to access it via git repo since updates are push
                         pVAC-Seq.pl
                         test_data/`
 
- * Adjust the perl shebang line of each .pl and .sh script in the bin/ folder as needed
+ * Adjust the perl shebang line of each .pl and .sh script in the bin/ folder as needed (should not be neccessary on most systems)
  * Execute(run) pVAC-Seq pipeline by typing the following command and providing necessary inputs :
  
  	`./pVAC-Seq.pl`
