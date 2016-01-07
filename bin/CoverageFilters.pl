@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-
 use strict;
 use warnings;
 use Data::Dumper ;
@@ -56,36 +54,35 @@ or die usage;
 
 if(! -e $input_file){
    die  "Input File $input_file doesn't exist.\n" ;
-   print usage;
-}   
-    #
-if(!# $output_file) {
-    #    die "Output File not specified.\n";
-}   #
-    #
-if (  (defined $norm ) && ($norm eq 1)){
-    #    print "Normal DNA is provided. Normal Coverage Cutoff is ".$norm_cov." and VAF cutoff is ".$norm_vaf."\n";
-   }#
-else#
+}
+
+if(! $output_file) {
+	die "Output File not specified.\n";
+}
+
+if ( (defined $norm ) && ($norm eq 1)){
+   	print "Normal DNA is provided. Normal Coverage Cutoff is ".$norm_cov." and VAF cutoff is ".$norm_vaf."\n";
+   }
+else
    {
-    #    print "No Normal DNA will be used for filtering\n";
-    s    
+   	print "No Normal DNA will be used for filtering\n";
+   	
    }
-    #
-    s
-if (# (defined $tdna) && ($tdna eq 1)){
-         print "Tumor DNA is provided. Tumor DNA Coverage Cutoff is ".$dna_tum_cov." and VAF cutoff is ".$dna_tum_vaf."\n";
-   }#
-elses
-   {s
-         print "No Tumor DNA will be used for filtering.\n";
-    #    
+
+
+if ( (defined $tdna) && ($tdna eq 1)){
+   	print "Tumor DNA is provided. Tumor DNA Coverage Cutoff is ".$dna_tum_cov." and VAF cutoff is ".$dna_tum_vaf."\n";
    }
-    s
-    
-if (i (defined $trna ) && ($trna eq 1)){
-         print "Tumor RNA is provided. Tumor RNA Coverage Cutoff is ".$rna_tum_cov." and VAF cutoff is ".$rna_tum_vaf."\n";
-   }e
+else
+   {
+   	print "No Tumor DNA will be used for filtering.\n";
+   	
+   }
+
+
+if ( (defined $trna ) && ($trna eq 1)){
+   	print "Tumor RNA is provided. Tumor RNA Coverage Cutoff is ".$rna_tum_cov." and VAF cutoff is ".$rna_tum_vaf."\n";
+   }
 else
    {
    	print "No Tumor RNA will be used for filtering\n";
