@@ -1,5 +1,6 @@
 # pVAC-Seq 
 A cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq) 
+http://www.genomemedicine.com/content/8/1/11
 
 ## License
 This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0">NPOSL-3.0</a>.
