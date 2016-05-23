@@ -4,12 +4,13 @@ from filecmp import cmp
 from subprocess import run
 import sys
 
+#python -m unittest tests/test_binding_filter.py
 class DefaultParametersTest(unittest.TestCase):
     def setUp(self):
         self.python = sys.argv[0].split()[0]
         #locate the bin and test_data directories
         self.pVac_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        self.binding_filter_path = os.path.join(self.pVac_directory, "bin", "BindingFilter.py")
+        self.binding_filter_path = os.path.join(self.pVac_directory, "pvac_seq", "binding_filter.py")
         self.test_data_path= os.path.join(self.pVac_directory, "test_data")
 
         #locate fof files in test data directory
