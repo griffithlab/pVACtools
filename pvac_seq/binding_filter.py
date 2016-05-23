@@ -13,7 +13,7 @@ def usage(msg=""):
     if(msg != ""):
         print()
         print("Error:", msg)
-    exit()
+    exit(1)
 
 def main():
     #getopt argument parsing
