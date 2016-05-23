@@ -55,9 +55,6 @@ args = parser.parse_args()
 tsvin = csv.reader(args.input_file, delimiter='\t')
 
 for line in tsvin:
-    chromosome = line[0]
-    start      = line[1]
-    stop       = line[2]
     pattern = re.compile('([A-Z])(\d+)([A-Z])');
     match = pattern.match(line[7]);
     if match is not None:
