@@ -14,24 +14,26 @@ class DefaultParametersTest(unittest.TestCase):
         self.test_data_path= os.path.join(self.pVac_directory, "test_data")
 
         #locate fof files in test data directory
-        self.fof_files = [os.path.join(self.test_data_path, f) for f in os.listdir(self.test_data_path) if(
-            f.endswith(".fof") and
-            os.path.isfile(os.path.join(self.test_data_path, f)))]
+        self.fof_files = [os.path.join(self.test_data_path, f) for f in
+                          os.listdir(self.test_data_path) if(f.endswith(".fof") and
+                                os.path.isfile(os.path.join(self.test_data_path, f)))
+                          ]
 
         #now edit the paths contained in the fof files to point to valid files
         for fof in self.fof_files:
             reader = open(fof, mode = 'r')
             writer = open(fof + ".temp", mode = 'w')
             intake = reader.readline().rstrip()
-            while(intake != ""):
+            while intake != "":
                 #if the path is already valid, just keep it
-                if(os.path.isfile(intake)):
+                if os.path.isfile(intake):
                     writer.write(intake + "\n")
                     intake = reader.readline().rstrip()
                     continue
                 #if not, try changing the path to the test_data_path
-                intake = os.path.join(self.test_data_path, os.path.basename(intake))
-                if(os.path.exists(intake)):
+                intake = os.path.join(self.test_data_path,
+                                      os.path.basename(intake))
+                if os.path.exists(intake):
                     writer.write(intake + "\n")
                 intake = reader.readline().rstrip()
             writer.close()
@@ -41,6 +43,8 @@ class DefaultParametersTest(unittest.TestCase):
     def tearDown(self):
         for fof in self.fof_files:
             os.remove(fof + ".temp")
+        os.remove(os.path.join(self.test_data_path,
+                               "test_binding_filter_py_default.xls"))
 
     def test_default(self):
         binding_filter_cmd = "%s  %s -i %s -f %s -o %s" % (

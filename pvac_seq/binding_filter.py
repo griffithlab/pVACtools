@@ -27,27 +27,27 @@ def main():
     minimum_fold_change = 0
     binding_threshold = 500
     for opt, arg in options:
-        if( opt == '-i' ):
+        if opt == '-i' :
             input_filename = arg
-        elif( opt == '-f' ):
+        elif opt == '-f' :
             fof_filename = arg
-        elif( opt == '-o'):
+        elif opt == '-o':
             output_filename = arg
-        elif( opt == '-c' ):
+        elif opt == '-c' :
             try:
                 minimum_fold_change = int(arg)
             except ValueError as e:
                 usage("Minimum fold change must be an integer value")
-        elif( opt == '-b' ):
+        elif opt == '-b' :
             try:
                 binding_threshold = int(arg)
             except ValueError as e:
                 usage("Binding threshold must be an integer value")
         else:
             usage("unrecognized option " + opt)
-    if(len(arguments) > 0):
+    if len(arguments) > 0:
         usage("unrecognized trailing arguments: [" + ", ".join(arguments) + "]")
-    if(input_filename == "" or fof_filename == "" or output_filename == ""):
+    if input_filename == "" or fof_filename == "" or output_filename == "":
         usage("Please provide all required parameters (-i -o -f)")
 
     #precompile regex patterns used later
@@ -59,8 +59,8 @@ def main():
     intake = input_file.readline().rstrip()
     variants = {}
 
-    while(intake != ''):
-        if(chromosome_name.match(intake)):
+    while intake != '':
+        if chromosome_name.match(intake):
             variants['header'] = intake
             intake = input_file.readline().rstrip()
             continue
@@ -86,13 +86,15 @@ def main():
 
     #dump header data to output file
     input_file.close()
-    if('header' not in variants):
+    if 'header' not in variants:
         usage("Header not defined in variant input file")
     output = open(output_filename, mode='w')
-    output.write('\t'.join(
-        [variants['header'], "GeneName", "HLAallele",
-         "PeptideLength", "SubPeptidePosition", "MTScore",
-         "WTScore", "MTEpitopeSeq", "WTEpitopeSeq", "FoldChange"]))
+    output.write('\t'.join([
+        variants['header'], "GeneName", "HLAallele",
+        "PeptideLength", "SubPeptidePosition",
+        "MTScore", "WTScore", "MTEpitopeSeq",
+        "WTEpitopeSeq", "FoldChange"
+        ]))
     output.write("\n")
 
     #open the fof file and parse into prediction dictionary
@@ -103,7 +105,7 @@ def main():
     intake = fof_file.readline().rstrip()
 
 
-    while(intake != ""):
+    while intake != "":
 
         #parse the filepath
         basename = os.path.basename(intake)
@@ -112,16 +114,17 @@ def main():
         allele = data[1]
         length = data[2]
         mode = 'filtered'
-        i = 0
+        # i = 0
 
         #open each file listed in the fof, and read gene data
         netmhc_reader = open(intake, mode = 'r')
+        netmhc_reader.readline() #skip first line
         netmhc_intake = netmhc_reader.readline().rstrip()
-        while(netmhc_intake != ""):
-            i+=1
-            if(i==1):
-                netmhc_intake = netmhc_reader.readline().rstrip()
-                continue
+        while netmhc_intake != "":
+            # i+=1
+            # if i==1:
+            #     netmhc_intake = netmhc_reader.readline().rstrip()
+            #     continue
 
             line_data = netmhc_intake.split("\t")[:8]
 
@@ -138,13 +141,13 @@ def main():
                 }
 
             #create the nested dictionary structure if necessary
-            if(mode not in prediction):
+            if mode not in prediction:
                 prediction[mode] = {}
-            if(sample not in prediction[mode]):
+            if sample not in prediction[mode]:
                 prediction[mode][sample] = {}
-            if(length not in prediction[mode][sample]):
+            if length not in prediction[mode][sample]:
                 prediction[mode][sample][length] = {}
-            if('genes' not in prediction[mode][sample][length]):
+            if 'genes' not in prediction[mode][sample][length]:
                 prediction[mode][sample][length]['genes']=[]
 
             prediction[mode][sample][length]['genes'].append(gene_name)
@@ -160,22 +163,26 @@ def main():
         for sample in sorted(prediction[mode]):
             for length in sorted(prediction[mode][sample]):
                 for gene in prediction[mode][sample][length]['genes']:
-                    if( sample in best and gene['gene_name'] in best[sample] and 'SCORE' in best[sample][gene['gene_name']]):
-                        if(float(gene['mt_score']) < best[sample][gene['gene_name']]['SCORE']):
+                    if (sample in best and
+                            gene['gene_name'] in best[sample] and
+                            'SCORE' in best[sample][gene['gene_name']]):
+                        if (float(gene['mt_score']) <
+                                best[sample][gene['gene_name']]['SCORE']):
                             best[sample][gene['gene_name']]['SCORE'] = float(gene['mt_score'])
                             gene['sample'] = sample
                             gene['length'] = length
                             gene['mode'] = mode
                             best[sample][gene['gene_name']]['GENES'] = [gene]
-                        elif(float(gene['mt_score']) == best[sample][gene['gene_name']]['SCORE']):
+                        elif (float(gene['mt_score']) ==
+                                best[sample][gene['gene_name']]['SCORE']):
                             gene['sample'] = sample
                             gene['length'] = length
                             gene['mode'] = mode
                             best[sample][gene['gene_name']]['GENES'].append(gene)
                     else:
-                        if(sample not in best):
+                        if sample not in best:
                             best[sample] = {}
-                        if(gene['gene_name'] not in best[sample]):
+                        if gene['gene_name'] not in best[sample]:
                             best[sample][gene['gene_name']] = {}
                         best[sample][gene['gene_name']]['SCORE'] = float(gene['mt_score'])
                         gene['sample'] = sample
@@ -187,9 +194,10 @@ def main():
     for sample in sorted(best):
         for gene in sorted(best[sample]):
             for entry in best[sample][gene]['GENES']:
-                if(float(entry['mt_score']) < binding_threshold and float(entry['fold_change']) > minimum_fold_change):
+                if (float(entry['mt_score']) < binding_threshold and
+                        float(entry['fold_change']) > minimum_fold_change):
                     key = gene + "\t" + entry['point_mutation']
-                    if(key in variants):
+                    if key in variants:
                         output.write("\t".join([
                             variants[key],
                             gene,
