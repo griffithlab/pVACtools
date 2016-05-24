@@ -28,8 +28,6 @@ def get_wildtype_subsequence_for_printing(position, wildtype_sequence, peptide_s
     # If the $position is too far toward the beginning or end of
     # @arr_wildtype_sequence there aren't enough amino acids on one side
     # to achieve this.
-    wildtype_subsequence = str
-    mutation_position = int
     one_flanking_sequence_length = int((peptide_sequence_length - 1) / 2)
     if distance_from_start(position, wildtype_sequence) < one_flanking_sequence_length:
         wildtype_subsequence = wildtype_sequence[0 : peptide_sequence_length]
