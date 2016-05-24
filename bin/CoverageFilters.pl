@@ -204,7 +204,7 @@ while ( my $line = <IFH> ) {
         #################### RNA FILTER ####################
 
         if ( $trna eq 1 ) {
-            if ( $trc >= $dna_tum_cov && $trvaf_r >= $rna_tum_cov )
+            if ( $trc >= $rna_tum_cov && $trvaf_r >= $rna_tum_vaf )
 
             {
 
