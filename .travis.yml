@@ -1,0 +1,4 @@
+language: perl
+perl:
+  - "5.10"
+script: prove --recurse --verbose 
