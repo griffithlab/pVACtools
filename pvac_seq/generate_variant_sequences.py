@@ -61,7 +61,7 @@ for line in tsvin:
 
         wildtype_sequence = line[9];
         if wildtype_amino_acid != wildtype_sequence[position]:
-            next
+            continue
         else:
             mutation_position, wildtype_subsequence = get_wildtype_subsequence_for_printing(position, wildtype_sequence, args.peptide_sequence_length, line)
             mutant_subsequence = list(wildtype_subsequence)
