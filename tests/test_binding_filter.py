@@ -56,7 +56,7 @@ class DefaultParametersTest(unittest.TestCase):
             os.path.join(self.test_data_path, "test_binding_filter_py_default.xls"),
             )
         result = run([binding_filter_cmd], shell=True)
-        self.assertFlase(result.returncode, "Binding Filter failed to run. " +
+        self.assertFalse(result.returncode, "Binding Filter failed to run. " +
                          "Invalid arguments, or input file had no header")
         self.assertTrue(cmp(
             os.path.join(self.test_data_path, "test_binding_filter_py_default.xls"),
