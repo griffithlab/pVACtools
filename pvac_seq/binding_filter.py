@@ -10,7 +10,7 @@ def main():
                         help="Input list of variants",
                         required=True)
     parser.add_argument('-f', '--fof', type=argparse.FileType('r'),
-                        help="OF containing list of parsed epitope files " +
+                        help="FOF containing list of parsed epitope files " +
                         "for different allele-length combinations (same sample)",
                         required=True)
     parser.add_argument('-o', '--output', type=argparse.FileType('w'),
