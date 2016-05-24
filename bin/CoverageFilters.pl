@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 use strict;
 use warnings;
 use Data::Dumper;
@@ -31,12 +32,11 @@ my $rna_tum_cov = 10;
 my $rna_tum_vaf = 40;
 my $expn_val    = 1;
 
-my $fpkm = 1;
-
 my $norm = 0;    # option variable with default value (true)
 my $tdna = 0;
 my $trna = 0;
 my $expn = 0;
+
 GetOptions(
     "input-file|i=s"  => \$input_file,
     "normal-cov:f"    => \$norm_cov,
@@ -45,7 +45,7 @@ GetOptions(
     "tdna-vaf:f"      => \$dna_tum_vaf,
     "trna-cov:f"      => \$rna_tum_cov,
     "trna-vaf:f"      => \$rna_tum_vaf,
-    "fpkm:f"          => \$fpkm,
+    "expn-val:f"      => \$expn_val,
     "norm!"           => \$norm,
     "tdna!"           => \$tdna,
     "trna!"           => \$trna,
@@ -94,9 +94,9 @@ else {
 
 }
 
-if ( ( defined $expn ) && ( $expn eq 1 ) ) {
-    print "Gene expression values will be filtered using cutoff of" . $fpkm
-      . "\n";
+if ( ( defined $expn_val ) && ( $expn eq 1 ) ) {
+    print "Gene expression values will be filtered using cutoff of "
+      . $expn_val . "\n";
 }
 else {
     print "No Gene expression values provided.\n";
@@ -204,7 +204,7 @@ while ( my $line = <IFH> ) {
         #################### RNA FILTER ####################
 
         if ( $trna eq 1 ) {
-            if ( $trc >= $dna_tum_cov && $trvaf_r >= $rna_tum_cov )
+            if ( $trc >= $rna_tum_cov && $trvaf_r >= $rna_tum_vaf )
 
             {
 
@@ -224,7 +224,7 @@ while ( my $line = <IFH> ) {
         if ( $expn eq 1 )
 
         {
-            if ( $expn_val >= $fpkm ) {
+            if ( $fpkmval >= $expn_val ) {
                 $flag_expn = 1;
 
             }
