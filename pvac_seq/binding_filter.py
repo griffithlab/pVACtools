@@ -26,7 +26,7 @@ def main():
                         "than WT)",
                         default=0,
                         required=False,
-                        dest="fold_change")
+                        dest="minimum_fold_change")
     parser.add_argument('-b', '--binding-threshold', type=int,
                         help="Report only epitopes where the mutant allele " +
                         "has ic50 binding scores below this value; default 500",
@@ -35,8 +35,6 @@ def main():
                         dest="binding_threshold")
 
     args = parser.parse_args()
-    minimum_fold_change = args.fold_change
-    binding_threshold = args.binding_threshold
 
     #precompile regex patterns used later
     chromosome_name = re.compile(r'^chromosome_name')
@@ -176,8 +174,8 @@ def main():
     for sample in sorted(best):
         for gene in sorted(best[sample]):
             for entry in best[sample][gene]['GENES']:
-                if (float(entry['mt_score']) < binding_threshold and
-                        float(entry['fold_change']) > minimum_fold_change):
+                if (float(entry['mt_score']) < args.binding_threshold and
+                        float(entry['fold_change']) > args.minimum_fold_change):
                     key = gene + "\t" + entry['point_mutation']
                     if key in variants:
                         args.output.write("\t".join([
