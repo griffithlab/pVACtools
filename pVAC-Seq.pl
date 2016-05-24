@@ -150,7 +150,7 @@ close $fh;
 ## Binding Filters ##
 my $filt_out = $sample_name . "_filtered.xls";
 my $b_cmd =
-"perl bin/BindingFilter.pl -i $input_file -f $fof -o $output_dir/$filt_out -c $minimum_fold_change -b $binding_threshold";
+"python pvac_seq/binding_filter.py -i $input_file -f $fof -o $output_dir/$filt_out -c $minimum_fold_change -b $binding_threshold";
 print "\n#RUNNING BINDING FILTERS: ";
 my $stderr_d = `$b_cmd`;
 if   ( $stderr_d =~ /^Usage/ ) { die "ERROR: Running Binding Filters"; }
