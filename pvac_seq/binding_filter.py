@@ -1,68 +1,55 @@
-import getopt
+import argparse
 import sys
 import re
 import os
 
-def usage(msg=""):
-    print("Usage:", sys.argv[0])
-    print("-i <input list of variants")
-    print("-f <FOF containing list of parsed epitope files for different allele-length combinations (same sample)>")
-    print("-o <Output .xls file containing list of filtered epitopes based on binding affinity for each allele-length combination per gene>")
-    print("-c <Minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT)>")
-    print("-b <report only epitopes where the mutant allele has ic50 binding scores below this value ; default 500>")
-    if(msg != ""):
-        print()
-        print("Error:", msg)
-    exit(1)
 
 def main():
-    #getopt argument parsing
-    try:
-        options, arguments = getopt.getopt(sys.argv[1:], "i:f:o:c:b:")
-    except getopt.GetoptError as e:
-        usage(e.msg)
-    input_filename = ""
-    fof_filename = ""
-    output_filename = ""
-    minimum_fold_change = 0
-    binding_threshold = 500
-    for opt, arg in options:
-        if opt == '-i' :
-            input_filename = arg
-        elif opt == '-f' :
-            fof_filename = arg
-        elif opt == '-o':
-            output_filename = arg
-        elif opt == '-c' :
-            try:
-                minimum_fold_change = int(arg)
-            except ValueError as e:
-                usage("Minimum fold change must be an integer value")
-        elif opt == '-b' :
-            try:
-                binding_threshold = int(arg)
-            except ValueError as e:
-                usage("Binding threshold must be an integer value")
-        else:
-            usage("unrecognized option " + opt)
-    if len(arguments) > 0:
-        usage("unrecognized trailing arguments: [" + ", ".join(arguments) + "]")
-    if input_filename == "" or fof_filename == "" or output_filename == "":
-        usage("Please provide all required parameters (-i -o -f)")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input', type=argparse.FileType('r'),
+                        help="Input list of variants",
+                        required=True)
+    parser.add_argument('-f', '--fof', type=argparse.FileType('r'),
+                        help="OF containing list of parsed epitope files " +
+                        "for different allele-length combinations (same sample)",
+                        required=True)
+    parser.add_argument('-o', '--output', type=argparse.FileType('w'),
+                        help="Output .xls file containing list of filtered " +
+                        "epitopes based on binding affinity for each " +
+                        "allele-length combination per gene",
+                        required=True)
+    parser.add_argument('-c', '--fold-change', type=int,
+                        help="Minimum fold change between mutant binding " +
+                        "score and wild-type score. The default is 0, which " +
+                        "filters no results, but 1 is often a sensible " +
+                        "default (requiring that binding is better to the MT " +
+                        "than WT)",
+                        default=0,
+                        required=False,
+                        dest="fold_change")
+    parser.add_argument('-b', '--binding-threshold', type=int,
+                        help="Report only epitopes where the mutant allele " +
+                        "has ic50 binding scores below this value; default 500",
+                        default=500,
+                        required=False,
+                        dest="binding_threshold")
+
+    args = parser.parse_args()
+    minimum_fold_change = args.fold_change
+    binding_threshold = args.binding_threshold
 
     #precompile regex patterns used later
     chromosome_name = re.compile(r'^chromosome_name')
     netmhc_subber = re.compile(r"_netmhc")
 
     #open the variants file and parse into variants dictionary
-    input_file = open(input_filename, mode='r')
-    intake = input_file.readline().rstrip()
+    intake = args.input.readline().rstrip()
     variants = {}
 
     while intake != '':
         if chromosome_name.match(intake):
             variants['header'] = intake
-            intake = input_file.readline().rstrip()
+            intake = args.input.readline().rstrip()
             continue
 
         data = intake.split('\t')
@@ -82,27 +69,27 @@ def main():
         amino_acid_change = data[7]
         variants[ gene + '\t' + amino_acid_change] = intake
 
-        intake = input_file.readline().rstrip()
+        intake = args.input.readline().rstrip()
 
     #dump header data to output file
-    input_file.close()
+    args.input.close()
     if 'header' not in variants:
-        usage("Header not defined in variant input file")
-    output = open(output_filename, mode='w')
-    output.write('\t'.join([
+        # usage("Header not defined in variant input file")
+        parser.print_help()
+        print("\nError: Header not defined in variant input file")
+        exit(1)
+    args.output.write('\t'.join([
         variants['header'], "GeneName", "HLAallele",
         "PeptideLength", "SubPeptidePosition",
         "MTScore", "WTScore", "MTEpitopeSeq",
         "WTEpitopeSeq", "FoldChange"
         ]))
-    output.write("\n")
+    args.output.write("\n")
 
-    #open the fof file and parse into prediction dictionary
-    fof_file = open(fof_filename, mode='r')
-
+    #Read netmhc files from the fof, and parse into predictions
     prediction = {}
 
-    intake = fof_file.readline().rstrip()
+    intake = args.fof.readline().rstrip()
 
 
     while intake != "":
@@ -149,8 +136,8 @@ def main():
             netmhc_intake = netmhc_reader.readline().rstrip()
         netmhc_reader.close()
 
-        intake = fof_file.readline().rstrip()
-    fof_file.close()
+        intake = args.fof.readline().rstrip()
+    args.fof.close()
 
     best = {}
     #now select the best predictions
@@ -193,7 +180,7 @@ def main():
                         float(entry['fold_change']) > minimum_fold_change):
                     key = gene + "\t" + entry['point_mutation']
                     if key in variants:
-                        output.write("\t".join([
+                        args.output.write("\t".join([
                             variants[key],
                             gene,
                             entry['allele'],
@@ -205,11 +192,11 @@ def main():
                             entry['wt_epitope_seq'],
                             entry['fold_change']
                             ]))
-                        output.write("\n")
+                        args.output.write("\n")
                     else:
                         print("Couldn't find variant for", gene,
                               entry['point_mutation'], "in variant file")
-    output.close()
+    args.output.close()
 
 
 if __name__ == "__main__":
