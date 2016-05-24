@@ -114,17 +114,12 @@ def main():
         allele = data[1]
         length = data[2]
         mode = 'filtered'
-        # i = 0
 
         #open each file listed in the fof, and read gene data
         netmhc_reader = open(intake, mode = 'r')
         netmhc_reader.readline() #skip first line
         netmhc_intake = netmhc_reader.readline().rstrip()
         while netmhc_intake != "":
-            # i+=1
-            # if i==1:
-            #     netmhc_intake = netmhc_reader.readline().rstrip()
-            #     continue
 
             line_data = netmhc_intake.split("\t")[:8]
 
