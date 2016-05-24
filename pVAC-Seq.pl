@@ -71,7 +71,7 @@ my $fasta_key_file = $sample_name . '_' . $peptide_sequence_length . '.key';
 
 ### Generate Variant FASTA Seq ###
 my $fa_cmd =
-"perl bin/GenerateVariantSequences.pl -i $input_file  -o  $output_dir/$fasta_file -l $peptide_sequence_length";
+"python pvac_seq/generate_variant_sequences.py $input_file $peptide_sequence_length $output_dir/$fasta_file";
 print "\n#GENERATING VARIANT PEPTIDE FASTA FILE: ";
 my $stderr_a = `$fa_cmd`;
 if ( $stderr_a =~ /^Usage/ ) {
