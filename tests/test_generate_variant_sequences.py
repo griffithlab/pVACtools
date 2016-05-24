@@ -3,6 +3,7 @@ import os
 import tempfile
 from subprocess import call
 from filecmp import cmp
+import py_compile
 
 class GenerateVariantSequences(unittest.TestCase):
     def setUp(self):
@@ -22,6 +23,7 @@ class GenerateVariantSequences(unittest.TestCase):
         generate_variant_sequences_input_file  = os.path.join(self.test_data_dir, 'annotated_variants.tsv')
         generate_variant_sequences_output_file = tempfile.NamedTemporaryFile().name
         generate_variant_sequences_executable  = os.path.join(self.executable_dir, 'generate_variant_sequences.py')
+        self.assertTrue(py_compile.compile(generate_variant_sequences_executable))
 
         generate_variant_sequences_command = "python %s %s %s %s" % (generate_variant_sequences_executable, generate_variant_sequences_input_file, self.peptide_sequence_length, generate_variant_sequences_output_file)
 
