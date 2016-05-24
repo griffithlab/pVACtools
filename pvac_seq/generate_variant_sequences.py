@@ -52,8 +52,8 @@ args = parser.parse_args()
 
 tsvin = csv.reader(args.input_file, delimiter='\t')
 
+pattern = re.compile('([A-Z])(\d+)([A-Z])');
 for line in tsvin:
-    pattern = re.compile('([A-Z])(\d+)([A-Z])');
     match = pattern.match(line[7]);
     if match is not None:
         wildtype_amino_acid, position, mutant_amino_acid = match.group(1, 2, 3)
