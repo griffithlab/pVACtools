@@ -92,12 +92,10 @@ def main():
         mode = 'filtered'
 
         #open each file listed in the fof, and read gene data
-        netmhc_reader = open(intake, mode = 'r')
-        netmhc_reader.readline() #skip first line
-        netmhc_intake = netmhc_reader.readline().rstrip()
-        while netmhc_intake != "":
-
-            line_data = netmhc_intake.split("\t")[:8]
+        netmhc_file = open(intake, mode = 'r')
+        netmhc_file.readline() #skip first line
+        netmhc_reader = csv.reader(netmhc_file, delimiter='\t')
+        for line_data in netmhc_reader:
 
             gene_name = {
                 'gene_name' : line_data[0],
@@ -122,8 +120,7 @@ def main():
                 prediction[mode][sample][length]['genes']=[]
 
             prediction[mode][sample][length]['genes'].append(gene_name)
-            netmhc_intake = netmhc_reader.readline().rstrip()
-        netmhc_reader.close()
+        netmhc_file.close()
 
         intake = args.fof.readline().rstrip()
     args.fof.close()
