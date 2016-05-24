@@ -17,9 +17,12 @@ my $output_dir     = tempdir(CLEANUP => 1);
 my $sample_name             = 'Test';
 my $peptide_sequence_length = 21;
 
+my $generate_fasta_key_executable  = File::Spec->join($executable_dir, 'GenerateFastaKey.pl');
+my $compile_output = `$^X -c $generate_fasta_key_executable 2>&1`;
+like( $compile_output, qr/syntax OK$/, 'GenerateFastaKey script compiles' );
+
 my $generate_fasta_key_input_file  = File::Spec->join($test_data_dir, "${sample_name}_${peptide_sequence_length}.fa");
 my $generate_fasta_key_output_file = File::Spec->join($output_dir, "${sample_name}_${peptide_sequence_length}.key");
-my $generate_fasta_key_executable  = File::Spec->join($executable_dir, 'GenerateFastaKey.pl');
 my $generate_fasta_key_command = join(' ',
     "perl $generate_fasta_key_executable",
     "-i $generate_fasta_key_input_file",
