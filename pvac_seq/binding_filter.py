@@ -2,22 +2,20 @@ import argparse
 import sys
 import re
 import os
+import csv
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', type=argparse.FileType('r'),
-                        help="Input list of variants",
-                        required=True)
-    parser.add_argument('-f', '--fof', type=argparse.FileType('r'),
+    parser.add_argument('input', type=argparse.FileType('r'),
+                        help="Input list of variants")
+    parser.add_argument('fof', type=argparse.FileType('r'),
                         help="FOF containing list of parsed epitope files " +
-                        "for different allele-length combinations (same sample)",
-                        required=True)
-    parser.add_argument('-o', '--output', type=argparse.FileType('w'),
+                        "for different allele-length combinations (same sample)")
+    parser.add_argument('output', type=argparse.FileType('w'),
                         help="Output .xls file containing list of filtered " +
                         "epitopes based on binding affinity for each " +
-                        "allele-length combination per gene",
-                        required=True)
+                        "allele-length combination per gene")
     parser.add_argument('-c', '--fold-change', type=int,
                         help="Minimum fold change between mutant binding " +
                         "score and wild-type score. The default is 0, which " +
@@ -25,13 +23,11 @@ def main():
                         "default (requiring that binding is better to the MT " +
                         "than WT)",
                         default=0,
-                        required=False,
                         dest="minimum_fold_change")
     parser.add_argument('-b', '--binding-threshold', type=int,
                         help="Report only epitopes where the mutant allele " +
                         "has ic50 binding scores below this value; default 500",
                         default=500,
-                        required=False,
                         dest="binding_threshold")
 
     args = parser.parse_args()
@@ -41,16 +37,13 @@ def main():
     netmhc_subber = re.compile(r"_netmhc")
 
     #open the variants file and parse into variants dictionary
-    intake = args.input.readline().rstrip()
+    reader = csv.reader(args.input, delimiter='\t')
     variants = {}
 
-    while intake != '':
-        if chromosome_name.match(intake):
-            variants['header'] = intake
-            intake = args.input.readline().rstrip()
+    for data in reader:
+        if chromosome_name.match(data[0]):
+            variants['header'] = '\t'.join(data)
             continue
-
-        data = intake.split('\t')
 
         #1	chromosome_name
         #2	start
@@ -65,9 +58,7 @@ def main():
 
         gene = data[5]
         amino_acid_change = data[7]
-        variants[ gene + '\t' + amino_acid_change] = intake
-
-        intake = args.input.readline().rstrip()
+        variants[ gene + '\t' + amino_acid_change] = '\t'.join(data)
 
     #dump header data to output file
     args.input.close()

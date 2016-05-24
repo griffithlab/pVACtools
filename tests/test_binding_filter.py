@@ -48,7 +48,7 @@ class DefaultParametersTest(unittest.TestCase):
                                "test_binding_filter_py_default.xls"))
 
     def test_default(self):
-        binding_filter_cmd = "%s  %s -i %s -f %s -o %s" % (
+        binding_filter_cmd = "%s  %s  %s  %s  %s" % (
             self.python,
             self.binding_filter_path,
             os.path.join(self.test_data_path, "annotated_variants.tsv"),
