@@ -38,28 +38,4 @@ ok(
     'ParseOutputNetmhc output as expected',
 );
 
-my $binding_filter_executable  = File::Spec->join($executable_dir, 'BindingFilter.pl');
-my $binding_filter_compile_output = `$^X -c $binding_filter_executable 2>&1`;
-like( $binding_filter_compile_output, qr/syntax OK$/, 'BindingFilter script compiles' );
-
-my $binding_filter_input_file  = File::Spec->join($test_data_dir, 'annotated_variants.tsv');
-my $binding_filter_output_fof  = File::Spec->join($output_dir, 'Test.fof');
-open(my $fh, '>', $binding_filter_output_fof);
-print $fh $parse_output_netmhc_output_file;
-close $fh;
-my $binding_filter_output_file = File::Spec->join($output_dir, "${sample_name}_filtered.xls");
-my $binding_filter_command = join(' ',
-    "perl $binding_filter_executable",
-    "-i $binding_filter_input_file",
-    "-f $binding_filter_output_fof",
-    "-c 0",
-    "-b 500",
-    "-o $binding_filter_output_file",
-);
-ok(!system($binding_filter_command), 'BindingFilter command executes successfully');
-ok(
-    !compare($binding_filter_output_file, File::Spec->join($test_data_dir, "${sample_name}_filtered.xls")),
-    'BindingFilter output as expected',
-);
-
 done_testing;
