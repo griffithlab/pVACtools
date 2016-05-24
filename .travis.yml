@@ -1,5 +1,4 @@
 language: perl
 perl:
   - "5.10"
-  - "5.12"
 script: prove --recurse
