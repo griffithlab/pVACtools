@@ -42,7 +42,7 @@ def main():
 
     for data in reader:
         if chromosome_name.match(data[0]):
-            variants['header'] = '\t'.join(data)
+            variants['header'] = [word for word in data]
             continue
 
         #1	chromosome_name
@@ -58,7 +58,7 @@ def main():
 
         gene = data[5]
         amino_acid_change = data[7]
-        variants[ gene + '\t' + amino_acid_change] = '\t'.join(data)
+        variants[ gene + '\t' + amino_acid_change] = [word for word in data]
 
     #dump header data to output file
     args.input.close()
@@ -67,13 +67,20 @@ def main():
         parser.print_help()
         print("\nError: Header not defined in variant input file")
         exit(1)
-    args.output.write('\t'.join([
-        variants['header'], "GeneName", "HLAallele",
-        "PeptideLength", "SubPeptidePosition",
-        "MTScore", "WTScore", "MTEpitopeSeq",
-        "WTEpitopeSeq", "FoldChange"
-        ]))
-    args.output.write("\n")
+    output = csv.writer(args.output, delimiter='\t', lineterminator='\n')
+
+    output.writerow([
+        *variants['header'],
+        "GeneName",
+        "HLAallele",
+        "PeptideLength",
+        "SubPeptidePosition",
+        "MTScore",
+        "WTScore",
+        "MTEpitopeSeq",
+        "WTEpitopeSeq",
+        "FoldChange"
+    ])
 
     #Read netmhc files from the fof, and parse into predictions
     prediction = {}
@@ -142,8 +149,8 @@ def main():
                 float(entry['fold_change']) > args.minimum_fold_change):
             key = entry['gene_name'] + "\t" + entry['point_mutation']
             if key in variants:
-                args.output.write("\t".join([
-                    variants[key],
+                output.writerow([
+                    *variants[key],
                     entry['gene_name'],
                     entry['allele'],
                     entry['length'],
@@ -153,8 +160,7 @@ def main():
                     entry['mt_epitope_seq'],
                     entry['wt_epitope_seq'],
                     entry['fold_change']
-                    ]))
-                args.output.write("\n")
+                ])
             else:
                 print("Couldn't find variant for", gene,
                       entry['point_mutation'], "in variant file")
