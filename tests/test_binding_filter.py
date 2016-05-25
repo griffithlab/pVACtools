@@ -1,7 +1,7 @@
 import unittest
 import os
 from filecmp import cmp
-from subprocess import run
+from subprocess import call
 import sys
 
 #python -m unittest tests/test_binding_filter.py
@@ -55,8 +55,7 @@ class DefaultParametersTest(unittest.TestCase):
             os.path.join(self.test_data_path, "Test.fof.temp"),
             os.path.join(self.test_data_path, "test_binding_filter_py_default.xls"),
             )
-        result = run([binding_filter_cmd], shell=True)
-        self.assertFalse(result.returncode)
+        self.assertFalse(call([binding_filter_cmd], shell=True))
         self.assertTrue(cmp(
             os.path.join(self.test_data_path, "test_binding_filter_py_default.xls"),
             os.path.join(self.test_data_path, "test_filtered.xls"),
