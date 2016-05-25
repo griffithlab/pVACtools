@@ -91,15 +91,19 @@ def main():
         length = data[2]
         mode = 'filtered'
 
+        if sample not in prediction:
+            prediction[sample] = {}
         #open each file listed in the fof, and read gene data
         netmhc_file = open(intake, mode = 'r')
         netmhc_file.readline() #skip first line
         netmhc_reader = csv.reader(netmhc_file, delimiter='\t')
         for line_data in netmhc_reader:
 
-            gene_name = {
+            gene = {
                 'gene_name' : line_data[0],
                 'allele' : allele,
+                'mode' : mode,
+                'length' : length,
                 'point_mutation' : line_data[1],
                 'sub_peptide_position' : line_data[2],
                 'mt_score' : line_data[3],
@@ -109,79 +113,51 @@ def main():
                 'fold_change' : line_data[7]
                 }
 
-            #create the nested dictionary structure if necessary
-            if mode not in prediction:
-                prediction[mode] = {}
-            if sample not in prediction[mode]:
-                prediction[mode][sample] = {}
-            if length not in prediction[mode][sample]:
-                prediction[mode][sample][length] = {}
-            if 'genes' not in prediction[mode][sample][length]:
-                prediction[mode][sample][length]['genes']=[]
+            gene_name = gene['gene_name']
+            gene_score = float(gene['mt_score'])
 
-            prediction[mode][sample][length]['genes'].append(gene_name)
+            #create the nested dictionary structure if necessary
+            if (gene_name not in prediction[sample] or
+                gene_score < prediction[sample][gene_name]['score']):
+                prediction[sample][gene_name] = {
+                    'genes' : [gene],
+                    'score' : gene_score
+                }
+            elif gene_score == prediction[sample][gene_name]['score']:
+                prediction[sample][gene_name]['genes'].append(gene)
         netmhc_file.close()
 
         intake = args.fof.readline().rstrip()
     args.fof.close()
 
-    best = {}
-    #now select the best predictions
-    for mode in sorted(prediction):
-        for sample in sorted(prediction[mode]):
-            for length in sorted(prediction[mode][sample]):
-                for gene in prediction[mode][sample][length]['genes']:
-                    if (sample in best and
-                            gene['gene_name'] in best[sample] and
-                            'SCORE' in best[sample][gene['gene_name']]):
-                        if (float(gene['mt_score']) <
-                                best[sample][gene['gene_name']]['SCORE']):
-                            best[sample][gene['gene_name']]['SCORE'] = float(gene['mt_score'])
-                            gene['sample'] = sample
-                            gene['length'] = length
-                            gene['mode'] = mode
-                            best[sample][gene['gene_name']]['GENES'] = [gene]
-                        elif (float(gene['mt_score']) ==
-                                best[sample][gene['gene_name']]['SCORE']):
-                            gene['sample'] = sample
-                            gene['length'] = length
-                            gene['mode'] = mode
-                            best[sample][gene['gene_name']]['GENES'].append(gene)
-                    else:
-                        if sample not in best:
-                            best[sample] = {}
-                        if gene['gene_name'] not in best[sample]:
-                            best[sample][gene['gene_name']] = {}
-                        best[sample][gene['gene_name']]['SCORE'] = float(gene['mt_score'])
-                        gene['sample'] = sample
-                        gene['length'] = length
-                        gene['mode'] = mode
-                        best[sample][gene['gene_name']]['GENES'] = [gene]
-
     #Finish off by dumping the selections to the output file
-    for sample in sorted(best):
-        for gene in sorted(best[sample]):
-            for entry in best[sample][gene]['GENES']:
-                if (float(entry['mt_score']) < args.binding_threshold and
-                        float(entry['fold_change']) > args.minimum_fold_change):
-                    key = gene + "\t" + entry['point_mutation']
-                    if key in variants:
-                        args.output.write("\t".join([
-                            variants[key],
-                            gene,
-                            entry['allele'],
-                            entry['length'],
-                            entry['sub_peptide_position'],
-                            entry['mt_score'],
-                            entry['wt_score'],
-                            entry['mt_epitope_seq'],
-                            entry['wt_epitope_seq'],
-                            entry['fold_change']
-                            ]))
-                        args.output.write("\n")
-                    else:
-                        print("Couldn't find variant for", gene,
-                              entry['point_mutation'], "in variant file")
+    for entry in (
+        #flatten the dictionary structure and iterate over each entry
+        item for sample
+        in sorted(prediction) for gene
+        in sorted(prediction[sample]) for item
+        in prediction[sample][gene]['genes']
+        ):
+        if (float(entry['mt_score']) < args.binding_threshold and
+                float(entry['fold_change']) > args.minimum_fold_change):
+            key = entry['gene_name'] + "\t" + entry['point_mutation']
+            if key in variants:
+                args.output.write("\t".join([
+                    variants[key],
+                    entry['gene_name'],
+                    entry['allele'],
+                    entry['length'],
+                    entry['sub_peptide_position'],
+                    entry['mt_score'],
+                    entry['wt_score'],
+                    entry['mt_epitope_seq'],
+                    entry['wt_epitope_seq'],
+                    entry['fold_change']
+                    ]))
+                args.output.write("\n")
+            else:
+                print("Couldn't find variant for", gene,
+                      entry['point_mutation'], "in variant file")
     args.output.close()
 
 
