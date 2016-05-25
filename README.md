@@ -25,8 +25,8 @@ We strongly recommend the users to access it via git repo since updates are push
  2. <b> OPTION 2 : Download and decompress the tar ball</b>: 
 
  * `wget https://github.com/griffithlab/pVAC-Seq/archive/1.0.0-beta.tar.gz -O pVAC-Seq-1.0.0-beta.tar.gz` 
- * `gunzip pVAC-Seq-1.0.0-beta.tar.gz`
- * `tar -xzf pVAC-Seq-1.0.0-beta.tar.gz`
+ * `gunzip pVAC-Seq-1.0.0.tar.gz`
+ * `tar -xzf pVAC-Seq-1.0.0.tar.gz`
  * Make sure you see the following directories:
  
                         LICENSE
