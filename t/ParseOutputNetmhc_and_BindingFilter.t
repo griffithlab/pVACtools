@@ -19,10 +19,13 @@ my $peptide_sequence_length = 21;
 my $epitope_length          = 9;
 my $allele                  = 'HLA-A29:02';
 
+my $parse_output_netmhc_executable  = File::Spec->join($executable_dir, 'ParseOutputNetmhc.pl');
+my $parse_output_netmhc_compile_output = `$^X -c $parse_output_netmhc_executable 2>&1`;
+like( $parse_output_netmhc_compile_output, qr/syntax OK$/, 'ParseOutputNetmhc script compiles' );
+
 my $parse_output_netmhc_input_file  = File::Spec->join($test_data_dir, "${sample_name}.${allele}.${epitope_length}.netmhc.xls");
 my $parse_output_netmhc_key_file    = File::Spec->join($test_data_dir, "${sample_name}_${peptide_sequence_length}.key");
 my $parse_output_netmhc_output_file = File::Spec->join($output_dir, "${sample_name}.${allele}.${epitope_length}.netmhc.parsed");
-my $parse_output_netmhc_executable  = File::Spec->join($executable_dir, 'ParseOutputNetmhc.pl');
 my $parse_output_netmhc_command = join(' ',
     "perl $parse_output_netmhc_executable",
     "-i $parse_output_netmhc_input_file",
@@ -35,13 +38,16 @@ ok(
     'ParseOutputNetmhc output as expected',
 );
 
+my $binding_filter_executable  = File::Spec->join($executable_dir, 'BindingFilter.pl');
+my $binding_filter_compile_output = `$^X -c $binding_filter_executable 2>&1`;
+like( $binding_filter_compile_output, qr/syntax OK$/, 'BindingFilter script compiles' );
+
 my $binding_filter_input_file  = File::Spec->join($test_data_dir, 'annotated_variants.tsv');
 my $binding_filter_output_fof  = File::Spec->join($output_dir, 'Test.fof');
 open(my $fh, '>', $binding_filter_output_fof);
 print $fh $parse_output_netmhc_output_file;
 close $fh;
 my $binding_filter_output_file = File::Spec->join($output_dir, "${sample_name}_filtered.xls");
-my $binding_filter_executable  = File::Spec->join($executable_dir, 'BindingFilter.pl');
 my $binding_filter_command = join(' ',
     "perl $binding_filter_executable",
     "-i $binding_filter_input_file",
