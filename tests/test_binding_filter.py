@@ -8,7 +8,7 @@ import sys
 class DefaultParametersTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.python = sys.argv[0].split()[0]
+        cls.python = sys.executable
         #locate the bin and test_data directories
         cls.pVac_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         cls.binding_filter_path = os.path.join(cls.pVac_directory, "pvac_seq", "binding_filter.py")
