@@ -81,7 +81,7 @@ else { print "COMPLETED"; }
 
 ### Generate FASTA Key File ###
 my $fa_key_cmd =
-"perl bin/GenerateFastaKey.pl -i $output_dir/$fasta_file -o $output_dir/$fasta_key_file";
+"python pVAC-Seq/generate_fasta_key.py $output_dir/$fasta_file $output_dir/$fasta_key_file";
 print "\n#GENERATING FASTA KEY FILE: ";
 my $stderr_b = `$fa_key_cmd`;
 if   ( $stderr_b =~ /^Usage/ ) { die "ERROR: Generating FASTA key file"; }
