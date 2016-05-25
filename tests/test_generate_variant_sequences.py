@@ -21,7 +21,7 @@ class GenerateVariantSequences(unittest.TestCase):
         del self.sample_name
         del self.peptide_sequence_length
 
-    def test_generate_variant_sequences(self):
+    def test_generate_variant_sequences_runs_and_produces_expected_output(self):
         generate_variant_sequences_input_file  = os.path.join(self.test_data_dir, 'annotated_variants.tsv')
         generate_variant_sequences_output_file = tempfile.NamedTemporaryFile().name
         generate_variant_sequences_executable  = os.path.join(self.executable_dir, 'generate_variant_sequences.py')
