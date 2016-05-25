@@ -3,12 +3,12 @@ import os
 from filecmp import cmp
 from subprocess import call
 import sys
+import py_compile
 
 #python -m unittest tests/test_binding_filter.py
 class DefaultParametersTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.python = sys.executable
         #locate the bin and test_data directories
         cls.pVac_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         cls.binding_filter_path = os.path.join(cls.pVac_directory, "pvac_seq", "binding_filter.py")
@@ -48,9 +48,11 @@ class DefaultParametersTest(unittest.TestCase):
                                "test_binding_filter_py_default.xls"))
 
     def test_binding_filter_runs_and_produces_expected_output(self):
+        compiled_script_path = py_compile.compile(self.binding_filter_path)
+        self.assertTrue(compiled_script_path)
         binding_filter_cmd = "%s  %s  %s  %s  %s" % (
-            self.python,
-            self.binding_filter_path,
+            sys.executable,
+            compiled_script_path,
             os.path.join(self.test_data_path, "annotated_variants.tsv"),
             os.path.join(self.test_data_path, "Test.fof.temp"),
             os.path.join(self.test_data_path, "test_binding_filter_py_default.xls"),
