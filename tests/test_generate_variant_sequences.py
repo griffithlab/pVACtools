@@ -29,9 +29,9 @@ class GenerateVariantSequences(unittest.TestCase):
 
         generate_variant_sequences_command = "%s %s %s %s %s" % (self.python, generate_variant_sequences_executable, generate_variant_sequences_input_file, self.peptide_sequence_length, generate_variant_sequences_output_file)
 
-        self.assertFalse(call(generate_variant_sequences_command, shell=True), 'GenerateVariantSequences command executes successfully')
+        self.assertFalse(call(generate_variant_sequences_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, ("%s_%s.fa" % (self.sample_name, self.peptide_sequence_length)))
-        self.assertTrue(cmp(generate_variant_sequences_output_file, expected_output_file), 'GenerateVariantSequences output as expected')
+        self.assertTrue(cmp(generate_variant_sequences_output_file, expected_output_file))
 
 if __name__ == '__main__':
     unittest.main()
