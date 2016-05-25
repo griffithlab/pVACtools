@@ -47,7 +47,7 @@ class DefaultParametersTest(unittest.TestCase):
         os.remove(os.path.join(cls.test_data_path,
                                "test_binding_filter_py_default.xls"))
 
-    def test_default(self):
+    def test_binding_filter_runs_and_produces_expected_output(self):
         binding_filter_cmd = "%s  %s  %s  %s  %s" % (
             self.python,
             self.binding_filter_path,
@@ -56,10 +56,9 @@ class DefaultParametersTest(unittest.TestCase):
             os.path.join(self.test_data_path, "test_binding_filter_py_default.xls"),
             )
         result = run([binding_filter_cmd], shell=True)
-        self.assertFalse(result.returncode, "Binding Filter failed to run. " +
-                         "Invalid arguments, or input file had no header")
+        self.assertFalse(result.returncode)
         self.assertTrue(cmp(
             os.path.join(self.test_data_path, "test_binding_filter_py_default.xls"),
             os.path.join(self.test_data_path, "test_filtered.xls"),
             False
-        ), "Binding Filter produced invalid output")
+        ))
