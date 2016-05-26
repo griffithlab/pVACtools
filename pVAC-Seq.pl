@@ -135,7 +135,7 @@ foreach my $epl (@epitope_len) {
           . $epl
           . '.netmhc.parsed';
         my $parse_cmd =
-"perl bin/ParseOutputNetmhc.pl -i $net_out  -o $net_parsed  -k $output_dir/$fasta_key_file";
+"python pvac_seq/parse_output_netmhc.py $net_out $output_dir/$fasta_key_file $net_parsed";
         print "\n#PARSING NETMHC OUTPUT:";
         my $stderr_c = `$parse_cmd`;
         if   ( $stderr_c =~ /^Usage/ ) { die "ERROR: Parsing NETMHC output"; }
