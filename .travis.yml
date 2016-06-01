@@ -1,4 +1,5 @@
 language: perl
 perl:
   - "5.10"
+  - "5.14"
 script: prove --recurse --verbose 
