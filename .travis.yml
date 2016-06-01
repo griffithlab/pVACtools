@@ -2,4 +2,5 @@ language: perl
 perl:
   - "5.10"
   - "5.14"
+install: true
 script: prove --recurse --verbose 
