@@ -1,6 +1,7 @@
-language: perl
-perl:
-  - "5.10"
-  - "5.14"
+language: python
+python:
+  - "3.5"
 install: true
-script: prove --recurse --verbose 
+script:
+  - python3 -m unittest discover -v
+  - prove --recurse --verbose
