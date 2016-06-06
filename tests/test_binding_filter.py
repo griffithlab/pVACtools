@@ -60,6 +60,6 @@ class DefaultParametersTest(unittest.TestCase):
         self.assertFalse(call([binding_filter_cmd], shell=True))
         self.assertTrue(cmp(
             os.path.join(self.test_data_path, "test_binding_filter_py_default.xls"),
-            os.path.join(self.test_data_path, "test_filtered.xls"),
+            os.path.join(self.test_data_path, "Test_filtered.xls"),
             False
         ))
