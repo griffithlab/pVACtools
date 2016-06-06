@@ -11,7 +11,7 @@ use File::Compare qw (compare);
 
 my $base_dir       = File::Spec->catdir(dirname(abs_path($0)), File::Spec->updir());
 my $executable_dir = File::Spec->catdir($base_dir, 'bin');
-my $test_data_dir  = File::Spec->catdir($base_dir, 'test_data');
+my $test_data_dir  = File::Spec->catdir($base_dir, 't', 'test_data');
 my $output_dir     = tempdir(CLEANUP => 1);
 
 
