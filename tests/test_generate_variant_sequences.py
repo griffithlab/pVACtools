@@ -11,7 +11,7 @@ class GenerateVariantSequences(unittest.TestCase):
         self.python = sys.executable
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
         self.executable_dir = os.path.join(base_dir, 'pvac_seq')
-        self.test_data_dir  = os.path.join(base_dir, 'test_data')
+        self.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'generate_variant_sequences')
         self.sample_name             = 'Test'
         self.peptide_sequence_length = 21
 
