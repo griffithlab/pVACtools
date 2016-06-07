@@ -31,10 +31,13 @@ We strongly recommend the users to access it via git repo since updates are push
                         LICENSE
                         README.md
                         bin/
+                        example_data/
                         pVAC-Seq.pl
-                        test_data/`
+                        pvac_seq/
+                        t/
+                        tests/
 
- * Adjust the perl shebang line of each .pl and .sh script in the bin/ folder as needed (should not be neccessary on most systems)
+ * Adjust the perl shebang line of pVAC-Seq.pl and each .pl script in the bin/ folder as needed (should not be neccessary on most systems)
  * Execute(run) pVAC-Seq pipeline by typing the following command and providing necessary inputs :
  
  	`./pVAC-Seq.pl`
@@ -81,11 +84,11 @@ https://github.com/jhundal/src/blob/master/bin/images/Fig1_fastav2.png
 4.  <b>Epitope length</b> : This refers to the length of subpeptides(neoepitopes) to predict. The pipeline can handle multiple lengths that can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.
 
 5. <b> Binding-cutoff </b> : The user can choose to report only epitopes where the mutant allele has IC50 binding scores below this value. By default, we recommend choosing high to medium binding epitopes and use a cutoff of 500.
-6. <b> Minimum Fold Change (min-fc):</b> This parameter is used to set the minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT). 
+6. <b> Minimum Fold Change (min-fc):</b> This parameter is used to set the minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT).
 
-## Individual Modules in bin/
+## Individual Modules in pvac_seq/
 
-1. <b> GenerateVariantSequences.pl </b>: Run this script to generate a FASTA file for wildtype(WT) and mutant(MT) 21-mer amino acid sequences for MHC Class I epitope prediction. The input file is the properly formatted TSV file of annotated variants. The following columns are expected as part of the TSV file (in the same order) along with the header row:
+1. <b> generate_variant_sequences.py </b>: Run this script to generate a FASTA file for wildtype(WT) and mutant(MT) 21-mer amino acid sequences for MHC Class I epitope prediction. The input file is the properly formatted TSV file of annotated variants. The following columns are expected as part of the TSV file (in the same order) along with the header row:
 
  |chromosome_name| start | stop | reference | variant | gene_name | transcript_name | amino_acid_change | ensembl_gene_id |wildtype_amino_acid_sequence
 --- | --- | --- | ---| ---| ---| ---| ---| ---| ---| ---| ---| ---
@@ -93,13 +96,15 @@ https://github.com/jhundal/src/blob/master/bin/images/Fig1_fastav2.png
 1	|108291655|	108291655|	C|	T|	VAV3|	ENST00000490388|	G474D|	ENSG00000134215|	XCAQWLIHCKVLPTNHRVTWDSAQVFDLAQTLRDGVLLCQLLNNLRAHSINLKEINLRPQMSQFLCLKNIRTFLTACCETFGMRKSELFEAFDLFDVRDFGKVIETLSRLSRTPIALATGIRPFPTEESINDEDIYKGLPDLIDETLVEDEEDLYDCVYGEDEGGEVYEDLMKAEEAHQPKCPENDIRSCCLAEIKQTEEKYTETLESIEKYFMAPLKRFLTAAEFDSVFINIPELVKLHRNLMQEIHDSIVNKNDQNLYQVFINYKERLVIYGQYCSGVESAISSLDYISKTKEDVKLKLEECSKRANNGKFTLRDLLVVPMQRVLKYHLLLQELVKHTTDPTEKANLKLALDAMKDLAQYVNEVKRDNETLREIKQFQLSIENLNQPVLLFGRPQGDGEIRITTLDKHTKQERHIFLFDLAVIVCKRKGDNYEMKEIIDLQQYKIANNPTTDKENKKWSYGFYLIHTQGQNGLEFYCKTKDLKKKWLEQFEMALSNIRPDYADSNFHDFKMHTFTRVTSCKVCQMLLRGTFYQGYLCFKCGARAHKECLGRVDNCGRVNSGEQGTLKLPEKRTNGLRRTPKQVDPDVPCLLHFFISMAPATRSIVKSQKKNKKF
 
   Any annotation database could be used for providing this information, as long as gene id, transcript id and wildtype transcript sequence is provided. 
-2. <b>GenerateFastaKey.pl</b>: NetMHC strips off the name of the FASTA header that contains gene names and type of sequence (WT vs MT). This module generates a key file to lookup original gene names in the output file of NetMHC 3.4 from the original 21-mer FASTA file for wildtype(WT) and mutant(MT) proteins.
+2. <b>generate_fasta_key.py</b>: NetMHC strips off the name of the FASTA header that contains gene names and type of sequence (WT vs MT). This module generates a key file to lookup original gene names in the output file of NetMHC 3.4 from the original 21-mer FASTA file for wildtype(WT) and mutant(MT) proteins.
 
-3. <b>ParseOutputNetmhc.pl</b>:  After running NETMHC3.4, this module parses the output for MHC Class I epitope prediction. It uses a special key file generated that could be generated using GenerateFastaKey.pl.The parsed TSV file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. 
+3. <b>parse_output_netmhc.py</b>:  After running NETMHC3.4, this module parses the output for MHC Class I epitope prediction. It uses a special key file generated that could be generated using GenerateFastaKey.pl.The parsed TSV file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. 
 
-4. <b>BindingFilter.pl</b>: Takes in a file of files with path to parsed NetMHC files for different allele-length combinations and outputs best candidates per gene based on binding affinities.
+4. <b>binding_filter.py</b>: Takes in a file of files with path to parsed NetMHC files for different allele-length combinations and outputs best candidates per gene based on binding affinities.
 
-5. <b>CoverageFilters.pl</b>: Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters could be used. The input file should contain the predicted epitopes along with read counts appended as additional columns. <b>Please note that if specific type of sequencing data is not available, the user should enter n/a in those columns, and set appropriate flags while running the script.</b> Column order should be preserved.
+## Individual Modules in bin/
+
+1. <b>CoverageFilters.pl</b>: Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters could be used. The input file should contain the predicted epitopes along with read counts appended as additional columns. <b>Please note that if specific type of sequencing data is not available, the user should enter n/a in those columns, and set appropriate flags while running the script.</b> Column order should be preserved.
 
    The Input file contains the following columns in tab-separated format : 
    1.	chromosome_name
@@ -129,4 +134,4 @@ https://github.com/jhundal/src/blob/master/bin/images/Fig1_fastav2.png
    25. TumorRNAVarCount
    26. GeneExpFPKM
 
-6. <b>GenerateFastaForNetChop.pl</b>: Takes in the filtered file generated from pVAC-Seq.pl, BindingFilter.pl or CoverageFilters.pl, and generates a FASTA file of MT epitope sequences. This FASTA file can be used as an input to NetChop to evaluate predictions for cleavage sites of the human proteasome.
+2. <b>GenerateFastaForNetChop.pl</b>: Takes in the filtered file generated from pVAC-Seq.pl, BindingFilter.pl or CoverageFilters.pl, and generates a FASTA file of MT epitope sequences. This FASTA file can be used as an input to NetChop to evaluate predictions for cleavage sites of the human proteasome.
