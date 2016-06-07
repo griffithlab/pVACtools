@@ -71,7 +71,7 @@ my $fasta_key_file = $sample_name . '_' . $peptide_sequence_length . '.key';
 
 ### Generate Variant FASTA Seq ###
 my $fa_cmd =
-"perl bin/GenerateVariantSequences.pl -i $input_file  -o  $output_dir/$fasta_file -l $peptide_sequence_length";
+"python pvac_seq/generate_variant_sequences.py $input_file $peptide_sequence_length $output_dir/$fasta_file";
 print "\n#GENERATING VARIANT PEPTIDE FASTA FILE: ";
 my $stderr_a = `$fa_cmd`;
 if ( $stderr_a =~ /^Usage/ ) {
@@ -81,7 +81,7 @@ else { print "COMPLETED"; }
 
 ### Generate FASTA Key File ###
 my $fa_key_cmd =
-"perl bin/GenerateFastaKey.pl -i $output_dir/$fasta_file -o $output_dir/$fasta_key_file";
+"python pvac_seq/generate_fasta_key.py $output_dir/$fasta_file $output_dir/$fasta_key_file";
 print "\n#GENERATING FASTA KEY FILE: ";
 my $stderr_b = `$fa_key_cmd`;
 if   ( $stderr_b =~ /^Usage/ ) { die "ERROR: Generating FASTA key file"; }
@@ -135,7 +135,7 @@ foreach my $epl (@epitope_len) {
           . $epl
           . '.netmhc.parsed';
         my $parse_cmd =
-"perl bin/ParseOutputNetmhc.pl -i $net_out  -o $net_parsed  -k $output_dir/$fasta_key_file";
+"python pvac_seq/parse_output_netmhc.py $net_out $output_dir/$fasta_key_file $net_parsed";
         print "\n#PARSING NETMHC OUTPUT:";
         my $stderr_c = `$parse_cmd`;
         if   ( $stderr_c =~ /^Usage/ ) { die "ERROR: Parsing NETMHC output"; }
@@ -150,7 +150,7 @@ close $fh;
 ## Binding Filters ##
 my $filt_out = $sample_name . "_filtered.xls";
 my $b_cmd =
-"perl bin/BindingFilter.pl -i $input_file -f $fof -o $output_dir/$filt_out -c $minimum_fold_change -b $binding_threshold";
+"python pvac_seq/binding_filter.py $input_file $fof $output_dir/$filt_out -c $minimum_fold_change -b $binding_threshold";
 print "\n#RUNNING BINDING FILTERS: ";
 my $stderr_d = `$b_cmd`;
 if   ( $stderr_d =~ /^Usage/ ) { die "ERROR: Running Binding Filters"; }
