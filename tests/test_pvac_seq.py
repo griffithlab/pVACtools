@@ -1,8 +1,6 @@
 import unittest
 import os
-import sys
 import py_compile
-import subprocess
 
 class pvacCompilationTest(unittest.TestCase):
     @classmethod
