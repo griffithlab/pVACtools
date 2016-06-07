@@ -12,7 +12,7 @@ def run_pvac_script(script, *args):
         " ".join(str(arg) for arg in args)
     )
     result = call([pvac_cmd], shell=True)
-    if(result):
+    if result:
         print("Error while running:", script, args)
         exit(result)
 
@@ -86,7 +86,7 @@ def main():
 
     for epl in args.epitope_len:
         for a in args.allele:
-            if(a in netmhc_output):
+            if a in netmhc_output:
                 net_out = ".".join([args.sample_name, a, epl, "netmhc.xls"])
                 print("Running NetMHC on Allele", a,
                       "and Epitope Length", epl
