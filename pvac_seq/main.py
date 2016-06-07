@@ -3,7 +3,7 @@ import os
 from subprocess import run, call, PIPE
 import sys
 
-current_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+current_directory = os.path.abspath(os.path.dirname(__file__))
 
 def run_pvac_script(script, *args):
     pvac_cmd = "%s %s %s" % (
@@ -22,19 +22,19 @@ def main():
     parser.add_argument("input",
                         help="Input TSV File with variants (please provide complete path)"
                         )
-    parser.add_argument("sample-name",
+    parser.add_argument("sample_name",
                         help="Name of Sample; will be used as prefix for output files"
                         )
-    parser.add_argument("netmhc-path",
+    parser.add_argument("netmhc_path",
                         help="Path to local NetMHC3.4 installation"
                         )
     parser.add_argument("allele",
                         help="Allele name to predict epitope prediction. Multiple alleles can be specified using a comma-separated list. For a list of available alleles, use: netMHC -A"
                         )
-    parser.add_argument("epitope-length",
+    parser.add_argument("epitope_length",
                         help="length of subpeptides(epitopes) to predict ; Multiple lengths can be specified using a comma-separated list. Typical epitope lengths vary between 8-11."
                         )
-    parser.add_argument("output-dir",
+    parser.add_argument("output_dir",
                         help="Output directory for writing all result files"
                         )
     parser.add_argument("-l", "--variant-peptide-length",
@@ -60,8 +60,8 @@ def main():
     args.epitope_length = [int(epl) for epl in args.epitope_length.split(',')]
     args.allele = [a for a in args.allele.split(',')]
 
-    fasta_file = args.sample_name + "_" + args.peptide_sequence_length + ".fa"
-    fasta_key_file = args.sample_name + "_" + args.peptide_sequence_length + ".key"
+    fasta_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa"
+    fasta_key_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".key"
 
     print("Generating Variant Peptide FASTA File")
     run_pvac_script("generate_variant_sequences.py",
@@ -84,10 +84,10 @@ def main():
             ).stdout.decode().split('\n')
         )
 
-    for epl in args.epitope_len:
+    for epl in args.epitope_length:
         for a in args.allele:
             if a in netmhc_output:
-                net_out = ".".join([args.sample_name, a, epl, "netmhc.xls"])
+                net_out = ".".join([args.sample_name, a, str(epl), "netmhc.xls"])
                 print("Running NetMHC on Allele", a,
                       "and Epitope Length", epl
                       )
@@ -104,12 +104,12 @@ def main():
 
     fof = os.path.join(args.output_dir, args.sample_name+".fof")
 
-    writer = open(fof)
+    writer = open(fof, mode='w')
 
-    for epl in args.epitope_len:
+    for epl in args.epitope_length:
         for a in args.allele:
-            net_out = ".".join([args.sample_name, a, epl, "netmhc.xls"])
-            net_parsed = ".".join([args.sample_name, a, epl, "netmhc.parsed"])
+            net_out = ".".join([args.sample_name, a, str(epl), "netmhc.xls"])
+            net_parsed = ".".join([args.sample_name, a, str(epl), "netmhc.parsed"])
             print("Parsing NetMHC Output")
             run_pvac_script("parse_output_netmhc.py",
                             os.path.join(args.output_dir, net_out),
