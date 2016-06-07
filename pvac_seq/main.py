@@ -29,10 +29,12 @@ def main():
                         help="Path to local NetMHC3.4 installation"
                         )
     parser.add_argument("allele",
-                        help="Allele name to predict epitope prediction. Multiple alleles can be specified using a comma-separated list. For a list of available alleles, use: netMHC -A"
+                        help="Allele name to predict epitope prediction. Multiple alleles can be specified using a comma-separated list. For a list of available alleles, use: netMHC -A",
+                        type=lambda s:[a for a in s.split(',')]
                         )
     parser.add_argument("epitope_length",
-                        help="length of subpeptides(epitopes) to predict ; Multiple lengths can be specified using a comma-separated list. Typical epitope lengths vary between 8-11."
+                        help="length of subpeptides(epitopes) to predict ; Multiple lengths can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.",
+                        type=lambda s:[int(epl) for epl in s.split(',')]
                         )
     parser.add_argument("output_dir",
                         help="Output directory for writing all result files"
@@ -57,8 +59,6 @@ def main():
                         )
 
     args = parser.parse_args()
-    args.epitope_length = [int(epl) for epl in args.epitope_length.split(',')]
-    args.allele = [a for a in args.allele.split(',')]
 
     fasta_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa"
     fasta_key_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".key"
