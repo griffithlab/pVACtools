@@ -59,7 +59,7 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('input_file', type=argparse.FileType('r'), help='Raw output file from Netmhc',)
     parser.add_argument('key_file', type=argparse.FileType('r'), help='Key file for lookup of FASTA IDs')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')
-    args = parser.parse_args()
+    args = parser.parse_args(args_input)
 
     tsvout = csv.writer(args.output_file, delimiter='\t', lineterminator='\n')
     tsvout.writerow(['Gene Name', 'Point Mutation', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold change'])
