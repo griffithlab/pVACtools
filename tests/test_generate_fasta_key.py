@@ -10,7 +10,7 @@ class GenerateFastaKeyTests(unittest.TestCase):
     def setUp(self):
         self.python = sys.executable
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        self.executable_dir = os.path.join(base_dir, 'pvacseq')
+        self.executable_dir = os.path.join(base_dir, 'src', 'pvacseq')
         self.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'generate_fasta_key')
         self.sample_name             = 'Test'
         self.peptide_sequence_length = 21

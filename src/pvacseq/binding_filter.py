@@ -5,7 +5,7 @@ import os
 import csv
 
 
-def main():
+def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser()
     parser.add_argument('input', type=argparse.FileType('r'),
                         help="Input list of variants")
@@ -30,7 +30,7 @@ def main():
                         default=500,
                         dest="binding_threshold")
 
-    args = parser.parse_args()
+    args = parser.parse_args(args_input)
 
     #precompile regex patterns used later
     chromosome_name = re.compile(r'^chromosome_name')

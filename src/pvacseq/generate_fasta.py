@@ -43,37 +43,41 @@ def get_wildtype_subsequence_for_printing(position, wildtype_sequence, peptide_s
 
     return mutation_position, wildtype_subsequence
 
-parser = argparse.ArgumentParser(description='')
-parser.add_argument('input_file', type=argparse.FileType('r'), help='input list of variants',)
-parser.add_argument('peptide_sequence_length', type=int, help='length of the peptide sequence')
-parser.add_argument('output_file', type=argparse.FileType('w'), help='output FASTA file')
 
-args = parser.parse_args()
+def main(args_input = sys.argv[1:]):
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('input_file', type=argparse.FileType('r'), help='input list of variants',)
+    parser.add_argument('peptide_sequence_length', type=int, help='length of the peptide sequence')
+    parser.add_argument('output_file', type=argparse.FileType('w'), help='output FASTA file')
 
-tsvin = csv.reader(args.input_file, delimiter='\t')
+    args = parser.parse_args(args_input)
 
-pattern = re.compile('([A-Z])(\d+)([A-Z])');
-for line in tsvin:
-    match = pattern.match(line[7]);
-    if match is not None:
-        wildtype_amino_acid, position, mutant_amino_acid = match.group(1, 2, 3)
-        position = int(position) - 1
+    tsvin = csv.reader(args.input_file, delimiter='\t')
 
-        wildtype_sequence = line[9];
-        if wildtype_amino_acid != wildtype_sequence[position]:
-            continue
-        else:
-            mutation_position, wildtype_subsequence = get_wildtype_subsequence_for_printing(position, wildtype_sequence, args.peptide_sequence_length, line)
-            mutant_subsequence = list(wildtype_subsequence)
+    pattern = re.compile('([A-Z])(\d+)([A-Z])');
+    for line in tsvin:
+        match = pattern.match(line[7]);
+        if match is not None:
+            wildtype_amino_acid, position, mutant_amino_acid = match.group(1, 2, 3)
+            position = int(position) - 1
 
-            mutant_subsequence[mutation_position] = mutant_amino_acid
-            if len(wildtype_subsequence) > 0:
-                for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, ''.join(mutant_subsequence)]):
-                    fasta_header = '.'.join(['>' + designation, line[5], line[7]])
-                    args.output_file.writelines([fasta_header + "\n", subsequence + "\n"])
+            wildtype_sequence = line[9];
+            if wildtype_amino_acid != wildtype_sequence[position]:
+                continue
             else:
-                print(join("\t", 'NULL', position))
+                mutation_position, wildtype_subsequence = get_wildtype_subsequence_for_printing(position, wildtype_sequence, args.peptide_sequence_length, line)
+                mutant_subsequence = list(wildtype_subsequence)
 
-args.input_file.close()
-args.output_file.close()
+                mutant_subsequence[mutation_position] = mutant_amino_acid
+                if len(wildtype_subsequence) > 0:
+                    for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, ''.join(mutant_subsequence)]):
+                        fasta_header = '.'.join(['>' + designation, line[5], line[7]])
+                        args.output_file.writelines([fasta_header + "\n", subsequence + "\n"])
+                else:
+                    print(join("\t", 'NULL', position))
 
+    args.input_file.close()
+    args.output_file.close()
+
+if __name__ == '__main__':
+    main()
