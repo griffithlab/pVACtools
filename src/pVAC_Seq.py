@@ -2,7 +2,10 @@ import argparse
 import sys
 from subprocess import call
 import os
-from . import pvacseq
+try:
+    from . import pvacseq
+except SystemError:
+    import pvacseq
 
 def main():
     parser = argparse.ArgumentParser()

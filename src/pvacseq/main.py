@@ -2,11 +2,10 @@ import argparse
 import os
 from subprocess import run, call, PIPE
 import sys
-<<<<<<< a425068d53cc49146962e783806b1f9d29f40410:src/pvacseq/main.py
-import pvacseq
-=======
-from .. import pvac_seq
->>>>>>> modified import to allow for non-development mode installation:src/pvac_seq/main.py
+try:
+    from .. import pvacseq
+except ValueError:
+    import pvacseq
 
 
 def main(args_input = sys.argv[1:]):
