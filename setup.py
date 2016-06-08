@@ -3,10 +3,10 @@ from setuptools import setup
 setup(
     name="pVAC-Seq",
     version="1.5",
-    packages=["src", "src.pvac_seq"],
+    packages=["pvac_seq", "pvac_seq.lib"],
     entry_points={
         "console_scripts":[
-            "pVAC-Seq = src.pVAC_Seq:main"
+            "pVAC-Seq = pvac_seq.pVAC_Seq:main"
         ]
     },
 

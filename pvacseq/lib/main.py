@@ -3,9 +3,9 @@ import os
 from subprocess import run, call, PIPE
 import sys
 try:
-    from .. import pvacseq
+    from .. import lib
 except ValueError:
-    import pvacseq
+    import lib
 
 
 def main(args_input = sys.argv[1:]):
@@ -56,7 +56,7 @@ def main(args_input = sys.argv[1:]):
     fasta_key_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".key"
 
     print("Generating Variant Peptide FASTA File")
-    pvacseq.generate_fasta.main(
+    lib.generate_fasta.main(
         [
             args.input,
             str(args.peptide_sequence_length),
@@ -66,7 +66,7 @@ def main(args_input = sys.argv[1:]):
     print("Completed")
 
     print("Generating FASTA Key File")
-    pvacseq.generate_fasta_key.main(
+    lib.generate_fasta_key.main(
         [
             os.path.join(args.output_dir, fasta_file),
             os.path.join(args.output_dir, fasta_key_file)
@@ -107,7 +107,7 @@ def main(args_input = sys.argv[1:]):
             net_out = ".".join([args.sample_name, a, str(epl), "netmhc.xls"])
             net_parsed = ".".join([args.sample_name, a, str(epl), "netmhc.parsed"])
             print("Parsing NetMHC Output")
-            pvacseq.parse_output.main(
+            lib.parse_output.main(
                 [
                     os.path.join(args.output_dir, net_out),
                     os.path.join(args.output_dir, fasta_key_file),
@@ -121,7 +121,7 @@ def main(args_input = sys.argv[1:]):
 
     filt_out = os.path.join(args.output_dir, args.sample_name+"_filtered.xls")
     print("Running Binding Filters")
-    pvacseq.binding_filter.main(
+    lib.binding_filter.main(
         [
             args.input,
             fof,

@@ -13,7 +13,7 @@ class PVACTests(unittest.TestCase):
     def test_pvacseq_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
             self.pVac_directory,
-            'src',
+            'pvacseq',
             "pvacseq.py"
         ))
         self.assertTrue(compiled_pvac_path)
@@ -21,7 +21,7 @@ class PVACTests(unittest.TestCase):
     def test_pvacseq_commands(self):
         pvac_script_path = os.path.join(
             self.pVac_directory,
-            'src',
+            'pvacseq',
             "pvacseq.py"
             )
         usage_search = re.compile(r"usage: ")
@@ -44,8 +44,8 @@ class PVACTests(unittest.TestCase):
     def test_main_compiles(self):
         compiled_main_path = py_compile.compile(os.path.join(
             self.pVac_directory,
-            'src',
-            "pvacseq",
+            'pvacseq',
+            "lib",
             "main.py"
         ))
         self.assertTrue(compiled_main_path)
