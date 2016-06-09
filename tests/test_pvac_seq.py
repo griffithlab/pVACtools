@@ -42,7 +42,7 @@ class pvacTest(unittest.TestCase):
     def test_main_compiles(self):
         compiled_main_path = py_compile.compile(os.path.join(
             self.pVac_directory,
-            "pvac_seq",
+            "pvacseq",
             "main.py"
         ))
         self.assertTrue(compiled_main_path)

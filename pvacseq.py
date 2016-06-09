@@ -5,7 +5,7 @@ import os
 
 def pvac_path_for_script(script):
     pVac_directory = os.path.abspath(os.path.dirname(__file__))
-    return os.path.join(pVac_directory, "pvac_seq", script)
+    return os.path.join(pVac_directory, "pvacseq", script)
 
 def run_subcommand(script, args):
     script_cmd = "%s %s %s" % (
