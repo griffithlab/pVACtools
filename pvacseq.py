@@ -34,7 +34,7 @@ def main():
     fasta_key_parser = subparsers.add_parser("generate_fasta_key",
                                              help="Generates a FASTA key file",
                                              add_help=False)
-    fasta_key_parser.set_defaults(script="generate_fata_key.py")
+    fasta_key_parser.set_defaults(script="generate_fasta_key.py")
 
     parse_netmhc_parser = subparsers.add_parser("parse_netmhc_output",
                                                 help="Parses output from NetMHC",
