@@ -21,30 +21,25 @@ def main():
     subparsers = parser.add_subparsers()
 
     #add subcommands
-    variant_sequences_parser = subparsers.add_parser("generateVariants",
+    variant_sequences_parser = subparsers.add_parser("generate_variant_sequences",
                                                      help="Generates a variant peptide FASTA file from the TSV input file",
                                                      add_help=False)
     variant_sequences_parser.set_defaults(script="generate_variant_sequences.py")
 
-    binding_filter_parser = subparsers.add_parser("bindingFilter",
+    binding_filter_parser = subparsers.add_parser("binding_filter",
                                                   help="Filters variants processed by NetMHC",
                                                   add_help=False)
     binding_filter_parser.set_defaults(script="binding_filter.py")
 
-    fasta_key_parser = subparsers.add_parser("generateKey",
+    fasta_key_parser = subparsers.add_parser("generate_fasta_key",
                                              help="Generates a FASTA key file",
                                              add_help=False)
     fasta_key_parser.set_defaults(script="generate_fata_key.py")
 
-    parse_netmhc_parser = subparsers.add_parser("parseNetMHC",
+    parse_netmhc_parser = subparsers.add_parser("parse_netmhc_output",
                                                 help="Parses output from NetMHC",
                                                 add_help=False)
     parse_netmhc_parser.set_defaults(script="parse_output_netmhc.py")
-
-    coverage_filter_parser = subparsers.add_parser("coverageFilter",
-                                                   help="Filters variants based on coverage data",
-                                                   add_help=False)
-    coverage_filter_parser.set_defaults(script="CHANGEME")
 
     run_main_program_parser = subparsers.add_parser("run",
                                                     help="Runs the pVAC-Seq pipeline",
