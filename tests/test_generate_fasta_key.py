@@ -6,7 +6,7 @@ from subprocess import call
 from filecmp import cmp
 import py_compile
 
-class GenerateVariantSequences(unittest.TestCase):
+class GenerateFastaKeyTests(unittest.TestCase):
     def setUp(self):
         self.python = sys.executable
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))

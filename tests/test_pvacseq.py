@@ -5,19 +5,19 @@ import re
 import sys
 import py_compile
 
-class pvacTest(unittest.TestCase):
+class PVACTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.pVac_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-    def test_pvac_seq_compiles(self):
+    def test_pvacseq_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
             self.pVac_directory,
             "pvacseq.py"
         ))
         self.assertTrue(compiled_pvac_path)
 
-    def test_pvac_seq_commands(self):
+    def test_pvacseq_commands(self):
         pvac_script_path = os.path.join(
             self.pVac_directory,
             "pvacseq.py"

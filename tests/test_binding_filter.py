@@ -7,7 +7,7 @@ import sys
 import py_compile
 
 #python -m unittest tests/test_binding_filter.py
-class DefaultParametersTest(unittest.TestCase):
+class BindingFilterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         #locate the bin and test_data directories

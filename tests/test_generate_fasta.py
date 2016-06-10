@@ -6,7 +6,7 @@ from subprocess import call
 from filecmp import cmp
 import py_compile
 
-class GenerateVariantSequences(unittest.TestCase):
+class GenerateFastaTests(unittest.TestCase):
     def setUp(self):
         self.python = sys.executable
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
@@ -21,7 +21,7 @@ class GenerateVariantSequences(unittest.TestCase):
         del self.sample_name
         del self.peptide_sequence_length
 
-    def test_generate_variant_sequences_runs_and_produces_expected_output(self):
+    def test_generate_fasta_runs_and_produces_expected_output(self):
         generate_variant_sequences_input_file  = os.path.join(self.test_data_dir, 'annotated_variants.tsv')
         generate_variant_sequences_output_file = tempfile.NamedTemporaryFile().name
         generate_variant_sequences_executable  = os.path.join(self.executable_dir, 'generate_fasta.py')

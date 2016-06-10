@@ -6,7 +6,7 @@ from subprocess import call
 from filecmp import cmp
 import py_compile
 
-class GenerateVariantSequences(unittest.TestCase):
+class ParseOutputTests(unittest.TestCase):
     def setUp(self):
         self.python = sys.executable
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
@@ -26,7 +26,7 @@ class GenerateVariantSequences(unittest.TestCase):
         del self.epitope_length
         del self.allele
 
-    def test_parse_output_netmhc_runs_and_produces_expected_output(self):
+    def test_parse_output_runs_and_produces_expected_output(self):
         parse_output_netmhc_executable  = os.path.join(self.executable_dir, 'parse_output.py')
         self.assertTrue(py_compile.compile(parse_output_netmhc_executable))
 
