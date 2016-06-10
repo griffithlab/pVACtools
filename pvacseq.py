@@ -21,10 +21,10 @@ def main():
     subparsers = parser.add_subparsers()
 
     #add subcommands
-    variant_sequences_parser = subparsers.add_parser("generate_variant_sequences",
+    variant_sequences_parser = subparsers.add_parser("generate_fasta",
                                                      help="Generates a variant peptide FASTA file from the TSV input file",
                                                      add_help=False)
-    variant_sequences_parser.set_defaults(script="generate_variant_sequences.py")
+    variant_sequences_parser.set_defaults(script="generate_fasta.py")
 
     binding_filter_parser = subparsers.add_parser("binding_filter",
                                                   help="Filters variants processed by NetMHC",
@@ -36,10 +36,10 @@ def main():
                                              add_help=False)
     fasta_key_parser.set_defaults(script="generate_fasta_key.py")
 
-    parse_netmhc_parser = subparsers.add_parser("parse_netmhc_output",
+    parse_netmhc_parser = subparsers.add_parser("parse_output",
                                                 help="Parses output from NetMHC",
                                                 add_help=False)
-    parse_netmhc_parser.set_defaults(script="parse_output_netmhc.py")
+    parse_netmhc_parser.set_defaults(script="parse_output.py")
 
     run_main_program_parser = subparsers.add_parser("run",
                                                     help="Runs the pVAC-Seq pipeline",

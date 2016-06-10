@@ -64,7 +64,7 @@ def main():
     fasta_key_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".key"
 
     print("Generating Variant Peptide FASTA File")
-    run_pvac_script("generate_variant_sequences.py",
+    run_pvac_script("generate_fasta.py",
                     args.input,
                     args.peptide_sequence_length,
                     os.path.join(args.output_dir, fasta_file)
@@ -111,7 +111,7 @@ def main():
             net_out = ".".join([args.sample_name, a, str(epl), "netmhc.xls"])
             net_parsed = ".".join([args.sample_name, a, str(epl), "netmhc.parsed"])
             print("Parsing NetMHC Output")
-            run_pvac_script("parse_output_netmhc.py",
+            run_pvac_script("parse_output.py",
                             os.path.join(args.output_dir, net_out),
                             os.path.join(args.output_dir, fasta_key_file),
                             os.path.join(args.output_dir, net_parsed)

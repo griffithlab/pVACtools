@@ -24,10 +24,10 @@ class pvacTest(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
-            "generate_variant_sequences",
+            "generate_fasta",
             "binding_filter",
             "generate_fasta_key",
-            "parse_netmhc_output",
+            "parse_output",
             "run"
             ]:
             temp_cmd = "%s %s %s -h" %(
