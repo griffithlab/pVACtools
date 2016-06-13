@@ -1,5 +1,5 @@
-# pVAC-Seq 
-A cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq) 
+# pVAC-Seq
+A cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq)
 http://www.genomemedicine.com/content/8/1/11
 
 ## Citation
@@ -13,34 +13,44 @@ This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0
 https://github.com/jhundal/src/blob/master/bin/images/pvacseq-code.jpg
 
 ## Installation Instructions
-pVAC-Seq could either be used via cloning the git repo or by downloading the tarball.
-We strongly recommend the users to access it via git repo since updates are pushed before they make it to the stable release.
+pVAC-Seq could either be used via pip, cloning the git repo or by downloading the tarball.
+We strongly recommend the users to access it via pip as it will automatically fetch the most recent version, and automatically install the program for you
 
- 1. <b> OPTION 1 : Clone pVAC-Seq git repository: </b>
+ 1. <b> OPTION 1: Install pVAC-Seq from PIP: </b>
+        Make sure you have pip installed first.  pip is generally included in python distributions, but may need to be upgraded first.  See these instructions for installing or upgrading pip: https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel
+
+  After you have pip installed, type the following command on your Terminal(for Mac and Linux users) or the command prompt (for Windows users): `pip install pvacseq`
+
+  pip will fetch and install pVAC-Seq and its dependencies for you.  After installing, you can run `pvacseq` directly from the Terminal/command prompt
+
+ 2. <b> OPTION 2 : Clone pVAC-Seq git repository: </b>
         Type the following command on your Terminal(for Mac and Linux users) or the command prompt (for Windows users):
-   `git clone git@github.com:griffithlab/pVAC-Seq.git  ` 
-  
+   `git clone git@github.com:griffithlab/pVAC-Seq.git  `
+
+  After cloning the repository you can either run the pvacseq scripts directly using: `python pvacseq/pvacseq.py` or by installing the script from the repo using `python setup.py install` which will enable you to run `pvacseq` directly from a Terminal/command prompt
+
  For more information, follow instructions for cloning a git repo :                               				  https://help.github.com/articles/cloning-a-repository/
 
- 2. <b> OPTION 2 : Download and decompress the tar ball</b>: 
+ 3. <b> OPTION 3 : Download and decompress the tar ball</b>:
 
- * `wget https://github.com/griffithlab/pVAC-Seq/archive/v1.0.0.tar.gz -O pVAC-Seq-1.0.0.tar.gz` 
+ * `wget https://github.com/griffithlab/pVAC-Seq/archive/v1.0.0.tar.gz -O pVAC-Seq-1.0.0.tar.gz`
  * `tar -xzf pVAC-Seq-1.0.0.tar.gz`
  * Make sure you see the following directories:
- 
+
                         LICENSE
                         README.md
-                        bin/
+                        pvacseq/
+                          lib/
+                          pvacseq.py
                         example_data/
-                        pVAC-Seq.pl
-                        pvac_seq/
-                        t/
                         tests/
+                          test_data/
+                            binding_filter/
+                            generate_fasta/
+                            generate_fasta_key/
+                            parse_output/
 
- * Adjust the perl shebang line of pVAC-Seq.pl and each .pl script in the bin/ folder as needed (should not be neccessary on most systems)
- * Execute(run) pVAC-Seq pipeline by typing the following command and providing necessary inputs :
- 
- 	`./pVAC-Seq.pl`
+  After unpacking the tarball you can either run the pvacseq scripts directly using: `python pvacseq/pvacseq.py` or by installing the script from the directory using `python setup.py install` which will enable you to run `pvacseq` directly from a Terminal/command prompt
 
 
 ##Pre-requisites
@@ -52,7 +62,7 @@ Please download NetMHC using appropriate licensing. Download and installation in
 
    Also note that there might be a minor bug in the NetMHC package, which can be fixed as follows :
 	 http://www.cbs.dtu.dk/services/NetMHC/correct_bug.php
-	 
+
   Once NetMHC is properly installed and tested, pVAC-Seq.pl expects the path to the installtion directory.
 
 
@@ -67,15 +77,15 @@ Please download NetMHC using appropriate licensing. Download and installation in
 1	| 92163648|	92163648|	G	|A	|TGFBR3	|ENST00000212355	|P776L	|ENSG00000069702|	MTSHYVIAIFALMSSCLATAGPEPGALCELSPVSASHPVQALMESFTVLSGCASRGTTGLPQEVHVLNLRTAGQGPGQLQREVTLHLNPISSVHIHHKSVVFLLNSPHPLVWHLKTERLATGVSRLFLVSEGSVVQFSSANFSLTAETEERNFPHGNEHLLNWARKEYGAVTSFTELKIARNIYIKVGEDQVFPPKCNIGKNFLSLNYLAEYLQPKAAEGCVMSSQPQNEEVHIIELITPNSNPYSAFQVDITIDIRPSQEDLEVVKNLILILKCKKSVNWVIKSFDVKGSLKIIAPNSIGFGKESERSMTMTKSIRDDIPSTQGNLVKWALDNGYSPITSYTMAPVANRFHLRLENNAEEMGDEEVHTIPPELRILLDPGALPALQNPPIRGGEGQNGGLPFPFPDISRRVWNEEGEDGLPRPKDPVIPSIQLFPGLREPEEVQGSVDIALSVKCDNEKMIVAVEKDSFQASGYSGMDVTLLDPTCKAKMNGTHFVLESPLNGCGTRPRWSALDGVVYYNSIVIQVPALGDSSGWPDGYEDLESGDNGFPGDMDEGDASLFTRPEIVVFNCSLQQVRNPSSFQEQPHGNITFNMELYNTDLFLVPSQGVFSVPENGHVYVEVSVTKAEQELGFAIQTCFISPYSNPDRMSHYTIIENICPKDESVKFYSPKRVHFPIPQADMDKKRFSFVFKPVFNTSLLFLQCELTLCTKMEKHPQKLPKCVPPDEACTSLDASIIWAMMQNKKTFTKPLAVIHHEAESKEKGPSMKEPNPISPPIFHGLDTLTVMGIAFAAFVIGALLTGALWYIYSHTGETAGRQQVPTSPPASENSSAAHSIGSTQSTPCSSSSTA|
 1	|108291655|	108291655|	C|	T|	VAV3|	ENST00000490388|	G474D|	ENSG00000134215|	XCAQWLIHCKVLPTNHRVTWDSAQVFDLAQTLRDGVLLCQLLNNLRAHSINLKEINLRPQMSQFLCLKNIRTFLTACCETFGMRKSELFEAFDLFDVRDFGKVIETLSRLSRTPIALATGIRPFPTEESINDEDIYKGLPDLIDETLVEDEEDLYDCVYGEDEGGEVYEDLMKAEEAHQPKCPENDIRSCCLAEIKQTEEKYTETLESIEKYFMAPLKRFLTAAEFDSVFINIPELVKLHRNLMQEIHDSIVNKNDQNLYQVFINYKERLVIYGQYCSGVESAISSLDYISKTKEDVKLKLEECSKRANNGKFTLRDLLVVPMQRVLKYHLLLQELVKHTTDPTEKANLKLALDAMKDLAQYVNEVKRDNETLREIKQFQLSIENLNQPVLLFGRPQGDGEIRITTLDKHTKQERHIFLFDLAVIVCKRKGDNYEMKEIIDLQQYKIANNPTTDKENKKWSYGFYLIHTQGQNGLEFYCKTKDLKKKWLEQFEMALSNIRPDYADSNFHDFKMHTFTRVTSCKVCQMLLRGTFYQGYLCFKCGARAHKECLGRVDNCGRVNSGEQGTLKLPEKRTNGLRRTPKQVDPDVPCLLHFFISMAPATRSIVKSQKKNKKF
 
-  Any annotation database could be used for providing this information, as long as gene id, transcript id and wildtype transcript sequence is provided. 
+  Any annotation database could be used for providing this information, as long as gene id, transcript id and wildtype transcript sequence is provided.
 
-3. <b>Variant peptide sequence length</b>: Since the goal of the pVAC-Seq pipeline to predict putative 'neo'antigens, we only consider a sub-section of the transcript sequence encompassing the mutated amino acid. 
+3. <b>Variant peptide sequence length</b>: Since the goal of the pVAC-Seq pipeline to predict putative 'neo'antigens, we only consider a sub-section of the transcript sequence encompassing the mutated amino acid.
 
      (a) In the following figure, amino acid FASTA sequence is built using 10 flanking amino acids on each side of the mutated amino acid. The preceding or succeeding 20 amino acids are taken if the mutation lies near the end or beginning of the transcript, respectively.
 
-     (b). All predicted candidate peptides from epitope prediction software based on selected k-mer window size. 
+     (b). All predicted candidate peptides from epitope prediction software based on selected k-mer window size.
 
-     (c). Only localized peptides (those containing the mutant amino acid) are considered to compare to wild-type counterpart. 
+     (c). Only localized peptides (those containing the mutant amino acid) are considered to compare to wild-type counterpart.
 
      (d). The ‘best candidate’ (lowest MT binding score) per mutation is chosen across all specified k-mers that were used as input.
 ![alt text][logo]
@@ -95,10 +105,10 @@ https://github.com/jhundal/src/blob/master/bin/images/Fig1_fastav2.png
 1	| 92163648|	92163648|	G	|A	|TGFBR3	|ENST00000212355	|P776L	|ENSG00000069702|	MTSHYVIAIFALMSSCLATAGPEPGALCELSPVSASHPVQALMESFTVLSGCASRGTTGLPQEVHVLNLRTAGQGPGQLQREVTLHLNPISSVHIHHKSVVFLLNSPHPLVWHLKTERLATGVSRLFLVSEGSVVQFSSANFSLTAETEERNFPHGNEHLLNWARKEYGAVTSFTELKIARNIYIKVGEDQVFPPKCNIGKNFLSLNYLAEYLQPKAAEGCVMSSQPQNEEVHIIELITPNSNPYSAFQVDITIDIRPSQEDLEVVKNLILILKCKKSVNWVIKSFDVKGSLKIIAPNSIGFGKESERSMTMTKSIRDDIPSTQGNLVKWALDNGYSPITSYTMAPVANRFHLRLENNAEEMGDEEVHTIPPELRILLDPGALPALQNPPIRGGEGQNGGLPFPFPDISRRVWNEEGEDGLPRPKDPVIPSIQLFPGLREPEEVQGSVDIALSVKCDNEKMIVAVEKDSFQASGYSGMDVTLLDPTCKAKMNGTHFVLESPLNGCGTRPRWSALDGVVYYNSIVIQVPALGDSSGWPDGYEDLESGDNGFPGDMDEGDASLFTRPEIVVFNCSLQQVRNPSSFQEQPHGNITFNMELYNTDLFLVPSQGVFSVPENGHVYVEVSVTKAEQELGFAIQTCFISPYSNPDRMSHYTIIENICPKDESVKFYSPKRVHFPIPQADMDKKRFSFVFKPVFNTSLLFLQCELTLCTKMEKHPQKLPKCVPPDEACTSLDASIIWAMMQNKKTFTKPLAVIHHEAESKEKGPSMKEPNPISPPIFHGLDTLTVMGIAFAAFVIGALLTGALWYIYSHTGETAGRQQVPTSPPASENSSAAHSIGSTQSTPCSSSSTA|
 1	|108291655|	108291655|	C|	T|	VAV3|	ENST00000490388|	G474D|	ENSG00000134215|	XCAQWLIHCKVLPTNHRVTWDSAQVFDLAQTLRDGVLLCQLLNNLRAHSINLKEINLRPQMSQFLCLKNIRTFLTACCETFGMRKSELFEAFDLFDVRDFGKVIETLSRLSRTPIALATGIRPFPTEESINDEDIYKGLPDLIDETLVEDEEDLYDCVYGEDEGGEVYEDLMKAEEAHQPKCPENDIRSCCLAEIKQTEEKYTETLESIEKYFMAPLKRFLTAAEFDSVFINIPELVKLHRNLMQEIHDSIVNKNDQNLYQVFINYKERLVIYGQYCSGVESAISSLDYISKTKEDVKLKLEECSKRANNGKFTLRDLLVVPMQRVLKYHLLLQELVKHTTDPTEKANLKLALDAMKDLAQYVNEVKRDNETLREIKQFQLSIENLNQPVLLFGRPQGDGEIRITTLDKHTKQERHIFLFDLAVIVCKRKGDNYEMKEIIDLQQYKIANNPTTDKENKKWSYGFYLIHTQGQNGLEFYCKTKDLKKKWLEQFEMALSNIRPDYADSNFHDFKMHTFTRVTSCKVCQMLLRGTFYQGYLCFKCGARAHKECLGRVDNCGRVNSGEQGTLKLPEKRTNGLRRTPKQVDPDVPCLLHFFISMAPATRSIVKSQKKNKKF
 
-  Any annotation database could be used for providing this information, as long as gene id, transcript id and wildtype transcript sequence is provided. 
+  Any annotation database could be used for providing this information, as long as gene id, transcript id and wildtype transcript sequence is provided.
 2. <b>generate_fasta_key.py</b>: NetMHC strips off the name of the FASTA header that contains gene names and type of sequence (WT vs MT). This module generates a key file to lookup original gene names in the output file of NetMHC 3.4 from the original 21-mer FASTA file for wildtype(WT) and mutant(MT) proteins.
 
-3. <b>parse_output_netmhc.py</b>:  After running NETMHC3.4, this module parses the output for MHC Class I epitope prediction. It uses a special key file generated that could be generated using GenerateFastaKey.pl.The parsed TSV file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. 
+3. <b>parse_output_netmhc.py</b>:  After running NETMHC3.4, this module parses the output for MHC Class I epitope prediction. It uses a special key file generated that could be generated using GenerateFastaKey.pl.The parsed TSV file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same.
 
 4. <b>binding_filter.py</b>: Takes in a file of files with path to parsed NetMHC files for different allele-length combinations and outputs best candidates per gene based on binding affinities.
 
@@ -106,7 +116,7 @@ https://github.com/jhundal/src/blob/master/bin/images/Fig1_fastav2.png
 
 1. <b>CoverageFilters.pl</b>: Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters could be used. The input file should contain the predicted epitopes along with read counts appended as additional columns. <b>Please note that if specific type of sequencing data is not available, the user should enter n/a in those columns, and set appropriate flags while running the script.</b> Column order should be preserved.
 
-   The Input file contains the following columns in tab-separated format : 
+   The Input file contains the following columns in tab-separated format :
    1.	chromosome_name
    2.	start
    3.	stop
