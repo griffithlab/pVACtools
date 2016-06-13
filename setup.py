@@ -16,6 +16,9 @@ setup(
             "pvacseq = pvacseq.pvacseq:main"
         ]
     },
+    install_requires=[
+        'PyVCF',
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
 
