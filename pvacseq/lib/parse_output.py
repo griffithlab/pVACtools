@@ -2,6 +2,7 @@ import argparse
 import csv
 import re
 import operator
+import sys
 
 def protein_identifier_for_label(key_file):
     tsvin = csv.reader(key_file, delimiter='\t')
@@ -53,18 +54,22 @@ def parse_input(input_file, key_file):
 
     return sorted_netmhc_result_list
 
+def main(args_input = sys.argv[1:]):
+    parser = argparse.ArgumentParser("Parse NetMHC Output", description='')
+    parser.add_argument('input_file', type=argparse.FileType('r'), help='Raw output file from Netmhc',)
+    parser.add_argument('key_file', type=argparse.FileType('r'), help='Key file for lookup of FASTA IDs')
+    parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')
+    args = parser.parse_args(args_input)
 
-parser = argparse.ArgumentParser(description='')
-parser.add_argument('input_file', type=argparse.FileType('r'), help='Raw output file from Netmhc',)
-parser.add_argument('key_file', type=argparse.FileType('r'), help='Key file for lookup of FASTA IDs')
-parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')
-args = parser.parse_args()
+    tsvout = csv.writer(args.output_file, delimiter='\t', lineterminator='\n')
+    tsvout.writerow(['Gene Name', 'Point Mutation', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold change'])
 
-tsvout = csv.writer(args.output_file, delimiter='\t', lineterminator='\n')
-tsvout.writerow(['Gene Name', 'Point Mutation', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold change'])
+    netmhc_results = parse_input(args.input_file, args.key_file)
+    for protein_name, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq in netmhc_results:
+        if mt_epitope_seq != wt_epitope_seq:
+            fold_change = "%.3f" % (wt_score/mt_score)
+            tsvout.writerow([protein_name, variant_aa, position, mt_score, wt_score, mt_epitope_seq, wt_epitope_seq, fold_change])
 
-netmhc_results = parse_input(args.input_file, args.key_file)
-for protein_name, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq in netmhc_results:
-    if mt_epitope_seq != wt_epitope_seq:
-        fold_change = "%.3f" % (wt_score/mt_score)
-        tsvout.writerow([protein_name, variant_aa, position, mt_score, wt_score, mt_epitope_seq, wt_epitope_seq, fold_change])
+
+if __name__ == '__main__':
+    main()

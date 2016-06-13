@@ -10,7 +10,7 @@ class ParseOutputTests(unittest.TestCase):
     def setUp(self):
         self.python = sys.executable
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        self.executable_dir = os.path.join(base_dir, 'pvacseq')
+        self.executable_dir = os.path.join(base_dir, 'pvacseq', 'lib')
         self.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'parse_output')
         self.sample_name             = 'Test'
         self.peptide_sequence_length = 21
