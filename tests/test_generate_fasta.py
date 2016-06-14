@@ -151,6 +151,26 @@ class GenerateFastaTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.fasta')
         self.assertTrue(cmp(generate_fasta_output_file, expected_output_file))
 
+    def test_input_file_with_frameshift_variant_feature_truncation_generates_expected_file(self):
+        generate_fasta_input_file  = os.path.join(self.test_data_dir, 'input_frameshift_variant_feature_truncation.tsv')
+        generate_fasta_output_file = tempfile.NamedTemporaryFile().name
+
+        generate_fasta_command = "%s %s %s %s %s" % (self.python, self.executable, generate_fasta_input_file, self.peptide_sequence_length, generate_fasta_output_file)
+
+        self.assertFalse(call(generate_fasta_command, shell=True))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file, expected_output_file))
+
+    def test_input_file_with_frameshift_variant_feature_elongation_generates_expected_file(self):
+        generate_fasta_input_file  = os.path.join(self.test_data_dir, 'input_frameshift_variant_feature_elongation.tsv')
+        generate_fasta_output_file = tempfile.NamedTemporaryFile().name
+
+        generate_fasta_command = "%s %s %s %s %s" % (self.python, self.executable, generate_fasta_input_file, self.peptide_sequence_length, generate_fasta_output_file)
+
+        self.assertFalse(call(generate_fasta_command, shell=True))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_elongation.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file, expected_output_file))
+
     def test_distance_from_start_works_as_expected(self):
         sequence = 'KKLKILGMPFRNIRSILKMVN'
         position = 5
