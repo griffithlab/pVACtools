@@ -111,6 +111,46 @@ class GenerateFastaTests(unittest.TestCase):
         self.assertFalse(call(generate_fasta_command, shell=True))
         self.assertEqual(os.stat(generate_fasta_output_file).st_size, 0)
 
+    def test_input_file_with_inframe_insertion_amino_acid_replacement_generates_expected_file(self):
+        generate_fasta_input_file  = os.path.join(self.test_data_dir, 'input_inframe_insertion_aa_replacement.tsv')
+        generate_fasta_output_file = tempfile.NamedTemporaryFile().name
+
+        generate_fasta_command = "%s %s %s %s %s" % (self.python, self.executable, generate_fasta_input_file, self.peptide_sequence_length, generate_fasta_output_file)
+
+        self.assertFalse(call(generate_fasta_command, shell=True))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_replacement.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file, expected_output_file))
+
+    def test_input_file_with_inframe_deletion_amino_acid_replacement_generates_expected_file(self):
+        generate_fasta_input_file  = os.path.join(self.test_data_dir, 'input_inframe_deletion_aa_replacement.tsv')
+        generate_fasta_output_file = tempfile.NamedTemporaryFile().name
+
+        generate_fasta_command = "%s %s %s %s %s" % (self.python, self.executable, generate_fasta_input_file, self.peptide_sequence_length, generate_fasta_output_file)
+
+        self.assertFalse(call(generate_fasta_command, shell=True))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_replacement.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file, expected_output_file))
+
+    def test_input_file_with_inframe_insertion_amino_acid_insertion_generates_expected_file(self):
+        generate_fasta_input_file  = os.path.join(self.test_data_dir, 'input_inframe_insertion_aa_insertion.tsv')
+        generate_fasta_output_file = tempfile.NamedTemporaryFile().name
+
+        generate_fasta_command = "%s %s %s %s %s" % (self.python, self.executable, generate_fasta_input_file, self.peptide_sequence_length, generate_fasta_output_file)
+
+        self.assertFalse(call(generate_fasta_command, shell=True))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_insertion.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file, expected_output_file))
+
+    def test_input_file_with_inframe_deletion_amino_acid_deletion_generates_expected_file(self):
+        generate_fasta_input_file  = os.path.join(self.test_data_dir, 'input_inframe_deletion_aa_deletion.tsv')
+        generate_fasta_output_file = tempfile.NamedTemporaryFile().name
+
+        generate_fasta_command = "%s %s %s %s %s" % (self.python, self.executable, generate_fasta_input_file, self.peptide_sequence_length, generate_fasta_output_file)
+
+        self.assertFalse(call(generate_fasta_command, shell=True))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file, expected_output_file))
+
     def test_distance_from_start_works_as_expected(self):
         sequence = 'KKLKILGMPFRNIRSILKMVN'
         position = 5

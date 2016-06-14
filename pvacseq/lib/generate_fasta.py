@@ -79,13 +79,22 @@ def main(args_input = sys.argv[1:]):
         consequences = {consequence.lower() for consequence in consequence_string.split('&')}
 
         full_wildtype_sequence = line['wildtype_amino_acid_sequence']
-        if 'missense_variant' in consequences:
+        if 'missense_variant' in consequences or 'inframe_insertion' in consequences:
             wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
             if wildtype_amino_acid == '-':
                 position = int(line['protein_position'].split('-', 1)[0])
                 wildtype_amino_acid_length = 0
             else:
                 position = int(line['protein_position']) - 1;
+                wildtype_amino_acid_length = len(wildtype_amino_acid)
+        elif 'inframe_deletion' in consequences:
+            wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
+            if mutant_amino_acid == '-':
+                position = int(line['protein_position']) - 1;
+                wildtype_amino_acid_length = len(wildtype_amino_acid)
+                mutant_amino_acid = '';
+            else:
+                position = int(line['protein_position'].split('-', 1)[0]) - 1
                 wildtype_amino_acid_length = len(wildtype_amino_acid)
         else:
             continue
