@@ -47,6 +47,9 @@ def parse_csq_entries_for_allele(csq_entries, csq_format, csq_allele):
 
     return transcripts
 
+def output_headers():
+    return['chromosome_name', 'start', 'stop', 'reference', 'variant', 'gene_name', 'transcript_name', 'amino_acid_change', 'ensembl_gene_id', 'wildtype_amino_acid_sequence', 'downstream_amino_acid_sequence', 'consequences', 'protein_position']
+
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('Convert VCF to input tsv file', description='')
     parser.add_argument('input_file', type=argparse.FileType('r'), help='input VCF',)
@@ -56,8 +59,8 @@ def main(args_input = sys.argv[1:]):
     vcf_reader = vcf.Reader(args.input_file)
     if len(vcf_reader.samples) > 1:
         sys.exit('ERROR: VCF file contains more than one sample')
-    tsv_writer = csv.writer(args.output_file, delimiter='\t')
-    tsv_writer.writerow(['chromosome_name', 'start', 'stop', 'reference', 'variant', 'gene_name', 'transcript_name', 'amino_acid_change', 'ensembl_gene_id', 'wildtype_amino_acid_sequence', 'downstream_amino_acid_sequence', 'consequences', 'protein_position'])
+    tsv_writer = csv.DictWriter(args.output_file, delimiter='\t', fieldnames=output_headers())
+    tsv_writer.writeheader()
     csq_format = parse_csq_format(vcf_reader)
     for entry in vcf_reader:
         chromosome = entry.CHROM
@@ -72,16 +75,21 @@ def main(args_input = sys.argv[1:]):
             csq_allele = alleles_dict[alt]
             transcripts = parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
             for transcript in transcripts:
-                gene_name                      = transcript['SYMBOL']
-                transcript_name                = transcript['Feature']
-                amino_acid_change              = transcript['Amino_acids']
-                ensembl_gene_id                = transcript['Gene']
-                wildtype_amino_acid_sequence   = transcript['WildtypeProtein']
-                downstream_amino_acid_sequence = transcript['DownstreamProtein']
-                consequences                   = transcript['Consequence']
-                protein_position               = transcript['Protein_position']
-
-                tsv_writer.writerow([chromosome, start, stop, reference, alt, gene_name, transcript_name, amino_acid_change, ensembl_gene_id, wildtype_amino_acid_sequence, downstream_amino_acid_sequence, consequences, protein_position])
+                tsv_writer.writerow({
+                    'chromosome_name'                : entry.CHROM,
+                    'start'                          : entry.affected_start,
+                    'stop'                           : entry.affected_end,
+                    'reference'                      : entry.REF,
+                    'variant'                        : alt,
+                    'gene_name'                      : transcript['SYMBOL'],
+                    'transcript_name'                : transcript['Feature'],
+                    'amino_acid_change'              : transcript['Amino_acids'],
+                    'ensembl_gene_id'                : transcript['Gene'],
+                    'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
+                    'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
+                    'consequences'                   : transcript['Consequence'],
+                    'protein_position'               : transcript['Protein_position'],
+                })
 
     args.input_file.close()
     args.output_file.close()
