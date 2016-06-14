@@ -1,6 +1,6 @@
 import unittest
 import os
-from subprocess import run, PIPE
+import subprocess
 import re
 import sys
 import tempfile
@@ -48,7 +48,7 @@ class PVACTests(unittest.TestCase):
                 pvac_script_path,
                 command
             )
-            result = run([temp_cmd], shell=True, stdout=PIPE)
+            result = subprocess.run([temp_cmd], shell=True, stdout=subprocess.PIPE)
             self.assertFalse(result.returncode)
             self.assertRegex(result.stdout.decode(), usage_search)
 
@@ -69,7 +69,6 @@ class PVACTests(unittest.TestCase):
             )
         output_dir_handle = tempfile.TemporaryDirectory(dir = self.test_data_directory)
         output_dir = output_dir_handle.name
-        # output_dir = os.path.join(self.test_data_directory, "output")
         pvac_pipeline_cmd = "%s %s run %s Test fake_path HLA-A29:02 9 %s" % (
             sys.executable,
             pvac_script_path,
@@ -80,8 +79,8 @@ class PVACTests(unittest.TestCase):
             os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.netmhc.xls'),
             os.path.join(output_dir, 'Test.HLA-A29:02.9.netmhc.xls')
         )
-        result = run([pvac_pipeline_cmd], shell=True, stdout=PIPE)
-        self.assertFalse(result.returncode)
+        result = subprocess.call([pvac_pipeline_cmd], shell=True, stdout=subprocess.PIPE)
+        self.assertFalse(result)
         self.assertTrue(cmp(
             os.path.join(output_dir, "Test_21.fa"),
             os.path.join(self.test_data_directory, "Test_21.fa"),
