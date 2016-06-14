@@ -1,6 +1,6 @@
 import unittest
 import os
-import subprocess
+from subprocess import run, call, PIPE
 import re
 import sys
 import tempfile
@@ -48,7 +48,7 @@ class PVACTests(unittest.TestCase):
                 pvac_script_path,
                 command
             )
-            result = subprocess.run([temp_cmd], shell=True, stdout=subprocess.PIPE)
+            result = run([temp_cmd], shell=True, stdout=PIPE)
             self.assertFalse(result.returncode)
             self.assertRegex(result.stdout.decode(), usage_search)
 
@@ -67,37 +67,36 @@ class PVACTests(unittest.TestCase):
             'pvacseq',
             "pvacseq.py"
             )
-        output_dir_handle = tempfile.TemporaryDirectory(dir = self.test_data_directory)
-        output_dir = output_dir_handle.name
+        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
         pvac_pipeline_cmd = "%s %s run %s Test fake_path HLA-A29:02 9 %s" % (
             sys.executable,
             pvac_script_path,
             os.path.join(self.test_data_directory, "annotated_variants.tsv"),
-            output_dir
+            output_dir.name
         )
         copyfile(
             os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.netmhc.xls'),
-            os.path.join(output_dir, 'Test.HLA-A29:02.9.netmhc.xls')
+            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.netmhc.xls')
         )
-        result = subprocess.call([pvac_pipeline_cmd], shell=True, stdout=subprocess.PIPE)
+        result = call([pvac_pipeline_cmd], shell=True, stdout=PIPE)
         self.assertFalse(result)
         self.assertTrue(cmp(
-            os.path.join(output_dir, "Test_21.fa"),
+            os.path.join(output_dir.name, "Test_21.fa"),
             os.path.join(self.test_data_directory, "Test_21.fa"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir, "Test_21.key"),
+            os.path.join(output_dir.name, "Test_21.key"),
             os.path.join(self.test_data_directory, "Test_21.key"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir, 'Test.HLA-A29:02.9.netmhc.parsed'),
+            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.netmhc.parsed'),
             os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.netmhc.parsed'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir, "Test_filtered.xls"),
+            os.path.join(output_dir.name, "Test_filtered.xls"),
             os.path.join(self.test_data_directory, "Test_filtered.xls"),
             False
         ))

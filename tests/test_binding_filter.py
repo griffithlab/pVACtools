@@ -20,8 +20,8 @@ class BindingFilterTests(unittest.TestCase):
 
         #now edit the paths contained in the fof file to point to valid files
         reader   = open(fof, mode = 'r')
-        temp_fof = tempfile.NamedTemporaryFile().name
-        writer   = open(temp_fof, mode = 'w')
+        temp_fof = tempfile.NamedTemporaryFile()
+        writer   = open(temp_fof.name, mode = 'w')
         intake   = reader.readline().rstrip()
         while intake != "":
             #if the path is already valid, just keep it
@@ -42,16 +42,16 @@ class BindingFilterTests(unittest.TestCase):
     def test_binding_filter_runs_and_produces_expected_output(self):
         compiled_script_path = py_compile.compile(self.binding_filter_path)
         self.assertTrue(compiled_script_path)
-        output_file = tempfile.NamedTemporaryFile().name
+        output_file = tempfile.NamedTemporaryFile()
         binding_filter_cmd = "%s  %s  %s %s" % (
             sys.executable,
             compiled_script_path,
-            self.fof,
-            output_file,
-            )
+            self.fof.name,
+            output_file.name,
+        )
         self.assertFalse(call([binding_filter_cmd], shell=True))
         self.assertTrue(cmp(
-            output_file,
+            output_file.name,
             os.path.join(self.test_data_path, "Test_filtered.xls"),
             False
         ))
