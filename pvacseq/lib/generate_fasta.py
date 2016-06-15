@@ -3,6 +3,9 @@ import csv
 import re
 import sys
 
+def position_out_of_bounds(position, sequence):
+    return position > len(sequence)-1
+
 #This subroutine is a bit funky but it was designed that way to mirror
 #distance_from_end to increase code readability from the caller's perspective
 def distance_from_start(position, string):
@@ -11,70 +14,134 @@ def distance_from_start(position, string):
 def distance_from_end(position, string):
     return len(string) - 1 - position;
 
-def get_wildtype_subsequence_for_printing(position, wildtype_sequence, peptide_sequence_length, line):
-    chromosome = line[0]
-    start      = line[1]
-    stop       = line[2]
+def determine_peptide_sequence_length(full_wildtype_sequence_length, peptide_sequence_length, line):
+    actual_peptide_sequence_length = peptide_sequence_length
+
     #If the wildtype sequence is shorter than the desired peptide sequence
     #length we use the wildtype sequence length instead so that the extraction
     #algorithm below works correctly
-    if len(wildtype_sequence) < peptide_sequence_length:
-        peptide_sequence_length = len(wildtype_sequence)
-        print("Wildtype sequence length is shorter than desired peptide sequence length at position (%s, %s, %s). Using wildtype sequence length (%s) instead." % chromosome, start, stop, peptide_sequence_length)
+    if full_wildtype_sequence_length < actual_peptide_sequence_length:
+        actual_peptide_sequence_length = full_wildtype_sequence_length
+        print('Wildtype sequence length is shorter than desired peptide sequence length at position (%s, %s, %s). Using wildtype sequence length (%s) instead.' % (line['chromosome_name'], line['start'], line['stop'], actual_peptide_sequence_length))
 
-    # We want to extract a subset from @arr_wildtype_sequence that is
-    # $peptide_sequence_length long so that the $position ends
+    return actual_peptide_sequence_length
+
+def determine_flanking_sequence_length(full_wildtype_sequence_length, peptide_sequence_length, line):
+    actual_peptide_sequence_length = determine_peptide_sequence_length(full_wildtype_sequence_length, peptide_sequence_length, line)
+    if actual_peptide_sequence_length%2 == 0:
+        return (actual_peptide_sequence_length-2) / 2
+    else:
+        return (actual_peptide_sequence_length-1) / 2
+
+def get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line):
+    one_flanking_sequence_length = int(determine_flanking_sequence_length(len(full_wildtype_sequence), peptide_sequence_length, line))
+    peptide_sequence_length = 2 * one_flanking_sequence_length + wildtype_amino_acid_length
+
+    # We want to extract a subset from full_wildtype_sequence that is
+    # peptide_sequence_length long so that the position ends
     # up in the middle of the extracted sequence.
-    # If the $position is too far toward the beginning or end of
-    # @arr_wildtype_sequence there aren't enough amino acids on one side
+    # If the position is too far toward the beginning or end of
+    # full_wildtype_sequence there aren't enough amino acids on one side
     # to achieve this.
-    one_flanking_sequence_length = int((peptide_sequence_length - 1) / 2)
-    if distance_from_start(position, wildtype_sequence) < one_flanking_sequence_length:
-        wildtype_subsequence = wildtype_sequence[0 : peptide_sequence_length]
+    if distance_from_start(position, full_wildtype_sequence) < one_flanking_sequence_length:
+        wildtype_subsequence = full_wildtype_sequence[:peptide_sequence_length]
         mutation_position = position
-    elif distance_from_end(position, wildtype_sequence) < one_flanking_sequence_length:
-        wildtype_subsequence = wildtype_sequence[len(wildtype_sequence)-peptide_sequence_length : len(wildtype_sequence)]
-        mutation_position = peptide_sequence_length - distance_from_end(position, wildtype_sequence) - 1
-    elif distance_from_start(position, wildtype_sequence) >= one_flanking_sequence_length and distance_from_end(position, wildtype_sequence) >= one_flanking_sequence_length:
-        wildtype_subsequence = wildtype_sequence[position-one_flanking_sequence_length : position+one_flanking_sequence_length+1]
+    elif distance_from_end(position, full_wildtype_sequence) < one_flanking_sequence_length:
+        start_position = len(full_wildtype_sequence) - peptide_sequence_length
+        wildtype_subsequence = full_wildtype_sequence[start_position:]
+        mutation_position = peptide_sequence_length - distance_from_end(position, full_wildtype_sequence) - 1
+    elif distance_from_start(position, full_wildtype_sequence) >= one_flanking_sequence_length and distance_from_end(position, full_wildtype_sequence) >= one_flanking_sequence_length:
+        start_position = position - one_flanking_sequence_length
+        end_position   = start_position + peptide_sequence_length
+        wildtype_subsequence = full_wildtype_sequence[start_position:end_position]
         mutation_position = one_flanking_sequence_length
     else:
-        sys.exit("Something went wrong during the retrieval of the wildtype sequence at position(%s, %s, %s)" % chromsome, start, stop)
+        sys.exit("ERROR: Something went wrong during the retrieval of the wildtype sequence at position(%s, %s, %s)" % line['chromsome_name'], line['start'], line['stop'])
 
     return mutation_position, wildtype_subsequence
 
+def get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line):
+    one_flanking_sequence_length = determine_flanking_sequence_length(len(full_wildtype_sequence), peptide_sequence_length, line)
+    if position < one_flanking_sequence_length:
+        start_position = 0
+    else:
+        start_position = int(position - one_flanking_sequence_length)
+    wildtype_subsequence_stop_position = int(position + one_flanking_sequence_length)
+    mutation_subsequence_stop_position = int(position)
+    wildtype_subsequence = full_wildtype_sequence[start_position:wildtype_subsequence_stop_position]
+    mutation_start_subsequence = full_wildtype_sequence[start_position:mutation_subsequence_stop_position]
+    return wildtype_subsequence, mutation_start_subsequence
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("Generate Variant Sequences", description='')
     parser.add_argument('input_file', type=argparse.FileType('r'), help='input list of variants',)
     parser.add_argument('peptide_sequence_length', type=int, help='length of the peptide sequence')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='output FASTA file')
-
     args = parser.parse_args(args_input)
 
-    tsvin = csv.reader(args.input_file, delimiter='\t')
-
-    pattern = re.compile('([A-Z])(\d+)([A-Z])');
+    peptide_sequence_length = args.peptide_sequence_length
+    tsvin                   = csv.DictReader(args.input_file, delimiter='\t')
+    transcript_count        = {}
+    pattern                 = re.compile('([A-Z])(\d+)([A-Z])');
     for line in tsvin:
-        match = pattern.match(line[7]);
-        if match is not None:
-            wildtype_amino_acid, position, mutant_amino_acid = match.group(1, 2, 3)
-            position = int(position) - 1
+        consequence_string = line['consequences']
+        if consequence_string is None:
+              continue
+        consequences = {consequence.lower() for consequence in consequence_string.split('&')}
 
-            wildtype_sequence = line[9];
-            if wildtype_amino_acid != wildtype_sequence[position]:
-                continue
+        full_wildtype_sequence = line['wildtype_amino_acid_sequence']
+        if 'frameshift_variant' in consequences:
+            consequence = 'FS'
+            position = int(line['protein_position']) - 1
+        elif 'missense_variant' in consequences or 'inframe_insertion' in consequences:
+            if 'missense_variant' in consequences:
+                consequence = 'missense'
+            elif 'inframe_insertion' in consequences:
+                consequence = 'inframe_ins'
+            wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
+            if wildtype_amino_acid == '-':
+                position = int(line['protein_position'].split('-', 1)[0])
+                wildtype_amino_acid_length = 0
             else:
-                mutation_position, wildtype_subsequence = get_wildtype_subsequence_for_printing(position, wildtype_sequence, args.peptide_sequence_length, line)
-                mutant_subsequence = list(wildtype_subsequence)
+                position = int(line['protein_position']) - 1;
+                wildtype_amino_acid_length = len(wildtype_amino_acid)
+        elif 'inframe_deletion' in consequences:
+            consequence = 'inframe_del'
+            wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
+            if mutant_amino_acid == '-':
+                position = int(line['protein_position']) - 1;
+                wildtype_amino_acid_length = len(wildtype_amino_acid)
+                mutant_amino_acid = '';
+            else:
+                position = int(line['protein_position'].split('-', 1)[0]) - 1
+                wildtype_amino_acid_length = len(wildtype_amino_acid)
+        else:
+            continue
 
-                mutant_subsequence[mutation_position] = mutant_amino_acid
-                if len(wildtype_subsequence) > 0:
-                    for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, ''.join(mutant_subsequence)]):
-                        fasta_header = '.'.join(['>' + designation, line[5], line[7]])
-                        args.output_file.writelines([fasta_header + "\n", subsequence + "\n"])
-                else:
-                    print(join("\t", 'NULL', position))
+        if position_out_of_bounds(position, full_wildtype_sequence):
+            continue
+
+        if line['transcript_name'] in transcript_count:
+            transcript_count[line['transcript_name']] += 1
+        else:
+            transcript_count[line['transcript_name']] = 1
+
+        if consequence == 'FS':
+            wildtype_subsequence, mutant_subsequence = get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
+            mutant_subsequence += line['downstream_amino_acid_sequence']
+            amino_acid_change = line['protein_position']
+        else:
+            mutation_start_position, wildtype_subsequence = get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line)
+            mutation_end_position = mutation_start_position + wildtype_amino_acid_length
+            mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:];
+            if mutant_amino_acid is '':
+                mutant_amino_acid = '-'
+            amino_acid_change = "%s%s%s" % (wildtype_amino_acid, line['protein_position'], mutant_amino_acid)
+
+        variant_id = '%s_%s_%s.%s.%s' % (line['gene_name'], line['transcript_name'], transcript_count[line['transcript_name']], consequence, amino_acid_change)
+        for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, mutant_subsequence]):
+            args.output_file.writelines('>%s.%s\n' % (designation, variant_id))
+            args.output_file.writelines('%s\n' % subsequence)
 
     args.input_file.close()
     args.output_file.close()
