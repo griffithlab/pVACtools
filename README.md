@@ -108,5 +108,26 @@ Depending on the type(s) of sequencing data available, a variety of coverage and
  4.  <b>Epitope length</b> : This refers to the length of subpeptides(neoepitopes) to predict. The pipeline can handle multiple lengths that can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.
 
  5. <b> Binding-cutoff </b> : The user can choose to report only epitopes where the mutant allele has IC50 binding scores below this value. By default, we recommend choosing high to medium binding epitopes and use a cutoff of 500.
- 
+
  6. <b> Minimum Fold Change (min-fc):</b> This parameter is installed to set the minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT).
+
+ ####Example command :
+
+ `pvacseq run ~/pVAC-Seq/example_data/annotated_variants.tsv Test ~/netMHC-3.4/netMHC HLA-A29:02 9 ~/pVAC-Seq/example_data/ -l 21`
+
+ ####Command Explanation:
+ `pVAC-Seq`
+ `~/pVAC-Seq/test_data/annotated_variants.tsv`
+ #######Use the TSV as an example to format your input file
+ `Test`
+ #######Specify your preferred sample name ; this will used as a prefix for all output files
+ `~/netMHC-3.4/netMHC `
+ ####### Install NetMHC and provide path to the directory
+ `HLA-A29:02 `
+ ####### One allele, or comma-separated list of different alleles
+ `9 `
+ ####### Predicted epitope length ; Comma-separated list may be used
+ `~/pVAC-Seq/test_data/`
+ ####### Directory where all result files will be written.
+ `-l 21 `
+ ####### Length of FASTA sequence with mutated amino acid
