@@ -13,6 +13,10 @@ def main():
     subparsers = parser.add_subparsers()
 
     #add subcommands
+    convert_vcf_parser = subparsers.add_parser("convert_vcf",
+                                               help="Converts a VCF into TSV format for downstream steps",
+                                               add_help=False)
+    convert_vcf_parser.set_defaults(func=lib.convert_vcf)
     variant_sequences_parser = subparsers.add_parser("generate_fasta",
                                                      help="Generates a variant peptide FASTA file from the TSV input file",
                                                      add_help=False)

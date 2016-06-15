@@ -12,7 +12,7 @@ def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pVAC-Seq Main")
 
     parser.add_argument("input",
-                        help="Input TSV File with variants (please provide complete path)"
+                        help="Input VCF with VEP annotations (please provide complete path)"
                         )
     parser.add_argument("sample_name",
                         help="Name of Sample; will be used as prefix for output files"
@@ -52,13 +52,22 @@ def main(args_input = sys.argv[1:]):
 
     args = parser.parse_args(args_input)
 
-    fasta_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa"
-    fasta_key_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".key"
-
-    print("Generating Variant Peptide FASTA File")
-    lib.generate_fasta.main(
+    print("Converting VCF to TSV")
+    tsv_file = args.sample_name + '.tsv'
+    lib.convert_vcf.main(
         [
             args.input,
+            tsv_file,
+        ]
+    )
+    print("Completed")
+
+    print("Generating Variant Peptide FASTA File")
+    fasta_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa"
+    fasta_key_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".key"
+    lib.generate_fasta.main(
+        [
+            tsv_file,
             str(args.peptide_sequence_length),
             os.path.join(args.output_dir, fasta_file)
         ]
@@ -132,7 +141,7 @@ def main(args_input = sys.argv[1:]):
     )
     print("Completed")
     print("\n")
-    print("Done: pVac-Seq.py has completed. File", filt_out,
+    print("Done: pvacseq has completed. File", filt_out,
           "contains list of binding-filtered putative neoantigens")
     print("We recommend appending coverage information and running CoverageFilters.py to filter based on sequencing coverage information")
 
