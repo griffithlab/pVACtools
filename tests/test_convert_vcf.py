@@ -23,7 +23,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output.tsv')
@@ -34,7 +33,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_multiple_transcripts.tsv')
@@ -45,7 +43,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_multiple_transcripts_per_alt.tsv')
@@ -56,7 +53,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutation_at_relative_beginning_of_full_sequence.tsv')
@@ -67,7 +63,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutation_at_relative_end_of_full_sequence.tsv')
@@ -78,7 +73,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_position_out_of_bounds.tsv')
@@ -89,7 +83,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_short_wildtype_sequence.tsv')
@@ -100,7 +93,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_elongation.tsv')
@@ -111,7 +103,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation.tsv')
@@ -122,7 +113,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_replacement.tsv')
@@ -133,7 +123,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_replacement.tsv')
@@ -144,7 +133,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_insertion.tsv')
@@ -155,7 +143,6 @@ class ConvertVcfTests(unittest.TestCase):
         convert_vcf_output_file = tempfile.NamedTemporaryFile().name
 
         convert_vcf_command = "%s %s %s %s" % (self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file)
-        print(convert_vcf_command)
 
         self.assertFalse(call(convert_vcf_command, shell=True))
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.tsv')
