@@ -51,7 +51,7 @@ def output_headers():
     return['chromosome_name', 'start', 'stop', 'reference', 'variant', 'gene_name', 'transcript_name', 'amino_acid_change', 'ensembl_gene_id', 'wildtype_amino_acid_sequence', 'downstream_amino_acid_sequence', 'consequences', 'protein_position']
 
 def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser('Convert VCF to input tsv file', description='')
+    parser = argparse.ArgumentParser('pvacseq convert_vcf')
     parser.add_argument('input_file', type=argparse.FileType('r'), help='input VCF',)
     parser.add_argument('output_file', type=argparse.FileType('w'), help='output list of variants')
     args = parser.parse_args(args_input)
