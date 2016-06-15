@@ -24,10 +24,12 @@ def min_match_count(peptide_length):
 
 def determine_consecutive_matches(mt_epitope_seq, wt_epitope_seq):
     consecutive_matches = 0
+    left_padding        = 0
     #Count consecutive matches from the beginning of the epitope sequences
     for a, b in zip(mt_epitope_seq, wt_epitope_seq):
         if a == b:
             consecutive_matches += 1
+            left_padding        += 1
         else:
             break
     #Count consecutive matches from the end of the epitope sequences
@@ -36,7 +38,7 @@ def determine_consecutive_matches(mt_epitope_seq, wt_epitope_seq):
             consecutive_matches += 1
         else:
             break
-    return consecutive_matches
+    return consecutive_matches, left_padding
 
 def parse_input(input_file, key_file):
     tsvin = csv.reader(input_file, delimiter='\t')
@@ -80,13 +82,18 @@ def parse_input(input_file, key_file):
         wt_results = wt_netmhc_results[wt_netmhc_result_key]
 
         mt_epitope_seq = result['mt_epitope_seq']
-        best_match_count = 0
+        best_match_count  = 0
+        best_left_padding = 0
         for wt_position, wt_result in wt_results.items():
             wt_epitope_seq = wt_result['wt_epitope_seq']
 
-            consecutive_matches = determine_consecutive_matches(mt_epitope_seq, wt_epitope_seq)
+            consecutive_matches, left_padding = determine_consecutive_matches(mt_epitope_seq, wt_epitope_seq)
             if consecutive_matches > best_match_count:
                 best_match_count    = consecutive_matches
+                best_left_padding   = left_padding
+                best_match_position = wt_position
+            elif consecutive_matches == best_match_count and left_padding > best_left_padding:
+                best_left_padding   = left_padding
                 best_match_position = wt_position
 
         netmhc_results[key]['wt_epitope_seq'] = 'NA'
