@@ -57,20 +57,22 @@ def parse_input(input_file, key_file):
         if protein_identifier_from_label[protein_label] is not None:
             protein_identifier = protein_identifier_from_label[protein_label]
 
-        (protein_type, protein_name, variant_type, variant_aa) = protein_identifier.split('.', 3)
+        (protein_type, name, variant_type, variant_aa) = protein_identifier.split('.', 3)
+        (protein_name, transcript, count)         = name.split('_', 2)
         if protein_type == 'MT':
-            key = "%s.%s.%s_%s" % (protein_name, variant_type, variant_aa, position)
+            key = "%s.%s.%s|%s" % (name, variant_type, variant_aa, position)
             if key not in netmhc_results:
                 netmhc_results[key] = {}
             netmhc_results[key]['mt_score']       = int(score)
             netmhc_results[key]['mt_epitope_seq'] = epitope
             netmhc_results[key]['protein_name']   = protein_name
+            netmhc_results[key]['transcript']     = transcript
             netmhc_results[key]['variant_type']   = variant_type
             netmhc_results[key]['variant_aa']     = variant_aa
             netmhc_results[key]['position']       = position
 
         if protein_type == 'WT':
-            key = "%s.%s.%s" % (protein_name, variant_type, variant_aa)
+            key = "%s.%s.%s" % (name, variant_type, variant_aa)
             if key not in wt_netmhc_results:
                 wt_netmhc_results[key] = {}
             wt_netmhc_results[key][position] = {}
@@ -78,7 +80,7 @@ def parse_input(input_file, key_file):
             wt_netmhc_results[key][position]['wt_epitope_seq'] = epitope
 
     for key, result in netmhc_results.items():
-        (wt_netmhc_result_key, mt_position) = key.split('_', 1)
+        (wt_netmhc_result_key, mt_position) = key.split('|', 1)
         if result['variant_type'] == 'missense':
             netmhc_results[key]['wt_epitope_seq'] = wt_netmhc_results[wt_netmhc_result_key][mt_position]['wt_epitope_seq']
             netmhc_results[key]['wt_score']       = wt_netmhc_results[wt_netmhc_result_key][mt_position]['wt_score']
@@ -106,9 +108,9 @@ def parse_input(input_file, key_file):
                 netmhc_results[key]['wt_score']       = wt_netmhc_results[wt_netmhc_result_key][best_match_position]['wt_score']
 
     #transform the netmhc_results dictionary into a two-dimensional list
-    netmhc_result_list = list((value['protein_name'], value['variant_type'], value['variant_aa'], value['position'], value['mt_score'], value['wt_score'], value['wt_epitope_seq'], value['mt_epitope_seq']) for value in netmhc_results.values())
+    netmhc_result_list = list((value['protein_name'], value['transcript'], value['variant_type'], value['variant_aa'], value['position'], value['mt_score'], value['wt_score'], value['wt_epitope_seq'], value['mt_epitope_seq']) for value in netmhc_results.values())
     #sort the list by protein_name, variant_aa, mt_score, and inverse wt_score
-    sorted_netmhc_result_list = sorted(netmhc_result_list, key=lambda netmhc_result_list: (netmhc_result_list[0], netmhc_result_list[2], netmhc_result_list[4]))
+    sorted_netmhc_result_list = sorted(netmhc_result_list, key=lambda netmhc_result_list: (netmhc_result_list[0], netmhc_result_list[3], netmhc_result_list[5]))
 
     return sorted_netmhc_result_list
 
@@ -120,16 +122,16 @@ def main(args_input = sys.argv[1:]):
     args = parser.parse_args(args_input)
 
     tsvout = csv.writer(args.output_file, delimiter='\t', lineterminator='\n')
-    tsvout.writerow(['Gene Name', 'Variant Type', 'Mutation', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold change'])
+    tsvout.writerow(['Gene Name', 'Transcript', 'Variant Type', 'Mutation', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold change'])
 
     netmhc_results = parse_input(args.input_file, args.key_file)
-    for protein_name, variant_type, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq in netmhc_results:
+    for protein_name, transcript, variant_type, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq in netmhc_results:
         if mt_epitope_seq != wt_epitope_seq:
             if wt_epitope_seq == 'NA':
                 fold_change = 'NA'
             else:
                 fold_change = "%.3f" % (wt_score/mt_score)
-            tsvout.writerow([protein_name, variant_type, variant_aa, position, mt_score, wt_score, mt_epitope_seq, wt_epitope_seq, fold_change])
+            tsvout.writerow([protein_name, transcript, variant_type, variant_aa, position, mt_score, wt_score, mt_epitope_seq, wt_epitope_seq, fold_change])
 
 
 if __name__ == '__main__':
