@@ -100,3 +100,4 @@ class PVACTests(unittest.TestCase):
             os.path.join(self.test_data_directory, "Test_filtered.xls"),
             False
         ))
+        output_dir.cleanup()
