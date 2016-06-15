@@ -57,7 +57,7 @@ def main(args_input = sys.argv[1:]):
     lib.convert_vcf.main(
         [
             args.input,
-            tsv_file,
+            os.path.join(args.output_dir, tsv_file),
         ]
     )
     print("Completed")
@@ -67,7 +67,7 @@ def main(args_input = sys.argv[1:]):
     fasta_key_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".key"
     lib.generate_fasta.main(
         [
-            tsv_file,
+            os.path.join(args.output_dir, tsv_file),
             str(args.peptide_sequence_length),
             os.path.join(args.output_dir, fasta_file)
         ]
