@@ -55,7 +55,7 @@ def parse_input(input_file, key_file):
     return sorted_netmhc_result_list
 
 def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser("Parse NetMHC Output", description='')
+    parser = argparse.ArgumentParser('pvacseq parse_output')
     parser.add_argument('input_file', type=argparse.FileType('r'), help='Raw output file from Netmhc',)
     parser.add_argument('key_file', type=argparse.FileType('r'), help='Key file for lookup of FASTA IDs')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')

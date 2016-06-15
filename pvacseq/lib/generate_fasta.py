@@ -45,7 +45,7 @@ def get_wildtype_subsequence_for_printing(position, wildtype_sequence, peptide_s
 
 
 def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser("Generate Variant Sequences", description='')
+    parser = argparse.ArgumentParser('pvacseq generate_fasta')
     parser.add_argument('input_file', type=argparse.FileType('r'), help='input list of variants',)
     parser.add_argument('peptide_sequence_length', type=int, help='length of the peptide sequence')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='output FASTA file')

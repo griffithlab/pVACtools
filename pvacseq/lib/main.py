@@ -9,7 +9,7 @@ except ValueError:
 
 
 def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser("pVAC-Seq Main")
+    parser = argparse.ArgumentParser("pvacseq run")
 
     parser.add_argument("input",
                         help="Input TSV File with variants (please provide complete path)"
