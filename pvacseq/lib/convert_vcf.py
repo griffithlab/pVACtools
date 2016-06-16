@@ -47,8 +47,22 @@ def parse_csq_entries_for_allele(csq_entries, csq_format, csq_allele):
 
     return transcripts
 
+def resolve_consequence(consequence_string):
+    consequences = {consequence.lower() for consequence in consequence_string.split('&')}
+    if 'frameshift_variant' in consequences:
+        consequence = 'FS'
+    elif 'missense_variant' in consequences:
+        consequence = 'missense'
+    elif 'inframe_insertion' in consequences:
+        consequence = 'inframe_ins'
+    elif 'inframe_deletion' in consequences:
+        consequence = 'inframe_del'
+    else:
+        consequence = consequence_string
+    return consequence
+
 def output_headers():
-    return['chromosome_name', 'start', 'stop', 'reference', 'variant', 'gene_name', 'transcript_name', 'amino_acid_change', 'ensembl_gene_id', 'wildtype_amino_acid_sequence', 'downstream_amino_acid_sequence', 'consequences', 'protein_position']
+    return['chromosome_name', 'start', 'stop', 'reference', 'variant', 'gene_name', 'transcript_name', 'amino_acid_change', 'ensembl_gene_id', 'wildtype_amino_acid_sequence', 'downstream_amino_acid_sequence', 'variant_type', 'protein_position', 'index']
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq convert_vcf')
@@ -62,6 +76,7 @@ def main(args_input = sys.argv[1:]):
     tsv_writer = csv.DictWriter(args.output_file, delimiter='\t', fieldnames=output_headers())
     tsv_writer.writeheader()
     csq_format = parse_csq_format(vcf_reader)
+    transcript_count = {}
     for entry in vcf_reader:
         chromosome = entry.CHROM
         start      = entry.affected_start
@@ -75,20 +90,33 @@ def main(args_input = sys.argv[1:]):
             csq_allele = alleles_dict[alt]
             transcripts = parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
             for transcript in transcripts:
+                transcript_name = transcript['Feature']
+                if transcript_name in transcript_count:
+                    transcript_count[transcript_name] += 1
+                else:
+                    transcript_count[transcript_name] = 1
+                consequence = resolve_consequence(transcript['Consequence'])
+                if consequence == 'FS':
+                    amino_acid_change_position = transcript['Protein_position']
+                else:
+                    amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
+                gene_name = transcript['SYMBOL']
+                index = '%s_%s_%s.%s.%s' % (gene_name, transcript_name, transcript_count[transcript_name], consequence, amino_acid_change_position)
                 tsv_writer.writerow({
                     'chromosome_name'                : entry.CHROM,
                     'start'                          : entry.affected_start,
                     'stop'                           : entry.affected_end,
                     'reference'                      : entry.REF,
                     'variant'                        : alt,
-                    'gene_name'                      : transcript['SYMBOL'],
-                    'transcript_name'                : transcript['Feature'],
+                    'gene_name'                      : gene_name,
+                    'transcript_name'                : transcript_name,
                     'amino_acid_change'              : transcript['Amino_acids'],
                     'ensembl_gene_id'                : transcript['Gene'],
                     'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
                     'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
-                    'consequences'                   : transcript['Consequence'],
+                    'variant_type'                   : consequence,
                     'protein_position'               : transcript['Protein_position'],
+                    'index'                          : index
                 })
 
     args.input_file.close()
