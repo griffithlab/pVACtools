@@ -114,6 +114,9 @@ def parse_input(input_file, key_file):
 
     return sorted_netmhc_result_list
 
+def output_headers():
+    return['Gene Name', 'Transcript', 'Variant Type', 'Mutation', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold Change']
+
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq parse_output')
     parser.add_argument('input_file', type=argparse.FileType('r'), help='Raw output file from Netmhc',)
@@ -121,8 +124,8 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')
     args = parser.parse_args(args_input)
 
-    tsvout = csv.writer(args.output_file, delimiter='\t', lineterminator='\n')
-    tsvout.writerow(['Gene Name', 'Transcript', 'Variant Type', 'Mutation', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold change'])
+    tsvout = csv.DictWriter(args.output_file, delimiter='\t', fieldnames=output_headers())
+    tsv_writer.writeheader()
 
     netmhc_results = parse_input(args.input_file, args.key_file)
     for protein_name, transcript, variant_type, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq in netmhc_results:
@@ -131,8 +134,18 @@ def main(args_input = sys.argv[1:]):
                 fold_change = 'NA'
             else:
                 fold_change = "%.3f" % (wt_score/mt_score)
-            tsvout.writerow([protein_name, transcript, variant_type, variant_aa, position, mt_score, wt_score, mt_epitope_seq, wt_epitope_seq, fold_change])
-
+            tsv_writer.writerow({
+                'Gene Name'           : protein_name,
+                'Transcript'          : transcript,
+                'Variant Type'        : variant_type,
+                'Mutation'            : variant_aa,
+                'Sub-peptide Position': position,
+                'MT score'            : mt_score,
+                'WT score'            : wt_score,
+                'MT epitope seq'      : mt_epitope_seq,
+                'WT epitope seq'      : wt_epitope_seq,
+                'Fold Change'         : fold_change,
+            })
 
 if __name__ == '__main__':
     main()
