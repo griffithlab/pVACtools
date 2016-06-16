@@ -26,6 +26,7 @@ class PVACTests(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
+            "convert_vcf",
             "generate_fasta",
             "binding_filter",
             "generate_fasta_key",
