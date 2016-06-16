@@ -4,7 +4,7 @@ import re
 import sys
 
 def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser("Generate Fasta Key", description='')
+    parser = argparse.ArgumentParser('pvacseq generate_fasta_key')
     parser.add_argument('input_file', type=argparse.FileType('r'), help="input FASTA file with variant sequences for wildtype(WT) and mutant(MT) proteins generated using 'GenerateVariantSequences.pl' and filtered using 'FilterSeq.pl'")
     parser.add_argument('output_file', type=argparse.FileType('w'), help='output Key file for lookup')
 

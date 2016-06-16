@@ -6,7 +6,7 @@ import csv
 
 
 def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser("Binding Filter")
+    parser = argparse.ArgumentParser('pvacseq binding_filter')
     parser.add_argument('input', type=argparse.FileType('r'),
                         help="Input list of variants")
     parser.add_argument('fof', type=argparse.FileType('r'),
