@@ -7,35 +7,97 @@ from filecmp import cmp
 import py_compile
 
 class ParseOutputTests(unittest.TestCase):
-    def setUp(self):
-        self.python = sys.executable
-        base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        self.executable_dir = os.path.join(base_dir, 'pvacseq', 'lib')
-        self.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'parse_output')
-        self.sample_name             = 'Test'
-        self.peptide_sequence_length = 21
-        self.epitope_length          = 9
-        self.allele                  = 'HLA-A29:02'
+    @classmethod
+    def setUp(cls):
+        cls.python        = sys.executable
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        executable_dir    = os.path.join(base_dir, 'pvacseq', 'lib')
+        cls.executable    = os.path.join(executable_dir, 'parse_output.py')
+        cls.test_data_dir = os.path.join(base_dir, 'tests', 'test_data', 'parse_output')
 
-    def tearDown(self):
-        del self.python
-        del self.executable_dir
-        del self.test_data_dir
-        del self.sample_name
-        del self.peptide_sequence_length
-        del self.epitope_length
-        del self.allele
+    def test_source_compiles(self):
+        self.assertTrue(py_compile.compile(self.executable))
 
     def test_parse_output_runs_and_produces_expected_output(self):
-        parse_output_netmhc_executable  = os.path.join(self.executable_dir, 'parse_output.py')
-        self.assertTrue(py_compile.compile(parse_output_netmhc_executable))
+        parse_output_input_netmhc_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.netmhc.xls")
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.tsv")
+        parse_output_key_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile().name
 
-        parse_output_netmhc_input_file  = os.path.join(self.test_data_dir, "%s.%s.%s.netmhc.xls" % (self.sample_name, self.allele, self.epitope_length))
-        parse_output_netmhc_key_file  = os.path.join(self.test_data_dir, "%s_%s.key" % (self.sample_name, self.peptide_sequence_length))
-        parse_output_netmhc_output_file = tempfile.NamedTemporaryFile().name
+        parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_netmhc_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file)
+        self.assertFalse(call(parse_output_command, shell=True))
 
-        parse_output_netmhc_command = "%s %s %s %s %s" % (self.python, parse_output_netmhc_executable, parse_output_netmhc_input_file, parse_output_netmhc_key_file, parse_output_netmhc_output_file)
-        self.assertFalse(call(parse_output_netmhc_command, shell=True))
+        expected_output_file  = os.path.join(self.test_data_dir, "output_peptide_sequence_length_21.netmhc.parsed")
+        self.assertTrue(cmp(parse_output_output_file, expected_output_file))
 
-        expected_output_file  = os.path.join(self.test_data_dir, "%s.%s.%s.netmhc.parsed" % (self.sample_name, self.allele, self.epitope_length))
-        self.assertTrue(cmp(parse_output_netmhc_output_file, expected_output_file))
+    def test_input_frameshift_variant_feature_elongation_gets_parsed_correctly(self):
+        parse_output_input_netmhc_file  = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_elongation.netmhc.xls")
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_elongation.tsv")
+        parse_output_key_file  = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_elongation.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile().name
+
+        parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_netmhc_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file)
+        self.assertFalse(call(parse_output_command, shell=True))
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_elongation.netmhc.parsed")
+        self.assertTrue(cmp(parse_output_output_file, expected_output_file))
+
+    def test_input_frameshift_variant_feature_truncation_gets_parsed_correctly(self):
+        parse_output_input_netmhc_file  = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation.netmhc.xls")
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation.tsv")
+        parse_output_key_file  = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile().name
+
+        parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_netmhc_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file)
+        self.assertFalse(call(parse_output_command, shell=True))
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_truncation.netmhc.parsed")
+        self.assertTrue(cmp(parse_output_output_file, expected_output_file))
+
+    def test_input_inframe_deletion_aa_deletion_gets_parsed_correctly(self):
+        parse_output_input_netmhc_file  = os.path.join(self.test_data_dir, "input_inframe_deletion_aa_deletion.netmhc.xls")
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_inframe_deletion_aa_deletion.tsv")
+        parse_output_key_file  = os.path.join(self.test_data_dir, "input_inframe_deletion_aa_deletion.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile().name
+
+        parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_netmhc_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file)
+        self.assertFalse(call(parse_output_command, shell=True))
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_deletion_aa_deletion.netmhc.parsed")
+        self.assertTrue(cmp(parse_output_output_file, expected_output_file))
+
+    def test_input_inframe_deletion_aa_replacement_gets_parsed_correctly(self):
+        parse_output_input_netmhc_file  = os.path.join(self.test_data_dir, "input_inframe_deletion_aa_replacement.netmhc.xls")
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_inframe_deletion_aa_replacement.tsv")
+        parse_output_key_file  = os.path.join(self.test_data_dir, "input_inframe_deletion_aa_replacement.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile().name
+
+        parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_netmhc_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file)
+        self.assertFalse(call(parse_output_command, shell=True))
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_deletion_aa_replacement.netmhc.parsed")
+        self.assertTrue(cmp(parse_output_output_file, expected_output_file))
+
+    def test_input_inframe_insertion_aa_insertion_gets_parsed_correctly(self):
+        parse_output_input_netmhc_file  = os.path.join(self.test_data_dir, "input_inframe_insertion_aa_insertion.netmhc.xls")
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_inframe_insertion_aa_insertion.tsv")
+        parse_output_key_file  = os.path.join(self.test_data_dir, "input_inframe_insertion_aa_insertion.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile().name
+
+        parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_netmhc_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file)
+        self.assertFalse(call(parse_output_command, shell=True))
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_insertion_aa_insertion.parsed")
+        self.assertTrue(cmp(parse_output_output_file, expected_output_file))
+
+    def test_input_frameshift_variant_feature_elongation_gets_parsed_correctly(self):
+        parse_output_input_netmhc_file  = os.path.join(self.test_data_dir, "input_inframe_insertion_aa_replacement.netmhc.xls")
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_inframe_insertion_aa_replacement.tsv")
+        parse_output_key_file  = os.path.join(self.test_data_dir, "input_inframe_insertion_aa_replacement.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile().name
+
+        parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_netmhc_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file)
+        self.assertFalse(call(parse_output_command, shell=True))
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_insertion_aa_replacement.netmhc.parsed")
+        self.assertTrue(cmp(parse_output_output_file, expected_output_file))
