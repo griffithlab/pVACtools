@@ -71,7 +71,7 @@ class PVACTests(unittest.TestCase):
         pvac_pipeline_cmd = "%s %s run %s Test fake_path HLA-A29:02 9 %s" % (
             sys.executable,
             pvac_script_path,
-            os.path.join(self.test_data_directory, "annotated_variants.tsv"),
+            os.path.join(self.test_data_directory, "input.vcf"),
             output_dir.name
         )
         copyfile(
@@ -80,6 +80,10 @@ class PVACTests(unittest.TestCase):
         )
         result = call([pvac_pipeline_cmd], shell=True, stdout=PIPE)
         self.assertFalse(result)
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "Test.tsv"),
+            os.path.join(self.test_data_directory, "Test.tsv")
+        ))
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test_21.fa"),
             os.path.join(self.test_data_directory, "Test_21.fa"),
