@@ -3,6 +3,7 @@ import csv
 import re
 import operator
 import sys
+import os
 from math import ceil
 
 import pdb
@@ -134,7 +135,7 @@ def parse_input(input_netmhc_file, input_tsv_file, key_file):
     return sorted_netmhc_result_list, tsv_entries
 
 def output_headers():
-    return['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Ensembl Gene ID', 'Variant Type', 'Mutation', 'Protein Position', 'Gene Name', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold Change']
+    return['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Ensembl Gene ID', 'Variant Type', 'Mutation', 'Protein Position', 'Gene Name', 'HLA Allele', 'Peptide Length', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold Change']
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq parse_output')
@@ -146,6 +147,9 @@ def main(args_input = sys.argv[1:]):
 
     tsv_writer = csv.DictWriter(args.output_file, delimiter='\t', fieldnames=output_headers())
     tsv_writer.writeheader()
+
+    basename = os.path.basename(args.input_netmhc_file.name)
+    (sample, allele, peptide_length, rest) = basename.split(".", 3)
 
     (netmhc_results, tsv_entries) = parse_input(args.input_netmhc_file, args.input_tsv_file, args.key_file)
     for gene_name, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq, tsv_index in netmhc_results:
@@ -167,6 +171,8 @@ def main(args_input = sys.argv[1:]):
                 'Mutation'            : variant_aa,
                 'Protein Position'    : tsv_entry['protein_position'],
                 'Gene Name'           : gene_name,
+                'HLA Allele'          : allele,
+                'Peptide Length'      : peptide_length,
                 'Sub-peptide Position': position,
                 'MT score'            : mt_score,
                 'WT score'            : wt_score,
