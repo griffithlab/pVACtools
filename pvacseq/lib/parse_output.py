@@ -8,10 +8,10 @@ from math import ceil
 import pdb
 
 def protein_identifier_for_label(key_file):
-    tsvin = csv.reader(key_file, delimiter='\t')
+    tsv_reader = csv.reader(key_file, delimiter='\t')
     pattern = re.compile('>')
     key_hash = {}
-    for line in tsvin:
+    for line in tsv_reader:
         new_name      = line[0]
         original_name = line[1]
         original_name = pattern.sub('', original_name)
@@ -40,13 +40,21 @@ def determine_consecutive_matches(mt_epitope_seq, wt_epitope_seq):
             break
     return consecutive_matches, left_padding
 
-def parse_input(input_file, key_file):
-    tsvin = csv.reader(input_file, delimiter='\t')
+def parse_tsv_input(input_tsv_file):
+    tsv_reader = csv.DictReader(input_tsv_file, delimiter='\t')
+    tsv_entries = {}
+    for line in tsv_reader:
+        tsv_entries[line['index']] = line
+    return tsv_entries
+
+def parse_input(input_netmhc_file, input_tsv_file, key_file):
+    tsv_reader = csv.reader(input_netmhc_file, delimiter='\t')
+    tsv_entries = parse_tsv_input(input_tsv_file)
     protein_identifier_from_label = protein_identifier_for_label(key_file)
     pattern = re.compile('NetMHC|Protein')
     netmhc_results = {}
     wt_netmhc_results = {}
-    for line in tsvin:
+    for line in tsv_reader:
         if len(line) == 0 or pattern.match(line[0]):
             continue
         protein_label = line[0]
@@ -57,27 +65,26 @@ def parse_input(input_file, key_file):
         if protein_identifier_from_label[protein_label] is not None:
             protein_identifier = protein_identifier_from_label[protein_label]
 
-        (protein_type, name, variant_type, variant_aa) = protein_identifier.split('.', 3)
-        (protein_name, transcript, count)         = name.split('_', 2)
+        (protein_type, tsv_index) = protein_identifier.split('.', 1)
         if protein_type == 'MT':
-            key = "%s.%s.%s|%s" % (name, variant_type, variant_aa, position)
+            tsv_entry = tsv_entries[tsv_index]
+            key = "%s|%s" % (tsv_index, position)
             if key not in netmhc_results:
                 netmhc_results[key] = {}
-            netmhc_results[key]['mt_score']       = int(score)
-            netmhc_results[key]['mt_epitope_seq'] = epitope
-            netmhc_results[key]['protein_name']   = protein_name
-            netmhc_results[key]['transcript']     = transcript
-            netmhc_results[key]['variant_type']   = variant_type
-            netmhc_results[key]['variant_aa']     = variant_aa
-            netmhc_results[key]['position']       = position
+            netmhc_results[key]['mt_score']          = int(score)
+            netmhc_results[key]['mt_epitope_seq']    = epitope
+            netmhc_results[key]['gene_name']         = tsv_entry['gene_name']
+            netmhc_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
+            netmhc_results[key]['variant_type']      = tsv_entry['variant_type']
+            netmhc_results[key]['position']          = position
+            netmhc_results[key]['tsv_index']         = tsv_index
 
         if protein_type == 'WT':
-            key = "%s.%s.%s" % (name, variant_type, variant_aa)
-            if key not in wt_netmhc_results:
-                wt_netmhc_results[key] = {}
-            wt_netmhc_results[key][position] = {}
-            wt_netmhc_results[key][position]['wt_score']       = int(score)
-            wt_netmhc_results[key][position]['wt_epitope_seq'] = epitope
+            if tsv_index not in wt_netmhc_results:
+                wt_netmhc_results[tsv_index] = {}
+            wt_netmhc_results[tsv_index][position] = {}
+            wt_netmhc_results[tsv_index][position]['wt_score']       = int(score)
+            wt_netmhc_results[tsv_index][position]['wt_epitope_seq'] = epitope
 
     for key, result in netmhc_results.items():
         (wt_netmhc_result_key, mt_position) = key.split('|', 1)
@@ -108,37 +115,58 @@ def parse_input(input_file, key_file):
                 netmhc_results[key]['wt_score']       = wt_netmhc_results[wt_netmhc_result_key][best_match_position]['wt_score']
 
     #transform the netmhc_results dictionary into a two-dimensional list
-    netmhc_result_list = list((value['protein_name'], value['transcript'], value['variant_type'], value['variant_aa'], value['position'], value['mt_score'], value['wt_score'], value['wt_epitope_seq'], value['mt_epitope_seq']) for value in netmhc_results.values())
-    #sort the list by protein_name, variant_aa, mt_score, and inverse wt_score
-    sorted_netmhc_result_list = sorted(netmhc_result_list, key=lambda netmhc_result_list: (netmhc_result_list[0], netmhc_result_list[3], netmhc_result_list[5]))
+    netmhc_result_list = list((
+        value['gene_name'],
+        value['amino_acid_change'],
+        value['position'],
+        value['mt_score'],
+        value['wt_score'],
+        value['wt_epitope_seq'],
+        value['mt_epitope_seq'],
+        value['tsv_index'],
+    ) for value in netmhc_results.values())
+    #sort the list by gene_name, amino_acid_change, mt_score
+    sorted_netmhc_result_list = sorted(
+        netmhc_result_list,
+        key=lambda netmhc_result_list: (netmhc_result_list[0], netmhc_result_list[1], netmhc_result_list[3])
+    )
 
-    return sorted_netmhc_result_list
+    return sorted_netmhc_result_list, tsv_entries
 
 def output_headers():
-    return['Gene Name', 'Transcript', 'Variant Type', 'Mutation', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold Change']
+    return['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Ensembl Gene ID', 'Variant Type', 'Mutation', 'Protein Position', 'Gene Name', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold Change']
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq parse_output')
-    parser.add_argument('input_file', type=argparse.FileType('r'), help='Raw output file from Netmhc',)
+    parser.add_argument('input_netmhc_file', type=argparse.FileType('r'), help='Raw output file from Netmhc',)
+    parser.add_argument('input_tsv_file', type=argparse.FileType('r'), help='Input list of variants')
     parser.add_argument('key_file', type=argparse.FileType('r'), help='Key file for lookup of FASTA IDs')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')
     args = parser.parse_args(args_input)
 
-    tsvout = csv.DictWriter(args.output_file, delimiter='\t', fieldnames=output_headers())
+    tsv_writer = csv.DictWriter(args.output_file, delimiter='\t', fieldnames=output_headers())
     tsv_writer.writeheader()
 
-    netmhc_results = parse_input(args.input_file, args.key_file)
-    for protein_name, transcript, variant_type, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq in netmhc_results:
+    (netmhc_results, tsv_entries) = parse_input(args.input_netmhc_file, args.input_tsv_file, args.key_file)
+    for gene_name, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq, tsv_index in netmhc_results:
+        tsv_entry = tsv_entries[tsv_index]
         if mt_epitope_seq != wt_epitope_seq:
             if wt_epitope_seq == 'NA':
                 fold_change = 'NA'
             else:
                 fold_change = "%.3f" % (wt_score/mt_score)
             tsv_writer.writerow({
-                'Gene Name'           : protein_name,
-                'Transcript'          : transcript,
-                'Variant Type'        : variant_type,
+                'Chromosome'          : tsv_entry['chromosome_name'],
+                'Start'               : tsv_entry['start'],
+                'Stop'                : tsv_entry['stop'],
+                'Reference'           : tsv_entry['reference'],
+                'Variant'             : tsv_entry['variant'],
+                'Transcript'          : tsv_entry['transcript_name'],
+                'Ensembl Gene ID'     : tsv_entry['ensembl_gene_id'],
+                'Variant Type'        : tsv_entry['variant_type'],
                 'Mutation'            : variant_aa,
+                'Protein Position'    : tsv_entry['protein_position'],
+                'Gene Name'           : gene_name,
                 'Sub-peptide Position': position,
                 'MT score'            : mt_score,
                 'WT score'            : wt_score,
