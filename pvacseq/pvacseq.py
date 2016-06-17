@@ -43,11 +43,15 @@ def main():
                                                     add_help=False)
     run_main_program_parser.set_defaults(func=lib.main)
 
+    download_example_data_parser = subparsers.add_parser("download_example_data",
+                                                         help="Download example input and output files",
+                                                         add_help=False)
+    download_example_data_parser.set_defaults(func=lib.download_example_data)
+
     install_vep_plugin_parser = subparsers.add_parser("install_vep_plugin",
                                                       help="Installs the Wildtype VEP plugin into your VEP_plugins directory",
                                                       add_help=False)
     install_vep_plugin_parser.set_defaults(func=lib.install_vep_plugin)
-
 
     args = parser.parse_known_args()
     try:
