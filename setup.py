@@ -19,6 +19,9 @@ setup(
     install_requires=[
         'PyVCF',
     ],
+    package_data={
+        'pvacseq' : ['VEP_plugins/*']
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
 
