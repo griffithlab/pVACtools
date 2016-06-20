@@ -77,14 +77,12 @@ def main(args_input = sys.argv[1:]):
 
     writer.writeheader()
 
-    for entry in (
-        #flatten the dictionary structure and iterate over each entry
-        item for sample
-        in sorted(prediction) for gene
-        in sorted(prediction[sample]) for item
-        in prediction[sample][gene]['GENES']
-    ):
-        writer.writerow(entry)
+    writer.writerows(
+        entry
+        for sample in sorted(prediction)
+        for gene in sorted(prediction[sample])
+        for entry in prediction[sample][gene]['GENES']
+    )
 
     args.output.close()
 
