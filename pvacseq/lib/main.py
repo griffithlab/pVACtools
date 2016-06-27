@@ -86,7 +86,7 @@ def main(args_input = sys.argv[1:]):
     for epl in args.epitope_length:
         for a in args.allele:
             if a in netmhc_output:
-                net_out = ".".join([args.sample_name, a, str(epl), "netmhc.xls"])
+                net_out = ".".join([args.sample_name, a, str(epl), "netmhc.txt"])
                 print("Running NetMHC on Allele", a,
                       "and Epitope Length", epl
                       )
