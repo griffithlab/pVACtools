@@ -107,9 +107,7 @@ def main(args_input = sys.argv[1:]):
                 print(args.netmhc_path,"-A")
             print("Completed")
 
-    fof = os.path.join(args.output_dir, args.sample_name+".fof")
-
-    writer = open(fof, mode='w')
+    input_files = []
 
     for epl in args.epitope_length:
         for a in args.allele:
@@ -125,15 +123,13 @@ def main(args_input = sys.argv[1:]):
                 ]
             )
             print("Completed")
-            writer.write(os.path.join(args.output_dir, net_parsed))
-            writer.write("\n")
-    writer.close()
+            input_files.append(os.path.join(args.output_dir, net_parsed))
 
     filt_out = os.path.join(args.output_dir, args.sample_name+"_filtered.xls")
     print("Running Binding Filters")
     lib.binding_filter.main(
         [
-            fof,
+            *input_files,
             filt_out,
             '-c', str(args.minimum_fold_change),
             '-b', str(args.binding_threshold)
