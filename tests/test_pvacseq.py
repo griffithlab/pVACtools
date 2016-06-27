@@ -75,8 +75,8 @@ class PVACTests(unittest.TestCase):
             output_dir.name
         )
         copyfile(
-            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.netmhc.xls'),
-            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.netmhc.xls')
+            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.netmhc.txt'),
+            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.netmhc.txt')
         )
         result = call([pvac_pipeline_cmd], shell=True, stdout=PIPE)
         self.assertFalse(result)
@@ -95,13 +95,13 @@ class PVACTests(unittest.TestCase):
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.netmhc.parsed'),
-            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.netmhc.parsed'),
+            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.netmhc.parsed.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.netmhc.parsed.tsv'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "Test_filtered.xls"),
-            os.path.join(self.test_data_directory, "Test_filtered.xls"),
+            os.path.join(output_dir.name, "Test_filtered.tsv"),
+            os.path.join(self.test_data_directory, "Test_filtered.tsv"),
             False
         ))
         output_dir.cleanup()

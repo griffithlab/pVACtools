@@ -111,8 +111,8 @@ def main(args_input = sys.argv[1:]):
 
     for epl in args.epitope_length:
         for a in args.allele:
-            net_out = ".".join([args.sample_name, a, str(epl), "netmhc.xls"])
-            net_parsed = ".".join([args.sample_name, a, str(epl), "netmhc.parsed"])
+            net_out = ".".join([args.sample_name, a, str(epl), "netmhc.txt"])
+            net_parsed = ".".join([args.sample_name, a, str(epl), "netmhc.parsed.tsv"])
             print("Parsing NetMHC Output")
             lib.parse_output.main(
                 [
@@ -125,7 +125,7 @@ def main(args_input = sys.argv[1:]):
             print("Completed")
             input_files.append(os.path.join(args.output_dir, net_parsed))
 
-    filt_out = os.path.join(args.output_dir, args.sample_name+"_filtered.xls")
+    filt_out = os.path.join(args.output_dir, args.sample_name+"_filtered.tsv")
     print("Running Binding Filters")
     lib.binding_filter.main(
         [
