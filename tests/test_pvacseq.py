@@ -31,7 +31,8 @@ class PVACTests(unittest.TestCase):
             "binding_filter",
             "generate_fasta_key",
             "parse_output",
-            "run"
+            "run",
+            "install_vep_plugin",
             ]:
             temp_cmd = "%s %s %s -h" %(
                 sys.executable,

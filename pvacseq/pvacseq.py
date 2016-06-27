@@ -17,6 +17,7 @@ def main():
                                                help="Converts a VCF into TSV format for downstream steps",
                                                add_help=False)
     convert_vcf_parser.set_defaults(func=lib.convert_vcf)
+
     variant_sequences_parser = subparsers.add_parser("generate_fasta",
                                                      help="Generates a variant peptide FASTA file from the TSV input file",
                                                      add_help=False)
@@ -41,6 +42,12 @@ def main():
                                                     help="Runs the pVAC-Seq pipeline",
                                                     add_help=False)
     run_main_program_parser.set_defaults(func=lib.main)
+
+    install_vep_plugin_parser = subparsers.add_parser("install_vep_plugin",
+                                                      help="Installs the Wildtype VEP plugin into your VEP_plugins directory",
+                                                      add_help=False)
+    install_vep_plugin_parser.set_defaults(func=lib.install_vep_plugin)
+
 
     args = parser.parse_known_args()
     try:
