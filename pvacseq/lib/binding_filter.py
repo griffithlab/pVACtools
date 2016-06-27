@@ -7,8 +7,9 @@ import csv
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq binding_filter')
-    parser.add_argument('fof', type=argparse.FileType('r'),
-                        help="FOF containing list of parsed epitope files " +
+    parser.add_argument('input_files', type=argparse.FileType('r'),
+                        nargs="+",
+                        help="List of parsed epitope files " +
                         "for different allele-length combinations (same sample)")
     parser.add_argument('output', type=argparse.FileType('w'),
                         help="Output .xls file containing list of filtered " +
@@ -33,17 +34,9 @@ def main(args_input = sys.argv[1:]):
     prediction = {}
     fieldnames = []
 
-    for line in args.fof:
-        filepath = line.rstrip()
-        sample = filepath.split(".")[0].replace("_netmhc", "")
-        if not os.path.isfile(filepath):
-            #if path does not exist, try making it relative to the fof
-            filepath = os.path.join(
-                os.path.dirname(os.path.abspath(args.fof.name)),
-                filepath
-            )
-        file_handle = open(filepath, mode='r')
-        reader = csv.DictReader(file_handle, delimiter='\t')
+    for input_file in args.input_files:
+        sample = os.path.basename(input_file.name).split(".")[0].replace("_netmhc", "")
+        reader = csv.DictReader(input_file, delimiter='\t')
         if len(fieldnames) == 0:
             fieldnames = reader.fieldnames
 
@@ -65,8 +58,7 @@ def main(args_input = sys.argv[1:]):
                 }
             elif score == prediction[sample][name]['SCORE']:
                 prediction[sample][name]['GENES'].append(entry)
-        file_handle.close()
-    args.fof.close()
+        input_file.close()
 
     writer = csv.DictWriter(
         args.output,

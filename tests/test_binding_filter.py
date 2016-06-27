@@ -15,30 +15,6 @@ class BindingFilterTests(unittest.TestCase):
         cls.binding_filter_path = os.path.join(cls.pVac_directory, "pvacseq", "lib", "binding_filter.py")
         cls.test_data_path= os.path.join(cls.pVac_directory, "tests", "test_data", "binding_filter")
 
-        #locate fof files in test data directory
-        fof = os.path.join(cls.test_data_path, 'Test.fof')
-
-        #now edit the paths contained in the fof file to point to valid files
-        reader   = open(fof, mode = 'r')
-        temp_fof = tempfile.NamedTemporaryFile()
-        writer   = open(temp_fof.name, mode = 'w')
-        intake   = reader.readline().rstrip()
-        while intake != "":
-            #if the path is already valid, just keep it
-            if os.path.isfile(intake):
-                writer.write(intake + "\n")
-                intake = reader.readline().rstrip()
-                continue
-            #if not, try changing the path to the test_data_path
-            intake = os.path.join(cls.test_data_path,
-                                  os.path.basename(intake))
-            if os.path.exists(intake):
-                writer.write(intake + "\n")
-            intake = reader.readline().rstrip()
-        writer.close()
-        reader.close()
-        cls.fof = temp_fof
-
     def test_binding_filter_runs_and_produces_expected_output(self):
         compiled_script_path = py_compile.compile(self.binding_filter_path)
         self.assertTrue(compiled_script_path)
@@ -46,8 +22,11 @@ class BindingFilterTests(unittest.TestCase):
         binding_filter_cmd = "%s  %s  %s %s" % (
             sys.executable,
             compiled_script_path,
-            self.fof.name,
-            output_file.name,
+            os.path.join(
+                self.test_data_path,
+                'Test.HLA-A29:02.9.netmhc.parsed'
+            ),
+            output_file.name
         )
         self.assertFalse(call([binding_filter_cmd], shell=True))
         self.assertTrue(cmp(
