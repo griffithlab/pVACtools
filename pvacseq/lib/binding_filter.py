@@ -7,7 +7,7 @@ import csv
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq binding_filter')
-    parser.add_argument('input', type=argparse.FileType('r'),
+    parser.add_argument('input_files', type=argparse.FileType('r'),
                         nargs="+",
                         help="List of parsed epitope files " +
                         "for different allele-length combinations (same sample)")
@@ -34,7 +34,7 @@ def main(args_input = sys.argv[1:]):
     prediction = {}
     fieldnames = []
 
-    for input_file in args.input:
+    for input_file in args.input_files:
         sample = os.path.basename(input_file.name).split(".")[0].replace("_netmhc", "")
         reader = csv.DictReader(input_file, delimiter='\t')
         if len(fieldnames) == 0:
