@@ -42,6 +42,7 @@ class PVACTests(unittest.TestCase):
             "parse_output",
             "run",
             "install_vep_plugin",
+            "download_example_data",
             ]:
             temp_cmd = "%s %s %s -h" %(
                 sys.executable,

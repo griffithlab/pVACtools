@@ -20,7 +20,7 @@ setup(
         'PyVCF',
     ],
     package_data={
-        'pvacseq' : ['VEP_plugins/*']
+        'pvacseq' : ['example_data/*', 'VEP_plugins/*']
     },
     classifiers=[
         'Development Status :: 4 - Beta',
