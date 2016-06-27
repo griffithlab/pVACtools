@@ -10,11 +10,11 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('fof', type=argparse.FileType('r'),
                         help="FOF containing list of parsed epitope files " +
                         "for different allele-length combinations (same sample)")
-    parser.add_argument('output', type=argparse.FileType('w'),
+    parser.add_argument('output_file', type=argparse.FileType('w'),
                         help="Output .xls file containing list of filtered " +
                         "epitopes based on binding affinity for each " +
                         "allele-length combination per gene")
-    parser.add_argument('-c', '--fold-change', type=int,
+    parser.add_argument('-c', '--minimum-fold-change', type=int,
                         help="Minimum fold change between mutant binding " +
                         "score and wild-type score. The default is 0, which " +
                         "filters no results, but 1 is often a sensible " +
@@ -69,7 +69,7 @@ def main(args_input = sys.argv[1:]):
     args.fof.close()
 
     writer = csv.DictWriter(
-        args.output,
+        args.output_file,
         fieldnames,
         delimiter = '\t',
         lineterminator = '\n'
@@ -84,7 +84,7 @@ def main(args_input = sys.argv[1:]):
         for entry in prediction[sample][gene]['GENES']
     )
 
-    args.output.close()
+    args.output_file.close()
 
 
 
