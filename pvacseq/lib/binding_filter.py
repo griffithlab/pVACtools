@@ -20,13 +20,11 @@ def main(args_input = sys.argv[1:]):
                         "filters no results, but 1 is often a sensible " +
                         "default (requiring that binding is better to the MT " +
                         "than WT)",
-                        default=0,
-                        dest="minimum_fold_change")
+                        default=0)
     parser.add_argument('-b', '--binding-threshold', type=int,
                         help="Report only epitopes where the mutant allele " +
                         "has ic50 binding scores below this value; default 500",
-                        default=500,
-                        dest="binding_threshold")
+                        default=500)
 
     args = parser.parse_args(args_input)
 
