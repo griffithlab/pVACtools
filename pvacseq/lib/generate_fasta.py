@@ -81,23 +81,13 @@ def main(args_input = sys.argv[1:]):
 
     peptide_sequence_length = args.peptide_sequence_length
     tsvin                   = csv.DictReader(args.input_file, delimiter='\t')
-    transcript_count        = {}
     pattern                 = re.compile('([A-Z])(\d+)([A-Z])');
     for line in tsvin:
-        consequence_string = line['consequences']
-        if consequence_string is None:
-              continue
-        consequences = {consequence.lower() for consequence in consequence_string.split('&')}
-
+        variant_type = line['variant_type']
         full_wildtype_sequence = line['wildtype_amino_acid_sequence']
-        if 'frameshift_variant' in consequences:
-            consequence = 'FS'
+        if variant_type == 'FS':
             position = int(line['protein_position']) - 1
-        elif 'missense_variant' in consequences or 'inframe_insertion' in consequences:
-            if 'missense_variant' in consequences:
-                consequence = 'missense'
-            elif 'inframe_insertion' in consequences:
-                consequence = 'inframe_ins'
+        elif variant_type == 'missense' or variant_type == 'inframe_ins':
             wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
             if wildtype_amino_acid == '-':
                 position = int(line['protein_position'].split('-', 1)[0])
@@ -105,8 +95,8 @@ def main(args_input = sys.argv[1:]):
             else:
                 position = int(line['protein_position']) - 1;
                 wildtype_amino_acid_length = len(wildtype_amino_acid)
-        elif 'inframe_deletion' in consequences:
-            consequence = 'inframe_del'
+        elif variant_type == 'inframe_del':
+            variant_type = 'inframe_del'
             wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
             if mutant_amino_acid == '-':
                 position = int(line['protein_position']) - 1;
@@ -121,24 +111,15 @@ def main(args_input = sys.argv[1:]):
         if position_out_of_bounds(position, full_wildtype_sequence):
             continue
 
-        if line['transcript_name'] in transcript_count:
-            transcript_count[line['transcript_name']] += 1
-        else:
-            transcript_count[line['transcript_name']] = 1
-
-        if consequence == 'FS':
+        if variant_type == 'FS':
             wildtype_subsequence, mutant_subsequence = get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
             mutant_subsequence += line['downstream_amino_acid_sequence']
-            amino_acid_change = line['protein_position']
         else:
             mutation_start_position, wildtype_subsequence = get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line)
             mutation_end_position = mutation_start_position + wildtype_amino_acid_length
             mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:];
-            if mutant_amino_acid is '':
-                mutant_amino_acid = '-'
-            amino_acid_change = "%s%s%s" % (wildtype_amino_acid, line['protein_position'], mutant_amino_acid)
 
-        variant_id = '%s_%s_%s.%s.%s' % (line['gene_name'], line['transcript_name'], transcript_count[line['transcript_name']], consequence, amino_acid_change)
+        variant_id = line['index']
         for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, mutant_subsequence]):
             args.output_file.writelines('>%s.%s\n' % (designation, variant_id))
             args.output_file.writelines('%s\n' % subsequence)
