@@ -1,4 +1,4 @@
-NetMHC version 3.4	Length of predicted peptides:9	Date:	Thursday June 16 2016	time:	16:18
+NetMHC version 3.4	Length of predicted peptides:9	Date:	Monday June 27 2016	time:	17:01
 
 Protein	Position	Peptide	HLA-A29:02 ANN/Mat Direct predicted affinity (Kd, nM)/Matscore
 Entry_18	0	PGKTVTISC	34983
