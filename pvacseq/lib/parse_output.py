@@ -129,7 +129,7 @@ def parse_input(input_netmhc_file, input_tsv_file, key_file):
     #sort the list by gene_name, amino_acid_change, mt_score
     sorted_netmhc_result_list = sorted(
         netmhc_result_list,
-        key=lambda netmhc_result_list: (netmhc_result_list[0], netmhc_result_list[1], netmhc_result_list[3])
+        key=lambda netmhc_result_list: (netmhc_result_list[0], netmhc_result_list[1], netmhc_result_list[3], " ".join(str(item) for item in netmhc_result_list))
     )
 
     return sorted_netmhc_result_list, tsv_entries
