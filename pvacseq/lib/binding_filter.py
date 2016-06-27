@@ -11,23 +11,21 @@ def main(args_input = sys.argv[1:]):
                         nargs="+",
                         help="List of parsed epitope files " +
                         "for different allele-length combinations (same sample)")
-    parser.add_argument('output', type=argparse.FileType('w'),
+    parser.add_argument('output_file', type=argparse.FileType('w'),
                         help="Output .xls file containing list of filtered " +
                         "epitopes based on binding affinity for each " +
                         "allele-length combination per gene")
-    parser.add_argument('-c', '--fold-change', type=int,
+    parser.add_argument('-c', '--minimum-fold-change', type=int,
                         help="Minimum fold change between mutant binding " +
                         "score and wild-type score. The default is 0, which " +
                         "filters no results, but 1 is often a sensible " +
                         "default (requiring that binding is better to the MT " +
                         "than WT)",
-                        default=0,
-                        dest="minimum_fold_change")
+                        default=0)
     parser.add_argument('-b', '--binding-threshold', type=int,
                         help="Report only epitopes where the mutant allele " +
                         "has ic50 binding scores below this value; default 500",
-                        default=500,
-                        dest="binding_threshold")
+                        default=500)
 
     args = parser.parse_args(args_input)
 
@@ -61,7 +59,7 @@ def main(args_input = sys.argv[1:]):
         input_file.close()
 
     writer = csv.DictWriter(
-        args.output,
+        args.output_file,
         fieldnames,
         delimiter = '\t',
         lineterminator = '\n'
@@ -76,7 +74,7 @@ def main(args_input = sys.argv[1:]):
         for entry in prediction[sample][gene]['GENES']
     )
 
-    args.output.close()
+    args.output_file.close()
 
 
 

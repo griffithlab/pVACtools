@@ -11,7 +11,7 @@ except ValueError:
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq run")
 
-    parser.add_argument("input",
+    parser.add_argument("input_file",
                         help="Input VCF with VEP annotations (please provide complete path)"
                         )
     parser.add_argument("sample_name",
@@ -31,24 +31,18 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument("output_dir",
                         help="Output directory for writing all result files"
                         )
-    parser.add_argument("-l", "--variant-peptide-length",
+    parser.add_argument("-l", "--peptide-sequence-length",
                         type=int,
                         help="length of the peptide sequences in the input FASTA file; default 21",
-                        default=21,
-                        dest="peptide_sequence_length"
-                        )
+                        default=21)
     parser.add_argument("-b","--binding-threshold",
                         type=int,
                         help="report only epitopes where the mutant allele has ic50 binding scores below this value ; default 500",
-                        default=500,
-                        dest="binding_threshold"
-                        )
-    parser.add_argument("-c", "--fold-change",
+                        default=500)
+    parser.add_argument("-c", "--minimum-fold-change",
                         type=int,
                         help="Minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT)",
-                        default=0,
-                        dest="minimum_fold_change"
-                        )
+                        default=0)
 
     args = parser.parse_args(args_input)
 
@@ -56,7 +50,7 @@ def main(args_input = sys.argv[1:]):
     tsv_file = args.sample_name + '.tsv'
     lib.convert_vcf.main(
         [
-            args.input,
+            args.input_file,
             os.path.join(args.output_dir, tsv_file),
         ]
     )
