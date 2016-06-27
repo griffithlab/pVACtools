@@ -43,10 +43,9 @@ class BindingFilterTests(unittest.TestCase):
         compiled_script_path = py_compile.compile(self.binding_filter_path)
         self.assertTrue(compiled_script_path)
         output_file = tempfile.NamedTemporaryFile().name
-        binding_filter_cmd = "%s  %s  %s  %s  %s" % (
+        binding_filter_cmd = "%s  %s  %s %s" % (
             sys.executable,
             compiled_script_path,
-            os.path.join(self.test_data_path, "annotated_variants.tsv"),
             self.fof,
             output_file,
             )
