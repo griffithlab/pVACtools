@@ -24,13 +24,13 @@ class BindingFilterTests(unittest.TestCase):
             compiled_script_path,
             os.path.join(
                 self.test_data_path,
-                'Test.HLA-A29:02.9.netmhc.parsed'
+                'Test.HLA-A29:02.9.netmhc.parsed.tsv'
             ),
             output_file.name
         )
         self.assertFalse(call([binding_filter_cmd], shell=True))
         self.assertTrue(cmp(
             output_file.name,
-            os.path.join(self.test_data_path, "Test_filtered.xls"),
+            os.path.join(self.test_data_path, "Test_filtered.tsv"),
             False
         ))
