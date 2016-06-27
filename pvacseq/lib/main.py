@@ -132,7 +132,6 @@ def main(args_input = sys.argv[1:]):
     print("Running Binding Filters")
     lib.binding_filter.main(
         [
-            args.input,
             fof,
             filt_out,
             '-c', str(args.minimum_fold_change),
