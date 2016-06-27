@@ -119,6 +119,7 @@ def main(args_input = sys.argv[1:]):
             lib.parse_output.main(
                 [
                     os.path.join(args.output_dir, net_out),
+                    os.path.join(args.output_dir, tsv_file),
                     os.path.join(args.output_dir, fasta_key_file),
                     os.path.join(args.output_dir, net_parsed)
                 ]
