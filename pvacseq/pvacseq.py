@@ -39,9 +39,14 @@ def main():
     parse_netmhc_parser.set_defaults(func=lib.parse_output)
 
     binding_filter_parser = subparsers.add_parser("binding_filter",
-                                                  help="Filters variants processed by NetMHC",
+                                                  help="Filters variants processed by NetMHC by binding score",
                                                   add_help=False)
     binding_filter_parser.set_defaults(func=lib.binding_filter)
+
+    coverage_filter_parser = subparsers.add_parser("coverage_filter",
+                                                   help="Filters variants processed by NetMHC by coverage, vaf, and gene expression",
+                                                   add_help=False)
+    coverage_filter_parser.set_defaults(func=lib.coverage_filter)
 
     download_example_data_parser = subparsers.add_parser("download_example_data",
                                                          help="Downloads example input and output files",

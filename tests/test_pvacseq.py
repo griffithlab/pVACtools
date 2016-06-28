@@ -38,6 +38,7 @@ class PVACTests(unittest.TestCase):
             "convert_vcf",
             "generate_fasta",
             "binding_filter",
+            "coverage_filter",
             "generate_fasta_key",
             "parse_output",
             "run",
