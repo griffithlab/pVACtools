@@ -41,60 +41,71 @@ pVAC-Seq uses NetMHC 3.4 to predict binding affinities. NetMHC 3.4 can be downlo
 
 
 ## pvacseq commands
+<b>run</b><br>
+`pvacseq run <input VCF file> <sample name> <NetMHC installation path> <allele name> <epitope length> <ouput directory> [-l peptide sequence length] [-b binding threshold] [-c minimum fold change]`<br>
+Run this command to automate the pVAC-Seq pipeline.  This will internally call the other commands, passing data between them to generate an TSV file of neoepitope predictions. Multiple alleles and epiope length can be specified as comma-separated lists.
 
-1. <b> run </b>:
-`pvacseq run <input TSV file> <sample name> <NetMHC installation path> <allele length> <epitope length> <ouput directory> [-l Variant_peptide_sequence_length] [-b Binding_threshold] [-c Minimum_fold_change]`
-Run this command to automate the pVAC-Seq pipeline.  This will internally call the other commands, passing data between them to generate an .xls spreadsheet of neoepitope predictions
+<b>convert_vcf</b><br>
+`pvacseq convert_vcf <input VCF file> <output TSV file>`
+Run this command to generate a TSV file with annotated variants from a VEP-annotated VCF.
 
-2. <b> generate_fasta </b>:
-`pvacseq generate_fasta <input TSV file> <variant peptide sequence length> <output FASTA file>`
-Run this command to generate a FASTA file for wildtype(WT) and mutant(MT) 21-mer amino acid sequences for MHC Class I epitope prediction. The input file is the properly formatted TSV file of annotated variants.
-3. <b> generate_fasta_key </b>:
-`pvacseq generate_fasta_key <input FASTA file (from generate_fasta)> <output key file>`
-NetMHC strips off the name of the FASTA header that contains gene names and type of sequence (WT vs MT). This command generates a key file to lookup original gene names in the output file of NetMHC 3.4 from the original 21-mer FASTA file for wildtype(WT) and mutant(MT) proteins.
+<b>generate_fasta</b><br>
+`pvacseq generate_fasta <input TSV file> <peptide sequence length> <output FASTA file>`<br>
+Run this command to generate a FASTA file for wildtype(WT) and mutant(MT) amino acid sequences for MHC Class I epitope prediction. The length of the amino acid sequences is determined by the peptide sequence length specified. The input file is the properly formatted TSV file of annotated variants.
 
-4. <b>parse_output</b>:  
-`pvacseq parse_output <NetMHC output file> <FASTA key file (from generate_fasta_key)> <output parsed file>`
-After running NETMHC3.4, this command parses the output for MHC Class I epitope prediction. It uses a special key file generated that can be generated using generate_fasta_key. The parsed TSV file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same.
+<b>generate_fasta_key</b><br>
+`pvacseq generate_fasta_key <input FASTA file> <output key file>`<br>
+NetMHC strips off the name of the FASTA header. This command generates a key file to lookup each NetMHC output entry to its original entry in the FASTA file.
 
-5. <b>binding_filter</b>:
-`pvacseq binding_filter <input TSV file> <FOF file containing filepaths to parsed NetMHC files (from parse_output)> <output file> [-b Binding_threshold] [-c Minimum_fold_change]`
-Takes in a file of files with path to parsed NetMHC files for different allele-length combinations and outputs best candidates per gene based on binding affinities.
+<b>parse_output</b><br>
+`pvacseq parse_output <NetMHC output file> <input TSV file> <FASTA key file> <output parsed file>`<br>
+After running NetMHC 3.4, this command parses the output for MHC Class I epitope prediction. It uses a special key file to link each NetMHC result entry to the original entry from the input TSV file. The parsed TSV output file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. It also contains gene and transcript information from the input TSV file.
 
-6. <b>coverage_filters</b>:
-`pvacseq coverage_filters *args*`
-Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters can be installed. The input file should contain the predicted epitopes along with read counts appended as additional columns. <b>Please note that if specific type of sequencing data is not available, the user should enter n/a in those columns, and set appropriate flags while running the script.</b> Column order should be preserved.
+<b>binding_filter</b><br>
+`pvacseq binding_filter <input TSV file> <output file> [-b binding threshold] [-c minimum fold change]`<br>
+Takes a comma-separated list of parsed NetMHC files for different allele-length combinations and outputs best candidates per gene based on binding affinities.
 
-   The Input file contains the following columns in tab-separated format :
-   1.	chromosome_name
-   2.	start
-   3.	stop
-   4.	reference
-   5.	variant
-   6.	gene_name
-   7.	transcript_name
-   8.	amino_acid_change
-   9.	ensembl_gene_id
-   10. wildtype_amino_acid_sequence
-   11.	GeneName
-   12.	HLAallele
-   13.	PeptideLength
-   14.	SubPeptidePosition
-   15.	MTScore
-   16.	WTScore
-   17.	MTEpitopeSeq
-   18.	WTEpitopeSeq
-   19.	FoldChange
-   20.	NormalRefCount
-   21. NormalVarCount
-   22. TumorDNARefCount
-   23. TumorDNAVarCount
-   24. TumorRNARefCount
-   25. TumorRNAVarCount
-   26. GeneExpFPKM
+<b>coverage_filter</b><br>
+`pvacseq coverage_filters <input TSV file> <output file> [--normal-cov normal coverage cutoff] [--tdna-cov tumor DNA coverage cutoff] [--trna-cov turmor DNA coverage cutoff] [--normal-vaf normal vaf cutoff] [--tdna-vaf tumor DNA vaf cutoff] [--trna-vaf tumor RNA vaf cutoff] [--expn-val gene expression (fpkm) cutoff]`<br>
+Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters can be installed. The input file should contain the predicted epitopes along with read counts appended as additional columns. If specific type of sequencing data is not available, the columns can be left off. Column order is not important.
 
+The input TSV file contains the following columns in tab-separated format:<br>
+Chromosome<br>
+Start<br>
+Stop<br>
+Reference<br>
+Variant<br>
+Transcript<br>
+Ensembl Gene ID<br>
+Variant Type<br>
+Mutation<br>
+Protein Position<br>
+Gene Name<br>
+HLA Allele<br>
+Peptide Length<br>
+Sub-peptide Position<br>
+MT score<br>
+WT score<br>
+MT epitope seq<br>
+WT epitope seq<br>
+Fold Change<br>
+Normal Ref Count<br>
+Normal Var Count<br>
+Tumor DNA Ref Count<br>
+Tumor DNA Var Count<br>
+Tumor RNA Ref Count<br>
+Tumor RNA Var Count<br>
+Gene Exp FPKM<br>
 
- ## Inputs for pvacseq commands
+<b>download_example_data</b><br>
+`pvacseq download_example_data <destination directory>`
+Downloads a set of example data files to the directory specififed.
+
+<b>install_vep_plugin</b><br>
+`pvacseq install_vep_plugin <vep plugins path>`
+Installs the Wildtype VEP plugin into the specified directory.
+
+## Inputs for pvacseq commands
 
  1. <b>NetMHC installation path: </b> Provide path to the NetMHC installation directory (please see above for installation instructions)
 
