@@ -20,10 +20,24 @@ https://github.com/jhundal/src/blob/master/bin/images/pvacseq-code.jpg
   pip will fetch and install pVAC-Seq and its dependencies for you.  After installing, you can run `pvacseq` directly from the Terminal/command prompt
 
 ##Prerequisites
-###<b>NetMHC </b>
+###<b>VEP</b>
 
-Since we use NetMHC to predict binding affinities, it is one of the major prerequisites to run pVAC-Seq
-Once NetMHC is properly installed and tested, pVAC-Seq expects the path to the installtion directory.
+The input to the pVAC-Seq pipeline is a VEP annotated VCF. In addition to the standard VEP annotations, pVAC-Seq also requires the annotations provided by the Downstream and Wildtype VEP plugins. To create a VCF for use with pVAC-Seq follow these steps:
+- Download and install the VEP command line tool following the instructions found <a href="http://useast.ensembl.org/info/docs/tools/vep/script/index.html">here</a>.
+- Download the VEP_plugins from their <a href="https://github.com/Ensembl/VEP_plugins">Github repository</a>
+- Copy the Wildtype plugin provided with the pVAC-Seq package to the folder with the other VEP_plugins by running `pvacseq install_vep_plugin`.
+- Run VEP on the input vcf with at least the following options:<br>
+`--format vcf`<br>
+`--vcf`<br>
+`--symbol`<br>
+`--plugin Downstream`<br>
+`--plugin Wildtype`<br>
+`--terms SO`<br>
+The `--dir_plugins <VEP_plugins directory>` option may need to be set depending on where the VEP_plugins were installed to. Additional VEP options that might be desired can be found <a href="http://useast.ensembl.org/info/docs/tools/vep/script/vep_options.html"here</a>.
+
+###<b>NetMHC 3.4</b>
+
+pVAC-Seq uses NetMHC 3.4 to predict binding affinities. NetMHC 3.4 can be downloaded <a href="http://www.cbs.dtu.dk/cgi-bin/sw_request?netMHC+3.4">here</a>. Once NetMHC is properly installed and tested, pVAC-Seq expects the path to the installtion directory.
 
 
 ## pvacseq commands
