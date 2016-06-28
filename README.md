@@ -42,11 +42,11 @@ pVAC-Seq uses NetMHC 3.4 to predict binding affinities. NetMHC 3.4 can be downlo
 
 ## pvacseq commands
 <b>run</b><br>
-`pvacseq run <input VCF file> <sample name> <NetMHC installation path> <allele name> <epitope length> <ouput directory> [-l peptide sequence length] [-b binding threshold] [-c minimum fold change]`<br>
+`pvacseq run <input VCF> <sample name> <NetMHC installation path> <allele name> <epitope length> <ouput directory> [-l peptide sequence length] [-b binding threshold] [-c minimum fold change]`<br>
 Run this command to automate the pVAC-Seq pipeline.  This will internally call the other commands, passing data between them to generate an TSV file of neoepitope predictions. Multiple alleles and epiope length can be specified as comma-separated lists.
 
 <b>convert_vcf</b><br>
-`pvacseq convert_vcf <input VCF file> <output TSV file>`
+`pvacseq convert_vcf <input VCF> <output TSV file>`
 Run this command to generate a TSV file with annotated variants from a VEP-annotated VCF.
 
 <b>generate_fasta</b><br>
@@ -105,38 +105,40 @@ Downloads a set of example data files to the directory specififed.
 `pvacseq install_vep_plugin <vep plugins path>`
 Installs the Wildtype VEP plugin into the specified directory.
 
-## Inputs for pvacseq commands
+## Inputs for `pvacseq run`
+## Required inputs
 
- 1. <b>NetMHC installation path: </b> Provide path to the NetMHC installation directory (please see above for installation instructions)
+<b>input VCF</b>: A VEP-annotated VCF containing transcript, Wildtype protein sequence, and Downstream protein sequence information. (Please see above for instructions)
 
- 2. <b>TSV file of annotated variants</b>: The program expects an annotated file of variants in tab-separated format. Any choice of aligner or variant caller can be installed. The following columns are expected as part of the TSV file (in the same order) along with the header row:
+<b>sample name</b>: The name of the sample being processed. This will be used as prefix for output files.
 
-  |chromosome_name| start | stop | reference | variant | gene_name | transcript_name | amino_acid_change | ensembl_gene_id |wildtype_amino_acid_sequence
- --- | --- | --- | ---| ---| ---| ---| ---| ---| ---| ---| ---| ---
- 1	| 92163648|	92163648|	G	|A	|TGFBR3	|ENST00000212355	|P776L	|ENSG00000069702|	MTSHYVIAIFALMSSCLATAGPEPGALCELSPVSASHPVQALMESFTVLSGCASRGTTGLPQEVHVLNLRTAGQGPGQLQREVTLHLNPISSVHIHHKSVVFLLNSPHPLVWHLKTERLATGVSRLFLVSEGSVVQFSSANFSLTAETEERNFPHGNEHLLNWARKEYGAVTSFTELKIARNIYIKVGEDQVFPPKCNIGKNFLSLNYLAEYLQPKAAEGCVMSSQPQNEEVHIIELITPNSNPYSAFQVDITIDIRPSQEDLEVVKNLILILKCKKSVNWVIKSFDVKGSLKIIAPNSIGFGKESERSMTMTKSIRDDIPSTQGNLVKWALDNGYSPITSYTMAPVANRFHLRLENNAEEMGDEEVHTIPPELRILLDPGALPALQNPPIRGGEGQNGGLPFPFPDISRRVWNEEGEDGLPRPKDPVIPSIQLFPGLREPEEVQGSVDIALSVKCDNEKMIVAVEKDSFQASGYSGMDVTLLDPTCKAKMNGTHFVLESPLNGCGTRPRWSALDGVVYYNSIVIQVPALGDSSGWPDGYEDLESGDNGFPGDMDEGDASLFTRPEIVVFNCSLQQVRNPSSFQEQPHGNITFNMELYNTDLFLVPSQGVFSVPENGHVYVEVSVTKAEQELGFAIQTCFISPYSNPDRMSHYTIIENICPKDESVKFYSPKRVHFPIPQADMDKKRFSFVFKPVFNTSLLFLQCELTLCTKMEKHPQKLPKCVPPDEACTSLDASIIWAMMQNKKTFTKPLAVIHHEAESKEKGPSMKEPNPISPPIFHGLDTLTVMGIAFAAFVIGALLTGALWYIYSHTGETAGRQQVPTSPPASENSSAAHSIGSTQSTPCSSSSTA|
- 1	|108291655|	108291655|	C|	T|	VAV3|	ENST00000490388|	G474D|	ENSG00000134215|	XCAQWLIHCKVLPTNHRVTWDSAQVFDLAQTLRDGVLLCQLLNNLRAHSINLKEINLRPQMSQFLCLKNIRTFLTACCETFGMRKSELFEAFDLFDVRDFGKVIETLSRLSRTPIALATGIRPFPTEESINDEDIYKGLPDLIDETLVEDEEDLYDCVYGEDEGGEVYEDLMKAEEAHQPKCPENDIRSCCLAEIKQTEEKYTETLESIEKYFMAPLKRFLTAAEFDSVFINIPELVKLHRNLMQEIHDSIVNKNDQNLYQVFINYKERLVIYGQYCSGVESAISSLDYISKTKEDVKLKLEECSKRANNGKFTLRDLLVVPMQRVLKYHLLLQELVKHTTDPTEKANLKLALDAMKDLAQYVNEVKRDNETLREIKQFQLSIENLNQPVLLFGRPQGDGEIRITTLDKHTKQERHIFLFDLAVIVCKRKGDNYEMKEIIDLQQYKIANNPTTDKENKKWSYGFYLIHTQGQNGLEFYCKTKDLKKKWLEQFEMALSNIRPDYADSNFHDFKMHTFTRVTSCKVCQMLLRGTFYQGYLCFKCGARAHKECLGRVDNCGRVNSGEQGTLKLPEKRTNGLRRTPKQVDPDVPCLLHFFISMAPATRSIVKSQKKNKKF
+<b>NetMHC installation path:</b> The path to the NetMHC installation directory (please see above for installation instructions)
 
-   Any annotation database can be installed for providing this information, as long as gene id, transcript id and wildtype transcript sequence are provided.
+<b>allele name</b>: Name of the allele to use for epitope prediction. Mutliple alles can be specified using a comma-separated list.
 
- 3. <b>Variant peptide sequence length</b>: Since the goal of the pVAC-Seq pipeline to predict putative 'neo'antigens, we only consider a sub-section of the transcript sequence encompassing the mutated amino acid.
+<b>epitope length</b>: This refers to the length of subpeptides (neoepitopes) to predict. The pipeline can handle multiple lengths that can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.
 
-      (a) In the following figure, the amino acid FASTA sequence is built using 10 flanking amino acids on each side of the mutated amino acid. The preceding or succeeding 20 amino acids are taken if the mutation lies near the end or beginning of the transcript, respectively.
+<b>Output directory</b>: The directory for writing all result files.
 
-      (b). All predicted candidate peptides from epitope prediction software based on selected k-mer window size.
+### Optional inputs
 
-      (c). Only localized peptides (those containing the mutant amino acid) are considered to compare to wild-type counterpart.
-
-      (d). The ‘best candidate’ (lowest MT binding score) per mutation is chosen across all specified k-mers that were installed as input.
+<b>peptide sequence length</b>: Since the goal of the pVAC-Seq pipeline to predict putative 'neo'antigens, we only consider a sub-section of the transcript sequence encompassing the mutated amino acid.
+<ol type="a">
+<li>In the following figure, the amino acid FASTA sequence is built using 10 flanking amino acids on each side of the mutated amino acid. The preceding or succeeding 20 amino acids are taken if the mutation lies near the end or beginning of the transcript, respectively.</li>
+<li>All predicted candidate peptides from epitope prediction software based on selected k-mer window size.</li>
+<li>Only localized peptides (those containing the mutant amino acid) are considered to compare to wild-type counterpart.</li>
+<li>The ‘best candidate’ (lowest MT binding score) per mutation is chosen across all specified k-mers that were installed as input.</li>
+</ol>
  ![alt text][logo]
  [logo]:
  https://github.com/jhundal/src/blob/master/bin/images/Fig1_fastav2.png
- 4.  <b>Epitope length</b> : This refers to the length of subpeptides(neoepitopes) to predict. The pipeline can handle multiple lengths that can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.
 
- 5. <b> Binding-cutoff </b> : The user can choose to report only epitopes where the mutant allele has IC50 binding scores below this value. By default, we recommend choosing high to medium binding epitopes and use a cutoff of 500.
+<b>binding threshold </b>: The user can choose to report only epitopes where the mutant allele has IC50 binding scores below this value. By default, we recommend choosing high to medium binding epitopes and use a cutoff of 500.
 
- 6. <b> Minimum Fold Change (min-fc):</b> This parameter is installed to set the minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT).
+<b>minimum fold change:</b> This parameter sets the minimum fold change between mutant binding score and wild-type score to use for filtering. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT).
 
- ####Example command :
+
+####Example command :
 
  `pvacseq run ~/pVAC-Seq/example_data/annotated_variants.tsv Test ~/netMHC-3.4/netMHC HLA-A29:02 9 ~/pVAC-Seq/example_data/ -l 21`
 
