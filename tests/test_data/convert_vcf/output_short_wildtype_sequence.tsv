@@ -1,0 +1,2 @@
+chromosome_name	start	stop	reference	variant	gene_name	transcript_name	amino_acid_change	ensembl_gene_id	wildtype_amino_acid_sequence	downstream_amino_acid_sequence	variant_type	protein_position	index
+17	79213211	79213212	G	A	C17orf89	ENST00000431388	A/T	ENSG00000224877	MSANGAVWGRVRSRLRAFP		missense	17	C17orf89_ENST00000431388_1.missense.17A/T
