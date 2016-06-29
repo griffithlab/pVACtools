@@ -13,7 +13,7 @@ This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0
 https://github.com/jhundal/src/blob/master/bin/images/pvacseq-code.jpg
 
 ## Installation Instructions
-  Make sure you have pip installed.  pip is generally included in python distributions, but may need to be upgraded before use.  See these instructions for installing or upgrading pip: https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel
+  Make sure you have `pip` installed.  `pip` is generally included in python distributions, but may need to be upgraded before use.  See these instructions for installing or upgrading pip: https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel
 
   After you have pip installed, type the following command on your Terminal(for Mac and Linux users) or the command prompt (for Windows users): `pip install pvacseq`
 
