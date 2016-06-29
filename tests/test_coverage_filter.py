@@ -16,7 +16,7 @@ class CoverageFilterTests(unittest.TestCase):
         cls.executable    = os.path.join(cls.base_dir, "pvacseq", "lib", "coverage_filter.py")
         cls.test_data_dir = os.path.join(cls.base_dir, "tests", "test_data", "coverage_filter")
 
-    def test_binding_filter_runs_and_produces_expected_output(self):
+    def test_coverage_filter_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile()
         coverage_filter_cmd = "%s  %s  %s %s" % (
