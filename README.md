@@ -46,7 +46,7 @@ pVAC-Seq uses NetMHC 3.4 to predict binding affinities. NetMHC 3.4 can be downlo
 Run this command to automate the pVAC-Seq pipeline.  This will internally call the other commands, passing data between them to generate an TSV file of neoepitope predictions. Multiple alleles and epiope length can be specified as comma-separated lists.
 
 <b>convert_vcf</b><br>
-`pvacseq convert_vcf <input VCF> <output TSV file>`
+`pvacseq convert_vcf <input VCF> <output TSV file>`<br>
 Run this command to generate a TSV file with annotated variants from a VEP-annotated VCF.
 
 <b>generate_fasta</b><br>
