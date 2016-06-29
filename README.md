@@ -7,10 +7,6 @@ Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi L. 
 
 ## License
 This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0">NPOSL-3.0</a>.
-## Pipeline Overview
-![alt text][overview]
-[overview]:
-https://github.com/jhundal/src/blob/master/bin/images/pvacseq-code.jpg
 
 ## Installation Instructions
   Make sure you have `pip` installed.  `pip` is generally included in python distributions, but may need to be upgraded before use.  See these instructions for installing or upgrading pip: https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel
@@ -39,6 +35,10 @@ The `--dir_plugins <VEP_plugins directory>` option may need to be set depending 
 
 pVAC-Seq uses NetMHC 3.4 to predict binding affinities. NetMHC 3.4 can be downloaded <a href="http://www.cbs.dtu.dk/cgi-bin/sw_request?netMHC+3.4">here</a>. Once NetMHC is properly installed and tested, pVAC-Seq expects the path to the installtion directory.
 
+## Pipeline Overview
+![alt text][overview]
+[overview]:
+https://raw.githubusercontent.com/wiki/griffithlab/pVAC-Seq/images/pvacseq-code-python.png
 
 ## pvacseq commands
 ### run
