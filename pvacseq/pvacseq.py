@@ -13,6 +13,11 @@ def main():
     subparsers = parser.add_subparsers()
 
     #add subcommands
+    run_main_program_parser = subparsers.add_parser("run",
+                                                    help="Runs the pVAC-Seq pipeline",
+                                                    add_help=False)
+    run_main_program_parser.set_defaults(func=lib.main)
+
     convert_vcf_parser = subparsers.add_parser("convert_vcf",
                                                help="Converts a VCF into TSV format for downstream steps",
                                                add_help=False)
@@ -22,11 +27,6 @@ def main():
                                                      help="Generates a variant peptide FASTA file from the TSV input file",
                                                      add_help=False)
     variant_sequences_parser.set_defaults(func=lib.generate_fasta)
-
-    binding_filter_parser = subparsers.add_parser("binding_filter",
-                                                  help="Filters variants processed by NetMHC",
-                                                  add_help=False)
-    binding_filter_parser.set_defaults(func=lib.binding_filter)
 
     fasta_key_parser = subparsers.add_parser("generate_fasta_key",
                                              help="Generates a FASTA key file",
@@ -38,13 +38,18 @@ def main():
                                                 add_help=False)
     parse_netmhc_parser.set_defaults(func=lib.parse_output)
 
-    run_main_program_parser = subparsers.add_parser("run",
-                                                    help="Runs the pVAC-Seq pipeline",
-                                                    add_help=False)
-    run_main_program_parser.set_defaults(func=lib.main)
+    binding_filter_parser = subparsers.add_parser("binding_filter",
+                                                  help="Filters variants processed by NetMHC by binding score",
+                                                  add_help=False)
+    binding_filter_parser.set_defaults(func=lib.binding_filter)
+
+    coverage_filter_parser = subparsers.add_parser("coverage_filter",
+                                                   help="Filters variants processed by NetMHC by coverage, vaf, and gene expression",
+                                                   add_help=False)
+    coverage_filter_parser.set_defaults(func=lib.coverage_filter)
 
     download_example_data_parser = subparsers.add_parser("download_example_data",
-                                                         help="Download example input and output files",
+                                                         help="Downloads example input and output files",
                                                          add_help=False)
     download_example_data_parser.set_defaults(func=lib.download_example_data)
 
