@@ -39,7 +39,7 @@ The `--dir_plugins <VEP_plugins directory>` option may need to be set depending 
 
 ###<b>NetMHC 3.4</b>
 
-pVAC-Seq uses NetMHC 3.4 to predict binding affinities. NetMHC 3.4 can be downloaded <a href="http://www.cbs.dtu.dk/cgi-bin/sw_request?netMHC+3.4">here</a>. Once NetMHC is properly installed and tested, pVAC-Seq expects the path to the installtion directory.
+pVAC-Seq uses NetMHC 3.4 to predict binding affinities. <a href="http://www.cbs.dtu.dk/cgi-bin/sw_request?netMHC+3.4">NetMHC 3.4 can be downloaded here</a>. Once NetMHC is properly installed and tested, pVAC-Seq expects the path to the installtion directory.
 
 ## Pipeline Overview
 ![alt text][overview]
@@ -49,23 +49,23 @@ https://raw.githubusercontent.com/wiki/griffithlab/pVAC-Seq/images/pvacseq-code-
 ## pvacseq commands
 ### run
 `pvacseq run <input VCF> <sample name> <NetMHC installation path> <allele name> <epitope length> <ouput directory> [-l peptide sequence length] [-b binding threshold] [-c minimum fold change]`<br>
-Run this command to automate the pVAC-Seq pipeline.  This will internally call the other commands, passing data between them to generate an TSV file of neoepitope predictions. Multiple alleles and epiope length can be specified as comma-separated lists.
+Use this command to run the full pVAC-Seq pipeline.  This will internally call the other commands, passing data between them to generate an output TSV file of neoepitope predictions. Multiple alleles and epiope length can be specified as comma-separated lists.
 
 <b>Required inputs</b><br>
 <ul>
 <li><code>input VCF</code>: A VEP-annotated VCF containing transcript, Wildtype protein sequence, and Downstream protein sequence information. (Please see above for instructions)</li>
-<li><code>sample name</code>: The name of the sample being processed. This will be used as prefix for output files.</li>
+<li><code>sample name</code>: The name of the sample being processed. This will be used as a prefix for output files.</li>
 <li><code>NetMHC installation path</code>: The path to the NetMHC installation directory (please see above for installation instructions)</li>
 <li><code>allele name</code>: Name of the allele to use for epitope prediction. Mutliple alles can be specified using a comma-separated list.</li>
-<li><code>epitope length</code>: This refers to the length of subpeptides (neoepitopes) to predict. The pipeline can handle multiple lengths that can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.</li>
+<li><code>epitope length</code>: This refers to the length of subpeptides (neoepitopes) to predict. The pipeline can handle multiple lengths, which can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.</li>
 <li><code>Output directory</code>: The directory for writing all result files.</li>
 </ul>
 
 <b>Optional inputs</b><br>
 <ul>
 <li><code>peptide sequence length</code>: Length of the peptide sequence to use when creating the FASTA. See "Additional Information" for details. 
-<li><code>binding threshold</code>: The user can choose to report only epitopes where the mutant allele has IC50 binding scores below this value. By default, we recommend choosing high to medium binding epitopes and use a cutoff of 500.
-<li><code>minimum fold change</code>: This parameter sets the minimum fold change between mutant binding score and wild-type score to use for filtering. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT).</li>
+<li><code>binding threshold</code>: The user can choose to report only epitopes where the mutant allele has IC50 binding scores below this value. By default, pvacseq uses a cutoff of 500.
+<li><code>minimum fold change</code>: This parameter sets the minimum fold change between mutant binding score and wild-type score to use for filtering. The default is 0, which filters no results. Using 1 will require that binding is better to the MT than WT.</li>
 </ul>
 
 ### convert_vcf
@@ -131,7 +131,7 @@ Installs the Wildtype VEP plugin into the specified directory.
 
 ## Additional Information
 
-Since the goal of the pVAC-Seq pipeline to predict putative 'neo'antigens, we only consider a sub-section of the transcript sequence encompassing the mutated amino acid.
+Since the goal of the pVAC-Seq pipeline is to predict putative 'neo'antigens, we only consider a sub-section of the transcript sequence encompassing the mutated amino acid.
 <ol type="a">
 <li>In the following figure, the amino acid FASTA sequence is built using 10 flanking amino acids on each side of the mutated amino acid. The preceding or succeeding 20 amino acids are taken if the mutation lies near the end or beginning of the transcript, respectively.</li>
 <li>All predicted candidate peptides from epitope prediction software based on selected k-mer window size.</li>
