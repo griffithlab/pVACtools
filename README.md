@@ -33,7 +33,7 @@ The input to the pVAC-Seq pipeline is a VEP annotated VCF. In addition to the st
 `--plugin Downstream`<br>
 `--plugin Wildtype`<br>
 `--terms SO`<br>
-The `--dir_plugins <VEP_plugins directory>` option may need to be set depending on where the VEP_plugins were installed to. Additional VEP options that might be desired can be found <a href="http://useast.ensembl.org/info/docs/tools/vep/script/vep_options.html"here</a>.
+The `--dir_plugins <VEP_plugins directory>` option may need to be set depending on where the VEP_plugins were installed to. Additional VEP options that might be desired can be found <a href="http://useast.ensembl.org/info/docs/tools/vep/script/vep_options.html">here</a>.
 
 ###<b>NetMHC 3.4</b>
 
