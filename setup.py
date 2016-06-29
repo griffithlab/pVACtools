@@ -9,7 +9,7 @@ if sys.version_info < (3,5):
 
 setup(
     name="pvacseq",
-    version="1.0.2",
+    version="2.0.0",
     packages=["pvacseq", "pvacseq.lib"],
     entry_points={
         "console_scripts":[
