@@ -4,8 +4,8 @@ http://www.genomemedicine.com/content/8/1/11
 
 ## New in version 2.0.0
 <ul>
-<li>Support for inframe indels and frameshifts.</li>
-<li>Support VCF as the input file format.</li>
+<li>Supports inframe indels and frameshifts.</li>
+<li>Supports VCF as the input file format.</li>
 </ul>
 
 ## Citation
