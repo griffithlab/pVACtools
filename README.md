@@ -26,7 +26,7 @@ This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0
 
 The input to the pVAC-Seq pipeline is a VEP annotated VCF. In addition to the standard VEP annotations, pVAC-Seq also requires the annotations provided by the Downstream and Wildtype VEP plugins. To create a VCF for use with pVAC-Seq follow these steps:
 - Download and install the VEP command line tool following the instructions found <a href="http://useast.ensembl.org/info/docs/tools/vep/script/index.html">here</a>.
-- Download the VEP_plugins from their <a href="https://github.com/Ensembl/VEP_plugins">Github repository</a>
+- Download the VEP_plugins from their <a href="https://github.com/Ensembl/VEP_plugins">Github repository</a>.
 - Copy the Wildtype plugin provided with the pVAC-Seq package to the folder with the other VEP_plugins by running `pvacseq install_vep_plugin`.
 - Run VEP on the input vcf with at least the following options:<br>
 `--format vcf`<br>
@@ -35,7 +35,9 @@ The input to the pVAC-Seq pipeline is a VEP annotated VCF. In addition to the st
 `--plugin Downstream`<br>
 `--plugin Wildtype`<br>
 `--terms SO`<br>
-The `--dir_plugins <VEP_plugins directory>` option may need to be set depending on where the VEP_plugins were installed to. Additional VEP options that might be desired can be found <a href="http://useast.ensembl.org/info/docs/tools/vep/script/vep_options.html">here</a>.
+The `--dir_plugins <VEP_plugins directory>` option may need to be set depending on where the VEP_plugins were installed to. Additional VEP options that might be desired can be found <a href="http://useast.ensembl.org/info/docs/tools/vep/script/vep_options.html">here</a>.<br>
+<b>Example VEP Command</b><br>
+`perl variant_effect_predictor.pl --input-file <input VCF> --format vcf --output_file <output VCF> --vcf --symbol --terms SO --plugin Downstream --plugin Wildtype [--dir_plugins <VEP_plugins directory>]`
 
 ###<b>NetMHC 3.4</b>
 
