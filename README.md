@@ -1,5 +1,5 @@
 # pVAC-Seq
-A cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq)
+Cancer immunotherapy has gained significant momentum from recent clinical successes of checkpoint blockade inhibition. Massively parallel sequence analysis suggests a connection between mutational load and response to this class of therapy. Methods to identify which tumor-specific mutant peptides (neoantigens) can elicit anti-tumor T cell immunity are needed to improve predictions of checkpoint therapy response and to identify targets for vaccines and adoptive T cell therapies. Here, we provide a cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq) that integrates tumor mutation and expression data (DNA- and RNA-Seq).
 http://www.genomemedicine.com/content/8/1/11
 
 ## New in version 2.0.0
@@ -39,7 +39,7 @@ The `--dir_plugins <VEP_plugins directory>` option may need to be set depending 
 
 ###<b>NetMHC 3.4</b>
 
-pVAC-Seq uses NetMHC 3.4 to predict binding affinities. <a href="http://www.cbs.dtu.dk/cgi-bin/sw_request?netMHC+3.4">NetMHC 3.4 can be downloaded here</a>. Once NetMHC is properly installed and tested, pVAC-Seq expects the path to the installtion directory.
+pVAC-Seq uses NetMHC 3.4 to predict binding affinities. <a href="http://www.cbs.dtu.dk/cgi-bin/sw_request?netMHC+3.4">NetMHC 3.4 can be downloaded here</a>. Once NetMHC is properly installed and tested, pVAC-Seq expects the path to the installation directory.
 
 ## Pipeline Overview
 ![alt text][overview]
