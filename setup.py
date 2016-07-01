@@ -18,6 +18,7 @@ setup(
     },
     install_requires=[
         'PyVCF',
+        'requests',
     ],
     package_data={
         'pvacseq' : ['example_data/*', 'VEP_plugins/*']
