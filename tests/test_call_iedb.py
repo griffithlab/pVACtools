@@ -23,7 +23,7 @@ class CallIEDBTests(unittest.TestCase):
 
     def test_iedb_methods_generate_expected_files(self):
         #netmhcpan, netmhccons, and pickpocket are slow so we won't run them in the tests
-        methods = ['ann', 'smmpmbec', 'smm', 'comblib_sidney2008']
+        methods = ['ann', 'smmpmbec', 'smm']
         for method in methods:
             call_iedb_output_file = tempfile.NamedTemporaryFile()
 

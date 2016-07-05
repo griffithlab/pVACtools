@@ -10,7 +10,7 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('output_file', type=argparse.FileType('w'),
                         help="Output file from iedb")
     parser.add_argument('method',
-                        choices=['netmhcpan', 'ann', 'smmpmbec', 'smm', 'comblib_sidney2008', 'netmhccons', 'pickpocket'],
+                        choices=['netmhcpan', 'ann', 'smmpmbec', 'smm', 'netmhccons', 'pickpocket'],
                         help="The iedb analysis method to use")
     parser.add_argument('allele',
                         help="Allele for which to make prediction")
