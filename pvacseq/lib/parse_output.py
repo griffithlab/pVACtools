@@ -39,16 +39,46 @@ def determine_consecutive_matches(mt_epitope_seq, wt_epitope_seq):
             break
     return consecutive_matches, left_padding
 
-def parse_tsv_input(input_tsv_file):
+def parse_input_tsv_file(input_tsv_file):
     tsv_reader = csv.DictReader(input_tsv_file, delimiter='\t')
     tsv_entries = {}
     for line in tsv_reader:
         tsv_entries[line['index']] = line
     return tsv_entries
 
-def parse_input(input_netmhc_file, input_tsv_file, key_file):
+def match_wildtype_and_mutant_entries(netmhc_results, wt_netmhc_results):
+    for key, result in netmhc_results.items():
+        (wt_netmhc_result_key, mt_position) = key.split('|', 1)
+        if result['variant_type'] == 'missense':
+            netmhc_results[key]['wt_epitope_seq'] = wt_netmhc_results[wt_netmhc_result_key][mt_position]['wt_epitope_seq']
+            netmhc_results[key]['wt_score']       = wt_netmhc_results[wt_netmhc_result_key][mt_position]['wt_score']
+        else:
+            wt_results        = wt_netmhc_results[wt_netmhc_result_key]
+            mt_epitope_seq    = result['mt_epitope_seq']
+            best_match_count  = 0
+            best_left_padding = 0
+            for wt_position, wt_result in wt_results.items():
+                wt_epitope_seq = wt_result['wt_epitope_seq']
+
+                consecutive_matches, left_padding = determine_consecutive_matches(mt_epitope_seq, wt_epitope_seq)
+                if consecutive_matches > best_match_count:
+                    best_match_count    = consecutive_matches
+                    best_left_padding   = left_padding
+                    best_match_position = wt_position
+                elif consecutive_matches == best_match_count and left_padding > best_left_padding:
+                    best_left_padding   = left_padding
+                    best_match_position = wt_position
+
+            netmhc_results[key]['wt_epitope_seq'] = 'NA'
+            netmhc_results[key]['wt_score']       = 'NA'
+            if best_match_count >= min_match_count(len(wt_result['wt_epitope_seq'])):
+                netmhc_results[key]['wt_epitope_seq'] = wt_netmhc_results[wt_netmhc_result_key][best_match_position]['wt_epitope_seq']
+                netmhc_results[key]['wt_score']       = wt_netmhc_results[wt_netmhc_result_key][best_match_position]['wt_score']
+
+    return netmhc_results
+
+def parse_netmhc_file(input_netmhc_file, tsv_entries, key_file):
     tsv_reader = csv.reader(input_netmhc_file, delimiter='\t')
-    tsv_entries = parse_tsv_input(input_tsv_file)
     protein_identifier_from_label = protein_identifier_for_label(key_file)
     pattern = re.compile('NetMHC|Protein')
     netmhc_results = {}
@@ -85,36 +115,11 @@ def parse_input(input_netmhc_file, input_tsv_file, key_file):
             wt_netmhc_results[tsv_index][position]['wt_score']       = int(score)
             wt_netmhc_results[tsv_index][position]['wt_epitope_seq'] = epitope
 
-    for key, result in netmhc_results.items():
-        (wt_netmhc_result_key, mt_position) = key.split('|', 1)
-        if result['variant_type'] == 'missense':
-            netmhc_results[key]['wt_epitope_seq'] = wt_netmhc_results[wt_netmhc_result_key][mt_position]['wt_epitope_seq']
-            netmhc_results[key]['wt_score']       = wt_netmhc_results[wt_netmhc_result_key][mt_position]['wt_score']
-        else:
-            wt_results        = wt_netmhc_results[wt_netmhc_result_key]
-            mt_epitope_seq    = result['mt_epitope_seq']
-            best_match_count  = 0
-            best_left_padding = 0
-            for wt_position, wt_result in wt_results.items():
-                wt_epitope_seq = wt_result['wt_epitope_seq']
+    return match_wildtype_and_mutant_entries(netmhc_results, wt_netmhc_results)
 
-                consecutive_matches, left_padding = determine_consecutive_matches(mt_epitope_seq, wt_epitope_seq)
-                if consecutive_matches > best_match_count:
-                    best_match_count    = consecutive_matches
-                    best_left_padding   = left_padding
-                    best_match_position = wt_position
-                elif consecutive_matches == best_match_count and left_padding > best_left_padding:
-                    best_left_padding   = left_padding
-                    best_match_position = wt_position
-
-            netmhc_results[key]['wt_epitope_seq'] = 'NA'
-            netmhc_results[key]['wt_score']       = 'NA'
-            if best_match_count >= min_match_count(len(wt_result['wt_epitope_seq'])):
-                netmhc_results[key]['wt_epitope_seq'] = wt_netmhc_results[wt_netmhc_result_key][best_match_position]['wt_epitope_seq']
-                netmhc_results[key]['wt_score']       = wt_netmhc_results[wt_netmhc_result_key][best_match_position]['wt_score']
-
+def flatten_netmhc_results(netmhc_results):
     #transform the netmhc_results dictionary into a two-dimensional list
-    netmhc_result_list = list((
+    flattened_netmhc_results = list((
         value['gene_name'],
         value['amino_acid_change'],
         value['position'],
@@ -124,13 +129,23 @@ def parse_input(input_netmhc_file, input_tsv_file, key_file):
         value['mt_epitope_seq'],
         value['tsv_index'],
     ) for value in netmhc_results.values())
-    #sort the list by gene_name, amino_acid_change, mt_score
-    sorted_netmhc_result_list = sorted(
-        netmhc_result_list,
-        key=lambda netmhc_result_list: (netmhc_result_list[0], netmhc_result_list[1], netmhc_result_list[3], " ".join(str(item) for item in netmhc_result_list))
+
+    return flattened_netmhc_results
+
+def sort_netmhc_results(flattened_netmhc_results):
+    sorted_netmhc_results = sorted(
+        flattened_netmhc_results,
+        key=lambda flattened_netmhc_results: (flattened_netmhc_results[0], flattened_netmhc_results[1], flattened_netmhc_results[3], " ".join(str(item) for item in flattened_netmhc_results))
     )
 
-    return sorted_netmhc_result_list, tsv_entries
+    return sorted_netmhc_results
+
+def process_input_netmhc_file(input_netmhc_file, tsv_entries, key_file):
+    netmhc_results           = parse_netmhc_file(input_netmhc_file, tsv_entries, key_file)
+    flattened_netmhc_results = flatten_netmhc_results(netmhc_results)
+    sorted_netmhc_results    = sort_netmhc_results(flattened_netmhc_results)
+
+    return sorted_netmhc_results
 
 def output_headers():
     return['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Ensembl Gene ID', 'Variant Type', 'Mutation', 'Protein Position', 'Gene Name', 'HLA Allele', 'Peptide Length', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold Change']
@@ -149,7 +164,8 @@ def main(args_input = sys.argv[1:]):
     basename = os.path.basename(args.input_netmhc_file.name)
     (sample, allele, peptide_length, rest) = basename.split(".", 3)
 
-    (netmhc_results, tsv_entries) = parse_input(args.input_netmhc_file, args.input_tsv_file, args.key_file)
+    tsv_entries    = parse_input_tsv_file(args.input_tsv_file)
+    netmhc_results = process_input_netmhc_file(args.input_netmhc_file, tsv_entries, args.key_file)
     for gene_name, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq, tsv_index in netmhc_results:
         tsv_entry = tsv_entries[tsv_index]
         if mt_epitope_seq != wt_epitope_seq:
