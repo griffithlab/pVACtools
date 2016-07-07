@@ -27,7 +27,7 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name)
         self.assertFalse(call(parse_output_command, shell=True))
 
-        expected_output_file  = os.path.join(self.test_data_dir, "output_peptide_sequence_length_21.netmhc.parsed.tsv")
+        expected_output_file  = os.path.join(self.test_data_dir, "output_peptide_sequence_length_21.iedb.parsed.tsv")
         self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
 
     def test_input_frameshift_variant_feature_elongation_gets_parsed_correctly(self):
@@ -39,7 +39,7 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name)
         self.assertFalse(call(parse_output_command, shell=True))
 
-        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_elongation.netmhc.parsed.tsv")
+        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_elongation.iedb.parsed.tsv")
         self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
 
     def test_input_frameshift_variant_feature_truncation_gets_parsed_correctly(self):
@@ -51,7 +51,7 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name)
         self.assertFalse(call(parse_output_command, shell=True))
 
-        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_truncation.netmhc.parsed.tsv")
+        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_truncation.iedb.parsed.tsv")
         self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
 
     def test_input_inframe_deletion_aa_deletion_gets_parsed_correctly(self):
@@ -63,7 +63,7 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name)
         self.assertFalse(call(parse_output_command, shell=True))
 
-        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_deletion_aa_deletion.netmhc.parsed.tsv")
+        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_deletion_aa_deletion.iedb.parsed.tsv")
         self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
 
     def test_input_inframe_deletion_aa_replacement_gets_parsed_correctly(self):
@@ -75,7 +75,7 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name)
         self.assertFalse(call(parse_output_command, shell=True))
 
-        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_deletion_aa_replacement.netmhc.parsed.tsv")
+        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_deletion_aa_replacement.iedb.parsed.tsv")
         self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
 
     def test_input_inframe_insertion_aa_insertion_gets_parsed_correctly(self):
@@ -87,7 +87,7 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name)
         self.assertFalse(call(parse_output_command, shell=True))
 
-        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_insertion_aa_insertion.netmhc.parsed.tsv")
+        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_insertion_aa_insertion.iedb.parsed.tsv")
         self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
 
     def test_input_inframe_insertion_aa_replacement_gets_parsed_correctly(self):
@@ -99,5 +99,5 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_command = "%s %s %s %s %s %s" % (self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name)
         self.assertFalse(call(parse_output_command, shell=True))
 
-        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_insertion_aa_replacement.netmhc.parsed.tsv")
+        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_insertion_aa_replacement.iedb.parsed.tsv")
         self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
