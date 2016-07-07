@@ -78,18 +78,15 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
     return iedb_results
 
 def parse_iedb_file(input_iedb_file, tsv_entries, key_file):
-    tsv_reader = csv.reader(input_iedb_file, delimiter='\t')
     protein_identifier_from_label = protein_identifier_for_label(key_file)
-    pattern = re.compile('NetMHC|Protein')
+    iedb_tsv_reader = csv.DictReader(input_iedb_file, delimiter='\t')
     iedb_results = {}
     wt_iedb_results = {}
-    for line in tsv_reader:
-        if len(line) == 0 or pattern.match(line[0]):
-            continue
-        protein_label = line[0]
-        position      = line[1]
-        epitope       = line[2]
-        score         = line[3]
+    for line in iedb_tsv_reader:
+        protein_label = line['seq_num']
+        position      = line['start']
+        epitope       = line['peptide']
+        score         = line['ic50']
 
         if protein_identifier_from_label[protein_label] is not None:
             protein_identifier = protein_identifier_from_label[protein_label]
@@ -100,7 +97,7 @@ def parse_iedb_file(input_iedb_file, tsv_entries, key_file):
             key = "%s|%s" % (tsv_index, position)
             if key not in iedb_results:
                 iedb_results[key] = {}
-            iedb_results[key]['mt_score']          = int(score)
+            iedb_results[key]['mt_score']          = float(score)
             iedb_results[key]['mt_epitope_seq']    = epitope
             iedb_results[key]['gene_name']         = tsv_entry['gene_name']
             iedb_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
@@ -112,7 +109,7 @@ def parse_iedb_file(input_iedb_file, tsv_entries, key_file):
             if tsv_index not in wt_iedb_results:
                 wt_iedb_results[tsv_index] = {}
             wt_iedb_results[tsv_index][position] = {}
-            wt_iedb_results[tsv_index][position]['wt_score']       = int(score)
+            wt_iedb_results[tsv_index][position]['wt_score']       = float(score)
             wt_iedb_results[tsv_index][position]['wt_epitope_seq'] = epitope
 
     return match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
