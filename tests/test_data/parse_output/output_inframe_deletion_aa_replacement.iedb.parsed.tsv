@@ -1,2 +1,2 @@
-Chromosome	Start	Stop	Reference	Variant	Transcript	Ensembl Gene ID	Variant Type	Mutation	Protein Position	Gene Name	HLA Allele	Peptide Length	Sub-peptide Position	MT Score	WT Score	MT Epitope Seq	WT Epitope Seq	Fold Change	ann WT Score	ann MT Score
-4	40434704	40434725	AGCGGCTGCGGCGGCTGCGGCC	A	ENST00000381793	ENSG00000163694	inframe_del	AAAAAAAA/A	495-502	RBM47	HLA-A*29:02	9	4	19055.0	23565.0	SAAAAAAAV	SAAAAAAAA	1.237	23565.0	19055.0
+Chromosome	Start	Stop	Reference	Variant	Transcript	Ensembl Gene ID	Variant Type	Mutation	Protein Position	Gene Name	HLA Allele	Peptide Length	Sub-peptide Position	MT Epitope Seq	WT Epitope Seq	Best MT Score	Corresponding WT Score	Fold Change	Best MT Score Method	Median MT Score All Methods	ann WT Score	ann MT Score
+4	40434704	40434725	AGCGGCTGCGGCGGCTGCGGCC	A	ENST00000381793	ENSG00000163694	inframe_del	AAAAAAAA/A	495-502	RBM47	HLA-A*29:02	9	4	SAAAAAAAV	SAAAAAAAA	19055.0	23565.0	1.237	ann	19055.0	23565.0	19055.0
