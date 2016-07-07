@@ -1,1 +1,1 @@
-Chromosome	Start	Stop	Reference	Variant	Transcript	Ensembl Gene ID	Variant Type	Mutation	Protein Position	Gene Name	HLA Allele	Peptide Length	Sub-peptide Position	MT score	WT score	MT epitope seq	WT epitope seq	Fold Change
+Chromosome	Start	Stop	Reference	Variant	Transcript	Ensembl Gene ID	Variant Type	Mutation	Protein Position	Gene Name	HLA Allele	Peptide Length	Sub-peptide Position	MT Score	WT Score	MT Epitope Seq	WT Epitope Seq	Fold Change	ann WT Score	ann MT Score

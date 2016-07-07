@@ -51,7 +51,7 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
         (wt_iedb_result_key, mt_position) = key.split('|', 1)
         if result['variant_type'] == 'missense':
             iedb_results[key]['wt_epitope_seq'] = wt_iedb_results[wt_iedb_result_key][mt_position]['wt_epitope_seq']
-            iedb_results[key]['wt_score']       = wt_iedb_results[wt_iedb_result_key][mt_position]['wt_score']
+            iedb_results[key]['wt_scores']      = wt_iedb_results[wt_iedb_result_key][mt_position]['wt_scores']
         else:
             wt_results        = wt_iedb_results[wt_iedb_result_key]
             mt_epitope_seq    = result['mt_epitope_seq']
@@ -69,11 +69,12 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
                     best_left_padding   = left_padding
                     best_match_position = wt_position
 
-            iedb_results[key]['wt_epitope_seq'] = 'NA'
-            iedb_results[key]['wt_score']       = 'NA'
-            if best_match_count >= min_match_count(len(wt_result['wt_epitope_seq'])):
+            if best_match_count >= min_match_count(int(iedb_results[key]['peptide_length'])):
                 iedb_results[key]['wt_epitope_seq'] = wt_iedb_results[wt_iedb_result_key][best_match_position]['wt_epitope_seq']
-                iedb_results[key]['wt_score']       = wt_iedb_results[wt_iedb_result_key][best_match_position]['wt_score']
+                iedb_results[key]['wt_scores']      = wt_iedb_results[wt_iedb_result_key][best_match_position]['wt_scores']
+            else:
+                iedb_results[key]['wt_epitope_seq'] = 'NA'
+                iedb_results[key]['wt_scores']      =  dict.fromkeys(iedb_results[key]['mt_scores'].keys(), 'NA')
 
     return iedb_results
 
@@ -100,22 +101,25 @@ def parse_iedb_file(input_iedb_file, tsv_entries, key_file):
             key = "%s|%s" % (tsv_index, position)
             if key not in iedb_results:
                 iedb_results[key] = {}
-            iedb_results[key]['mt_score']          = float(score)
-            iedb_results[key]['mt_epitope_seq']    = epitope
-            iedb_results[key]['gene_name']         = tsv_entry['gene_name']
-            iedb_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
-            iedb_results[key]['variant_type']      = tsv_entry['variant_type']
-            iedb_results[key]['position']          = position
-            iedb_results[key]['tsv_index']         = tsv_index
-            iedb_results[key]['allele']            = allele
-            iedb_results[key]['peptide_length']    = peptide_length
+                iedb_results[key]['mt_scores']         = {}
+                iedb_results[key]['mt_epitope_seq']    = epitope
+                iedb_results[key]['gene_name']         = tsv_entry['gene_name']
+                iedb_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
+                iedb_results[key]['variant_type']      = tsv_entry['variant_type']
+                iedb_results[key]['position']          = position
+                iedb_results[key]['tsv_index']         = tsv_index
+                iedb_results[key]['allele']            = allele
+                iedb_results[key]['peptide_length']    = peptide_length
+            iedb_results[key]['mt_scores'][method] = float(score)
 
         if protein_type == 'WT':
             if tsv_index not in wt_iedb_results:
                 wt_iedb_results[tsv_index] = {}
-            wt_iedb_results[tsv_index][position] = {}
-            wt_iedb_results[tsv_index][position]['wt_score']       = float(score)
-            wt_iedb_results[tsv_index][position]['wt_epitope_seq'] = epitope
+            if position not in wt_iedb_results[tsv_index]:
+                wt_iedb_results[tsv_index][position] = {}
+                wt_iedb_results[tsv_index][position]['wt_scores']         = {}
+            wt_iedb_results[tsv_index][position]['wt_epitope_seq']    = epitope
+            wt_iedb_results[tsv_index][position]['wt_scores'][method] = float(score)
 
     return match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
 
@@ -125,8 +129,8 @@ def flatten_iedb_results(iedb_results):
         value['gene_name'],
         value['amino_acid_change'],
         value['position'],
-        value['mt_score'],
-        value['wt_score'],
+        value['mt_scores'],
+        value['wt_scores'],
         value['wt_epitope_seq'],
         value['mt_epitope_seq'],
         value['tsv_index'],
@@ -139,7 +143,7 @@ def flatten_iedb_results(iedb_results):
 def sort_iedb_results(flattened_iedb_results):
     sorted_iedb_results = sorted(
         flattened_iedb_results,
-        key=lambda flattened_iedb_results: (flattened_iedb_results[0], flattened_iedb_results[1], flattened_iedb_results[3], " ".join(str(item) for item in flattened_iedb_results))
+        key=lambda flattened_iedb_results: (flattened_iedb_results[0], flattened_iedb_results[1], next(iter(flattened_iedb_results[3].values())), " ".join(str(item) for item in flattened_iedb_results))
     )
 
     return sorted_iedb_results
@@ -151,8 +155,20 @@ def process_input_iedb_file(input_iedb_file, tsv_entries, key_file):
 
     return sorted_iedb_results
 
-def output_headers():
-    return['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Ensembl Gene ID', 'Variant Type', 'Mutation', 'Protein Position', 'Gene Name', 'HLA Allele', 'Peptide Length', 'Sub-peptide Position', 'MT score', 'WT score', 'MT epitope seq', 'WT epitope seq', 'Fold Change']
+def base_headers():
+    return['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Ensembl Gene ID', 'Variant Type', 'Mutation', 'Protein Position', 'Gene Name', 'HLA Allele', 'Peptide Length', 'Sub-peptide Position', 'MT Score', 'WT Score', 'MT Epitope Seq', 'WT Epitope Seq', 'Fold Change']
+
+def output_headers(method):
+    headers = base_headers()
+    headers.append("%s WT Score" % method)
+    headers.append("%s MT Score" % method)
+
+    return headers
+
+def determine_prediction_method(input_iedb_file):
+    (sample, allele_tmp, peptide_length_tmp, method, file_extension) = input_iedb_file.name.split(".", 4)
+
+    return method
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq parse_output')
@@ -162,19 +178,20 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')
     args = parser.parse_args(args_input)
 
-    tsv_writer = csv.DictWriter(args.output_file, delimiter='\t', fieldnames=output_headers())
+    method = determine_prediction_method(args.input_iedb_file)
+    tsv_writer = csv.DictWriter(args.output_file, delimiter='\t', fieldnames=output_headers(method))
     tsv_writer.writeheader()
 
     tsv_entries  = parse_input_tsv_file(args.input_tsv_file)
     iedb_results = process_input_iedb_file(args.input_iedb_file, tsv_entries, args.key_file)
-    for gene_name, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq, tsv_index, allele, peptide_length in iedb_results:
+    for gene_name, variant_aa, position, mt_scores, wt_scores, wt_epitope_seq, mt_epitope_seq, tsv_index, allele, peptide_length in iedb_results:
         tsv_entry = tsv_entries[tsv_index]
         if mt_epitope_seq != wt_epitope_seq:
             if wt_epitope_seq == 'NA':
                 fold_change = 'NA'
             else:
-                fold_change = "%.3f" % (wt_score/mt_score)
-            tsv_writer.writerow({
+                fold_change = "%.3f" % (wt_scores[method]/mt_scores[method])
+            row = {
                 'Chromosome'          : tsv_entry['chromosome_name'],
                 'Start'               : tsv_entry['start'],
                 'Stop'                : tsv_entry['stop'],
@@ -189,12 +206,15 @@ def main(args_input = sys.argv[1:]):
                 'HLA Allele'          : allele,
                 'Peptide Length'      : peptide_length,
                 'Sub-peptide Position': position,
-                'MT score'            : mt_score,
-                'WT score'            : wt_score,
-                'MT epitope seq'      : mt_epitope_seq,
-                'WT epitope seq'      : wt_epitope_seq,
+                'MT Score'            : mt_scores[method],
+                'WT Score'            : wt_scores[method],
+                'MT Epitope Seq'      : mt_epitope_seq,
+                'WT Epitope Seq'      : wt_epitope_seq,
                 'Fold Change'         : fold_change,
-            })
+            }
+            row["%s WT Score" % method] = wt_scores[method]
+            row["%s MT Score" % method] = mt_scores[method]
+            tsv_writer.writerow(row)
 
 if __name__ == '__main__':
     main()
