@@ -80,13 +80,16 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
 def parse_iedb_file(input_iedb_file, tsv_entries, key_file):
     protein_identifier_from_label = protein_identifier_for_label(key_file)
     iedb_tsv_reader = csv.DictReader(input_iedb_file, delimiter='\t')
+    (sample, allele_tmp, peptide_length_tmp, method, file_extension) = input_iedb_file.name.split(".", 4)
     iedb_results = {}
     wt_iedb_results = {}
     for line in iedb_tsv_reader:
-        protein_label = line['seq_num']
-        position      = line['start']
-        epitope       = line['peptide']
-        score         = line['ic50']
+        protein_label  = line['seq_num']
+        position       = line['start']
+        epitope        = line['peptide']
+        score          = line['ic50']
+        allele         = line['allele']
+        peptide_length = line['length']
 
         if protein_identifier_from_label[protein_label] is not None:
             protein_identifier = protein_identifier_from_label[protein_label]
@@ -104,6 +107,8 @@ def parse_iedb_file(input_iedb_file, tsv_entries, key_file):
             iedb_results[key]['variant_type']      = tsv_entry['variant_type']
             iedb_results[key]['position']          = position
             iedb_results[key]['tsv_index']         = tsv_index
+            iedb_results[key]['allele']            = allele
+            iedb_results[key]['peptide_length']    = peptide_length
 
         if protein_type == 'WT':
             if tsv_index not in wt_iedb_results:
@@ -125,6 +130,8 @@ def flatten_iedb_results(iedb_results):
         value['wt_epitope_seq'],
         value['mt_epitope_seq'],
         value['tsv_index'],
+        value['allele'],
+        value['peptide_length'],
     ) for value in iedb_results.values())
 
     return flattened_iedb_results
@@ -158,12 +165,9 @@ def main(args_input = sys.argv[1:]):
     tsv_writer = csv.DictWriter(args.output_file, delimiter='\t', fieldnames=output_headers())
     tsv_writer.writeheader()
 
-    basename = os.path.basename(args.input_iedb_file.name)
-    (sample, allele, peptide_length, rest) = basename.split(".", 3)
-
     tsv_entries  = parse_input_tsv_file(args.input_tsv_file)
     iedb_results = process_input_iedb_file(args.input_iedb_file, tsv_entries, args.key_file)
-    for gene_name, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq, tsv_index in iedb_results:
+    for gene_name, variant_aa, position, mt_score, wt_score, wt_epitope_seq, mt_epitope_seq, tsv_index, allele, peptide_length in iedb_results:
         tsv_entry = tsv_entries[tsv_index]
         if mt_epitope_seq != wt_epitope_seq:
             if wt_epitope_seq == 'NA':
