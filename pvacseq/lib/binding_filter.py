@@ -43,7 +43,7 @@ def main(args_input = sys.argv[1:]):
 
         for entry in reader:
             name = entry['Gene Name']
-            score = int(entry['MT score'])
+            score = float(entry['Best MT Score'])
             fold_change = sys.maxsize if entry['Fold Change'] == 'NA' else float(entry['Fold Change'])
 
             if score > args.binding_threshold or fold_change < args.minimum_fold_change:
