@@ -33,13 +33,18 @@ def main():
                                              add_help=False)
     fasta_key_parser.set_defaults(func=lib.generate_fasta_key)
 
-    parse_netmhc_parser = subparsers.add_parser("parse_output",
-                                                help="Parses output from NetMHC",
+    call_iedb_parser = subparsers.add_parser("call_iedb",
+                                             help="Make epitope binding predicitions using IEDB",
+                                             add_help=False)
+    call_iedb_parser.set_defaults(func=lib.call_iedb)
+
+    parse_output_parser = subparsers.add_parser("parse_output",
+                                                help="Parses output from IEDB",
                                                 add_help=False)
-    parse_netmhc_parser.set_defaults(func=lib.parse_output)
+    parse_output_parser.set_defaults(func=lib.parse_output)
 
     binding_filter_parser = subparsers.add_parser("binding_filter",
-                                                  help="Filters variants processed by NetMHC by binding score",
+                                                  help="Filters variants processed by IEDB by binding score",
                                                   add_help=False)
     binding_filter_parser.set_defaults(func=lib.binding_filter)
 

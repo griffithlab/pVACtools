@@ -7,6 +7,16 @@ try:
 except ValueError:
     import lib
 
+def prediction_method_lookup(prediction_method):
+    prediction_method_lookup_dict = {
+        'NetMHCpan' : 'netmhcpan',
+        'NetMHC'    : 'ann',
+        'SMMPMBEC'  : 'smmpmbec',
+        'SMM'       : 'smm',
+        'NetMHCcons': 'netmhccons',
+        'PickPocket': 'pickpocket',
+    }
+    return prediction_method_lookup_dict[prediction_method]
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq run")
@@ -17,9 +27,6 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument("sample_name",
                         help="Name of Sample; will be used as prefix for output files"
                         )
-    parser.add_argument("netmhc_path",
-                        help="Path to local NetMHC3.4 installation"
-                        )
     parser.add_argument("allele",
                         help="Allele name to predict epitope prediction. Multiple alleles can be specified using a comma-separated list. For a list of available alleles, use: netMHC -A",
                         type=lambda s:[a for a in s.split(',')]
@@ -27,6 +34,11 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument("epitope_length",
                         help="length of subpeptides(epitopes) to predict ; Multiple lengths can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.",
                         type=lambda s:[int(epl) for epl in s.split(',')]
+                        )
+    parser.add_argument("prediction_algorithms",
+                        choices=['NetMHCpan', 'NetMHC', 'SMMPMBEC', 'SMM', 'NetMHCcons', 'PickPocket'],
+                        nargs="+",
+                        help="The epitope prediction algorithms to use",
                         )
     parser.add_argument("output_dir",
                         help="Output directory for writing all result files"
@@ -77,40 +89,42 @@ def main(args_input = sys.argv[1:]):
     )
     print("Completed")
 
-    netmhc_output = set(
-        run([args.netmhc_path+" -A"],
-            shell=True, stdout=PIPE
-            ).stdout.decode().split('\n')
-        )
+#    netmhc_output = set(
+#        run([args.netmhc_path+" -A"],
+#            shell=True, stdout=PIPE
+#            ).stdout.decode().split('\n')
+#        )
 
-    for epl in args.epitope_length:
-        for a in args.allele:
-            if a in netmhc_output:
-                net_out = ".".join([args.sample_name, a, str(epl), "netmhc.txt"])
-                print("Running NetMHC on Allele", a,
-                      "and Epitope Length", epl
-                      )
-                netmhc_cmd = "%s -a %s -l %d %s -x %s" % (
-                    args.netmhc_path, a, epl,
+    iedb_output_files = []
+    for method in args.prediction_algorithms:
+        iedb_method = prediction_method_lookup(method)
+        for epl in args.epitope_length:
+            for a in args.allele:
+ #               if a in netmhc_output:
+                iedb_out = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv"]))
+                print("Running IEDB on Allele %s and Epitope Length %s with Method %s" % (a, epl, method))
+                lib.call_iedb.main([
                     os.path.join(args.output_dir, fasta_file),
-                    os.path.join(args.output_dir, net_out)
-                )
-                call([netmhc_cmd], shell=True, stdout=DEVNULL)
-            else:
-                print("NetMHC allele not valid.  Please check using:")
-                print(args.netmhc_path,"-A")
-            print("Completed")
+                    iedb_out,
+                    iedb_method,
+                    a,
+                    str(epl),
+                ])
+                iedb_output_files.append(iedb_out)
+#                else:
+#                    print("Allele not valid.  Please check using:")
+#                    print(args.netmhc_path,"-A")
+                print("Completed")
 
     input_files = []
 
     for epl in args.epitope_length:
         for a in args.allele:
-            net_out = ".".join([args.sample_name, a, str(epl), "netmhc.txt"])
-            net_parsed = ".".join([args.sample_name, a, str(epl), "netmhc.parsed.tsv"])
+            net_parsed = ".".join([args.sample_name, a, str(epl), "parsed.tsv"])
             print("Parsing NetMHC Output")
             lib.parse_output.main(
                 [
-                    os.path.join(args.output_dir, net_out),
+                    *iedb_output_files,
                     os.path.join(args.output_dir, tsv_file),
                     os.path.join(args.output_dir, fasta_key_file),
                     os.path.join(args.output_dir, net_parsed)
