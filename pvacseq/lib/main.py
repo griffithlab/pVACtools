@@ -6,6 +6,9 @@ sys.path.append(root)
 import argparse
 import os
 from subprocess import run, call, PIPE
+import glob
+import csv
+import tempfile
 
 try:
     from .. import lib
@@ -69,12 +72,13 @@ def main(args_input = sys.argv[1:]):
 
     print("Generating Variant Peptide FASTA File")
     fasta_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa"
+    fasta_file_path = os.path.join(args.output_dir, fasta_file)
     fasta_key_file = args.sample_name + "_" + str(args.peptide_sequence_length) + ".key"
     lib.generate_fasta.main(
         [
             os.path.join(args.output_dir, tsv_file),
             str(args.peptide_sequence_length),
-            os.path.join(args.output_dir, fasta_file)
+            fasta_file_path
         ]
     )
     print("Completed")
@@ -82,7 +86,7 @@ def main(args_input = sys.argv[1:]):
     print("Generating FASTA Key File")
     lib.generate_fasta_key.main(
         [
-            os.path.join(args.output_dir, fasta_file),
+            fasta_file_path,
             os.path.join(args.output_dir, fasta_key_file)
         ]
     )
@@ -94,21 +98,44 @@ def main(args_input = sys.argv[1:]):
 #            ).stdout.decode().split('\n')
 #        )
 
+    tmp_dir = tempfile.TemporaryDirectory()
+    tmp_split_fasta_prefix = os.path.join(tmp_dir.name, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
+
+    run(["split --lines=400 %s %s.split" % (fasta_file_path, tmp_split_fasta_prefix)], shell=True)
+    split_fasta_files = glob.glob("%s*" % tmp_split_fasta_prefix)
+
     iedb_output_files = []
     for method in args.prediction_algorithms:
         iedb_method = prediction_method_lookup(method)
         for epl in args.epitope_length:
             for a in args.allele:
- #               if a in netmhc_output:
-                iedb_out = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv"]))
+#               if a in netmhc_output:
                 print("Running IEDB on Allele %s and Epitope Length %s with Method %s" % (a, epl, method))
-                lib.call_iedb.main([
-                    os.path.join(args.output_dir, fasta_file),
-                    iedb_out,
-                    iedb_method,
-                    a,
-                    str(epl),
-                ])
+                iterator = 1
+                split_iedb_output_files = []
+                for split_fasta_file in split_fasta_files:
+                    split_iedb_out = os.path.join(tmp_dir.name, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv%s" % iterator]))
+                    lib.call_iedb.main([
+                        os.path.join(args.output_dir, split_fasta_file),
+                        split_iedb_out,
+                        iedb_method,
+                        a,
+                        str(epl),
+                    ])
+                    split_iedb_output_files.append(split_iedb_out)
+                    iterator += 1
+                with open(split_iedb_output_files[0]) as split_iedb_out_file:
+                    tsv_reader = csv.DictReader(split_iedb_out_file, delimiter='\t')
+                    fieldnames = tsv_reader.fieldnames
+                iedb_out = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv"]))
+                with open(iedb_out, 'w') as iedb_out_file:
+                    tsv_writer = csv.DictWriter(iedb_out_file, fieldnames, delimiter = '\t', lineterminator = '\n')
+                    tsv_writer.writeheader()
+                    for split_iedb_out in split_iedb_output_files:
+                        with open(split_iedb_out) as split_iedb_out_file:
+                            tsv_reader = csv.DictReader(split_iedb_out_file, delimiter='\t')
+                            for row in tsv_reader:
+                                tsv_writer.writerow(row)
                 iedb_output_files.append(iedb_out)
 #                else:
 #                    print("Allele not valid.  Please check using:")
