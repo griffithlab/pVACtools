@@ -7,6 +7,17 @@ import os
 from math import ceil
 from statistics import median
 
+def prediction_method_lookup(prediction_method):
+    prediction_method_lookup_dict = {
+        'netmhcpan' : 'NetMHCpan',
+        'ann'       : 'NetMHC',
+        'smmpmbec'  : 'SMMPMBEC',
+        'smm'       : 'SMM',
+        'netmhccons': 'NetMHCcons',
+        'pickpocket': 'PickPocket',
+    }
+    return prediction_method_lookup_dict[prediction_method]
+
 def protein_identifier_for_label(key_file):
     tsv_reader = csv.reader(key_file, delimiter='\t')
     pattern = re.compile('>')
@@ -198,8 +209,9 @@ def base_headers():
 def output_headers(methods):
     headers = base_headers()
     for method in methods:
-        headers.append("%s WT Score" % method)
-        headers.append("%s MT Score" % method)
+        pretty_method = prediction_method_lookup(method)
+        headers.append("%s WT Score" % pretty_method)
+        headers.append("%s MT Score" % pretty_method)
 
     return headers
 
@@ -251,13 +263,14 @@ def main(args_input = sys.argv[1:]):
                 'WT Epitope Seq'      : wt_epitope_seq,
                 'Best MT Score'       : best_mt_score,
                 'Corresponding WT Score': corresponding_wt_score,
-                'Best MT Score Method': best_mt_score_method,
+                'Best MT Score Method': prediction_method_lookup(best_mt_score_method),
                 'Median MT Score All Methods': median_mt_score,
                 'Fold Change'         : fold_change,
             }
             for method in methods:
-                row["%s WT Score" % method] = wt_scores[method]
-                row["%s MT Score" % method] = mt_scores[method]
+                pretty_method = prediction_method_lookup(method)
+                row["%s WT Score" % pretty_method] = wt_scores[method]
+                row["%s MT Score" % pretty_method] = mt_scores[method]
             tsv_writer.writerow(row)
 
 if __name__ == '__main__':
