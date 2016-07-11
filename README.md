@@ -93,7 +93,7 @@ After running NetMHC 3.4, this command parses the output for MHC Class I epitope
 Takes a comma-separated list of parsed NetMHC files for different allele-length combinations and outputs best candidates per gene based on binding affinities.
 
 ### coverage_filter
-`pvacseq coverage_filters <input TSV file> <output file> [--normal-cov normal coverage cutoff] [--tdna-cov tumor DNA coverage cutoff] [--trna-cov turmor DNA coverage cutoff] [--normal-vaf normal vaf cutoff] [--tdna-vaf tumor DNA vaf cutoff] [--trna-vaf tumor RNA vaf cutoff] [--expn-val gene expression (fpkm) cutoff]`<br>
+`pvacseq coverage_filters <input TSV file> <output file> [--normal-cov normal coverage cutoff] [--tdna-cov tumor DNA coverage cutoff] [--trna-cov tumor RNA coverage cutoff] [--normal-vaf normal vaf cutoff] [--tdna-vaf tumor DNA vaf cutoff] [--trna-vaf tumor RNA vaf cutoff] [--expn-val gene expression (fpkm) cutoff]`<br>
 Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters can be installed. The input file should contain the predicted epitopes along with read counts appended as additional columns. If specific type of sequencing data is not available, the columns can be left off. Column order is not important.
 
 The input TSV file contains the following columns in tab-separated format:<br>
