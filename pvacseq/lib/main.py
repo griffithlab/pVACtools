@@ -95,7 +95,7 @@ def main(args_input = sys.argv[1:]):
                     os.path.join(args.output_dir, fasta_file),
                     os.path.join(args.output_dir, net_out)
                 )
-                call([netmhc_cmd], shell=True)
+                call([netmhc_cmd], shell=True, stdout=PIPE)
             else:
                 print("NetMHC allele not valid.  Please check using:")
                 print(args.netmhc_path,"-A")
