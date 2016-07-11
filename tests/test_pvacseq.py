@@ -70,15 +70,11 @@ class PVACTests(unittest.TestCase):
             "pvacseq.py"
             )
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
-        pvac_pipeline_cmd = "%s %s run %s Test fake_path HLA-A29:02 9 %s" % (
+        pvac_pipeline_cmd = "%s %s run %s Test HLA-A29:02 9 NetMHC SMM SMMPMBEC %s" % (
             sys.executable,
             pvac_script_path,
             os.path.join(self.test_data_directory, "input.vcf"),
             output_dir.name
-        )
-        copyfile(
-            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.netmhc.txt'),
-            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.netmhc.txt')
         )
         result = call([pvac_pipeline_cmd], shell=True, stdout=PIPE)
         self.assertFalse(result)
@@ -97,8 +93,23 @@ class PVACTests(unittest.TestCase):
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.netmhc.parsed.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.netmhc.parsed.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.ann.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.ann.tsv'),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.smm.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.smm.tsv'),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.smmpmbec.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.smmpmbec.tsv'),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.parsed.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.parsed.tsv'),
             False
         ))
         self.assertTrue(cmp(
