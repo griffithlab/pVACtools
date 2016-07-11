@@ -28,10 +28,10 @@ def main(args_input = sys.argv[1:]):
         'length':        args.epitope_length,
     }
 
-    request = requests.post('http://tools-api.iedb.org/tools_api/mhci/', data=data)
-    if "list indices must be integers, not str" in request.text:
+    response = requests.post('http://tools-api.iedb.org/tools_api/mhci/', data=data)
+    if "list indices must be integers, not str" in response.text:
         sys.exit("Error posting request to IEDB.")
-    args.output_file.write(request.text)
+    args.output_file.write(response.text)
 
     args.input_file.close()
     args.output_file.close()
