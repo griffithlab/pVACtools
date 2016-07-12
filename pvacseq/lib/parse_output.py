@@ -6,8 +6,6 @@ import sys
 import os
 from math import ceil
 
-import pdb
-
 def protein_identifier_for_label(key_file):
     tsv_reader = csv.reader(key_file, delimiter='\t')
     pattern = re.compile('>')
