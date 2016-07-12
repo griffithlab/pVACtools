@@ -101,7 +101,7 @@ def main(args_input = sys.argv[1:]):
     tmp_dir = tempfile.TemporaryDirectory()
     tmp_split_fasta_prefix = os.path.join(tmp_dir.name, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
 
-    run(["split --lines=400 %s %s.split" % (fasta_file_path, tmp_split_fasta_prefix)], shell=True)
+    run(['split', '--lines=400', fasta_file_path, tmp_split_fasta_prefix], check=True)
     split_fasta_files = glob.glob("%s*" % tmp_split_fasta_prefix)
 
     iedb_output_files = []
