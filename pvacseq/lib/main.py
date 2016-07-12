@@ -1,21 +1,20 @@
+import sys
+from pathlib import Path # if you haven't already done so
+root = str(Path(__file__).resolve().parents[1])
+sys.path.append(root)
+
 import argparse
 import os
-from subprocess import run, call, PIPE, DEVNULL
-import sys
+from subprocess import run, call, PIPE
+
 try:
     from .. import lib
 except ValueError:
-    import lib
+    import lib 
+from lib import pvacseq_utils
 
 def prediction_method_lookup(prediction_method):
-    prediction_method_lookup_dict = {
-        'NetMHCpan' : 'netmhcpan',
-        'NetMHC'    : 'ann',
-        'SMMPMBEC'  : 'smmpmbec',
-        'SMM'       : 'smm',
-        'NetMHCcons': 'netmhccons',
-        'PickPocket': 'pickpocket',
-    }
+    prediction_method_lookup_dict = pvacseq_utils.prediction_method_to_iedb_lookup_dict()
     return prediction_method_lookup_dict[prediction_method]
 
 def main(args_input = sys.argv[1:]):
@@ -36,7 +35,7 @@ def main(args_input = sys.argv[1:]):
                         type=lambda s:[int(epl) for epl in s.split(',')]
                         )
     parser.add_argument("prediction_algorithms",
-                        choices=['NetMHCpan', 'NetMHC', 'SMMPMBEC', 'SMM', 'NetMHCcons', 'PickPocket'],
+                        choices=pvacseq_utils.prediction_methods(),
                         nargs="+",
                         help="The epitope prediction algorithms to use",
                         )

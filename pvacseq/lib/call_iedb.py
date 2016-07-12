@@ -1,7 +1,12 @@
+import sys
+from pathlib import Path # if you haven't already done so
+root = str(Path(__file__).resolve().parents[1])
+sys.path.append(root)
+
 import argparse
 import requests
-import sys
 import re
+from lib import pvacseq_utils
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq call_iedb')
@@ -10,7 +15,7 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('output_file', type=argparse.FileType('w'),
                         help="Output file from iedb")
     parser.add_argument('method',
-                        choices=['netmhcpan', 'ann', 'smmpmbec', 'smm', 'netmhccons', 'pickpocket'],
+                        choices=pvacseq_utils.iedb_prediction_methods(),
                         help="The iedb analysis method to use")
     parser.add_argument('allele',
                         help="Allele for which to make prediction")

@@ -1,21 +1,19 @@
+import sys
+from pathlib import Path # if you haven't already done so
+root = str(Path(__file__).resolve().parents[1])
+sys.path.append(root)
+
 import argparse
 import csv
 import re
 import operator
-import sys
 import os
 from math import ceil
 from statistics import median
+from lib import pvacseq_utils
 
 def prediction_method_lookup(prediction_method):
-    prediction_method_lookup_dict = {
-        'netmhcpan' : 'NetMHCpan',
-        'ann'       : 'NetMHC',
-        'smmpmbec'  : 'SMMPMBEC',
-        'smm'       : 'SMM',
-        'netmhccons': 'NetMHCcons',
-        'pickpocket': 'PickPocket',
-    }
+    prediction_method_lookup_dict = pvacseq_utils.iedb_to_prediction_method_lookup_dict()
     return prediction_method_lookup_dict[prediction_method]
 
 def protein_identifier_for_label(key_file):
