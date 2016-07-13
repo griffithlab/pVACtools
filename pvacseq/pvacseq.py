@@ -2,6 +2,7 @@ import argparse
 import sys
 from subprocess import call
 import os
+import pkg_resources
 try:
     from . import lib
 except SystemError:
@@ -63,13 +64,20 @@ def main():
                                                       add_help=False)
     install_vep_plugin_parser.set_defaults(func=lib.install_vep_plugin)
 
+    parser.add_argument("-v", "--version",
+                        help="Display the currently installed pvacseq version",
+                        action="store_true")
+
     args = parser.parse_known_args()
-    try:
-        args[0].func.main(args[1])
-    except AttributeError as e:
-        parser.print_help()
-        print("Error: No command specified")
-        sys.exit(-1)
+    if args[0].version is True:
+        print(pkg_resources.get_distribution("pvacseq").version)
+    else:
+        try:
+            args[0].func.main(args[1])
+        except AttributeError as e:
+            parser.print_help()
+            print("Error: No command specified")
+            sys.exit(-1)
 
 
 if __name__ == '__main__':
