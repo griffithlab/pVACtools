@@ -19,7 +19,7 @@ class BindingFilterTests(unittest.TestCase):
         compiled_script_path = py_compile.compile(self.binding_filter_path)
         self.assertTrue(compiled_script_path)
         output_file = tempfile.NamedTemporaryFile()
-        binding_filter_cmd = "%s  %s  %s %s" % (
+        self.assertFalse(call([
             sys.executable,
             compiled_script_path,
             os.path.join(
@@ -27,8 +27,7 @@ class BindingFilterTests(unittest.TestCase):
                 'Test.HLA-A29:02.9.netmhc.parsed.tsv'
             ),
             output_file.name
-        )
-        self.assertFalse(call([binding_filter_cmd], shell=True))
+        ], shell=False))
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_path, "Test_filtered.tsv"),

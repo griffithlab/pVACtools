@@ -27,9 +27,9 @@ class GenerateFastaKeyTests(unittest.TestCase):
         generate_fasta_key_executable  = os.path.join(self.executable_dir, 'generate_fasta_key.py')
         self.assertTrue(py_compile.compile(generate_fasta_key_executable))
 
-        generate_fasta_key_command = "%s %s %s %s" % (self.python, generate_fasta_key_executable, generate_fasta_key_input_file, generate_fasta_key_output_file.name)
-
-        self.assertFalse(call(generate_fasta_key_command, shell=True))
+        self.assertFalse(call([
+            self.python, generate_fasta_key_executable, generate_fasta_key_input_file, generate_fasta_key_output_file.name
+        ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, ("%s_%s.key" % (self.sample_name, self.peptide_sequence_length)))
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_output_file, shallow=False))
 

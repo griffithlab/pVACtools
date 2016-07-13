@@ -47,16 +47,6 @@ class CallIEDBTests(unittest.TestCase):
         for method in self.methods:
             call_iedb_output_file = tempfile.NamedTemporaryFile()
 
-            call_iedb_command = "%s %s %s %s %s %s %s" % (
-                self.python,
-                self.executable,
-                self.input_file,
-                call_iedb_output_file.name,
-                method,
-                self.allele,
-                self.epitope_length,
-            )
-
             pvacseq.lib.call_iedb.main([
                 self.input_file,
                 call_iedb_output_file.name,

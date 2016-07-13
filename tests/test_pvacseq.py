@@ -79,12 +79,12 @@ class PVACTests(unittest.TestCase):
             "install_vep_plugin",
             "download_example_data",
             ]:
-            temp_cmd = "%s %s %s -h" %(
+            result = run([
                 sys.executable,
                 pvac_script_path,
-                command
-            )
-            result = run([temp_cmd], shell=True, stdout=PIPE)
+                command,
+                '-h'
+            ], shell=False, stdout=PIPE)
             self.assertFalse(result.returncode)
             self.assertRegex(result.stdout.decode(), usage_search)
 
@@ -104,12 +104,6 @@ class PVACTests(unittest.TestCase):
             "pvacseq.py"
             )
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
-        pvac_pipeline_cmd = "%s %s run %s Test HLA-A29:02 9 NetMHC SMM SMMPMBEC %s" % (
-            sys.executable,
-            pvac_script_path,
-            os.path.join(self.test_data_directory, "input.vcf"),
-            output_dir.name
-        )
         pvacseq.lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
