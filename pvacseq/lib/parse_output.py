@@ -270,6 +270,11 @@ def main(args_input = sys.argv[1:]):
                 row["%s WT Score" % pretty_method] = wt_scores[method]
                 row["%s MT Score" % pretty_method] = mt_scores[method]
             tsv_writer.writerow(row)
+    for file_handle in args.input_iedb_files:
+        file_handle.close()
+    args.input_tsv_file.close()
+    args.key_file.close()
+    args.output_file.close()
 
 if __name__ == '__main__':
     main()
