@@ -1,4 +1,5 @@
 import unittest
+import unittest.mock
 import os
 from subprocess import run, call, PIPE
 import re
@@ -7,17 +8,50 @@ import tempfile
 import py_compile
 from filecmp import cmp
 from shutil import copyfile
+pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(pvac_dir)
+import pvacseq.lib
+
+def make_response(method, path):
+    reader = open(os.path.join(
+        path,
+        'response_%s.tsv' %method
+    ), mode='r')
+    response_obj = lambda :None
+    response_obj.status_code = 200
+    response_obj.text = reader.read()
+    reader.close()
+    return response_obj
+
+def generate_call(method, path, input_path):
+    reader = open(os.path.join(
+        input_path,
+        "Test_21.fa"
+    ), mode='r')
+    text = reader.read()
+    reader.close()
+    return unittest.mock.call('http://tools-api.iedb.org/tools_api/mhci/', data={
+        'sequence_text': ""+text,
+        'method':        method,
+        'allele':        "HLA-A*29:02",
+        'length':        9,
+    })
 
 class PVACTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.pVac_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+        cls.pVac_directory =  pvac_dir
         cls.test_data_directory = os.path.join(
             cls.pVac_directory,
             'tests',
             'test_data',
             'pvacseq'
         )
+        cls.methods = ['ann', 'smm', 'smmpmbec']
+        cls.request_mock = unittest.mock.Mock(side_effect = (
+            make_response(method, cls.test_data_directory) for method in cls.methods
+        ))
+        pvacseq.lib.call_iedb.requests.post = cls.request_mock
 
     def test_pvacseq_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -76,8 +110,16 @@ class PVACTests(unittest.TestCase):
             os.path.join(self.test_data_directory, "input.vcf"),
             output_dir.name
         )
-        result = call([pvac_pipeline_cmd], shell=True, stdout=PIPE)
-        self.assertFalse(result)
+        pvacseq.lib.main.main([
+            os.path.join(self.test_data_directory, "input.vcf"),
+            'Test',
+            'HLA-A29:02',
+            '9',
+            'NetMHC',
+            'SMM',
+            'SMMPMBEC',
+            output_dir.name
+        ])
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test.tsv"),
             os.path.join(self.test_data_directory, "Test.tsv")
@@ -92,6 +134,11 @@ class PVACTests(unittest.TestCase):
             os.path.join(self.test_data_directory, "Test_21.key"),
             False
         ))
+        self.assertEqual(len(self.request_mock.mock_calls), 3)
+        self.request_mock.assert_has_calls([
+            generate_call(method, self.test_data_directory, output_dir.name)
+            for method in self.methods
+        ], True)
         self.assertTrue(cmp(
             os.path.join(output_dir.name, 'Test.HLA-A29:02.9.ann.tsv'),
             os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.ann.tsv'),
