@@ -138,7 +138,7 @@ class PVACTests(unittest.TestCase):
         self.request_mock.assert_has_calls([
             generate_call(method, self.test_data_directory, output_dir.name)
             for method in self.methods
-        ], True)
+        ])
         self.assertTrue(cmp(
             os.path.join(output_dir.name, 'Test.HLA-A29:02.9.ann.tsv'),
             os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.ann.tsv'),
