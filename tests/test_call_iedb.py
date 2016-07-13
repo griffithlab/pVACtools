@@ -11,17 +11,6 @@ base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file_
 sys.path.append(base_dir)
 import pvacseq.lib.call_iedb
 
-def unordered_test(file1, file2):
-    r1 = open(file1, mode='r')
-    s1 = set(row.rstrip() for row in r1)
-    r1.close()
-    r2 = open(file2, mode='r')
-    s2 = set(row.rstrip() for row in r2)
-    r2.close()
-    result = s1^s2
-    print(result)
-    return not len(result)
-
 def make_response(method, path):
     reader = open(os.path.join(
         path,
@@ -88,7 +77,6 @@ class CallIEDBTests(unittest.TestCase):
             reader.close()
             expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
             self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
-            # self.assertTrue(unordered_test(call_iedb_output_file.name, expected_output_file))
 
 if __name__ == '__main__':
     unittest.main()
