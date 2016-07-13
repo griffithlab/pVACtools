@@ -45,9 +45,7 @@ class CallIEDBTests(unittest.TestCase):
     def test_iedb_methods_generate_expected_files(self):
         #netmhcpan, netmhccons, and pickpocket are slow so we won't run them in the tests
         for method in self.methods:
-            # call_iedb_output_file = tempfile.NamedTemporaryFile()
-            call_iedb_output_file = lambda :None
-            call_iedb_output_file.name = "testout_%s.tsv"%method
+            call_iedb_output_file = tempfile.NamedTemporaryFile()
 
             call_iedb_command = "%s %s %s %s %s %s %s" % (
                 self.python,
@@ -59,7 +57,6 @@ class CallIEDBTests(unittest.TestCase):
                 self.epitope_length,
             )
 
-            # self.assertFalse(call(call_iedb_command, shell=True))
             pvacseq.lib.call_iedb.main([
                 self.input_file,
                 call_iedb_output_file.name,
