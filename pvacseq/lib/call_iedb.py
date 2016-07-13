@@ -22,14 +22,14 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('epitope_length', type=int, choices=[8,9,10,11,12,13,14,15],
                         help="Length of subpeptides (epitopes) to predict")
     args = parser.parse_args(args_input)
-
-    #Insert * in the allele name
-    allele = re.sub(r'(\w*-[\w|\d])(.*)', r'\1*\2', args.allele)
+    pvacseq_utils.check_alleles_valid([args.allele])
+    pvacseq_utils.check_allele_valid_for_method(args.allele, args.method)
+    pvacseq_utils.check_length_valid_for_allele_and_method(args.epitope_length, args.allele, args.method)
 
     data = {
         'sequence_text': args.input_file.read(),
         'method':        args.method,
-        'allele':        allele,
+        'allele':        args.allele,
         'length':        args.epitope_length,
     }
 

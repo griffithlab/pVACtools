@@ -59,6 +59,7 @@ def main(args_input = sys.argv[1:]):
                         default=0)
 
     args = parser.parse_args(args_input)
+    pvacseq_utils.check_alleles_valid(args.allele)
 
     print("Converting VCF to TSV")
     tsv_file = args.sample_name + '.tsv'
@@ -92,12 +93,6 @@ def main(args_input = sys.argv[1:]):
     )
     print("Completed")
 
-#    netmhc_output = set(
-#        run([args.netmhc_path+" -A"],
-#            shell=True, stdout=PIPE
-#            ).stdout.decode().split('\n')
-#        )
-
     tmp_dir = tempfile.TemporaryDirectory()
     tmp_split_fasta_prefix = os.path.join(tmp_dir.name, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
 
@@ -114,40 +109,40 @@ def main(args_input = sys.argv[1:]):
     iedb_output_files = []
     for method in args.prediction_algorithms:
         iedb_method = prediction_method_lookup(method)
-        for epl in args.epitope_length:
-            for a in args.allele:
-#               if a in netmhc_output:
-                print("Running IEDB on Allele %s and Epitope Length %s with Method %s" % (a, epl, method))
-                iterator = 1
-                split_iedb_output_files = []
-                for split_fasta_file in split_fasta_files:
-                    split_iedb_out = os.path.join(tmp_dir.name, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv%s" % iterator]))
-                    lib.call_iedb.main([
-                        os.path.join(args.output_dir, split_fasta_file),
-                        split_iedb_out,
-                        iedb_method,
-                        a,
-                        str(epl),
-                    ])
-                    split_iedb_output_files.append(split_iedb_out)
-                    iterator += 1
-                with open(split_iedb_output_files[0]) as split_iedb_out_file:
-                    tsv_reader = csv.DictReader(split_iedb_out_file, delimiter='\t')
-                    fieldnames = tsv_reader.fieldnames
-                iedb_out = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv"]))
-                with open(iedb_out, 'w') as iedb_out_file:
-                    tsv_writer = csv.DictWriter(iedb_out_file, fieldnames, delimiter = '\t', lineterminator = '\n')
-                    tsv_writer.writeheader()
-                    for split_iedb_out in split_iedb_output_files:
-                        with open(split_iedb_out) as split_iedb_out_file:
+        valid_alleles = pvacseq_utils.valid_allele_names_for_method(iedb_method)
+        for a in args.allele:
+            if a in valid_alleles:
+                valid_lengths = pvacseq_utils.valid_lengths_for_allele_and_method(a, iedb_method)
+                for epl in args.epitope_length:
+                    if epl in valid_lengths:
+                        print("Running IEDB on Allele %s and Epitope Length %s with Method %s" % (a, epl, method))
+                        iterator = 1
+                        split_iedb_output_files = []
+                        for split_fasta_file in split_fasta_files:
+                            split_iedb_out = os.path.join(tmp_dir.name, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv%s" % iterator]))
+                            lib.call_iedb.main([
+                                os.path.join(args.output_dir, split_fasta_file),
+                                split_iedb_out,
+                                iedb_method,
+                                a,
+                                str(epl),
+                            ])
+                            split_iedb_output_files.append(split_iedb_out)
+                            iterator += 1
+                        with open(split_iedb_output_files[0]) as split_iedb_out_file:
                             tsv_reader = csv.DictReader(split_iedb_out_file, delimiter='\t')
-                            for row in tsv_reader:
-                                tsv_writer.writerow(row)
-                iedb_output_files.append(iedb_out)
-#                else:
-#                    print("Allele not valid.  Please check using:")
-#                    print(args.netmhc_path,"-A")
-                print("Completed")
+                            fieldnames = tsv_reader.fieldnames
+                        iedb_out = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv"]))
+                        with open(iedb_out, 'w') as iedb_out_file:
+                            tsv_writer = csv.DictWriter(iedb_out_file, fieldnames, delimiter = '\t', lineterminator = '\n')
+                            tsv_writer.writeheader()
+                            for split_iedb_out in split_iedb_output_files:
+                                with open(split_iedb_out) as split_iedb_out_file:
+                                    tsv_reader = csv.DictReader(split_iedb_out_file, delimiter='\t')
+                                    for row in tsv_reader:
+                                        tsv_writer.writerow(row)
+                        iedb_output_files.append(iedb_out)
+                        print("Completed")
 
     input_files = []
     tmp_dir.cleanup()

@@ -107,7 +107,7 @@ class PVACTests(unittest.TestCase):
         pvacseq.lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
-            'HLA-A29:02',
+            'HLA-A*29:02',
             '9',
             'NetMHC',
             'SMM',
@@ -134,23 +134,23 @@ class PVACTests(unittest.TestCase):
             for method in self.methods
         ])
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.ann.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.ann.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-A*29:02.9.ann.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-A*29:02.9.ann.tsv'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.smm.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.smm.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-A*29:02.9.smm.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-A*29:02.9.smm.tsv'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.smmpmbec.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.smmpmbec.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-A*29:02.9.smmpmbec.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-A*29:02.9.smmpmbec.tsv'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-A29:02.9.parsed.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-A29:02.9.parsed.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-A*29:02.9.parsed.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-A*29:02.9.parsed.tsv'),
             False
         ))
         self.assertTrue(cmp(

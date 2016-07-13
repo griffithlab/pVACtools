@@ -21,7 +21,7 @@ setup(
         'requests',
     ],
     package_data={
-        'pvacseq' : ['example_data/*', 'VEP_plugins/*']
+        'pvacseq' : ['example_data/*', 'VEP_plugins/*', 'iedb_alleles/*']
     },
     classifiers=[
         'Development Status :: 4 - Beta',

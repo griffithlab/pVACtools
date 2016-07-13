@@ -30,7 +30,7 @@ class CallIEDBTests(unittest.TestCase):
         cls.executable     = os.path.join(cls.executable_dir, 'call_iedb.py')
         cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'call_iedb')
         cls.input_file     = os.path.join(cls.test_data_dir, 'input.fasta')
-        cls.allele         = 'HLA-A02:01'
+        cls.allele         = 'HLA-A*02:01'
         cls.epitope_length = 9
         cls.methods = ['ann', 'smmpmbec', 'smm']
         cls.request_mock = unittest.mock.Mock(side_effect = (
@@ -58,7 +58,7 @@ class CallIEDBTests(unittest.TestCase):
             self.request_mock.assert_called_with('http://tools-api.iedb.org/tools_api/mhci/', data={
                 'sequence_text':reader.read(),
                 'method': method,
-                'allele': re.sub(r'(\w*-[\w|\d])(.*)', r'\1*\2', self.allele),
+                'allele': self.allele,
                 'length': self.epitope_length
             })
             reader.close()
