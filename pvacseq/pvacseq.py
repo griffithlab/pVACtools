@@ -64,6 +64,11 @@ def main():
                                                       add_help=False)
     install_vep_plugin_parser.set_defaults(func=lib.install_vep_plugin)
 
+    valid_alleles_parser = subparsers.add_parser("valid_alleles",
+                                                 help="Shows a list of valid allele names",
+                                                 add_help=False)
+    valid_alleles_parser.set_defaults(func=lib.valid_alleles)
+
     parser.add_argument("-v", "--version",
                         help="Display the currently installed pvacseq version",
                         action="store_true")

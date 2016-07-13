@@ -30,12 +30,12 @@ def valid_allele_names_for_method(iedb_method):
     base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
     iedb_alleles_dir       = os.path.join(base_dir, 'iedb_alleles')
     iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % iedb_method)
-    alleles = []
+    alleles = set()
     with open(iedb_alleles_file_name) as iedb_alleles_file:
         tsv_reader = csv.DictReader(iedb_alleles_file, delimiter='\t')
         for row in tsv_reader:
-            alleles.append(row['MHC'])
-    return alleles
+            alleles.add(row['MHC'])
+    return list(alleles)
 
 def valid_allele_names():
     valid_allele_names = set()
