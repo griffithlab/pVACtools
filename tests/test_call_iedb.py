@@ -22,6 +22,17 @@ def unordered_test(file1, file2):
     print(result)
     return not len(result)
 
+def make_response(method, path):
+    reader = open(os.path.join(
+        path,
+        'response_%s.tsv' %method
+    ), mode='r')
+    response_obj = lambda :None
+    response_obj.status_code = 200
+    response_obj.text = reader.read()
+    reader.close()
+    return response_obj
+
 class CallIEDBTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -32,15 +43,10 @@ class CallIEDBTests(unittest.TestCase):
         cls.input_file     = os.path.join(cls.test_data_dir, 'input.fasta')
         cls.allele         = 'HLA-A02:01'
         cls.epitope_length = 9
-        reader = open(os.path.join(
-            cls.test_data_dir,
-            'response.html'
-        ), mode='r')
-        response_obj = lambda :None
-        response_obj.status_code = 200
-        response_obj.text = reader.read()
-        reader.close()
-        cls.request_mock = unittest.mock.Mock(return_value = response_obj)
+        cls.methods = ['ann', 'smmpmbec', 'smm']
+        cls.request_mock = unittest.mock.Mock(side_effect = (
+            make_response(method, cls.test_data_dir) for method in cls.methods
+        ))
         pvacseq.lib.call_iedb.requests.post = cls.request_mock
 
 
@@ -49,8 +55,7 @@ class CallIEDBTests(unittest.TestCase):
 
     def test_iedb_methods_generate_expected_files(self):
         #netmhcpan, netmhccons, and pickpocket are slow so we won't run them in the tests
-        methods = ['ann', 'smmpmbec', 'smm']
-        for method in methods:
+        for method in self.methods:
             # call_iedb_output_file = tempfile.NamedTemporaryFile()
             call_iedb_output_file = lambda :None
             call_iedb_output_file.name = "testout_%s.tsv"%method
@@ -82,8 +87,8 @@ class CallIEDBTests(unittest.TestCase):
             })
             reader.close()
             expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
-            # self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
-            self.assertTrue(unordered_test(call_iedb_output_file.name, expected_output_file))
+            self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+            # self.assertTrue(unordered_test(call_iedb_output_file.name, expected_output_file))
 
 if __name__ == '__main__':
     unittest.main()
