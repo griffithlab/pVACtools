@@ -165,7 +165,7 @@ def main(args_input = sys.argv[1:]):
     for epl in args.epitope_length:
         for a in args.allele:
             net_parsed = ".".join([args.sample_name, a, str(epl), "parsed.tsv"])
-            print("Parsing NetMHC Output for Allele %s and Epitope Length %s" % (a, epl))
+            print("Parsing IEDB Output for Allele %s and Epitope Length %s" % (a, epl))
             lib.parse_output.main(
                 [
                     *iedb_output_files[a][epl],
@@ -177,7 +177,7 @@ def main(args_input = sys.argv[1:]):
             print("Completed")
             parsed_files.append(os.path.join(args.output_dir, net_parsed))
 
-    print("Combining Parsed NetMHC Output Files")
+    print("Combining Parsed IEDB Output Files")
     combined_parsed = "%s.parsed.tsv" % args.sample_name
     lib.combine_parsed_outputs.main([
         *parsed_files,
@@ -199,7 +199,7 @@ def main(args_input = sys.argv[1:]):
     print("\n")
     print("Done: pvacseq has completed. File", filt_out,
           "contains list of binding-filtered putative neoantigens")
-    print("We recommend appending coverage information and running CoverageFilters.py to filter based on sequencing coverage information")
+    print("We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
 
 
 def split_file(reader, lines=400):
