@@ -101,7 +101,6 @@ def main(args_input = sys.argv[1:]):
     tmp_dir = tempfile.TemporaryDirectory()
     tmp_split_fasta_prefix = os.path.join(tmp_dir.name, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
 
-    # run(['split', '--lines=400', fasta_file_path, tmp_split_fasta_prefix], check=True)
     split_reader = open(fasta_file_path, mode='r')
     split_counter = 0
     for chunk in split_file(split_reader, 400):
