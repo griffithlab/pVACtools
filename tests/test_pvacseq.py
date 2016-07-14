@@ -79,6 +79,7 @@ class PVACTests(unittest.TestCase):
             "install_vep_plugin",
             "download_example_data",
             "valid_alleles",
+            "combine_parsed_outputs",
             ]:
             result = run([
                 sys.executable,

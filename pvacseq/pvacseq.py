@@ -44,6 +44,11 @@ def main():
                                                 add_help=False)
     parse_output_parser.set_defaults(func=lib.parse_output)
 
+    combine_parsed_outputs_parser = subparsers.add_parser("combine_parsed_outputs",
+                                                          help="Combines the parsed output files into one file",
+                                                          add_help=False)
+    combine_parsed_outputs_parser.set_defaults(func=lib.combine_parsed_outputs)
+
     binding_filter_parser = subparsers.add_parser("binding_filter",
                                                   help="Filters variants processed by IEDB by binding score",
                                                   add_help=False)

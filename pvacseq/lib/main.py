@@ -177,11 +177,18 @@ def main(args_input = sys.argv[1:]):
             print("Completed")
             parsed_files.append(os.path.join(args.output_dir, net_parsed))
 
+    print("Combining Parsed NetMHC Output Files")
+    combined_parsed = "%s.parsed.tsv" % args.sample_name
+    lib.combine_parsed_outputs.main([
+        *parsed_files,
+        os.path.join(args.output_dir, combined_parsed)
+    ])
+
     filt_out = os.path.join(args.output_dir, args.sample_name+"_filtered.tsv")
     print("Running Binding Filters")
     lib.binding_filter.main(
         [
-            *parsed_files,
+            combined_parsed,
             filt_out,
             '-c', str(args.minimum_fold_change),
             '-b', str(args.binding_threshold),
