@@ -13,7 +13,7 @@ import tempfile
 try:
     from .. import lib
 except ValueError:
-    import lib 
+    import lib
 from lib import pvacseq_utils
 
 def prediction_method_lookup(prediction_method):
@@ -101,8 +101,16 @@ def main(args_input = sys.argv[1:]):
     tmp_dir = tempfile.TemporaryDirectory()
     tmp_split_fasta_prefix = os.path.join(tmp_dir.name, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
 
-    run(['split', '--lines=400', fasta_file_path, tmp_split_fasta_prefix], check=True)
+    # run(['split', '--lines=400', fasta_file_path, tmp_split_fasta_prefix], check=True)
+    split_reader = open(fasta_file_path, mode='r')
+    split_counter = 0
+    for chunk in split_file(split_reader, 400):
+        split_writer = open("%s_%d"%(tmp_split_fasta_prefix, split_counter), mode='w')
+        split_writer.writelines(chunk)
+        split_writer.close()
+        split_counter += 1
     split_fasta_files = glob.glob("%s*" % tmp_split_fasta_prefix)
+    split_reader.close()
 
     iedb_output_files = []
     for method in args.prediction_algorithms:
@@ -143,6 +151,7 @@ def main(args_input = sys.argv[1:]):
                 print("Completed")
 
     input_files = []
+    tmp_dir.cleanup()
 
     for epl in args.epitope_length:
         for a in args.allele:
@@ -175,6 +184,16 @@ def main(args_input = sys.argv[1:]):
           "contains list of binding-filtered putative neoantigens")
     print("We recommend appending coverage information and running CoverageFilters.py to filter based on sequencing coverage information")
 
+
+def split_file(reader, lines=400):
+    from itertools import islice, chain
+    tmp = next(reader)
+    while tmp!="":
+        yield chain([tmp], islice(reader, lines-1))
+        try:
+            tmp = next(reader)
+        except StopIteration:
+            return
 
 if __name__ == '__main__':
     main()
