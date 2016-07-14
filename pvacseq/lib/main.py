@@ -165,7 +165,7 @@ def main(args_input = sys.argv[1:]):
     for epl in args.epitope_length:
         for a in args.allele:
             net_parsed = ".".join([args.sample_name, a, str(epl), "parsed.tsv"])
-            print("Parsing NetMHC Output")
+            print("Parsing NetMHC Output for Allele %s and Epitope Length %s" % (a, epl))
             lib.parse_output.main(
                 [
                     *iedb_output_files[a][epl],
