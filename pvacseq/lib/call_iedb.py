@@ -34,6 +34,9 @@ def main(args_input = sys.argv[1:]):
     }
 
     response = requests.post('http://tools-api.iedb.org/tools_api/mhci/', data=data)
+    if response.status_code == 500:
+        #Retry once
+        response = requests.post('http://tools-api.iedb.org/tools_api/mhci/', data=data)
     if response.status_code != 200:
         sys.exit("Error posting request to IEDB.\n%s" % response.text)
     args.output_file.write(response.text)
