@@ -12,10 +12,12 @@ pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
 import pvacseq.lib
 
-def make_response(method, path):
+import pdb
+
+def make_response(method, allele, length, path):
     reader = open(os.path.join(
         path,
-        'response_%s.tsv' %method
+        'response_%s_%s_%s.tsv' % (allele, length, method)
     ), mode='r')
     response_obj = lambda :None
     response_obj.status_code = 200
@@ -23,7 +25,7 @@ def make_response(method, path):
     reader.close()
     return response_obj
 
-def generate_call(method, path, input_path):
+def generate_call(method, allele, length, path, input_path):
     reader = open(os.path.join(
         input_path,
         "Test_21.fa"
@@ -33,8 +35,8 @@ def generate_call(method, path, input_path):
     return unittest.mock.call('http://tools-api.iedb.org/tools_api/mhci/', data={
         'sequence_text': ""+text,
         'method':        method,
-        'allele':        "HLA-A*29:02",
-        'length':        9,
+        'allele':        allele,
+        'length':        length,
     })
 
 class PVACTests(unittest.TestCase):
@@ -47,9 +49,20 @@ class PVACTests(unittest.TestCase):
             'test_data',
             'pvacseq'
         )
-        cls.methods = ['ann', 'smm', 'smmpmbec']
-        cls.request_mock = unittest.mock.Mock(side_effect = (
-            make_response(method, cls.test_data_directory) for method in cls.methods
+        cls.methods = {
+            'ann': {
+                'HLA-E*01:01': [9, 10]
+            },
+            'pickpocket': {
+                'HLA-G*01:09': [9, 10],
+                'HLA-E*01:01': [9, 10],
+            },
+        }
+        cls.request_mock = unittest.mock.Mock(side_effect = lambda sequence, data: make_response(
+            data['method'],
+            data['allele'],
+            int(data['length']),
+            cls.test_data_directory
         ))
         pvacseq.lib.call_iedb.requests.post = cls.request_mock
 
@@ -109,11 +122,10 @@ class PVACTests(unittest.TestCase):
         pvacseq.lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
-            'HLA-A*29:02',
-            '9',
+            'HLA-G*01:09,HLA-E*01:01',
+            '9,10',
             'NetMHC',
-            'SMM',
-            'SMMPMBEC',
+            'PickPocket',
             output_dir.name
         ])
         self.assertTrue(cmp(
@@ -130,29 +142,40 @@ class PVACTests(unittest.TestCase):
             os.path.join(self.test_data_directory, "Test_21.key"),
             False
         ))
-        self.assertEqual(len(self.request_mock.mock_calls), 3)
-        self.request_mock.assert_has_calls([
-            generate_call(method, self.test_data_directory, output_dir.name)
-            for method in self.methods
-        ])
+        self.assertEqual(len(self.request_mock.mock_calls), 6)
+        methods = self.methods
+        for method in methods.keys():
+            for allele in methods[method].keys():
+                for length in methods[method][allele]:
+                    self.request_mock.assert_has_calls([
+                        generate_call(method, allele, length, self.test_data_directory, output_dir.name)
+                    ])
+                    output_file   = os.path.join(output_dir.name, 'Test.%s.%s.%s.tsv' % (allele, length, method))
+                    expected_file = os.path.join(self.test_data_directory, 'Test.%s.%s.%s.tsv' % (allele, length, method))
+                    self.assertTrue(cmp(output_file, expected_file, False))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-A*29:02.9.ann.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-A*29:02.9.ann.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-E*01:01.9.parsed.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-E*01:01.9.parsed.tsv'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-A*29:02.9.smm.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-A*29:02.9.smm.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-E*01:01.10.parsed.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-E*01:01.10.parsed.tsv'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-A*29:02.9.smmpmbec.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-A*29:02.9.smmpmbec.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-G*01:09.9.parsed.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-G*01:09.9.parsed.tsv'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-A*29:02.9.parsed.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-A*29:02.9.parsed.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-G*01:09.10.parsed.tsv'),
+            os.path.join(self.test_data_directory, 'Test.HLA-G*01:09.10.parsed.tsv'),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, 'Test.parsed.tsv'),
+            os.path.join(self.test_data_directory, 'Test.parsed.tsv'),
             False
         ))
         self.assertTrue(cmp(
