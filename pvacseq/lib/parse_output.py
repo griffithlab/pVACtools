@@ -214,12 +214,12 @@ def output_headers(methods):
     return headers
 
 def determine_prediction_methods(input_iedb_files):
-    methods = []
+    methods = set()
     for input_iedb_file in input_iedb_files:
         (sample, allele_tmp, peptide_length_tmp, method, file_extension) = input_iedb_file.name.split(".", 4)
-        methods.append(method)
+        methods.add(method)
 
-    return methods
+    return sorted(list(methods))
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq parse_output')
