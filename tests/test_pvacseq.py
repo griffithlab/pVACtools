@@ -169,30 +169,21 @@ class PVACTests(unittest.TestCase):
     def test_split_file(self):
         import random
         random.seed()
-        test_dir = tempfile.TemporaryDirectory()
-        prefix = os.path.join(test_dir.name, 'split_file_')
-        writer = open(prefix+"source", mode='w')
+        source_file = tempfile.NamedTemporaryFile()
+        writer = open(source_file.name, mode='w')
         writer.writelines(
             "".join(chr(random.randint(32,255)) for i in range(25))+"\n"
             for line in range(500)
         )
         writer.close()
         for trial in range(5):
-            reader = open(prefix+"source", mode='r')
+            reader = open(source_file.name, mode='r')
             counter = 0
+            total = 0
             split = random.randint(10,500)
             for chunk in pvacseq.lib.main.split_file(reader, split):
-                writer = open(prefix+"output_%d_%d"%(trial, counter), mode='w')
-                counter+=1
-                writer.writelines(chunk)
-                writer.close()
-            total = 0
-            reader.close()
-            for i in range(counter):
-                reader = open(prefix+"output_%d_%d"%(trial, i), mode='r')
-                lines = len(reader.read().strip().split("\n"))
-                reader.close()
+                lines = len([line for line in chunk])
                 self.assertLessEqual(lines, split)
                 total+=lines
             self.assertEqual(total, 500)
-        test_dir.cleanup()
+            reader.close()
