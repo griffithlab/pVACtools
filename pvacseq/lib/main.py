@@ -188,7 +188,7 @@ def main(args_input = sys.argv[1:]):
     print("Running Binding Filters")
     lib.binding_filter.main(
         [
-            combined_parsed,
+            os.path.join(args.output_dir, combined_parsed),
             filt_out,
             '-c', str(args.minimum_fold_change),
             '-b', str(args.binding_threshold),
