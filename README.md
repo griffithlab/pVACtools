@@ -102,7 +102,7 @@ This command make epitope binding predicitions using the IEDB RESTful interface 
 
 ### parse_output
 `pvacseq parse_output <IEDB files> <input TSV file> <input key file> <output parsed TSV file>`<br>
-After running IEDB, this command parses the output from the IEDB RESTful API calls. It combines the IEDB output files for multiple prediction algorithms that have the same allele and epitope lengths. It uses a special key file to link each IEDB result entry to the original entry from the input TSV file. The parsed TSV output file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. It also contains gene and transcript information from the input TSV file.
+After running IEDB, this command parses the output from the IEDB RESTful API calls. It combines the IEDB output files for multiple prediction algorithms that have the same allele and epitope lengths. It uses a special key file to link each IEDB result entry to the original entry from the input TSV file. The parsed TSV output file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. When multiple prediction algorithms are used the parser will find the best mutant ic50 score as well as the median mutant ic50 score. The file also contains gene and transcript information from the input TSV file.
 
 ### combine_parsed_outputs
 `pvacseq combine_parsed_outputs <input parsed TSV file> <output combined parsed TSV file>`<br>
@@ -114,28 +114,7 @@ Takes combined parsed epitope file for different allele-length combinations and 
 
 ### coverage_filter
 `pvacseq coverage_filters <input TSV file> <output filtered TSV file> [--normal-cov normal coverage cutoff] [--tdna-cov tumor DNA coverage cutoff] [--trna-cov tumor RNA coverage cutoff] [--normal-vaf normal vaf cutoff] [--tdna-vaf tumor DNA vaf cutoff] [--trna-vaf tumor RNA vaf cutoff] [--expn-val gene expression (fpkm) cutoff]`<br>
-Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters can be installed. The input file should contain the predicted epitopes along with read counts appended as additional columns. If specific type of sequencing data is not available, the columns can be left off. Column order is not important.
-
-The input TSV file contains the following columns in tab-separated format:<br>
-Chromosome<br>
-Start<br>
-Stop<br>
-Reference<br>
-Variant<br>
-Transcript<br>
-Ensembl Gene ID<br>
-Variant Type<br>
-Mutation<br>
-Protein Position<br>
-Gene Name<br>
-HLA Allele<br>
-Peptide Length<br>
-Sub-peptide Position<br>
-MT score<br>
-WT score<br>
-MT epitope seq<br>
-WT epitope seq<br>
-Fold Change<br>
+Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters can be installed. The input file should contain the predicted epitopes along with read counts appended as additional columns. If specific type of sequencing data is not available, the columns can be left off. Column order is not important but the names of the headers for the columns containing coverage information is. The headers need to be named as follows:<br>
 Normal Ref Count<br>
 Normal Var Count<br>
 Tumor DNA Ref Count<br>
