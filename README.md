@@ -2,6 +2,11 @@
 Cancer immunotherapy has gained significant momentum from recent clinical successes of checkpoint blockade inhibition. Massively parallel sequence analysis suggests a connection between mutational load and response to this class of therapy. Methods to identify which tumor-specific mutant peptides (neoantigens) can elicit anti-tumor T cell immunity are needed to improve predictions of checkpoint therapy response and to identify targets for vaccines and adoptive T cell therapies. Here, we provide a cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq) that integrates tumor mutation and expression data (DNA- and RNA-Seq).
 http://www.genomemedicine.com/content/8/1/11
 
+## New in version 3.0.0
+<ul>
+<li>pVAC-Seq now uses the IEDB RESTful interface for making epitope binding predictions. A local install of NetMHC3.4 is no longer required. By using IEDB the user now has a choice between several prediction algorithms, including NetMHC (3.4), NetMHCcons (1.1), NetMHCpan (2.8), PickPocket (1.1), SMM, and SMMPMBEC.</li>
+</ul>
+
 ## New in version 2.0.2
 <ul>
 <li>Bugfix: There was a problem in version 2.0.1 where pVAC-Seq would hang while calling NetMHC under certain cirumstances. This is now fixed.</li>
@@ -52,10 +57,6 @@ The `--dir_plugins <VEP_plugins directory>` option may need to be set depending 
 <b>Example VEP Command</b><br>
 `perl variant_effect_predictor.pl --input_file <input VCF> --format vcf --output_file <output VCF> --vcf --symbol --terms SO --plugin Downstream --plugin Wildtype [--dir_plugins <VEP_plugins directory>]`
 
-###<b>NetMHC 3.4</b>
-
-pVAC-Seq uses NetMHC 3.4 to predict binding affinities. <a href="http://www.cbs.dtu.dk/cgi-bin/sw_request?netMHC+3.4">NetMHC 3.4 can be downloaded here</a>. Once NetMHC is properly installed and tested, pVAC-Seq expects the path to the installation directory.
-
 ## Pipeline Overview
 ![alt text][overview]
 [overview]:
@@ -63,16 +64,16 @@ https://raw.githubusercontent.com/wiki/griffithlab/pVAC-Seq/images/pvacseq-code-
 
 ## pvacseq commands
 ### run
-`pvacseq run <input VCF> <sample name> <NetMHC installation path> <allele name> <epitope length> <ouput directory> [-l peptide sequence length] [-b binding threshold] [-c minimum fold change]`<br>
+`pvacseq run <input VCF> <sample name> <allele name> <epitope length> <prediction_algorithm> <output directory> [-l peptide sequence length] [-b binding threshold] [-c minimum fold change]`<br>
 Use this command to run the full pVAC-Seq pipeline.  This will internally call the other commands, passing data between them to generate an output TSV file of neoepitope predictions. Multiple alleles and epiope length can be specified as comma-separated lists.
 
 <b>Required inputs</b><br>
 <ul>
 <li><code>input VCF</code>: A VEP-annotated VCF containing transcript, Wildtype protein sequence, and Downstream protein sequence information. (Please see above for instructions)</li>
 <li><code>sample name</code>: The name of the sample being processed. This will be used as a prefix for output files.</li>
-<li><code>NetMHC installation path</code>: The path to the NetMHC installation directory (please see above for installation instructions)</li>
 <li><code>allele name</code>: Name of the allele to use for epitope prediction. Mutliple alles can be specified using a comma-separated list.</li>
 <li><code>epitope length</code>: This refers to the length of subpeptides (neoepitopes) to predict. The pipeline can handle multiple lengths, which can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.</li>
+<li><code>prediction algorithm</code>: The prediction algorithm to use. The available choices are `NetMHC`, `NetMHCcons`, `NetMHCpan`, `PickPocket`, `SMM`, and `SMMPMBEC`. Multiple prediction algorithms can be specified, separated by spaces.</li>
 <li><code>Output directory</code>: The directory for writing all result files.</li>
 </ul>
 
@@ -143,6 +144,9 @@ Downloads a set of example data files to the directory specififed.
 `pvacseq install_vep_plugin <vep plugins path>`
 Installs the Wildtype VEP plugin into the specified directory.
 
+### valid_alleles
+`pvacseq valid_alleles [-p <prediction_algorithm>]`
+Shows a list of valid allele names. If the `-p` option is specified with a prediction algorithm than only the alleles available for that predicion algorithm will be displayed. `prediction_algorithm` can be one of `NetMHC`, `NetMHCcons`, `NetMHCpan`, `PickPocket`, `SMM`, or `SMMPMBEC`.
 
 ## Additional Information
 
