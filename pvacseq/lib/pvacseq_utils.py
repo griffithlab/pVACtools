@@ -24,18 +24,23 @@ def iedb_prediction_methods():
     prediction_method_lookup_dict = iedb_to_prediction_method_lookup_dict()
     return sorted(prediction_method_lookup_dict.keys())
 
+valid_allele_names_for_method_dict = {}
+
 def valid_allele_names_for_method(iedb_method):
-    #Ultimately we probably want this method to call out to IEDB but their command is currently broken
-    #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/
-    base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-    iedb_alleles_dir       = os.path.join(base_dir, 'iedb_alleles')
-    iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % iedb_method)
-    alleles = set()
-    with open(iedb_alleles_file_name) as iedb_alleles_file:
-        tsv_reader = csv.DictReader(iedb_alleles_file, delimiter='\t')
-        for row in tsv_reader:
-            alleles.add(row['MHC'])
-    return list(alleles)
+    if iedb_method not in valid_allele_names_for_method_dict.keys():
+        #Ultimately we probably want this method to call out to IEDB but their command is currently broken
+        #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/
+        base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        iedb_alleles_dir       = os.path.join(base_dir, 'iedb_alleles')
+        iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % iedb_method)
+        alleles = set()
+        with open(iedb_alleles_file_name) as iedb_alleles_file:
+            tsv_reader = csv.DictReader(iedb_alleles_file, delimiter='\t')
+            for row in tsv_reader:
+                alleles.add(row['MHC'])
+        valid_allele_names_for_method_dict[iedb_method] = list(alleles)
+
+    return valid_allele_names_for_method_dict[iedb_method]
 
 def valid_allele_names():
     valid_allele_names = set()
