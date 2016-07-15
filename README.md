@@ -73,7 +73,7 @@ Use this command to run the full pVAC-Seq pipeline.  This will internally call t
 <li><code>sample name</code>: The name of the sample being processed. This will be used as a prefix for output files.</li>
 <li><code>allele name</code>: Name of the allele to use for epitope prediction. Mutliple alles can be specified using a comma-separated list.</li>
 <li><code>epitope length</code>: This refers to the length of subpeptides (neoepitopes) to predict. The pipeline can handle multiple lengths, which can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.</li>
-<li><code>prediction algorithm</code>: The prediction algorithm to use. The available choices are `NetMHC`, `NetMHCcons`, `NetMHCpan`, `PickPocket`, `SMM`, and `SMMPMBEC`. Multiple prediction algorithms can be specified, separated by spaces.</li>
+<li><code>prediction algorithm</code>: The prediction algorithm to use. The available choices are <code>NetMHC</code>, <code>NetMHCcons</code>, <code>NetMHCpan</code>, <code>PickPocket</code>, <code>SMM</code>, and <code>SMMPMBEC</code>. Multiple prediction algorithms can be specified, separated by spaces.</li>
 <li><code>Output directory</code>: The directory for writing all result files.</li>
 </ul>
 
@@ -94,18 +94,26 @@ Run this command to generate a FASTA file for wildtype(WT) and mutant(MT) amino 
 
 ### generate_fasta_key
 `pvacseq generate_fasta_key <input FASTA file> <output key file>`<br>
-NetMHC strips off the name of the FASTA header. This command generates a key file to lookup each NetMHC output entry to its original entry in the FASTA file.
+IEDB strips off the name of the FASTA header. This command generates a key file to lookup each IEDB output entry to its original entry in the FASTA file.
+
+## call_iedb
+`pvacseq call_iedb <input FASTA file> <output IEDB file> <IEDB analysis method> <allele> <epitope length>`<br>
+This command make epitope binding predicitions using the IEDB RESTful interface and writes the result to a file.
 
 ### parse_output
-`pvacseq parse_output <NetMHC output file> <input TSV file> <FASTA key file> <output parsed file>`<br>
-After running NetMHC 3.4, this command parses the output for MHC Class I epitope prediction. It uses a special key file to link each NetMHC result entry to the original entry from the input TSV file. The parsed TSV output file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. It also contains gene and transcript information from the input TSV file.
+`pvacseq parse_output <IEDB files> <input TSV file> <input key file> <output parsed TSV file>`<br>
+After running IEDB, this command parses the output from the IEDB RESTful API calls. It combines the IEDB output files for multiple prediction algorithms that have the same allele and epitope lengths. It uses a special key file to link each IEDB result entry to the original entry from the input TSV file. The parsed TSV output file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. It also contains gene and transcript information from the input TSV file.
+
+### combine_parsed_outputs
+`pvacseq combine_parsed_outputs <input parsed TSV file> <output combined parsed TSV file>`<br>
+Combines all parsed output IEDB files into one file. Each parsed output IEDB file contains entries for the same allele and epitope length. This step combines parsed files from multiple alleles and epitope lengths into one single output TSV file.
 
 ### binding_filter
-`pvacseq binding_filter <input TSV file> <output file> [-b binding threshold] [-c minimum fold change]`<br>
-Takes a comma-separated list of parsed NetMHC files for different allele-length combinations and outputs best candidates per gene based on binding affinities.
+`pvacseq binding_filter <input combined parsed TSV file> <output filtered TSV file> [-b binding threshold] [-c minimum fold change]`<br>
+Takes combined parsed epitope file for different allele-length combinations and outputs best candidates per gene based on binding affinities.
 
 ### coverage_filter
-`pvacseq coverage_filters <input TSV file> <output file> [--normal-cov normal coverage cutoff] [--tdna-cov tumor DNA coverage cutoff] [--trna-cov tumor RNA coverage cutoff] [--normal-vaf normal vaf cutoff] [--tdna-vaf tumor DNA vaf cutoff] [--trna-vaf tumor RNA vaf cutoff] [--expn-val gene expression (fpkm) cutoff]`<br>
+`pvacseq coverage_filters <input TSV file> <output filtered TSV file> [--normal-cov normal coverage cutoff] [--tdna-cov tumor DNA coverage cutoff] [--trna-cov tumor RNA coverage cutoff] [--normal-vaf normal vaf cutoff] [--tdna-vaf tumor DNA vaf cutoff] [--trna-vaf tumor RNA vaf cutoff] [--expn-val gene expression (fpkm) cutoff]`<br>
 Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters can be installed. The input file should contain the predicted epitopes along with read counts appended as additional columns. If specific type of sequencing data is not available, the columns can be left off. Column order is not important.
 
 The input TSV file contains the following columns in tab-separated format:<br>
@@ -145,7 +153,7 @@ Downloads a set of example data files to the directory specififed.
 Installs the Wildtype VEP plugin into the specified directory.
 
 ### valid_alleles
-`pvacseq valid_alleles [-p <prediction_algorithm>]`
+`pvacseq valid_alleles [-p <prediction_algorithm>]`<br>
 Shows a list of valid allele names. If the `-p` option is specified with a prediction algorithm than only the alleles available for that predicion algorithm will be displayed. `prediction_algorithm` can be one of `NetMHC`, `NetMHCcons`, `NetMHCpan`, `PickPocket`, `SMM`, or `SMMPMBEC`.
 
 ## Additional Information
