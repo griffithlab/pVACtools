@@ -26,21 +26,27 @@ def iedb_prediction_methods():
 
 valid_allele_names_for_method_dict = {}
 
-def valid_allele_names_for_method(iedb_method):
-    if iedb_method not in valid_allele_names_for_method_dict.keys():
-        #Ultimately we probably want this method to call out to IEDB but their command is currently broken
-        #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/
-        base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        iedb_alleles_dir       = os.path.join(base_dir, 'iedb_alleles')
-        iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % iedb_method)
-        alleles = set()
-        with open(iedb_alleles_file_name) as iedb_alleles_file:
-            tsv_reader = csv.DictReader(iedb_alleles_file, delimiter='\t')
-            for row in tsv_reader:
-                alleles.add(row['MHC'])
-        valid_allele_names_for_method_dict[iedb_method] = list(alleles)
+def parse_iedb_allele_file(method):
+    #Ultimately we probably want this method to call out to IEDB but their command is currently broken
+    #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/
+    base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+    iedb_alleles_dir       = os.path.join(base_dir, 'iedb_alleles')
+    iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % method)
+    alleles = {}
+    with open(iedb_alleles_file_name) as iedb_alleles_file:
+        tsv_reader = csv.DictReader(iedb_alleles_file, delimiter='\t')
+        for row in tsv_reader:
+            allele = row['MHC']
+            if allele not in alleles.keys():
+                alleles[allele] = []
+            alleles[allele].append(int(row['PeptideLength']))
+    return alleles
 
-    return valid_allele_names_for_method_dict[iedb_method]
+def valid_allele_names_for_method(method):
+    if method not in valid_allele_names_for_method_dict.keys():
+        valid_allele_names_for_method_dict[method] = parse_iedb_allele_file(method)
+
+    return valid_allele_names_for_method_dict[method].keys()
 
 def valid_allele_names():
     valid_allele_names = set()
@@ -60,16 +66,10 @@ def check_allele_valid_for_method(allele, method):
         sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, method, method))
 
 def valid_lengths_for_allele_and_method(allele, method):
-    base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-    iedb_alleles_dir       = os.path.join(base_dir, 'iedb_alleles')
-    iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % method)
-    valid_lengths = []
-    with open(iedb_alleles_file_name) as iedb_alleles_file:
-        tsv_reader = csv.DictReader(iedb_alleles_file, delimiter='\t')
-        for row in tsv_reader:
-            if row['MHC'] == allele:
-                valid_lengths.append(int(row['PeptideLength']))
-    return valid_lengths
+    if method not in valid_allele_names_for_method_dict.keys():
+        valid_allele_names_for_method_dict[method] = parse_iedb_allele_file(method)
+
+    return valid_allele_names_for_method_dict[method][allele]
 
 def check_length_valid_for_allele_and_method(length, allele, method):
     valid_lengths = valid_lengths_for_allele_and_method(allele, method)
