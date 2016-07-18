@@ -29,5 +29,5 @@ class CombineParsedOutputsTests(unittest.TestCase):
         ]
         self.assertFalse(call(combine_parsed_outputs_command))
 
-        expected_output_file  = os.path.join(self.test_data_dir, "Test.parsed.tsv")
+        expected_output_file  = os.path.join(self.test_data_dir, "Test.combined.parsed.tsv")
         self.assertTrue(cmp(combine_parsed_outputs_output_file.name, expected_output_file))

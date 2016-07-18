@@ -178,7 +178,7 @@ def main(args_input = sys.argv[1:]):
             parsed_files.append(os.path.join(args.output_dir, iedb_parsed))
 
     print("Combining Parsed IEDB Output Files")
-    combined_parsed = "%s.parsed.tsv" % args.sample_name
+    combined_parsed = "%s.combined.parsed.tsv" % args.sample_name
     lib.combine_parsed_outputs.main([
         *parsed_files,
         os.path.join(args.output_dir, combined_parsed)

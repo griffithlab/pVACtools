@@ -174,8 +174,8 @@ class PVACTests(unittest.TestCase):
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.parsed.tsv'),
-            os.path.join(self.test_data_directory, 'Test.parsed.tsv'),
+            os.path.join(output_dir.name, 'Test.combined.parsed.tsv'),
+            os.path.join(self.test_data_directory, 'Test.combined.parsed.tsv'),
             False
         ))
         self.assertTrue(cmp(

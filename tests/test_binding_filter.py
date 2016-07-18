@@ -24,7 +24,7 @@ class BindingFilterTests(unittest.TestCase):
             compiled_script_path,
             os.path.join(
                 self.test_data_path,
-                'Test.HLA-A*29:02.9.parsed.tsv'
+                'Test.combined.parsed.tsv'
             ),
             output_file.name
         ], shell=False))
