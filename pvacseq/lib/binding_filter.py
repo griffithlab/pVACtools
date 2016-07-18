@@ -26,6 +26,13 @@ def main(args_input = sys.argv[1:]):
                         help="Report only epitopes where the mutant allele " +
                         "has ic50 binding scores below this value; default 500",
                         default=500)
+    parser.add_argument('-m', '--top-score-metric',
+                        choices=['lowest', 'median'],
+                        default='median',
+                        help="Which ic50 scoring metric to use when filtering epitopes by binding-threshold. " +
+                        "lowest: Best MT Score - lowest WT ic50 binding score between all chosen prediction methods. " +
+                        "median: Median MT Score - median WT ic50 binding score between all chosen prediction methods. " +
+                        "Default: median")
 
     args = parser.parse_args(args_input)
 
@@ -43,7 +50,10 @@ def main(args_input = sys.argv[1:]):
 
         for entry in reader:
             name = entry['Gene Name']
-            score = float(entry['Best MT Score'])
+            if args.top_score_metric == 'median':
+                score = float(entry['Median MT Score All Methods'])
+            elif args.top_score_metric == 'best':
+                score = float(entry['Best MT Score'])
             fold_change = sys.maxsize if entry['Fold Change'] == 'NA' else float(entry['Fold Change'])
 
             if score > args.binding_threshold or fold_change < args.minimum_fold_change:

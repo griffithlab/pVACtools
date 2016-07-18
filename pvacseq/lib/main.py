@@ -57,6 +57,13 @@ def main(args_input = sys.argv[1:]):
                         type=int,
                         help="Minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT)",
                         default=0)
+    parser.add_argument('-m', '--top-score-metric',
+                        choices=['lowest', 'median'],
+                        default='median',
+                        help="Which ic50 scoring metric to use when filtering epitopes by binding-threshold. " +
+                        "lowest: Best MT Score - lowest WT ic50 binding score between all chosen prediction methods. " +
+                        "median: Median MT Score - median WT ic50 binding score between all chosen prediction methods. " +
+                        "Default: median")
 
     args = parser.parse_args(args_input)
     pvacseq_utils.check_alleles_valid(args.allele)
@@ -175,7 +182,8 @@ def main(args_input = sys.argv[1:]):
             *input_files,
             filt_out,
             '-c', str(args.minimum_fold_change),
-            '-b', str(args.binding_threshold)
+            '-b', str(args.binding_threshold),
+            '-m', str(args.top_score_metric),
         ]
     )
     print("Completed")
