@@ -30,7 +30,7 @@ def main(args_input = sys.argv[1:]):
                         help="Name of Sample; will be used as prefix for output files"
                         )
     parser.add_argument("allele",
-                        help="Allele name to predict epitope prediction. Multiple alleles can be specified using a comma-separated list. For a list of available alleles, use: netMHC -A",
+                        help="Allele name to predict epitope prediction. Multiple alleles can be specified using a comma-separated list. For a list of available alleles, use: pvacseq valid_alleles",
                         type=lambda s:[a for a in s.split(',')]
                         )
     parser.add_argument("epitope_length",
@@ -164,18 +164,18 @@ def main(args_input = sys.argv[1:]):
     parsed_files = []
     for epl in args.epitope_length:
         for a in args.allele:
-            net_parsed = ".".join([args.sample_name, a, str(epl), "parsed.tsv"])
+            iedb_parsed = ".".join([args.sample_name, a, str(epl), "parsed.tsv"])
             print("Parsing IEDB Output for Allele %s and Epitope Length %s" % (a, epl))
             lib.parse_output.main(
                 [
                     *iedb_output_files[a][epl],
                     os.path.join(args.output_dir, tsv_file),
                     os.path.join(args.output_dir, fasta_key_file),
-                    os.path.join(args.output_dir, net_parsed)
+                    os.path.join(args.output_dir, iedb_parsed)
                 ]
             )
             print("Completed")
-            parsed_files.append(os.path.join(args.output_dir, net_parsed))
+            parsed_files.append(os.path.join(args.output_dir, iedb_parsed))
 
     print("Combining Parsed IEDB Output Files")
     combined_parsed = "%s.parsed.tsv" % args.sample_name

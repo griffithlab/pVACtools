@@ -223,7 +223,7 @@ def determine_prediction_methods(input_iedb_files):
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq parse_output')
-    parser.add_argument('input_iedb_files', type=argparse.FileType('r'), nargs='+', help='Raw output file from Netmhc',)
+    parser.add_argument('input_iedb_files', type=argparse.FileType('r'), nargs='+', help='Raw output file from IEDB',)
     parser.add_argument('input_tsv_file', type=argparse.FileType('r'), help='Input list of variants')
     parser.add_argument('key_file', type=argparse.FileType('r'), help='Key file for lookup of FASTA IDs')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')
