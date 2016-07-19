@@ -41,7 +41,7 @@ def main(args_input = sys.argv[1:]):
         name = entry['Gene Name']
         if args.top_score_metric == 'median':
             score = float(entry['Median MT Score All Methods'])
-        elif args.top_score_metric == 'best':
+        elif args.top_score_metric == 'lowest':
             score = float(entry['Best MT Score'])
         fold_change = sys.maxsize if entry['Fold Change'] == 'NA' else float(entry['Fold Change'])
 
