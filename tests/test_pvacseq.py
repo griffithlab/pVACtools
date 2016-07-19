@@ -126,7 +126,8 @@ class PVACTests(unittest.TestCase):
             '9,10',
             'NetMHC',
             'PickPocket',
-            output_dir.name
+            output_dir.name,
+            '--top-score-metric=lowest',
         ])
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test.tsv"),
