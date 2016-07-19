@@ -49,6 +49,9 @@ def main(args_input = sys.argv[1:]):
                         type=int,
                         help="length of the peptide sequences in the input FASTA file; default 21",
                         default=21)
+    parser.add_argument('-t', '--top-result-per-mutation',
+                        action='store_true', default=False,
+                        help='Output top scoring candidate per allele-length per mutation. Default: False')
     parser.add_argument("-b","--binding-threshold",
                         type=int,
                         help="report only epitopes where the mutant allele has ic50 binding scores below this value ; default 500",
@@ -165,15 +168,16 @@ def main(args_input = sys.argv[1:]):
     for epl in args.epitope_length:
         for a in args.allele:
             iedb_parsed = ".".join([args.sample_name, a, str(epl), "parsed.tsv"])
-            print("Parsing IEDB Output for Allele %s and Epitope Length %s" % (a, epl))
-            lib.parse_output.main(
-                [
-                    *iedb_output_files[a][epl],
-                    os.path.join(args.output_dir, tsv_file),
-                    os.path.join(args.output_dir, fasta_key_file),
-                    os.path.join(args.output_dir, iedb_parsed)
-                ]
-            )
+            print("Parsing NetMHC Output")
+            params = [
+                *iedb_output_files[a][epl],
+                os.path.join(args.output_dir, tsv_file),
+                os.path.join(args.output_dir, fasta_key_file),
+                os.path.join(args.output_dir, iedb_parsed)
+            ]
+            if args.top_result_per_mutation == True:
+                params.append('-t')
+            lib.parse_output.main(params)
             print("Completed")
             parsed_files.append(os.path.join(args.output_dir, iedb_parsed))
 

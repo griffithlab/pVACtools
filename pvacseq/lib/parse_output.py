@@ -199,10 +199,14 @@ def sort_iedb_results(flattened_iedb_results):
 
     return sorted_iedb_results
 
-def process_input_iedb_file(input_iedb_files, tsv_entries, key_file):
+def process_input_iedb_file(input_iedb_files, tsv_entries, key_file, top_result_per_mutation):
     iedb_results              = parse_iedb_file(input_iedb_files, tsv_entries, key_file)
     iedb_results_with_metrics = add_summary_metrics(iedb_results)
-    flattened_iedb_results    = flatten_iedb_results(iedb_results_with_metrics)
+    if top_result_per_mutation == True:
+        filtered_iedb_results  = pick_top_results(iedb_results_with_metrics)
+        flattened_iedb_results = flatten_iedb_results(filtered_iedb_results)
+    else:
+        flattened_iedb_results = flatten_iedb_results(iedb_results_with_metrics)
     sorted_iedb_results       = sort_iedb_results(flattened_iedb_results)
 
     return sorted_iedb_results
@@ -255,6 +259,7 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('input_tsv_file', type=argparse.FileType('r'), help='Input list of variants')
     parser.add_argument('key_file', type=argparse.FileType('r'), help='Key file for lookup of FASTA IDs')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')
+    parser.add_argument('-t', '--top-result-per-mutation', action='store_true', default=False, help='Output top scoring candidate per allele-length per mutation. Default: False')
     args = parser.parse_args(args_input)
 
     methods = determine_prediction_methods(args.input_iedb_files)
@@ -262,7 +267,7 @@ def main(args_input = sys.argv[1:]):
     tsv_writer.writeheader()
 
     tsv_entries  = parse_input_tsv_file(args.input_tsv_file)
-    iedb_results = process_input_iedb_file(args.input_iedb_files, tsv_entries, args.key_file)
+    iedb_results = process_input_iedb_file(args.input_iedb_files, tsv_entries, args.key_file, args.top_result_per_mutation)
     for gene_name, variant_aa, position, mt_scores, wt_scores, wt_epitope_seq, mt_epitope_seq, tsv_index, allele, peptide_length, best_mt_score, corresponding_wt_score, best_mt_score_method, median_mt_score in iedb_results:
         tsv_entry = tsv_entries[tsv_index]
         if mt_epitope_seq != wt_epitope_seq:

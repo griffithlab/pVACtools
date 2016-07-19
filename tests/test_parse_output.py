@@ -25,7 +25,12 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_output_file = tempfile.NamedTemporaryFile()
 
         self.assertFalse(call([
-            self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name
+            self.python,
+            self.executable,
+            parse_output_input_iedb_file,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
         ], shell=False))
 
         expected_output_file  = os.path.join(self.test_data_dir, "output_peptide_sequence_length_21.iedb.parsed.tsv")
@@ -42,7 +47,12 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_output_file = tempfile.NamedTemporaryFile()
 
         self.assertFalse(call([
-            self.python, self.executable, *parse_output_input_iedb_files, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name
+            self.python,
+            self.executable,
+            *parse_output_input_iedb_files,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
         ], shell=False))
 
         expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.tsv")
@@ -55,7 +65,12 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_output_file = tempfile.NamedTemporaryFile()
 
         self.assertFalse(call([
-            self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name
+            self.python,
+            self.executable,
+            parse_output_input_iedb_file,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
         ], shell=False))
 
         expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_elongation.iedb.parsed.tsv")
@@ -68,7 +83,12 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_output_file = tempfile.NamedTemporaryFile()
 
         self.assertFalse(call([
-            self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name
+            self.python,
+            self.executable,
+            parse_output_input_iedb_file,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
         ], shell=False))
 
         expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_truncation.iedb.parsed.tsv")
@@ -81,7 +101,12 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_output_file = tempfile.NamedTemporaryFile()
 
         self.assertFalse(call([
-            self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name
+            self.python,
+            self.executable,
+            parse_output_input_iedb_file,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
         ], shell=False))
 
         expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_deletion_aa_deletion.iedb.parsed.tsv")
@@ -94,7 +119,12 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_output_file = tempfile.NamedTemporaryFile()
 
         self.assertFalse(call([
-            self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name
+            self.python,
+            self.executable,
+            parse_output_input_iedb_file,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
         ], shell=False))
 
         expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_deletion_aa_replacement.iedb.parsed.tsv")
@@ -107,7 +137,12 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_output_file = tempfile.NamedTemporaryFile()
 
         self.assertFalse(call([
-            self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name
+            self.python,
+            self.executable,
+            parse_output_input_iedb_file,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
         ], shell=False))
 
         expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_insertion_aa_insertion.iedb.parsed.tsv")
@@ -120,7 +155,12 @@ class ParseOutputTests(unittest.TestCase):
         parse_output_output_file = tempfile.NamedTemporaryFile()
 
         self.assertFalse(call([
-            self.python, self.executable, parse_output_input_iedb_file, parse_output_input_tsv_file, parse_output_key_file, parse_output_output_file.name
+            self.python,
+            self.executable,
+            parse_output_input_iedb_file,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
         ], shell=False))
 
         expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_insertion_aa_replacement.iedb.parsed.tsv")
