@@ -128,39 +128,47 @@ def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
                     wt_iedb_results[tsv_index] = {}
                 if position not in wt_iedb_results[tsv_index]:
                     wt_iedb_results[tsv_index][position] = {}
-                    wt_iedb_results[tsv_index][position]['wt_scores']         = {}
+                    wt_iedb_results[tsv_index][position]['wt_scores']     = {}
                 wt_iedb_results[tsv_index][position]['wt_epitope_seq']    = epitope
                 wt_iedb_results[tsv_index][position]['wt_scores'][method] = float(score)
 
     return match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
 
-def flatten_iedb_results(iedb_results):
-    #transform the iedb_results dictionary into a two-dimensional list
-    flattened_iedb_results = []
-    for value in iedb_results.values():
-        result_line = [
-            value['gene_name'],
-            value['amino_acid_change'],
-            value['position'],
-            value['mt_scores'],
-            value['wt_scores'],
-            value['wt_epitope_seq'],
-            value['mt_epitope_seq'],
-            value['tsv_index'],
-            value['allele'],
-            value['peptide_length'],
-        ]
+def add_summary_metrics(iedb_results):
+    iedb_results_with_metrics = {}
+    for key, value in iedb_results.items():
         mt_scores     = value['mt_scores']
         best_mt_score = sys.maxsize
         for method, score in mt_scores.items():
             if score < best_mt_score:
                 best_mt_score        = score
                 best_mt_score_method = method
-        result_line.append(best_mt_score)
-        result_line.append(value['wt_scores'][best_mt_score_method])
-        result_line.append(best_mt_score_method)
-        result_line.append(median(mt_scores.values()))
-        flattened_iedb_results.append(result_line)
+        value['best_mt_score']          = best_mt_score
+        value['corresponding_wt_score'] = value['wt_scores'][best_mt_score_method]
+        value['best_mt_score_method']   = best_mt_score_method
+        value['median_mt_score']        = median(mt_scores.values())
+        iedb_results_with_metrics[key]  = value
+
+    return iedb_results_with_metrics
+
+def flatten_iedb_results(iedb_results):
+    #transform the iedb_results dictionary into a two-dimensional list
+    flattened_iedb_results = list((
+        value['gene_name'],
+        value['amino_acid_change'],
+        value['position'],
+        value['mt_scores'],
+        value['wt_scores'],
+        value['wt_epitope_seq'],
+        value['mt_epitope_seq'],
+        value['tsv_index'],
+        value['allele'],
+        value['peptide_length'],
+        value['best_mt_score'],
+        value['corresponding_wt_score'],
+        value['best_mt_score_method'],
+        value['median_mt_score'],
+    ) for value in iedb_results.values())
 
     return flattened_iedb_results
 
@@ -173,9 +181,10 @@ def sort_iedb_results(flattened_iedb_results):
     return sorted_iedb_results
 
 def process_input_iedb_file(input_iedb_files, tsv_entries, key_file):
-    iedb_results           = parse_iedb_file(input_iedb_files, tsv_entries, key_file)
-    flattened_iedb_results = flatten_iedb_results(iedb_results)
-    sorted_iedb_results    = sort_iedb_results(flattened_iedb_results)
+    iedb_results              = parse_iedb_file(input_iedb_files, tsv_entries, key_file)
+    iedb_results_with_metrics = add_summary_metrics(iedb_results)
+    flattened_iedb_results    = flatten_iedb_results(iedb_results_with_metrics)
+    sorted_iedb_results       = sort_iedb_results(flattened_iedb_results)
 
     return sorted_iedb_results
 
