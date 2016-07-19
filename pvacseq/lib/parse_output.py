@@ -151,6 +151,25 @@ def add_summary_metrics(iedb_results):
 
     return iedb_results_with_metrics
 
+def pick_top_results(iedb_results):
+    score_at_position = {}
+    for key, value in iedb_results.items():
+        (tsv_index, position) = key.split('|', 1)
+        if tsv_index not in score_at_position.keys():
+            score_at_position[tsv_index] = {}
+        score_at_position[tsv_index][position] = value['median_mt_score']
+
+    filtered_iedb_results = {}
+    for tsv_index, value in score_at_position.items():
+        top_score = sys.maxsize
+        for position, score in sorted(value.items(), key=lambda x: x[1]):
+            top_score_key = "%s|%s" % (tsv_index, position)
+            if iedb_results[top_score_key]['wt_epitope_seq'] != iedb_results[top_score_key]['mt_epitope_seq']:
+                filtered_iedb_results[top_score_key] = iedb_results[top_score_key]
+                break
+
+    return filtered_iedb_results
+
 def flatten_iedb_results(iedb_results):
     #transform the iedb_results dictionary into a two-dimensional list
     flattened_iedb_results = list((
