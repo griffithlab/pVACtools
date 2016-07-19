@@ -58,6 +58,29 @@ class ParseOutputTests(unittest.TestCase):
         expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.tsv")
         self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
 
+    def test_parse_output_runs_and_produces_expected_output_with_multiple_iedb_files_and_top_scores(self):
+        parse_output_input_iedb_files = [
+            os.path.join(self.test_data_dir, "input.HLA-A*29:02.9.ann.tsv"),
+            os.path.join(self.test_data_dir, "input.HLA-A*29:02.9.smm.tsv"),
+            os.path.join(self.test_data_dir, "input.HLA-A*29:02.9.smmpmbec.tsv"),
+        ]
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
+        parse_output_key_file = os.path.join(self.test_data_dir, "Test_21.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            *parse_output_input_iedb_files,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
+            '--top-result-per-mutation',
+        ], shell=False))
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.top.tsv")
+        self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
+
     def test_input_frameshift_variant_feature_elongation_gets_parsed_correctly(self):
         parse_output_input_iedb_file  = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_elongation.HLA-A*29:02.9.ann.tsv")
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_elongation.tsv")
