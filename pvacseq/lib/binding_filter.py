@@ -30,8 +30,8 @@ def main(args_input = sys.argv[1:]):
                         choices=['lowest', 'median'],
                         default='median',
                         help="Which ic50 scoring metric to use when filtering epitopes by binding-threshold. " +
-                        "lowest: Best MT Score - lowest WT ic50 binding score between all chosen prediction methods. " +
-                        "median: Median MT Score - median WT ic50 binding score between all chosen prediction methods. " +
+                        "lowest: Best MT Score - lowest WT ic50 binding score of all chosen prediction methods. " +
+                        "median: Median MT Score - median WT ic50 binding score of all chosen prediction methods. " +
                         "Default: median")
 
     args = parser.parse_args(args_input)
