@@ -151,13 +151,16 @@ def add_summary_metrics(iedb_results):
 
     return iedb_results_with_metrics
 
-def pick_top_results(iedb_results):
+def pick_top_results(iedb_results, top_score_metric):
     score_at_position = {}
     for key, value in iedb_results.items():
         (tsv_index, position) = key.split('|', 1)
         if tsv_index not in score_at_position.keys():
             score_at_position[tsv_index] = {}
-        score_at_position[tsv_index][position] = value['median_mt_score']
+        if top_score_metric == 'median':
+            score_at_position[tsv_index][position] = value['median_mt_score']
+        elif top_score_metric == 'lowest':
+            score_at_position[tsv_index][position] = value['best_mt_score']
 
     filtered_iedb_results = {}
     for tsv_index, value in score_at_position.items():
@@ -191,23 +194,39 @@ def flatten_iedb_results(iedb_results):
 
     return flattened_iedb_results
 
-def sort_iedb_results(flattened_iedb_results):
-    sorted_iedb_results = sorted(
-        flattened_iedb_results,
-        key=lambda flattened_iedb_results: (flattened_iedb_results[0], flattened_iedb_results[1], flattened_iedb_results[10], " ".join(str(item) for item in flattened_iedb_results))
-    )
+def sort_iedb_results(flattened_iedb_results, top_score_metric):
+    if top_score_metric == 'median':
+        sorted_iedb_results = sorted(
+            flattened_iedb_results,
+            key=lambda flattened_iedb_results: (
+                flattened_iedb_results[0],
+                flattened_iedb_results[1],
+                flattened_iedb_results[13],
+                " ".join(str(item) for item in flattened_iedb_results),
+            )
+        )
+    elif top_score_metric == 'lowest':
+        sorted_iedb_results = sorted(
+            flattened_iedb_results,
+            key=lambda flattened_iedb_results: (
+                flattened_iedb_results[0],
+                flattened_iedb_results[1],
+                flattened_iedb_results[10],
+                " ".join(str(item) for item in flattened_iedb_results),
+            )
+        )
 
     return sorted_iedb_results
 
-def process_input_iedb_file(input_iedb_files, tsv_entries, key_file, top_result_per_mutation):
+def process_input_iedb_file(input_iedb_files, tsv_entries, key_file, top_result_per_mutation, top_score_metric):
     iedb_results              = parse_iedb_file(input_iedb_files, tsv_entries, key_file)
     iedb_results_with_metrics = add_summary_metrics(iedb_results)
     if top_result_per_mutation == True:
-        filtered_iedb_results  = pick_top_results(iedb_results_with_metrics)
+        filtered_iedb_results  = pick_top_results(iedb_results_with_metrics, top_score_metric)
         flattened_iedb_results = flatten_iedb_results(filtered_iedb_results)
     else:
         flattened_iedb_results = flatten_iedb_results(iedb_results_with_metrics)
-    sorted_iedb_results       = sort_iedb_results(flattened_iedb_results)
+    sorted_iedb_results       = sort_iedb_results(flattened_iedb_results, top_score_metric)
 
     return sorted_iedb_results
 
@@ -260,6 +279,15 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('key_file', type=argparse.FileType('r'), help='Key file for lookup of FASTA IDs')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')
     parser.add_argument('-t', '--top-result-per-mutation', action='store_true', default=False, help='Output top scoring candidate per allele-length per mutation. Default: False')
+    parser.add_argument(
+        '-m', '--top-score-metric',
+        choices=['lowest', 'median'],
+        default='median',
+        help="Which ic50 scoring metric to use when filtering epitopes by binding-threshold. " +
+        "lowest: Best MT Score - lowest WT ic50 binding score of all chosen prediction methods. " +
+        "median: Median MT Score - median WT ic50 binding score of all chosen prediction methods. " +
+        "Default: median"
+    )
     args = parser.parse_args(args_input)
 
     methods = determine_prediction_methods(args.input_iedb_files)
@@ -267,7 +295,7 @@ def main(args_input = sys.argv[1:]):
     tsv_writer.writeheader()
 
     tsv_entries  = parse_input_tsv_file(args.input_tsv_file)
-    iedb_results = process_input_iedb_file(args.input_iedb_files, tsv_entries, args.key_file, args.top_result_per_mutation)
+    iedb_results = process_input_iedb_file(args.input_iedb_files, tsv_entries, args.key_file, args.top_result_per_mutation, args.top_score_metric)
     for gene_name, variant_aa, position, mt_scores, wt_scores, wt_epitope_seq, mt_epitope_seq, tsv_index, allele, peptide_length, best_mt_score, corresponding_wt_score, best_mt_score_method, median_mt_score in iedb_results:
         tsv_entry = tsv_entries[tsv_index]
         if mt_epitope_seq != wt_epitope_seq:

@@ -52,6 +52,13 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('-t', '--top-result-per-mutation',
                         action='store_true', default=False,
                         help='Output top scoring candidate per allele-length per mutation. Default: False')
+    parser.add_argument('-m', '--top-score-metric',
+                        choices=['lowest', 'median'],
+                        default='median',
+                        help="Which ic50 scoring metric to use when filtering epitopes by binding-threshold. " +
+                        "lowest: Best MT Score - lowest WT ic50 binding score of all chosen prediction methods. " +
+                        "median: Median MT Score - median WT ic50 binding score of all chosen prediction methods. " +
+                        "Default: median")
     parser.add_argument("-b","--binding-threshold",
                         type=int,
                         help="report only epitopes where the mutant allele has ic50 binding scores below this value ; default 500",
@@ -60,13 +67,6 @@ def main(args_input = sys.argv[1:]):
                         type=int,
                         help="Minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT)",
                         default=0)
-    parser.add_argument('-m', '--top-score-metric',
-                        choices=['lowest', 'median'],
-                        default='median',
-                        help="Which ic50 scoring metric to use when filtering epitopes by binding-threshold. " +
-                        "lowest: Best MT Score - lowest WT ic50 binding score of all chosen prediction methods. " +
-                        "median: Median MT Score - median WT ic50 binding score of all chosen prediction methods. " +
-                        "Default: median")
 
     args = parser.parse_args(args_input)
     pvacseq_utils.check_alleles_valid(args.allele)
@@ -173,7 +173,8 @@ def main(args_input = sys.argv[1:]):
                 *iedb_output_files[a][epl],
                 os.path.join(args.output_dir, tsv_file),
                 os.path.join(args.output_dir, fasta_key_file),
-                os.path.join(args.output_dir, iedb_parsed)
+                os.path.join(args.output_dir, iedb_parsed),
+                '-m', args.top_score_metric,
             ]
             if args.top_result_per_mutation == True:
                 params.append('-t')

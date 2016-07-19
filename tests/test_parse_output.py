@@ -53,6 +53,7 @@ class ParseOutputTests(unittest.TestCase):
             parse_output_input_tsv_file,
             parse_output_key_file,
             parse_output_output_file.name,
+            '--top-score-metric=lowest',
         ], shell=False))
 
         expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.tsv")
