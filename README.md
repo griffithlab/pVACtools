@@ -110,7 +110,7 @@ IEDB strips off the name of the FASTA header. This command generates a key file 
 This command make epitope binding predicitions using the IEDB RESTful interface and writes the result to a file.
 
 ### parse_output
-`pvacseq parse_output <IEDB files> <input TSV file> <input key file> <output parsed TSV file>`<br>
+`pvacseq parse_output <IEDB files> <input TSV file> <input key file> <output parsed TSV file> [--top-result-per-mutation] [-m <lowest|median>]`<br>
 After running IEDB, this command parses the output from the IEDB RESTful API calls. It combines the IEDB output files for multiple prediction algorithms that have the same allele and epitope lengths. It uses a special key file to link each IEDB result entry to the original entry from the input TSV file. The parsed TSV output file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. When multiple prediction algorithms are used the parser will find the best mutant ic50 score as well as the median mutant ic50 score. The file also contains gene and transcript information from the input TSV file.
 
 ### combine_parsed_outputs
@@ -118,7 +118,7 @@ After running IEDB, this command parses the output from the IEDB RESTful API cal
 Combines all parsed output IEDB files into one file. Each parsed output IEDB file contains entries for the same allele and epitope length. This step combines parsed files from multiple alleles and epitope lengths into one single output TSV file.
 
 ### binding_filter
-`pvacseq binding_filter <input combined parsed TSV file> <output filtered TSV file> [-b binding threshold] [-c minimum fold change]`<br>
+`pvacseq binding_filter <input combined parsed TSV file> <output filtered TSV file> [-b binding threshold] [-c minimum fold change] [-m <lowest|median>]`<br>
 Takes combined parsed epitope file for different allele-length combinations and outputs best candidates per gene based on binding affinities.
 
 ### coverage_filter
