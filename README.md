@@ -64,7 +64,7 @@ https://raw.githubusercontent.com/wiki/griffithlab/pVAC-Seq/images/pvacseq-code-
 
 ## pvacseq commands
 ### run
-`pvacseq run <input VCF> <sample name> <allele name> <epitope length> <prediction_algorithm> <output directory> [-l peptide sequence length] [-b binding threshold] [-c minimum fold change]`<br>
+`pvacseq run <input VCF> <sample name> <allele name> <epitope length> <prediction_algorithm> <output directory> [-l peptide sequence length] [--top-result-per-mutation] [-m top score metric] [-b binding threshold] [-c minimum fold change]`<br>
 Use this command to run the full pVAC-Seq pipeline.  This will internally call the other commands, passing data between them to generate an output TSV file of neoepitope predictions. Multiple alleles and epiope length can be specified as comma-separated lists.
 
 <b>Required inputs</b><br>
@@ -79,7 +79,14 @@ Use this command to run the full pVAC-Seq pipeline.  This will internally call t
 
 <b>Optional inputs</b><br>
 <ul>
-<li><code>peptide sequence length</code>: Length of the peptide sequence to use when creating the FASTA. See "Additional Information" for details.
+<li><code>peptide sequence length</code>: Length of the peptide sequence to use when creating the FASTA. See "Additional Information" for details. This is set to 21 by default.
+<li><code>top result per mutation</code>: When this flag is set only the top scoring candidate per allele-length per mutation will be outputted. By default this is set to false)</li>
+<li><code>top score metric</code>: The user can chose which ic50 scoring metric to will be used when filtering epitopes
+<ul>
+<li>lowest: Best MT Score - lowest mutant ic50 binding score of all chosen prediction methods.</li>
+<li>median: Median MT Score - median mutant ic50 binding score of all chosen prediction methods.</li>
+</ul>
+By default this argument is set to median.</li>
 <li><code>binding threshold</code>: The user can choose to report only epitopes where the mutant allele has IC50 binding scores below this value. By default, pvacseq uses a cutoff of 500.
 <li><code>minimum fold change</code>: This parameter sets the minimum fold change between mutant binding score and wild-type score to use for filtering. The default is 0, which filters no results. Using 1 will require that binding is better to the MT than WT.</li>
 </ul>
