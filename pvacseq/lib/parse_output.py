@@ -283,9 +283,9 @@ def main(args_input = sys.argv[1:]):
         '-m', '--top-score-metric',
         choices=['lowest', 'median'],
         default='median',
-        help="Which ic50 scoring metric to use when filtering epitopes by binding-threshold. " +
-        "lowest: Best MT Score - lowest WT ic50 binding score of all chosen prediction methods. " +
-        "median: Median MT Score - median WT ic50 binding score of all chosen prediction methods. " +
+        help="The ic50 scoring metric to use when filtering for the top scoring results. " +
+        "lowest: Best MT Score - lowest MT ic50 binding score of all chosen prediction methods. " +
+        "median: Median MT Score All Methods - median MT ic50 binding score of all chosen prediction methods. " +
         "Default: median"
     )
     args = parser.parse_args(args_input)
