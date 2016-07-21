@@ -15,11 +15,11 @@ Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi L. 
 This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0">NPOSL-3.0</a>.
 
 ## Installation Instructions
-pVAC-Seq requires Python 3.5. You can check your installed Python version by running `python -V`. If you don't have Python 3.5 installed, we recommend using <a href="http://conda.pydata.org/docs/py2or3.html">Conda</a> to emulate a Python 3.5 environment.
+pVAC-Seq requires Python 3.5. You can check your installed Python version by running `python -V`. If you don't have Python 3.5 installed, we recommend using <a href="http://conda.pydata.org/docs/py2or3.html">Conda</a> to emulate a Python 3.5. environment. We've encountered problems with users that already have Python 2.* installed when they also try to install Python 3.5. The defaults will not be set correctly in that case. If you already have Python 2.* installed we <b>strongly</b> recommmend using Conda instead of installing Python 3.5 locally.
 
-Once you have set up your Python 3.5 environment correctly you can use `pip` to install pVAC-Seq. Make sure you have `pip` installed.  `pip` is generally included in python distributions, but may need to be upgraded before use.  See the <a href="https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel">instructions</a> for installing or upgrading pip. You might need to use `pip3` if you have multiple Python versions installed locally.
+Once you have set up your Python 3.5 environment correctly you can use `pip` to install pVAC-Seq. Make sure you have `pip` installed.  `pip` is generally included in python distributions, but may need to be upgraded before use.  See the <a href="https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel">instructions</a> for installing or upgrading pip.
 
-After you have pip installed, type the following command on your Terminal(for Mac and Linux users) or the command prompt (for Windows users): `pip install pvacseq`.
+After you have pip installed, type the following command on your Terminal(for Mac and Linux users) or the command prompt (for Windows users): `pip install pvacseq`. You can check that pvacseq has been installed under the default environment by running `pip list`.
 
 pip will fetch and install pVAC-Seq and its dependencies for you.  After installing, you can run `pvacseq` directly from the Terminal/command prompt.
 
@@ -93,7 +93,7 @@ After running NetMHC 3.4, this command parses the output for MHC Class I epitope
 Takes a comma-separated list of parsed NetMHC files for different allele-length combinations and outputs best candidates per gene based on binding affinities.
 
 ### coverage_filter
-`pvacseq coverage_filters <input TSV file> <output file> [--normal-cov normal coverage cutoff] [--tdna-cov tumor DNA coverage cutoff] [--trna-cov turmor DNA coverage cutoff] [--normal-vaf normal vaf cutoff] [--tdna-vaf tumor DNA vaf cutoff] [--trna-vaf tumor RNA vaf cutoff] [--expn-val gene expression (fpkm) cutoff]`<br>
+`pvacseq coverage_filters <input TSV file> <output file> [--normal-cov normal coverage cutoff] [--tdna-cov tumor DNA coverage cutoff] [--trna-cov tumor RNA coverage cutoff] [--normal-vaf normal vaf cutoff] [--tdna-vaf tumor DNA vaf cutoff] [--trna-vaf tumor RNA vaf cutoff] [--expn-val gene expression (fpkm) cutoff]`<br>
 Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters can be installed. The input file should contain the predicted epitopes along with read counts appended as additional columns. If specific type of sequencing data is not available, the columns can be left off. Column order is not important.
 
 The input TSV file contains the following columns in tab-separated format:<br>

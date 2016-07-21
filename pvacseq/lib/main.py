@@ -1,6 +1,6 @@
 import argparse
 import os
-from subprocess import run, call, PIPE
+from subprocess import run, call, PIPE, DEVNULL
 import sys
 try:
     from .. import lib
@@ -95,7 +95,7 @@ def main(args_input = sys.argv[1:]):
                     os.path.join(args.output_dir, fasta_file),
                     os.path.join(args.output_dir, net_out)
                 )
-                call([netmhc_cmd], shell=True, stdout=PIPE)
+                call([netmhc_cmd], shell=True, stdout=DEVNULL)
             else:
                 print("NetMHC allele not valid.  Please check using:")
                 print(args.netmhc_path,"-A")
