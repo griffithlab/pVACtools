@@ -38,7 +38,8 @@ def main(args_input = sys.argv[1:]):
         if len(fieldnames) == 0:
             fieldnames = reader.fieldnames
 
-        prediction[sample] = {}
+        if sample not in prediction:
+            prediction[sample] = {}
 
         for entry in reader:
             name = entry['Gene Name']
