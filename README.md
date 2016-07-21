@@ -62,7 +62,7 @@ The `--dir_plugins <VEP_plugins directory>` option may need to be set depending 
 ## Pipeline Overview
 ![alt text][overview]
 [overview]:
-https://raw.githubusercontent.com/wiki/griffithlab/pVAC-Seq/images/pvacseq-code-python.png
+https://raw.githubusercontent.com/wiki/griffithlab/pVAC-Seq/images/pvacseq-code-pythonv3.0.0.png
 
 ## pvacseq commands
 ### run
