@@ -9,7 +9,7 @@ if sys.version_info < (3,5):
 
 setup(
     name="pvacseq",
-    version="2.0.2",
+    version="3.0.0",
     packages=["pvacseq", "pvacseq.lib"],
     entry_points={
         "console_scripts":[
@@ -18,9 +18,10 @@ setup(
     },
     install_requires=[
         'PyVCF',
+        'requests',
     ],
     package_data={
-        'pvacseq' : ['example_data/*', 'VEP_plugins/*']
+        'pvacseq' : ['example_data/*', 'VEP_plugins/*', 'iedb_alleles/*']
     },
     classifiers=[
         'Development Status :: 4 - Beta',

@@ -1,2 +1,0 @@
-Chromosome	Start	Stop	Reference	Variant	Transcript	Ensembl Gene ID	Variant Type	Mutation	Protein Position	Gene Name	HLA Allele	Peptide Length	Sub-peptide Position	MT score	WT score	MT epitope seq	WT epitope seq	Fold Change
-4	40434704	40434725	AGCGGCTGCGGCGGCTGCGGCC	A	ENST00000381793	ENSG00000163694	inframe_del	AAAAAAAA/A	495-502	RBM47	HLA-A29:02	9	3	19055	23565	SAAAAAAAV	SAAAAAAAA	1.237

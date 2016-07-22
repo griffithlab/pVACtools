@@ -18,7 +18,7 @@ def main(args_input = sys.argv[1:]):
         match = pattern.match(line)
         if match is not None:
             original_name = line.rstrip()
-            new_name      = "Entry_%s" % i
+            new_name      = i
             tsvout.writerow([new_name, original_name])
             i += 1
 

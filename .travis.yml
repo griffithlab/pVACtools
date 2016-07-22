@@ -3,6 +3,7 @@ python:
   - "3.5"
 before_install:
   - pip install PyVCF
+  - pip install requests
 install: true
 script:
   - python3 -m unittest discover -v

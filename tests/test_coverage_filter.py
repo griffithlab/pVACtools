@@ -19,7 +19,7 @@ class CoverageFilterTests(unittest.TestCase):
     def test_coverage_filter_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile()
-        coverage_filter_cmd = "%s  %s  %s %s" % (
+        self.assertFalse(call([
             self.python,
             self.executable,
             os.path.join(
@@ -27,8 +27,7 @@ class CoverageFilterTests(unittest.TestCase):
                 'Test_filtered.readcounts.tsv'
             ),
             output_file.name
-        )
-        self.assertFalse(call([coverage_filter_cmd], shell=True))
+        ], shell=False))
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "Test_filtered.readcounts.covfilt.tsv"),
