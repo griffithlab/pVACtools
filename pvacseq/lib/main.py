@@ -86,6 +86,10 @@ def call_iedb_and_parse_outputs(args, split_fasta_file_paths, tsv_file_path):
                         continue
 
                     split_iedb_out = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv%s" % iterator]))
+                    if os.path.exists(split_iedb_out):
+                        print("IEDB file for Allele %s and Epitope Length %s with Method %s (Chunk %s) already exists. Skipping." % (a, epl, method, iterator))
+                        split_iedb_output_files.append(split_iedb_out)
+                        continue
                     print("Running IEDB on Allele %s and Epitope Length %s with Method %s - Chunk %s" % (a, epl, method, iterator))
                     lib.call_iedb.main([
                         split_fasta_file_path,
