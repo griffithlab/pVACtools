@@ -2,6 +2,13 @@
 Cancer immunotherapy has gained significant momentum from recent clinical successes of checkpoint blockade inhibition. Massively parallel sequence analysis suggests a connection between mutational load and response to this class of therapy. Methods to identify which tumor-specific mutant peptides (neoantigens) can elicit anti-tumor T cell immunity are needed to improve predictions of checkpoint therapy response and to identify targets for vaccines and adoptive T cell therapies. Here, we provide a cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq) that integrates tumor mutation and expression data (DNA- and RNA-Seq).
 http://www.genomemedicine.com/content/8/1/11
 
+## New in version 3.0.0
+<ul>
+<li>pVAC-Seq now uses the IEDB RESTful interface for making epitope binding predictions. A local install of NetMHC3.4 is no longer required. By using IEDB the user now has a choice between several prediction algorithms, including NetMHC (3.4), NetMHCcons (1.1), NetMHCpan (2.8), PickPocket (1.1), SMM, and SMMPMBEC.</li>
+<li>The user can now set the <code>--top-result-per-mutation</code> flag in order to only output the top scoring candidate per allele-length per mutation.</li>
+<li>Since it is now possible to run mutliple epitope prediction algorithms at the same time, the scores for each candidate epitope are aggregated as <code>Median MT score All Methods</code>, which is the median mutant ic50 binding score of all chosen prediction methods, and the <code>Best MT score</code>, which is the lowest mutant ic50 binding score of all chosen preidction methods. For the Best MT score we also output the <code>Corresponding WT score</code> and the <code>Best MT Score Method</code>. Individual ic50 binding score for each prediction method are also outputted. The user can specify which metric to use for filtering by setting the <code>--top-score-metric</code> argument to either <code>lowest</code> or <code>median</code>.</li>
+</ul>
+
 ## New in version 2.0.2
 <ul>
 <li>Bugfix: There was a problem in version 2.0.1 where pVAC-Seq would hang while calling NetMHC under certain cirumstances. This is now fixed.</li>
@@ -52,34 +59,37 @@ The `--dir_plugins <VEP_plugins directory>` option may need to be set depending 
 <b>Example VEP Command</b><br>
 `perl variant_effect_predictor.pl --input_file <input VCF> --format vcf --output_file <output VCF> --vcf --symbol --terms SO --plugin Downstream --plugin Wildtype [--dir_plugins <VEP_plugins directory>]`
 
-###<b>NetMHC 3.4</b>
-
-pVAC-Seq uses NetMHC 3.4 to predict binding affinities. <a href="http://www.cbs.dtu.dk/cgi-bin/sw_request?netMHC+3.4">NetMHC 3.4 can be downloaded here</a>. Once NetMHC is properly installed and tested, pVAC-Seq expects the path to the installation directory.
-
 ## Pipeline Overview
 ![alt text][overview]
 [overview]:
-https://raw.githubusercontent.com/wiki/griffithlab/pVAC-Seq/images/pvacseq-code-python.png
+https://raw.githubusercontent.com/wiki/griffithlab/pVAC-Seq/images/pvacseq-code-pythonv3.0.0.png
 
 ## pvacseq commands
 ### run
-`pvacseq run <input VCF> <sample name> <NetMHC installation path> <allele name> <epitope length> <ouput directory> [-l peptide sequence length] [-b binding threshold] [-c minimum fold change]`<br>
+`pvacseq run <input VCF> <sample name> <allele name> <epitope length> <prediction_algorithm> <output directory> [-l peptide sequence length] [--top-result-per-mutation] [-m top score metric] [-b binding threshold] [-c minimum fold change]`<br>
 Use this command to run the full pVAC-Seq pipeline.  This will internally call the other commands, passing data between them to generate an output TSV file of neoepitope predictions. Multiple alleles and epiope length can be specified as comma-separated lists.
 
 <b>Required inputs</b><br>
 <ul>
 <li><code>input VCF</code>: A VEP-annotated VCF containing transcript, Wildtype protein sequence, and Downstream protein sequence information. (Please see above for instructions)</li>
 <li><code>sample name</code>: The name of the sample being processed. This will be used as a prefix for output files.</li>
-<li><code>NetMHC installation path</code>: The path to the NetMHC installation directory (please see above for installation instructions)</li>
 <li><code>allele name</code>: Name of the allele to use for epitope prediction. Mutliple alles can be specified using a comma-separated list.</li>
 <li><code>epitope length</code>: This refers to the length of subpeptides (neoepitopes) to predict. The pipeline can handle multiple lengths, which can be specified using a comma-separated list. Typical epitope lengths vary between 8-11.</li>
+<li><code>prediction algorithm</code>: The prediction algorithm to use. The available choices are <code>NetMHC</code>, <code>NetMHCcons</code>, <code>NetMHCpan</code>, <code>PickPocket</code>, <code>SMM</code>, and <code>SMMPMBEC</code>. Multiple prediction algorithms can be specified, separated by spaces.</li>
 <li><code>Output directory</code>: The directory for writing all result files.</li>
 </ul>
 
 <b>Optional inputs</b><br>
 <ul>
-<li><code>peptide sequence length</code>: Length of the peptide sequence to use when creating the FASTA. See "Additional Information" for details.
-<li><code>binding threshold</code>: The user can choose to report only epitopes where the mutant allele has IC50 binding scores below this value. By default, pvacseq uses a cutoff of 500.
+<li><code>peptide sequence length</code>: Length of the peptide sequence to use when creating the FASTA. See "Additional Information" for details. This is set to 21 by default.
+<li><code>top result per mutation</code>: When this flag is set only the top scoring candidate per allele-length per mutation will be outputted. By default this is set to false)</li>
+<li><code>top score metric</code>: The user can chose which ic50 scoring metric to will be used when filtering epitopes
+<ul>
+<li>lowest: Best MT Score - lowest mutant ic50 binding score of all chosen prediction methods.</li>
+<li>median: Median MT Score All Methods - median mutant ic50 binding score of all chosen prediction methods.</li>
+</ul>
+By default this argument is set to median.</li>
+<li><code>binding threshold</code>: The user can choose to report only epitopes where the mutant allele has IC50 binding scores below this value. By default, pVAC-Seq uses a cutoff of 500.
 <li><code>minimum fold change</code>: This parameter sets the minimum fold change between mutant binding score and wild-type score to use for filtering. The default is 0, which filters no results. Using 1 will require that binding is better to the MT than WT.</li>
 </ul>
 
@@ -93,40 +103,27 @@ Run this command to generate a FASTA file for wildtype(WT) and mutant(MT) amino 
 
 ### generate_fasta_key
 `pvacseq generate_fasta_key <input FASTA file> <output key file>`<br>
-NetMHC strips off the name of the FASTA header. This command generates a key file to lookup each NetMHC output entry to its original entry in the FASTA file.
+IEDB strips off the name of the FASTA header. This command generates a key file to lookup each IEDB output entry to its original entry in the FASTA file.
+
+## call_iedb
+`pvacseq call_iedb <input FASTA file> <output IEDB file> <IEDB analysis method> <allele> <epitope length>`<br>
+This command make epitope binding predicitions using the IEDB RESTful interface and writes the result to a file.
 
 ### parse_output
-`pvacseq parse_output <NetMHC output file> <input TSV file> <FASTA key file> <output parsed file>`<br>
-After running NetMHC 3.4, this command parses the output for MHC Class I epitope prediction. It uses a special key file to link each NetMHC result entry to the original entry from the input TSV file. The parsed TSV output file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. It also contains gene and transcript information from the input TSV file.
+`pvacseq parse_output <IEDB files> <input TSV file> <input key file> <output parsed TSV file> [--top-result-per-mutation] [-m <lowest|median>]`<br>
+After running IEDB, this command parses the output from the IEDB RESTful API calls. It combines the IEDB output files for multiple prediction algorithms that have the same allele and epitope lengths. It uses a special key file to link each IEDB result entry to the original entry from the input TSV file. The parsed TSV output file contains predictions for the mutant as well as the wildtype version of the epitope, and compares binding affinities for the same. When multiple prediction algorithms are used the parser will find the best mutant ic50 score as well as the median mutant ic50 score. The file also contains gene and transcript information from the input TSV file.
+
+### combine_parsed_outputs
+`pvacseq combine_parsed_outputs <input parsed TSV file> <output combined parsed TSV file>`<br>
+Combines all parsed output IEDB files into one file. Each parsed output IEDB file contains entries for the same allele and epitope length. This step combines parsed files from multiple alleles and epitope lengths into one single output TSV file.
 
 ### binding_filter
-`pvacseq binding_filter <input TSV file> <output file> [-b binding threshold] [-c minimum fold change]`<br>
-Takes a comma-separated list of parsed NetMHC files for different allele-length combinations and outputs best candidates per gene based on binding affinities.
+`pvacseq binding_filter <input combined parsed TSV file> <output filtered TSV file> [-b binding threshold] [-c minimum fold change] [-m <lowest|median>]`<br>
+Takes combined parsed epitope file for different allele-length combinations and outputs best candidates per gene based on binding affinities.
 
 ### coverage_filter
-`pvacseq coverage_filters <input TSV file> <output file> [--normal-cov normal coverage cutoff] [--tdna-cov tumor DNA coverage cutoff] [--trna-cov tumor RNA coverage cutoff] [--normal-vaf normal vaf cutoff] [--tdna-vaf tumor DNA vaf cutoff] [--trna-vaf tumor RNA vaf cutoff] [--expn-val gene expression (fpkm) cutoff]`<br>
-Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters can be installed. The input file should contain the predicted epitopes along with read counts appended as additional columns. If specific type of sequencing data is not available, the columns can be left off. Column order is not important.
-
-The input TSV file contains the following columns in tab-separated format:<br>
-Chromosome<br>
-Start<br>
-Stop<br>
-Reference<br>
-Variant<br>
-Transcript<br>
-Ensembl Gene ID<br>
-Variant Type<br>
-Mutation<br>
-Protein Position<br>
-Gene Name<br>
-HLA Allele<br>
-Peptide Length<br>
-Sub-peptide Position<br>
-MT score<br>
-WT score<br>
-MT epitope seq<br>
-WT epitope seq<br>
-Fold Change<br>
+`pvacseq coverage_filters <input TSV file> <output filtered TSV file> [--normal-cov normal coverage cutoff] [--tdna-cov tumor DNA coverage cutoff] [--trna-cov tumor RNA coverage cutoff] [--normal-vaf normal vaf cutoff] [--tdna-vaf tumor DNA vaf cutoff] [--trna-vaf tumor RNA vaf cutoff] [--expn-val gene expression (fpkm) cutoff]`<br>
+Depending on the type(s) of sequencing data available, a variety of coverage and expression based filters can be installed. The input file should contain the predicted epitopes along with read counts appended as additional columns. If specific type of sequencing data is not available, the columns can be left off. Column order is not important but the names of the headers for the columns containing coverage information is. The headers need to be named as follows:<br>
 Normal Ref Count<br>
 Normal Var Count<br>
 Tumor DNA Ref Count<br>
@@ -143,6 +140,9 @@ Downloads a set of example data files to the directory specififed.
 `pvacseq install_vep_plugin <vep plugins path>`
 Installs the Wildtype VEP plugin into the specified directory.
 
+### valid_alleles
+`pvacseq valid_alleles [-p <prediction_algorithm>]`<br>
+Shows a list of valid allele names. If the `-p` option is specified with a prediction algorithm than only the alleles available for that predicion algorithm will be displayed. `prediction_algorithm` can be one of `NetMHC`, `NetMHCcons`, `NetMHCpan`, `PickPocket`, `SMM`, or `SMMPMBEC`.
 
 ## Additional Information
 
