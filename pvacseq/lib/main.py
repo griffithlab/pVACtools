@@ -94,6 +94,9 @@ def main(args_input = sys.argv[1:]):
     )
     print("Completed")
 
+    if os.path.getsize(fasta_file_path) == 0:
+        sys.exit("The fasta file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
+
     print("Generating FASTA Key File")
     lib.generate_fasta_key.main(
         [
