@@ -2,6 +2,12 @@
 Cancer immunotherapy has gained significant momentum from recent clinical successes of checkpoint blockade inhibition. Massively parallel sequence analysis suggests a connection between mutational load and response to this class of therapy. Methods to identify which tumor-specific mutant peptides (neoantigens) can elicit anti-tumor T cell immunity are needed to improve predictions of checkpoint therapy response and to identify targets for vaccines and adoptive T cell therapies. Here, we provide a cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq) that integrates tumor mutation and expression data (DNA- and RNA-Seq).
 http://www.genomemedicine.com/content/8/1/11
 
+## New in version 3.0.1
+<ul>
+<li>Bugfix: Some allele names in the list of valid alleles were incorrect. The list has been updated.</li>
+<li>If the generate_fasta step creates an empty file during the execution of a run the run will terminate early.</li>
+</ul>
+
 ## New in version 3.0.0
 <ul>
 <li>pVAC-Seq now uses the IEDB RESTful interface for making epitope binding predictions. A local install of NetMHC3.4 is no longer required. By using IEDB the user now has a choice between several prediction algorithms, including NetMHC (3.4), NetMHCcons (1.1), NetMHCpan (2.8), PickPocket (1.1), SMM, and SMMPMBEC.</li>
@@ -40,6 +46,8 @@ Once you have set up your Python 3.5 environment correctly you can use `pip` to 
 After you have pip installed, type the following command on your Terminal(for Mac and Linux users) or the command prompt (for Windows users): `pip install pvacseq`. You can check that pvacseq has been installed under the default environment by running `pip list`.
 
 pip will fetch and install pVAC-Seq and its dependencies for you.  After installing, you can run `pvacseq` directly from the Terminal/command prompt.
+
+If you already have pVAC-Seq installed but would like to upgrade to the latest version, you can do so by running `pip install pvacseq --upgrade`.
 
 ##Prerequisites
 ###<b>VEP</b>

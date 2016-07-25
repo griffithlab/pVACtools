@@ -17,26 +17,26 @@ chimpanzee	Patr-B*1301	9
 chimpanzee	Patr-B*1301	10
 chimpanzee	Patr-B*2401	9
 chimpanzee	Patr-B*2401	10
-mouse	H-2 Db	8
-mouse	H-2 Db	9
-mouse	H-2 Db	10
-mouse	H-2 Db	11
-mouse	H-2 Dd	9
-mouse	H-2 Dd	10
-mouse	H-2 Kb	8
-mouse	H-2 Kb	9
-mouse	H-2 Kb	10
-mouse	H-2 Kb	11
-mouse	H-2 Kd	8
-mouse	H-2 Kd	9
-mouse	H-2 Kd	10
-mouse	H-2 Kd	11
-mouse	H-2 Kk	8
-mouse	H-2 Kk	9
-mouse	H-2 Kk	10
-mouse	H-2 Kk	11
-mouse	H-2 Ld	9
-mouse	H-2 Ld	12
+mouse	H-2-Db	8
+mouse	H-2-Db	9
+mouse	H-2-Db	10
+mouse	H-2-Db	11
+mouse	H-2-Dd	9
+mouse	H-2-Dd	10
+mouse	H-2-Kb	8
+mouse	H-2-Kb	9
+mouse	H-2-Kb	10
+mouse	H-2-Kb	11
+mouse	H-2-Kd	8
+mouse	H-2-Kd	9
+mouse	H-2-Kd	10
+mouse	H-2-Kd	11
+mouse	H-2-Kk	8
+mouse	H-2-Kk	9
+mouse	H-2-Kk	10
+mouse	H-2-Kk	11
+mouse	H-2-Ld	9
+mouse	H-2-Ld	12
 macaque	Mamu-A*01	8
 macaque	Mamu-A*01	9
 macaque	Mamu-A*01	10
@@ -53,11 +53,11 @@ macaque	Mamu-A*11	8
 macaque	Mamu-A*11	9
 macaque	Mamu-A*11	10
 macaque	Mamu-A*11	11
-macaque	Mamu-A*2-0102	9
+macaque	Mamu-A2*0102	9
 macaque	Mamu-A*2201	9
 macaque	Mamu-A*2201	10
 macaque	Mamu-A*2601	9
-macaque	Mamu-A*7-0103	9
+macaque	Mamu-A7*0103	9
 macaque	Mamu-B*01	8
 macaque	Mamu-B*01	9
 macaque	Mamu-B*01	10
