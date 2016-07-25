@@ -2,7 +2,7 @@
 Cancer immunotherapy has gained significant momentum from recent clinical successes of checkpoint blockade inhibition. Massively parallel sequence analysis suggests a connection between mutational load and response to this class of therapy. Methods to identify which tumor-specific mutant peptides (neoantigens) can elicit anti-tumor T cell immunity are needed to improve predictions of checkpoint therapy response and to identify targets for vaccines and adoptive T cell therapies. Here, we provide a cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq) that integrates tumor mutation and expression data (DNA- and RNA-Seq).
 http://www.genomemedicine.com/content/8/1/11
 
-## New in version 3.0.1
+## New in version 3.0.2
 <ul>
 <li>Bugfix: Some allele names in the list of valid alleles were incorrect. The list has been updated.</li>
 <li>If the generate_fasta step creates an empty file during the execution of a run the run will terminate early.</li>
