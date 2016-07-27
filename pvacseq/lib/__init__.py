@@ -11,6 +11,7 @@ __all__ = [
     "main",
     "parse_output",
     "valid_alleles",
+    'net_chop'
 ]
 
 from . import *
