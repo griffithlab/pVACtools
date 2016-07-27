@@ -31,11 +31,16 @@ def main(args_input = sys.argv[1:]):
 
     args = parser.parse_args(args_input)
 
-    prediction = {}
-    fieldnames = []
-
     reader = csv.DictReader(args.input_file, delimiter='\t')
     fieldnames = reader.fieldnames
+
+    writer = csv.DictWriter(
+        args.output_file,
+        fieldnames,
+        delimiter = '\t',
+        lineterminator = '\n'
+    )
+    writer.writeheader()
 
     for entry in reader:
         name = entry['Gene Name']
@@ -48,34 +53,10 @@ def main(args_input = sys.argv[1:]):
         if score > args.binding_threshold or fold_change < args.minimum_fold_change:
             continue
 
-        if (name not in prediction or
-                score < prediction[name]['SCORE']):
-            prediction[name] = {
-                'GENES' : [entry],
-                'SCORE' : score
-            }
-        elif score == prediction[name]['SCORE']:
-            prediction[name]['GENES'].append(entry)
+        writer.writerow(entry)
+
     args.input_file.close()
-
-    writer = csv.DictWriter(
-        args.output_file,
-        fieldnames,
-        delimiter = '\t',
-        lineterminator = '\n'
-    )
-
-    writer.writeheader()
-
-    writer.writerows(
-        entry
-        for gene in sorted(prediction)
-        for entry in prediction[gene]['GENES']
-    )
-
     args.output_file.close()
-
-
 
 if __name__ == "__main__":
     main()

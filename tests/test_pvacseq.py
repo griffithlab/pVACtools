@@ -12,8 +12,6 @@ pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
 import pvacseq.lib
 
-import pdb
-
 def make_response(method, allele, length, path):
     reader = open(os.path.join(
         path,
