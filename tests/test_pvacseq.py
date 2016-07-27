@@ -137,8 +137,13 @@ class PVACTests(unittest.TestCase):
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "Test_21.key"),
-            os.path.join(self.test_data_directory, "Test_21.key"),
+            os.path.join(output_dir.name, "Test_21.fa.split_1"),
+            os.path.join(self.test_data_directory, "Test_21.fa.split_1"),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "Test_21.fa.split_1.key"),
+            os.path.join(self.test_data_directory, "Test_21.fa.split_1.key"),
             False
         ))
         self.assertEqual(len(self.request_mock.mock_calls), 6)
@@ -149,27 +154,27 @@ class PVACTests(unittest.TestCase):
                     self.request_mock.assert_has_calls([
                         generate_call(method, allele, length, self.test_data_directory, output_dir.name)
                     ])
-                    output_file   = os.path.join(output_dir.name, 'Test.%s.%s.%s.tsv' % (allele, length, method))
-                    expected_file = os.path.join(self.test_data_directory, 'Test.%s.%s.%s.tsv' % (allele, length, method))
+                    output_file   = os.path.join(output_dir.name, 'Test.%s.%s.%s.tsv1' % (allele, length, method))
+                    expected_file = os.path.join(self.test_data_directory, 'Test.%s.%s.%s.tsv1' % (allele, length, method))
                     self.assertTrue(cmp(output_file, expected_file, False))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-E*01:01.9.parsed.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-E*01:01.9.parsed.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-E*01:01.9.parsed.tsv1'),
+            os.path.join(self.test_data_directory, 'Test.HLA-E*01:01.9.parsed.tsv1'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-E*01:01.10.parsed.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-E*01:01.10.parsed.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-E*01:01.10.parsed.tsv1'),
+            os.path.join(self.test_data_directory, 'Test.HLA-E*01:01.10.parsed.tsv1'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-G*01:09.9.parsed.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-G*01:09.9.parsed.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-E*01:01.9.parsed.tsv1'),
+            os.path.join(self.test_data_directory, 'Test.HLA-E*01:01.9.parsed.tsv1'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, 'Test.HLA-G*01:09.10.parsed.tsv'),
-            os.path.join(self.test_data_directory, 'Test.HLA-G*01:09.10.parsed.tsv'),
+            os.path.join(output_dir.name, 'Test.HLA-E*01:01.10.parsed.tsv1'),
+            os.path.join(self.test_data_directory, 'Test.HLA-E*01:01.10.parsed.tsv1'),
             False
         ))
         self.assertTrue(cmp(
