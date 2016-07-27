@@ -28,7 +28,24 @@ class ConvertVcfTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
-    def test_input_vcf_with_mutliple_transcripts_generates_expected_tsv(self):
+    def test_input_vcf_with_cufflinks_files_generates_expected_tsv(self):
+        convert_vcf_input_file              = os.path.join(self.test_data_dir, 'full_input.vcf')
+        convert_vcf_output_file             = tempfile.NamedTemporaryFile()
+        convert_vcf_cufflinks_genes_file    = os.path.join(self.test_data_dir, 'genes.fpkm_tracking')
+        convert_vcf_cufflinks_isoforms_file = os.path.join(self.test_data_dir, 'isoforms.fpkm_tracking')
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            convert_vcf_input_file,
+            convert_vcf_output_file.name,
+            '--cufflinks_genes_tracking_file', convert_vcf_cufflinks_genes_file,
+            '--cufflinks_isoforms_tracking_file', convert_vcf_cufflinks_isoforms_file,
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_cufflinks.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
+    def test_input_vcf_with_multiple_transcripts_generates_expected_tsv(self):
         convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_multiple_transcripts.vcf')
         convert_vcf_output_file = tempfile.NamedTemporaryFile()
 
