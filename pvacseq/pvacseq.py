@@ -74,6 +74,11 @@ def main():
                                                  add_help=False)
     valid_alleles_parser.set_defaults(func=lib.valid_alleles)
 
+    net_chop_parser = subparsers.add_parser("net_chop",
+                                            help="Submits epitope predictions to NetChop and records the best cleavage site for each variant",
+                                            add_help=False)
+    net_chop_parser.set_defaults(func=lib.net_chop)
+
     parser.add_argument("-v", "--version",
                         help="Display the currently installed pvacseq version",
                         action="store_true")

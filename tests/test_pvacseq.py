@@ -1,27 +1,37 @@
 import unittest
 import unittest.mock
 import os
-from subprocess import run, call, PIPE
 import re
 import sys
 import tempfile
 import py_compile
+from subprocess import run, PIPE
 from filecmp import cmp
-from shutil import copyfile
 pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
 import pvacseq.lib
 
-def make_response(method, allele, length, path):
-    reader = open(os.path.join(
-        path,
-        'response_%s_%s_%s.tsv' % (allele, length, method)
-    ), mode='r')
-    response_obj = lambda :None
-    response_obj.status_code = 200
-    response_obj.text = reader.read()
-    reader.close()
-    return response_obj
+def make_response(data, files, path):
+    if not files:
+        reader = open(os.path.join(
+            path,
+            'response_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'])
+        ), mode='r')
+        response_obj = lambda :None
+        response_obj.status_code = 200
+        response_obj.text = reader.read()
+        reader.close()
+        return response_obj
+    else:
+        reader = open(os.path.join(
+            path,
+            'net_chop.html'
+        ), mode='rb')
+        response_obj = lambda :None
+        response_obj.status_code = 200
+        response_obj.content = reader.read()
+        reader.close()
+        return response_obj
 
 def generate_call(method, allele, length, path, input_path):
     reader = open(os.path.join(
@@ -56,10 +66,9 @@ class PVACTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
-        cls.request_mock = unittest.mock.Mock(side_effect = lambda sequence, data: make_response(
-            data['method'],
-            data['allele'],
-            int(data['length']),
+        cls.request_mock = unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
             cls.test_data_directory
         ))
         pvacseq.lib.call_iedb.requests.post = cls.request_mock
@@ -91,6 +100,7 @@ class PVACTests(unittest.TestCase):
             "download_example_data",
             "valid_alleles",
             "combine_parsed_outputs",
+            "net_chop"
             ]:
             result = run([
                 sys.executable,
@@ -127,6 +137,7 @@ class PVACTests(unittest.TestCase):
             output_dir.name,
             '--top-score-metric=lowest',
             '--keep-tmp-files',
+            '--net-chop'
         ])
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test.tsv"),
@@ -147,7 +158,7 @@ class PVACTests(unittest.TestCase):
             os.path.join(self.test_data_directory, "tmp", "Test_21.fa.split_1-200.key"),
             False
         ))
-        self.assertEqual(len(self.request_mock.mock_calls), 6)
+        self.assertEqual(len(self.request_mock.mock_calls), 7)
         methods = self.methods
         for method in methods.keys():
             for allele in methods[method].keys():
@@ -186,6 +197,11 @@ class PVACTests(unittest.TestCase):
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test_filtered.tsv"),
             os.path.join(self.test_data_directory, "Test_filtered.tsv"),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "Test_filtered.chop.tsv"),
+            os.path.join(self.test_data_directory, "Test_filtered.chop.tsv"),
             False
         ))
         output_dir.cleanup()

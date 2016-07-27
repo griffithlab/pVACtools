@@ -44,7 +44,7 @@ def main(args_input = sys.argv[1:]):
     reader = csv.DictReader(args.input, delimiter='\t')
     writer = csv.DictWriter(
         args.output,
-         reader.fieldnames+['Best Cleavage Position', 'Best Cleaveage Score'],
+        reader.fieldnames+['Best Cleavage Position', 'Best Cleavage Score'],
         delimiter='\t',
         lineterminator='\n'
     )
@@ -106,7 +106,7 @@ def main(args_input = sys.argv[1:]):
                 line = current_buffer[sequence_name]
                 line.update({
                     'Best Cleavage Position':pos,
-                    'Best Cleaveage Score':score
+                    'Best Cleavage Score':score
                 })
                 writer.writerow(line)
                 score=-1
