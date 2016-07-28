@@ -2,6 +2,12 @@
 Cancer immunotherapy has gained significant momentum from recent clinical successes of checkpoint blockade inhibition. Massively parallel sequence analysis suggests a connection between mutational load and response to this class of therapy. Methods to identify which tumor-specific mutant peptides (neoantigens) can elicit anti-tumor T cell immunity are needed to improve predictions of checkpoint therapy response and to identify targets for vaccines and adoptive T cell therapies. Here, we provide a cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq) that integrates tumor mutation and expression data (DNA- and RNA-Seq).
 http://www.genomemedicine.com/content/8/1/11
 
+## New in version 3.0.3
+<ul>
+<li>Bugfix: The binding filter used to filter out all but the top peptide candidate for a variant even if the <code>--top-result-per-mutation</code> flag wasn't set. This is now fixed and the top-result-per-mutation filtering only happens when the flag is set.</li>
+<li>Bugfix: For large input files the mutant protein sequence wasn't being correctly matched to a wildtype protein sequence. This issue has been corrected.</li>
+</ul>
+
 ## New in version 3.0.2
 <ul>
 <li>Bugfix: Some allele names in the list of valid alleles were incorrect. The list has been updated.</li>
@@ -12,7 +18,7 @@ http://www.genomemedicine.com/content/8/1/11
 <ul>
 <li>pVAC-Seq now uses the IEDB RESTful interface for making epitope binding predictions. A local install of NetMHC3.4 is no longer required. By using IEDB the user now has a choice between several prediction algorithms, including NetMHC (3.4), NetMHCcons (1.1), NetMHCpan (2.8), PickPocket (1.1), SMM, and SMMPMBEC.</li>
 <li>The user can now set the <code>--top-result-per-mutation</code> flag in order to only output the top scoring candidate per allele-length per mutation.</li>
-<li>Since it is now possible to run mutliple epitope prediction algorithms at the same time, the scores for each candidate epitope are aggregated as <code>Median MT score All Methods</code>, which is the median mutant ic50 binding score of all chosen prediction methods, and the <code>Best MT score</code>, which is the lowest mutant ic50 binding score of all chosen preidction methods. For the Best MT score we also output the <code>Corresponding WT score</code> and the <code>Best MT Score Method</code>. Individual ic50 binding score for each prediction method are also outputted. The user can specify which metric to use for filtering by setting the <code>--top-score-metric</code> argument to either <code>lowest</code> or <code>median</code>.</li>
+<li>Since it is now possible to run mutliple epitope prediction algorithms at the same time, the scores for each candidate epitope are aggregated as <code>Median MT score All Methods</code>, which is the median mutant ic50 binding score of all chosen prediction methods, and the <code>Best MT score</code>, which is the lowest mutant ic50 binding score of all chosen prediction methods. For the Best MT score we also output the <code>Corresponding WT score</code> and the <code>Best MT Score Method</code>. Individual ic50 binding score for each prediction method are also outputted. The user can specify which metric to use for filtering by setting the <code>--top-score-metric</code> argument to either <code>lowest</code> or <code>median</code>.</li>
 </ul>
 
 ## New in version 2.0.2
@@ -159,7 +165,6 @@ Since the goal of the pVAC-Seq pipeline is to predict putative 'neo'antigens, we
 <li>In the following figure, the amino acid FASTA sequence is built using 10 flanking amino acids on each side of the mutated amino acid. The preceding or succeeding 20 amino acids are taken if the mutation lies near the end or beginning of the transcript, respectively.</li>
 <li>All predicted candidate peptides from epitope prediction software based on selected k-mer window size.</li>
 <li>Only localized peptides (those containing the mutant amino acid) are considered to compare to wild-type counterpart.</li>
-<li>The ‘best candidate’ (lowest MT binding score) per mutation is chosen across all specified k-mers that were installed as input.</li>
 </ol>
  ![alt text][logo]
  [logo]:
