@@ -97,98 +97,80 @@ def main(args_input = sys.argv[1:]):
     if os.path.getsize(fasta_file_path) == 0:
         sys.exit("The fasta file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
 
-    print("Generating FASTA Key File")
-    lib.generate_fasta_key.main(
-        [
-            fasta_file_path,
-            os.path.join(args.output_dir, fasta_key_file)
-        ]
-    )
-    print("Completed")
-
-    tmp_dir = tempfile.TemporaryDirectory()
-    tmp_split_fasta_prefix = os.path.join(tmp_dir.name, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
-
+    split_fasta_basename = os.path.join(args.output_dir, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
     split_reader = open(fasta_file_path, mode='r')
-    split_counter = 0
+    split_counter = 1
+    split_fasta_files = []
     for chunk in split_file(split_reader, 400):
-        split_writer = open("%s_%d"%(tmp_split_fasta_prefix, split_counter), mode='w')
+        print("Splitting FASTA into smaller chunks - Chunk %s" % split_counter)
+        split_fasta_file_path = "%s_%d"%(split_fasta_basename, split_counter)
+        split_writer = open(split_fasta_file_path, mode='w')
         split_writer.writelines(chunk)
         split_writer.close()
+        print("Completed")
+        split_fasta_files.append(split_fasta_file_path)
+        print("Generating FASTA Key File - Chunk %s" % split_counter)
+        split_fasta_key_file_path = split_fasta_file_path + '.key'
+        lib.generate_fasta_key.main([
+            split_fasta_file_path,
+            split_fasta_key_file_path,
+        ])
+        print("Completed")
         split_counter += 1
-    split_fasta_files = glob.glob("%s*" % tmp_split_fasta_prefix)
     split_reader.close()
 
-    iedb_output_files = {}
-    for method in args.prediction_algorithms:
-        iedb_method = prediction_method_lookup(method)
-        valid_alleles = pvacseq_utils.valid_allele_names_for_method(iedb_method)
+    iterator = 1
+    split_parsed_output_files = []
+    for split_fasta_file in split_fasta_files:
         for a in args.allele:
-            if a in valid_alleles:
-                if a not in iedb_output_files.keys():
-                    iedb_output_files[a] = {}
-                valid_lengths = pvacseq_utils.valid_lengths_for_allele_and_method(a, iedb_method)
-                for epl in args.epitope_length:
-                    if epl in valid_lengths:
-                        print("Running IEDB on Allele %s and Epitope Length %s with Method %s" % (a, epl, method))
-                        if epl not in iedb_output_files[a].keys():
-                            iedb_output_files[a][epl] = []
-                        iterator = 1
-                        split_iedb_output_files = []
-                        for split_fasta_file in split_fasta_files:
-                            split_iedb_out = os.path.join(tmp_dir.name, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv%s" % iterator]))
-                            lib.call_iedb.main([
-                                os.path.join(args.output_dir, split_fasta_file),
-                                split_iedb_out,
-                                iedb_method,
-                                a,
-                                str(epl),
-                            ])
-                            split_iedb_output_files.append(split_iedb_out)
-                            iterator += 1
-                        with open(split_iedb_output_files[0]) as split_iedb_out_file:
-                            tsv_reader = csv.DictReader(split_iedb_out_file, delimiter='\t')
-                            fieldnames = tsv_reader.fieldnames
-                        iedb_out = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv"]))
-                        with open(iedb_out, 'w') as iedb_out_file:
-                            tsv_writer = csv.DictWriter(iedb_out_file, fieldnames, delimiter = '\t', lineterminator = '\n')
-                            tsv_writer.writeheader()
-                            for split_iedb_out in split_iedb_output_files:
-                                with open(split_iedb_out) as split_iedb_out_file:
-                                    tsv_reader = csv.DictReader(split_iedb_out_file, delimiter='\t')
-                                    for row in tsv_reader:
-                                        tsv_writer.writerow(row)
-                        iedb_output_files[a][epl].append(iedb_out)
-                        print("Completed")
-                    else:
+            for epl in args.epitope_length:
+                split_iedb_output_files = []
+                print("Processing entries for Allele %s and Epitope Length %s - Chunk %s" % (a, epl, iterator))
+                for method in args.prediction_algorithms:
+                    iedb_method = prediction_method_lookup(method)
+                    valid_alleles = pvacseq_utils.valid_allele_names_for_method(iedb_method)
+                    if a not in valid_alleles:
+                        print("Allele %s not valid for Method %s. Skipping." % (a, method))
+                        continue
+                    valid_lengths = pvacseq_utils.valid_lengths_for_allele_and_method(a, iedb_method)
+                    if epl not in valid_lengths:
                         print("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
-            else:
-                print("Allele %s not valid for Method %s. Skipping." % (a, method))
+                        continue
 
-    tmp_dir.cleanup()
+                    split_iedb_out = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv%s" % iterator]))
+                    split_fasta_file_path = os.path.join(args.output_dir, split_fasta_file)
+                    print("Running IEDB on Allele %s and Epitope Length %s with Method %s - Chunk %s" % (a, epl, method, iterator))
+                    lib.call_iedb.main([
+                        split_fasta_file_path,
+                        split_iedb_out,
+                        iedb_method,
+                        a,
+                        str(epl),
+                    ])
+                    print("Completed")
+                    split_iedb_output_files.append(split_iedb_out)
 
-    parsed_files = []
-    for epl in args.epitope_length:
-        for a in args.allele:
-            iedb_parsed = ".".join([args.sample_name, a, str(epl), "parsed.tsv"])
-            print("Parsing NetMHC Output")
-            params = [
-                *iedb_output_files[a][epl],
-                os.path.join(args.output_dir, tsv_file),
-                os.path.join(args.output_dir, fasta_key_file),
-                os.path.join(args.output_dir, iedb_parsed),
-                '-m', args.top_score_metric,
-            ]
-            if args.top_result_per_mutation == True:
-                params.append('-t')
-            lib.parse_output.main(params)
-            print("Completed")
-            parsed_files.append(os.path.join(args.output_dir, iedb_parsed))
+                split_parsed_file_path = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), "parsed", "tsv%s" % iterator]))
+                split_fasta_key_file_path = split_fasta_file_path + '.key'
+                print("Parsing IEDB Output for Allele %s and Epitope Length %s - Chunk %s" % (a, epl, iterator))
+                params = [
+                    *split_iedb_output_files,
+                    os.path.join(args.output_dir, tsv_file),
+                    split_fasta_key_file_path,
+                    split_parsed_file_path,
+                    '-m', args.top_score_metric,
+                ]
+                if args.top_result_per_mutation == True:
+                    params.append('-t')
+                lib.parse_output.main(params)
+                print("Completed")
+                split_parsed_output_files.append(split_parsed_file_path)
+        iterator += 1
 
     print("Combining Parsed IEDB Output Files")
     combined_parsed = "%s.combined.parsed.tsv" % args.sample_name
     lib.combine_parsed_outputs.main([
-        *parsed_files,
+        *split_parsed_output_files,
         os.path.join(args.output_dir, combined_parsed)
     ])
 
