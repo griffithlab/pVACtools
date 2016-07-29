@@ -40,7 +40,6 @@ def main(args_input = sys.argv[1:]):
     jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
     result_delimiter = re.compile(r'-+')
     fail_searcher = re.compile(r'(Failed run|Problematic input:)')
-    # staging_file = open('staging.txt', mode='w+')
     reader = csv.DictReader(args.input, delimiter='\t')
     writer = csv.DictWriter(
         args.output,
@@ -94,7 +93,6 @@ def main(args_input = sys.argv[1:]):
                 mode = (mode+1)%5
             elif mode==2: #Reading results from the current sequence
                 data = [word for word in line.strip().split(' ') if len(word)]
-                # print(data)
                 currentPosition = data[0]
                 currentScore = float(data[3])
                 if not sequence_name:
