@@ -14,6 +14,7 @@ try:
 except ValueError:
     import lib
 from lib import pvacseq_utils
+import shutil
 
 def prediction_method_lookup(prediction_method):
     prediction_method_lookup_dict = pvacseq_utils.prediction_method_to_iedb_lookup_dict()
@@ -42,10 +43,10 @@ def generate_fasta(args, tsv_file_path, output_dir):
     print("Completed")
     return fasta_file_path
 
-def split_fasta_basename(args, output_dir):
-    return os.path.join(output_dir, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
+def split_fasta_basename(args, tmp_dir):
+    return os.path.join(tmp_dir, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
 
-def split_fasta_file_and_create_key_files(args, fasta_file_path, output_dir):
+def split_fasta_file_and_create_key_files(args, fasta_file_path, tmp_dir):
     split_reader = open(fasta_file_path, mode='r')
     split_start = 1
     #Each fasta entry consists of two lines: header and sequence
@@ -54,7 +55,7 @@ def split_fasta_file_and_create_key_files(args, fasta_file_path, output_dir):
     for chunk in split_file(split_reader, chunk_size):
         split_end = split_start + args.fasta_size - 1
         print("Splitting FASTA into smaller chunks - Entries %d-%d" % (split_start, split_end))
-        split_fasta_file_path = "%s_%d-%d"%(split_fasta_basename(args, output_dir), split_start, split_end)
+        split_fasta_file_path = "%s_%d-%d"%(split_fasta_basename(args, tmp_dir), split_start, split_end)
         if os.path.exists(split_fasta_file_path):
             print("Split FASTA file for Entries %d-%d already exists. Skipping." % (split_start, split_end))
             [entry for entry in chunk]
@@ -78,12 +79,12 @@ def split_fasta_file_and_create_key_files(args, fasta_file_path, output_dir):
     split_reader.close()
     return chunks
 
-def call_iedb_and_parse_outputs(args, chunks, tsv_file_path, output_dir):
+def call_iedb_and_parse_outputs(args, chunks, tsv_file_path, tmp_dir):
     split_parsed_output_files = []
     for chunk in chunks:
         for a in args.allele:
             for epl in args.epitope_length:
-                split_fasta_file_path = "%s_%s"%(split_fasta_basename(args, output_dir), chunk)
+                split_fasta_file_path = "%s_%s"%(split_fasta_basename(args, tmp_dir), chunk)
                 split_iedb_output_files = []
                 print("Processing entries for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
                 for method in args.prediction_algorithms:
@@ -97,7 +98,7 @@ def call_iedb_and_parse_outputs(args, chunks, tsv_file_path, output_dir):
                         print("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
                         continue
 
-                    split_iedb_out = os.path.join(output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv_%s" % chunk]))
+                    split_iedb_out = os.path.join(tmp_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv_%s" % chunk]))
                     if os.path.exists(split_iedb_out):
                         print("IEDB file for Allele %s and Epitope Length %s with Method %s (Entries %s) already exists. Skipping." % (a, epl, method, chunk))
                         split_iedb_output_files.append(split_iedb_out)
@@ -113,7 +114,7 @@ def call_iedb_and_parse_outputs(args, chunks, tsv_file_path, output_dir):
                     print("Completed")
                     split_iedb_output_files.append(split_iedb_out)
 
-                split_parsed_file_path = os.path.join(output_dir, ".".join([args.sample_name, a, str(epl), "parsed", "tsv_%s" % chunk]))
+                split_parsed_file_path = os.path.join(tmp_dir, ".".join([args.sample_name, a, str(epl), "parsed", "tsv_%s" % chunk]))
                 if os.path.exists(split_parsed_file_path):
                     print("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, chunk))
                     split_parsed_output_files.append(split_parsed_file_path)
@@ -212,6 +213,9 @@ def main(args_input = sys.argv[1:]):
                         type=int,
                         help="Number of fasta entries per IEDB request. For some resource-intensive prediction algorithms like Pickpocket and NetMHC it might be helpful to reduce this number. Needs to be an even number.",
                         default=200)
+    parser.add_argument("-k", "--keep-tmp-files",
+                        action='store_true', default=False,
+                        help="Keep intermediate output files.",)
 
     args = parser.parse_args(args_input)
     pvacseq_utils.check_alleles_valid(args.allele)
@@ -228,8 +232,10 @@ def main(args_input = sys.argv[1:]):
     fasta_file_path           = generate_fasta(args, tsv_file_path, output_dir)
     if os.path.getsize(fasta_file_path) == 0:
         sys.exit("The fasta file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
-    chunks                    = split_fasta_file_and_create_key_files(args, fasta_file_path, output_dir)
-    split_parsed_output_files = call_iedb_and_parse_outputs(args, chunks, tsv_file_path, output_dir)
+    tmp_dir = os.path.join(args.output_dir, 'tmp')
+    os.makedirs(tmp_dir)
+    chunks                    = split_fasta_file_and_create_key_files(args, fasta_file_path, tmp_dir)
+    split_parsed_output_files = call_iedb_and_parse_outputs(args, chunks, tsv_file_path, tmp_dir)
     combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files, output_dir)
     filt_out_path             = binding_filter(args, combined_parsed_path, output_dir)
 
@@ -238,6 +244,8 @@ def main(args_input = sys.argv[1:]):
           "contains list of binding-filtered putative neoantigens")
     print("We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
 
+    if args.keep_tmp_files is False:
+        shutil.rmtree(tmp_dir)
 
 def split_file(reader, lines=400):
     from itertools import islice, chain
