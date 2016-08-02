@@ -120,19 +120,21 @@ def call_iedb_and_parse_outputs(args, chunks, tsv_file_path, tmp_dir):
                     split_parsed_output_files.append(split_parsed_file_path)
                     continue
                 split_fasta_key_file_path = split_fasta_file_path + '.key'
-                print("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
-                params = [
-                    *split_iedb_output_files,
-                    tsv_file_path,
-                    split_fasta_key_file_path,
-                    split_parsed_file_path,
-                    '-m', args.top_score_metric,
-                ]
-                if args.top_result_per_mutation == True:
-                    params.append('-t')
-                lib.parse_output.main(params)
-                print("Completed")
-                split_parsed_output_files.append(split_parsed_file_path)
+
+                if len(split_iedb_output_files) > 0:
+                    print("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
+                    params = [
+                        *split_iedb_output_files,
+                        tsv_file_path,
+                        split_fasta_key_file_path,
+                        split_parsed_file_path,
+                        '-m', args.top_score_metric,
+                    ]
+                    if args.top_result_per_mutation == True:
+                        params.append('-t')
+                    lib.parse_output.main(params)
+                    print("Completed")
+                    split_parsed_output_files.append(split_parsed_file_path)
 
     return split_parsed_output_files
 
@@ -230,12 +232,18 @@ def main(args_input = sys.argv[1:]):
 
     tsv_file_path             = convert_vcf(args, output_dir)
     fasta_file_path           = generate_fasta(args, tsv_file_path, output_dir)
+
     if os.path.getsize(fasta_file_path) == 0:
         sys.exit("The fasta file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
+
     tmp_dir = os.path.join(args.output_dir, 'tmp')
     os.makedirs(tmp_dir)
     chunks                    = split_fasta_file_and_create_key_files(args, fasta_file_path, tmp_dir)
     split_parsed_output_files = call_iedb_and_parse_outputs(args, chunks, tsv_file_path, tmp_dir)
+
+    if len(split_parsed_output_files) == 0:
+        sys.exit("No output files were created. Aborting.")
+
     combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files, output_dir)
     filt_out_path             = binding_filter(args, combined_parsed_path, output_dir)
 
