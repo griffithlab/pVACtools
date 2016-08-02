@@ -55,17 +55,24 @@ def split_fasta_file_and_create_key_files(args, fasta_file_path):
         split_end = split_start + fasta_size - 1
         print("Splitting FASTA into smaller chunks - Entries %d-%d" % (split_start, split_end))
         split_fasta_file_path = "%s_%d-%d"%(split_fasta_basename(args), split_start, split_end)
-        split_writer = open(split_fasta_file_path, mode='w')
-        split_writer.writelines(chunk)
-        split_writer.close()
-        print("Completed")
+        if os.path.exists(split_fasta_file_path):
+            print("Split FASTA file for Entries %d-%d already exists. Skipping." % (split_start, split_end))
+            [entry for entry in chunk]
+        else:
+            split_writer = open(split_fasta_file_path, mode='w')
+            split_writer.writelines(chunk)
+            split_writer.close()
+            print("Completed")
         print("Generating FASTA Key File - Entries %d-%d" % (split_start, split_end))
         split_fasta_key_file_path = split_fasta_file_path + '.key'
-        lib.generate_fasta_key.main([
-            split_fasta_file_path,
-            split_fasta_key_file_path,
-        ])
-        print("Completed")
+        if os.path.exists(split_fasta_key_file_path):
+            print("Split FASTA Key File for Entries %d-%d already exists. Skipping." % (split_start, split_end))
+        else:
+            lib.generate_fasta_key.main([
+                split_fasta_file_path,
+                split_fasta_key_file_path,
+            ])
+            print("Completed")
         chunks.append("%d-%d" % (split_start, split_end))
         split_start += fasta_size
     split_reader.close()
@@ -107,6 +114,10 @@ def call_iedb_and_parse_outputs(args, chunks, tsv_file_path):
                     split_iedb_output_files.append(split_iedb_out)
 
                 split_parsed_file_path = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), "parsed", "tsv_%s" % chunk]))
+                if os.path.exists(split_parsed_file_path):
+                    print("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, chunk))
+                    split_parsed_output_files.append(split_parsed_file_path)
+                    continue
                 split_fasta_key_file_path = split_fasta_file_path + '.key'
                 print("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
                 params = [
