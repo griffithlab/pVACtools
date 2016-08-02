@@ -42,38 +42,43 @@ def generate_fasta(args, tsv_file_path):
     print("Completed")
     return fasta_file_path
 
+def split_fasta_basename(args):
+    return os.path.join(args.output_dir, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
+
 def split_fasta_file_and_create_key_files(args, fasta_file_path):
-    split_fasta_basename = os.path.join(args.output_dir, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
     split_reader = open(fasta_file_path, mode='r')
-    split_counter = 1
-    split_fasta_file_paths = []
-    for chunk in split_file(split_reader, 400):
-        print("Splitting FASTA into smaller chunks - Chunk %s" % split_counter)
-        split_fasta_file_path = "%s_%d"%(split_fasta_basename, split_counter)
+    split_start = 1
+    fasta_size  = 200
+    chunk_size  = fasta_size * 2
+    chunks = []
+    for chunk in split_file(split_reader, chunk_size):
+        split_end = split_start + fasta_size - 1
+        print("Splitting FASTA into smaller chunks - Entries %d-%d" % (split_start, split_end))
+        split_fasta_file_path = "%s_%d-%d"%(split_fasta_basename(args), split_start, split_end)
         split_writer = open(split_fasta_file_path, mode='w')
         split_writer.writelines(chunk)
         split_writer.close()
         print("Completed")
-        split_fasta_file_paths.append(split_fasta_file_path)
-        print("Generating FASTA Key File - Chunk %s" % split_counter)
+        print("Generating FASTA Key File - Entries %d-%d" % (split_start, split_end))
         split_fasta_key_file_path = split_fasta_file_path + '.key'
         lib.generate_fasta_key.main([
             split_fasta_file_path,
             split_fasta_key_file_path,
         ])
         print("Completed")
-        split_counter += 1
+        chunks.append("%d-%d" % (split_start, split_end))
+        split_start += fasta_size
     split_reader.close()
-    return split_fasta_file_paths
+    return chunks
 
-def call_iedb_and_parse_outputs(args, split_fasta_file_paths, tsv_file_path):
-    iterator = 1
+def call_iedb_and_parse_outputs(args, chunks, tsv_file_path):
     split_parsed_output_files = []
-    for split_fasta_file_path in split_fasta_file_paths:
+    for chunk in chunks:
         for a in args.allele:
             for epl in args.epitope_length:
+                split_fasta_file_path = "%s_%s"%(split_fasta_basename(args), chunk)
                 split_iedb_output_files = []
-                print("Processing entries for Allele %s and Epitope Length %s - Chunk %s" % (a, epl, iterator))
+                print("Processing entries for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
                 for method in args.prediction_algorithms:
                     iedb_method = prediction_method_lookup(method)
                     valid_alleles = pvacseq_utils.valid_allele_names_for_method(iedb_method)
@@ -85,12 +90,12 @@ def call_iedb_and_parse_outputs(args, split_fasta_file_paths, tsv_file_path):
                         print("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
                         continue
 
-                    split_iedb_out = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv%s" % iterator]))
+                    split_iedb_out = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv_%s" % chunk]))
                     if os.path.exists(split_iedb_out):
-                        print("IEDB file for Allele %s and Epitope Length %s with Method %s (Chunk %s) already exists. Skipping." % (a, epl, method, iterator))
+                        print("IEDB file for Allele %s and Epitope Length %s with Method %s (Entries %s) already exists. Skipping." % (a, epl, method, chunk))
                         split_iedb_output_files.append(split_iedb_out)
                         continue
-                    print("Running IEDB on Allele %s and Epitope Length %s with Method %s - Chunk %s" % (a, epl, method, iterator))
+                    print("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, chunk))
                     lib.call_iedb.main([
                         split_fasta_file_path,
                         split_iedb_out,
@@ -101,9 +106,9 @@ def call_iedb_and_parse_outputs(args, split_fasta_file_paths, tsv_file_path):
                     print("Completed")
                     split_iedb_output_files.append(split_iedb_out)
 
-                split_parsed_file_path = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), "parsed", "tsv%s" % iterator]))
+                split_parsed_file_path = os.path.join(args.output_dir, ".".join([args.sample_name, a, str(epl), "parsed", "tsv_%s" % chunk]))
                 split_fasta_key_file_path = split_fasta_file_path + '.key'
-                print("Parsing IEDB Output for Allele %s and Epitope Length %s - Chunk %s" % (a, epl, iterator))
+                print("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
                 params = [
                     *split_iedb_output_files,
                     tsv_file_path,
@@ -116,7 +121,6 @@ def call_iedb_and_parse_outputs(args, split_fasta_file_paths, tsv_file_path):
                 lib.parse_output.main(params)
                 print("Completed")
                 split_parsed_output_files.append(split_parsed_file_path)
-        iterator += 1
 
     return split_parsed_output_files
 
@@ -201,8 +205,8 @@ def main(args_input = sys.argv[1:]):
     fasta_file_path           = generate_fasta(args, tsv_file_path)
     if os.path.getsize(fasta_file_path) == 0:
         sys.exit("The fasta file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
-    split_fasta_file_paths    = split_fasta_file_and_create_key_files(args, fasta_file_path)
-    split_parsed_output_files = call_iedb_and_parse_outputs(args, split_fasta_file_paths, tsv_file_path)
+    chunks                    = split_fasta_file_and_create_key_files(args, fasta_file_path)
+    split_parsed_output_files = call_iedb_and_parse_outputs(args, chunks, tsv_file_path)
     combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files)
     filt_out_path             = binding_filter(args, combined_parsed_path)
 
