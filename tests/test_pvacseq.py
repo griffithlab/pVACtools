@@ -126,6 +126,7 @@ class PVACTests(unittest.TestCase):
             'PickPocket',
             output_dir.name,
             '--top-score-metric=lowest',
+            '--keep-tmp-files',
         ])
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test.tsv"),

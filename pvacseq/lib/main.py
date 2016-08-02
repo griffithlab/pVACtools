@@ -14,6 +14,7 @@ try:
 except ValueError:
     import lib
 from lib import pvacseq_utils
+import shutil
 
 def prediction_method_lookup(prediction_method):
     prediction_method_lookup_dict = pvacseq_utils.prediction_method_to_iedb_lookup_dict()
@@ -212,6 +213,9 @@ def main(args_input = sys.argv[1:]):
                         type=int,
                         help="Number of fasta entries per IEDB request. For some resource-intensive prediction algorithms like Pickpocket and NetMHC it might be helpful to reduce this number. Needs to be an even number.",
                         default=200)
+    parser.add_argument("-k", "--keep-tmp-files",
+                        action='store_true', default=False,
+                        help="Keep intermediate output files.",)
 
     args = parser.parse_args(args_input)
     pvacseq_utils.check_alleles_valid(args.allele)
@@ -240,6 +244,8 @@ def main(args_input = sys.argv[1:]):
           "contains list of binding-filtered putative neoantigens")
     print("We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
 
+    if args.keep_tmp_files is False:
+        shutil.rmtree(tmp_dir)
 
 def split_file(reader, lines=400):
     from itertools import islice, chain
