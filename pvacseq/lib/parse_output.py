@@ -94,7 +94,7 @@ def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
     wt_iedb_results = {}
     for input_iedb_file in input_iedb_files:
         iedb_tsv_reader = csv.DictReader(input_iedb_file, delimiter='\t')
-        (sample, allele_tmp, peptide_length_tmp, method, file_extension) = input_iedb_file.name.split(".", 4)
+        (sample, allele_tmp, peptide_length_tmp, method, file_extension) = os.path.basename(input_iedb_file.name).split(".", 4)
         for line in iedb_tsv_reader:
             protein_label  = line['seq_num']
             position       = line['start']
@@ -267,7 +267,7 @@ def output_headers(methods):
 def determine_prediction_methods(input_iedb_files):
     methods = set()
     for input_iedb_file in input_iedb_files:
-        (sample, allele_tmp, peptide_length_tmp, method, file_extension) = input_iedb_file.name.split(".", 4)
+        (sample, allele_tmp, peptide_length_tmp, method, file_extension) = os.path.basename(input_iedb_file.name).split(".", 4)
         methods.add(method)
 
     return sorted(list(methods))

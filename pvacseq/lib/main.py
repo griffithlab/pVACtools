@@ -212,6 +212,9 @@ def main(args_input = sys.argv[1:]):
     args = parser.parse_args(args_input)
     pvacseq_utils.check_alleles_valid(args.allele)
 
+    if "." in args.sample_name:
+        sys.exit("Sample name cannot contain '.'")
+
     tsv_file_path             = convert_vcf(args)
     fasta_file_path           = generate_fasta(args, tsv_file_path)
     if os.path.getsize(fasta_file_path) == 0:
