@@ -48,11 +48,11 @@ def split_fasta_basename(args, output_dir):
 def split_fasta_file_and_create_key_files(args, fasta_file_path, output_dir):
     split_reader = open(fasta_file_path, mode='r')
     split_start = 1
-    fasta_size  = 200
-    chunk_size  = fasta_size * 2
+    #Each fasta entry consists of two lines: header and sequence
+    chunk_size  = args.fasta_size * 2
     chunks = []
     for chunk in split_file(split_reader, chunk_size):
-        split_end = split_start + fasta_size - 1
+        split_end = split_start + args.fasta_size - 1
         print("Splitting FASTA into smaller chunks - Entries %d-%d" % (split_start, split_end))
         split_fasta_file_path = "%s_%d-%d"%(split_fasta_basename(args, output_dir), split_start, split_end)
         if os.path.exists(split_fasta_file_path):
@@ -74,7 +74,7 @@ def split_fasta_file_and_create_key_files(args, fasta_file_path, output_dir):
             ])
             print("Completed")
         chunks.append("%d-%d" % (split_start, split_end))
-        split_start += fasta_size
+        split_start += args.fasta_size
     split_reader.close()
     return chunks
 
@@ -208,12 +208,19 @@ def main(args_input = sys.argv[1:]):
                         type=int,
                         help="Minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT)",
                         default=0)
+    parser.add_argument("-s", "--fasta-size",
+                        type=int,
+                        help="Number of fasta entries per IEDB request. For some resource-intensive prediction algorithms like Pickpocket and NetMHC it might be helpful to reduce this number. Needs to be an even number.",
+                        default=200)
 
     args = parser.parse_args(args_input)
     pvacseq_utils.check_alleles_valid(args.allele)
 
     if "." in args.sample_name:
         sys.exit("Sample name cannot contain '.'")
+
+    if args.fasta_size%2 != 0:
+        sys.exit("The fasta size needs to be an even number")
 
     output_dir = os.path.abspath(args.output_dir)
 
