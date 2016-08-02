@@ -172,6 +172,16 @@ class GenerateFastaTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_elongation.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
+    def test_input_file_with_frameshift_variant_range_generates_expected_file(self):
+        generate_fasta_input_file  = os.path.join(self.test_data_dir, 'input_frameshift_variant_range.tsv')
+        generate_fasta_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python, self.executable, generate_fasta_input_file, self.peptide_sequence_length, generate_fasta_output_file.name
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_range.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+
     def test_distance_from_start_works_as_expected(self):
         sequence = 'KKLKILGMPFRNIRSILKMVN'
         position = 5
