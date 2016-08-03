@@ -2,15 +2,18 @@ import argparse
 import csv
 import re
 import sys
+import os
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq generate_fasta_key')
     parser.add_argument('input_file', type=argparse.FileType('r'), help="input FASTA file with variant sequences for wildtype(WT) and mutant(MT) proteins generated using 'GenerateVariantSequences.pl' and filtered using 'FilterSeq.pl'")
-    parser.add_argument('output_file', type=argparse.FileType('w'), help='output Key file for lookup')
+    parser.add_argument('output_file', help='output Key file for lookup')
 
     args = parser.parse_args(args_input)
 
-    tsvout = csv.writer(args.output_file, delimiter='\t', lineterminator='\n')
+    tmp_output_file = args.output_file + '.tmp'
+    tmp_output_filehandle = open(tmp_output_file, 'w')
+    tsvout = csv.writer(tmp_output_filehandle, delimiter='\t', lineterminator='\n')
 
     i = 1
     pattern = re.compile('>');
@@ -22,9 +25,10 @@ def main(args_input = sys.argv[1:]):
             tsvout.writerow([new_name, original_name])
             i += 1
 
-    args.input_file.close()
-    args.output_file.close()
+    tmp_output_filehandle.close()
+    os.replace(tmp_output_file, args.output_file)
 
+    args.input_file.close()
 
 if __name__ == '__main__':
     main()
