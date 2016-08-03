@@ -44,6 +44,10 @@ def main(args_input = sys.argv[1:]):
                         help="Gene Expression (FPKM) Cutoff. " +
                         "default 1",
                         default=1)
+    parser.add_argument('--transcript-expn-val', type=int,
+                        help="Transcript Expression (FPKM) Cutoff. " +
+                        "default 1",
+                        default=1)
     args = parser.parse_args(args_input)
 
 #### INPUT AND OUTPUT FILE FORMAT ##
@@ -119,6 +123,11 @@ def main(args_input = sys.argv[1:]):
         if 'Gene Exp FPKM' in entry:
             fpkm  = float(entry['Gene Exp FPKM'])
             if fpkm < args.expn_val:
+                continue
+
+        if 'Transcript Exp FPKM' in entry:
+            fpkm  = float(entry['Transcript Exp FPKM'])
+            if fpkm < args.transcript_expn_val:
                 continue
 
         writer.writerow(entry)
