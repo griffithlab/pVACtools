@@ -237,7 +237,8 @@ def main(args_input = sys.argv[1:]):
         sys.exit("The fasta file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
 
     tmp_dir = os.path.join(args.output_dir, 'tmp')
-    os.makedirs(tmp_dir)
+    if not os.path.exists(tmp_dir):
+        os.makedirs(tmp_dir)
     chunks                    = split_fasta_file_and_create_key_files(args, fasta_file_path, tmp_dir)
     split_parsed_output_files = call_iedb_and_parse_outputs(args, chunks, tsv_file_path, tmp_dir)
 
