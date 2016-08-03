@@ -270,7 +270,7 @@ def main(args_input = sys.argv[1:]):
         sys.exit("No output files were created. Aborting.")
 
     combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files, output_dir)
-    final_path             = binding_filter(args, combined_parsed_path, output_dir)
+    final_path                = binding_filter(args, combined_parsed_path, output_dir)
 
     if args.net_chop:
         final_path = net_chop(
