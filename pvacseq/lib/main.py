@@ -20,10 +20,15 @@ def convert_vcf(args, output_dir):
     print("Converting VCF to TSV")
     tsv_file      = args.sample_name + '.tsv'
     tsv_file_path = os.path.join(output_dir, tsv_file)
-    lib.convert_vcf.main([
+    convert_params = [
         args.input_file,
         tsv_file_path,
-    ])
+    ]
+    if args.cufflinks_genes_tracking_file is not None:
+        convert_params.extend(['-g', args.cufflinks_genes_tracking_file])
+    if args.cufflinks_isoforms_tracking_file is not None:
+        convert_params.extend(['-i', args.cufflinks_isoforms_tracking_file])
+    lib.convert_vcf.main(convert_params)
     print("Completed")
     return tsv_file_path
 
@@ -148,19 +153,31 @@ def combined_parsed_outputs(args, split_parsed_output_files, output_dir):
     return combined_parsed_path
 
 def binding_filter(args, combined_parsed_path, output_dir):
-    filt_out_path = os.path.join(output_dir, args.sample_name+"_filtered.tsv")
+    binding_filt_out_path = os.path.join(output_dir, args.sample_name+"_binding_filtered.tsv")
     print("Running Binding Filters")
     lib.binding_filter.main(
         [
             combined_parsed_path,
-            filt_out_path,
+            binding_filt_out_path,
             '-c', str(args.minimum_fold_change),
             '-b', str(args.binding_threshold),
             '-m', str(args.top_score_metric),
         ]
     )
     print("Completed")
-    return filt_out_path
+    return binding_filt_out_path
+
+def coverage_filter(args, binding_filt_out_path, output_dir):
+    coverage_filt_out_path = os.path.join(args.output_dir, args.sample_name+"_final_filtered.tsv")
+    print("Running Coverage Filters")
+    lib.coverage_filter.main([
+        binding_filt_out_path,
+        coverage_filt_out_path,
+        '--expn-val', str(args.expn_val),
+        '--transcript-expn-val', str(args.transcript_expn_val),
+    ])
+    print("Completed")
+    return coverage_filt_out_path
 
 def net_chop(args, input_path):
     output_path = os.path.join(args.output_dir, args.sample_name+"_filtered.chop.tsv")
@@ -218,6 +235,8 @@ def main(args_input = sys.argv[1:]):
                         type=int,
                         help="length of the peptide sequences in the input FASTA file; default 21",
                         default=21)
+    parser.add_argument('-g', '--cufflinks_genes_tracking_file', help='genes.fpkm_tracking file from Cufflinks')
+    parser.add_argument('-i', '--cufflinks_isoforms_tracking_file', help='isoforms.fpkm_tracking file from Cufflinks')
     parser.add_argument('-t', '--top-result-per-mutation',
                         action='store_true',
                         help='Output top scoring candidate per allele-length per mutation. Default: False')
@@ -236,6 +255,14 @@ def main(args_input = sys.argv[1:]):
                         type=int,
                         help="Minimum fold change between mutant binding score and wild-type score. The default is 0, which filters no results, but 1 is often a sensible default (requiring that binding is better to the MT than WT)",
                         default=0)
+    parser.add_argument('--expn-val', type=int,
+                        help="Gene Expression (FPKM) Cutoff. " +
+                        "default 1",
+                        default=1)
+    parser.add_argument('--transcript-expn-val', type=int,
+                        help="Transcript Expression (FPKM) Cutoff. " +
+                        "default 1",
+                        default=1)
     parser.add_argument("-s", "--fasta-size",
                         type=int,
                         help="Number of fasta entries per IEDB request. For some resource-intensive prediction algorithms like Pickpocket and NetMHC it might be helpful to reduce this number. Needs to be an even number.",
@@ -285,6 +312,11 @@ def main(args_input = sys.argv[1:]):
 
     combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files, output_dir)
     final_path                = binding_filter(args, combined_parsed_path, output_dir)
+
+    if (args.cufflinks_genes_tracking_file is not None
+        or args.cufflinks_isoforms_tracking_file is not None):
+        final_path = coverage_filter(args, binding_filt_out_path, output_dir)
+
     if args.net_chop_method:
         final_path = net_chop(
             args,
@@ -295,9 +327,8 @@ def main(args_input = sys.argv[1:]):
         final_path = netmhc_stab(args, final_path, output_dir)
 
     print("\n")
-    print("Done: pvacseq has completed. File", final_path,
-          "contains list of binding-filtered putative neoantigens")
-    print("We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
+    print("Done: pvacseq has completed. File", final_path, "contains list of filtered putative neoantigens.\n", 
+         "We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
 
     if not args.keep_tmp_files:
         shutil.rmtree(tmp_dir)
