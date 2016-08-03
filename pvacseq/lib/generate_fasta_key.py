@@ -26,7 +26,7 @@ def main(args_input = sys.argv[1:]):
             i += 1
 
     tmp_output_filehandle.close()
-    os.rename(tmp_output_file, args.output_file)
+    os.replace(tmp_output_file, args.output_file)
 
     args.input_file.close()
 

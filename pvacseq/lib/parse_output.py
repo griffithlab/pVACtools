@@ -335,7 +335,7 @@ def main(args_input = sys.argv[1:]):
             tsv_writer.writerow(row)
 
     tmp_output_filehandle.close()
-    os.rename(tmp_output_file, args.output_file)
+    os.replace(tmp_output_file, args.output_file)
     for file_handle in args.input_iedb_files:
         file_handle.close()
     args.input_tsv_file.close()
