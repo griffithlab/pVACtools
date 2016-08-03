@@ -1,4 +1,5 @@
 from setuptools import setup
+import os
 
 import sys
 if sys.version_info < (3,5):
@@ -6,6 +7,11 @@ if sys.version_info < (3,5):
     print(sys.version)
     print("pVAC-Seq requires python 3.5 or greater")
     sys.exit(1)
+
+data_files = []
+for dirpath, dirnames, filenames in os.walk("pvacseq/example_data"):
+    for filename in filenames:
+        data_files.append(os.path.join('..', dirpath, filename))
 
 setup(
     name="pvacseq",
@@ -21,7 +27,7 @@ setup(
         'requests',
     ],
     package_data={
-        'pvacseq' : ['example_data/*', 'VEP_plugins/*', 'iedb_alleles/*']
+        'pvacseq' : data_files + ['VEP_plugins/*', 'iedb_alleles/*']
     },
     classifiers=[
         'Development Status :: 4 - Beta',
