@@ -86,7 +86,10 @@ def main(args_input = sys.argv[1:]):
         variant_type = line['variant_type']
         full_wildtype_sequence = line['wildtype_amino_acid_sequence']
         if variant_type == 'FS':
-            position = int(line['protein_position']) - 1
+            if '-' in line['protein_position']:
+                position = int(line['protein_position'].split('-', 1)[0]) - 1
+            else:
+                position = int(line['protein_position']) - 1
         elif variant_type == 'missense' or variant_type == 'inframe_ins':
             wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
             if wildtype_amino_acid == '-':

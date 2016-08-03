@@ -94,7 +94,7 @@ def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
     wt_iedb_results = {}
     for input_iedb_file in input_iedb_files:
         iedb_tsv_reader = csv.DictReader(input_iedb_file, delimiter='\t')
-        (sample, allele_tmp, peptide_length_tmp, method, file_extension) = input_iedb_file.name.split(".", 4)
+        (sample, allele_tmp, peptide_length_tmp, method, file_extension) = os.path.basename(input_iedb_file.name).split(".", 4)
         for line in iedb_tsv_reader:
             protein_label  = line['seq_num']
             position       = line['start']
@@ -267,7 +267,7 @@ def output_headers(methods):
 def determine_prediction_methods(input_iedb_files):
     methods = set()
     for input_iedb_file in input_iedb_files:
-        (sample, allele_tmp, peptide_length_tmp, method, file_extension) = input_iedb_file.name.split(".", 4)
+        (sample, allele_tmp, peptide_length_tmp, method, file_extension) = os.path.basename(input_iedb_file.name).split(".", 4)
         methods.add(method)
 
     return sorted(list(methods))
@@ -277,7 +277,7 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('input_iedb_files', type=argparse.FileType('r'), nargs='+', help='Raw output file from IEDB',)
     parser.add_argument('input_tsv_file', type=argparse.FileType('r'), help='Input list of variants')
     parser.add_argument('key_file', type=argparse.FileType('r'), help='Key file for lookup of FASTA IDs')
-    parser.add_argument('output_file', type=argparse.FileType('w'), help='Parsed output file')
+    parser.add_argument('output_file', help='Parsed output file')
     parser.add_argument('-t', '--top-result-per-mutation', action='store_true', default=False, help='Output top scoring candidate per allele-length per mutation. Default: False')
     parser.add_argument(
         '-m', '--top-score-metric',
@@ -291,7 +291,9 @@ def main(args_input = sys.argv[1:]):
     args = parser.parse_args(args_input)
 
     methods = determine_prediction_methods(args.input_iedb_files)
-    tsv_writer = csv.DictWriter(args.output_file, delimiter='\t', fieldnames=output_headers(methods))
+    tmp_output_file = args.output_file + '.tmp'
+    tmp_output_filehandle = open(tmp_output_file, 'w')
+    tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=output_headers(methods))
     tsv_writer.writeheader()
 
     tsv_entries  = parse_input_tsv_file(args.input_tsv_file)
@@ -331,11 +333,13 @@ def main(args_input = sys.argv[1:]):
                 row["%s WT Score" % pretty_method] = wt_scores[method]
                 row["%s MT Score" % pretty_method] = mt_scores[method]
             tsv_writer.writerow(row)
+
+    tmp_output_filehandle.close()
+    os.replace(tmp_output_file, args.output_file)
     for file_handle in args.input_iedb_files:
         file_handle.close()
     args.input_tsv_file.close()
     args.key_file.close()
-    args.output_file.close()
 
 if __name__ == '__main__':
     main()
