@@ -39,8 +39,8 @@ class ConvertVcfTests(unittest.TestCase):
             self.executable,
             convert_vcf_input_file,
             convert_vcf_output_file.name,
-            '--cufflinks_genes_tracking_file', convert_vcf_cufflinks_genes_file,
-            '--cufflinks_isoforms_tracking_file', convert_vcf_cufflinks_isoforms_file,
+            '--gene-expn-file', convert_vcf_cufflinks_genes_file,
+            '--transcript-expn-file', convert_vcf_cufflinks_isoforms_file,
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output_cufflinks.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))

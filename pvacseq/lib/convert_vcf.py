@@ -85,25 +85,25 @@ def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq convert_vcf')
     parser.add_argument('input_file', type=argparse.FileType('r'), help='input VCF',)
     parser.add_argument('output_file', type=argparse.FileType('w'), help='output list of variants')
-    parser.add_argument('-g', '--cufflinks_genes_tracking_file', type=argparse.FileType('r'), help='genes.fpkm_tracking file from Cufflinks')
-    parser.add_argument('-i', '--cufflinks_isoforms_tracking_file', type=argparse.FileType('r'), help='isoforms.fpkm_tracking file from Cufflinks')
+    parser.add_argument('-g', '--gene-expn-file', type=argparse.FileType('r'), help='genes.fpkm_tracking file from Cufflinks')
+    parser.add_argument('-i', '--transcript-expn-file', type=argparse.FileType('r'), help='isoforms.fpkm_tracking file from Cufflinks')
     args = parser.parse_args(args_input)
 
-    cufflinks_genes = {}
-    if args.cufflinks_genes_tracking_file is not None:
-        genes_tsv_reader = csv.DictReader(args.cufflinks_genes_tracking_file, delimiter='\t')
+    gene_expns = {}
+    if args.gene_expn_file is not None:
+        genes_tsv_reader = csv.DictReader(args.gene_expn_file, delimiter='\t')
         for row in genes_tsv_reader:
-            if row['tracking_id'] not in cufflinks_genes.keys():
-                cufflinks_genes[row['tracking_id']] = {}
-            cufflinks_genes[row['tracking_id']][row['locus']] = row
-        args.cufflinks_genes_tracking_file.close()
+            if row['tracking_id'] not in gene_expns.keys():
+                gene_expns[row['tracking_id']] = {}
+            gene_expns[row['tracking_id']][row['locus']] = row
+        args.gene_expn_file.close()
 
-    cufflinks_isoforms = {}
-    if args.cufflinks_isoforms_tracking_file is not None:
-        isoforms_tsv_reader = csv.DictReader(args.cufflinks_isoforms_tracking_file, delimiter='\t')
+    transcript_expns = {}
+    if args.transcript_expn_file is not None:
+        isoforms_tsv_reader = csv.DictReader(args.transcript_expn_file, delimiter='\t')
         for row in isoforms_tsv_reader:
-            cufflinks_isoforms[row['tracking_id']] = row
-        args.cufflinks_isoforms_tracking_file.close()
+            transcript_expns[row['tracking_id']] = row
+        args.transcript_expn_file.close()
 
     vcf_reader = vcf.Reader(args.input_file)
     if len(vcf_reader.samples) > 1:
@@ -154,14 +154,14 @@ def main(args_input = sys.argv[1:]):
                     'protein_position'               : transcript['Protein_position'],
                     'index'                          : index
                 }
-                if transcript_name in cufflinks_isoforms.keys():
-                    cufflinks_isoforms_entry = cufflinks_isoforms[transcript_name]
-                    output_row['transcript_fpkm'] = cufflinks_isoforms_entry['FPKM']
-                if ensembl_gene_id in cufflinks_genes.keys():
-                    cufflinks_genes_entries = cufflinks_genes[ensembl_gene_id]
+                if transcript_name in transcript_expns.keys():
+                    transcript_expn_entry = transcript_expns[transcript_name]
+                    output_row['transcript_fpkm'] = transcript_expn_entry['FPKM']
+                if ensembl_gene_id in gene_expns.keys():
+                    gene_expn_entries = gene_expns[ensembl_gene_id]
                     gene_fpkm = 0
-                    for locus, cufflinks_genes_entry in cufflinks_genes_entries.items():
-                        gene_fpkm += float(cufflinks_genes_entry['FPKM'])
+                    for locus, gene_expn_entry in gene_expn_entries.items():
+                        gene_fpkm += float(gene_expn_entry['FPKM'])
                     output_row['gene_fpkm'] = gene_fpkm
                 tsv_writer.writerow(output_row)
 

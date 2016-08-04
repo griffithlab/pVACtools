@@ -24,10 +24,10 @@ def convert_vcf(args, output_dir):
         args.input_file,
         tsv_file_path,
     ]
-    if args.cufflinks_genes_tracking_file is not None:
-        convert_params.extend(['-g', args.cufflinks_genes_tracking_file])
-    if args.cufflinks_isoforms_tracking_file is not None:
-        convert_params.extend(['-i', args.cufflinks_isoforms_tracking_file])
+    if args.gene_expn_file is not None:
+        convert_params.extend(['-g', args.gene_expn_file])
+    if args.transcript_expn_file is not None:
+        convert_params.extend(['-i', args.transcript_expn_file])
     lib.convert_vcf.main(convert_params)
     print("Completed")
     return tsv_file_path
@@ -234,8 +234,8 @@ def main(args_input = sys.argv[1:]):
                         type=int,
                         help="length of the peptide sequences in the input FASTA file; default 21",
                         default=21)
-    parser.add_argument('-g', '--cufflinks_genes_tracking_file', help='genes.fpkm_tracking file from Cufflinks')
-    parser.add_argument('-i', '--cufflinks_isoforms_tracking_file', help='isoforms.fpkm_tracking file from Cufflinks')
+    parser.add_argument('-g', '--gene-expn-file', help='genes.fpkm_tracking file from Cufflinks')
+    parser.add_argument('-i', '--transcript-expn-file', help='isoforms.fpkm_tracking file from Cufflinks')
     parser.add_argument('-t', '--top-result-per-mutation',
                         action='store_true',
                         help='Output top scoring candidate per allele-length per mutation. Default: False')
@@ -308,9 +308,9 @@ def main(args_input = sys.argv[1:]):
     combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files, output_dir)
     final_path                = binding_filter(args, combined_parsed_path, output_dir)
 
-    if (args.cufflinks_genes_tracking_file is not None
-        or args.cufflinks_isoforms_tracking_file is not None):
-        final_path = coverage_filter(args, binding_filt_out_path, output_dir)
+    if (args.gene_expn_file is not None
+        or args.transcript_expn_file is not None):
+        final_path = coverage_filter(args, final_path, output_dir)
 
     if args.net_chop_method:
         final_path = net_chop(

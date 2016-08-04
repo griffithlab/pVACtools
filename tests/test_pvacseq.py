@@ -142,8 +142,8 @@ class PVACTests(unittest.TestCase):
             '--net-chop-method',
             'cterm',
             '--netmhc-stab',
-            '--cufflinks_genes_tracking_file', os.path.join(self.test_data_directory, "genes.fpkm_tracking"),
-            '--cufflinks_isoforms_tracking_file', os.path.join(self.test_data_directory, "isoforms.fpkm_tracking"),
+            '--gene-expn-file', os.path.join(self.test_data_directory, "genes.fpkm_tracking"),
+            '--transcript-expn-file', os.path.join(self.test_data_directory, "isoforms.fpkm_tracking"),
         ])
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test.tsv"),
