@@ -174,7 +174,6 @@ def coverage_filter(args, binding_filt_out_path, output_dir):
         binding_filt_out_path,
         coverage_filt_out_path,
         '--expn-val', str(args.expn_val),
-        '--transcript-expn-val', str(args.transcript_expn_val),
     ])
     print("Completed")
     return coverage_filt_out_path
@@ -257,10 +256,6 @@ def main(args_input = sys.argv[1:]):
                         default=0)
     parser.add_argument('--expn-val', type=int,
                         help="Gene Expression (FPKM) Cutoff. " +
-                        "default 1",
-                        default=1)
-    parser.add_argument('--transcript-expn-val', type=int,
-                        help="Transcript Expression (FPKM) Cutoff. " +
                         "default 1",
                         default=1)
     parser.add_argument("-s", "--fasta-size",
