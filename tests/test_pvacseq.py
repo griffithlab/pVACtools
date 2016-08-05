@@ -137,7 +137,8 @@ class PVACTests(unittest.TestCase):
             output_dir.name,
             '--top-score-metric=lowest',
             '--keep-tmp-files',
-            '--net-chop'
+            '--net-chop-method',
+            'cterm'
         ])
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test.tsv"),

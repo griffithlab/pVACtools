@@ -232,13 +232,10 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument("-k", "--keep-tmp-files",
                         action='store_true',
                         help="Keep intermediate output files.",)
-    parser.add_argument('--net-chop',
-                        action='store_true',
-                        help="Run NetChop after the binding filter")
     parser.add_argument('--net-chop-method',
                         choices=lib.net_chop.methods,
                         help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0).  Default: \"cterm\" (C term 3.0)",
-                        default='cterm')
+                        default=None)
     parser.add_argument('--net-chop-threshold',
                         type=float,
                         help="NetChop prediction threshold.  Default: 0.5",
@@ -272,7 +269,7 @@ def main(args_input = sys.argv[1:]):
     combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files, output_dir)
     final_path                = binding_filter(args, combined_parsed_path, output_dir)
 
-    if args.net_chop:
+    if args.net_chop_method:
         final_path = net_chop(
             args,
             final_path

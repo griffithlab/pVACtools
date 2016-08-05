@@ -14,14 +14,14 @@ methods = ['cterm', '20s']
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq net_chop")
     parser.add_argument(
-        'input',
+        'input_file',
         type=argparse.FileType('r'),
         help="Input filtered file with predicted epitopes"
     )
     parser.add_argument(
-        'output',
+        'output_file',
         type=argparse.FileType('w'),
-        help="Output FASTA filename for putative neoepitopes"
+        help="Output tsv filename for putative neoepitopes"
     )
     parser.add_argument(
         '--method',
@@ -40,9 +40,9 @@ def main(args_input = sys.argv[1:]):
     jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
     result_delimiter = re.compile(r'-+')
     fail_searcher = re.compile(r'(Failed run|Problematic input:)')
-    reader = csv.DictReader(args.input, delimiter='\t')
+    reader = csv.DictReader(args.input_file, delimiter='\t')
     writer = csv.DictWriter(
-        args.output,
+        args.output_file,
         reader.fieldnames+['Best Cleavage Position', 'Best Cleavage Score'],
         delimiter='\t',
         lineterminator='\n'
@@ -112,8 +112,8 @@ def main(args_input = sys.argv[1:]):
                 mode+=1
     sys.stdout.write('\b\b')
     print("OK")
-    args.output.close()
-    args.input.close()
+    args.output_file.close()
+    args.input_file.close()
 
 
 if __name__ == '__main__':
