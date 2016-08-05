@@ -25,7 +25,7 @@ def main(args_input = sys.argv[1:]):
     )
     args = parser.parse_args(args_input)
     jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
-    result_delimiter = re.compile(r'-+')
+    result_delimiter = re.compile(r'-{20,}')
     fail_searcher = re.compile(r'(Failed run|Problematic input:)')
     reader = csv.DictReader(args.input, delimiter='\t')
     writer = csv.DictWriter(
@@ -80,17 +80,15 @@ def main(args_input = sys.argv[1:]):
                 sleep(1)
                 i+=1
             response = requests.get(response.url)
-        mode=0
         if fail_searcher.search(response.content.decode()):
             sys.stdout.write('\b\b')
             print('Failed!')
             print("NetMHCStabPan encountered an error during processing")
             sys.exit(1)
         pending = []
-        for line in response.content.decode().split('\n'):
-            if result_delimiter.match(line):
-                mode = (mode+1)%4
-            elif mode==2: #Reading results from the current sequence
+        results = [item.strip() for item in result_delimiter.split(response.content.decode())]
+        for i in range(2, len(results), 4): #examine only the parts we want, skipping all else
+            for line in results[i].split('\n'):
                 data = [word for word in line.strip().split(' ') if len(word)]
                 line = current_buffer[data[3]]
                 if data[1] == line['HLA Allele'] and len(data[2]) == int(line['Peptide Length']):
