@@ -38,7 +38,7 @@ def main(args_input = sys.argv[1:]):
     args = parser.parse_args(args_input)
     chosen_method = str(methods.index(args.method))
     jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
-    result_delimiter = re.compile(r'-+')
+    result_delimiter = re.compile(r'-{20,}')
     fail_searcher = re.compile(r'(Failed run|Problematic input:)')
     reader = csv.DictReader(args.input_file, delimiter='\t')
     writer = csv.DictWriter(
@@ -85,13 +85,13 @@ def main(args_input = sys.argv[1:]):
             print('Failed!')
             print("NetChop encountered an error during processing")
             sys.exit(1)
-        score = -1
-        pos = 0
-        sequence_name = False
-        for line in response.content.decode().split('\n'):
-            if result_delimiter.match(line):
-                mode = (mode+1)%5
-            elif mode==2: #Reading results from the current sequence
+
+        results = [item.strip() for item in result_delimiter.split(response.content.decode())]
+        for i in range(2, len(results), 4): #examine only the parts we want, skipping all else
+            score = -1
+            pos = 0
+            sequence_name = False
+            for line in results[i].split('\n'):
                 data = [word for word in line.strip().split(' ') if len(word)]
                 currentPosition = data[0]
                 currentScore = float(data[3])
@@ -100,16 +100,12 @@ def main(args_input = sys.argv[1:]):
                 if currentScore > score:
                     score = currentScore
                     pos = currentPosition
-            elif mode==3: #End of results for this sequence.  Output the best sequence
-                line = current_buffer[sequence_name]
-                line.update({
-                    'Best Cleavage Position':pos,
-                    'Best Cleavage Score':score
-                })
-                writer.writerow(line)
-                score=-1
-                sequence_name=False
-                mode+=1
+            line = current_buffer[sequence_name]
+            line.update({
+                'Best Cleavage Position':pos,
+                'Best Cleavage Score':score
+            })
+            writer.writerow(line)
     sys.stdout.write('\b\b')
     print("OK")
     args.output_file.close()
