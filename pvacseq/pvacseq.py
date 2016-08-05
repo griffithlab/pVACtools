@@ -79,6 +79,11 @@ def main():
                                             add_help=False)
     net_chop_parser.set_defaults(func=lib.net_chop)
 
+    netmhc_stab_parser = subparsers.add_parser("netmhc_stab",
+                                               help="Generates stability predictions for predicted epitopes",
+                                               add_help=False)
+    netmhc_stab_parser.set_defaults(func=lib.netmhc_stab)
+
     parser.add_argument("-v", "--version",
                         help="Display the currently installed pvacseq version",
                         action="store_true")

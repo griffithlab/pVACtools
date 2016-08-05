@@ -285,7 +285,6 @@ def main(args_input = sys.argv[1:]):
 
     combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files, output_dir)
     final_path                = binding_filter(args, combined_parsed_path, output_dir)
-
     if args.net_chop_method:
         final_path = net_chop(
             args,
@@ -294,7 +293,7 @@ def main(args_input = sys.argv[1:]):
 
     if args.netmhc_stab:
         final_path = netmhstab(args, final_path, output_dir)
-
+        
     print("\n")
     print("Done: pvacseq has completed. File", final_path,
           "contains list of binding-filtered putative neoantigens")
