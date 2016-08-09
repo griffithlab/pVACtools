@@ -156,15 +156,5 @@ def main(args_input = sys.argv[1:]):
     )
     pipeline.execute()
 
-def split_file(reader, lines=400):
-    from itertools import islice, chain
-    tmp = next(reader)
-    while tmp!="":
-        yield chain([tmp], islice(reader, lines-1))
-        try:
-            tmp = next(reader)
-        except StopIteration:
-            return
-
 if __name__ == '__main__':
     main()

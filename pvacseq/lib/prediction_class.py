@@ -61,12 +61,21 @@ class PredictionClass(metaclass=ABCMeta):
     def iedb_prediction_method(self):
         pass
 
+    @property
+    @abstractmethod
+    def url(self):
+        pass
+
     def check_allele_valid(self, allele):
         valid_alleles = self.valid_allele_names()
         if allele not in valid_alleles:
             sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, self.iedb_prediction_method, method))
 
 class MHCI(PredictionClass, metaclass=ABCMeta):
+    @property
+    def url(self):
+        return 'http://tools-api.iedb.org/tools_api/mhci/'
+
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
         #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/
@@ -131,6 +140,10 @@ class PickPocket(MHCI):
         return 'pickpocket'
 
 class MHCII(PredictionClass, metaclass=ABCMeta):
+    @property
+    def url(self):
+        return 'http://tools-api.iedb.org/tools_api/mhcii/'
+
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
         #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/

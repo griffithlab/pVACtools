@@ -20,7 +20,7 @@ def main(args_input = sys.argv[1:]):
                         help="The iedb analysis method to use")
     parser.add_argument('allele',
                         help="Allele for which to make prediction")
-    parser.add_argument('epitope_length', type=int, choices=[8,9,10,11,12,13,14,15],
+    parser.add_argument('-l', '--epitope-length', type=int, choices=[8,9,10,11,12,13,14,15],
                         help="Length of subpeptides (epitopes) to predict")
     args = parser.parse_args(args_input)
 
@@ -29,20 +29,26 @@ def main(args_input = sys.argv[1:]):
     prediction_class.check_allele_valid(args.allele)
     prediction_class.check_length_valid_for_allele(args.epitope_length, args.allele)
 
+    if args.epitope_length is None and isinstance(prediction_class_object, MHCI):
+        sys.exit("Epitope length is required for class I binding predictions")
+
     data = {
         'sequence_text': args.input_file.read(),
         'method':        args.method,
         'allele':        args.allele,
-        'length':        args.epitope_length,
     }
+    if args.epitope_length is not None:
+        data['length'] = args.epitope_length
 
-    response = requests.post('http://tools-api.iedb.org/tools_api/mhci/', data=data)
+    url = prediction_class_object.url
+
+    response = requests.post(url, data=data)
     if response.status_code == 500:
         #Retry once
-        response = requests.post('http://tools-api.iedb.org/tools_api/mhci/', data=data)
+        response = requests.post(url, data=data)
         if response.status_code == 500:
             #Retry a second time
-            response = requests.post('http://tools-api.iedb.org/tools_api/mhci/', data=data)
+            response = requests.post(url, data=data)
     if response.status_code != 200:
         sys.exit("Error posting request to IEDB.\n%s" % response.text)
 

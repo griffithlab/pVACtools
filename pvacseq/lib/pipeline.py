@@ -136,7 +136,7 @@ class Pipeline(metaclass=ABCMeta):
                             split_iedb_out,
                             iedb_method,
                             a,
-                            str(epl),
+                            '-l', str(epl),
                         ])
                         print("Completed")
                         split_iedb_output_files.append(split_iedb_out)

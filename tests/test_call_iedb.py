@@ -52,7 +52,7 @@ class CallIEDBTests(unittest.TestCase):
                 call_iedb_output_file.name,
                 method,
                 self.allele,
-                str(self.epitope_length)
+                '-l', str(self.epitope_length)
             ])
             reader = open(self.input_file, mode='r')
             self.request_mock.assert_called_with('http://tools-api.iedb.org/tools_api/mhci/', data={
