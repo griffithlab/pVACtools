@@ -7,7 +7,7 @@ import argparse
 import requests
 import re
 import os
-from lib import pvacseq_utils
+from lib.prediction_class import *
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq call_iedb')
@@ -16,16 +16,19 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('output_file',
                         help="Output file from iedb")
     parser.add_argument('method',
-                        choices=pvacseq_utils.iedb_prediction_methods(),
+                        choices=PredictionClass.iedb_prediction_methods(),
                         help="The iedb analysis method to use")
     parser.add_argument('allele',
                         help="Allele for which to make prediction")
     parser.add_argument('epitope_length', type=int, choices=[8,9,10,11,12,13,14,15],
                         help="Length of subpeptides (epitopes) to predict")
     args = parser.parse_args(args_input)
-    pvacseq_utils.check_alleles_valid([args.allele])
-    pvacseq_utils.check_allele_valid_for_method(args.allele, args.method)
-    pvacseq_utils.check_length_valid_for_allele_and_method(args.epitope_length, args.allele, args.method)
+
+    PredictionClass.check_alleles_valid([args.allele])
+    prediction_class = globals()[PredictionClass.prediction_class_for_iedb_prediction_method(args.method)]
+    prediction_class_object = prediction_class()
+    prediction_class_object.check_allele_valid(args.allele)
+    prediction_class_object.check_length_valid_for_allele(args.epitope_length, args.allele)
 
     data = {
         'sequence_text': args.input_file.read(),

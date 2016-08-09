@@ -13,12 +13,8 @@ try:
     from .. import lib
 except ValueError:
     import lib
-from lib import pvacseq_utils
+from lib.prediction_class import *
 import shutil
-
-def prediction_method_lookup(prediction_method):
-    prediction_method_lookup_dict = pvacseq_utils.prediction_method_to_iedb_lookup_dict()
-    return prediction_method_lookup_dict[prediction_method]
 
 def convert_vcf(args, output_dir):
     print("Converting VCF to TSV")
@@ -88,12 +84,14 @@ def call_iedb_and_parse_outputs(args, chunks, tsv_file_path, tmp_dir):
                 split_iedb_output_files = []
                 print("Processing entries for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
                 for method in args.prediction_algorithms:
-                    iedb_method = prediction_method_lookup(method)
-                    valid_alleles = pvacseq_utils.valid_allele_names_for_method(iedb_method)
+                    prediction_class = globals()[method]
+                    prediction = prediction_class()
+                    iedb_method = prediction.iedb_prediction_method
+                    valid_alleles = prediction.valid_allele_names()
                     if a not in valid_alleles:
                         print("Allele %s not valid for Method %s. Skipping." % (a, method))
                         continue
-                    valid_lengths = pvacseq_utils.valid_lengths_for_allele_and_method(a, iedb_method)
+                    valid_lengths = prediction.valid_lengths_for_allele(a)
                     if epl not in valid_lengths:
                         print("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
                         continue
@@ -182,7 +180,7 @@ def main(args_input = sys.argv[1:]):
                         type=lambda s:[int(epl) for epl in s.split(',')]
                         )
     parser.add_argument("prediction_algorithms",
-                        choices=pvacseq_utils.prediction_methods(),
+                        choices=PredictionClass.prediction_methods(),
                         nargs="+",
                         help="The epitope prediction algorithms to use",
                         )
@@ -220,7 +218,8 @@ def main(args_input = sys.argv[1:]):
                         help="Keep intermediate output files.",)
 
     args = parser.parse_args(args_input)
-    pvacseq_utils.check_alleles_valid(args.allele)
+
+    PredictionClass.check_alleles_valid(args.allele)
 
     if "." in args.sample_name:
         sys.exit("Sample name cannot contain '.'")
