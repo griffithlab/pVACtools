@@ -40,8 +40,13 @@ class PredictionClass(metaclass=ABCMeta):
     def prediction_class_for_iedb_prediction_method(cls, method):
         prediction_classes = cls.prediction_classes()
         for prediction_class in prediction_classes:
-            if prediction_class().iedb_prediction_method == method:
-                return prediction_class.__name__
+            prediction_class_object = prediction_class()
+            if prediction_class_object.iedb_prediction_method == method:
+                return prediction_class_object
+
+    @classmethod
+    def prediction_class_name_for_iedb_prediction_method(cls, method):
+        return cls.prediction_class_for_iedb_prediction_method(method).__class__.__name__
 
     @abstractmethod
     def parse_iedb_allele_file(self):

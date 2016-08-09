@@ -254,7 +254,7 @@ def base_headers():
 def output_headers(methods):
     headers = base_headers()
     for method in methods:
-        pretty_method = PredictionClass.prediction_class_for_iedb_prediction_method(method)
+        pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
         headers.append("%s WT Score" % pretty_method)
         headers.append("%s MT Score" % pretty_method)
 
@@ -320,12 +320,12 @@ def main(args_input = sys.argv[1:]):
                 'WT Epitope Seq'      : wt_epitope_seq,
                 'Best MT Score'       : best_mt_score,
                 'Corresponding WT Score': corresponding_wt_score,
-                'Best MT Score Method': PredictionClass.prediction_class_for_iedb_prediction_method(best_mt_score_method),
+                'Best MT Score Method': PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
                 'Median MT Score All Methods': median_mt_score,
                 'Fold Change'         : fold_change,
             }
             for method in methods:
-                pretty_method = PredictionClass.prediction_class_for_iedb_prediction_method(method)
+                pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                 row["%s WT Score" % pretty_method] = wt_scores[method]
                 row["%s MT Score" % pretty_method] = mt_scores[method]
             tsv_writer.writerow(row)
