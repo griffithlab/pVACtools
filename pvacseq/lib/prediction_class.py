@@ -129,3 +129,37 @@ class PickPocket(MHCI):
     @property
     def iedb_prediction_method(self):
         return 'pickpocket'
+
+class MHCII(PredictionClass, metaclass=ABCMeta):
+    def parse_iedb_allele_file(self):
+        #Ultimately we probably want this method to call out to IEDB but their command is currently broken
+        #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/
+        base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        iedb_alleles_dir       = os.path.join(base_dir, 'iedb_alleles', 'class_ii')
+        iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % self.iedb_prediction_method)
+        alleles = []
+        with open(iedb_alleles_file_name) as iedb_alleles_file:
+            for row in iedb_alleles_file:
+                alleles.append(row.rstrip())
+        return alleles
+
+    def valid_allele_names(self):
+        method = self.iedb_prediction_method
+        if not self.valid_allele_names_dict:
+            self.valid_allele_names_dict = self.parse_iedb_allele_file()
+        return self.valid_allele_names_dict
+
+class NetMHCIIpan(MHCII):
+    @property
+    def iedb_prediction_method(self):
+        return 'NetMHCIIpan'
+
+class NNalign(MHCII):
+    @property
+    def iedb_prediction_method(self):
+        return 'nn_align'
+
+class SMMalign(MHCII):
+    @property
+    def iedb_prediction_method(self):
+        return 'smm_align'
