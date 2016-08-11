@@ -176,6 +176,19 @@ def net_chop(args, input_path):
     print("Completed")
     return output_path
 
+def netmhc_stab(args, input_path, output_dir):
+    (filename, ext) = os.path.splitext(input_path)
+    output_filepath = filename+'.stab'+ext
+    print("Running NetMHCStabPan")
+    lib.netmhc_stab.main(
+        [
+            input_path,
+            output_filepath
+        ]
+    )
+    print("Completed")
+    return output_filepath
+
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq run")
 
@@ -238,6 +251,11 @@ def main(args_input = sys.argv[1:]):
                         type=float,
                         help="NetChop prediction threshold.  Default: 0.5",
                         default=0.5)
+    parser.add_argument(
+        '--netmhc-stab',
+        action='store_true',
+        help="Run NetMHCStabPan after all filtering and add stability predictions to predicted epitopes"
+    )
 
     args = parser.parse_args(args_input)
 
@@ -267,12 +285,14 @@ def main(args_input = sys.argv[1:]):
 
     combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files, output_dir)
     final_path                = binding_filter(args, combined_parsed_path, output_dir)
-
     if args.net_chop_method:
         final_path = net_chop(
             args,
             final_path
         )
+
+    if args.netmhc_stab:
+        final_path = netmhc_stab(args, final_path, output_dir)
 
     print("\n")
     print("Done: pvacseq has completed. File", final_path,

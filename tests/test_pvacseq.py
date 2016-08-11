@@ -23,9 +23,10 @@ def make_response(data, files, path):
         reader.close()
         return response_obj
     else:
+        basefile = os.path.basename(data['configfile'])
         reader = open(os.path.join(
             path,
-            'net_chop.html'
+            'net_chop.html' if basefile == 'NetChop.cf' else 'Netmhcstab.html'
         ), mode='rb')
         response_obj = lambda :None
         response_obj.status_code = 200
@@ -100,7 +101,8 @@ class PVACTests(unittest.TestCase):
             "download_example_data",
             "valid_alleles",
             "combine_parsed_outputs",
-            "net_chop"
+            "net_chop",
+            "netmhc_stab"
             ]:
             result = run([
                 sys.executable,
@@ -138,7 +140,8 @@ class PVACTests(unittest.TestCase):
             '--top-score-metric=lowest',
             '--keep-tmp-files',
             '--net-chop-method',
-            'cterm'
+            'cterm',
+            '--netmhc-stab'
         ])
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test.tsv"),
@@ -159,7 +162,7 @@ class PVACTests(unittest.TestCase):
             os.path.join(self.test_data_directory, "tmp", "Test_21.fa.split_1-200.key"),
             False
         ))
-        self.assertEqual(len(self.request_mock.mock_calls), 7)
+        self.assertEqual(len(self.request_mock.mock_calls), 8)
         methods = self.methods
         for method in methods.keys():
             for allele in methods[method].keys():
@@ -203,6 +206,11 @@ class PVACTests(unittest.TestCase):
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test_filtered.chop.tsv"),
             os.path.join(self.test_data_directory, "Test_filtered.chop.tsv"),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "Test_filtered.chop.stab.tsv"),
+            os.path.join(self.test_data_directory, "Test_filtered.chop.stab.tsv"),
             False
         ))
         output_dir.cleanup()
