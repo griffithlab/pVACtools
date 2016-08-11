@@ -200,28 +200,28 @@ class PVACTests(unittest.TestCase):
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "Test_binding_filtered.tsv"),
-            os.path.join(self.test_data_directory, "Test_binding_filtered.tsv"),
+            os.path.join(output_dir.name, "Test.filtered.binding.tsv"),
+            os.path.join(self.test_data_directory, "Test.filtered.binding.tsv"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "Test_final_filtered.tsv"),
-            os.path.join(self.test_data_directory, "Test_final_filtered.tsv"),
+            os.path.join(output_dir.name, "Test.filtered.coverage.tsv"),
+            os.path.join(self.test_data_directory, "Test.filtered.coverage.tsv"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "Test_filtered.chop.tsv"),
-            os.path.join(self.test_data_directory, "Test_filtered.chop.tsv"),
+            os.path.join(output_dir.name, "Test.chop.tsv"),
+            os.path.join(self.test_data_directory, "Test.chop.tsv"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "Test.filtered.final.tsv"),
-            os.path.join(self.test_data_directory, "Test.filtered.final.tsv"),
+            os.path.join(output_dir.name, "Test.stab.tsv"),
+            os.path.join(self.test_data_directory, "Test.stab.tsv"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "Test_filtered.chop.stab.tsv"),
-            os.path.join(self.test_data_directory, "Test_filtered.chop.stab.tsv"),
+            os.path.join(output_dir.name, "Test.final.tsv"),
+            os.path.join(self.test_data_directory, "Test.final.tsv"),
             False
         ))
         output_dir.cleanup()
