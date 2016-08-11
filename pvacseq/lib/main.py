@@ -162,6 +162,20 @@ def binding_filter(args, combined_parsed_path, output_dir):
     print("Completed")
     return filt_out_path
 
+def net_chop(args, input_path):
+    output_path = os.path.join(args.output_dir, args.sample_name+"_filtered.chop.tsv")
+    print("Submitting remaining epitopes to NetChop")
+    lib.net_chop.main([
+        input_path,
+        output_path,
+        '--method',
+        args.net_chop_method,
+        '--threshold',
+        str(args.net_chop_threshold)
+    ])
+    print("Completed")
+    return output_path
+
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq run")
 
@@ -192,7 +206,7 @@ def main(args_input = sys.argv[1:]):
                         help="length of the peptide sequences in the input FASTA file; default 21",
                         default=21)
     parser.add_argument('-t', '--top-result-per-mutation',
-                        action='store_true', default=False,
+                        action='store_true',
                         help='Output top scoring candidate per allele-length per mutation. Default: False')
     parser.add_argument('-m', '--top-score-metric',
                         choices=['lowest', 'median'],
@@ -214,8 +228,16 @@ def main(args_input = sys.argv[1:]):
                         help="Number of fasta entries per IEDB request. For some resource-intensive prediction algorithms like Pickpocket and NetMHC it might be helpful to reduce this number. Needs to be an even number.",
                         default=200)
     parser.add_argument("-k", "--keep-tmp-files",
-                        action='store_true', default=False,
+                        action='store_true',
                         help="Keep intermediate output files.",)
+    parser.add_argument('--net-chop-method',
+                        choices=lib.net_chop.methods,
+                        help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0).  Default: \"cterm\" (C term 3.0)",
+                        default=None)
+    parser.add_argument('--net-chop-threshold',
+                        type=float,
+                        help="NetChop prediction threshold.  Default: 0.5",
+                        default=0.5)
 
     args = parser.parse_args(args_input)
 
@@ -244,14 +266,20 @@ def main(args_input = sys.argv[1:]):
         sys.exit("No output files were created. Aborting.")
 
     combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files, output_dir)
-    filt_out_path             = binding_filter(args, combined_parsed_path, output_dir)
+    final_path                = binding_filter(args, combined_parsed_path, output_dir)
+
+    if args.net_chop_method:
+        final_path = net_chop(
+            args,
+            final_path
+        )
 
     print("\n")
-    print("Done: pvacseq has completed. File", filt_out_path,
+    print("Done: pvacseq has completed. File", final_path,
           "contains list of binding-filtered putative neoantigens")
     print("We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
 
-    if args.keep_tmp_files is False:
+    if not args.keep_tmp_files:
         shutil.rmtree(tmp_dir)
 
 def split_file(reader, lines=400):
