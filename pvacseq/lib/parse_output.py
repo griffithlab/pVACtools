@@ -248,7 +248,9 @@ def base_headers():
         'Corresponding WT Score',
         'Fold Change',
         'Best MT Score Method',
-        'Median MT Score All Methods'
+        'Median MT Score All Methods',
+        'Gene Exp FPKM',
+        'Transcript Exp FPKM',
     ]
 
 def output_headers(methods):
@@ -328,6 +330,10 @@ def main(args_input = sys.argv[1:]):
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                 row["%s WT Score" % pretty_method] = wt_scores[method]
                 row["%s MT Score" % pretty_method] = mt_scores[method]
+            if 'gene_fpkm' in tsv_entry:
+                row['Gene Exp FPKM'] = tsv_entry['gene_fpkm']
+            if 'transcript_fpkm' in tsv_entry:
+                row['Transcript Exp FPKM'] = tsv_entry['transcript_fpkm']
             tsv_writer.writerow(row)
 
     tmp_output_filehandle.close()

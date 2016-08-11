@@ -141,7 +141,9 @@ class PVACTests(unittest.TestCase):
             '--keep-tmp-files',
             '--net-chop-method',
             'cterm',
-            '--netmhc-stab'
+            '--netmhc-stab',
+            '--gene-expn-file', os.path.join(self.test_data_directory, "genes.fpkm_tracking"),
+            '--transcript-expn-file', os.path.join(self.test_data_directory, "isoforms.fpkm_tracking"),
         ])
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test.tsv"),
@@ -199,8 +201,13 @@ class PVACTests(unittest.TestCase):
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "Test_filtered.tsv"),
-            os.path.join(self.test_data_directory, "Test_filtered.tsv"),
+            os.path.join(output_dir.name, "Test_binding_filtered.tsv"),
+            os.path.join(self.test_data_directory, "Test_binding_filtered.tsv"),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "Test_final_filtered.tsv"),
+            os.path.join(self.test_data_directory, "Test_final_filtered.tsv"),
             False
         ))
         self.assertTrue(cmp(

@@ -121,6 +121,11 @@ def main(args_input = sys.argv[1:]):
             if fpkm < args.expn_val:
                 continue
 
+        if 'Transcript Exp FPKM' in entry:
+            fpkm  = float(entry['Transcript Exp FPKM'])
+            if fpkm < args.expn_val:
+                continue
+
         writer.writerow(entry)
 
     args.input_file.close()
