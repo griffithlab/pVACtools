@@ -45,6 +45,15 @@ def main(args_input = sys.argv[1:]):
                         default=21)
     parser.add_argument('-g', '--gene-expn-file', help='genes.fpkm_tracking file from Cufflinks')
     parser.add_argument('-i', '--transcript-expn-file', help='isoforms.fpkm_tracking file from Cufflinks')
+    parser.add_argument('--net-chop-method',
+                        choices=lib.net_chop.methods,
+                        help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0).  Default: \"cterm\" (C term 3.0)",
+                        default=None)
+    parser.add_argument(
+        '--netmhc-stab',
+        action='store_true',
+        help="Run NetMHCStabPan after all filtering and add stability predictions to predicted epitopes"
+    )
     parser.add_argument('-t', '--top-result-per-mutation',
                         action='store_true',
                         help='Output top scoring candidate per allele-length per mutation. Default: False')
@@ -67,6 +76,10 @@ def main(args_input = sys.argv[1:]):
                         help="Gene Expression (FPKM) Cutoff. " +
                         "default 1",
                         default=1)
+    parser.add_argument('--net-chop-threshold',
+                        type=float,
+                        help="NetChop prediction threshold.  Default: 0.5",
+                        default=0.5)
     parser.add_argument("-s", "--fasta-size",
                         type=int,
                         help="Number of fasta entries per IEDB request. For some resource-intensive prediction algorithms like Pickpocket and NetMHC it might be helpful to reduce this number. Needs to be an even number.",
@@ -74,19 +87,6 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument("-k", "--keep-tmp-files",
                         action='store_true',
                         help="Keep intermediate output files.",)
-    parser.add_argument('--net-chop-method',
-                        choices=lib.net_chop.methods,
-                        help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0).  Default: \"cterm\" (C term 3.0)",
-                        default=None)
-    parser.add_argument('--net-chop-threshold',
-                        type=float,
-                        help="NetChop prediction threshold.  Default: 0.5",
-                        default=0.5)
-    parser.add_argument(
-        '--netmhc-stab',
-        action='store_true',
-        help="Run NetMHCStabPan after all filtering and add stability predictions to predicted epitopes"
-    )
 
     args = parser.parse_args(args_input)
 

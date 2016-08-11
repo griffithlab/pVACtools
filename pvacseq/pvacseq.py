@@ -59,6 +59,16 @@ def main():
                                                    add_help=False)
     coverage_filter_parser.set_defaults(func=lib.coverage_filter)
 
+    net_chop_parser = subparsers.add_parser("net_chop",
+                                            help="Submits epitope predictions to NetChop and records the best cleavage site for each variant",
+                                            add_help=False)
+    net_chop_parser.set_defaults(func=lib.net_chop)
+
+    netmhc_stab_parser = subparsers.add_parser("netmhc_stab",
+                                               help="Generates stability predictions for predicted epitopes",
+                                               add_help=False)
+    netmhc_stab_parser.set_defaults(func=lib.netmhc_stab)
+
     download_example_data_parser = subparsers.add_parser("download_example_data",
                                                          help="Downloads example input and output files",
                                                          add_help=False)
@@ -73,16 +83,6 @@ def main():
                                                  help="Shows a list of valid allele names",
                                                  add_help=False)
     valid_alleles_parser.set_defaults(func=lib.valid_alleles)
-
-    net_chop_parser = subparsers.add_parser("net_chop",
-                                            help="Submits epitope predictions to NetChop and records the best cleavage site for each variant",
-                                            add_help=False)
-    net_chop_parser.set_defaults(func=lib.net_chop)
-
-    netmhc_stab_parser = subparsers.add_parser("netmhc_stab",
-                                               help="Generates stability predictions for predicted epitopes",
-                                               add_help=False)
-    netmhc_stab_parser.set_defaults(func=lib.netmhc_stab)
 
     parser.add_argument("-v", "--version",
                         help="Display the currently installed pvacseq version",
