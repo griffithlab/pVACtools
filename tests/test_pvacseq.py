@@ -162,7 +162,7 @@ class PVACTests(unittest.TestCase):
             os.path.join(self.test_data_directory, "tmp", "Test_21.fa.split_1-200.key"),
             False
         ))
-        self.assertEqual(len(self.request_mock.mock_calls), 7)
+        self.assertEqual(len(self.request_mock.mock_calls), 8)
         methods = self.methods
         for method in methods.keys():
             for allele in methods[method].keys():
@@ -210,9 +210,9 @@ class PVACTests(unittest.TestCase):
         ))
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test_filtered.chop.stab.tsv"),
-            os.path.join(self.test_data_directory, "Test_filtered.stab.tsv")
+            os.path.join(self.test_data_directory, "Test_filtered.chop.stab.tsv"),
             False
-        )
+        ))
         output_dir.cleanup()
 
     def test_split_file(self):

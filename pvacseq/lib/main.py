@@ -292,8 +292,8 @@ def main(args_input = sys.argv[1:]):
         )
 
     if args.netmhc_stab:
-        final_path = netmhstab(args, final_path, output_dir)
-        
+        final_path = netmhc_stab(args, final_path, output_dir)
+
     print("\n")
     print("Done: pvacseq has completed. File", final_path,
           "contains list of binding-filtered putative neoantigens")
