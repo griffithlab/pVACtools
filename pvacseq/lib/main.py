@@ -17,6 +17,7 @@ import shutil
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq run")
 
+<<<<<<< HEAD
     parser.add_argument(
         "input_file",
         help="Input VCF with VEP annotations (please provide complete path)"
@@ -32,12 +33,6 @@ def main(args_input = sys.argv[1:]):
              + "For a list of available alleles, use: pvacseq valid_alleles",
     )
     parser.add_argument(
-        "epitope_length", type=lambda s:[int(epl) for epl in s.split(',')],
-        help="Length of subpeptides(epitopes) to predict. "
-             + "Multiple lengths can be specified using a comma-separated list. "
-             + "Typical epitope lengths vary between 8-11.",
-    )
-    parser.add_argument(
         "prediction_algorithms",
         choices=PredictionClass.prediction_methods(),
         nargs="+",
@@ -46,6 +41,13 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument(
         "output_dir",
         help="Output directory for writing all result files"
+    )
+    parser.add_argument(
+        "-e", "--epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+        help="Length of subpeptides(epitopes) to predict. "
+             + "Multiple lengths can be specified using a comma-separated list. "
+             + "Typical epitope lengths vary between 8-11. " 
+             + "Required for Class II prediction algorithms",
     )
     parser.add_argument(
         "-l", "--peptide-sequence-length", type=int,
@@ -133,28 +135,42 @@ def main(args_input = sys.argv[1:]):
 
     output_dir = os.path.abspath(args.output_dir)
 
-    pipeline = MHCIPipeline(
-        input_file              = args.input_file,
-        sample_name             = args.sample_name,
-        alleles                 = args.allele,
-        epitope_lengths         = args.epitope_length,
-        prediction_algorithms   = args.prediction_algorithms,
-        output_dir              = output_dir,
-        peptide_sequence_length = args.peptide_sequence_length,
-        gene_expn_file          = args.gene_expn_file,
-        transcript_expn_file    = args.transcript_expn_file,
-        net_chop_method         = args.net_chop_method,
-        net_chop_threshold      = args.net_chop_threshold,
-        netmhc_stab             = args.netmhc_stab,
-        top_result_per_mutation = args.top_result_per_mutation,
-        top_score_metric        = args.top_score_metric,
-        binding_threshold       = args.binding_threshold,
-        minimum_fold_change     = args.minimum_fold_change,
-        expn_val                = args.expn_val,
-        fasta_size              = args.fasta_size,
-        keep_tmp_files          = args.keep_tmp_files,
-    )
-    pipeline.execute()
+    class_i_prediction_algorithms = []
+    class_ii_prediction_algorithms = []
+    for prediction_algorithm in args.prediction_algorithms:
+        prediction_class = globals()[prediction_algorithm]
+        prediction_class_object = prediction_class()
+        if isinstance(prediction_class_object, MHCI):
+            class_i_prediction_algorithms.append(prediction_algorithm)
+        elif isinstance(prediction_class_object, MHCII):
+            class_ii_prediction_algorithms.append(prediction_algorithm)
+
+    if class_i_prediction_algorithms is not None:
+        if args.epitope_length is None:
+            sys.exit("Epitope length is required for class I binding predictions")
+
+        pipeline = MHCIPipeline(
+            input_file              = args.input_file,
+            sample_name             = args.sample_name,
+            alleles                 = args.allele,
+            epitope_lengths         = args.epitope_length,
+            prediction_algorithms   = args.prediction_algorithms,
+            output_dir              = output_dir,
+            peptide_sequence_length = args.peptide_sequence_length,
+            gene_expn_file          = args.gene_expn_file,
+            transcript_expn_file    = args.transcript_expn_file,
+            net_chop_method         = args.net_chop_method,
+            net_chop_threshold      = args.net_chop_threshold,
+            netmhc_stab             = args.netmhc_stab,
+            top_result_per_mutation = args.top_result_per_mutation,
+            top_score_metric        = args.top_score_metric,
+            binding_threshold       = args.binding_threshold,
+            minimum_fold_change     = args.minimum_fold_change,
+            expn_val                = args.expn_val,
+            fasta_size              = args.fasta_size,
+            keep_tmp_files          = args.keep_tmp_files,
+        )
+        pipeline.execute()
 
 if __name__ == '__main__':
     main()

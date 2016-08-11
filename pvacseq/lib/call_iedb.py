@@ -28,6 +28,7 @@ def main(args_input = sys.argv[1:]):
     prediction_class = PredictionClass.prediction_class_for_iedb_prediction_method(args.method)
     prediction_class.check_allele_valid(args.allele)
     prediction_class.check_length_valid_for_allele(args.epitope_length, args.allele)
+    prediction_class_object = PredictionClass.prediction_class_for_iedb_prediction_method(args.method)
 
     if args.epitope_length is None and isinstance(prediction_class_object, MHCI):
         sys.exit("Epitope length is required for class I binding predictions")
