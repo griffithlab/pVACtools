@@ -17,7 +17,6 @@ import shutil
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq run")
 
-<<<<<<< HEAD
     parser.add_argument(
         "input_file",
         help="Input VCF with VEP annotations (please provide complete path)"
@@ -133,7 +132,7 @@ def main(args_input = sys.argv[1:]):
     if args.fasta_size%2 != 0:
         sys.exit("The fasta size needs to be an even number")
 
-    output_dir = os.path.abspath(args.output_dir)
+    base_output_dir = os.path.abspath(args.output_dir)
 
     class_i_prediction_algorithms = []
     class_ii_prediction_algorithms = []
@@ -145,31 +144,38 @@ def main(args_input = sys.argv[1:]):
         elif isinstance(prediction_class_object, MHCII):
             class_ii_prediction_algorithms.append(prediction_algorithm)
 
-    if class_i_prediction_algorithms is not None:
+    arguments = {
+        'input_file'              : args.input_file,
+        'sample_name'             : args.sample_name,
+        'alleles'                 : args.allele,
+        'gene_expn_file'          : args.gene_expn_file,
+        'transcript_expn_file'    : args.transcript_expn_file,
+        'net_chop_method'         : args.net_chop_method,
+        'net_chop_threshold'      : args.net_chop_threshold,
+        'netmhc_stab'             : args.netmhc_stab,
+        'top_result_per_mutation' : args.top_result_per_mutation,
+        'top_score_metric'        : args.top_score_metric,
+        'binding_threshold'       : args.binding_threshold,
+        'minimum_fold_change'     : args.minimum_fold_change,
+        'expn_val'                : args.expn_val,
+        'fasta_size'              : args.fasta_size,
+        'keep_tmp_files'          : args.keep_tmp_files,
+    }
+
+    if len(class_i_prediction_algorithms) > 0:
         if args.epitope_length is None:
             sys.exit("Epitope length is required for class I binding predictions")
 
-        pipeline = MHCIPipeline(
-            input_file              = args.input_file,
-            sample_name             = args.sample_name,
-            alleles                 = args.allele,
-            epitope_lengths         = args.epitope_length,
-            prediction_algorithms   = args.prediction_algorithms,
-            output_dir              = output_dir,
-            peptide_sequence_length = args.peptide_sequence_length,
-            gene_expn_file          = args.gene_expn_file,
-            transcript_expn_file    = args.transcript_expn_file,
-            net_chop_method         = args.net_chop_method,
-            net_chop_threshold      = args.net_chop_threshold,
-            netmhc_stab             = args.netmhc_stab,
-            top_result_per_mutation = args.top_result_per_mutation,
-            top_score_metric        = args.top_score_metric,
-            binding_threshold       = args.binding_threshold,
-            minimum_fold_change     = args.minimum_fold_change,
-            expn_val                = args.expn_val,
-            fasta_size              = args.fasta_size,
-            keep_tmp_files          = args.keep_tmp_files,
-        )
+        print("Executing MHC Class I predictions")
+
+        output_dir = os.path.join(base_output_dir, 'class_i')
+        os.makedirs(output_dir)
+
+        arguments['peptide_sequence_length'] = args.peptide_sequence_length
+        arguments['epitope_lengths']         = args.epitope_length
+        arguments['prediction_algorithms']   = class_i_prediction_algorithms
+        arguments['output_dir']              = output_dir
+        pipeline = MHCIPipeline(**arguments)
         pipeline.execute()
 
 if __name__ == '__main__':
