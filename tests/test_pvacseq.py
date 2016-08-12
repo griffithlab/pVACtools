@@ -139,8 +139,7 @@ class PVACTests(unittest.TestCase):
             output_dir.name,
             '--top-score-metric=lowest',
             '--keep-tmp-files',
-            '--net-chop-method',
-            'cterm',
+            '--net-chop-method', 'cterm',
             '--netmhc-stab',
             '--gene-expn-file', os.path.join(self.test_data_directory, "genes.fpkm_tracking"),
             '--transcript-expn-file', os.path.join(self.test_data_directory, "isoforms.fpkm_tracking"),
@@ -213,6 +212,11 @@ class PVACTests(unittest.TestCase):
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "Test_filtered.chop.tsv"),
             os.path.join(self.test_data_directory, "Test_filtered.chop.tsv"),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "Test.filtered.final.tsv"),
+            os.path.join(self.test_data_directory, "Test.filtered.final.tsv"),
             False
         ))
         self.assertTrue(cmp(

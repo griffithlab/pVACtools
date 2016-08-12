@@ -5,205 +5,14 @@ sys.path.append(root)
 
 import argparse
 import os
-from subprocess import run, call, PIPE
-import glob
-import csv
 
 try:
     from .. import lib
 except ValueError:
     import lib
 from lib.prediction_class import *
+from lib.pipeline import *
 import shutil
-
-def convert_vcf(args, output_dir):
-    print("Converting VCF to TSV")
-    tsv_file      = args.sample_name + '.tsv'
-    tsv_file_path = os.path.join(output_dir, tsv_file)
-    convert_params = [
-        args.input_file,
-        tsv_file_path,
-    ]
-    if args.gene_expn_file is not None:
-        convert_params.extend(['-g', args.gene_expn_file])
-    if args.transcript_expn_file is not None:
-        convert_params.extend(['-i', args.transcript_expn_file])
-    lib.convert_vcf.main(convert_params)
-    print("Completed")
-    return tsv_file_path
-
-def generate_fasta(args, tsv_file_path, output_dir):
-    print("Generating Variant Peptide FASTA File")
-    fasta_file      = args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa"
-    fasta_file_path = os.path.join(output_dir, fasta_file)
-    lib.generate_fasta.main([
-        tsv_file_path,
-        str(args.peptide_sequence_length),
-        fasta_file_path
-    ])
-    print("Completed")
-    return fasta_file_path
-
-def split_fasta_basename(args, tmp_dir):
-    return os.path.join(tmp_dir, args.sample_name + "_" + str(args.peptide_sequence_length) + ".fa.split")
-
-def split_fasta_file_and_create_key_files(args, fasta_file_path, tmp_dir):
-    split_reader = open(fasta_file_path, mode='r')
-    split_start = 1
-    #Each fasta entry consists of two lines: header and sequence
-    chunk_size  = args.fasta_size * 2
-    chunks = []
-    for chunk in split_file(split_reader, chunk_size):
-        split_end = split_start + args.fasta_size - 1
-        print("Splitting FASTA into smaller chunks - Entries %d-%d" % (split_start, split_end))
-        split_fasta_file_path = "%s_%d-%d"%(split_fasta_basename(args, tmp_dir), split_start, split_end)
-        if os.path.exists(split_fasta_file_path):
-            print("Split FASTA file for Entries %d-%d already exists. Skipping." % (split_start, split_end))
-            [entry for entry in chunk]
-        else:
-            split_writer = open(split_fasta_file_path, mode='w')
-            split_writer.writelines(chunk)
-            split_writer.close()
-            print("Completed")
-        print("Generating FASTA Key File - Entries %d-%d" % (split_start, split_end))
-        split_fasta_key_file_path = split_fasta_file_path + '.key'
-        if os.path.exists(split_fasta_key_file_path):
-            print("Split FASTA Key File for Entries %d-%d already exists. Skipping." % (split_start, split_end))
-        else:
-            lib.generate_fasta_key.main([
-                split_fasta_file_path,
-                split_fasta_key_file_path,
-            ])
-            print("Completed")
-        chunks.append("%d-%d" % (split_start, split_end))
-        split_start += args.fasta_size
-    split_reader.close()
-    return chunks
-
-def call_iedb_and_parse_outputs(args, chunks, tsv_file_path, tmp_dir):
-    split_parsed_output_files = []
-    for chunk in chunks:
-        for a in args.allele:
-            for epl in args.epitope_length:
-                split_fasta_file_path = "%s_%s"%(split_fasta_basename(args, tmp_dir), chunk)
-                split_iedb_output_files = []
-                print("Processing entries for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
-                for method in args.prediction_algorithms:
-                    prediction_class = globals()[method]
-                    prediction = prediction_class()
-                    iedb_method = prediction.iedb_prediction_method
-                    valid_alleles = prediction.valid_allele_names()
-                    if a not in valid_alleles:
-                        print("Allele %s not valid for Method %s. Skipping." % (a, method))
-                        continue
-                    valid_lengths = prediction.valid_lengths_for_allele(a)
-                    if epl not in valid_lengths:
-                        print("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
-                        continue
-
-                    split_iedb_out = os.path.join(tmp_dir, ".".join([args.sample_name, a, str(epl), iedb_method, "tsv_%s" % chunk]))
-                    if os.path.exists(split_iedb_out):
-                        print("IEDB file for Allele %s and Epitope Length %s with Method %s (Entries %s) already exists. Skipping." % (a, epl, method, chunk))
-                        split_iedb_output_files.append(split_iedb_out)
-                        continue
-                    print("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, chunk))
-                    lib.call_iedb.main([
-                        split_fasta_file_path,
-                        split_iedb_out,
-                        iedb_method,
-                        a,
-                        str(epl),
-                    ])
-                    print("Completed")
-                    split_iedb_output_files.append(split_iedb_out)
-
-                split_parsed_file_path = os.path.join(tmp_dir, ".".join([args.sample_name, a, str(epl), "parsed", "tsv_%s" % chunk]))
-                if os.path.exists(split_parsed_file_path):
-                    print("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, chunk))
-                    split_parsed_output_files.append(split_parsed_file_path)
-                    continue
-                split_fasta_key_file_path = split_fasta_file_path + '.key'
-
-                if len(split_iedb_output_files) > 0:
-                    print("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
-                    params = [
-                        *split_iedb_output_files,
-                        tsv_file_path,
-                        split_fasta_key_file_path,
-                        split_parsed_file_path,
-                        '-m', args.top_score_metric,
-                    ]
-                    if args.top_result_per_mutation == True:
-                        params.append('-t')
-                    lib.parse_output.main(params)
-                    print("Completed")
-                    split_parsed_output_files.append(split_parsed_file_path)
-
-    return split_parsed_output_files
-
-def combined_parsed_outputs(args, split_parsed_output_files, output_dir):
-    print("Combining Parsed IEDB Output Files")
-    combined_parsed      = "%s.combined.parsed.tsv" % args.sample_name
-    combined_parsed_path = os.path.join(output_dir, combined_parsed)
-    lib.combine_parsed_outputs.main([
-        *split_parsed_output_files,
-        combined_parsed_path
-    ])
-    print("Completed")
-    return combined_parsed_path
-
-def binding_filter(args, combined_parsed_path, output_dir):
-    binding_filt_out_path = os.path.join(output_dir, args.sample_name+"_binding_filtered.tsv")
-    print("Running Binding Filters")
-    lib.binding_filter.main(
-        [
-            combined_parsed_path,
-            binding_filt_out_path,
-            '-c', str(args.minimum_fold_change),
-            '-b', str(args.binding_threshold),
-            '-m', str(args.top_score_metric),
-        ]
-    )
-    print("Completed")
-    return binding_filt_out_path
-
-def coverage_filter(args, binding_filt_out_path, output_dir):
-    coverage_filt_out_path = os.path.join(args.output_dir, args.sample_name+"_final_filtered.tsv")
-    print("Running Coverage Filters")
-    lib.coverage_filter.main([
-        binding_filt_out_path,
-        coverage_filt_out_path,
-        '--expn-val', str(args.expn_val),
-    ])
-    print("Completed")
-    return coverage_filt_out_path
-
-def net_chop(args, input_path):
-    output_path = os.path.join(args.output_dir, args.sample_name+"_filtered.chop.tsv")
-    print("Submitting remaining epitopes to NetChop")
-    lib.net_chop.main([
-        input_path,
-        output_path,
-        '--method',
-        args.net_chop_method,
-        '--threshold',
-        str(args.net_chop_threshold)
-    ])
-    print("Completed")
-    return output_path
-
-def netmhc_stab(args, input_path, output_dir):
-    (filename, ext) = os.path.splitext(input_path)
-    output_filepath = filename+'.stab'+ext
-    print("Running NetMHCStabPan")
-    lib.netmhc_stab.main(
-        [
-            input_path,
-            output_filepath
-        ]
-    )
-    print("Completed")
-    return output_filepath
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq run")
@@ -291,42 +100,28 @@ def main(args_input = sys.argv[1:]):
 
     output_dir = os.path.abspath(args.output_dir)
 
-    tsv_file_path             = convert_vcf(args, output_dir)
-    fasta_file_path           = generate_fasta(args, tsv_file_path, output_dir)
-
-    if os.path.getsize(fasta_file_path) == 0:
-        sys.exit("The fasta file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
-
-    tmp_dir = os.path.join(args.output_dir, 'tmp')
-    os.makedirs(tmp_dir)
-    chunks                    = split_fasta_file_and_create_key_files(args, fasta_file_path, tmp_dir)
-    split_parsed_output_files = call_iedb_and_parse_outputs(args, chunks, tsv_file_path, tmp_dir)
-
-    if len(split_parsed_output_files) == 0:
-        sys.exit("No output files were created. Aborting.")
-
-    combined_parsed_path      = combined_parsed_outputs(args, split_parsed_output_files, output_dir)
-    final_path                = binding_filter(args, combined_parsed_path, output_dir)
-
-    if (args.gene_expn_file is not None
-        or args.transcript_expn_file is not None):
-        final_path = coverage_filter(args, final_path, output_dir)
-
-    if args.net_chop_method:
-        final_path = net_chop(
-            args,
-            final_path
-        )
-
-    if args.netmhc_stab:
-        final_path = netmhc_stab(args, final_path, output_dir)
-
-    print("\n")
-    print("Done: pvacseq has completed. File", final_path, "contains list of filtered putative neoantigens.\n", 
-         "We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
-
-    if not args.keep_tmp_files:
-        shutil.rmtree(tmp_dir)
+    pipeline = MHCIPipeline(
+        input_file              = args.input_file,
+        sample_name             = args.sample_name,
+        alleles                 = args.allele,
+        epitope_lengths         = args.epitope_length,
+        prediction_algorithms   = args.prediction_algorithms,
+        output_dir              = output_dir,
+        peptide_sequence_length = args.peptide_sequence_length,
+        gene_expn_file          = args.gene_expn_file,
+        transcript_expn_file    = args.transcript_expn_file,
+        net_chop_method         = args.net_chop_method,
+        net_chop_threshold      = args.net_chop_threshold,
+        netmhc_stab             = args.netmhc_stab,
+        top_result_per_mutation = args.top_result_per_mutation,
+        top_score_metric        = args.top_score_metric,
+        binding_threshold       = args.binding_threshold,
+        minimum_fold_change     = args.minimum_fold_change,
+        expn_val                = args.expn_val,
+        fasta_size              = args.fasta_size,
+        keep_tmp_files          = args.keep_tmp_files,
+    )
+    pipeline.execute()
 
 def split_file(reader, lines=400):
     from itertools import islice, chain
