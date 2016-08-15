@@ -178,5 +178,16 @@ def main(args_input = sys.argv[1:]):
         pipeline = MHCIPipeline(**arguments)
         pipeline.execute()
 
+    if len(class_ii_prediction_algorithms) > 0:
+        print("Executing MHC Class II predictions")
+
+        output_dir = os.path.join(base_output_dir, 'class_ii')
+        os.makedirs(output_dir, exist_ok=True)
+
+        arguments['prediction_algorithms']   = class_ii_prediction_algorithms
+        arguments['output_dir']              = output_dir
+        pipeline = MHCIIPipeline(**arguments)
+        pipeline.execute()
+
 if __name__ == '__main__':
     main()
