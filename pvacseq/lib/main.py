@@ -169,7 +169,7 @@ def main(args_input = sys.argv[1:]):
         print("Executing MHC Class I predictions")
 
         output_dir = os.path.join(base_output_dir, 'class_i')
-        os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
         arguments['peptide_sequence_length'] = args.peptide_sequence_length
         arguments['epitope_lengths']         = args.epitope_length

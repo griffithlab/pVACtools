@@ -35,7 +35,7 @@ class Pipeline(metaclass=ABCMeta):
         self.fasta_size              = kwargs['fasta_size']
         self.keep_tmp_files          = kwargs['keep_tmp_files']
         tmp_dir = os.path.join(self.output_dir, 'tmp')
-        os.makedirs(tmp_dir)
+        os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
 
     def tsv_file_path(self):
