@@ -245,7 +245,8 @@ class Pipeline(metaclass=ABCMeta):
         split_parsed_output_files = self.call_iedb_and_parse_outputs(chunks)
 
         if len(split_parsed_output_files) == 0:
-            sys.exit("No output files were created. Aborting.")
+            print("No output files were created. Aborting.")
+            return
 
         self.combined_parsed_outputs(split_parsed_output_files)
         self.binding_filter()
