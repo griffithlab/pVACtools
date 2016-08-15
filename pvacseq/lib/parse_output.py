@@ -93,7 +93,10 @@ def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
         (sample, allele_tmp, peptide_length_tmp, method, file_extension) = os.path.basename(input_iedb_file.name).split(".", 4)
         for line in iedb_tsv_reader:
             protein_label  = line['seq_num']
-            position       = line['start']
+            if 'core_peptide' in line:
+                position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
+            else:
+                position   = line['start']
             epitope        = line['peptide']
             score          = line['ic50']
             allele         = line['allele']
