@@ -97,7 +97,7 @@ def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
             epitope        = line['peptide']
             score          = line['ic50']
             allele         = line['allele']
-            peptide_length = line['length']
+            peptide_length = len(epitope)
 
             if protein_identifier_from_label[protein_label] is not None:
                 protein_identifier = protein_identifier_from_label[protein_label]
