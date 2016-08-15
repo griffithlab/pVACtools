@@ -125,7 +125,7 @@ class Pipeline(metaclass=ABCMeta):
                             print("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
                             continue
 
-                        split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, str(epl), iedb_method, "tsv_%s" % chunk]))
+                        split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, str(epl), "tsv_%s" % chunk]))
                         if os.path.exists(split_iedb_out):
                             print("IEDB file for Allele %s and Epitope Length %s with Method %s (Entries %s) already exists. Skipping." % (a, epl, method, chunk))
                             split_iedb_output_files.append(split_iedb_out)

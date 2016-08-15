@@ -172,8 +172,8 @@ class PVACTests(unittest.TestCase):
                     self.request_mock.assert_has_calls([
                         generate_call(method, allele, length, self.test_data_directory, output_dir.name)
                     ])
-                    output_file   = os.path.join(output_dir.name, "class_i", "tmp", 'Test.%s.%s.%s.tsv_1-200' % (allele, length, method))
-                    expected_file = os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.%s.%s.%s.tsv_1-200' % (allele, length, method))
+                    output_file   = os.path.join(output_dir.name, "class_i", "tmp", 'Test.%s.%s.%s.tsv_1-200' % (method, allele, length))
+                    expected_file = os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.%s.%s.%s.tsv_1-200' % (method, allele, length))
                     self.assertTrue(cmp(output_file, expected_file, False))
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-200'),
