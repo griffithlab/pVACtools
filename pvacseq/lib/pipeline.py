@@ -178,7 +178,7 @@ class Pipeline(metaclass=ABCMeta):
         print("Completed")
 
     def binding_filter_out_path(self):
-        return os.path.join(self.output_dir, self.sample_name+"_binding_filtered.tsv")
+        return os.path.join(self.output_dir, self.sample_name+".filtered.binding.tsv")
 
     def binding_filter(self):
         print("Running Binding Filters")
@@ -194,7 +194,7 @@ class Pipeline(metaclass=ABCMeta):
         print("Completed")
 
     def coverage_filter_out_path(self):
-        return os.path.join(self.output_dir, self.sample_name+"_final_filtered.tsv")
+        return os.path.join(self.output_dir, self.sample_name+".filtered.coverage.tsv")
 
     def coverage_filter(self):
         print("Running Coverage Filters")
@@ -206,7 +206,7 @@ class Pipeline(metaclass=ABCMeta):
         print("Completed")
 
     def net_chop_out_path(self):
-        return os.path.join(self.output_dir, self.sample_name+"_filtered.chop.tsv")
+        return os.path.join(self.output_dir, self.sample_name+".chop.tsv")
 
     def net_chop(self):
         print("Submitting remaining epitopes to NetChop")
@@ -220,19 +220,19 @@ class Pipeline(metaclass=ABCMeta):
         ])
         print("Completed")
 
-    def final_filtered_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".filtered.final.tsv")
-
     def netmhc_stab_out_path(self):
-        return os.path.join(self.output_dir, self.sample_name+"_filtered.chop.stab.tsv")
+        return os.path.join(self.output_dir, self.sample_name+".stab.tsv")
 
     def call_netmhc_stab(self):
         print("Running NetMHCStabPan")
         lib.netmhc_stab.main([
-            self.final_filtered_path(),
+            self.net_chop_out_path(),
             self.netmhc_stab_out_path(),
         ])
         print("Completed")
+
+    def final_path(self):
+        return os.path.join(self.output_dir, self.sample_name+".final.tsv")
 
     def execute(self):
         self.convert_vcf()
@@ -264,15 +264,18 @@ class Pipeline(metaclass=ABCMeta):
             os.symlink(self.coverage_filter_out_path(), self.net_chop_out_path())
             symlinks_to_delete.append(self.net_chop_out_path())
 
-        shutil.copy(self.net_chop_out_path(), self.final_filtered_path())
+        if self.netmhc_stab:
+            self.call_netmhc_stab()
+        else:
+            os.symlink(self.net_chop_out_path(), self.netmhc_stab_out_path())
+            symlinks_to_delete.append(self.netmhc_stab_out_path())
+
+        shutil.copy(self.netmhc_stab_out_path(), self.final_path())
         for symlink in symlinks_to_delete:
             os.unlink(symlink)
 
-        if self.netmhc_stab:
-            self.call_netmhc_stab()
-
         print("\n")
-        print("Done: pvacseq has completed. File", self.netmhc_stab_out_path(),
+        print("Done: pvacseq has completed. File", self.final_path(),
               "contains list of filtered putative neoantigens")
         print("We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
 
