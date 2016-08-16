@@ -3,7 +3,7 @@ from pathlib import Path # if you haven't already done so
 root = str(Path(__file__).resolve().parents[1])
 sys.path.append(root)
 
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 import os
 import csv
 
@@ -103,7 +103,9 @@ class Pipeline(metaclass=ABCMeta):
         split_reader.close()
         return chunks
 
-
+    @abstractmethod
+    def call_iedb_and_parse_outputs(self, chunks):
+        pass
 
     def combined_parsed_path(self):
         combined_parsed = "%s.combined.parsed.tsv" % self.sample_name

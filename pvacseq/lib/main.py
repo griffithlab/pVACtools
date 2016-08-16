@@ -144,19 +144,17 @@ def main(args_input = sys.argv[1:]):
         elif isinstance(prediction_class_object, MHCII):
             class_ii_prediction_algorithms.append(prediction_algorithm)
 
-    arguments = {
+    shared_arguments = {
         'input_file'              : args.input_file,
         'sample_name'             : args.sample_name,
         'alleles'                 : args.allele,
         'gene_expn_file'          : args.gene_expn_file,
         'transcript_expn_file'    : args.transcript_expn_file,
-        'net_chop_method'         : args.net_chop_method,
-        'net_chop_threshold'      : args.net_chop_threshold,
-        'netmhc_stab'             : args.netmhc_stab,
         'top_result_per_mutation' : args.top_result_per_mutation,
         'top_score_metric'        : args.top_score_metric,
         'binding_threshold'       : args.binding_threshold,
         'minimum_fold_change'     : args.minimum_fold_change,
+        'net_chop_threshold'      : args.net_chop_threshold,
         'expn_val'                : args.expn_val,
         'fasta_size'              : args.fasta_size,
         'keep_tmp_files'          : args.keep_tmp_files,
@@ -171,11 +169,14 @@ def main(args_input = sys.argv[1:]):
         output_dir = os.path.join(base_output_dir, 'class_i')
         os.makedirs(output_dir, exist_ok=True)
 
-        arguments['peptide_sequence_length'] = args.peptide_sequence_length
-        arguments['epitope_lengths']         = args.epitope_length
-        arguments['prediction_algorithms']   = class_i_prediction_algorithms
-        arguments['output_dir']              = output_dir
-        pipeline = MHCIPipeline(**arguments)
+        class_i_arguments = shared_arguments.copy()
+        class_i_arguments['peptide_sequence_length'] = args.peptide_sequence_length
+        class_i_arguments['epitope_lengths']         = args.epitope_length
+        class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
+        class_i_arguments['output_dir']              = output_dir
+        class_i_arguments['net_chop_method']         = args.net_chop_method
+        class_i_arguments['netmhc_stab']             = args.netmhc_stab
+        pipeline = MHCIPipeline(**class_i_arguments)
         pipeline.execute()
 
     if len(class_ii_prediction_algorithms) > 0:
@@ -184,9 +185,12 @@ def main(args_input = sys.argv[1:]):
         output_dir = os.path.join(base_output_dir, 'class_ii')
         os.makedirs(output_dir, exist_ok=True)
 
-        arguments['prediction_algorithms']   = class_ii_prediction_algorithms
-        arguments['output_dir']              = output_dir
-        pipeline = MHCIIPipeline(**arguments)
+        class_ii_arguments = shared_arguments.copy()
+        class_ii_arguments['prediction_algorithms'] = class_ii_prediction_algorithms
+        class_ii_arguments['output_dir']            = output_dir
+        class_ii_arguments['net_chop_method']       = None
+        class_ii_arguments['netmhc_stab']           = False
+        pipeline = MHCIIPipeline(**class_ii_arguments)
         pipeline.execute()
 
 if __name__ == '__main__':
