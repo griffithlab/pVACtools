@@ -69,7 +69,7 @@ class PredictionClass(metaclass=ABCMeta):
     def check_allele_valid(self, allele):
         valid_alleles = self.valid_allele_names()
         if allele not in valid_alleles:
-            sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, self.iedb_prediction_method, method))
+            sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, self.iedb_prediction_method, self.__class__.__name__))
 
 class MHCI(PredictionClass, metaclass=ABCMeta):
     @property
