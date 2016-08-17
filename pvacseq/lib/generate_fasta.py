@@ -12,7 +12,7 @@ def distance_from_start(position, string):
     return position
 
 def distance_from_end(position, string):
-    return len(string) - 1 - position;
+    return len(string) - 1 - position
 
 def determine_peptide_sequence_length(full_wildtype_sequence_length, peptide_sequence_length, line):
     actual_peptide_sequence_length = peptide_sequence_length
@@ -81,7 +81,7 @@ def main(args_input = sys.argv[1:]):
 
     peptide_sequence_length = args.peptide_sequence_length
     tsvin                   = csv.DictReader(args.input_file, delimiter='\t')
-    pattern                 = re.compile('([A-Z])(\d+)([A-Z])');
+    pattern                 = re.compile('([A-Z])(\d+)([A-Z])')
     for line in tsvin:
         variant_type = line['variant_type']
         full_wildtype_sequence = line['wildtype_amino_acid_sequence']
@@ -96,7 +96,7 @@ def main(args_input = sys.argv[1:]):
                 position = int(line['protein_position'].split('-', 1)[0])
                 wildtype_amino_acid_length = 0
             else:
-                position = int(line['protein_position']) - 1;
+                position = int(line['protein_position']) - 1
                 wildtype_amino_acid_length = len(wildtype_amino_acid)
         elif variant_type == 'inframe_del':
             variant_type = 'inframe_del'
@@ -120,7 +120,7 @@ def main(args_input = sys.argv[1:]):
         else:
             mutation_start_position, wildtype_subsequence = get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line)
             mutation_end_position = mutation_start_position + wildtype_amino_acid_length
-            mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:];
+            mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
 
         variant_id = line['index']
         for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, mutant_subsequence]):
