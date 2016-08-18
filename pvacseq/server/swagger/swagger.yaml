@@ -1,0 +1,354 @@
+---
+swagger: "2.0"
+info:
+  description: "API to support pVacSeq user interface for generating reports on pipeline\
+    \ results"
+  version: "1.0.0"
+  title: "pVacSeq UI"
+host: "localhost"
+basePath: "/q"
+schemes:
+- "https"
+produces:
+- "application/json"
+paths:
+  /api/v1/results/{id}:
+    get:
+      tags:
+      - "results"
+      summary: "Get available output files"
+      description: "The results endpoint returns a list of available pipeline data\
+        \ files for generating reports. The response includes an array of objects\
+        \ containing a \n"
+      operationId: "pvacseq.server.controllers.default_controller.results_get"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Process ID from which to fetch results"
+        required: true
+        type: "integer"
+      - name: "count"
+        in: "query"
+        description: "Number of results to return"
+        required: false
+        type: "integer"
+        default: 10
+      - name: "page"
+        in: "query"
+        description: "Page number of results to return"
+        required: false
+        type: "integer"
+        default: 1
+      responses:
+        200:
+          description: "An array of results"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Result"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-tags:
+      - tag: "results"
+  /api/v1/results/{id}/{file}:
+    get:
+      tags:
+      - "file"
+      summary: "Get pipeline output data"
+      description: "This endpoint returns raw data from the requested output file \n"
+      operationId: "pvacseq.server.controllers.default_controller.results_getfile"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Process ID from which to read results"
+        required: true
+        type: "integer"
+      - name: "count"
+        in: "query"
+        description: "Number of results to return"
+        required: false
+        type: "integer"
+        default: 10
+      - name: "page"
+        in: "query"
+        description: "Page number of results to return"
+        required: false
+        type: "integer"
+        default: 1
+      - name: "file"
+        in: "path"
+        description: "File id from which to read data"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "An array of entries"
+          schema:
+            type: "array"
+            items: {
+              type: "object"
+            }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-tags:
+      - tag: "file"
+  /api/v1/results/{id}/{file}/cols:
+    get:
+      tags:
+      - "columns"
+      summary: "Get column mappings"
+      description: "This endpoint returns mappings from standardized column names\
+        to their names as they appear in the source data \n"
+      operationId: "pvacseq.server.controllers.default_controller.results_getcols"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Process ID from which to read results"
+        required: true
+        type: "integer"
+      - name: "file"
+        in: "path"
+        description: "File id from which to read data"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "An object mapping the columns"
+          schema:
+            type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-tags:
+      - tag: "cols"
+  /api/v1/start:
+    post:
+      tags:
+      - "start"
+      summary: "Start a new pVAC-Seq run"
+      description: "This endpoint initiates a new pVAC-Seq run\n"
+      operationId: "pvacseq.server.controllers.default_controller.start"
+      parameters:
+      - name: "input"
+        in: "formData"
+        description: "Input VCF file"
+        required: true
+        type: "string"
+      - name: "samplename"
+        in: "formData"
+        description: "Sample Name"
+        required: true
+        type: "string"
+      - name: "alleles"
+        in: "formData"
+        description: "A comma-separated list of alleles to run the sequences against"
+        required: true
+        type: "string"
+      - name: "epitope_lengths"
+        in: "formData"
+        description: "A comma-separated list of epitope lengths to produce"
+        required: true
+        type: "string"
+      - name: "prediction_algorithms"
+        in: "formData"
+        description: "A comma-separated list of prediction algorithms to use"
+        required: true
+        type: "string"
+      - name: "output"
+        in: "formData"
+        description: "The directory to write output to"
+        required: true
+        type: "string"
+      - name: "peptide_sequence_length"
+        in: "formData"
+        description: "Length of the peptide sequences to produce in the FASTA"
+        type: "integer"
+        default: 21
+      - name: "gene_expn_file"
+        in: "formData"
+        description: "genes.fpkm_tracking file from Cufflinks"
+        type: "string"
+        default: ""
+      - name: "transcript_expn_file"
+        in: "formData"
+        description: "isoforms.fpkm_tracking file from Cufflinks"
+        type: "string"
+        default: ""
+      - name: "net_chop_method"
+        in: "formData"
+        description: "Run NetChop using the specified method"
+        type: "string"
+        enum: ["cterm", "20s"]
+      - name: "netmhc_stab"
+        in: "formData"
+        description: "Run NetMHCStabPan at the end of the pipeline"
+        type: "boolean"
+        default: false
+      - name: "top_result_per_mutation"
+        in: "formData"
+        description: "Output top scoring candidate per allele-length per mutation"
+        type: "boolean"
+        default: false
+      - name: "top_score_metric"
+        in: "formData"
+        description: "ic50 metric for choosing best epitopes during binding filtering"
+        type: "string"
+        enum: ["lowest", "median"]
+        default: "median"
+      - name: "binding_threshold"
+        in: "formData"
+        description: "Report only epitopes with a predicted binding score below this value"
+        type: "integer"
+        default: 500
+      - name: "minimum_fold_change"
+        in: "formData"
+        description: "Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
+        type: "integer"
+        default: 0
+      - name: "expn_val"
+        in: "formData"
+        description: "Gene expression cutoff"
+        type: "integer"
+        default: 1
+      - name: "net_chop_threshold"
+        in: "formData"
+        description: "NetChop prediction threshold"
+        type: "number"
+        default: 0.5
+      - name: "fasta_size"
+        in: "formData"
+        description: "Number of entries submitted to IEDB in each request.  Must be an even number"
+        type: "integer"
+        default: 200
+      - name: "keep_tmp_files"
+        in: "formData"
+        description: "Keep temporary files in the output directory after completion"
+        type: "boolean"
+        default: false
+      responses:
+        200:
+          description: "Returns the process ID of the newly started pVAC-Seq run"
+          schema:
+            type: "integer"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-tags:
+      - tag: "test"
+  /api/v1/processes:
+    get:
+      tags:
+        - "processes"
+      summary: "Get list of running processes"
+      description: "This endpoint returns a list of active pvacseq runs\n"
+      operationId: "pvacseq.server.controllers.default_controller.processes"
+      responses:
+        200:
+          description: "A list of active processes"
+          schema:
+            type: "array"
+            items: {
+              type: "integer"
+            }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{id}:
+    get:
+      tags:
+        - "processes"
+      summary: "Get info about a specific process"
+      description: "This endpoint returns data about a currently running process\n"
+      operationId: "pvacseq.server.controllers.default_controller.process_info"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "File id from which to read data"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "A list of active processes"
+          schema:
+            $ref: "#/definitions/Process"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/shutdown:
+    get:
+      tags:
+        - "processes"
+      summary: "Terminate any running processes then shutdown the server"
+      description: "This endpoint handles the cleanup for closing any active \
+        pvacseq runs, then shutsdown the server\n"
+      operationId: "pvacseq.server.controllers.default_controller.shutdown"
+      responses:
+        200:
+          description: "This endpoint does not actually return anything"
+          schema:
+            type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Process:
+    type: "object"
+    properties:
+      pid:
+        type: "integer"
+        description: "Actual pid assigned by the OS for this pVAC-Seq run"
+      id:
+        type: "integer"
+        description: "Unique process ID"
+      command:
+        type: "string"
+        description: "The shell command issued to start this pVAC-Seq run"
+      status:
+        type: "string"
+        description: "The most recent message sent by pVAC-Seq"
+      log:
+        type: "string"
+        description: "The full output transcript from pVAC-Seq"
+      output:
+        type: "string"
+        description: "The output folder of the specified process"
+      running:
+        type: "boolean"
+        description: "Indicates whether or not the process is still running"
+  Result:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        description: "Unique identifier of the result file."
+      description:
+        type: "string"
+        description: "Description of result file"
+      display_name:
+        type: "string"
+        description: "Display name of result file (try to keep under 32 chars or so)"
+      url:
+        type: "string"
+        description: "URL of results file"
+      size:
+        type: "string"
+        description: "Size of data file, in bytes"
+  Error:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+      fields:
+        type: "string"
