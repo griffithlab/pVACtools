@@ -46,6 +46,7 @@ class Pipeline(metaclass=ABCMeta):
         self.fasta_size                  = kwargs['fasta_size']
         self.downstream_sequence_length  = kwargs['downstream_sequence_length']
         self.keep_tmp_files              = kwargs['keep_tmp_files']
+        self.pipe                        = kwargs['_pipe']
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
@@ -56,6 +57,7 @@ class Pipeline(metaclass=ABCMeta):
 
     def convert_vcf(self):
         print("Converting VCF to TSV")
+
         convert_params = [
             self.input_file,
             self.tsv_file_path(),
@@ -77,6 +79,7 @@ class Pipeline(metaclass=ABCMeta):
 
         lib.convert_vcf.main(convert_params)
         print("Completed")
+        sys.stdout.flush()
 
     def tsv_entry_count(self):
         with open(self.tsv_file_path()) as tsv_file:
@@ -152,17 +155,20 @@ class Pipeline(metaclass=ABCMeta):
 
     def combined_parsed_outputs(self, split_parsed_output_files):
         print("Combining Parsed IEDB Output Files")
+
         lib.combine_parsed_outputs.main([
             *split_parsed_output_files,
             self.combined_parsed_path()
         ])
         print("Completed")
+        sys.stdout.flush()
 
     def binding_filter_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".filtered.binding.tsv")
 
     def binding_filter(self):
         print("Running Binding Filters")
+
         lib.binding_filter.main(
             [
                 self.combined_parsed_path(),
@@ -173,6 +179,7 @@ class Pipeline(metaclass=ABCMeta):
             ]
         )
         print("Completed")
+        sys.stdout.flush()
 
     def coverage_filter_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".filtered.coverage.tsv")
@@ -199,12 +206,14 @@ class Pipeline(metaclass=ABCMeta):
                 coverage_params.extend([param, str(getattr(self, attribute))])
         lib.coverage_filter.main(coverage_params)
         print("Completed")
+        sys.stdout.flush()
 
     def net_chop_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".chop.tsv")
 
     def net_chop(self):
         print("Submitting remaining epitopes to NetChop")
+
         lib.net_chop.main([
             self.coverage_filter_out_path(),
             self.net_chop_out_path(),
@@ -214,17 +223,20 @@ class Pipeline(metaclass=ABCMeta):
             str(self.net_chop_threshold)
         ])
         print("Completed")
+        sys.stdout.flush()
 
     def netmhc_stab_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".stab.tsv")
 
     def call_netmhc_stab(self):
         print("Running NetMHCStabPan")
+
         lib.netmhc_stab.main([
             self.net_chop_out_path(),
             self.netmhc_stab_out_path(),
         ])
         print("Completed")
+        sys.stdout.flush()
 
     def final_path(self):
         return os.path.join(self.output_dir, self.sample_name+".final.tsv")
@@ -277,11 +289,11 @@ class Pipeline(metaclass=ABCMeta):
         for symlink in symlinks_to_delete:
             os.unlink(symlink)
 
-        print("\n")
-        print("Done: pvacseq has completed. File", self.final_path(),
-              "contains list of filtered putative neoantigens")
-        print("We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
 
+        print("\n")
+        print("Done: pvacseq has completed. File %s contains list of filtered putative neoantigens" % self.final_path())
+        print("We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
+        sys.stdout.flush()
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir)
 
@@ -315,6 +327,7 @@ class MHCIPipeline(Pipeline):
                 generate_fasta_params.extend(['-d', self.downstream_sequence_length,])
             lib.generate_fasta.main(generate_fasta_params)
         print("Completed")
+        sys.stdout.flush()
 
     def call_iedb_and_parse_outputs(self, chunks):
         split_parsed_output_files = []
@@ -345,6 +358,7 @@ class MHCIPipeline(Pipeline):
                             split_iedb_output_files.append(split_iedb_out)
                             continue
                         print("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, fasta_chunk))
+                        sys.stdout.flush()
                         lib.call_iedb.main([
                             split_fasta_file_path,
                             split_iedb_out,
@@ -376,8 +390,8 @@ class MHCIPipeline(Pipeline):
                             params.append('-t')
                         lib.parse_output.main(params)
                         print("Completed")
+                        sys.stdout.flush()
                         split_parsed_output_files.append(split_parsed_file_path)
-
         return split_parsed_output_files
 
 class MHCIIPipeline(Pipeline):
@@ -409,6 +423,7 @@ class MHCIIPipeline(Pipeline):
                 generate_fasta_params.extend(['-d', self.downstream_sequence_length,])
             lib.generate_fasta.main(generate_fasta_params)
         print("Completed")
+        sys.stdout.flush()
 
     def call_iedb_and_parse_outputs(self, chunks):
         split_parsed_output_files = []
@@ -434,6 +449,7 @@ class MHCIIPipeline(Pipeline):
                         split_iedb_output_files.append(split_iedb_out)
                         continue
                     print("Running IEDB on Allele %s with Method %s - Entries %s" % (a, method, fasta_chunk))
+                    sys.stdout.flush()
                     lib.call_iedb.main([
                         split_fasta_file_path,
                         split_iedb_out,
@@ -464,6 +480,7 @@ class MHCIIPipeline(Pipeline):
                         params.append('-t')
                     lib.parse_output.main(params)
                     print("Completed")
+                    sys.stdout.flush()
                     split_parsed_output_files.append(split_parsed_file_path)
 
         return split_parsed_output_files
