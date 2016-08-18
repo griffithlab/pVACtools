@@ -3,6 +3,8 @@ import csv
 import re
 import sys
 
+csv.field_size_limit(sys.maxsize)
+
 def position_out_of_bounds(position, sequence):
     return position > len(sequence)-1
 
