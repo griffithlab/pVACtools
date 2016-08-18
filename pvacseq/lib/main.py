@@ -154,6 +154,7 @@ def main(args_input = sys.argv[1:]):
         'top_score_metric'        : args.top_score_metric,
         'binding_threshold'       : args.binding_threshold,
         'minimum_fold_change'     : args.minimum_fold_change,
+        'net_chop_method'         : args.net_chop_method,
         'net_chop_threshold'      : args.net_chop_threshold,
         'expn_val'                : args.expn_val,
         'fasta_size'              : args.fasta_size,
@@ -174,7 +175,6 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments['epitope_lengths']         = args.epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
-        class_i_arguments['net_chop_method']         = args.net_chop_method
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
         pipeline = MHCIPipeline(**class_i_arguments)
         pipeline.execute()
@@ -188,7 +188,6 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments = shared_arguments.copy()
         class_ii_arguments['prediction_algorithms'] = class_ii_prediction_algorithms
         class_ii_arguments['output_dir']            = output_dir
-        class_ii_arguments['net_chop_method']       = None
         class_ii_arguments['netmhc_stab']           = False
         pipeline = MHCIIPipeline(**class_ii_arguments)
         pipeline.execute()

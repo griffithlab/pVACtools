@@ -151,16 +151,26 @@ class PVACTests(unittest.TestCase):
         pvacseq.lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
-            'HLA-G*01:09,HLA-E*01:01,H2-IAb',
+            'HLA-G*01:09,HLA-E*01:01',
             'NetMHC',
             'PickPocket',
-            'NNalign',
             output_dir.name,
             '-e', '9,10',
             '--top-score-metric=lowest',
             '--keep-tmp-files',
             '--net-chop-method', 'cterm',
             '--netmhc-stab',
+            '--gene-expn-file', os.path.join(self.test_data_directory, "genes.fpkm_tracking"),
+            '--transcript-expn-file', os.path.join(self.test_data_directory, "isoforms.fpkm_tracking"),
+        ])
+        pvacseq.lib.main.main([
+            os.path.join(self.test_data_directory, "input.vcf"),
+            'Test',
+            'H2-IAb',
+            'NNalign',
+            output_dir.name,
+            '--top-score-metric=lowest',
+            '--keep-tmp-files',
             '--gene-expn-file', os.path.join(self.test_data_directory, "genes.fpkm_tracking"),
             '--transcript-expn-file', os.path.join(self.test_data_directory, "isoforms.fpkm_tracking"),
         ])
