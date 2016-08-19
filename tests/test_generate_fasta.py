@@ -152,6 +152,16 @@ class GenerateFastaTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
+    def test_input_file_with_inframe_deletion_range(self):
+        generate_fasta_input_file  = os.path.join(self.test_data_dir, 'input_inframe_deletion_range.tsv')
+        generate_fasta_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python, self.executable, generate_fasta_input_file, self.peptide_sequence_length, generate_fasta_output_file.name
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_range.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+
     def test_input_file_with_frameshift_variant_feature_truncation_generates_expected_file(self):
         generate_fasta_input_file  = os.path.join(self.test_data_dir, 'input_frameshift_variant_feature_truncation.tsv')
         generate_fasta_output_file = tempfile.NamedTemporaryFile()
