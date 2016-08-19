@@ -3,7 +3,7 @@ from pathlib import Path # if you haven't already done so
 root = str(Path(__file__).resolve().parents[1])
 sys.path.append(root)
 
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 import os
 import csv
 
@@ -19,7 +19,6 @@ class Pipeline(metaclass=ABCMeta):
         self.input_file              = kwargs['input_file']
         self.sample_name             = kwargs['sample_name']
         self.alleles                 = kwargs['alleles']
-        self.epitope_lengths         = kwargs['epitope_lengths']
         self.prediction_algorithms   = kwargs['prediction_algorithms']
         self.output_dir              = kwargs['output_dir']
         self.gene_expn_file          = kwargs['gene_expn_file']
@@ -35,7 +34,7 @@ class Pipeline(metaclass=ABCMeta):
         self.fasta_size              = kwargs['fasta_size']
         self.keep_tmp_files          = kwargs['keep_tmp_files']
         tmp_dir = os.path.join(self.output_dir, 'tmp')
-        os.makedirs(tmp_dir)
+        os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
 
     def tsv_file_path(self):
@@ -104,66 +103,9 @@ class Pipeline(metaclass=ABCMeta):
         split_reader.close()
         return chunks
 
+    @abstractmethod
     def call_iedb_and_parse_outputs(self, chunks):
-        split_parsed_output_files = []
-        for chunk in chunks:
-            for a in self.alleles:
-                for epl in self.epitope_lengths:
-                    split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), chunk)
-                    split_iedb_output_files = []
-                    print("Processing entries for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
-                    for method in self.prediction_algorithms:
-                        prediction_class = globals()[method]
-                        prediction = prediction_class()
-                        iedb_method = prediction.iedb_prediction_method
-                        valid_alleles = prediction.valid_allele_names()
-                        if a not in valid_alleles:
-                            print("Allele %s not valid for Method %s. Skipping." % (a, method))
-                            continue
-                        valid_lengths = prediction.valid_lengths_for_allele(a)
-                        if epl not in valid_lengths:
-                            print("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
-                            continue
-
-                        split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, str(epl), iedb_method, "tsv_%s" % chunk]))
-                        if os.path.exists(split_iedb_out):
-                            print("IEDB file for Allele %s and Epitope Length %s with Method %s (Entries %s) already exists. Skipping." % (a, epl, method, chunk))
-                            split_iedb_output_files.append(split_iedb_out)
-                            continue
-                        print("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, chunk))
-                        lib.call_iedb.main([
-                            split_fasta_file_path,
-                            split_iedb_out,
-                            iedb_method,
-                            a,
-                            str(epl),
-                        ])
-                        print("Completed")
-                        split_iedb_output_files.append(split_iedb_out)
-
-                    split_parsed_file_path = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, str(epl), "parsed", "tsv_%s" % chunk]))
-                    if os.path.exists(split_parsed_file_path):
-                        print("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, chunk))
-                        split_parsed_output_files.append(split_parsed_file_path)
-                        continue
-                    split_fasta_key_file_path = split_fasta_file_path + '.key'
-
-                    if len(split_iedb_output_files) > 0:
-                        print("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
-                        params = [
-                            *split_iedb_output_files,
-                            self.tsv_file_path(),
-                            split_fasta_key_file_path,
-                            split_parsed_file_path,
-                            '-m', self.top_score_metric,
-                        ]
-                        if self.top_result_per_mutation == True:
-                            params.append('-t')
-                        lib.parse_output.main(params)
-                        print("Completed")
-                        split_parsed_output_files.append(split_parsed_file_path)
-
-        return split_parsed_output_files
+        pass
 
     def combined_parsed_path(self):
         combined_parsed = "%s.combined.parsed.tsv" % self.sample_name
@@ -245,7 +187,8 @@ class Pipeline(metaclass=ABCMeta):
         split_parsed_output_files = self.call_iedb_and_parse_outputs(chunks)
 
         if len(split_parsed_output_files) == 0:
-            sys.exit("No output files were created. Aborting.")
+            print("No output files were created. Aborting.")
+            return
 
         self.combined_parsed_outputs(split_parsed_output_files)
         self.binding_filter()
@@ -286,6 +229,129 @@ class MHCIPipeline(Pipeline):
     def __init__(self, **kwargs):
         Pipeline.__init__(self, **kwargs)
         self.peptide_sequence_length = kwargs['peptide_sequence_length']
+        self.epitope_lengths         = kwargs['epitope_lengths']
+
+    def call_iedb_and_parse_outputs(self, chunks):
+        split_parsed_output_files = []
+        for chunk in chunks:
+            for a in self.alleles:
+                for epl in self.epitope_lengths:
+                    split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), chunk)
+                    split_iedb_output_files = []
+                    print("Processing entries for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
+                    for method in self.prediction_algorithms:
+                        prediction_class = globals()[method]
+                        prediction = prediction_class()
+                        iedb_method = prediction.iedb_prediction_method
+                        valid_alleles = prediction.valid_allele_names()
+                        if a not in valid_alleles:
+                            print("Allele %s not valid for Method %s. Skipping." % (a, method))
+                            continue
+                        valid_lengths = prediction.valid_lengths_for_allele(a)
+                        if epl not in valid_lengths:
+                            print("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
+                            continue
+
+                        split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, str(epl), "tsv_%s" % chunk]))
+                        if os.path.exists(split_iedb_out):
+                            print("IEDB file for Allele %s and Epitope Length %s with Method %s (Entries %s) already exists. Skipping." % (a, epl, method, chunk))
+                            split_iedb_output_files.append(split_iedb_out)
+                            continue
+                        print("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, chunk))
+                        lib.call_iedb.main([
+                            split_fasta_file_path,
+                            split_iedb_out,
+                            iedb_method,
+                            a,
+                            '-l', str(epl),
+                        ])
+                        print("Completed")
+                        split_iedb_output_files.append(split_iedb_out)
+
+                    split_parsed_file_path = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, str(epl), "parsed", "tsv_%s" % chunk]))
+                    if os.path.exists(split_parsed_file_path):
+                        print("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, chunk))
+                        split_parsed_output_files.append(split_parsed_file_path)
+                        continue
+                    split_fasta_key_file_path = split_fasta_file_path + '.key'
+
+                    if len(split_iedb_output_files) > 0:
+                        print("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, chunk))
+                        params = [
+                            *split_iedb_output_files,
+                            self.tsv_file_path(),
+                            split_fasta_key_file_path,
+                            split_parsed_file_path,
+                            '-m', self.top_score_metric,
+                        ]
+                        if self.top_result_per_mutation == True:
+                            params.append('-t')
+                        lib.parse_output.main(params)
+                        print("Completed")
+                        split_parsed_output_files.append(split_parsed_file_path)
+
+        return split_parsed_output_files
+
+class MHCIIPipeline(Pipeline):
+    def __init__(self, **kwargs):
+        Pipeline.__init__(self, **kwargs)
+        self.peptide_sequence_length = 31
+
+    def call_iedb_and_parse_outputs(self, chunks):
+        split_parsed_output_files = []
+        for chunk in chunks:
+            for a in self.alleles:
+                split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), chunk)
+                split_iedb_output_files = []
+                print("Processing entries for Allele %s - Entries %s" % (a, chunk))
+                for method in self.prediction_algorithms:
+                    prediction_class = globals()[method]
+                    prediction = prediction_class()
+                    iedb_method = prediction.iedb_prediction_method
+                    valid_alleles = prediction.valid_allele_names()
+                    if a not in valid_alleles:
+                        print("Allele %s not valid for Method %s. Skipping." % (a, method))
+                        continue
+
+                    split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, "tsv_%s" % chunk]))
+                    if os.path.exists(split_iedb_out):
+                        print("IEDB file for Allele %s with Method %s (Entries %s) already exists. Skipping." % (a, method, chunk))
+                        split_iedb_output_files.append(split_iedb_out)
+                        continue
+                    print("Running IEDB on Allele %s with Method %s - Entries %s" % (a, method, chunk))
+                    lib.call_iedb.main([
+                        split_fasta_file_path,
+                        split_iedb_out,
+                        iedb_method,
+                        a,
+                    ])
+                    print("Completed")
+                    split_iedb_output_files.append(split_iedb_out)
+
+                split_parsed_file_path = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, "parsed", "tsv_%s" % chunk]))
+                if os.path.exists(split_parsed_file_path):
+                    print("Parsed Output File for Allele %s (Entries %s) already exists. Skipping" % (a, chunk))
+                    split_parsed_output_files.append(split_parsed_file_path)
+                    continue
+                split_fasta_key_file_path = split_fasta_file_path + '.key'
+
+                if len(split_iedb_output_files) > 0:
+                    print("Parsing IEDB Output for Allele %s - Entries %s" % (a, chunk))
+                    params = [
+                        *split_iedb_output_files,
+                        self.tsv_file_path(),
+                        split_fasta_key_file_path,
+                        split_parsed_file_path,
+                        '-m', self.top_score_metric,
+                    ]
+                    if self.top_result_per_mutation == True:
+                        params.append('-t')
+                    lib.parse_output.main(params)
+                    print("Completed")
+                    split_parsed_output_files.append(split_parsed_file_path)
+
+        return split_parsed_output_files
+
 
 def split_file(reader, lines=400):
     from itertools import islice, chain

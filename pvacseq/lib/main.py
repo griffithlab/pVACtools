@@ -32,12 +32,6 @@ def main(args_input = sys.argv[1:]):
              + "For a list of available alleles, use: pvacseq valid_alleles",
     )
     parser.add_argument(
-        "epitope_length", type=lambda s:[int(epl) for epl in s.split(',')],
-        help="Length of subpeptides(epitopes) to predict. "
-             + "Multiple lengths can be specified using a comma-separated list. "
-             + "Typical epitope lengths vary between 8-11.",
-    )
-    parser.add_argument(
         "prediction_algorithms",
         choices=PredictionClass.prediction_methods(),
         nargs="+",
@@ -46,6 +40,13 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument(
         "output_dir",
         help="Output directory for writing all result files"
+    )
+    parser.add_argument(
+        "-e", "--epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+        help="Length of subpeptides(epitopes) to predict. "
+             + "Multiple lengths can be specified using a comma-separated list. "
+             + "Typical epitope lengths vary between 8-11. " 
+             + "Required for Class II prediction algorithms",
     )
     parser.add_argument(
         "-l", "--peptide-sequence-length", type=int,
@@ -131,40 +132,65 @@ def main(args_input = sys.argv[1:]):
     if args.fasta_size%2 != 0:
         sys.exit("The fasta size needs to be an even number")
 
-    output_dir = os.path.abspath(args.output_dir)
+    base_output_dir = os.path.abspath(args.output_dir)
 
-    pipeline = MHCIPipeline(
-        input_file              = args.input_file,
-        sample_name             = args.sample_name,
-        alleles                 = args.allele,
-        epitope_lengths         = args.epitope_length,
-        prediction_algorithms   = args.prediction_algorithms,
-        output_dir              = output_dir,
-        peptide_sequence_length = args.peptide_sequence_length,
-        gene_expn_file          = args.gene_expn_file,
-        transcript_expn_file    = args.transcript_expn_file,
-        net_chop_method         = args.net_chop_method,
-        net_chop_threshold      = args.net_chop_threshold,
-        netmhc_stab             = args.netmhc_stab,
-        top_result_per_mutation = args.top_result_per_mutation,
-        top_score_metric        = args.top_score_metric,
-        binding_threshold       = args.binding_threshold,
-        minimum_fold_change     = args.minimum_fold_change,
-        expn_val                = args.expn_val,
-        fasta_size              = args.fasta_size,
-        keep_tmp_files          = args.keep_tmp_files,
-    )
-    pipeline.execute()
+    class_i_prediction_algorithms = []
+    class_ii_prediction_algorithms = []
+    for prediction_algorithm in args.prediction_algorithms:
+        prediction_class = globals()[prediction_algorithm]
+        prediction_class_object = prediction_class()
+        if isinstance(prediction_class_object, MHCI):
+            class_i_prediction_algorithms.append(prediction_algorithm)
+        elif isinstance(prediction_class_object, MHCII):
+            class_ii_prediction_algorithms.append(prediction_algorithm)
 
-def split_file(reader, lines=400):
-    from itertools import islice, chain
-    tmp = next(reader)
-    while tmp!="":
-        yield chain([tmp], islice(reader, lines-1))
-        try:
-            tmp = next(reader)
-        except StopIteration:
-            return
+    shared_arguments = {
+        'input_file'              : args.input_file,
+        'sample_name'             : args.sample_name,
+        'alleles'                 : args.allele,
+        'gene_expn_file'          : args.gene_expn_file,
+        'transcript_expn_file'    : args.transcript_expn_file,
+        'top_result_per_mutation' : args.top_result_per_mutation,
+        'top_score_metric'        : args.top_score_metric,
+        'binding_threshold'       : args.binding_threshold,
+        'minimum_fold_change'     : args.minimum_fold_change,
+        'net_chop_method'         : args.net_chop_method,
+        'net_chop_threshold'      : args.net_chop_threshold,
+        'expn_val'                : args.expn_val,
+        'fasta_size'              : args.fasta_size,
+        'keep_tmp_files'          : args.keep_tmp_files,
+    }
+
+    if len(class_i_prediction_algorithms) > 0:
+        if args.epitope_length is None:
+            sys.exit("Epitope length is required for class I binding predictions")
+
+        print("Executing MHC Class I predictions")
+
+        output_dir = os.path.join(base_output_dir, 'class_i')
+        os.makedirs(output_dir, exist_ok=True)
+
+        class_i_arguments = shared_arguments.copy()
+        class_i_arguments['peptide_sequence_length'] = args.peptide_sequence_length
+        class_i_arguments['epitope_lengths']         = args.epitope_length
+        class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
+        class_i_arguments['output_dir']              = output_dir
+        class_i_arguments['netmhc_stab']             = args.netmhc_stab
+        pipeline = MHCIPipeline(**class_i_arguments)
+        pipeline.execute()
+
+    if len(class_ii_prediction_algorithms) > 0:
+        print("Executing MHC Class II predictions")
+
+        output_dir = os.path.join(base_output_dir, 'class_ii')
+        os.makedirs(output_dir, exist_ok=True)
+
+        class_ii_arguments = shared_arguments.copy()
+        class_ii_arguments['prediction_algorithms'] = class_ii_prediction_algorithms
+        class_ii_arguments['output_dir']            = output_dir
+        class_ii_arguments['netmhc_stab']           = False
+        pipeline = MHCIIPipeline(**class_ii_arguments)
+        pipeline.execute()
 
 if __name__ == '__main__':
     main()
