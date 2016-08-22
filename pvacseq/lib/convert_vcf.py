@@ -84,7 +84,7 @@ def main(args_input = sys.argv[1:]):
         reference  = entry.REF
         alts       = entry.ALT
 
-        alleles_dict = resolve_alleles(entry);
+        alleles_dict = resolve_alleles(entry)
         for alt in alts:
             alt = str(alt)
             csq_allele = alleles_dict[alt]

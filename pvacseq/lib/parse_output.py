@@ -12,6 +12,8 @@ from math import ceil
 from statistics import median
 from lib import pvacseq_utils
 
+csv.field_size_limit(sys.maxsize)
+
 def prediction_method_lookup(prediction_method):
     prediction_method_lookup_dict = pvacseq_utils.iedb_to_prediction_method_lookup_dict()
     return prediction_method_lookup_dict[prediction_method]

@@ -16,7 +16,7 @@ def main(args_input = sys.argv[1:]):
     tsvout = csv.writer(tmp_output_filehandle, delimiter='\t', lineterminator='\n')
 
     i = 1
-    pattern = re.compile('>');
+    pattern = re.compile('>')
     for line in args.input_file:
         match = pattern.match(line)
         if match is not None:
