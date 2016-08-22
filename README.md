@@ -2,12 +2,19 @@
 Cancer immunotherapy has gained significant momentum from recent clinical successes of checkpoint blockade inhibition. Massively parallel sequence analysis suggests a connection between mutational load and response to this class of therapy. Methods to identify which tumor-specific mutant peptides (neoantigens) can elicit anti-tumor T cell immunity are needed to improve predictions of checkpoint therapy response and to identify targets for vaccines and adoptive T cell therapies. Here, we provide a cancer immunotherapy pipeline for the identification of **p**ersonalized **V**ariant **A**ntigens by **C**ancer **Seq**uencing (pVAC-Seq) that integrates tumor mutation and expression data (DNA- and RNA-Seq).
 http://www.genomemedicine.com/content/8/1/11
 
+## New in version 3.0.5
+<ul>
+<li>Bugfix: The generation of the fasta file would fail for some insertions with a range position. This is now fixed.</li>
+<li>Bugfix: The generation of the fasta file would fail if the wildtype or downstream sequences were too long. The size limit for these fields has been increased to the user system's maximum supported size. This error might still occur if the sequences are longer than that.</li>
+<li>Bugfix: When rerunning a command an error would occur if the <code>tmp</code> subdirectory already exists in the output directory. This has now been fixed.</li>
+</ul>
+
 ## New in version 3.0.4
 <ul>
 <li>Certain intermediate files are now written into a <code>tmp</code> directory underneath the main output directory. This <code>tmp</code> directory will be deleted at the end of a successful run unless the <code>--keep-tmp-files</code> flag is set.</li>
 <li>Intermediate files will now not be reprocessed if they already exist in the output directory. This can be helpful if a run exits early, for example, when a 500 Error was returned by IEDB. In this case the user can now simply run the same <code>pvacseq run</code> command again and the run will pick up where it failed previously.</li>
 <li>We added a new option <code>--fasta-size</code> that the user can set to specify how many FASTA entries at a time will be included in a request to the IEDB RESTful API. The default is 200 but certain variants or prediction algorithms might warrant a smaller number of FASTA entries in order to avoid timeouts from IEDB.</li>
-<li>Bugfix: The parsing step would fail for frameshift mutations with a range position. This is now fixed.</li>
+<li>Bugfix: The generation of the fasta file would fail for frameshift mutations with a range position. This is now fixed.</li>
 <li>Bugfix: Previously a run might fail if certain intermediate files weren't created.</li>
 <li>Bugfix: Using <code>.</code> in the output directory name and the sample name would previously result in errors. This has now been fixed.</li>
 <li>Bugfix: Using a relative directory path for the output directory would previsouly result in an error. This is now fixed.</li>
