@@ -12,6 +12,8 @@ from math import ceil
 from statistics import median
 from lib.prediction_class import *
 
+csv.field_size_limit(sys.maxsize)
+
 def protein_identifier_for_label(key_file):
     tsv_reader = csv.reader(key_file, delimiter='\t')
     pattern = re.compile('>')
