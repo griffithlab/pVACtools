@@ -34,25 +34,43 @@ def gen_files_list(id):
     if 'files' not in session['process-%d'%id]:
         session['process-%d'%id]['files'] = []
         base_dir = session['process-%d'%id]['output']
+        for path in os.listdir(os.path.join(base_dir, 'class_i')):
+            if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'class_i', path)):
+                session['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_i', path))
+        for path in os.listdir(os.path.join(base_dir, 'class_ii')):
+            if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'class_ii', path)):
+                session['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_ii', path))
         for path in os.listdir(base_dir):
             if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, path)):
                 session['process-%d'%id]['files'].append(os.path.join(base_dir, path))
 
 def results_get(id, count = None, page = None):
+    processKey = 'process-%d'%id
+    if processKey in session and children[id][1].is_alive():
+        return []
     output = []
     gen_files_list(id)
     for fileID in range(len(session['process-%d'%id]['files'])):
         extension = '.'.join(os.path.basename(session['process-%d'%id]['files'][fileID]).split('.')[1:])
+        display_name = os.path.join(
+            os.path.dirname(session['process-%d'%id]['files'][fileID]),
+            os.path.basename(session['process-%d'%id]['files'][fileID])
+        )
+        if 'class_i' not in display_name:
+            display_name = os.path.basename(display_name)
         output.append({
             'fileID':fileID,
             'description':descriptions[extension] if extension in descriptions else "Unknown file",
-            'display_name':os.path.basename(session['process-%d'%id]['files'][fileID]),
-            'url':'/v1/results/%d'%fileID,
+            'display_name':display_name,
+            'url':'/api/v1/processes/%d/results/%d'%(id, fileID),
             'size':os.path.getsize(os.path.join(session['process-%d'%id]['output'], session['process-%d'%id]['files'][fileID]))
         })
     return output[(page-1)*count:page*count]
 
 def results_getfile(id, count = None, page = None, fileID = None):
+    processKey = 'process-%d'%id
+    if processKey in session and children[id][1].is_alive():
+        return []
     gen_files_list(id)
     raw_reader = open(session['process-%d'%id]['files'][fileID])
     reader = csv.DictReader(raw_reader, delimiter='\t')
@@ -61,6 +79,9 @@ def results_getfile(id, count = None, page = None, fileID = None):
     return output
 
 def results_getcols(id, fileID):
+    processKey = 'process-%d'%id
+    if processKey in session and children[id][1].is_alive():
+        return {}
     gen_files_list(id)
     raw_reader = open(session['process-%d'%id]['files'][fileID])
     reader = csv.DictReader(raw_reader, delimiter='\t')
@@ -68,31 +89,6 @@ def results_getcols(id, fileID):
     raw_reader.close()
     return output
 
-# - name: "input"
-# - name: "samplename"
-# - name: "alleles"
-# - name: "epitope_lengths"
-# - name: "prediction_algorithms"
-# - name: "output"
-# - name: "peptfileIDe_sequence_length"
-# - name: "gene_expn_file"
-# - name: "transcript_expn_file"
-# - name: "net_chop_method"
-# - name: "netmhc_stab"
-# - name: "top_result_per_mutation"
-# - name: "top_score_metric"
-# - name: "binding_threshold"
-# - name: "minimum_fold_change"
-# - name: "expn_val"
-# - name: "net_chop_threshold"
-# - name: "fasta_size"
-# - name: "keep_tmp_files"
-
-# input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
-#           peptfileIDe_sequence_length, gene_expn_file, transcript_expn_file,
-#           net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
-#           binding_threshold, minimum_fold_change, expn_val, net_chop_threshold,
-#           fasta_size, keep_tmp_files
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
           peptide_sequence_length, gene_expn_file, transcript_expn_file,
           net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
@@ -101,13 +97,13 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
     command = [
         input,
         samplename,
-        alleles,
-        epitope_lengths
+        alleles
     ]
     for algo in prediction_algorithms.split(','):
         command.append(algo)
     command += [
         output,
+        '-e', epitope_lengths,
         '-l', str(peptide_sequence_length),
         '-m', top_score_metric,
         '-b', str(binding_threshold),
@@ -146,18 +142,16 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
     return len(children)-1
 
 def processes():
-    print([key for key in session])
     return [i for i in range(len(children)) if 'process-%d'%i in session]
 
 def process_info(id):
     intake = b''
     while children[id][0].poll():
-        intake += os.read(children[id][0].fileno(), 32)
-        print(intake)
+        intake += os.read(children[id][0].fileno(), 512)
     intake = spinner.sub('', intake.decode()).strip().split("\n")
     logs[id]+='\n'.join(intake)
     session['process-%d'%id]['status'] = logs[id].split("\n")[-1]
-    if not (len(intake[-1]) or children[id][1].is_alive()):
+    if not children[id][1].is_alive():
         session['process-%d'%id]['status'] = "Process complete: %d"%children[id][1].exitcode
     return {
         'pid':children[id][1].pid,
@@ -169,6 +163,12 @@ def process_info(id):
         'running':children[id][1].is_alive()
     }
 
+# def stop(id):
+#     status = process_info(id)
+#     children[id][1].terminate()
+#     children[id][0].close()
+#     return status
+
 def shutdown():
     for i in range(len(children)):
         children[i][1].join(.1)
@@ -178,13 +178,9 @@ def shutdown():
     return {}
 
 def _process_worker(pipe, command):
-    # from ...lib.main import main
-    proc = subprocess.Popen(['pvacseq', 'run']+command, stdout=pipe.fileno(), stderr=subprocess.STDOUT)
-    proc.wait()
-    # alive = True
-    # while alive:
-    #     try:
-    #         proc.wait(1)
-    #     except subprocess.TimeoutExpired:
-    #         pass
-    sys.exit(proc.returncode)
+    from ...lib.main import main
+    # setup this process' stdout and stderr to write to the pipe's file descriptor
+    sys.stdout = open(pipe.fileno(), mode='w')
+    sys.stderr = sys.stdout
+    # run the pvacseq command
+    main(command)
