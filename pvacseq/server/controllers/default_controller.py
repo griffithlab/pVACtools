@@ -13,38 +13,35 @@ children = []
 logs = []
 
 descriptions = {
-    'chop.tsv':"Processed and filtered data, with peptfileIDe cleavage data added",
+    'chop.tsv':"Processed and filtered data, with peptide cleavage data added",
     'combined.parsed.tsv':"Processed data from IEDB, but with no filtering or extra data",
     'filtered.binding.tsv':"Processed data filtered by binding strength",
     'filtered.coverage.tsv':"Processed data filtered by binding strength and coverage",
-    'stab.tsv':"Processed and filtered data, with peptfileIDe stability data added",
+    'stab.tsv':"Processed and filtered data, with peptide stability data added",
     'final.tsv':"Final output data",
     'tsv':"Raw input data parsed out of the input vcf"
 }
 
 def column_filter(id, column):
-    if 'columns' not in session['process-%d'%id]:
-        session['process-%d'%id]['columns'] = {}
-    result = column.replace(' ', '_').lower().strip()
-    if column not in session['process-%d'%id]['columns']:
-        session['process-%d'%id]['columns'][column]=result
-    return result
+    return column.replace(' ', '_').lower().strip()
 
 def gen_files_list(id):
     if 'files' not in session['process-%d'%id]:
         session['process-%d'%id]['files'] = []
         base_dir = session['process-%d'%id]['output']
-        for path in os.listdir(os.path.join(base_dir, 'class_i')):
-            if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'class_i', path)):
-                session['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_i', path))
-        for path in os.listdir(os.path.join(base_dir, 'class_ii')):
-            if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'class_ii', path)):
-                session['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_ii', path))
+        if os.path.isdir(os.path.join(base_dir, 'class_i')):
+            for path in os.listdir(os.path.join(base_dir, 'class_i')):
+                if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'class_i', path)):
+                    session['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_i', path))
+        if os.path.isdir(os.path.join(base_dir, 'class_ii')):
+            for path in os.listdir(os.path.join(base_dir, 'class_ii')):
+                if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'class_ii', path)):
+                    session['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_ii', path))
         for path in os.listdir(base_dir):
             if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, path)):
                 session['process-%d'%id]['files'].append(os.path.join(base_dir, path))
 
-def results_get(id, count = None, page = None):
+def results_get(id):
     processKey = 'process-%d'%id
     if processKey in session and children[id][1].is_alive():
         return []
@@ -52,20 +49,14 @@ def results_get(id, count = None, page = None):
     gen_files_list(id)
     for fileID in range(len(session['process-%d'%id]['files'])):
         extension = '.'.join(os.path.basename(session['process-%d'%id]['files'][fileID]).split('.')[1:])
-        display_name = os.path.join(
-            os.path.dirname(session['process-%d'%id]['files'][fileID]),
-            os.path.basename(session['process-%d'%id]['files'][fileID])
-        )
-        if 'class_i' not in display_name:
-            display_name = os.path.basename(display_name)
         output.append({
             'fileID':fileID,
             'description':descriptions[extension] if extension in descriptions else "Unknown file",
-            'display_name':display_name,
+            'display_name':os.path.relpath(session['process-%d'%id]['files'][fileID], session['process-%d'%id]['output']),
             'url':'/api/v1/processes/%d/results/%d'%(id, fileID),
-            'size':os.path.getsize(os.path.join(session['process-%d'%id]['output'], session['process-%d'%id]['files'][fileID]))
+            'size':"%0.3f KB"%(os.path.getsize(os.path.join(session['process-%d'%id]['output'], session['process-%d'%id]['files'][fileID]))/1024)
         })
-    return output[(page-1)*count:page*count]
+    return output
 
 def results_getfile(id, count = None, page = None, fileID = None):
     processKey = 'process-%d'%id
@@ -115,7 +106,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         command+= ['-g', gene_expn_file]
     if len(transcript_expn_file):
         command+=['-i', transcript_expn_file]
-    if net_chop_method:
+    if len(net_chop_method):
         command += [
             '--net-chop-method', net_chop_method,
             '--net-chop-threshold', str(net_chop_threshold)
@@ -142,14 +133,17 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
     return len(children)-1
 
 def processes():
-    return [i for i in range(len(children)) if 'process-%d'%i in session]
+    return [{
+        'id':i,
+        'running':children[i][1].is_alive()
+    } for i in range(len(children)) if 'process-%d'%i in session]
 
 def process_info(id):
     intake = b''
     while children[id][0].poll():
         intake += os.read(children[id][0].fileno(), 512)
-    intake = spinner.sub('', intake.decode()).strip().split("\n")
-    logs[id]+='\n'.join(intake)
+    intake = spinner.sub('', intake.decode()).strip()
+    logs[id]+=intake
     session['process-%d'%id]['status'] = logs[id].split("\n")[-1]
     if not children[id][1].is_alive():
         session['process-%d'%id]['status'] = "Process complete: %d"%children[id][1].exitcode
@@ -166,16 +160,18 @@ def process_info(id):
 def stop(id):
     status = process_info(id)
     children[id][1].terminate()
-    children[id][0].close()
+    # children[id][0].close()
     return status
 
 def shutdown():
+    output = []
     for i in range(len(children)):
+        if children[i][1].is_alive():
+            output.append(i)
         children[i][1].join(.1)
         if children[i][1].is_alive():
             children[i][1].terminate()
-    sys.exit("Server closed")
-    return {}
+    return output
 
 def _process_worker(pipe, command):
     from ...lib.main import main
