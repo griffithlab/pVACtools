@@ -27,7 +27,7 @@ def main(args_input = sys.argv[1:]):
     jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
     result_delimiter = re.compile(r'-{20,}')
     fail_searcher = re.compile(r'(Failed run|Problematic input:)')
-    allele_searcher = re.compile(r'^(.*?) : Distance to traning data .*? nearest neighbor (.*?)\)$', re.MULTILINE)
+    allele_searcher = re.compile(r'^(.*?) : Distance to trai?ning data .*? nearest neighbor (.*?)\)$', re.MULTILINE)
     reader = csv.DictReader(args.input_file, delimiter='\t')
     writer = csv.DictWriter(
         args.output_file,
