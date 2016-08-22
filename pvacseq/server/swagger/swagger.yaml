@@ -11,7 +11,6 @@ schemes:
 - "https"
 produces:
 - "application/json"
-- "text/html"
 paths:
   /api/v1/processes/{id}/results:
     get:
@@ -301,29 +300,29 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  # /api/v1/stop/{id}:
-  #   get:
-  #     tags:
-  #       - "stop"
-  #     summary: "Terminate the specified process"
-  #     description: "This endpoint closes the requested process if it is still running. /
-  #       id must refer to a valid process id started by the current user"
-  #     operationId: "pvacseq.server.controllers.default_controller.stop"
-  #     parameters:
-  #     - name: "id"
-  #       in: "path"
-  #       description: "Process id of an active pVAC-Seq run"
-  #       required: true
-  #       type: "integer"
-  #     responses:
-  #       200:
-  #         description: "Returns the status of the process just before termination"
-  #         schema:
-  #           $ref: "#/definitions/Process"
-  #       default:
-  #         description: "Unexpected error"
-  #         schema:
-  #           $ref: "#/definitions/Error"
+  /api/v1/stop/{id}:
+    get:
+      tags:
+        - "stop"
+      summary: "Terminate the specified process"
+      description: "This endpoint closes the requested process if it is still running. /
+        id must refer to a valid process id started by the current user"
+      operationId: "pvacseq.server.controllers.default_controller.stop"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Process id of an active pVAC-Seq run"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Returns the status of the process just before termination"
+          schema:
+            $ref: "#/definitions/Process"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
   Process:
     type: "object"
