@@ -11,8 +11,9 @@ schemes:
 - "https"
 produces:
 - "application/json"
+- "text/html"
 paths:
-  /api/v1/results/{id}:
+  /api/v1/processes/{id}/results:
     get:
       tags:
       - "results"
@@ -52,7 +53,7 @@ paths:
             $ref: "#/definitions/Error"
       x-tags:
       - tag: "results"
-  /api/v1/results/{id}/{file}:
+  /api/v1/processes/{id}/results/{fileID}:
     get:
       tags:
       - "file"
@@ -77,7 +78,7 @@ paths:
         required: false
         type: "integer"
         default: 1
-      - name: "file"
+      - name: "fileID"
         in: "path"
         description: "File id from which to read data"
         required: true
@@ -96,7 +97,7 @@ paths:
             $ref: "#/definitions/Error"
       x-tags:
       - tag: "file"
-  /api/v1/results/{id}/{file}/cols:
+  /api/v1/processes/{id}/results/{fileID}/cols:
     get:
       tags:
       - "columns"
@@ -110,7 +111,7 @@ paths:
         description: "Process ID from which to read results"
         required: true
         type: "integer"
-      - name: "file"
+      - name: "fileID"
         in: "path"
         description: "File id from which to read data"
         required: true
@@ -152,8 +153,9 @@ paths:
       - name: "epitope_lengths"
         in: "formData"
         description: "A comma-separated list of epitope lengths to produce"
-        required: true
+        required: false
         type: "string"
+        default: "10"
       - name: "prediction_algorithms"
         in: "formData"
         description: "A comma-separated list of prediction algorithms to use"
@@ -270,7 +272,7 @@ paths:
       parameters:
       - name: "id"
         in: "path"
-        description: "File id from which to read data"
+        description: "Process id of an active pVAC-Seq run"
         required: true
         type: "integer"
       responses:
@@ -285,7 +287,7 @@ paths:
   /api/v1/shutdown:
     get:
       tags:
-        - "processes"
+        - "shutdown"
       summary: "Terminate any running processes then shutdown the server"
       description: "This endpoint handles the cleanup for closing any active \
         pvacseq runs, then shutsdown the server\n"
@@ -299,6 +301,29 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
+  # /api/v1/stop/{id}:
+  #   get:
+  #     tags:
+  #       - "stop"
+  #     summary: "Terminate the specified process"
+  #     description: "This endpoint closes the requested process if it is still running. /
+  #       id must refer to a valid process id started by the current user"
+  #     operationId: "pvacseq.server.controllers.default_controller.stop"
+  #     parameters:
+  #     - name: "id"
+  #       in: "path"
+  #       description: "Process id of an active pVAC-Seq run"
+  #       required: true
+  #       type: "integer"
+  #     responses:
+  #       200:
+  #         description: "Returns the status of the process just before termination"
+  #         schema:
+  #           $ref: "#/definitions/Process"
+  #       default:
+  #         description: "Unexpected error"
+  #         schema:
+  #           $ref: "#/definitions/Error"
 definitions:
   Process:
     type: "object"

@@ -46,7 +46,6 @@ class Pipeline(metaclass=ABCMeta):
         self.fasta_size                  = kwargs['fasta_size']
         self.downstream_sequence_length  = kwargs['downstream_sequence_length']
         self.keep_tmp_files              = kwargs['keep_tmp_files']
-        self.pipe                        = kwargs['_pipe']
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
@@ -57,7 +56,7 @@ class Pipeline(metaclass=ABCMeta):
 
     def convert_vcf(self):
         print("Converting VCF to TSV")
-
+        sys.stdout.flush()
         convert_params = [
             self.input_file,
             self.tsv_file_path(),
@@ -79,7 +78,6 @@ class Pipeline(metaclass=ABCMeta):
 
         lib.convert_vcf.main(convert_params)
         print("Completed")
-        sys.stdout.flush()
 
     def tsv_entry_count(self):
         with open(self.tsv_file_path()) as tsv_file:
@@ -155,20 +153,19 @@ class Pipeline(metaclass=ABCMeta):
 
     def combined_parsed_outputs(self, split_parsed_output_files):
         print("Combining Parsed IEDB Output Files")
-
+        sys.stdout.flush()
         lib.combine_parsed_outputs.main([
             *split_parsed_output_files,
             self.combined_parsed_path()
         ])
         print("Completed")
-        sys.stdout.flush()
 
     def binding_filter_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".filtered.binding.tsv")
 
     def binding_filter(self):
         print("Running Binding Filters")
-
+        sys.stdout.flush()
         lib.binding_filter.main(
             [
                 self.combined_parsed_path(),
@@ -179,13 +176,13 @@ class Pipeline(metaclass=ABCMeta):
             ]
         )
         print("Completed")
-        sys.stdout.flush()
 
     def coverage_filter_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".filtered.coverage.tsv")
 
     def coverage_filter(self):
         print("Running Coverage Filters")
+        sys.stdout.flush()
         coverage_params = [
             self.binding_filter_out_path(),
             self.coverage_filter_out_path(),
@@ -206,14 +203,13 @@ class Pipeline(metaclass=ABCMeta):
                 coverage_params.extend([param, str(getattr(self, attribute))])
         lib.coverage_filter.main(coverage_params)
         print("Completed")
-        sys.stdout.flush()
 
     def net_chop_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".chop.tsv")
 
     def net_chop(self):
         print("Submitting remaining epitopes to NetChop")
-
+        sys.stdout.flush()
         lib.net_chop.main([
             self.coverage_filter_out_path(),
             self.net_chop_out_path(),
@@ -223,20 +219,18 @@ class Pipeline(metaclass=ABCMeta):
             str(self.net_chop_threshold)
         ])
         print("Completed")
-        sys.stdout.flush()
 
     def netmhc_stab_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".stab.tsv")
 
     def call_netmhc_stab(self):
         print("Running NetMHCStabPan")
-
+        sys.stdout.flush()
         lib.netmhc_stab.main([
             self.net_chop_out_path(),
             self.netmhc_stab_out_path(),
         ])
         print("Completed")
-        sys.stdout.flush()
 
     def final_path(self):
         return os.path.join(self.output_dir, self.sample_name+".final.tsv")
@@ -327,7 +321,6 @@ class MHCIPipeline(Pipeline):
                 generate_fasta_params.extend(['-d', self.downstream_sequence_length,])
             lib.generate_fasta.main(generate_fasta_params)
         print("Completed")
-        sys.stdout.flush()
 
     def call_iedb_and_parse_outputs(self, chunks):
         split_parsed_output_files = []
@@ -390,7 +383,6 @@ class MHCIPipeline(Pipeline):
                             params.append('-t')
                         lib.parse_output.main(params)
                         print("Completed")
-                        sys.stdout.flush()
                         split_parsed_output_files.append(split_parsed_file_path)
         return split_parsed_output_files
 
@@ -423,7 +415,6 @@ class MHCIIPipeline(Pipeline):
                 generate_fasta_params.extend(['-d', self.downstream_sequence_length,])
             lib.generate_fasta.main(generate_fasta_params)
         print("Completed")
-        sys.stdout.flush()
 
     def call_iedb_and_parse_outputs(self, chunks):
         split_parsed_output_files = []
@@ -480,7 +471,6 @@ class MHCIIPipeline(Pipeline):
                         params.append('-t')
                     lib.parse_output.main(params)
                     print("Completed")
-                    sys.stdout.flush()
                     split_parsed_output_files.append(split_parsed_file_path)
 
         return split_parsed_output_files
