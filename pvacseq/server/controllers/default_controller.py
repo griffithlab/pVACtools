@@ -163,11 +163,11 @@ def process_info(id):
         'running':children[id][1].is_alive()
     }
 
-# def stop(id):
-#     status = process_info(id)
-#     children[id][1].terminate()
-#     children[id][0].close()
-#     return status
+def stop(id):
+    status = process_info(id)
+    children[id][1].terminate()
+    children[id][0].close()
+    return status
 
 def shutdown():
     for i in range(len(children)):
