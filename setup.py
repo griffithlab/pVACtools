@@ -15,7 +15,7 @@ for dirpath, dirnames, filenames in os.walk("pvacseq/example_data"):
 
 setup(
     name="pvacseq",
-    version="3.0.4",
+    version="3.0.5",
     packages=["pvacseq", "pvacseq.lib"],
     entry_points={
         "console_scripts":[
