@@ -6,7 +6,6 @@ info:
   version: "1.0.0"
   title: "pVacSeq UI"
 host: "localhost"
-basePath: "/q"
 schemes:
 - "https"
 produces:
@@ -27,18 +26,6 @@ paths:
         description: "Process ID from which to fetch results"
         required: true
         type: "integer"
-      - name: "count"
-        in: "query"
-        description: "Number of results to return"
-        required: false
-        type: "integer"
-        default: 10
-      - name: "page"
-        in: "query"
-        description: "Page number of results to return"
-        required: false
-        type: "integer"
-        default: 1
       responses:
         200:
           description: "An array of results"
@@ -185,6 +172,8 @@ paths:
         description: "Run NetChop using the specified method"
         type: "string"
         enum: ["cterm", "20s"]
+        required: false
+        default: ''
       - name: "netmhc_stab"
         in: "formData"
         description: "Run NetMHCStabPan at the end of the pipeline"
@@ -255,7 +244,7 @@ paths:
           schema:
             type: "array"
             items: {
-              type: "integer"
+              $ref: "#/definitions/ProcessSummary"
             }
         default:
           description: "Unexpected error"
@@ -276,7 +265,7 @@ paths:
         type: "integer"
       responses:
         200:
-          description: "A list of active processes"
+          description: "Returns all data collected about the requested process"
           schema:
             $ref: "#/definitions/Process"
         default:
@@ -287,15 +276,18 @@ paths:
     get:
       tags:
         - "shutdown"
-      summary: "Terminate any running processes then shutdown the server"
+      summary: "Terminate any running processes"
       description: "This endpoint handles the cleanup for closing any active \
-        pvacseq runs, then shutsdown the server\n"
+        pvacseq runs\n"
       operationId: "pvacseq.server.controllers.default_controller.shutdown"
       responses:
         200:
-          description: "This endpoint does not actually return anything"
+          description: "Returns a list of the process ID's for the terminated processes"
           schema:
-            type: "object"
+            type: "array"
+            items: {
+              type: "integer"
+            }
         default:
           description: "Unexpected error"
           schema:
@@ -332,7 +324,7 @@ definitions:
         description: "Actual pid assigned by the OS for this pVAC-Seq run"
       id:
         type: "integer"
-        description: "Unique process ID"
+        description: "Unique process ID used for accessing the process data through the api"
       command:
         type: "string"
         description: "The shell command issued to start this pVAC-Seq run"
@@ -366,6 +358,15 @@ definitions:
       size:
         type: "string"
         description: "Size of data file, in bytes"
+  ProcessSummary:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        description: "Unique process ID used for accessing the process data through the api"
+      running:
+        type: "boolean"
+        description: "Indicates whether or not the process is still running"
   Error:
     type: "object"
     properties:
