@@ -12,14 +12,10 @@ except ValueError:
     import lib
 from lib.prediction_class import *
 from lib.pipeline import *
+from lib.config_files import additional_input_file_list_options
+
 import shutil
 import yaml
-
-def additional_input_file_list_options():
-    return {
-        'gene_expn_file'      : 'genes.fpkm_tracking file from Cufflinks',
-        'transcript_expn_file': 'isoforms.fpkm_tracking file from Cufflinks',
-    }
 
 def parse_additional_input_file_list(additional_input_file_list):
     if additional_input_file_list:

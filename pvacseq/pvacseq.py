@@ -112,6 +112,13 @@ def main():
     )
     valid_alleles_parser.set_defaults(func=lib.valid_alleles)
 
+    config_files_parser = subparsers.add_parser(
+        "config_files",
+        help="Documentation for the configuration files",
+        add_help=False
+    )
+    config_files_parser.set_defaults(func=lib.config_files)
+
     parser.add_argument(
         "-v", "--version",
         action="store_true",
