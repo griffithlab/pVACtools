@@ -13,6 +13,28 @@ except ValueError:
 from lib.prediction_class import *
 from lib.pipeline import *
 import shutil
+import yaml
+
+def additional_input_file_list_options():
+    return {
+        'gene_expn_file'      : 'genes.fpkm_tracking file from Cufflinks',
+        'transcript_expn_file': 'isoforms.fpkm_tracking file from Cufflinks',
+    }
+
+def parse_additional_input_file_list(additional_input_file_list):
+    if additional_input_file_list:
+        with open(additional_input_file_list, 'r') as stream:
+            try:
+                additional_input_files = yaml.load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+        for additional_input_file in additional_input_files:
+            if additional_input_file not in additional_input_file_list_options().keys():
+                sys.exit("%s not a valid key in the additional_input_file_list" % additional_input_file)
+    for additional_input_file_list_option in additional_input_file_list_options().keys():
+        if additional_input_file_list_option not in additional_input_files:
+            additional_input_files[additional_input_file_list_option] = None
+    return additional_input_files
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq run")
@@ -42,6 +64,11 @@ def main(args_input = sys.argv[1:]):
         help="Output directory for writing all result files"
     )
     parser.add_argument(
+        "additional_input_file_list",
+        help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
+             + "For an example of this yaml file run `pvacseq config additional_input_file_list`."
+    )
+    parser.add_argument(
         "-e", "--epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
         help="Length of subpeptides(epitopes) to predict. "
              + "Multiple lengths can be specified using a comma-separated list. "
@@ -52,14 +79,6 @@ def main(args_input = sys.argv[1:]):
         "-l", "--peptide-sequence-length", type=int,
         default=21,
         help="length of the peptide sequences in the input FASTA file. Default: 21",
-    )
-    parser.add_argument(
-        '-g', '--gene-expn-file',
-        help='genes.fpkm_tracking file from Cufflinks'
-    )
-    parser.add_argument(
-        '-i', '--transcript-expn-file',
-        help='isoforms.fpkm_tracking file from Cufflinks'
     )
     parser.add_argument(
         '--net-chop-method',
@@ -144,12 +163,12 @@ def main(args_input = sys.argv[1:]):
         elif isinstance(prediction_class_object, MHCII):
             class_ii_prediction_algorithms.append(prediction_algorithm)
 
+    additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
+
     shared_arguments = {
         'input_file'              : args.input_file,
         'sample_name'             : args.sample_name,
         'alleles'                 : args.allele,
-        'gene_expn_file'          : args.gene_expn_file,
-        'transcript_expn_file'    : args.transcript_expn_file,
         'top_result_per_mutation' : args.top_result_per_mutation,
         'top_score_metric'        : args.top_score_metric,
         'binding_threshold'       : args.binding_threshold,
@@ -160,6 +179,7 @@ def main(args_input = sys.argv[1:]):
         'fasta_size'              : args.fasta_size,
         'keep_tmp_files'          : args.keep_tmp_files,
     }
+    shared_arguments.update(additional_input_files)
 
     if len(class_i_prediction_algorithms) > 0:
         if args.epitope_length is None:

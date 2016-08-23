@@ -1,0 +1,2 @@
+gene_expn_file: tests/test_data/pvacseq/genes.fpkm_tracking
+transcript_expn_file: tests/test_data/pvacseq/isoforms.fpkm_tracking
