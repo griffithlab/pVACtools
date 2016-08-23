@@ -46,7 +46,7 @@ def main(args_input = sys.argv[1:]):
         help="Length of subpeptides(epitopes) to predict. "
              + "Multiple lengths can be specified using a comma-separated list. "
              + "Typical epitope lengths vary between 8-11. " 
-             + "Required for Class II prediction algorithms",
+             + "Required for Class I prediction algorithms",
     )
     parser.add_argument(
         "-l", "--peptide-sequence-length", type=int,
@@ -65,8 +65,7 @@ def main(args_input = sys.argv[1:]):
         '--net-chop-method',
         choices=lib.net_chop.methods,
         default=None,
-        help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0). "
-             + "Default: \"cterm\" (C term 3.0)",
+        help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0). ",
     )
     parser.add_argument(
         '--netmhc-stab',
