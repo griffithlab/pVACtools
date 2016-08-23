@@ -6,11 +6,13 @@ from flask import session
 import multiprocessing as mp
 import subprocess
 import re
+import tempfile
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
 
 children = []
 logs = []
+staging_files = []
 
 descriptions = {
     'chop.tsv':"Processed and filtered data, with peptide cleavage data added",
@@ -30,14 +32,14 @@ def gen_files_list(id):
         session['process-%d'%id]['files'] = []
         base_dir = session['process-%d'%id]['output']
         if os.path.isdir(os.path.join(base_dir, 'class_i')):
-            for path in os.listdir(os.path.join(base_dir, 'class_i')):
+            for path in sorted(os.listdir(os.path.join(base_dir, 'class_i'))):
                 if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'class_i', path)):
                     session['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_i', path))
         if os.path.isdir(os.path.join(base_dir, 'class_ii')):
-            for path in os.listdir(os.path.join(base_dir, 'class_ii')):
+            for path in sorted(os.listdir(os.path.join(base_dir, 'class_ii'))):
                 if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'class_ii', path)):
                     session['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_ii', path))
-        for path in os.listdir(base_dir):
+        for path in sorted(os.listdir(base_dir)):
             if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, path)):
                 session['process-%d'%id]['files'].append(os.path.join(base_dir, path))
 
@@ -79,6 +81,40 @@ def results_getcols(id, fileID):
     output = {column_filter(id, field):field for field in reader.fieldnames}
     raw_reader.close()
     return output
+
+def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
+          peptide_sequence_length, gene_expn_file, transcript_expn_file,
+          net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
+          binding_threshold, minimum_fold_change, expn_val, net_chop_threshold,
+          fasta_size, keep_tmp_files):
+    staged_input = tempfile.NamedTemporaryFile('wb')
+    input.save(staged_input)
+    staged_input.flush()
+    staging_files.append(staged_input)
+
+    staged_gene_expn_file = tempfile.NamedTemporaryFile('wb')
+    gene_expn_file.save(staged_gene_expn_file)
+    staged_gene_expn_file.flush()
+    staging_files.append(staged_gene_expn_file)
+
+    staged_transcript_expn_file = tempfile.NamedTemporaryFile('wb')
+    transcript_expn_file.save(staged_transcript_expn_file)
+    staged_transcript_expn_file.flush()
+    staging_files.append(staged_transcript_expn_file)
+
+    current_path = os.path.join(os.path.expanduser('~'), "Documents", "pVAC-Seq Output", samplename)
+    if os.path.exists(current_path):
+        i = 1
+        while os.path.exists(current_path+"_"+str(i)):
+            i+=1
+        current_path += "_"+str(i)
+
+    return start(staged_input.name, samplename, alleles, epitope_lengths, prediction_algorithms, current_path,
+              peptide_sequence_length, staged_gene_expn_file.name if staged_gene_expn_file.tell() else "",
+              staged_transcript_expn_file.name if staged_transcript_expn_file.tell() else "", #check if any data written to file
+              net_chop_method, len(netmhc_stab), len(top_result_per_mutation), top_score_metric,
+              binding_threshold, minimum_fold_change, expn_val, net_chop_threshold,
+              fasta_size, len(keep_tmp_files))
 
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
           peptide_sequence_length, gene_expn_file, transcript_expn_file,
@@ -172,6 +208,12 @@ def shutdown():
         if children[i][1].is_alive():
             children[i][1].terminate()
     return output
+
+def test():
+    reader = open("/Users/agrauber/Documents/pVAC-Seq/pvacseq/server/test_start.html")
+    data = reader.read()
+    reader.close()
+    return data
 
 def _process_worker(pipe, command):
     from ...lib.main import main

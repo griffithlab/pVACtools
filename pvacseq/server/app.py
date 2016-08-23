@@ -3,7 +3,8 @@
 import connexion
 import os
 import sys
-import multiprocessing as mp
+from threading import Thread
+from webbrowser import open_new_tab
 
 def check_is_directory(directory):
     fullpath = os.path.abspath(directory)
@@ -21,7 +22,10 @@ def main():
     ))
     app.add_api('swagger.yaml', arguments={'title': 'API to support pVacSeq user interface for generating reports on pipeline results'})
     app.app.secret_key = os.urandom(1024)
+    #Eventually, have this open a browser to whatever the main page is
+    # Thread(target=lambda:open_new_tab("localhost:8080/static/testpage"), daemon=True).start()
     app.run(port=8080)
+
 
 if __name__ == '__main__':
     main()
