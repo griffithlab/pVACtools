@@ -2,7 +2,6 @@ import os
 import csv
 import sys
 import itertools
-from flask import session
 import multiprocessing as mp
 import subprocess
 import re
@@ -11,9 +10,9 @@ import tempfile
 spinner = re.compile(r'[\\\b\-/|]{2,}')
 allele_file = None
 
-children = []
-logs = []
+children = {}
 staging_files = []
+#data['processid']=-1
 
 descriptions = {
     'chop.tsv':"Processed and filtered data, with peptide cleavage data added",
@@ -29,20 +28,20 @@ def column_filter(id, column):
     return column.replace(' ', '_').lower().strip()
 
 def gen_files_list(id):
-    if 'files' not in session['process-%d'%id]:
-        session['process-%d'%id]['files'] = []
-        base_dir = session['process-%d'%id]['output']
+    if 'files' not in data['process-%d'%id]:
+        data['process-%d'%id]['files'] = []
+        base_dir = data['process-%d'%id]['output']
         if os.path.isdir(os.path.join(base_dir, 'class_i')):
             for path in sorted(os.listdir(os.path.join(base_dir, 'class_i'))):
                 if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'class_i', path)):
-                    session['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_i', path))
+                    data['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_i', path))
         if os.path.isdir(os.path.join(base_dir, 'class_ii')):
             for path in sorted(os.listdir(os.path.join(base_dir, 'class_ii'))):
                 if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'class_ii', path)):
-                    session['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_ii', path))
+                    data['process-%d'%id]['files'].append(os.path.join(base_dir, 'class_ii', path))
         for path in sorted(os.listdir(base_dir)):
             if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, path)):
-                session['process-%d'%id]['files'].append(os.path.join(base_dir, path))
+                data['process-%d'%id]['files'].append(os.path.join(base_dir, path))
 
 def results_get(id):
     processKey = 'process-%d'%id
@@ -50,14 +49,14 @@ def results_get(id):
         return []
     output = []
     gen_files_list(id)
-    for fileID in range(len(session['process-%d'%id]['files'])):
-        extension = '.'.join(os.path.basename(session['process-%d'%id]['files'][fileID]).split('.')[1:])
+    for fileID in range(len(data['process-%d'%id]['files'])):
+        extension = '.'.join(os.path.basename(data['process-%d'%id]['files'][fileID]).split('.')[1:])
         output.append({
             'fileID':fileID,
             'description':descriptions[extension] if extension in descriptions else "Unknown file",
-            'display_name':os.path.relpath(session['process-%d'%id]['files'][fileID], session['process-%d'%id]['output']),
+            'display_name':os.path.relpath(data['process-%d'%id]['files'][fileID], data['process-%d'%id]['output']),
             'url':'/api/v1/processes/%d/results/%d'%(id, fileID),
-            'size':"%0.3f KB"%(os.path.getsize(os.path.join(session['process-%d'%id]['output'], session['process-%d'%id]['files'][fileID]))/1024)
+            'size':"%0.3f KB"%(os.path.getsize(os.path.join(data['process-%d'%id]['output'], data['process-%d'%id]['files'][fileID]))/1024)
         })
     return output
 
@@ -66,7 +65,7 @@ def results_getfile(id, count = None, page = None, fileID = None):
     if processKey in session and children[id][1].is_alive():
         return []
     gen_files_list(id)
-    raw_reader = open(session['process-%d'%id]['files'][fileID])
+    raw_reader = open(data['process-%d'%id]['files'][fileID])
     reader = csv.DictReader(raw_reader, delimiter='\t')
     output = [{column_filter(id, k):entry[k] for k in entry} for entry in itertools.islice(reader, (page-1)*count, page*count)]
     raw_reader.close()
@@ -77,7 +76,7 @@ def results_getcols(id, fileID):
     if processKey in session and children[id][1].is_alive():
         return {}
     gen_files_list(id)
-    raw_reader = open(session['process-%d'%id]['files'][fileID])
+    raw_reader = open(data['process-%d'%id]['files'][fileID])
     reader = csv.DictReader(raw_reader, delimiter='\t')
     output = {column_filter(id, field):field for field in reader.fieldnames}
     raw_reader.close()
@@ -154,20 +153,18 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         command.append('--top-result-per-mutation')
     if keep_tmp_files:
         command.append('-k')
-    (parent, child) = mp.Pipe()
-    children.append([
-        parent,
-        mp.Process(target=_process_worker, args=(child, command))
-    ])
-    children[-1][1].start()
-    session['process-%d'%(len(children)-1)] = {
+    logfile = tempfile.mkstemp(text=True) #generate a new file for logging
+    data['processid']+=1
+    children[data['processid']] = mp.Process(target=_process_worker, args=(logfile[1], command), daemon=False)
+    children[data['processid']].start()
+    data['process-%d'%(data['processid'])] = {
         'command': "pvacseq run "+" ".join(command),
         'status': "Task Started",
         'log': "",
+        'logfile':logfile[1],
         'output':os.path.abspath(output)
     }
-    logs.append("")
-    return len(children)-1
+    return data['processid']
 
 def processes():
     return [{
@@ -176,21 +173,21 @@ def processes():
     } for i in range(len(children)) if 'process-%d'%i in session]
 
 def process_info(id):
-    intake = b''
-    while children[id][0].poll():
-        intake += os.read(children[id][0].fileno(), 512)
-    intake = spinner.sub('', intake.decode()).strip()
-    logs[id]+=intake
-    session['process-%d'%id]['status'] = logs[id].split("\n")[-1]
-    if not children[id][1].is_alive():
-        session['process-%d'%id]['status'] = "Process complete: %d"%children[id][1].exitcode
+    processkey = 'process-%d'%id
+    reader = open(data[processkey]['logfile'])
+    data[processkey]['log'] = spinner.sub('', reader.read()).strip()
+    data[processkey]['status'] = data[processkey]['log'].split("\n")[-1]
+    running = False
+    if id not in children:
+        try:
+            os.waitpid()
     return {
         'pid':children[id][1].pid,
         'id':id,
-        'command':session['process-%d'%id]['command'],
-        'status':session['process-%d'%id]['status'],
-        'log':logs[id],
-        'output':session['process-%d'%id]['output'],
+        'command':data[processkey]['command'],
+        'status':data[processkey]['status'],
+        'log':data[processkey]['log'],
+        'output':data[processkey]['output'],
         'running':children[id][1].is_alive()
     }
 
@@ -227,10 +224,12 @@ def check_allele(allele):
             return True
     return False
 
-def _process_worker(pipe, command):
+def _process_worker(log_path, command):
     from ...lib.main import main
     # setup this process' stdout and stderr to write to the pipe's file descriptor
-    sys.stdout = open(pipe.fileno(), mode='w')
+    sys.stdout = open(log_path, mode='w+')
     sys.stderr = sys.stdout
     # run the pvacseq command
     main(command)
+
+    sys.stdout.write("[[PROCESS COMPLETE]]")
