@@ -20,6 +20,14 @@ class ConfigFilesTests(unittest.TestCase):
             [self.python, self.executable, 'additional_input_file_list'],
             shell = False
         )
-        expected_output = ("gene_expn_file: <genes.fpkm_tracking file from Cufflinks>\n"
-        + "transcript_expn_file: <isoforms.fpkm_tracking file from Cufflinks>\n")
+        expected_output = (
+            "gene_expn_file: <genes.fpkm_tracking file from Cufflinks>\n"
+            + "transcript_expn_file: <isoforms.fpkm_tracking file from Cufflinks>\n"
+            + "normal_snvs_coverage_file: <bam-readcount output file for normal BAM and snvs>\n"
+            + "normal_indels_coverage_file: <bam-readcount output file for normal BAM and indels>\n"
+            + "tdna_snvs_coverage_file: <bam-readcount output file for tumor DNA BAM and snvs>\n"
+            + "tdna_indels_coverage_file: <bam-readcount output file for tumor DNA BAM and indels>\n"
+            + "trna_snvs_coverage_file: <bam-readcount output file for tumor RNA BAM and snvs>\n"
+            + "trna_indels_coverage_file: <bam-readcount output file for tumor RNA BAM and indels>\n"
+        )
         self.assertEqual(output.decode(), expected_output)

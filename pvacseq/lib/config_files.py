@@ -6,6 +6,12 @@ def additional_input_file_list_options():
     return OrderedDict([
         ('gene_expn_file', 'genes.fpkm_tracking file from Cufflinks'),
         ('transcript_expn_file', 'isoforms.fpkm_tracking file from Cufflinks'),
+        ('normal_snvs_coverage_file', 'bam-readcount output file for normal BAM and snvs'),
+        ('normal_indels_coverage_file', 'bam-readcount output file for normal BAM and indels'),
+        ('tdna_snvs_coverage_file', 'bam-readcount output file for tumor DNA BAM and snvs'),
+        ('tdna_indels_coverage_file', 'bam-readcount output file for tumor DNA BAM and indels'),
+        ('trna_snvs_coverage_file', 'bam-readcount output file for tumor RNA BAM and snvs'),
+        ('trna_indels_coverage_file', 'bam-readcount output file for tumor RNA BAM and indels'),
     ])
 
 def main(args_input = sys.argv[1:]):

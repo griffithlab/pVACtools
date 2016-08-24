@@ -16,23 +16,29 @@ import shutil
 
 class Pipeline(metaclass=ABCMeta):
     def __init__(self, **kwargs):
-        self.input_file              = kwargs['input_file']
-        self.sample_name             = kwargs['sample_name']
-        self.alleles                 = kwargs['alleles']
-        self.prediction_algorithms   = kwargs['prediction_algorithms']
-        self.output_dir              = kwargs['output_dir']
-        self.gene_expn_file          = kwargs['gene_expn_file']
-        self.transcript_expn_file    = kwargs['transcript_expn_file']
-        self.net_chop_method         = kwargs['net_chop_method']
-        self.net_chop_threshold      = kwargs['net_chop_threshold']
-        self.netmhc_stab             = kwargs['netmhc_stab']
-        self.top_result_per_mutation = kwargs['top_result_per_mutation']
-        self.top_score_metric        = kwargs['top_score_metric']
-        self.binding_threshold       = kwargs['binding_threshold']
-        self.minimum_fold_change     = kwargs['minimum_fold_change']
-        self.expn_val                = kwargs['expn_val']
-        self.fasta_size              = kwargs['fasta_size']
-        self.keep_tmp_files          = kwargs['keep_tmp_files']
+        self.input_file                  = kwargs['input_file']
+        self.sample_name                 = kwargs['sample_name']
+        self.alleles                     = kwargs['alleles']
+        self.prediction_algorithms       = kwargs['prediction_algorithms']
+        self.output_dir                  = kwargs['output_dir']
+        self.gene_expn_file              = kwargs['gene_expn_file']
+        self.transcript_expn_file        = kwargs['transcript_expn_file']
+        self.normal_snvs_coverage_file   = kwargs['normal_snvs_coverage_file']
+        self.normal_indels_coverage_file = kwargs['normal_indels_coverage_file']
+        self.tdna_snvs_coverage_file     = kwargs['tdna_snvs_coverage_file']
+        self.tdna_indels_coverage_file   = kwargs['tdna_indels_coverage_file']
+        self.trna_snvs_coverage_file     = kwargs['trna_snvs_coverage_file']
+        self.trna_indels_coverage_file   = kwargs['trna_indels_coverage_file']
+        self.net_chop_method             = kwargs['net_chop_method']
+        self.net_chop_threshold          = kwargs['net_chop_threshold']
+        self.netmhc_stab                 = kwargs['netmhc_stab']
+        self.top_result_per_mutation     = kwargs['top_result_per_mutation']
+        self.top_score_metric            = kwargs['top_score_metric']
+        self.binding_threshold           = kwargs['binding_threshold']
+        self.minimum_fold_change         = kwargs['minimum_fold_change']
+        self.expn_val                    = kwargs['expn_val']
+        self.fasta_size                  = kwargs['fasta_size']
+        self.keep_tmp_files              = kwargs['keep_tmp_files']
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
@@ -51,6 +57,18 @@ class Pipeline(metaclass=ABCMeta):
             convert_params.extend(['-g', self.gene_expn_file])
         if self.transcript_expn_file is not None:
             convert_params.extend(['-i', self.transcript_expn_file])
+        if self.normal_snvs_coverage_file is not None:
+            convert_params.extend(['--normal-snvs-coverage-file', self.normal_snvs_coverage_file])
+        if self.normal_indels_coverage_file is not None:
+            convert_params.extend(['--normal-indels-coverage-file', self.normal_indels_coverage_file])
+        if self.tdna_snvs_coverage_file is not None:
+            convert_params.extend(['--tdna-snvs-coverage-file', self.tdna_snvs_coverage_file])
+        if self.tdna_indels_coverage_file is not None:
+            convert_params.extend(['--tdna-indels-coverage-file', self.tdna_indels_coverage_file])
+        if self.trna_snvs_coverage_file is not None:
+            convert_params.extend(['--trna-snvs-coverage-file', self.trna_snvs_coverage_file])
+        if self.trna_indels_coverage_file is not None:
+            convert_params.extend(['--trna-indels-coverage-file', self.trna_indels_coverage_file])
         lib.convert_vcf.main(convert_params)
         print("Completed")
 

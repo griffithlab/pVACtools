@@ -87,6 +87,12 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('output_file', type=argparse.FileType('w'), help='output list of variants')
     parser.add_argument('-g', '--gene-expn-file', type=argparse.FileType('r'), help='genes.fpkm_tracking file from Cufflinks')
     parser.add_argument('-i', '--transcript-expn-file', type=argparse.FileType('r'), help='isoforms.fpkm_tracking file from Cufflinks')
+    parser.add_argument('--normal-snvs-coverage-file', type=argparse.FileType('r'), help='bam-readcount output file for normal BAM and snvs'),
+    parser.add_argument('--normal-indels-coverage-file', type=argparse.FileType('r'), help='bam-readcount output file for normal BAM and indels'),
+    parser.add_argument('--tdna-snvs-coverage-file', type=argparse.FileType('r'), help='bam-readcount output file for tumor DNA BAM and snvs'),
+    parser.add_argument('--tdna-indels-coverage-file', type=argparse.FileType('r'), help='bam-readcount output file for tumor DNA BAM and indels'),
+    parser.add_argument('--trna-snvs-coverage-file', type=argparse.FileType('r'), help='bam-readcount output file for tumor RNA BAM and snvs'),
+    parser.add_argument('--trna-indels-coverage-file', type=argparse.FileType('r'), help='bam-readcount output file for tumor RNA BAM and indels'),
     args = parser.parse_args(args_input)
 
     gene_expns = {}
