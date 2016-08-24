@@ -4,6 +4,42 @@ import csv
 import sys
 import re
 
+def parse_bam_readcount_file(bam_readcount_file):
+    coverage_tsv_reader = csv.reader(bam_readcount_file, delimiter='\t')
+    coverage = {}
+    for row in coverage_tsv_reader:
+        chromosome     = row[0]
+        position       = row[1]
+        reference_base = row[2]
+        depth          = row[3]
+        brct           = row[4:]
+        if chromosome not in coverage:
+            coverage[chromosome] = {}
+        coverage[chromosome][position] = brct
+    return coverage
+
+def parse_brct_field(brct_entry):
+    parsed_brct = {}
+    for brct in brct_entry:
+        (base, count, rest) = brct.split(':', 2)
+        parsed_brct[base.upper()] = count
+    return parsed_brct
+
+def is_insertion(ref, alt):
+    return len(alt) > len(ref)
+
+def is_deletion(ref, alt):
+    return len(alt) < len(ref)
+
+def simplify_indel_allele(ref, alt):
+    while len(ref)> 0 and len(alt) > 0 and ref[-1] == alt[-1]:
+        ref = ref[0:-1]
+        alt = alt[0:-1]
+    while len(ref)> 0 and len(alt) > 0 and ref[0] == alt[0]:
+        ref = ref[1:]
+        alt = alt[1:]
+    return ref, alt
+
 def parse_csq_format(vcf_reader):
     info_fields = vcf_reader.infos
 
@@ -78,6 +114,12 @@ def output_headers():
         'protein_position',
         'transcript_fpkm',
         'gene_fpkm',
+        'normal_ref_count',
+        'normal_var_count',
+        'tdna_ref_count',
+        'tdna_var_count',
+        'trna_ref_count',
+        'trna_var_count',
         'index'
     ]
 
@@ -111,6 +153,38 @@ def main(args_input = sys.argv[1:]):
             transcript_expns[row['tracking_id']] = row
         args.transcript_expn_file.close()
 
+    coverage = {}
+    if args.normal_snvs_coverage_file is not None:
+        if 'snvs' not in coverage:
+            coverage['snvs'] = {}
+        coverage['snvs']['normal'] = parse_bam_readcount_file(args.normal_snvs_coverage_file)
+        args.normal_snvs_coverage_file.close()
+    if args.normal_indels_coverage_file is not None:
+        if 'indels' not in coverage:
+            coverage['indels'] = {}
+        coverage['indels']['normal'] = parse_bam_readcount_file(args.normal_indels_coverage_file)
+        args.normal_indels_coverage_file.close()
+    if args.tdna_snvs_coverage_file is not None:
+        if 'snvs' not in coverage:
+            coverage['snvs'] = {}
+        coverage['snvs']['tdna'] = parse_bam_readcount_file(args.tdna_snvs_coverage_file)
+        args.tdna_snvs_coverage_file.close()
+    if args.tdna_indels_coverage_file is not None:
+        if 'indels' not in coverage:
+            coverage['indels'] = {}
+        coverage['indels']['tdna'] = parse_bam_readcount_file(args.tdna_indels_coverage_file)
+        args.tdna_indels_coverage_file.close()
+    if args.trna_snvs_coverage_file is not None:
+        if 'snvs' not in coverage:
+            coverage['snvs'] = {}
+        coverage['snvs']['trna'] = parse_bam_readcount_file(args.trna_snvs_coverage_file)
+        args.trna_snvs_coverage_file.close()
+    if args.trna_indels_coverage_file is not None:
+        if 'indels' not in coverage:
+            coverage['indels'] = {}
+        coverage['indels']['trna'] = parse_bam_readcount_file(args.trna_indels_coverage_file)
+        args.trna_indels_coverage_file.close()
+
     vcf_reader = vcf.Reader(args.input_file)
     if len(vcf_reader.samples) > 1:
         sys.exit('ERROR: VCF file contains more than one sample')
@@ -128,6 +202,32 @@ def main(args_input = sys.argv[1:]):
         alleles_dict = resolve_alleles(entry)
         for alt in alts:
             alt = str(alt)
+            if entry.is_indel:
+                if is_deletion(reference, alt):
+                    bam_readcount_position = start + 1
+                    (simplified_reference, simplified_alt) = simplify_indel_allele(reference, alt)
+                    ref_base = reference[1:2]
+                    var_base = '-' + simplified_reference
+                elif is_insertion(reference, alt):
+                    bam_readcount_position = start
+                    (simplified_reference, simplified_alt) = simplify_indel_allele(reference, alt)
+                    ref_base = reference
+                    var_base = '+' + simplified_alt
+                variant_type = 'indels'
+            else:
+                bam_readcount_position = entry.POS
+                variant_type = 'snvs'
+                ref_base = reference
+                var_base = alt
+            coverage_for_entry = {}
+            if variant_type in coverage:
+                for coverage_type in coverage[variant_type]:
+                    brct = parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)])
+                    if ref_base in brct:
+                        coverage_for_entry[coverage_type + '_ref_count'] = brct[ref_base]
+                    if var_base in brct:
+                        coverage_for_entry[coverage_type + '_var_count'] = brct[var_base]
+
             csq_allele = alleles_dict[alt]
             transcripts = parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
             for transcript in transcripts:
@@ -169,6 +269,7 @@ def main(args_input = sys.argv[1:]):
                     for locus, gene_expn_entry in gene_expn_entries.items():
                         gene_fpkm += float(gene_expn_entry['FPKM'])
                     output_row['gene_fpkm'] = gene_fpkm
+                output_row.update(coverage_for_entry)
                 tsv_writer.writerow(output_row)
 
     args.input_file.close()

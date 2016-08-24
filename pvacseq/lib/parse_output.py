@@ -256,6 +256,12 @@ def base_headers():
         'Median MT Score All Methods',
         'Gene Exp FPKM',
         'Transcript Exp FPKM',
+        'Normal Ref Count',
+        'Normal Var Count',
+        'Tumor DNA Ref Count',
+        'Tumor DNA Var Count',
+        'Tumor RNA Ref Count',
+        'Tumor RNA Var Count',
     ]
 
 def output_headers(methods):
@@ -339,6 +345,18 @@ def main(args_input = sys.argv[1:]):
                 row['Gene Exp FPKM'] = tsv_entry['gene_fpkm']
             if 'transcript_fpkm' in tsv_entry:
                 row['Transcript Exp FPKM'] = tsv_entry['transcript_fpkm']
+            if 'normal_ref_count' in tsv_entry:
+                row['Normal Ref Count'] = tsv_entry['normal_ref_count']
+            if 'normal_var_count' in tsv_entry:
+                row['Normal Var Count'] = tsv_entry['normal_var_count']
+            if 'tdna_ref_count' in tsv_entry:
+                row['Tumor DNA Ref Count'] = tsv_entry['tdna_ref_count']
+            if 'tdna_var_count' in tsv_entry:
+                row['Tumor DNA Var Count'] = tsv_entry['tdna_var_count']
+            if 'trna_ref_count' in tsv_entry:
+                row['Tumor RNA Ref Count'] = tsv_entry['trna_ref_count']
+            if 'trna_var_count' in tsv_entry:
+                row['Tumor RNA Var Count'] = tsv_entry['trna_var_count']
             tsv_writer.writerow(row)
 
     tmp_output_filehandle.close()

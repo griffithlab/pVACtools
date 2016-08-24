@@ -213,7 +213,13 @@ class Pipeline(metaclass=ABCMeta):
 
         symlinks_to_delete = []
         if (self.gene_expn_file is not None
-            or self.transcript_expn_file is not None):
+            or self.transcript_expn_file is not None
+            or self.normal_snvs_coverage_file is not None
+            or self.normal_indels_coverage_file is not None
+            or self.tdna_snvs_coverage_file is not None
+            or self.tdna_indels_coverage_file is not None
+            or self.trna_snvs_coverage_file is not None
+            or self.trna_indels_coverage_file is not None):
             self.coverage_filter()
         else:
             os.symlink(self.binding_filter_out_path(), self.coverage_filter_out_path())
