@@ -435,6 +435,29 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
+  /api/v1/checkallele:
+    get:
+      tags:
+        - "allele"
+      summary: "Verifies that the specified allele is supported"
+      description: "Checks the supplied allele against the list of supported alleles \
+        and returns a boolean indicating if the allele is supported or not"
+      operationId: "pvacseq.server.controllers.default_controller.check_allele"
+      parameters:
+        - name: "allele"
+          in: "query"
+          description: "Allele name to check"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Returns a boolean indicating if the allele is supported or not"
+          schema:
+            type: "boolean"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
   /static/testpage:
     get:
       tags:
