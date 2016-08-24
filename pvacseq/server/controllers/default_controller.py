@@ -9,6 +9,7 @@ import re
 import tempfile
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
+allele_file = None
 
 children = []
 logs = []
@@ -214,6 +215,17 @@ def test():
     data = reader.read()
     reader.close()
     return data
+
+def check_allele(allele):
+    global allele_file
+    if not allele_file:
+        allele_file = tempfile.TemporaryFile('w+')
+        subprocess.call(['pvacseq', 'valid_alleles'], stdout=allele_file)
+    allele_file.seek(0)
+    for line in allele_file:
+        if line.strip() == allele:
+            return True
+    return False
 
 def _process_worker(pipe, command):
     from ...lib.main import main
