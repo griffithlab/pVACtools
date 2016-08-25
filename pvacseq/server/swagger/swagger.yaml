@@ -458,6 +458,34 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
+  /api/v1/reset:
+    get:
+      tags:
+        - "reset"
+      summary: "Resets the log of old processes"
+      description: "Clears out processes which were started by previous instances \
+        of the ui server.  Processes started by this instance will be kept unless \
+        the clearall paramter is set to 1"
+      operationId: "pvacseq.server.controllers.default_controller.reset"
+      parameters:
+        - name: "clearall"
+          in: "query"
+          description: "Informs the controller to drop all processes, not just old ones"
+          type: "integer"
+          default: 0
+      responses:
+        200:
+          description: "Returns a list of cleared process id's (which are now \
+            invalid until reassigned by starting new runs)"
+          schema:
+            type: "array"
+            items: {
+              type: "integer"
+            }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
   /static/testpage:
     get:
       tags:

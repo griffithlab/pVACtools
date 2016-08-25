@@ -6,6 +6,7 @@ import subprocess
 import re
 import tempfile
 import json
+import shutil
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
 allele_file = None
@@ -28,7 +29,7 @@ if os.path.isfile(configfile):
     reader = open(configfile)
     data = json.load(reader)
     reader.close()
-    if data['reboot'] != reboot:
+    if 'reboot' in data and data['reboot'] != reboot:
         print("A reboot has occurred since the server was first started")
         print(
             "pid's of old pVAC-Seq runs with id's",
@@ -38,8 +39,7 @@ if os.path.isfile(configfile):
 else:
     print("No saved state found")
     data={
-        'processid':-1,
-        'reboot': reboot
+        'processid':-1
     }
 
 #a mapping to provide a description of each result file based on its extension
@@ -93,9 +93,13 @@ def is_running(id):
     """Returns True if the requested process looks like it's still running"""
     process = fetch_process(id)
     if not process[0]:
-        raise KeyError("The requested process (%d) does not exist"%id)
-    if process[1] and process[1].returncode == None:
-        return True
+        return False #The process doesn't exist
+    if process[1]:
+        try:
+            process[1].wait(.05)
+            return False
+        except subprocess.TimeoutExpired:
+            return True
     try:
         #check if the process is active by sending a dummy signal
         os.kill(process[0]['pid'], 0)
@@ -114,7 +118,13 @@ def results_get(id):
     """Get the list of result files from a specific pVAC-Seq run"""
     process = fetch_process(id)
     if not process[0]:
-        raise KeyError("The requested process (%d) does not exist"%id)
+        return (
+            {
+                "code":400,
+                "message":"The requested process (%d) does not exist"%id,
+                "fields":"id"
+            },400
+        )
     if is_running(id):
         return []
     gen_files_list(id)
@@ -134,12 +144,24 @@ def results_getfile(id, count = None, page = None, fileID = None):
     """Read data directly from a specific output file"""
     process = fetch_process(id)
     if not process[0]:
-        raise KeyError("The requested process (%d) does not exist"%id)
+        return (
+            {
+                "code":400,
+                "message":"The requested process (%d) does not exist"%id,
+                "fields":"id"
+            },400
+        )
     if is_running(id):
         return []
     gen_files_list(id)
     if fileID not in range(len(process[0]['files'])):
-        raise KeyError("The requested fileID (%d) does not exist for this process (%d)" %(fileID, id))
+        return (
+            {
+                "code":400,
+                "message":"The requested fileID (%d) does not exist for this process (%d)" %(fileID, id),
+                "fields":"fileID"
+            },400
+        )
     raw_reader = open(process[0]['files'][fileID])
     reader = csv.DictReader(raw_reader, delimiter='\t')
     output = [{column_filter(k):entry[k] for k in entry} for entry in itertools.islice(reader, (page-1)*count, page*count)]
@@ -150,12 +172,24 @@ def results_getcols(id, fileID):
     """Get a mapping of standardized column names -> original column names"""
     process = fetch_process(id)
     if not process[0]:
-        raise KeyError("The requested process (%d) does not exist"%id)
+        return (
+            {
+                "code":400,
+                "message":"The requested process (%d) does not exist"%id,
+                "fields":"id"
+            },400
+        )
     if is_running(id):
         return {}
     gen_files_list(id)
     if fileID not in range(len(process[0]['files'])):
-        raise KeyError("The requested fileID (%d) does not exist for this process (%d)" %(fileID, id))
+        return (
+            {
+                "code":400,
+                "message":"The requested fileID (%d) does not exist for this process (%d)" %(fileID, id),
+                "fields":"fileID"
+            },400
+        )
     raw_reader = open(process[0]['files'][fileID])
     reader = csv.DictReader(raw_reader, delimiter='\t')
     output = {column_filter(field):field for field in reader.fieldnames}
@@ -206,6 +240,8 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
           fasta_size, keep_tmp_files):
     """Build the command for pVAC-Seq, then spawn a new process to run it"""
     command = [
+        'pvacseq',
+        'run',
         input,
         samplename,
         alleles
@@ -244,11 +280,8 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
     data['processid']+=1
     os.makedirs(os.path.dirname(logfile), exist_ok = True)
     children[data['processid']] = subprocess.Popen(
-        [
-            sys.executable,
-            os.path.join(os.path.dirname(__file__), 'process_controller.py'),
-        ]+command,
-        stdout = open(logfile, 'w'),
+        command,
+        stdout = open(logfile, 'w'), #capture stdout in the logfile
         stderr = subprocess.STDOUT,
         #isolate the child in a new process group
         #this way it will remainin running no matter what happens to this process
@@ -256,12 +289,16 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
     )
     #Store some data about the child process
     data['process-%d'%(data['processid'])] = {
-        'command': "pvacseq run "+" ".join(command),
+        #Do the replacement so that the displayed command is actually valid
+        #The executed command is automatically escaped as part of Popen
+        'command': " ".join(command),
         'logfile':logfile,
         'pid':children[data['processid']].pid,
         'status': "Task Started",
         'output':os.path.abspath(output)
     }
+    if 'reboot' not in data:
+        data['reboot'] = reboot
     savedata()
     return data['processid']
 
@@ -276,13 +313,22 @@ def process_info(id):
     """Returns more detailed information about a specific process"""
     process = fetch_process(id)
     if not process[0]:
-        raise KeyError("The requested process (%d) does not exist"%id)
+        return (
+            {
+                "code":400,
+                "message":"The requested process (%d) does not exist"%id,
+                "fields":"id"
+            },400
+        )
     reader = open(process[0]['logfile'])
     log = spinner.sub('', reader.read()).strip()
     process[0]['status'] = log.split("\n")[-1]
     reader.close()
-    if process[1] and not is_running(id):
-        process[0]['status'] = "Process Complete: %d"%process[1].exitcode
+    if not is_running(id):
+        if process[1]:
+            process[0]['status'] = "Process Complete: %d"%process[1].returncode
+        else:
+            process[0]['status'] = "Process Complete"
     savedata()
     return {
         'pid':process[0]['pid'],
@@ -298,8 +344,9 @@ def process_info(id):
 def stop(id):
     """Stops the requested process.  This is only allowed if the child is still attached"""
     status = process_info(id)
-    if status['running'] and status['pid']>1:
-        children[id].terminate()
+    if type(status) == dict: #status could be an error object if the id is invalid
+        if status['running'] and status['pid']>1:
+            children[id].terminate()
     return status
 
 def shutdown():
@@ -332,3 +379,24 @@ def check_allele(allele):
         if line.strip() == allele:
             return True
     return False
+
+def reset(clearall):
+    output = []
+    for i in range(data['processid']+1):
+        if 'process-%d'%i in data and is_running(i):
+            if i not in children:
+                shutil.rmtree(data['process-%d'%i]['output'])
+                del data['process-%d'%i]
+                output.append(i)
+            elif clearall:
+                os.kill(data['process-%d'%i]['pid'], 15) #SIGTERM
+                shutil.rmtree(data['process-%d'%i]['output'])
+                del data['process-%d'%i]
+                del children[i]
+                output.append(i)
+    #Set the processid to the highest child process from this session
+    data['processid'] = max(i for i in range(data['processid']+1) if 'process-%d'%i in data)
+    if clearall and 'reboot' in data:
+        del data['reboot']
+    savedata()
+    return output
