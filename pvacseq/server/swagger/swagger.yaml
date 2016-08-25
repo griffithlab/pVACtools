@@ -499,6 +499,10 @@ definitions:
       running:
         type: "boolean"
         description: "Indicates whether or not the process is still running"
+      attached:
+        type: "boolean"
+        description: "Indicates whether or not the process is still directly attached \
+          to the server, or if the process has become orphaned"
   Result:
     type: "object"
     properties:

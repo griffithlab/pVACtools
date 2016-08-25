@@ -21,6 +21,11 @@ for dirpath, dirnames, filenames in os.walk("pvacseq/iedb_alleles"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             data_files.append(os.path.join('..', dirpath, filename))
+server_data = []
+for dirpath, dirnames, filenames in os.walk("pvacseq/server"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            server_data.append(os.path.join('..', dirpath, filename))
 
 setup(
     name="pvacseq",
@@ -42,7 +47,7 @@ setup(
     },
     package_data={
         'pvacseq' : data_files
-        'pvacseq.server': ['LICENSE', 'README.md']
+        'pvacseq.server': server_data
     },
     classifiers=[
         'Development Status :: 4 - Beta',
