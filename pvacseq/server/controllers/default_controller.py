@@ -367,7 +367,7 @@ def shutdown():
 
 def test():
     """Return the submission page (a stand-in until there is a proper ui for submission)"""
-    reader = open("/Users/agrauber/Documents/pVAC-Seq/pvacseq/server/test_start.html")
+    reader = open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_start.html'))
     data = reader.read()
     reader.close()
     return data
