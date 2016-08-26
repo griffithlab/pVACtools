@@ -34,17 +34,15 @@ setup(
     entry_points={
         "console_scripts":[
             "pvacseq = pvacseq.pvacseq:main",
-            "pvacseq-ui = pvacseq.server.app:main [UI]"
+            "pvacseq-ui = pvacseq.server.app:main"
         ]
     },
     install_requires=[
         'PyVCF',
         'requests',
         'PyYAML',
+        'connexion'
     ],
-    extras_require={
-        'UI': ['connexion']
-    },
     package_data={
         'pvacseq' : data_files
         'pvacseq.server': server_data
