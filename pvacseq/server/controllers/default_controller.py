@@ -13,9 +13,6 @@ allele_file = None
 
 children = {} #Holds popen objects for processes spawned by this current session
 
-#--FIXME: staging files should be created with mkstemp, so that that they still exist as needed
-staging_files = [] #holds temporary files so they still exist for use by the subprocesses
-
 #path to the configuration file where the server stores its data between runs
 configfile = os.path.join(os.path.expanduser('~'), '.pvacseq_ui')
 
@@ -26,9 +23,7 @@ reboot = subprocess.check_output(['last', 'reboot']).decode().split("\n")[0]
 #fetch data from the configuration file
 if os.path.isfile(configfile):
     print("Resuming from saved state")
-    reader = open(configfile)
-    data = json.load(reader)
-    reader.close()
+    data = json.load(open(configfile))
     if 'reboot' in data and data['reboot'] != reboot:
         print("A reboot has occurred since the server was first started")
         print(
@@ -95,11 +90,7 @@ def is_running(id):
     if not process[0]:
         return False #The process doesn't exist
     if process[1]:
-        try:
-            process[1].wait(.05)
-            return False
-        except subprocess.TimeoutExpired:
-            return True
+        return process[1].poll() == None
     try:
         #check if the process is active by sending a dummy signal
         os.kill(process[0]['pid'], 0)
@@ -134,9 +125,17 @@ def results_get(id):
         output.append({
             'fileID':fileID,
             'description':descriptions[extension] if extension in descriptions else "Unknown file",
-            'display_name':os.path.relpath(process[0]['files'][fileID], process[0]['output']),
+            'display_name':os.path.relpath(
+                process[0]['files'][fileID],
+                process[0]['output']
+            ),
             'url':'/api/v1/processes/%d/results/%d'%(id, fileID),
-            'size':"%0.3f KB"%(os.path.getsize(os.path.join(process[0]['output'], process[0]['files'][fileID]))/1024)
+            'size':"%0.3f KB"%(
+                os.path.getsize(os.path.join(
+                    process[0]['output'],
+                    process[0]['files'][fileID]
+                ))/1024
+            )
         })
     return output
 
@@ -164,7 +163,10 @@ def results_getfile(id, count = None, page = None, fileID = None):
         )
     raw_reader = open(process[0]['files'][fileID])
     reader = csv.DictReader(raw_reader, delimiter='\t')
-    output = [{column_filter(k):entry[k] for k in entry} for entry in itertools.islice(reader, (page-1)*count, page*count)]
+    output = [
+        {column_filter(k):entry[k] for k in entry}
+        for entry in itertools.islice(reader, (page-1)*count, page*count)
+    ]
     raw_reader.close()
     return output
 
@@ -204,20 +206,6 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
     """Stage input for a new pVAC-Seq run.  Generate a unique output directory and \
     save uploaded files to temporary locations (and give pVAC-Seq the filepaths). \
     Then forward the command to start()"""
-    staged_input = tempfile.NamedTemporaryFile('wb')
-    input.save(staged_input)
-    staged_input.flush()
-    staging_files.append(staged_input)
-
-    staged_gene_expn_file = tempfile.NamedTemporaryFile('wb')
-    gene_expn_file.save(staged_gene_expn_file)
-    staged_gene_expn_file.flush()
-    staging_files.append(staged_gene_expn_file)
-
-    staged_transcript_expn_file = tempfile.NamedTemporaryFile('wb')
-    transcript_expn_file.save(staged_transcript_expn_file)
-    staged_transcript_expn_file.flush()
-    staging_files.append(staged_transcript_expn_file)
 
     current_path = os.path.join(os.path.expanduser('~'), "Documents", "pVAC-Seq Output", samplename)
     if os.path.exists(current_path):
@@ -225,6 +213,20 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
         while os.path.exists(current_path+"_"+str(i)):
             i+=1
         current_path += "_"+str(i)
+
+    os.makedirs(os.path.join(current_path, 'Staging'), exist_ok=True)
+
+    staged_input = open(os.path.join(current_path, "Staging", "input.vcf"), 'wb')
+    input.save(staged_input)
+    staged_input.flush()
+
+    staged_gene_expn_file = open(os.path.join(current_path, "Staging", "genes.fpkm_tracking"), 'wb')
+    gene_expn_file.save(staged_gene_expn_file)
+    staged_gene_expn_file.flush()
+
+    staged_transcript_expn_file = open(os.path.join(current_path, "Staging", "transcript.fpkm_tracking"), 'wb')
+    transcript_expn_file.save(staged_transcript_expn_file)
+    staged_transcript_expn_file.flush()
 
     return start(staged_input.name, samplename, alleles, epitope_lengths, prediction_algorithms, current_path,
               peptide_sequence_length, staged_gene_expn_file.name if staged_gene_expn_file.tell() else "",
@@ -329,6 +331,9 @@ def process_info(id):
             process[0]['status'] = "Process Complete: %d"%process[1].returncode
         else:
             process[0]['status'] = "Process Complete"
+        #If there is a staging directory, remove it
+        if os.path.isdir(os.path.join(process[0]['output'], 'Staging')):
+            shutil.rmtree(os.path.join(process[0]['output'], 'Staging'))
     savedata()
     return {
         'pid':process[0]['pid'],
@@ -354,10 +359,9 @@ def shutdown():
     output = []
     for i in range(data['processid']+1):
         if is_running(i) and i in children:
-            if children[i].returncode == None:
-                output.append(i)
+            output.append(i)
             children[i].wait(.1)
-            if children[i].returncode == None:
+            if is_running(i):
                 children[i].terminate()
     return output
 
@@ -381,6 +385,7 @@ def check_allele(allele):
     return False
 
 def reset(clearall):
+    """Clears out finished processes from the record"""
     output = []
     for i in range(data['processid']+1):
         if 'process-%d'%i in data and is_running(i):
@@ -389,7 +394,6 @@ def reset(clearall):
                 del data['process-%d'%i]
                 output.append(i)
             elif clearall:
-                os.kill(data['process-%d'%i]['pid'], 15) #SIGTERM
                 shutil.rmtree(data['process-%d'%i]['output'])
                 del data['process-%d'%i]
                 del children[i]
