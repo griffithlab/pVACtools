@@ -23,7 +23,7 @@ def parse_additional_input_file_list(additional_input_file_list):
             try:
                 additional_input_files = yaml.load(stream)
             except yaml.YAMLError as exc:
-                print(exc)
+                sys.exit(exc)
         for additional_input_file in additional_input_files:
             if additional_input_file not in additional_input_file_list_options().keys():
                 sys.exit("%s not a valid key in the additional_input_file_list" % additional_input_file)
