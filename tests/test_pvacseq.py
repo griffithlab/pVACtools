@@ -155,8 +155,8 @@ class PVACTests(unittest.TestCase):
             'NetMHC',
             'PickPocket',
             output_dir.name,
-            os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
             '-e', '9,10',
+            '-i', os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
             '--top-score-metric=lowest',
             '--keep-tmp-files',
             '--net-chop-method', 'cterm',
@@ -168,7 +168,7 @@ class PVACTests(unittest.TestCase):
             'H2-IAb',
             'NNalign',
             output_dir.name,
-            os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
+            '-i', os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
             '--top-score-metric=lowest',
             '--keep-tmp-files',
         ])

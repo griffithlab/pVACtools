@@ -57,11 +57,6 @@ def main(args_input = sys.argv[1:]):
         help="Output directory for writing all result files"
     )
     parser.add_argument(
-        "additional_input_file_list",
-        help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
-             + "For an example of this yaml file run `pvacseq config additional_input_file_list`."
-    )
-    parser.add_argument(
         "-e", "--epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
         help="Length of subpeptides(epitopes) to predict. "
              + "Multiple lengths can be specified using a comma-separated list. "
@@ -72,6 +67,11 @@ def main(args_input = sys.argv[1:]):
         "-l", "--peptide-sequence-length", type=int,
         default=21,
         help="length of the peptide sequences in the input FASTA file. Default: 21",
+    )
+    parser.add_argument(
+        "-i", "--additional-input-file-list",
+        help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
+             + "For an example of this yaml file run `pvacseq config additional_input_file_list`."
     )
     parser.add_argument(
         '--net-chop-method',
@@ -155,8 +155,6 @@ def main(args_input = sys.argv[1:]):
         elif isinstance(prediction_class_object, MHCII):
             class_ii_prediction_algorithms.append(prediction_algorithm)
 
-    additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
-
     shared_arguments = {
         'input_file'              : args.input_file,
         'sample_name'             : args.sample_name,
@@ -171,7 +169,9 @@ def main(args_input = sys.argv[1:]):
         'fasta_size'              : args.fasta_size,
         'keep_tmp_files'          : args.keep_tmp_files,
     }
-    shared_arguments.update(additional_input_files)
+    if args.additional_input_file_list:
+        additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
+        shared_arguments.update(additional_input_files)
 
     if len(class_i_prediction_algorithms) > 0:
         if args.epitope_length is None:
