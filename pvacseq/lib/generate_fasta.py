@@ -121,6 +121,9 @@ def main(args_input = sys.argv[1:]):
         if '*' in wildtype_subsequence or '*' in mutant_subsequence:
             continue
 
+        if 'X' in wildtype_subsequence or 'X' in mutant_subsequence:
+            continue
+
         variant_id = line['index']
         for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, mutant_subsequence]):
             args.output_file.writelines('>%s.%s\n' % (designation, variant_id))
