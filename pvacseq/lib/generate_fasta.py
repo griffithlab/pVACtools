@@ -78,6 +78,7 @@ def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq generate_fasta')
     parser.add_argument('input_file', type=argparse.FileType('r'), help='input list of variants',)
     parser.add_argument('peptide_sequence_length', type=int, help='length of the peptide sequence')
+    parser.add_argument('epitope_length', type=int, help='length of subpeptides(epitopes) to predict')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='output FASTA file')
     args = parser.parse_args(args_input)
 
