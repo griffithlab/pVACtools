@@ -20,10 +20,7 @@ import yaml
 def parse_additional_input_file_list(additional_input_file_list):
     if additional_input_file_list:
         with open(additional_input_file_list, 'r') as stream:
-            try:
-                additional_input_files = yaml.load(stream)
-            except yaml.YAMLError as exc:
-                sys.exit(exc)
+            additional_input_files = yaml.load(stream)
         for additional_input_file in additional_input_files:
             if additional_input_file not in additional_input_file_list_options().keys():
                 sys.exit("%s not a valid key in the additional_input_file_list" % additional_input_file)
