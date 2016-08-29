@@ -254,6 +254,25 @@ class PVACTests(unittest.TestCase):
             False
         ))
         #Class II output files
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "class_ii", "Test.tsv"),
+            os.path.join(self.test_data_directory, "class_ii", "Test.tsv")
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "class_ii", "Test_31.fa"),
+            os.path.join(self.test_data_directory, "class_ii", "Test_31.fa"),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "class_ii", "tmp", "Test_31.fa.split_1-200"),
+            os.path.join(self.test_data_directory, "class_ii", "tmp", "Test_31.fa.split_1-200"),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "class_ii", "tmp", "Test_31.fa.split_1-200.key"),
+            os.path.join(self.test_data_directory, "class_ii", "tmp", "Test_31.fa.split_1-200.key"),
+            False
+        ))
         self.request_mock.assert_has_calls([
             generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name)
         ])

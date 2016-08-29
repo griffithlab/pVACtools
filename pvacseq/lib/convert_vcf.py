@@ -10,12 +10,14 @@ def parse_bam_readcount_file(bam_readcount_file):
     for row in coverage_tsv_reader:
         chromosome     = row[0]
         position       = row[1]
-        reference_base = row[2]
+        reference_base = row[2].upper()
         depth          = row[3]
         brct           = row[4:]
         if chromosome not in coverage:
             coverage[chromosome] = {}
-        coverage[chromosome][position] = brct
+        if position not in coverage[chromosome]:
+            coverage[chromosome][position] = {}
+        coverage[chromosome][position][reference_base] = brct
     return coverage
 
 def parse_brct_field(brct_entry):
@@ -222,11 +224,12 @@ def main(args_input = sys.argv[1:]):
             coverage_for_entry = {}
             if variant_type in coverage:
                 for coverage_type in coverage[variant_type]:
-                    brct = parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)])
-                    if ref_base in brct:
-                        coverage_for_entry[coverage_type + '_ref_count'] = brct[ref_base]
-                    if var_base in brct:
-                        coverage_for_entry[coverage_type + '_var_count'] = brct[var_base]
+                    if reference in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]:
+                        brct = parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][reference])
+                        if ref_base in brct:
+                            coverage_for_entry[coverage_type + '_ref_count'] = brct[ref_base]
+                        if var_base in brct:
+                            coverage_for_entry[coverage_type + '_var_count'] = brct[var_base]
 
             csq_allele = alleles_dict[alt]
             transcripts = parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
