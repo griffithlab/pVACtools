@@ -1,0 +1,4 @@
+gene_expn_file: tests/test_data/pvacseq/genes.fpkm_tracking
+transcript_expn_file: tests/test_data/pvacseq/isoforms.fpkm_tracking
+tdna_snvs_coverage_file: tests/test_data/pvacseq/snvs.bam_readcount
+tdna_indels_coverage_file: tests/test_data/pvacseq/indels.bam_readcount
