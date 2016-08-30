@@ -352,7 +352,7 @@ class MHCIIPipeline(Pipeline):
         lib.generate_fasta.main([
             self.tsv_file_path(),
             str(self.peptide_sequence_length),
-            '9',
+            '9', #This is the default core epitope length for IEDB class ii predictions
             self.fasta_file_path()
         ])
         print("Completed")
