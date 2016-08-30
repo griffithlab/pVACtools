@@ -53,22 +53,21 @@ class Pipeline(metaclass=ABCMeta):
             self.input_file,
             self.tsv_file_path(),
         ]
-        if self.gene_expn_file is not None:
-            convert_params.extend(['-g', self.gene_expn_file])
-        if self.transcript_expn_file is not None:
-            convert_params.extend(['-i', self.transcript_expn_file])
-        if self.normal_snvs_coverage_file is not None:
-            convert_params.extend(['--normal-snvs-coverage-file', self.normal_snvs_coverage_file])
-        if self.normal_indels_coverage_file is not None:
-            convert_params.extend(['--normal-indels-coverage-file', self.normal_indels_coverage_file])
-        if self.tdna_snvs_coverage_file is not None:
-            convert_params.extend(['--tdna-snvs-coverage-file', self.tdna_snvs_coverage_file])
-        if self.tdna_indels_coverage_file is not None:
-            convert_params.extend(['--tdna-indels-coverage-file', self.tdna_indels_coverage_file])
-        if self.trna_snvs_coverage_file is not None:
-            convert_params.extend(['--trna-snvs-coverage-file', self.trna_snvs_coverage_file])
-        if self.trna_indels_coverage_file is not None:
-            convert_params.extend(['--trna-indels-coverage-file', self.trna_indels_coverage_file])
+        for attribute in [
+            'gene_expn_file',
+            'transcript_expn_file',
+            'normal_snvs_coverage_file',
+            'normal_indels_coverage_file',
+            'tdna_snvs_coverage_file',
+            'tdna_indels_coverage_file',
+            'trna_snvs_coverage_file',
+            'trna_indels_coverage_file'
+        ]:
+            if getattr(self, attribute):
+                param = '--' + attribute
+                param = param.replace('_', '-')
+                convert_params.extend([param, getattr(self, attribute)])
+
         lib.convert_vcf.main(convert_params)
         print("Completed")
 
