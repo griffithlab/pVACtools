@@ -155,13 +155,12 @@ class PVACTests(unittest.TestCase):
             'NetMHC',
             'PickPocket',
             output_dir.name,
+            os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
             '-e', '9,10',
             '--top-score-metric=lowest',
             '--keep-tmp-files',
             '--net-chop-method', 'cterm',
             '--netmhc-stab',
-            '--gene-expn-file', os.path.join(self.test_data_directory, "genes.fpkm_tracking"),
-            '--transcript-expn-file', os.path.join(self.test_data_directory, "isoforms.fpkm_tracking"),
         ])
         pvacseq.lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
@@ -169,10 +168,9 @@ class PVACTests(unittest.TestCase):
             'H2-IAb',
             'NNalign',
             output_dir.name,
+            os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
             '--top-score-metric=lowest',
             '--keep-tmp-files',
-            '--gene-expn-file', os.path.join(self.test_data_directory, "genes.fpkm_tracking"),
-            '--transcript-expn-file', os.path.join(self.test_data_directory, "isoforms.fpkm_tracking"),
         ])
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "class_i", "Test.tsv"),

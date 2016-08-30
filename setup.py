@@ -25,6 +25,7 @@ setup(
     install_requires=[
         'PyVCF',
         'requests',
+        'PyYAML',
     ],
     package_data={
         'pvacseq' : data_files + ['VEP_plugins/*', 'iedb_alleles/*']

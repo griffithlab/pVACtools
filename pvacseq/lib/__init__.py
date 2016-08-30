@@ -2,6 +2,7 @@ __all__ = [
     "binding_filter",
     "call_iedb",
     "combine_parsed_outputs",
+    "config_files",
     "convert_vcf",
     "coverage_filter",
     "download_example_data",
