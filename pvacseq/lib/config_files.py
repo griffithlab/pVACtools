@@ -1,11 +1,12 @@
 import sys
 import argparse
+from collections import OrderedDict
 
 def additional_input_file_list_options():
-    return {
-        'gene_expn_file'      : 'genes.fpkm_tracking file from Cufflinks',
-        'transcript_expn_file': 'isoforms.fpkm_tracking file from Cufflinks',
-    }
+    return OrderedDict([
+        ('gene_expn_file', 'genes.fpkm_tracking file from Cufflinks'),
+        ('transcript_expn_file', 'isoforms.fpkm_tracking file from Cufflinks'),
+    ])
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq config_files')
