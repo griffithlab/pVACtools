@@ -185,13 +185,13 @@ class PVACTests(unittest.TestCase):
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", "Test_21.fa.split_1-200"),
-            os.path.join(self.test_data_directory, "class_i", "tmp", "Test_21.fa.split_1-200"),
+            os.path.join(output_dir.name, "class_i", "tmp", "Test_21.fa.split_1-48"),
+            os.path.join(self.test_data_directory, "class_i", "tmp", "Test_21.fa.split_1-48"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", "Test_21.fa.split_1-200.key"),
-            os.path.join(self.test_data_directory, "class_i", "tmp", "Test_21.fa.split_1-200.key"),
+            os.path.join(output_dir.name, "class_i", "tmp", "Test_21.fa.split_1-48.key"),
+            os.path.join(self.test_data_directory, "class_i", "tmp", "Test_21.fa.split_1-48.key"),
             False
         ))
         self.assertEqual(len(self.request_mock.mock_calls), 9)
@@ -203,27 +203,27 @@ class PVACTests(unittest.TestCase):
                     self.request_mock.assert_has_calls([
                         generate_class_i_call(method, allele, length, self.test_data_directory, output_dir.name)
                     ])
-                    output_file   = os.path.join(output_dir.name, "class_i", "tmp", 'Test.%s.%s.%s.tsv_1-200' % (method, allele, length))
-                    expected_file = os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.%s.%s.%s.tsv_1-200' % (method, allele, length))
+                    output_file   = os.path.join(output_dir.name, "class_i", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
+                    expected_file = os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
                     self.assertTrue(cmp(output_file, expected_file, False))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-200'),
-            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-200'),
+            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
+            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-200'),
-            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-200'),
+            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
+            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-200'),
-            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-200'),
+            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
+            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-200'),
-            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-200'),
+            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
+            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
@@ -267,26 +267,26 @@ class PVACTests(unittest.TestCase):
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "tmp", "Test_31.fa.split_1-200"),
-            os.path.join(self.test_data_directory, "class_ii", "tmp", "Test_31.fa.split_1-200"),
+            os.path.join(output_dir.name, "class_ii", "tmp", "Test_31.fa.split_1-48"),
+            os.path.join(self.test_data_directory, "class_ii", "tmp", "Test_31.fa.split_1-48"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "tmp", "Test_31.fa.split_1-200.key"),
-            os.path.join(self.test_data_directory, "class_ii", "tmp", "Test_31.fa.split_1-200.key"),
+            os.path.join(output_dir.name, "class_ii", "tmp", "Test_31.fa.split_1-48.key"),
+            os.path.join(self.test_data_directory, "class_ii", "tmp", "Test_31.fa.split_1-48.key"),
             False
         ))
         self.request_mock.assert_has_calls([
             generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name)
         ])
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "tmp", 'Test.nn_align.H2-IAb.tsv_1-200'),
-            os.path.join(self.test_data_directory, "class_ii", "tmp", 'Test.nn_align.H2-IAb.tsv_1-200'),
+            os.path.join(output_dir.name, "class_ii", "tmp", 'Test.nn_align.H2-IAb.tsv_1-48'),
+            os.path.join(self.test_data_directory, "class_ii", "tmp", 'Test.nn_align.H2-IAb.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "tmp", 'Test.H2-IAb.parsed.tsv_1-200'),
-            os.path.join(self.test_data_directory, "class_ii", "tmp", 'Test.H2-IAb.parsed.tsv_1-200'),
+            os.path.join(output_dir.name, "class_ii", "tmp", 'Test.H2-IAb.parsed.tsv_1-48'),
+            os.path.join(self.test_data_directory, "class_ii", "tmp", 'Test.H2-IAb.parsed.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
