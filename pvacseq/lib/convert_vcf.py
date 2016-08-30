@@ -156,36 +156,15 @@ def main(args_input = sys.argv[1:]):
         args.transcript_expn_file.close()
 
     coverage = {}
-    if args.normal_snvs_coverage_file is not None:
-        if 'snvs' not in coverage:
-            coverage['snvs'] = {}
-        coverage['snvs']['normal'] = parse_bam_readcount_file(args.normal_snvs_coverage_file)
-        args.normal_snvs_coverage_file.close()
-    if args.normal_indels_coverage_file is not None:
-        if 'indels' not in coverage:
-            coverage['indels'] = {}
-        coverage['indels']['normal'] = parse_bam_readcount_file(args.normal_indels_coverage_file)
-        args.normal_indels_coverage_file.close()
-    if args.tdna_snvs_coverage_file is not None:
-        if 'snvs' not in coverage:
-            coverage['snvs'] = {}
-        coverage['snvs']['tdna'] = parse_bam_readcount_file(args.tdna_snvs_coverage_file)
-        args.tdna_snvs_coverage_file.close()
-    if args.tdna_indels_coverage_file is not None:
-        if 'indels' not in coverage:
-            coverage['indels'] = {}
-        coverage['indels']['tdna'] = parse_bam_readcount_file(args.tdna_indels_coverage_file)
-        args.tdna_indels_coverage_file.close()
-    if args.trna_snvs_coverage_file is not None:
-        if 'snvs' not in coverage:
-            coverage['snvs'] = {}
-        coverage['snvs']['trna'] = parse_bam_readcount_file(args.trna_snvs_coverage_file)
-        args.trna_snvs_coverage_file.close()
-    if args.trna_indels_coverage_file is not None:
-        if 'indels' not in coverage:
-            coverage['indels'] = {}
-        coverage['indels']['trna'] = parse_bam_readcount_file(args.trna_indels_coverage_file)
-        args.trna_indels_coverage_file.close()
+    for variant_type in ['snvs', 'indels']:
+        for data_type in ['normal', 'tdna', 'trna']:
+            coverage_file_name = '_'.join([data_type, variant_type, 'coverage_file'])
+            coverage_file = getattr(args, coverage_file_name)
+            if coverage_file is not None:
+                if variant_type not in coverage:
+                    coverage[variant_type] = {}
+                coverage[variant_type][data_type] = parse_bam_readcount_file(coverage_file)
+                coverage_file.close()
 
     vcf_reader = vcf.Reader(args.input_file)
     if len(vcf_reader.samples) > 1:
