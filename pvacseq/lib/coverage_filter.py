@@ -86,7 +86,9 @@ def main(args_input = sys.argv[1:]):
         if ('Normal Ref Count' in entry
             and 'Normal Var Count' in entry
             and entry['Normal Ref Count']
-            and entry['Normal Var Count']):
+            and entry['Normal Var Count']
+            and entry['Normal Ref Count'] != 'NA'
+            and entry['Normal Var Count'] != 'NA'):
             ref = int(entry['Normal Ref Count'])
             var = int(entry['Normal Var Count'])
             ncov  = coverage(ref, var)
@@ -100,7 +102,9 @@ def main(args_input = sys.argv[1:]):
         if ('Tumor DNA Ref Count' in entry
             and 'Tumor DNA Var Count' in entry
             and entry['Tumor DNA Ref Count']
-            and entry['Tumor DNA Var Count']):
+            and entry['Tumor DNA Var Count']
+            and entry['Tumor DNA Ref Count'] != 'NA'
+            and entry['Tumor DNA Var Count'] != 'NA'):
             ref = int(entry['Tumor DNA Ref Count'])
             var = int(entry['Tumor DNA Var Count'])
             tdcov = coverage(ref, var)
@@ -114,7 +118,9 @@ def main(args_input = sys.argv[1:]):
         if ('Tumor RNA Ref Count' in entry
             and 'Tumor RNA Var Count' in entry
             and entry['Tumor RNA Ref Count']
-            and entry['Tumor RNA Var Count']):
+            and entry['Tumor RNA Var Count']
+            and entry['Tumor RNA Ref Count'] != 'NA'
+            and entry['Tumor RNA Var Count'] != 'NA'):
             ref = int(entry['Tumor RNA Ref Count'])
             var = int(entry['Tumor RNA Var Count'])
             trcov = coverage(ref, var)
