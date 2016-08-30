@@ -44,6 +44,7 @@ class Pipeline(metaclass=ABCMeta):
         self.trna_vaf                    = kwargs['trna_vaf']
         self.expn_val                    = kwargs['expn_val']
         self.fasta_size                  = kwargs['fasta_size']
+        self.downstream_sequence_length  = kwargs['downstream_sequence_length']
         self.keep_tmp_files              = kwargs['keep_tmp_files']
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
@@ -285,7 +286,8 @@ class MHCIPipeline(Pipeline):
             self.tsv_file_path(),
             str(self.peptide_sequence_length),
             str(min(self.epitope_lengths)),
-            self.fasta_file_path()
+            self.fasta_file_path(),
+            '-d', self.downstream_sequence_length,
         ])
         print("Completed")
 
@@ -362,7 +364,8 @@ class MHCIIPipeline(Pipeline):
             self.tsv_file_path(),
             str(self.peptide_sequence_length),
             '9', #This is the default core epitope length for IEDB class ii predictions
-            self.fasta_file_path()
+            self.fasta_file_path(),
+            '-d', self.downstream_sequence_length,
         ])
         print("Completed")
 
