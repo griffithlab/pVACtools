@@ -121,7 +121,8 @@ class PVACTests(unittest.TestCase):
             "valid_alleles",
             "combine_parsed_outputs",
             "net_chop",
-            "netmhc_stab"
+            "netmhc_stab",
+            "config_files",
             ]:
             result = run([
                 sys.executable,
