@@ -27,10 +27,11 @@ def main(args_input = sys.argv[1:]):
     jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
     result_delimiter = re.compile(r'-{20,}')
     fail_searcher = re.compile(r'(Failed run|Problematic input:)')
+    allele_searcher = re.compile(r'^(.*?) : Distance to trai?ning data .*? nearest neighbor (.*?)\)$', re.MULTILINE)
     reader = csv.DictReader(args.input_file, delimiter='\t')
     writer = csv.DictWriter(
         args.output_file,
-        reader.fieldnames+['Predicted Stability', 'Half Life', 'Stability Rank'],
+        reader.fieldnames+['Predicted Stability', 'Half Life', 'Stability Rank', 'NetMHCstab allele'],
         delimiter='\t',
         lineterminator='\n'
     )
@@ -86,6 +87,7 @@ def main(args_input = sys.argv[1:]):
             print("NetMHCStabPan encountered an error during processing")
             sys.exit(1)
         pending = []
+        allele_map = {item[0]:item[1] for item in allele_searcher.findall(response.content.decode())}
         results = [item.strip() for item in result_delimiter.split(response.content.decode())]
         for i in range(2, len(results), 4): #examine only the parts we want, skipping all else
             for line in results[i].split('\n'):
@@ -95,7 +97,8 @@ def main(args_input = sys.argv[1:]):
                     line.update({
                         'Predicted Stability':data[4],
                         'Half Life':data[5],
-                        'Stability Rank':data[6]
+                        'Stability Rank':data[6],
+                        'NetMHCstab allele':allele_map[line['HLA Allele'].replace('*', '', 1)]
                     })
                     pending.append([int(data[3], 16), {k:line[k] for k in line}])
         writer.writerows([{k:entry[1][k] for k in entry[1]} for entry in sorted(pending, key=lambda x:x[0])])
