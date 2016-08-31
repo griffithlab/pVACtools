@@ -45,7 +45,7 @@ def main(args_input = sys.argv[1:]):
         current_buffer = {}
         alleles_in_chunk = set()
         for line in chunk:
-            sequence_id = '%010x'%x
+            sequence_id = ('%010x'%x)[-10:]
             staging_file.write('>'+sequence_id+'\n')
             staging_file.write(line['MT Epitope Seq']+'\n')
             alleles_in_chunk.add(line['HLA Allele'])
@@ -97,7 +97,7 @@ def main(args_input = sys.argv[1:]):
                         'Half Life':data[5],
                         'Stability Rank':data[6]
                     })
-                    pending.append([int(data[3]), {k:line[k] for k in line}])
+                    pending.append([int(data[3], 16), {k:line[k] for k in line}])
         writer.writerows([{k:entry[1][k] for k in entry[1]} for entry in sorted(pending, key=lambda x:x[0])])
     sys.stdout.write('\b\b')
     print("OK")
