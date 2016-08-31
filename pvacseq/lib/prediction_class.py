@@ -16,7 +16,7 @@ class PredictionClass(metaclass=ABCMeta):
 
     @classmethod
     def prediction_methods(cls):
-        return [prediction_class.__name__ for prediction_class in cls.prediction_classes()]
+        return sorted([prediction_class.__name__ for prediction_class in cls.prediction_classes()])
 
     @classmethod
     def iedb_prediction_methods(cls):

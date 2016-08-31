@@ -6,12 +6,17 @@ sys.path.append(root)
 import argparse
 from lib.prediction_class import *
 
-def main(args_input = sys.argv[1:]):
+def define_parser():
     parser = argparse.ArgumentParser('pvacseq valid_alleles')
-    parser.add_argument("-p", "--prediction-algorithm",
-                        choices=PredictionClass.prediction_methods(),
-                        help="The epitope prediction algorithms to use",
-                        )
+    parser.add_argument(
+        "-p", "--prediction-algorithm",
+        choices=PredictionClass.prediction_methods(),
+        help="The epitope prediction algorithms to use",
+    )
+    return parser
+
+def main(args_input = sys.argv[1:]):
+    parser = define_parser()
     args = parser.parse_args(args_input)
 
     if args.prediction_algorithm is None:

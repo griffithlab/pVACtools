@@ -3,32 +3,45 @@ import sys
 import re
 import csv
 
-def main(args_input = sys.argv[1:]):
+def define_parser():
     parser = argparse.ArgumentParser('pvacseq binding_filter')
-    parser.add_argument('input_file', type=argparse.FileType('r'),
-                        help="Combined parsed epitope file")
-    parser.add_argument('output_file', type=argparse.FileType('w'),
-                        help="Output .tsv file containing list of filtered " +
-                        "epitopes based on binding affinity")
-    parser.add_argument('-c', '--minimum-fold-change', type=int,
-                        help="Minimum fold change between mutant binding " +
-                        "score and wild-type score. The default is 0, which " +
-                        "filters no results, but 1 is often a sensible " +
-                        "default (requiring that binding is better to the MT " +
-                        "than WT)",
-                        default=0)
-    parser.add_argument('-b', '--binding-threshold', type=int,
-                        help="Report only epitopes where the mutant allele " +
-                        "has ic50 binding scores below this value; default 500",
-                        default=500)
-    parser.add_argument('-m', '--top-score-metric',
-                        choices=['lowest', 'median'],
-                        default='median',
-                        help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. " +
-                        "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. " +
-                        "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. " +
-                        "Default: median")
+    parser.add_argument(
+        'input_file', type=argparse.FileType('r'),
+        help="The final report .tsv file to filter"
+    )
+    parser.add_argument(
+        'output_file', type=argparse.FileType('w'),
+        help="Output .tsv file containing list of filtered "
+             + "epitopes based on binding affinity"
+    )
+    parser.add_argument(
+        '-b', '--binding-threshold', type=int,
+        help="Report only epitopes where the mutant allele "
+             + "has ic50 binding scores below this value. Default: 500",
+        default=500
+    )
+    parser.add_argument(
+        '-c', '--minimum-fold-change', type=int,
+        help="Minimum fold change between mutant binding "
+             + "score and wild-type score. The default is 0, which "
+             + "filters no results, but 1 is often a sensible "
+             + "option (requiring that binding is better to the MT than WT). "
+             + "Default: 0",
+        default=0
+    )
+    parser.add_argument(
+        '-m', '--top-score-metric',
+        choices=['lowest', 'median'],
+        help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
+             + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
+             + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. "
+             + "Default: median",
+        default='median',
+    )
+    return parser
 
+def main(args_input = sys.argv[1:]):
+    parser = define_parser()
     args = parser.parse_args(args_input)
 
     reader = csv.DictReader(args.input_file, delimiter='\t')
