@@ -1,0 +1,15 @@
+Metadata-Version: 1.1
+Name: pvacseq
+Version: 3.0.5
+Summary: Personalized Variant Antigens by Cancer Sequencing (pVAC-Seq)
+Home-page: https://github.com/griffithlab/pVAC-Seq
+Author: Jasreet Hundal, Susanna Kiwala, Aaron Graubert, Jason Walker, Chris Miller, Malachi Griffith and Elaine Mardis
+Author-email: pvacseq-support@genome.wustl.edu
+License: NPOSL-3.0
+Description: A cancer immunotherapy pipeline for the identification of personalized Variant Antigens by Cancer Sequencing (pVAC-Seq)
+Keywords: antigens neoantigens cancer sequencing variant variants
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Programming Language :: Python :: 3.5

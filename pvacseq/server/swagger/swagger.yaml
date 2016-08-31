@@ -4,7 +4,7 @@ info:
   description: "API to support pVacSeq user interface for generating reports on pipeline\
     \ results"
   version: "1.0.0"
-  title: "pVacSeq UI"
+  title: "pVacSeq Server Schema"
 host: "localhost"
 schemes:
 - "https"

@@ -11,16 +11,16 @@ import shutil
 spinner = re.compile(r'[\\\b\-/|]{2,}')
 allele_file = None
 
-children = {} #Holds popen objects for processes spawned by this current session
+children = {}  # Holds popen objects for processes spawned by this current session
 
-#path to the configuration file where the server stores its data between runs
+# path to the configuration file where the server stores its data between runs
 configfile = os.path.join(os.path.expanduser('~'), '.pvacseq_ui')
 
-#check the last system reboot, because it means that the logged pid's can now
-#be used by new processes
+# check the last system reboot, because it means that the logged pid's can now
+# be used by new processes
 reboot = subprocess.check_output(['last', 'reboot']).decode().split("\n")[0]
 
-#fetch data from the configuration file
+# fetch data from the configuration file
 if os.path.isfile(configfile):
     print("Resuming from saved state")
     data = json.load(open(configfile))
@@ -37,7 +37,7 @@ else:
         'processid':-1
     }
 
-#a mapping to provide a description of each result file based on its extension
+# a mapping to provide a description of each result file based on its extension
 descriptions = {
     'chop.tsv':"Processed and filtered data, with peptide cleavage data added",
     'combined.parsed.tsv':"Processed data from IEDB, but with no filtering or extra data",
@@ -54,7 +54,7 @@ def column_filter(column):
 
 def gen_files_list(id):
     """Generate the list of result files for a given process.  Stash them for later use"""
-    # if 'process-%d'%id not in data:
+    #  if 'process-%d'%id not in data:
     #     raise KeyError("The requested process (%d) does not exist"%id)
     if 'files' not in data['process-%d'%id]:
         data['process-%d'%id]['files'] = []
@@ -75,12 +75,12 @@ def gen_files_list(id):
 def fetch_process(id):
     """Fetch a tuple of available process info"""
     return (
-        #This entry should always exist.  Any spawned process will have an entry in data
+        # This entry should always exist.  Any spawned process will have an entry in data
         data['process-%d'%id] if 'process-%d'%id in data else {},
-        #This will only exist if spawned by the current run of the server
-        #If the server crashed and restarted, the child is orphaned,
-        #and the server will only be able to read its output files
-        #(unable to access the return code or terminate it)
+        # This will only exist if spawned by the current run of the server
+        # If the server crashed and restarted, the child is orphaned,
+        # and the server will only be able to read its output files
+        # (unable to access the return code or terminate it)
         children[id] if id in children else False
     )
 
@@ -88,11 +88,11 @@ def is_running(id):
     """Returns True if the requested process looks like it's still running"""
     process = fetch_process(id)
     if not process[0]:
-        return False #The process doesn't exist
+        return False  # The process doesn't exist
     if process[1]:
         return process[1].poll() == None
     try:
-        #check if the process is active by sending a dummy signal
+        # check if the process is active by sending a dummy signal
         os.kill(process[0]['pid'], 0)
     except ProcessLookupError:
         return False
@@ -139,15 +139,16 @@ def results_get(id):
         })
     return output
 
+
 def results_getfile(id, count = None, page = None, fileID = None):
     """Read data directly from a specific output file"""
     process = fetch_process(id)
     if not process[0]:
         return (
             {
-                "code":400,
-                "message":"The requested process (%d) does not exist"%id,
-                "fields":"id"
+                "code": 400,
+                "message": "The requested process (%d) does not exist"%id,
+                "fields": "id"
             },400
         )
     if is_running(id):
@@ -156,9 +157,9 @@ def results_getfile(id, count = None, page = None, fileID = None):
     if fileID not in range(len(process[0]['files'])):
         return (
             {
-                "code":400,
-                "message":"The requested fileID (%d) does not exist for this process (%d)" %(fileID, id),
-                "fields":"fileID"
+                "code": 400,
+                "message": "The requested fileID (%d) does not exist for this process (%d)" %(fileID, id),
+                "fields": "fileID"
             },400
         )
     raw_reader = open(process[0]['files'][fileID])
@@ -170,15 +171,16 @@ def results_getfile(id, count = None, page = None, fileID = None):
     raw_reader.close()
     return output
 
+
 def results_getcols(id, fileID):
     """Get a mapping of standardized column names -> original column names"""
     process = fetch_process(id)
     if not process[0]:
         return (
             {
-                "code":400,
-                "message":"The requested process (%d) does not exist"%id,
-                "fields":"id"
+                "code": 400,
+                "message": "The requested process (%d) does not exist"%id,
+                "fields": "id"
             },400
         )
     if is_running(id):
@@ -190,13 +192,14 @@ def results_getcols(id, fileID):
                 "code":400,
                 "message":"The requested fileID (%d) does not exist for this process (%d)" %(fileID, id),
                 "fields":"fileID"
-            },400
+            }, 400
         )
     raw_reader = open(process[0]['files'][fileID])
     reader = csv.DictReader(raw_reader, delimiter='\t')
     output = {column_filter(field):field for field in reader.fieldnames}
     raw_reader.close()
     return output
+
 
 def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
           peptide_sequence_length, gene_expn_file, transcript_expn_file,
@@ -211,7 +214,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
     if os.path.exists(current_path):
         i = 1
         while os.path.exists(current_path+"_"+str(i)):
-            i+=1
+            i += 1
         current_path += "_"+str(i)
 
     os.makedirs(os.path.join(current_path, 'Staging'), exist_ok=True)
@@ -230,10 +233,11 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
 
     return start(staged_input.name, samplename, alleles, epitope_lengths, prediction_algorithms, current_path,
               peptide_sequence_length, staged_gene_expn_file.name if staged_gene_expn_file.tell() else "",
-              staged_transcript_expn_file.name if staged_transcript_expn_file.tell() else "", #check if any data written to file
+              staged_transcript_expn_file.name if staged_transcript_expn_file.tell() else "", # check if any data written to file
               net_chop_method, len(netmhc_stab), len(top_result_per_mutation), top_score_metric,
               binding_threshold, minimum_fold_change, expn_val, net_chop_threshold,
               fasta_size, len(keep_tmp_files))
+
 
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
           peptide_sequence_length, gene_expn_file, transcript_expn_file,
@@ -261,9 +265,9 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         '-s', str(fasta_size)
     ]
     if len(gene_expn_file):
-        command+= ['-g', gene_expn_file]
+        command += ['-g', gene_expn_file]
     if len(transcript_expn_file):
-        command+=['-i', transcript_expn_file]
+        command +=['-i', transcript_expn_file]
     if len(net_chop_method):
         command += [
             '--net-chop-method', net_chop_method,
@@ -276,23 +280,23 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
     if keep_tmp_files:
         command.append('-k')
 
-    #stdout and stderr from the child process will be directed to this file
+    # stdout and stderr from the child process will be directed to this file
     logfile = os.path.join(output, 'pVAC-Seq.log')
 
     data['processid']+=1
     os.makedirs(os.path.dirname(logfile), exist_ok = True)
     children[data['processid']] = subprocess.Popen(
         command,
-        stdout = open(logfile, 'w'), #capture stdout in the logfile
-        stderr = subprocess.STDOUT,
-        #isolate the child in a new process group
-        #this way it will remainin running no matter what happens to this process
-        preexec_fn = os.setpgrp
+        stdout=open(logfile, 'w'),  # capture stdout in the logfile
+        stderr=subprocess.STDOUT,
+        # isolate the child in a new process group
+        # this way it will remainin running no matter what happens to this process
+        preexec_fn=os.setpgrp
     )
-    #Store some data about the child process
+    # Store some data about the child process
     data['process-%d'%(data['processid'])] = {
-        #Do the replacement so that the displayed command is actually valid
-        #The executed command is automatically escaped as part of Popen
+        # Do the replacement so that the displayed command is actually valid
+        # The executed command is automatically escaped as part of Popen
         'command': " ".join(command),
         'logfile':logfile,
         'pid':children[data['processid']].pid,
@@ -304,12 +308,14 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
     savedata()
     return data['processid']
 
+
 def processes():
     """Returns a list of processes, and whether or not each process is running"""
     return [{
         'id':i,
         'running':is_running(i)
     } for i in range(data['processid']+1) if 'process-%d'%i in data]
+
 
 def process_info(id):
     """Returns more detailed information about a specific process"""
@@ -331,7 +337,7 @@ def process_info(id):
             process[0]['status'] = "Process Complete: %d"%process[1].returncode
         else:
             process[0]['status'] = "Process Complete"
-        #If there is a staging directory, remove it
+        # If there is a staging directory, remove it
         if os.path.isdir(os.path.join(process[0]['output'], 'Staging')):
             shutil.rmtree(os.path.join(process[0]['output'], 'Staging'))
     savedata()
@@ -346,13 +352,15 @@ def process_info(id):
         'running':is_running(id)
     }
 
+
 def stop(id):
     """Stops the requested process.  This is only allowed if the child is still attached"""
     status = process_info(id)
-    if type(status) == dict: #status could be an error object if the id is invalid
+    if type(status) == dict:  # status could be an error object if the id is invalid
         if status['running'] and status['pid']>1:
             children[id].terminate()
     return status
+
 
 def shutdown():
     """Stops all attached, running children"""
@@ -365,12 +373,14 @@ def shutdown():
                 children[i].terminate()
     return output
 
+
 def test():
     """Return the submission page (a stand-in until there is a proper ui for submission)"""
     reader = open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_start.html'))
     data = reader.read()
     reader.close()
     return data
+
 
 def check_allele(allele):
     """Checks if the requested allele is supported by pVAC-Seq or not"""
@@ -383,6 +393,7 @@ def check_allele(allele):
         if line.strip() == allele:
             return True
     return False
+
 
 def reset(clearall):
     """Clears out finished processes from the record"""
@@ -398,7 +409,7 @@ def reset(clearall):
                 del data['process-%d'%i]
                 del children[i]
                 output.append(i)
-    #Set the processid to the highest child process from this session
+    # Set the processid to the highest child process from this session
     data['processid'] = max(i for i in range(data['processid']+1) if 'process-%d'%i in data)
     if clearall and 'reboot' in data:
         del data['reboot']
