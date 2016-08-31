@@ -111,6 +111,42 @@ def main(args_input = sys.argv[1:]):
              + "(requiring that binding is better to the MT than WT)",
     )
     parser.add_argument(
+        '--normal-cov', type=int,
+        help="Normal Coverage Cutoff. Sites above this cutoff will be considered. " +
+        "Default: 5",
+        default=5
+    )
+    parser.add_argument(
+        '--tdna-cov', type=int,
+        help="Tumor DNA Coverage Cutoff. Sites above this cutoff will be considered. " +
+        "Default: 10",
+        default=10
+    )
+    parser.add_argument(
+        '--trna-cov', type=int,
+        help="Tumor RNA Coverage Cutoff. Sites above this cutoff will be considered. " +
+        "Default: 10",
+        default=10
+    )
+    parser.add_argument(
+        '--normal-vaf', type=int,
+        help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered. " +
+        "Default: 2",
+        default=2
+    )
+    parser.add_argument(
+        '--tdna-vaf', type=int,
+        help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered. " +
+        "Default: 40",
+        default=40
+    )
+    parser.add_argument(
+        '--trna-vaf', type=int,
+        help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered. " +
+        "Default: 40",
+        default=40
+    )
+    parser.add_argument(
         '--expn-val', type=int,
         default=1,
         help="Gene Expression (FPKM) Cutoff. Default: 1",
@@ -165,6 +201,12 @@ def main(args_input = sys.argv[1:]):
         'minimum_fold_change'     : args.minimum_fold_change,
         'net_chop_method'         : args.net_chop_method,
         'net_chop_threshold'      : args.net_chop_threshold,
+        'normal_cov'              : args.normal_cov,
+        'normal_vaf'              : args.normal_vaf,
+        'tdna_cov'                : args.tdna_cov,
+        'tdna_vaf'                : args.tdna_vaf,
+        'trna_cov'                : args.trna_cov,
+        'trna_vaf'                : args.trna_vaf,
         'expn_val'                : args.expn_val,
         'fasta_size'              : args.fasta_size,
         'keep_tmp_files'          : args.keep_tmp_files,

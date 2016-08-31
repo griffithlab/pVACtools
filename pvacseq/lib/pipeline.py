@@ -36,6 +36,12 @@ class Pipeline(metaclass=ABCMeta):
         self.top_score_metric            = kwargs['top_score_metric']
         self.binding_threshold           = kwargs['binding_threshold']
         self.minimum_fold_change         = kwargs['minimum_fold_change']
+        self.normal_cov                  = kwargs['normal_cov']
+        self.normal_vaf                  = kwargs['normal_vaf']
+        self.tdna_cov                    = kwargs['tdna_cov']
+        self.tdna_vaf                    = kwargs['tdna_vaf']
+        self.trna_cov                    = kwargs['trna_cov']
+        self.trna_vaf                    = kwargs['trna_vaf']
         self.expn_val                    = kwargs['expn_val']
         self.fasta_size                  = kwargs['fasta_size']
         self.keep_tmp_files              = kwargs['keep_tmp_files']
@@ -157,11 +163,25 @@ class Pipeline(metaclass=ABCMeta):
 
     def coverage_filter(self):
         print("Running Coverage Filters")
-        lib.coverage_filter.main([
+        coverage_params = [
             self.binding_filter_out_path(),
             self.coverage_filter_out_path(),
             '--expn-val', str(self.expn_val),
-        ])
+        ]
+        for attribute in [
+            'expn_val',
+            'normal_cov',
+            'normal_vaf',
+            'tdna_cov',
+            'tdna_vaf',
+            'trna_cov',
+            'trna_vaf',
+        ]:
+            if getattr(self, attribute):
+                param = '--' + attribute
+                param = param.replace('_', '-')
+                coverage_params.extend([param, str(getattr(self, attribute))])
+        lib.coverage_filter.main(coverage_params)
         print("Completed")
 
     def net_chop_out_path(self):
