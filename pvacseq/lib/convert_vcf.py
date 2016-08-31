@@ -203,8 +203,8 @@ def main(args_input = sys.argv[1:]):
             coverage_for_entry = {}
             if variant_type in coverage:
                 for coverage_type in coverage[variant_type]:
-                    if reference in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]:
-                        brct = parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][reference])
+                    if ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]:
+                        brct = parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base])
                         if ref_base in brct:
                             coverage_for_entry[coverage_type + '_ref_count'] = brct[ref_base]
                         if var_base in brct:

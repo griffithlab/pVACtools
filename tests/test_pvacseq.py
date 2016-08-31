@@ -162,6 +162,7 @@ class PVACTests(unittest.TestCase):
             '--keep-tmp-files',
             '--net-chop-method', 'cterm',
             '--netmhc-stab',
+            '--tdna-vaf', '20',
         ])
         pvacseq.lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
@@ -173,6 +174,7 @@ class PVACTests(unittest.TestCase):
             '--top-score-metric=lowest',
             '--keep-tmp-files',
         ])
+
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "class_i", "Test.tsv"),
             os.path.join(self.test_data_directory, "class_i", "Test.tsv")
