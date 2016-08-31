@@ -12,6 +12,12 @@ data_files = []
 for dirpath, dirnames, filenames in os.walk("pvacseq/example_data"):
     for filename in filenames:
         data_files.append(os.path.join('..', dirpath, filename))
+for dirpath, dirnames, filenames in os.walk("pvacseq/VEP_plugins"):
+    for filename in filenames:
+        data_files.append(os.path.join('..', dirpath, filename))
+for dirpath, dirnames, filenames in os.walk("pvacseq/iedb_alleles"):
+    for filename in filenames:
+        data_files.append(os.path.join('..', dirpath, filename))
 
 setup(
     name="pvacseq",
@@ -28,7 +34,7 @@ setup(
         'PyYAML',
     ],
     package_data={
-        'pvacseq' : data_files + ['VEP_plugins/*', 'iedb_alleles/*']
+        'pvacseq' : data_files
     },
     classifiers=[
         'Development Status :: 4 - Beta',
