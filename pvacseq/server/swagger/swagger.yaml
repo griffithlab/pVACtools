@@ -128,101 +128,104 @@ paths:
       parameters:
       - name: "input"
         in: "formData"
-        description: "Filepath to the input VCF file"
+        description: "Input VCF File: Filepath to the input VCF file"
         required: true
         type: "string"
       - name: "samplename"
         in: "formData"
-        description: "Sample Name"
+        description: "Sample Name: Name for your sample"
         required: true
         type: "string"
       - name: "alleles"
         in: "formData"
-        description: "A comma-separated list of alleles to run the sequences against"
+        description: "Alleles: A comma-separated list of alleles to run the sequences against"
         required: true
         type: "string"
       - name: "epitope_lengths"
         in: "formData"
-        description: "A comma-separated list of epitope lengths to produce"
+        description: "Epitope Lengths: A comma-separated list of epitope lengths to produce"
         required: false
         type: "string"
         default: "10"
       - name: "prediction_algorithms"
         in: "formData"
-        description: "A comma-separated list of prediction algorithms to use"
+        description: "Prediction Algorithms: A comma-separated list of prediction algorithms to use"
         required: true
         type: "string"
       - name: "output"
         in: "formData"
-        description: "The directory to write output to"
+        description: "Output Directory: The directory to which output will be written"
         required: true
         type: "string"
       - name: "peptide_sequence_length"
         in: "formData"
-        description: "Length of the peptide sequences to produce in the FASTA"
+        description: "Peptide Sequence Length: Length of the peptide sequences to produce in the FASTA"
+        required: false
         type: "integer"
         default: 21
       - name: "gene_expn_file"
         in: "formData"
-        description: "FIlepath to the genes.fpkm_tracking file from Cufflinks"
+        description: "Gene EXPN File: Filepath to the genes.fpkm_tracking file from Cufflinks"
+        required: false
         type: "string"
         default: ""
       - name: "transcript_expn_file"
         in: "formData"
-        description: "FIlepath to the isoforms.fpkm_tracking file from Cufflinks"
+        description: "Transcript EXPN File: Filepath to the isoforms.fpkm_tracking file from Cufflinks"
+        required: false
         type: "string"
         default: ""
       - name: "net_chop_method"
         in: "formData"
-        description: "Run NetChop using the specified method"
+        description: "Net Chop Method: Run NetChop using the specified method"
         type: "string"
         enum: ["cterm", "20s"]
         required: false
         default: ''
       - name: "netmhc_stab"
         in: "formData"
-        description: "Run NetMHCStabPan at the end of the pipeline"
+        description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
         type: "boolean"
         default: false
       - name: "top_result_per_mutation"
         in: "formData"
-        description: "Output top scoring candidate per allele-length per mutation"
+        description: "Top Result Per Mutation: Output top scoring candidate per allele-length per mutation"
         type: "boolean"
         default: false
       - name: "top_score_metric"
         in: "formData"
-        description: "ic50 metric for choosing best epitopes during binding filtering"
+        description: "Top Score Metric: ic50 metric for choosing best epitopes during binding filtering"
         type: "string"
         enum: ["lowest", "median"]
         default: "median"
       - name: "binding_threshold"
         in: "formData"
-        description: "Report only epitopes with a predicted binding score below this value"
+        description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
         type: "integer"
         default: 500
       - name: "minimum_fold_change"
         in: "formData"
-        description: "Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
+        description: "Minimum Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
         type: "integer"
         default: 0
       - name: "expn_val"
         in: "formData"
-        description: "Gene expression cutoff"
+        description: "EXPN Value: Gene expression cutoff"
         type: "integer"
         default: 1
       - name: "net_chop_threshold"
         in: "formData"
-        description: "NetChop prediction threshold"
+        description: "NetChop Threshold: NetChop prediction threshold"
         type: "number"
         default: 0.5
       - name: "fasta_size"
         in: "formData"
-        description: "Number of entries submitted to IEDB in each request.  Must be an even number"
+        description: "FASTA Size: Number of entries submitted to IEDB in each request.  Must be an even number"
         type: "integer"
         default: 200
       - name: "keep_tmp_files"
         in: "formData"
-        description: "Keep temporary files in the output directory after completion"
+        description: "Keep Temp Files? Keep temporary files in the output directory after completion"
         type: "boolean"
         default: false
       responses:
@@ -249,94 +252,106 @@ paths:
       parameters:
       - name: "input"
         in: "formData"
-        description: "Input VCF file"
+        description: "Input VCF File: Local VCF file"
         required: true
         type: "file"
       - name: "samplename"
         in: "formData"
-        description: "Sample Name"
+        description: "Sample Name: Your name for the sample"
         required: true
         type: "string"
       - name: "alleles"
         in: "formData"
-        description: "A comma-separated list of alleles to run the sequences against"
+        description: "Alleles: A comma-separated list of alleles to run the sequences against"
         required: true
         type: "string"
       - name: "epitope_lengths"
         in: "formData"
-        description: "A comma-separated list of epitope lengths to produce"
+        description: "Epitope Lengths: A comma-separated list of epitope lengths to produce"
         required: false
         type: "string"
         default: "10"
       - name: "prediction_algorithms"
         in: "formData"
-        description: "A comma-separated list of prediction algorithms to use"
+        description: "Prediction Algorithm: A comma-separated list of prediction algorithms to use"
         required: true
         type: "string"
       - name: "peptide_sequence_length"
         in: "formData"
-        description: "Length of the peptide sequences to produce in the FASTA"
+        description: "Peptide Sequence Length: Length of the peptide sequences to produce in the FASTA"
+        required: false
         type: "integer"
         default: 21
       - name: "gene_expn_file"
         in: "formData"
-        description: "genes.fpkm_tracking file from Cufflinks"
+        description: "Gene EXPN File: genes.fpkm_tracking file from Cufflinks"
+        required: false
         type: "file"
       - name: "transcript_expn_file"
         in: "formData"
-        description: "isoforms.fpkm_tracking file from Cufflinks"
+        description: "Transcription EXPN File: isoforms.fpkm_tracking file from Cufflinks"
+        required: false
         type: "file"
       - name: "net_chop_method"
         in: "formData"
-        description: "Run NetChop using the specified method"
+        description: "Net Chop Method: Run NetChop using the specified method"
         type: "string"
         enum: ["cterm", "20s", ""]
         required: false
         default: ''
       - name: "netmhc_stab"
         in: "formData"
-        description: "Run NetMHCStabPan at the end of the pipeline"
+        description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
+        required: false
         type: "string"
         default: ""
       - name: "top_result_per_mutation"
         in: "formData"
-        description: "Output top scoring candidate per allele-length per mutation"
+        description: "Top Results per Mutation: Output top scoring candidate per allele-length per mutation"
+        required: false
         type: "string"
         default: ""
       - name: "top_score_metric"
         in: "formData"
-        description: "ic50 metric for choosing best epitopes during binding filtering"
+        description: "Top Score Metric: ic50 metric for choosing best epitopes during binding filtering"
+        required: false
         type: "string"
         enum: ["lowest", "median"]
         default: "median"
       - name: "binding_threshold"
         in: "formData"
-        description: "Report only epitopes with a predicted binding score below this value"
+        description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
+        required: false
         type: "integer"
         default: 500
       - name: "minimum_fold_change"
         in: "formData"
-        description: "Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
+        description: "Medium Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
+        required: false
         type: "integer"
         default: 0
       - name: "expn_val"
         in: "formData"
-        description: "Gene expression cutoff"
+        description: "EXPN Value: Gene expression cutoff"
+        required: false
         type: "integer"
         default: 1
       - name: "net_chop_threshold"
         in: "formData"
-        description: "NetChop prediction threshold"
+        description: "NetChip Threshold: NetChop prediction threshold"
+        required: false
         type: "number"
         default: 0.5
       - name: "fasta_size"
         in: "formData"
-        description: "Number of entries submitted to IEDB in each request.  Must be an even number"
+        description: "FASTA Size: Number of entries submitted to IEDB in each request.  Must be an even number"
+        required: false
         type: "integer"
         default: 200
       - name: "keep_tmp_files"
         in: "formData"
-        description: "Keep temporary files in the output directory after completion"
+        description: "Keep Temp Files? Keep temporary files in the output directory after completion"
+        required: false
         type: "string"
         default: ""
       responses:
