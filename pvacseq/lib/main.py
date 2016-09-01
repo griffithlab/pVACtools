@@ -24,6 +24,8 @@ def parse_additional_input_file_list(additional_input_file_list):
         for additional_input_file in additional_input_files:
             if additional_input_file not in additional_input_file_list_options().keys():
                 sys.exit("%s not a valid key in the additional_input_file_list" % additional_input_file)
+    else:
+        additional_input_files = {}
     for additional_input_file_list_option in additional_input_file_list_options().keys():
         if additional_input_file_list_option not in additional_input_files:
             additional_input_files[additional_input_file_list_option] = None
@@ -211,9 +213,8 @@ def main(args_input = sys.argv[1:]):
         'fasta_size'              : args.fasta_size,
         'keep_tmp_files'          : args.keep_tmp_files,
     }
-    if args.additional_input_file_list:
-        additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
-        shared_arguments.update(additional_input_files)
+    additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
+    shared_arguments.update(additional_input_files)
 
     if len(class_i_prediction_algorithms) > 0:
         if args.epitope_length is None:
