@@ -16,23 +16,35 @@ import shutil
 
 class Pipeline(metaclass=ABCMeta):
     def __init__(self, **kwargs):
-        self.input_file              = kwargs['input_file']
-        self.sample_name             = kwargs['sample_name']
-        self.alleles                 = kwargs['alleles']
-        self.prediction_algorithms   = kwargs['prediction_algorithms']
-        self.output_dir              = kwargs['output_dir']
-        self.gene_expn_file          = kwargs['gene_expn_file']
-        self.transcript_expn_file    = kwargs['transcript_expn_file']
-        self.net_chop_method         = kwargs['net_chop_method']
-        self.net_chop_threshold      = kwargs['net_chop_threshold']
-        self.netmhc_stab             = kwargs['netmhc_stab']
-        self.top_result_per_mutation = kwargs['top_result_per_mutation']
-        self.top_score_metric        = kwargs['top_score_metric']
-        self.binding_threshold       = kwargs['binding_threshold']
-        self.minimum_fold_change     = kwargs['minimum_fold_change']
-        self.expn_val                = kwargs['expn_val']
-        self.fasta_size              = kwargs['fasta_size']
-        self.keep_tmp_files          = kwargs['keep_tmp_files']
+        self.input_file                  = kwargs['input_file']
+        self.sample_name                 = kwargs['sample_name']
+        self.alleles                     = kwargs['alleles']
+        self.prediction_algorithms       = kwargs['prediction_algorithms']
+        self.output_dir                  = kwargs['output_dir']
+        self.gene_expn_file              = kwargs['gene_expn_file']
+        self.transcript_expn_file        = kwargs['transcript_expn_file']
+        self.normal_snvs_coverage_file   = kwargs['normal_snvs_coverage_file']
+        self.normal_indels_coverage_file = kwargs['normal_indels_coverage_file']
+        self.tdna_snvs_coverage_file     = kwargs['tdna_snvs_coverage_file']
+        self.tdna_indels_coverage_file   = kwargs['tdna_indels_coverage_file']
+        self.trna_snvs_coverage_file     = kwargs['trna_snvs_coverage_file']
+        self.trna_indels_coverage_file   = kwargs['trna_indels_coverage_file']
+        self.net_chop_method             = kwargs['net_chop_method']
+        self.net_chop_threshold          = kwargs['net_chop_threshold']
+        self.netmhc_stab                 = kwargs['netmhc_stab']
+        self.top_result_per_mutation     = kwargs['top_result_per_mutation']
+        self.top_score_metric            = kwargs['top_score_metric']
+        self.binding_threshold           = kwargs['binding_threshold']
+        self.minimum_fold_change         = kwargs['minimum_fold_change']
+        self.normal_cov                  = kwargs['normal_cov']
+        self.normal_vaf                  = kwargs['normal_vaf']
+        self.tdna_cov                    = kwargs['tdna_cov']
+        self.tdna_vaf                    = kwargs['tdna_vaf']
+        self.trna_cov                    = kwargs['trna_cov']
+        self.trna_vaf                    = kwargs['trna_vaf']
+        self.expn_val                    = kwargs['expn_val']
+        self.fasta_size                  = kwargs['fasta_size']
+        self.keep_tmp_files              = kwargs['keep_tmp_files']
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
@@ -47,10 +59,21 @@ class Pipeline(metaclass=ABCMeta):
             self.input_file,
             self.tsv_file_path(),
         ]
-        if self.gene_expn_file is not None:
-            convert_params.extend(['-g', self.gene_expn_file])
-        if self.transcript_expn_file is not None:
-            convert_params.extend(['-i', self.transcript_expn_file])
+        for attribute in [
+            'gene_expn_file',
+            'transcript_expn_file',
+            'normal_snvs_coverage_file',
+            'normal_indels_coverage_file',
+            'tdna_snvs_coverage_file',
+            'tdna_indels_coverage_file',
+            'trna_snvs_coverage_file',
+            'trna_indels_coverage_file'
+        ]:
+            if getattr(self, attribute):
+                param = '--' + attribute
+                param = param.replace('_', '-')
+                convert_params.extend([param, getattr(self, attribute)])
+
         lib.convert_vcf.main(convert_params)
         print("Completed")
 
@@ -140,11 +163,25 @@ class Pipeline(metaclass=ABCMeta):
 
     def coverage_filter(self):
         print("Running Coverage Filters")
-        lib.coverage_filter.main([
+        coverage_params = [
             self.binding_filter_out_path(),
             self.coverage_filter_out_path(),
             '--expn-val', str(self.expn_val),
-        ])
+        ]
+        for attribute in [
+            'expn_val',
+            'normal_cov',
+            'normal_vaf',
+            'tdna_cov',
+            'tdna_vaf',
+            'trna_cov',
+            'trna_vaf',
+        ]:
+            if getattr(self, attribute):
+                param = '--' + attribute
+                param = param.replace('_', '-')
+                coverage_params.extend([param, str(getattr(self, attribute))])
+        lib.coverage_filter.main(coverage_params)
         print("Completed")
 
     def net_chop_out_path(self):
@@ -195,7 +232,13 @@ class Pipeline(metaclass=ABCMeta):
 
         symlinks_to_delete = []
         if (self.gene_expn_file is not None
-            or self.transcript_expn_file is not None):
+            or self.transcript_expn_file is not None
+            or self.normal_snvs_coverage_file is not None
+            or self.normal_indels_coverage_file is not None
+            or self.tdna_snvs_coverage_file is not None
+            or self.tdna_indels_coverage_file is not None
+            or self.trna_snvs_coverage_file is not None
+            or self.trna_indels_coverage_file is not None):
             self.coverage_filter()
         else:
             os.symlink(self.binding_filter_out_path(), self.coverage_filter_out_path())

@@ -57,11 +57,6 @@ def main(args_input = sys.argv[1:]):
         help="Output directory for writing all result files"
     )
     parser.add_argument(
-        "additional_input_file_list",
-        help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
-             + "For an example of this yaml file run `pvacseq config additional_input_file_list`."
-    )
-    parser.add_argument(
         "-e", "--epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
         help="Length of subpeptides(epitopes) to predict. "
              + "Multiple lengths can be specified using a comma-separated list. "
@@ -72,6 +67,11 @@ def main(args_input = sys.argv[1:]):
         "-l", "--peptide-sequence-length", type=int,
         default=21,
         help="length of the peptide sequences in the input FASTA file. Default: 21",
+    )
+    parser.add_argument(
+        "-i", "--additional-input-file-list",
+        help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
+             + "For an example of this yaml file run `pvacseq config additional_input_file_list`."
     )
     parser.add_argument(
         '--net-chop-method',
@@ -109,6 +109,42 @@ def main(args_input = sys.argv[1:]):
         help="Minimum fold change between mutant binding score and wild-type score. "
              + "The default is 0, which filters no results, but 1 is often a sensible choice "
              + "(requiring that binding is better to the MT than WT)",
+    )
+    parser.add_argument(
+        '--normal-cov', type=int,
+        help="Normal Coverage Cutoff. Sites above this cutoff will be considered. " +
+        "Default: 5",
+        default=5
+    )
+    parser.add_argument(
+        '--tdna-cov', type=int,
+        help="Tumor DNA Coverage Cutoff. Sites above this cutoff will be considered. " +
+        "Default: 10",
+        default=10
+    )
+    parser.add_argument(
+        '--trna-cov', type=int,
+        help="Tumor RNA Coverage Cutoff. Sites above this cutoff will be considered. " +
+        "Default: 10",
+        default=10
+    )
+    parser.add_argument(
+        '--normal-vaf', type=int,
+        help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered. " +
+        "Default: 2",
+        default=2
+    )
+    parser.add_argument(
+        '--tdna-vaf', type=int,
+        help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered. " +
+        "Default: 40",
+        default=40
+    )
+    parser.add_argument(
+        '--trna-vaf', type=int,
+        help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered. " +
+        "Default: 40",
+        default=40
     )
     parser.add_argument(
         '--expn-val', type=int,
@@ -155,8 +191,6 @@ def main(args_input = sys.argv[1:]):
         elif isinstance(prediction_class_object, MHCII):
             class_ii_prediction_algorithms.append(prediction_algorithm)
 
-    additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
-
     shared_arguments = {
         'input_file'              : args.input_file,
         'sample_name'             : args.sample_name,
@@ -167,11 +201,19 @@ def main(args_input = sys.argv[1:]):
         'minimum_fold_change'     : args.minimum_fold_change,
         'net_chop_method'         : args.net_chop_method,
         'net_chop_threshold'      : args.net_chop_threshold,
+        'normal_cov'              : args.normal_cov,
+        'normal_vaf'              : args.normal_vaf,
+        'tdna_cov'                : args.tdna_cov,
+        'tdna_vaf'                : args.tdna_vaf,
+        'trna_cov'                : args.trna_cov,
+        'trna_vaf'                : args.trna_vaf,
         'expn_val'                : args.expn_val,
         'fasta_size'              : args.fasta_size,
         'keep_tmp_files'          : args.keep_tmp_files,
     }
-    shared_arguments.update(additional_input_files)
+    if args.additional_input_file_list:
+        additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
+        shared_arguments.update(additional_input_files)
 
     if len(class_i_prediction_algorithms) > 0:
         if args.epitope_length is None:

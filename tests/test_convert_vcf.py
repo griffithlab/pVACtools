@@ -45,6 +45,23 @@ class ConvertVcfTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_cufflinks.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
+    def test_input_vcf_with_bam_readcount_files_generates_expected_tsv(self):
+        convert_vcf_input_file         = os.path.join(self.test_data_dir, 'full_input.vcf')
+        convert_vcf_output_file        = tempfile.NamedTemporaryFile()
+        convert_vcf_normal_snvs_file   = os.path.join(self.test_data_dir, 'snvs.bam_readcount')
+        convert_vcf_normal_indels_file = os.path.join(self.test_data_dir, 'indels.bam_readcount')
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            convert_vcf_input_file,
+            convert_vcf_output_file.name,
+            '--tdna-snvs-coverage-file', convert_vcf_normal_snvs_file,
+            '--tdna-indels-coverage-file', convert_vcf_normal_indels_file,
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_bam_readcount.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
     def test_input_vcf_with_multiple_transcripts_generates_expected_tsv(self):
         convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_multiple_transcripts.vcf')
         convert_vcf_output_file = tempfile.NamedTemporaryFile()

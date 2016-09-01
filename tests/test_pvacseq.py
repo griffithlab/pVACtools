@@ -121,7 +121,8 @@ class PVACTests(unittest.TestCase):
             "valid_alleles",
             "combine_parsed_outputs",
             "net_chop",
-            "netmhc_stab"
+            "netmhc_stab",
+            "config_files",
             ]:
             result = run([
                 sys.executable,
@@ -155,12 +156,13 @@ class PVACTests(unittest.TestCase):
             'NetMHC',
             'PickPocket',
             output_dir.name,
-            os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
             '-e', '9,10',
+            '-i', os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
             '--top-score-metric=lowest',
             '--keep-tmp-files',
             '--net-chop-method', 'cterm',
             '--netmhc-stab',
+            '--tdna-vaf', '20',
         ])
         pvacseq.lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
@@ -168,10 +170,11 @@ class PVACTests(unittest.TestCase):
             'H2-IAb',
             'NNalign',
             output_dir.name,
-            os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
+            '-i', os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
             '--top-score-metric=lowest',
             '--keep-tmp-files',
         ])
+
         self.assertTrue(cmp(
             os.path.join(output_dir.name, "class_i", "Test.tsv"),
             os.path.join(self.test_data_directory, "class_i", "Test.tsv")
@@ -254,6 +257,25 @@ class PVACTests(unittest.TestCase):
             False
         ))
         #Class II output files
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "class_ii", "Test.tsv"),
+            os.path.join(self.test_data_directory, "class_ii", "Test.tsv")
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "class_ii", "Test_31.fa"),
+            os.path.join(self.test_data_directory, "class_ii", "Test_31.fa"),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "class_ii", "tmp", "Test_31.fa.split_1-200"),
+            os.path.join(self.test_data_directory, "class_ii", "tmp", "Test_31.fa.split_1-200"),
+            False
+        ))
+        self.assertTrue(cmp(
+            os.path.join(output_dir.name, "class_ii", "tmp", "Test_31.fa.split_1-200.key"),
+            os.path.join(self.test_data_directory, "class_ii", "tmp", "Test_31.fa.split_1-200.key"),
+            False
+        ))
         self.request_mock.assert_has_calls([
             generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name)
         ])
