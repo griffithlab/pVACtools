@@ -236,7 +236,7 @@ def main(args_input = sys.argv[1:]):
 
         print("Executing MHC Class I predictions")
 
-        output_dir = os.path.join(base_output_dir, 'class_i')
+        output_dir = os.path.join(base_output_dir, 'MHC_Class_I')
         os.makedirs(output_dir, exist_ok=True)
 
         class_i_arguments = shared_arguments.copy()
@@ -251,7 +251,7 @@ def main(args_input = sys.argv[1:]):
     if len(class_ii_prediction_algorithms) > 0:
         print("Executing MHC Class II predictions")
 
-        output_dir = os.path.join(base_output_dir, 'class_ii')
+        output_dir = os.path.join(base_output_dir, 'MHC_Class_II')
         os.makedirs(output_dir, exist_ok=True)
 
         class_ii_arguments = shared_arguments.copy()

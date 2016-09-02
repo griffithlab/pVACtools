@@ -41,7 +41,7 @@ def make_response(data, files, path):
 def generate_class_i_call(method, allele, length, path, input_path):
     reader = open(os.path.join(
         input_path,
-        "class_i",
+        "MHC_Class_I",
         "Test_21.fa"
     ), mode='r')
     text = reader.read()
@@ -56,7 +56,7 @@ def generate_class_i_call(method, allele, length, path, input_path):
 def generate_class_ii_call(method, allele, path, input_path):
     reader = open(os.path.join(
         input_path,
-        "class_ii",
+        "MHC_Class_II",
         "Test_31.fa"
     ), mode='r')
     text = reader.read()
@@ -171,22 +171,22 @@ class PVACTests(unittest.TestCase):
         ])
 
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "Test.tsv"),
-            os.path.join(self.test_data_directory, "class_i", "Test.tsv")
+            os.path.join(output_dir.name, "MHC_Class_I", "Test.tsv"),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "Test.tsv")
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "Test_21.fa"),
-            os.path.join(self.test_data_directory, "class_i", "Test_21.fa"),
+            os.path.join(output_dir.name, "MHC_Class_I", "Test_21.fa"),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "Test_21.fa"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", "Test_21.fa.split_1-48"),
-            os.path.join(self.test_data_directory, "class_i", "tmp", "Test_21.fa.split_1-48"),
+            os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-48"),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", "Test_21.fa.split_1-48"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", "Test_21.fa.split_1-48.key"),
-            os.path.join(self.test_data_directory, "class_i", "tmp", "Test_21.fa.split_1-48.key"),
+            os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-48.key"),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", "Test_21.fa.split_1-48.key"),
             False
         ))
         self.assertEqual(len(self.request_mock.mock_calls), 9)
@@ -198,110 +198,110 @@ class PVACTests(unittest.TestCase):
                     self.request_mock.assert_has_calls([
                         generate_class_i_call(method, allele, length, self.test_data_directory, output_dir.name)
                     ])
-                    output_file   = os.path.join(output_dir.name, "class_i", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
-                    expected_file = os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
+                    output_file   = os.path.join(output_dir.name, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
+                    expected_file = os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
                     self.assertTrue(cmp(output_file, expected_file, False))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
-            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
+            os.path.join(output_dir.name, "MHC_Class_I", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
-            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
+            os.path.join(output_dir.name, "MHC_Class_I", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
-            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
+            os.path.join(output_dir.name, "MHC_Class_I", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", 'Test.HLA-E*01:01.9.parsed.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
-            os.path.join(self.test_data_directory, "class_i", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
+            os.path.join(output_dir.name, "MHC_Class_I", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", 'Test.HLA-E*01:01.10.parsed.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", 'Test.combined.parsed.tsv'),
-            os.path.join(self.test_data_directory, "class_i", 'Test.combined.parsed.tsv'),
+            os.path.join(output_dir.name, "MHC_Class_I", 'Test.combined.parsed.tsv'),
+            os.path.join(self.test_data_directory, "MHC_Class_I", 'Test.combined.parsed.tsv'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "Test.filtered.binding.tsv"),
-            os.path.join(self.test_data_directory, "class_i", "Test.filtered.binding.tsv"),
+            os.path.join(output_dir.name, "MHC_Class_I", "Test.filtered.binding.tsv"),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "Test.filtered.binding.tsv"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "Test.filtered.coverage.tsv"),
-            os.path.join(self.test_data_directory, "class_i", "Test.filtered.coverage.tsv"),
+            os.path.join(output_dir.name, "MHC_Class_I", "Test.filtered.coverage.tsv"),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "Test.filtered.coverage.tsv"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "Test.chop.tsv"),
-            os.path.join(self.test_data_directory, "class_i", "Test.chop.tsv"),
+            os.path.join(output_dir.name, "MHC_Class_I", "Test.chop.tsv"),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "Test.chop.tsv"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "Test.stab.tsv"),
-            os.path.join(self.test_data_directory, "class_i", "Test.stab.tsv"),
+            os.path.join(output_dir.name, "MHC_Class_I", "Test.stab.tsv"),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "Test.stab.tsv"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_i", "Test.final.tsv"),
-            os.path.join(self.test_data_directory, "class_i", "Test.final.tsv"),
+            os.path.join(output_dir.name, "MHC_Class_I", "Test.final.tsv"),
+            os.path.join(self.test_data_directory, "MHC_Class_I", "Test.final.tsv"),
             False
         ))
         #Class II output files
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "Test.tsv"),
-            os.path.join(self.test_data_directory, "class_ii", "Test.tsv")
+            os.path.join(output_dir.name, "MHC_Class_II", "Test.tsv"),
+            os.path.join(self.test_data_directory, "MHC_Class_II", "Test.tsv")
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "Test_31.fa"),
-            os.path.join(self.test_data_directory, "class_ii", "Test_31.fa"),
+            os.path.join(output_dir.name, "MHC_Class_II", "Test_31.fa"),
+            os.path.join(self.test_data_directory, "MHC_Class_II", "Test_31.fa"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "tmp", "Test_31.fa.split_1-48"),
-            os.path.join(self.test_data_directory, "class_ii", "tmp", "Test_31.fa.split_1-48"),
+            os.path.join(output_dir.name, "MHC_Class_II", "tmp", "Test_31.fa.split_1-48"),
+            os.path.join(self.test_data_directory, "MHC_Class_II", "tmp", "Test_31.fa.split_1-48"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "tmp", "Test_31.fa.split_1-48.key"),
-            os.path.join(self.test_data_directory, "class_ii", "tmp", "Test_31.fa.split_1-48.key"),
+            os.path.join(output_dir.name, "MHC_Class_II", "tmp", "Test_31.fa.split_1-48.key"),
+            os.path.join(self.test_data_directory, "MHC_Class_II", "tmp", "Test_31.fa.split_1-48.key"),
             False
         ))
         self.request_mock.assert_has_calls([
             generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name)
         ])
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "tmp", 'Test.nn_align.H2-IAb.tsv_1-48'),
-            os.path.join(self.test_data_directory, "class_ii", "tmp", 'Test.nn_align.H2-IAb.tsv_1-48'),
+            os.path.join(output_dir.name, "MHC_Class_II", "tmp", 'Test.nn_align.H2-IAb.tsv_1-48'),
+            os.path.join(self.test_data_directory, "MHC_Class_II", "tmp", 'Test.nn_align.H2-IAb.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "tmp", 'Test.H2-IAb.parsed.tsv_1-48'),
-            os.path.join(self.test_data_directory, "class_ii", "tmp", 'Test.H2-IAb.parsed.tsv_1-48'),
+            os.path.join(output_dir.name, "MHC_Class_II", "tmp", 'Test.H2-IAb.parsed.tsv_1-48'),
+            os.path.join(self.test_data_directory, "MHC_Class_II", "tmp", 'Test.H2-IAb.parsed.tsv_1-48'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", 'Test.combined.parsed.tsv'),
-            os.path.join(self.test_data_directory, "class_ii", 'Test.combined.parsed.tsv'),
+            os.path.join(output_dir.name, "MHC_Class_II", 'Test.combined.parsed.tsv'),
+            os.path.join(self.test_data_directory, "MHC_Class_II", 'Test.combined.parsed.tsv'),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "Test.filtered.binding.tsv"),
-            os.path.join(self.test_data_directory, "class_ii", "Test.filtered.binding.tsv"),
+            os.path.join(output_dir.name, "MHC_Class_II", "Test.filtered.binding.tsv"),
+            os.path.join(self.test_data_directory, "MHC_Class_II", "Test.filtered.binding.tsv"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "Test.filtered.coverage.tsv"),
-            os.path.join(self.test_data_directory, "class_ii", "Test.filtered.coverage.tsv"),
+            os.path.join(output_dir.name, "MHC_Class_II", "Test.filtered.coverage.tsv"),
+            os.path.join(self.test_data_directory, "MHC_Class_II", "Test.filtered.coverage.tsv"),
             False
         ))
         self.assertTrue(cmp(
-            os.path.join(output_dir.name, "class_ii", "Test.final.tsv"),
-            os.path.join(self.test_data_directory, "class_ii", "Test.final.tsv"),
+            os.path.join(output_dir.name, "MHC_Class_II", "Test.final.tsv"),
+            os.path.join(self.test_data_directory, "MHC_Class_II", "Test.final.tsv"),
             False
         ))
         output_dir.cleanup()
