@@ -109,19 +109,12 @@ class PVACTests(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
-            "convert_vcf",
-            "generate_fasta",
             "binding_filter",
             "coverage_filter",
-            "generate_fasta_key",
-            "parse_output",
             "run",
             "install_vep_plugin",
             "download_example_data",
             "valid_alleles",
-            "combine_parsed_outputs",
-            "net_chop",
-            "netmhc_stab",
             "config_files",
             ]:
             result = run([

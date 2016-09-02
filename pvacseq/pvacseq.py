@@ -21,48 +21,6 @@ def main():
     )
     run_main_program_parser.set_defaults(func=lib.main)
 
-    convert_vcf_parser = subparsers.add_parser(
-        "convert_vcf",
-        help="Converts a VCF into TSV format for downstream steps",
-        add_help=False
-    )
-    convert_vcf_parser.set_defaults(func=lib.convert_vcf)
-
-    variant_sequences_parser = subparsers.add_parser(
-        "generate_fasta",
-        help="Generates a variant peptide FASTA file from the TSV input file",
-        add_help=False
-    )
-    variant_sequences_parser.set_defaults(func=lib.generate_fasta)
-
-    fasta_key_parser = subparsers.add_parser(
-        "generate_fasta_key",
-        help="Generates a FASTA key file",
-        add_help=False
-    )
-    fasta_key_parser.set_defaults(func=lib.generate_fasta_key)
-
-    call_iedb_parser = subparsers.add_parser(
-        "call_iedb",
-        help="Make epitope binding predicitions using IEDB",
-        add_help=False
-    )
-    call_iedb_parser.set_defaults(func=lib.call_iedb)
-
-    parse_output_parser = subparsers.add_parser(
-        "parse_output",
-        help="Parses output from IEDB",
-        add_help=False
-    )
-    parse_output_parser.set_defaults(func=lib.parse_output)
-
-    combine_parsed_outputs_parser = subparsers.add_parser(
-        "combine_parsed_outputs",
-        help="Combines the parsed output files into one file",
-        add_help=False
-    )
-    combine_parsed_outputs_parser.set_defaults(func=lib.combine_parsed_outputs)
-
     binding_filter_parser = subparsers.add_parser(
         "binding_filter",
         help="Filters variants processed by IEDB by binding score",
@@ -76,20 +34,6 @@ def main():
         add_help=False
     )
     coverage_filter_parser.set_defaults(func=lib.coverage_filter)
-
-    net_chop_parser = subparsers.add_parser(
-        "net_chop",
-        help="Submits epitope predictions to NetChop and records the best cleavage site for each variant",
-        add_help=False
-    )
-    net_chop_parser.set_defaults(func=lib.net_chop)
-
-    netmhc_stab_parser = subparsers.add_parser(
-        "netmhc_stab",
-        help="Generates stability predictions for predicted epitopes",
-        add_help=False
-    )
-    netmhc_stab_parser.set_defaults(func=lib.netmhc_stab)
 
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
