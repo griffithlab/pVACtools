@@ -201,6 +201,9 @@ def main(args_input = sys.argv[1:]):
                 ref_base = reference
                 var_base = alt
             coverage_for_entry = {}
+            for coverage_type in ['normal', 'tdna', 'trna']:
+                coverage_for_entry[coverage_type + '_ref_count'] = 'NA'
+                coverage_for_entry[coverage_type + '_var_count'] = 'NA'
             if variant_type in coverage:
                 for coverage_type in coverage[variant_type]:
                     if ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]:
@@ -242,16 +245,27 @@ def main(args_input = sys.argv[1:]):
                     'protein_position'               : transcript['Protein_position'],
                     'index'                          : index
                 }
+                if transcript['Amino_acids']:
+                    output_row['amino_acid_change'] = transcript['Amino_acids']
+                else:
+                    output_row['amino_acid_change'] = 'NA'
+
                 if transcript_name in transcript_expns.keys():
                     transcript_expn_entry = transcript_expns[transcript_name]
                     output_row['transcript_fpkm'] = transcript_expn_entry['FPKM']
+                else:
+                    output_row['transcript_fpkm'] = 'NA'
                 if ensembl_gene_id in gene_expns.keys():
                     gene_expn_entries = gene_expns[ensembl_gene_id]
                     gene_fpkm = 0
                     for locus, gene_expn_entry in gene_expn_entries.items():
                         gene_fpkm += float(gene_expn_entry['FPKM'])
                     output_row['gene_fpkm'] = gene_fpkm
+                else:
+                    output_row['gene_fpkm'] = 'NA'
+
                 output_row.update(coverage_for_entry)
+
                 tsv_writer.writerow(output_row)
 
     args.input_file.close()

@@ -28,6 +28,9 @@ def main(args_input = sys.argv[1:]):
     for input_file in args.input_files:
         reader = csv.DictReader(input_file, delimiter='\t')
         for row in reader:
+            for fieldname in fieldnames:
+                if fieldname not in row:
+                    row[fieldname] = 'NA'
             tsv_writer.writerow(row)
         input_file.close()
 
