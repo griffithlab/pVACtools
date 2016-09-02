@@ -85,10 +85,17 @@ class Pipeline(metaclass=ABCMeta):
     def generate_fasta(self):
         pass
 
+    def fasta_entry_count(self):
+        with open(self.fasta_file_path()) as f:
+            for i, l in enumerate(f, 1):
+                pass
+        return i/2
+
     def split_fasta_basename(self):
         return os.path.join(self.tmp_dir, self.sample_name + "_" + str(self.peptide_sequence_length) + ".fa.split")
 
     def split_fasta_file_and_create_key_files(self):
+        entry_count = self.fasta_entry_count()
         split_reader = open(self.fasta_file_path(), mode='r')
         split_start = 1
         #Each fasta entry consists of two lines: header and sequence
@@ -96,6 +103,8 @@ class Pipeline(metaclass=ABCMeta):
         chunks = []
         for chunk in split_file(split_reader, chunk_size):
             split_end = split_start + self.fasta_size - 1
+            if split_end > entry_count:
+                split_end = entry_count
             print("Splitting FASTA into smaller chunks - Entries %d-%d" % (split_start, split_end))
             split_fasta_file_path = "%s_%d-%d"%(self.split_fasta_basename(), split_start, split_end)
             if os.path.exists(split_fasta_file_path):
