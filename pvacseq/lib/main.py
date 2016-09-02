@@ -166,6 +166,12 @@ def main(args_input = sys.argv[1:]):
              + "Needs to be an even number.",
     )
     parser.add_argument(
+        "-d", "--downstream-sequence-length",
+        default='1000',
+        help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
+            + "Use 'full' to include the full downstream sequence. Default: 1000"
+    )
+    parser.add_argument(
         "-k", "--keep-tmp-files",
         action='store_true',
         help="Keep intermediate output files.",
@@ -181,6 +187,13 @@ def main(args_input = sys.argv[1:]):
     if args.fasta_size%2 != 0:
         sys.exit("The fasta size needs to be an even number")
 
+    if args.downstream_sequence_length == 'full':
+        downstream_sequence_length = None
+    elif args.downstream_sequence_length.isdigit():
+        downstream_sequence_length = args.downstream_sequence_length
+    else:
+        sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
+
     base_output_dir = os.path.abspath(args.output_dir)
 
     class_i_prediction_algorithms = []
@@ -194,24 +207,25 @@ def main(args_input = sys.argv[1:]):
             class_ii_prediction_algorithms.append(prediction_algorithm)
 
     shared_arguments = {
-        'input_file'              : args.input_file,
-        'sample_name'             : args.sample_name,
-        'alleles'                 : args.allele,
-        'top_result_per_mutation' : args.top_result_per_mutation,
-        'top_score_metric'        : args.top_score_metric,
-        'binding_threshold'       : args.binding_threshold,
-        'minimum_fold_change'     : args.minimum_fold_change,
-        'net_chop_method'         : args.net_chop_method,
-        'net_chop_threshold'      : args.net_chop_threshold,
-        'normal_cov'              : args.normal_cov,
-        'normal_vaf'              : args.normal_vaf,
-        'tdna_cov'                : args.tdna_cov,
-        'tdna_vaf'                : args.tdna_vaf,
-        'trna_cov'                : args.trna_cov,
-        'trna_vaf'                : args.trna_vaf,
-        'expn_val'                : args.expn_val,
-        'fasta_size'              : args.fasta_size,
-        'keep_tmp_files'          : args.keep_tmp_files,
+        'input_file'                : args.input_file,
+        'sample_name'               : args.sample_name,
+        'alleles'                   : args.allele,
+        'top_result_per_mutation'   : args.top_result_per_mutation,
+        'top_score_metric'          : args.top_score_metric,
+        'binding_threshold'         : args.binding_threshold,
+        'minimum_fold_change'       : args.minimum_fold_change,
+        'net_chop_method'           : args.net_chop_method,
+        'net_chop_threshold'        : args.net_chop_threshold,
+        'normal_cov'                : args.normal_cov,
+        'normal_vaf'                : args.normal_vaf,
+        'tdna_cov'                  : args.tdna_cov,
+        'tdna_vaf'                  : args.tdna_vaf,
+        'trna_cov'                  : args.trna_cov,
+        'trna_vaf'                  : args.trna_vaf,
+        'expn_val'                  : args.expn_val,
+        'fasta_size'                : args.fasta_size,
+        'downstream_sequence_length': downstream_sequence_length,
+        'keep_tmp_files'            : args.keep_tmp_files,
     }
     additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
     shared_arguments.update(additional_input_files)
