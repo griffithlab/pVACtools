@@ -282,13 +282,15 @@ class MHCIPipeline(Pipeline):
     def generate_fasta(self):
         print("Generating Variant Peptide FASTA File")
         sys.stdout.flush()
-        lib.generate_fasta.main([
+        generate_fasta_params = [
             self.tsv_file_path(),
             str(self.peptide_sequence_length),
             str(min(self.epitope_lengths)),
             self.fasta_file_path(),
-            '-d', self.downstream_sequence_length,
-        ])
+        ]
+        if self.downstream_sequence_length:
+            generate_fasta_params.extend(['-d', self.downstream_sequence_length,])
+        lib.generate_fasta.main(generate_fasta_params)
         print("Completed")
 
     def call_iedb_and_parse_outputs(self, chunks):
@@ -360,13 +362,15 @@ class MHCIIPipeline(Pipeline):
     def generate_fasta(self):
         print("Generating Variant Peptide FASTA File")
         sys.stdout.flush()
-        lib.generate_fasta.main([
+        generate_fasta_params = [
             self.tsv_file_path(),
             str(self.peptide_sequence_length),
             '9', #This is the default core epitope length for IEDB class ii predictions
             self.fasta_file_path(),
-            '-d', self.downstream_sequence_length,
-        ])
+        ]
+        if self.downstream_sequence_length:
+            generate_fasta_params.extend(['-d', self.downstream_sequence_length,])
+        lib.generate_fasta.main(generate_fasta_params)
         print("Completed")
 
     def call_iedb_and_parse_outputs(self, chunks):
