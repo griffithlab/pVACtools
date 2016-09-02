@@ -118,6 +118,9 @@ def main(args_input = sys.argv[1:]):
             mutation_end_position = mutation_start_position + wildtype_amino_acid_length
             mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
 
+        if '*' in wildtype_subsequence or '*' in mutant_subsequence:
+            continue
+
         variant_id = line['index']
         for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, mutant_subsequence]):
             args.output_file.writelines('>%s.%s\n' % (designation, variant_id))
