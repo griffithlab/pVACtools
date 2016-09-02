@@ -1,0 +1,2 @@
+chromosome_name	start	stop	reference	variant	gene_name	transcript_name	amino_acid_change	ensembl_gene_id	wildtype_amino_acid_sequence	downstream_amino_acid_sequence	variant_type	protein_position	transcript_fpkm	gene_fpkm	index
+7	102465130	102465130	N	NCGAC	LRWD1	ENST00000476270	S/SDX	ENSG00000161036	XARLLMQRGRPKSDRLGKIRSLDGVESGVVARASSPSYSRG	SDRPAGEDPESGWCGVGSSGARF	FS	13			LRWD1_ENST00000476270_1.FS.13

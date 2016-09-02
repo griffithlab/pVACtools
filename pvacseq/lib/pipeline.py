@@ -81,14 +81,9 @@ class Pipeline(metaclass=ABCMeta):
         fasta_file = self.sample_name + "_" + str(self.peptide_sequence_length) + ".fa"
         return os.path.join(self.output_dir, fasta_file)
 
+    @abstractmethod
     def generate_fasta(self):
-        print("Generating Variant Peptide FASTA File")
-        lib.generate_fasta.main([
-            self.tsv_file_path(),
-            str(self.peptide_sequence_length),
-            self.fasta_file_path()
-        ])
-        print("Completed")
+        pass
 
     def split_fasta_basename(self):
         return os.path.join(self.tmp_dir, self.sample_name + "_" + str(self.peptide_sequence_length) + ".fa.split")
@@ -274,6 +269,17 @@ class MHCIPipeline(Pipeline):
         self.peptide_sequence_length = kwargs['peptide_sequence_length']
         self.epitope_lengths         = kwargs['epitope_lengths']
 
+    def generate_fasta(self):
+        print("Generating Variant Peptide FASTA File")
+        sys.stdout.flush()
+        lib.generate_fasta.main([
+            self.tsv_file_path(),
+            str(self.peptide_sequence_length),
+            str(min(self.epitope_lengths)),
+            self.fasta_file_path()
+        ])
+        print("Completed")
+
     def call_iedb_and_parse_outputs(self, chunks):
         split_parsed_output_files = []
         for chunk in chunks:
@@ -339,6 +345,17 @@ class MHCIIPipeline(Pipeline):
     def __init__(self, **kwargs):
         Pipeline.__init__(self, **kwargs)
         self.peptide_sequence_length = 31
+
+    def generate_fasta(self):
+        print("Generating Variant Peptide FASTA File")
+        sys.stdout.flush()
+        lib.generate_fasta.main([
+            self.tsv_file_path(),
+            str(self.peptide_sequence_length),
+            '9', #This is the default core epitope length for IEDB class ii predictions
+            self.fasta_file_path()
+        ])
+        print("Completed")
 
     def call_iedb_and_parse_outputs(self, chunks):
         split_parsed_output_files = []
