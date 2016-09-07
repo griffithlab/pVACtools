@@ -24,11 +24,11 @@ class CoverageFilterTests(unittest.TestCase):
             self.executable,
             os.path.join(
                 self.test_data_dir,
-                'Test_filtered.readcounts.tsv'
+                'Test.combined.parsed.tsv'
             ),
             output_file.name
         ], shell=False))
         self.assertTrue(cmp(
             output_file.name,
-            os.path.join(self.test_data_dir, "Test_filtered.readcounts.covfilt.tsv"),
+            os.path.join(self.test_data_dir, "Test.filtered.coverage.tsv"),
         ))

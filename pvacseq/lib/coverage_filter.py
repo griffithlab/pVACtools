@@ -4,12 +4,6 @@ import re
 import os
 import csv
 
-def coverage(ref, var):
-    return ref + var
-
-def vaf(ref, var):
-    return (var / (coverage(ref, var)+0.00001)) * 100
-
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq coverage_filter')
     parser.add_argument('input_file', type=argparse.FileType('r'),
@@ -46,33 +40,15 @@ def main(args_input = sys.argv[1:]):
                         default=1)
     args = parser.parse_args(args_input)
 
-#### INPUT AND OUTPUT FILE FORMAT ##
-#Chromosome
-#Start
-#Stop
-#Reference
-#Variant
-#Transcript
-#Ensembl Gene ID
-#Variant Type
-#Mutation
-#Protein Position
-#Gene Name
-#HLA Allele
-#Peptide Length
-#Sub-peptide Position
-#MT score
-#WT score
-#MT epitope seq
-#WT epitope seq
-#Fold Change
-#Normal Ref Count
-#Normal Var Count
-#Tumor DNA Ref Count
-#Tumor DNA Var Count
-#Tumor RNA Ref Count
-#Tumor RNA Var Count
-#Gene Exp FPKM
+#### COVERAGE COLUMNS ##
+#Normal Depth
+#Normal VAF
+#Tumor DNA Depth
+#Tumor DNA VAF
+#Tumor RNA Depth
+#Tumor RNA VAF
+#Gene Expression
+#Transcript Expression
 
     reader = csv.DictReader(args.input_file, delimiter='\t')
     writer = csv.DictWriter(
@@ -83,63 +59,53 @@ def main(args_input = sys.argv[1:]):
     )
     writer.writeheader()
     for entry in reader:
-        if ('Normal Ref Count' in entry
-            and 'Normal Var Count' in entry
-            and entry['Normal Ref Count']
-            and entry['Normal Var Count']
-            and entry['Normal Ref Count'] != 'NA'
-            and entry['Normal Var Count'] != 'NA'):
-            ref = int(entry['Normal Ref Count'])
-            var = int(entry['Normal Var Count'])
-            ncov  = coverage(ref, var)
-            if ncov < args.normal_cov:
-                continue
+        if ('Normal Depth' in entry
+            and entry['Normal Depth']
+            and entry['Normal Depth'] != 'NA'
+            and float(entry ['Normal Depth']) < args.normal_cov):
+            continue
 
-            nvaf  = vaf(ref, var)
-            if nvaf > args.normal_vaf:
-                continue
+        if ('Normal VAF' in entry
+            and entry['Normal VAF']
+            and entry['Normal VAF'] != 'NA'
+            and float(entry['Normal VAF']) > args.normal_vaf):
+            continue
 
-        if ('Tumor DNA Ref Count' in entry
-            and 'Tumor DNA Var Count' in entry
-            and entry['Tumor DNA Ref Count']
-            and entry['Tumor DNA Var Count']
-            and entry['Tumor DNA Ref Count'] != 'NA'
-            and entry['Tumor DNA Var Count'] != 'NA'):
-            ref = int(entry['Tumor DNA Ref Count'])
-            var = int(entry['Tumor DNA Var Count'])
-            tdcov = coverage(ref, var)
-            if tdcov < args.tdna_cov:
-                continue
+        if ('Tumor DNA Depth' in entry
+            and entry['Tumor DNA Depth']
+            and entry['Tumor DNA Depth'] != 'NA'
+            and float(entry['Tumor DNA Depth']) < args.tdna_cov):
+            continue
 
-            tdvaf = vaf(ref, var)
-            if tdvaf < args.tdna_vaf:
-                continue
+        if ('Tumor DNA VAF' in entry
+            and entry['Tumor DNA VAF']
+            and entry['Tumor DNA VAF'] != 'NA'
+            and float(entry['Tumor DNA VAF']) < args.tdna_vaf):
+            continue
 
-        if ('Tumor RNA Ref Count' in entry
-            and 'Tumor RNA Var Count' in entry
-            and entry['Tumor RNA Ref Count']
-            and entry['Tumor RNA Var Count']
-            and entry['Tumor RNA Ref Count'] != 'NA'
-            and entry['Tumor RNA Var Count'] != 'NA'):
-            ref = int(entry['Tumor RNA Ref Count'])
-            var = int(entry['Tumor RNA Var Count'])
-            trcov = coverage(ref, var)
-            if trcov < args.trna_cov:
-                continue
+        if ('Tumor RNA Depth' in entry
+            and entry['Tumor RNA Depth']
+            and entry['Tumor RNA Depth'] != 'NA'
+            and float(entry['Tumor RNA Depth']) < args.trna_cov):
+            continue
 
-            trvaf = vaf(ref, var)
-            if trvaf < args.trna_vaf:
-                continue
+        if ('Tumor RNA VAF' in entry
+            and entry['Tumor RNA VAF']
+            and entry['Tumor RNA VAF'] != 'NA'
+            and float(entry['Tumor RNA VAF']) < args.trna_vaf):
+            continue
 
-        if 'Gene Exp FPKM' in entry and entry['Gene Exp FPKM']:
-            fpkm  = float(entry['Gene Exp FPKM'])
-            if fpkm < args.expn_val:
-                continue
+        if ('Gene Expression' in entry
+            and entry['Gene Expression']
+            and entry['Gene Expression'] != 'NA'
+            and float(entry['Gene Expression']) < args.expn_val):
+            continue
 
-        if 'Transcript Exp FPKM' in entry and entry['Transcript Exp FPKM']:
-            fpkm  = float(entry['Transcript Exp FPKM'])
-            if fpkm < args.expn_val:
-                continue
+        if ('Transcript Expression' in entry
+            and entry['Transcript Expression']
+            and entry['Transcript Expression'] != 'NA'
+            and float(entry['Transcript Expression']) < args.expn_val):
+            continue
 
         writer.writerow(entry)
 

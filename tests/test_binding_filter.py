@@ -30,6 +30,6 @@ class BindingFilterTests(unittest.TestCase):
         ], shell=False))
         self.assertTrue(cmp(
             output_file.name,
-            os.path.join(self.test_data_path, "Test_filtered.tsv"),
+            os.path.join(self.test_data_path, "Test.filtered.binding.tsv"),
             False
         ))
