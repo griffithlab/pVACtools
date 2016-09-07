@@ -43,7 +43,7 @@ def main(args_input = sys.argv[1:]):
     reader = csv.DictReader(args.input_file, delimiter='\t')
     writer = csv.DictWriter(
         args.output_file,
-        reader.fieldnames+['Best Cleavage Position', 'Best Cleavage Score'],
+        reader.fieldnames+['Best Cleavage Position', 'Best Cleavage Score', 'Cleavage Sites'],
         delimiter='\t',
         lineterminator='\n'
     )
@@ -91,19 +91,23 @@ def main(args_input = sys.argv[1:]):
             score = -1
             pos = 0
             sequence_name = False
+            cleavage_scores = {}
             for line in results[i].split('\n'):
                 data = [word for word in line.strip().split(' ') if len(word)]
                 currentPosition = data[0]
+                isCleavage = data[2]
+                if isCleavage is not 'S':
+                    continue
                 currentScore = float(data[3])
                 if not sequence_name:
                     sequence_name = data[4]
-                if currentScore > score:
-                    score = currentScore
-                    pos = currentPosition
+                cleavage_scores[currentPosition] = currentScore
+            sorted_cleavage_scores = sorted(cleavage_scores.items(), key=lambda x: x[1], reverse=True)
             line = current_buffer[sequence_name]
             line.update({
-                'Best Cleavage Position':pos,
-                'Best Cleavage Score':score
+                'Best Cleavage Position':sorted_cleavage_scores[0][0],
+                'Best Cleavage Score'   :sorted_cleavage_scores[0][1],
+                'Cleavage Sites'        :','.join(['%s:%s' % (key, value) for (key, value) in sorted_cleavage_scores])
             })
             writer.writerow(line)
     sys.stdout.write('\b\b')
