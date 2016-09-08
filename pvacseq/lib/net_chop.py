@@ -7,6 +7,7 @@ import re
 import os
 from time import sleep
 from lib.main import split_file
+import collections
 
 cycle = ['|', '/', '-', '\\']
 methods = ['cterm', '20s']
@@ -102,12 +103,13 @@ def main(args_input = sys.argv[1:]):
                 if not sequence_name:
                     sequence_name = data[4]
                 cleavage_scores[currentPosition] = currentScore
-            sorted_cleavage_scores = sorted(cleavage_scores.items(), key=lambda x: x[1], reverse=True)
+            ranked_cleavage_scores = sorted(cleavage_scores.items(), key=lambda x: x[1], reverse=True)
+            sorted_cleavage_scores = collections.OrderedDict(sorted(cleavage_scores.items()))
             line = current_buffer[sequence_name]
             line.update({
-                'Best Cleavage Position':sorted_cleavage_scores[0][0],
-                'Best Cleavage Score'   :sorted_cleavage_scores[0][1],
-                'Cleavage Sites'        :','.join(['%s:%s' % (key, value) for (key, value) in sorted_cleavage_scores])
+                'Best Cleavage Position':ranked_cleavage_scores[0][0],
+                'Best Cleavage Score'   :ranked_cleavage_scores[0][1],
+                'Cleavage Sites'        :','.join(['%s:%s' % (key, value) for (key, value) in sorted_cleavage_scores.items()])
             })
             writer.writerow(line)
     sys.stdout.write('\b\b')
