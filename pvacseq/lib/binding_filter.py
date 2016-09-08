@@ -45,10 +45,10 @@ def main(args_input = sys.argv[1:]):
     for entry in reader:
         name = entry['Gene Name']
         if args.top_score_metric == 'median':
-            score = float(entry['Median MT Score All Methods'])
+            score = float(entry['Median MT Score'])
         elif args.top_score_metric == 'lowest':
             score = float(entry['Best MT Score'])
-        fold_change = sys.maxsize if entry['Fold Change'] == 'NA' else float(entry['Fold Change'])
+        fold_change = sys.maxsize if entry['Corresponding Fold Change'] == 'NA' else float(entry['Corresponding Fold Change'])
 
         if score > args.binding_threshold or fold_change < args.minimum_fold_change:
             continue

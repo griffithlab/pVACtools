@@ -148,6 +148,11 @@ def add_summary_metrics(iedb_results):
         value['corresponding_wt_score'] = value['wt_scores'][best_mt_score_method]
         value['best_mt_score_method']   = best_mt_score_method
         value['median_mt_score']        = median(mt_scores.values())
+        wt_scores_with_value = [score for score in value['wt_scores'].values() if score != 'NA']
+        if not wt_scores_with_value:
+            value['median_wt_score']    = 'NA'
+        else:
+            value['median_wt_score']    = median(wt_scores_with_value)
         iedb_results_with_metrics[key]  = value
 
     return iedb_results_with_metrics
@@ -191,6 +196,7 @@ def flatten_iedb_results(iedb_results):
         value['corresponding_wt_score'],
         value['best_mt_score_method'],
         value['median_mt_score'],
+        value['median_wt_score'],
     ) for value in iedb_results.values())
 
     return flattened_iedb_results
@@ -249,19 +255,21 @@ def base_headers():
         'Sub-peptide Position',
         'MT Epitope Seq',
         'WT Epitope Seq',
+        'Best MT Score Method',
         'Best MT Score',
         'Corresponding WT Score',
-        'Fold Change',
-        'Best MT Score Method',
-        'Median MT Score All Methods',
-        'Gene Exp FPKM',
-        'Transcript Exp FPKM',
-        'Normal Ref Count',
-        'Normal Var Count',
-        'Tumor DNA Ref Count',
-        'Tumor DNA Var Count',
-        'Tumor RNA Ref Count',
-        'Tumor RNA Var Count',
+        'Corresponding Fold Change',
+        'Tumor DNA Depth',
+        'Tumor DNA VAF',
+        'Tumor RNA Depth',
+        'Tumor RNA VAF',
+        'Normal Depth',
+        'Normal VAF',
+        'Gene Expression',
+        'Transcript Expression',
+        'Median MT Score',
+        'Median WT Score',
+        'Median Fold Change',
     ]
 
 def output_headers(methods):
@@ -307,13 +315,32 @@ def main(args_input = sys.argv[1:]):
 
     tsv_entries  = parse_input_tsv_file(args.input_tsv_file)
     iedb_results = process_input_iedb_file(args.input_iedb_files, tsv_entries, args.key_file, args.top_result_per_mutation, args.top_score_metric)
-    for gene_name, variant_aa, position, mt_scores, wt_scores, wt_epitope_seq, mt_epitope_seq, tsv_index, allele, peptide_length, best_mt_score, corresponding_wt_score, best_mt_score_method, median_mt_score in iedb_results:
+    for (
+        gene_name,
+        variant_aa,
+        position,
+        mt_scores,
+        wt_scores,
+        wt_epitope_seq,
+        mt_epitope_seq,
+        tsv_index, allele,
+        peptide_length,
+        best_mt_score,
+        corresponding_wt_score,
+        best_mt_score_method,
+        median_mt_score,
+        median_wt_score
+    ) in iedb_results:
         tsv_entry = tsv_entries[tsv_index]
         if mt_epitope_seq != wt_epitope_seq:
             if wt_epitope_seq == 'NA':
-                fold_change = 'NA'
+                corresponding_fold_change = 'NA'
             else:
-                fold_change = "%.3f" % (corresponding_wt_score/best_mt_score)
+                corresponding_fold_change = "%.3f" % (corresponding_wt_score/best_mt_score)
+            if median_wt_score == 'NA':
+                median_fold_change = 'NA'
+            else:
+                median_fold_change = "%.3f" % (median_wt_score/median_mt_score)
             row = {
                 'Chromosome'          : tsv_entry['chromosome_name'],
                 'Start'               : tsv_entry['start'],
@@ -331,32 +358,34 @@ def main(args_input = sys.argv[1:]):
                 'Sub-peptide Position': position,
                 'MT Epitope Seq'      : mt_epitope_seq,
                 'WT Epitope Seq'      : wt_epitope_seq,
-                'Best MT Score'       : best_mt_score,
-                'Corresponding WT Score': corresponding_wt_score,
                 'Best MT Score Method': PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
-                'Median MT Score All Methods': median_mt_score,
-                'Fold Change'         : fold_change,
+                'Best MT Score'       : best_mt_score,
+                'Corresponding WT Score'    : corresponding_wt_score,
+                'Corresponding Fold Change' : corresponding_fold_change,
+                'Median MT Score'     : median_mt_score,
+                'Median WT Score'     : median_wt_score,
+                'Median Fold Change'  : median_fold_change,
             }
             for method in methods:
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                 row["%s WT Score" % pretty_method] = wt_scores[method]
                 row["%s MT Score" % pretty_method] = mt_scores[method]
-            if 'gene_fpkm' in tsv_entry:
-                row['Gene Exp FPKM'] = tsv_entry['gene_fpkm']
-            if 'transcript_fpkm' in tsv_entry:
-                row['Transcript Exp FPKM'] = tsv_entry['transcript_fpkm']
-            if 'normal_ref_count' in tsv_entry:
-                row['Normal Ref Count'] = tsv_entry['normal_ref_count']
-            if 'normal_var_count' in tsv_entry:
-                row['Normal Var Count'] = tsv_entry['normal_var_count']
-            if 'tdna_ref_count' in tsv_entry:
-                row['Tumor DNA Ref Count'] = tsv_entry['tdna_ref_count']
-            if 'tdna_var_count' in tsv_entry:
-                row['Tumor DNA Var Count'] = tsv_entry['tdna_var_count']
-            if 'trna_ref_count' in tsv_entry:
-                row['Tumor RNA Ref Count'] = tsv_entry['trna_ref_count']
-            if 'trna_var_count' in tsv_entry:
-                row['Tumor RNA Var Count'] = tsv_entry['trna_var_count']
+            if 'gene_expression' in tsv_entry:
+                row['Gene Expression'] = tsv_entry['gene_expression']
+            if 'transcript_expression' in tsv_entry:
+                row['Transcript Expression'] = tsv_entry['transcript_expression']
+            if 'normal_depth' in tsv_entry:
+                row['Normal Depth'] = tsv_entry['normal_depth']
+            if 'normal_vaf' in tsv_entry:
+                row['Normal VAF'] = tsv_entry['normal_vaf']
+            if 'tdna_depth' in tsv_entry:
+                row['Tumor DNA Depth'] = tsv_entry['tdna_depth']
+            if 'tdna_vaf' in tsv_entry:
+                row['Tumor DNA VAF'] = tsv_entry['tdna_vaf']
+            if 'trna_depth' in tsv_entry:
+                row['Tumor RNA Depth'] = tsv_entry['trna_depth']
+            if 'trna_vaf' in tsv_entry:
+                row['Tumor RNA VAF'] = tsv_entry['trna_vaf']
             tsv_writer.writerow(row)
 
     tmp_output_filehandle.close()

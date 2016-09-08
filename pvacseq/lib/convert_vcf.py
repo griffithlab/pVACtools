@@ -99,6 +99,12 @@ def resolve_consequence(consequence_string):
         consequence = consequence_string
     return consequence
 
+def calculate_coverage(ref, var):
+    return ref + var
+
+def calculate_vaf(ref, var):
+    return (var / (calculate_coverage(ref, var)+0.00001)) * 100
+
 def output_headers():
     return[
         'chromosome_name',
@@ -114,14 +120,14 @@ def output_headers():
         'downstream_amino_acid_sequence',
         'variant_type',
         'protein_position',
-        'transcript_fpkm',
-        'gene_fpkm',
-        'normal_ref_count',
-        'normal_var_count',
-        'tdna_ref_count',
-        'tdna_var_count',
-        'trna_ref_count',
-        'trna_var_count',
+        'transcript_expression',
+        'gene_expression',
+        'normal_depth',
+        'normal_vaf',
+        'tdna_depth',
+        'tdna_vaf',
+        'trna_depth',
+        'trna_vaf',
         'index'
     ]
 
@@ -202,16 +208,15 @@ def main(args_input = sys.argv[1:]):
                 var_base = alt
             coverage_for_entry = {}
             for coverage_type in ['normal', 'tdna', 'trna']:
-                coverage_for_entry[coverage_type + '_ref_count'] = 'NA'
-                coverage_for_entry[coverage_type + '_var_count'] = 'NA'
+                coverage_for_entry[coverage_type + '_depth'] = 'NA'
+                coverage_for_entry[coverage_type + '_vaf'] = 'NA'
             if variant_type in coverage:
                 for coverage_type in coverage[variant_type]:
                     if ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]:
                         brct = parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base])
-                        if ref_base in brct:
-                            coverage_for_entry[coverage_type + '_ref_count'] = brct[ref_base]
-                        if var_base in brct:
-                            coverage_for_entry[coverage_type + '_var_count'] = brct[var_base]
+                        if ref_base in brct and var_base in brct:
+                            coverage_for_entry[coverage_type + '_depth'] = calculate_coverage(int(brct[ref_base]), int(brct[var_base]))
+                            coverage_for_entry[coverage_type + '_vaf']   = calculate_vaf(int(brct[ref_base]), int(brct[var_base]))
 
             csq_allele = alleles_dict[alt]
             transcripts = parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
@@ -252,17 +257,17 @@ def main(args_input = sys.argv[1:]):
 
                 if transcript_name in transcript_expns.keys():
                     transcript_expn_entry = transcript_expns[transcript_name]
-                    output_row['transcript_fpkm'] = transcript_expn_entry['FPKM']
+                    output_row['transcript_expression'] = transcript_expn_entry['FPKM']
                 else:
-                    output_row['transcript_fpkm'] = 'NA'
+                    output_row['transcript_expression'] = 'NA'
                 if ensembl_gene_id in gene_expns.keys():
                     gene_expn_entries = gene_expns[ensembl_gene_id]
                     gene_fpkm = 0
                     for locus, gene_expn_entry in gene_expn_entries.items():
                         gene_fpkm += float(gene_expn_entry['FPKM'])
-                    output_row['gene_fpkm'] = gene_fpkm
+                    output_row['gene_expression'] = gene_fpkm
                 else:
-                    output_row['gene_fpkm'] = 'NA'
+                    output_row['gene_expression'] = 'NA'
 
                 output_row.update(coverage_for_entry)
 
