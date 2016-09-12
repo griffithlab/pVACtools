@@ -1,13 +1,13 @@
 Features
 ========
 
-**SNVS and InDel support**
+**SNV and InDel support**
 
 pVAC-Seq offers epitope binding predictions for missense, inframe indel, and frameshift mutations.
 
 **VCF support**
 
-pVAC-Seq uses a single-sample VCF file as its input. The only prerequisite is annotation of the user's VCF file with VEP. See the :ref:`prerequisites_label` for more information.
+pVAC-Seq uses a single-sample VCF file as its input. This VCF file must be annotated with VEP. See the :ref:`prerequisites_label` for more information.
 
 **No local install of epitope prediction software**
 
@@ -17,7 +17,7 @@ pVAC-Seq utilizes the IEDB RESTful web interface. This means that none of the un
 
 Both MHC Class I and Class II predictions are supported. Simply choose the desired prediction algorithms and HLA alleles during processing and Class I and Class II prediction results will be written to their own respective subdirectories in your output directory.
 
-By using the IEDB RESTful web interface, pVAC-Seq is leveraging their extensive support of different prediction algorithms.
+By using the IEDB RESTful web interface, pVAC-Seq leverages their extensive support of different prediction algorithms.
 
 ================================= =======
 MHC Class I Prediction Algorithm  Version

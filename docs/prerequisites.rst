@@ -58,12 +58,12 @@ Coverage and expression data can be added to the pVAC-Seq processing by providin
     trna_snvs_coverage_file: <bam-readcount output file for tumor RNA BAM and snvs>
     trna_indels_coverage_file: <bam-readcount output file for tumor RNA BAM and indels>
 
-Any file in this list is optional, and its entry can be omitted. If no additional files exist then this yaml file is optional and can be omitted from the list of ``pvacseq`` arguments.
+Each file in this list is optional, and its entry can be omitted. If no additional files exist then this yaml file is optional and can be omitted from the list of ``pvacseq`` arguments.
 
 bam-readcount
 ^^^^^^^^^^^^^
 
-pVAC-Seq optionally accepts bam-readcount files as inputs which are used to add coverage information (depth and VAF) for downstream filtering. Depth and VAF are calculated from the read counts of the reference allele and alternate allele.
+pVAC-Seq optionally accepts bam-readcount files as inputs to add coverage information (depth and VAF) for downstream filtering. Depth and VAF are calculated from the read counts of the reference allele and alternate allele.
 
 Follow the installation instructions on the `bam-readcount GitHub page <https://github.com/genome/bam-readcount#build-instructions>`_.
 
@@ -82,7 +82,7 @@ A minimum base quality of 20 is recommended which can be enabled by ``-b 20``.
 Cufflinks
 ^^^^^^^^^
 
-Cufflinks files can be added as optional inputs to pVAC-Seq to extract gene and transcript expression data for downstream filtering.
+pVAC-Seq optionally accepts Cufflinks files as inputs to extract gene and transcript expression data for downstream filtering.
 
 Installation instructions for Cufflinks can be found on their `GitHub page <https://github.com/cole-trapnell-lab/cufflinks#install-quick-start>`_.
 

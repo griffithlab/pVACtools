@@ -3,9 +3,9 @@ Filtering Commands
 
 pVAC-Seq currently offers two filters: a binding filter and a coverage filter.
 
-The binding filter is always run automatically as part of the pVAC-Seq pipeline but can be run again on the final output file if further filtering is desired.
+The binding filter is always run automatically as part of the pVAC-Seq pipeline.  The coverage filter is run automatically if bam-readcount or cufflinks file are provided as additional input files to a pVAC-Seq run.
 
-The coverage filter is run automatically if bam-readcount or cufflinks file are provided as additional input files to a pVAC-Seq run but can also be run again on the final report file to narrow the results down further.
+Both filters can also be run manually to narrow the final results down further.
 
 Binding Filter
 --------------

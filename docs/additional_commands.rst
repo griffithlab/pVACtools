@@ -1,7 +1,7 @@
 Additional Commands
 ===================
 
-To make the usage of pVAC-Seq easier we have included in the package a list of convenience methods.
+To make using pVAC-Seq easier several convenience methods are included in the package.
 
 Download Example Data
 ---------------------

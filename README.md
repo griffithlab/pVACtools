@@ -63,7 +63,7 @@ Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi L. 
 This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0">NPOSL-3.0</a>.
 
 ## Installation Instructions
-pVAC-Seq requires Python 3.5. You can check your installed Python version by running `python -V`. If you don't have Python 3.5 installed, we recommend using <a href="http://conda.pydata.org/docs/py2or3.html">Conda</a> to emulate a Python 3.5. environment. We've encountered problems with users that already have Python 2.* installed when they also try to install Python 3.5. The defaults will not be set correctly in that case. If you already have Python 2.* installed we <b>strongly</b> recommmend using Conda instead of installing Python 3.5 locally.
+pVAC-Seq requires Python 3.5. You can check your installed Python version by running `python -V`. If you don't have Python 3.5 installed, we recommend using <a href="http://conda.pydata.org/docs/py2or3.html">Conda</a> to emulate a Python 3.5. environment. We've encountered problems with users that already have Python 2.x installed when they also try to install Python 3.5. The defaults will not be set correctly in that case. If you already have Python 2.x installed we <b>strongly</b> recommmend using Conda instead of installing Python 3.5 locally.
 
 Once you have set up your Python 3.5 environment correctly you can use `pip` to install pVAC-Seq. Make sure you have `pip` installed.  `pip` is generally included in python distributions, but may need to be upgraded before use.  See the <a href="https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel">instructions</a> for installing or upgrading pip.
 
