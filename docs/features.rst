@@ -1,7 +1,7 @@
 Features
 ========
 
-**SNV and InDel support**
+**SNV and Indel support**
 
 pVAC-Seq offers epitope binding predictions for missense, inframe indel, and frameshift mutations.
 

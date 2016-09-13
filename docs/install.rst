@@ -25,7 +25,7 @@ You can check that ``pvacseq`` has been installed under the default environment 
 
 ``pip`` will fetch and install pVAC-Seq and its dependencies for you. After installing, you can run ``pvacseq`` directly from the Terminal/Command Prompt.
 
-If you have an an old version of pVAC-Seq installed you might want to consider upgrading to the latest version:
+If you have an old version of pVAC-Seq installed you might want to consider upgrading to the latest version:
 
 .. code-block:: none
 
