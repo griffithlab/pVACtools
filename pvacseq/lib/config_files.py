@@ -14,12 +14,17 @@ def additional_input_file_list_options():
         ('trna_indels_coverage_file', 'bam-readcount output file for tumor RNA BAM and indels'),
     ])
 
-def main(args_input = sys.argv[1:]):
+def define_parser():
     parser = argparse.ArgumentParser('pvacseq config_files')
-    parser.add_argument("config_file_type",
-                        choices=['additional_input_file_list'],
-                        help="The config file type to retrieve more information for",
-                        )
+    parser.add_argument(
+        "config_file_type",
+        choices=['additional_input_file_list'],
+        help="The config file type to retrieve more information for",
+    )
+    return parser
+
+def main(args_input = sys.argv[1:]):
+    parser = define_parser()
     args = parser.parse_args(args_input)
 
     if args.config_file_type == 'additional_input_file_list':

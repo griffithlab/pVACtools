@@ -31,44 +31,44 @@ def parse_additional_input_file_list(additional_input_file_list):
             additional_input_files[additional_input_file_list_option] = None
     return additional_input_files
 
-def main(args_input = sys.argv[1:]):
+def define_parser():
     parser = argparse.ArgumentParser("pvacseq run")
 
     parser.add_argument(
         "input_file",
-        help="Input VCF with VEP annotations (please provide complete path)"
+        help="A VEP-annotated single-sample VCF containing transcript, Wildtype protein sequence, and Downstream protein sequence information"
     )
     parser.add_argument(
         "sample_name",
-        help="Name of Sample; will be used as prefix for output files"
+        help="The name of the sample being processed. This will be used as a prefix for output files"
     )
     parser.add_argument(
         "allele", type=lambda s:[a for a in s.split(',')],
-        help="Allele name to predict epitope prediction. "
+        help="Name of the allele to use for epitope prediction. "
              + "Multiple alleles can be specified using a comma-separated list. "
-             + "For a list of available alleles, use: pvacseq valid_alleles",
+             + "For a list of available alleles, use: `pvacseq valid_alleles`",
     )
     parser.add_argument(
         "prediction_algorithms",
         choices=PredictionClass.prediction_methods(),
         nargs="+",
-        help="The epitope prediction algorithms to use",
+        help="The epitope prediction algorithms to use. Multiple prediction algorithms can be specified, separated by spaces",
     )
     parser.add_argument(
         "output_dir",
-        help="Output directory for writing all result files"
+        help="The directory for writing all result files"
     )
     parser.add_argument(
         "-e", "--epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
-        help="Length of subpeptides(epitopes) to predict. "
-             + "Multiple lengths can be specified using a comma-separated list. "
+        help="Length of subpeptides (neoepitopes) to predict. "
+             + "Multiple epitope lengths can be specified using a comma-separated list. "
              + "Typical epitope lengths vary between 8-11. " 
              + "Required for Class I prediction algorithms",
     )
     parser.add_argument(
         "-l", "--peptide-sequence-length", type=int,
         default=21,
-        help="length of the peptide sequences in the input FASTA file. Default: 21",
+        help="Length of the peptide sequence to use when creating the FASTA. Default: 21",
     )
     parser.add_argument(
         "-i", "--additional-input-file-list",
@@ -89,7 +89,7 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument(
         '-t', '--top-result-per-mutation',
         action='store_true',
-        help='Output top scoring candidate per allele-length per mutation. Default: False'
+        help='Output only the top scoring result for each allele-peptide length combination for each variant. Default: False'
     )
     parser.add_argument(
         '-m', '--top-score-metric',
@@ -110,7 +110,7 @@ def main(args_input = sys.argv[1:]):
         default=0,
         help="Minimum fold change between mutant binding score and wild-type score. "
              + "The default is 0, which filters no results, but 1 is often a sensible choice "
-             + "(requiring that binding is better to the MT than WT)",
+             + "(requiring that binding is better to the MT than WT). Default: 0",
     )
     parser.add_argument(
         '--normal-cov', type=int,
@@ -151,7 +151,7 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument(
         '--expn-val', type=int,
         default=1,
-        help="Gene Expression (FPKM) Cutoff. Default: 1",
+        help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered. Default: 1",
     )
     parser.add_argument(
         '--net-chop-threshold', type=float,
@@ -162,7 +162,7 @@ def main(args_input = sys.argv[1:]):
         "-s", "--fasta-size",type=int,
         default=200,
         help="Number of fasta entries per IEDB request. "
-             + "For some resource-intensive prediction algorithms like Pickpocket and NetMHC it might be helpful to reduce this number. "
+             + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
              + "Needs to be an even number.",
     )
     parser.add_argument(
@@ -174,9 +174,12 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument(
         "-k", "--keep-tmp-files",
         action='store_true',
-        help="Keep intermediate output files.",
+        help="Keep intermediate output files. This migt be useful for debugging purposes.",
     )
+    return parser
 
+def main(args_input = sys.argv[1:]):
+    parser = define_parser()
     args = parser.parse_args(args_input)
 
     PredictionClass.check_alleles_valid(args.allele)
