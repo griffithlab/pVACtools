@@ -78,7 +78,9 @@ def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq generate_fasta')
     parser.add_argument('input_file', type=argparse.FileType('r'), help='input list of variants',)
     parser.add_argument('peptide_sequence_length', type=int, help='length of the peptide sequence')
+    parser.add_argument('epitope_length', type=int, help='length of subpeptides(epitopes) to predict')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='output FASTA file')
+    parser.add_argument("-d", "--downstream-sequence-length", type=int, help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file.")
     args = parser.parse_args(args_input)
 
     peptide_sequence_length = args.peptide_sequence_length
@@ -112,11 +114,24 @@ def main(args_input = sys.argv[1:]):
 
         if variant_type == 'FS':
             wildtype_subsequence, mutant_subsequence = get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
-            mutant_subsequence += line['downstream_amino_acid_sequence']
+            downstream_sequence = line['downstream_amino_acid_sequence']
+
+            if args.downstream_sequence_length and len(downstream_sequence) > args.downstream_sequence_length:
+                downstream_sequence = downstream_sequence[0:args.downstream_sequence_length]
+            mutant_subsequence += downstream_sequence
         else:
             mutation_start_position, wildtype_subsequence = get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line)
             mutation_end_position = mutation_start_position + wildtype_amino_acid_length
             mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
+
+        if '*' in wildtype_subsequence or '*' in mutant_subsequence:
+            continue
+
+        if 'X' in wildtype_subsequence or 'X' in mutant_subsequence:
+            continue
+
+        if len(wildtype_subsequence) < args.epitope_length or len(mutant_subsequence) < args.epitope_length:
+            continue
 
         variant_id = line['index']
         for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, mutant_subsequence]):

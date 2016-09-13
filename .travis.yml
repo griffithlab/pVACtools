@@ -4,6 +4,7 @@ python:
 before_install:
   - pip install PyVCF
   - pip install requests
+  - pip install PyYAML
 install: true
 script:
   - python3 -m unittest discover -v

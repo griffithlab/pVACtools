@@ -29,6 +29,19 @@ class CallIEDBTests(unittest.TestCase):
         cls.executable_dir = os.path.join(base_dir, 'pvacseq', 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'call_iedb.py')
         cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'call_iedb')
+        cls.additional_setup()
+
+    @classmethod
+    def additional_setup(cls):
+        pass
+
+class CallIEDBCompileTests(CallIEDBTests):
+    def test_source_compiles(self):
+        self.assertTrue(py_compile.compile(self.executable))
+
+class CallIEDBClassITests(CallIEDBTests):
+    @classmethod
+    def additional_setup(cls):
         cls.input_file     = os.path.join(cls.test_data_dir, 'input.fasta')
         cls.allele         = 'HLA-A*02:01'
         cls.epitope_length = 9
@@ -37,10 +50,6 @@ class CallIEDBTests(unittest.TestCase):
             make_response(method, cls.test_data_dir) for method in cls.methods
         ))
         pvacseq.lib.call_iedb.requests.post = cls.request_mock
-
-
-    def test_source_compiles(self):
-        self.assertTrue(py_compile.compile(self.executable))
 
     def test_iedb_methods_generate_expected_files(self):
         #netmhcpan, netmhccons, and pickpocket are slow so we won't run them in the tests
@@ -52,7 +61,7 @@ class CallIEDBTests(unittest.TestCase):
                 call_iedb_output_file.name,
                 method,
                 self.allele,
-                str(self.epitope_length)
+                '-l', str(self.epitope_length)
             ])
             reader = open(self.input_file, mode='r')
             self.request_mock.assert_called_with('http://tools-api.iedb.org/tools_api/mhci/', data={
@@ -60,6 +69,37 @@ class CallIEDBTests(unittest.TestCase):
                 'method': method,
                 'allele': self.allele,
                 'length': self.epitope_length
+            })
+            reader.close()
+            expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
+            self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+
+class CallIEDBClassIITests(CallIEDBTests):
+    @classmethod
+    def additional_setup(cls):
+        cls.input_file     = os.path.join(cls.test_data_dir, 'input_31.fasta')
+        cls.allele         = 'H2-IAb'
+        cls.methods = ['nn_align']
+        cls.request_mock = unittest.mock.Mock(side_effect = (
+            make_response(method, cls.test_data_dir) for method in cls.methods
+        ))
+        pvacseq.lib.call_iedb.requests.post = cls.request_mock
+
+    def test_iedb_methods_generate_expected_files(self):
+        for method in self.methods:
+            call_iedb_output_file = tempfile.NamedTemporaryFile()
+
+            pvacseq.lib.call_iedb.main([
+                self.input_file,
+                call_iedb_output_file.name,
+                method,
+                self.allele,
+            ])
+            reader = open(self.input_file, mode='r')
+            self.request_mock.assert_called_with('http://tools-api.iedb.org/tools_api/mhcii/', data={
+                'sequence_text':reader.read(),
+                'method': method,
+                'allele': self.allele,
             })
             reader.close()
             expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)

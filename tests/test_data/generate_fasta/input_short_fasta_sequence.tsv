@@ -1,0 +1,2 @@
+chromosome_name	start	stop	reference	variant	gene_name	transcript_name	amino_acid_change	ensembl_gene_id	wildtype_amino_acid_sequence	downstream_amino_acid_sequence	variant_type	protein_position	transcript_fpkm	gene_fpkm	index
+2	158795373	158795373	N	NT	DAPL1	ENST00000309950	M/IX	ENSG00000163331	MANEVQDLLSPRKGGHPPAVKAGGMRISKKQEIGTLERHTKKTGFEKTSAIANVAKIQTLDALNDALEKLNYKFPATVHMAHQKPTPALEKVVPLKRIYIIQQPRKC	IGK	FS	1			DAPL1_ENST00000309950_1.FS.1
