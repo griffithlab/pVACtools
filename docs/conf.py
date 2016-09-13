@@ -33,7 +33,6 @@ sys.path.insert(0, os.path.abspath('../pvacseq'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
-    'sphinx.ext.githubpages',
     'sphinxarg.ext',
 ]
 
