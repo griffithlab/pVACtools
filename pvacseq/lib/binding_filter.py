@@ -24,9 +24,9 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('-m', '--top-score-metric',
                         choices=['lowest', 'median'],
                         default='median',
-                        help="The ic50 scoring metric to use when filtering epitopes by binding-threshold. " +
-                        "lowest: Best MT Score - lowest MT ic50 binding score of all chosen prediction methods. " +
-                        "median: Median MT Score All Methods - median MT ic50 binding score of all chosen prediction methods. " +
+                        help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. " +
+                        "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. " +
+                        "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. " +
                         "Default: median")
 
     args = parser.parse_args(args_input)
@@ -46,9 +46,10 @@ def main(args_input = sys.argv[1:]):
         name = entry['Gene Name']
         if args.top_score_metric == 'median':
             score = float(entry['Median MT Score'])
+            fold_change = sys.maxsize if entry['Median Fold Change'] == 'NA' else float(entry['Median Fold Change'])
         elif args.top_score_metric == 'lowest':
             score = float(entry['Best MT Score'])
-        fold_change = sys.maxsize if entry['Corresponding Fold Change'] == 'NA' else float(entry['Corresponding Fold Change'])
+            fold_change = sys.maxsize if entry['Corresponding Fold Change'] == 'NA' else float(entry['Corresponding Fold Change'])
 
         if score > args.binding_threshold or fold_change < args.minimum_fold_change:
             continue

@@ -95,9 +95,9 @@ def main(args_input = sys.argv[1:]):
         '-m', '--top-score-metric',
         choices=['lowest', 'median'],
         default='median',
-        help="The ic50 scoring metric to use when filtering epitopes. "
-             + "lowest: Best MT Score - lowest MT ic50 binding score of all chosen prediction methods. "
-             + "median: Median MT Score All Methods - median MT ic50 binding score of all chosen prediction methods. "
+        help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
+             + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
+             + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. "
              + "Default: median"
         )
     parser.add_argument(
