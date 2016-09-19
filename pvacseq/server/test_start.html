@@ -15,6 +15,12 @@
       Peptide Sequence Length: <input type="number" name="peptide_sequence_length" value="21"><br>
       Gene Expression File: <input type="file" name="gene_expn_file" accept=".fpkm_tracking"><br>
       Transcript Expression File: <input type="file" name="transcript_expn_file" accept=".fpkm_tracking"><br>
+      Normal SNVs Coverage File: <input type="file" name="normal_snvs_coverage_file"><br>
+      Normal Indels Coverage File: <input type="file" name="normal_indels_coverage_file"><br>
+      Tumor DNA SNVs Coverage File: <input type="file" name="tdna_snvs_coverage_file"><br>
+      Tumor DNA Indels Coverage File: <input type="file" name="tdna_indels_coverage_file"><br>
+      Tumor RNA SNVs Coverage File: <input type="file" name="trna_snvs_coverage_file"><br>
+      Tumor RNA Indels Coverage File: <input type="file" name="trna_indels_coverage_file"><br>
       NetChop Method: <select name="net_chop_method">
         <option value="" selected>Skip NetChop</option>
         <option value="cterm">C term 3.0</option>
@@ -30,7 +36,14 @@
       Binding Threshold: <input type="number" name="binding_threshold" value="500" step="5"><br>
       Minimum Fold Change: <input type="number" name="minimum_fold_change" value="0"><br>
       Expression Value: <input type="number" name="expn_val" value="1"><br>
+      Normal Coverage Cutoff: <input type="number" name="normal_cov" value="5"><br>
+      Tumor DNA Coverage Cutoff: <input type="number" name="tdna_cov" value="5"><br>
+      Tumor RNA Coverage Cutoff: <input type="number" name="trna_cov" value="5"><br>
+      Normal VAF Cutoff: <input type="number" name="normal_vaf" value="5"><br>
+      Tumor DNA VAF Cutoff: <input type="number" name="tdna_vaf" value="5"><br>
+      Tumor RNA VAF Cutoff: <input type="number" name="trna_vaf" value="5"><br>
       FASTA Size: <input type="number" name="fasta_size" value="200" step="2"><br>
+      Downstream Sequence Length: <input type="text" name="downstream_sequence_length" value="1000"><br>
       Keep Tmp Files: <input type="checkbox" name="keep_tmp_files"><br>
 
       <input type="submit">
