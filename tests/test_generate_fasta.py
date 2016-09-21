@@ -1,81 +1,89 @@
-import unittest
-import os
 import sys
+import os
+import unittest
 import tempfile
-from subprocess import call
 from filecmp import cmp
 import py_compile
-from pvacseq.lib import generate_fasta
+try:
+    from pvacseq import lib
+except ValueError:
+    import lib
+from lib.generate_fasta import *
 
 class GenerateFastaTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.python = sys.executable
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
         cls.executable_dir = os.path.join(base_dir, 'pvacseq', 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'generate_fasta.py')
         cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'generate_fasta')
-        cls.peptide_sequence_length = '21'
-        cls.epitope_length = '8'
+        cls.peptide_sequence_length = 21
+        cls.epitope_length = 8
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
     def test_input_file_with_peptide_sequence_length_17_generates_expected_file(self):
-        peptide_sequence_length        = '17'
+        peptide_sequence_length        = 17
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input.tsv')
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_peptide_sequence_length_17.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_peptide_sequence_length_17.key')
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
     def test_input_file_with_peptide_sequence_length_21_generates_expected_file(self):
-        peptide_sequence_length        = '21'
+        peptide_sequence_length        = 21
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input.tsv')
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_peptide_sequence_length_21.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_peptide_sequence_length_21.key')
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
     def test_input_file_with_peptide_sequence_length_31_generates_expected_file(self):
-        peptide_sequence_length        = '31'
+        peptide_sequence_length        = 31
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input.tsv')
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_peptide_sequence_length_31.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_peptide_sequence_length_31.key')
@@ -86,15 +94,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutation_at_relative_end_of_full_sequence.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_mutation_at_relative_end_of_full_sequence.key')
@@ -105,15 +115,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutation_at_relative_beginning_of_full_sequence.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_mutation_at_relative_beginning_of_full_sequence.key')
@@ -124,15 +136,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_short_wildtype_sequence.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_short_wildtype_sequence.key')
@@ -143,15 +157,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_multiple_transcripts.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_multiple_transcripts.key')
@@ -162,15 +178,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_multiple_transcripts_per_alt.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_multiple_transcripts_per_alt.key')
@@ -181,15 +199,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         self.assertEqual(os.stat(generate_fasta_output_file.name).st_size, 0)
         self.assertEqual(os.stat(generate_fasta_key_output_file.name).st_size, 0)
 
@@ -198,15 +218,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_replacement.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_replacement.key')
@@ -217,15 +239,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_replacement.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_replacement.key')
@@ -236,15 +260,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_insertion.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_insertion.key')
@@ -255,15 +281,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.key')
@@ -274,15 +302,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_range.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_range.key')
@@ -293,15 +323,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation.key')
@@ -312,16 +344,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-            '-d', '100',
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': 100,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation2.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation2.key')
@@ -332,15 +365,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_elongation.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_elongation.key')
@@ -351,15 +386,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_range.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_range.key')
@@ -370,35 +407,39 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_asterisk_sequence.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_asterisk_sequence.key')
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
     def test_input_file_with_sequence_containing_X(self):
-        peptide_sequence_length        = '31'
+        peptide_sequence_length        = 31
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_X_sequence.tsv')
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_X_sequence.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_X_sequence.key')
@@ -409,15 +450,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_short_fasta_sequence.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_short_fasta_sequence.key')
@@ -428,15 +471,17 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python, self.executable,
-            generate_fasta_input_file,
-            self.peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-            '-d', '20'
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': 20,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_downstream_sequence_length_limit.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_downstream_sequence_length_limit.key')
@@ -448,29 +493,59 @@ class GenerateFastaTests(unittest.TestCase):
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
         generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_fasta_input_file,
-            peptide_sequence_length,
-            self.epitope_length,
-            generate_fasta_output_file.name,
-            generate_fasta_key_output_file.name,
-        ], shell=False))
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
+        self.assertFalse(generate_fasta_object.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_dnp.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_dnp.key')
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
     def test_distance_from_start_works_as_expected(self):
+        generate_fasta_input_file      = tempfile.NamedTemporaryFile()
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file.name,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': 20,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
         sequence = 'KKLKILGMPFRNIRSILKMVN'
         position = 5
-        self.assertEqual(generate_fasta.distance_from_start(position, sequence), 5)
+        self.assertEqual(generate_fasta_object.distance_from_start(position, sequence), 5)
 
     def test_distance_from_end_works_as_expected(self):
+        generate_fasta_input_file      = tempfile.NamedTemporaryFile()
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file.name,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': 20,
+        }
+        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+
         sequence = 'KKLKILGMPFRNIRSILKMVN'
         position = 5
-        self.assertEqual(generate_fasta.distance_from_end(position, sequence), 15)
+        self.assertEqual(generate_fasta_object.distance_from_end(position, sequence), 15)
 
 if __name__ == '__main__':
     unittest.main()

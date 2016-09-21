@@ -14,6 +14,7 @@ try:
 except ValueError:
     import lib
 from lib.prediction_class import *
+from lib.generate_fasta import *
 import shutil
 import yaml
 import pkg_resources
@@ -363,16 +364,19 @@ class MHCIPipeline(Pipeline):
                 continue
             split_fasta_key_file_path = split_fasta_file_path + '.key'
             status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
-            generate_fasta_params = [
-                split_tsv_file_path,
-                str(self.peptide_sequence_length),
-                str(max(self.epitope_lengths)),
-                split_fasta_file_path,
-                split_fasta_key_file_path,
-            ]
+            generate_fasta_params = {
+                'input_file'             : split_tsv_file_path,
+                'peptide_sequence_length': self.peptide_sequence_length,
+                'epitope_length'         : max(self.epitope_lengths),
+                'output_file'            : split_fasta_file_path,
+                'output_key_file'        : split_fasta_key_file_path,
+            }
             if self.downstream_sequence_length:
-                generate_fasta_params.extend(['-d', self.downstream_sequence_length,])
-            lib.generate_fasta.main(generate_fasta_params)
+                generate_fasta_params['downstream_sequence_length'] = self.downstream_sequence_length
+            else:
+                generate_fasta_params['downstream_sequence_length'] = None
+            generate_fasta_object = GenerateFasta(**generate_fasta_params)
+            generate_fasta_object.execute()
         status_message("Completed")
 
     def call_iedb_and_parse_outputs(self, chunks):
@@ -468,16 +472,19 @@ class MHCIIPipeline(Pipeline):
                 continue
             split_fasta_key_file_path = split_fasta_file_path + '.key'
             status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
-            generate_fasta_params = [
-                split_tsv_file_path,
-                str(self.peptide_sequence_length),
-                '9', #This is the default core epitope length for IEDB class ii predictions
-                split_fasta_file_path,
-                split_fasta_key_file_path,
-            ]
+            generate_fasta_params = {
+                'input_file'             : split_tsv_file_path,
+                'peptide_sequence_length': self.peptide_sequence_length,
+                'epitope_length'         : 9,
+                'output_file'            : split_fasta_file_path,
+                'output_key_file'        : split_fasta_key_file_path,
+            }
             if self.downstream_sequence_length:
-                generate_fasta_params.extend(['-d', self.downstream_sequence_length,])
-            lib.generate_fasta.main(generate_fasta_params)
+                generate_fasta_params['downstream_sequence_length'] = self.downstream_sequence_length
+            else:
+                generate_fasta_params['downstream_sequence_length'] = None
+            generate_fasta_object = GenerateFasta(**generate_fasta_params)
+            generate_fasta_object.execute()
         status_message("Completed")
 
     def call_iedb_and_parse_outputs(self, chunks):

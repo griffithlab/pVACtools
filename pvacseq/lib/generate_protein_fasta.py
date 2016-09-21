@@ -8,6 +8,7 @@ import os
 import yaml
 from collections import OrderedDict
 import lib
+from lib.generate_fasta import *
 
 def define_parser():
     parser = argparse.ArgumentParser("pvacseq generate_protein_fasta")
@@ -47,16 +48,16 @@ def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     fasta_file = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file = os.path.join(temp_dir, 'tmp.fasta.key')
-    generate_fasta_params = [
-        tsv_file,
-        str(peptide_sequence_length),
-        "0",
-        fasta_file,
-        fasta_key_file,
-    ]
-    if downstream_sequence_length:
-        generate_fasta_params.extend(['-d', downstream_sequence_length,])
-    lib.generate_fasta.main(generate_fasta_params)
+    generate_fasta_params = {
+        'input_file'                : tsv_file,
+        'peptide_sequence_length'   : peptide_sequence_length,
+        'epitope_length'            : 0,
+        'output_file'               : fasta_file,
+        'output_key_file'           : fasta_key_file,
+        'downstream_sequence_length': downstream_sequence_length
+    }
+    generate_fasta_object = GenerateFasta(**generate_fasta_params)
+    generate_fasta_object.execute()
     print("Completed")
 
 def parse_files(output_file, temp_dir):

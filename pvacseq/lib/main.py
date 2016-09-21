@@ -209,7 +209,7 @@ def main(args_input = sys.argv[1:]):
     if args.downstream_sequence_length == 'full':
         downstream_sequence_length = None
     elif args.downstream_sequence_length.isdigit():
-        downstream_sequence_length = args.downstream_sequence_length
+        downstream_sequence_length = int(args.downstream_sequence_length)
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
