@@ -1,8 +1,4 @@
 import sys
-from pathlib import Path # if you haven't already done so
-root = str(Path(__file__).resolve().parents[1])
-sys.path.append(root)
-
 from abc import ABCMeta, abstractmethod
 import os
 import csv
@@ -14,6 +10,7 @@ try:
 except ValueError:
     import lib
 from lib.prediction_class import *
+from lib.convert_vcf import *
 from lib.generate_fasta import *
 import shutil
 import yaml
@@ -112,10 +109,10 @@ class Pipeline(metaclass=ABCMeta):
             status_message("TSV file already exists. Skipping.")
             return
 
-        convert_params = [
-            self.input_file,
-            self.tsv_file_path(),
-        ]
+        convert_params = {
+            'input_file' : self.input_file,
+            'output_file': self.tsv_file_path(),
+        }
         for attribute in [
             'gene_expn_file',
             'transcript_expn_file',
@@ -127,12 +124,13 @@ class Pipeline(metaclass=ABCMeta):
             'trna_indels_coverage_file'
         ]:
             if getattr(self, attribute):
-                param = '--' + attribute
-                param = param.replace('_', '-')
-                convert_params.extend([param, getattr(self, attribute)])
+                convert_params[attribute] = getattr(self, attribute)
+            else:
+                convert_params[attribute] = None
 
-        lib.convert_vcf.main(convert_params)
-        status_message("Completed")
+        convert_vcf_object = ConvertVcf(**convert_params)
+        convert_vcf_object.execute()
+        print("Completed")
 
     def tsv_entry_count(self):
         with open(self.tsv_file_path()) as tsv_file:
