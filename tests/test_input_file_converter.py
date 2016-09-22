@@ -4,11 +4,7 @@ import sys
 import tempfile
 from filecmp import cmp
 import py_compile
-try:
-    from pvacseq import lib
-except ValueError:
-    import lib
-from lib.input_file_converter import *
+from pvacseq.lib.input_file_converter import *
 
 class InputFileConverterTests(unittest.TestCase):
     @classmethod

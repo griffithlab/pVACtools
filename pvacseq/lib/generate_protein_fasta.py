@@ -7,7 +7,6 @@ import tempfile
 import os
 import yaml
 from collections import OrderedDict
-import lib
 from lib.fasta_generator import *
 from lib.input_file_converter import *
 

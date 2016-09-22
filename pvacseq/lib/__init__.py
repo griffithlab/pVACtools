@@ -13,7 +13,12 @@ __all__ = [
     "output_parser",
     "valid_alleles",
     'net_chop',
-    "netmhc_stab"
+    "netmhc_stab",
 ]
 
+import os
+import sys
+pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(pvac_dir)
+sys.path.append(os.path.join(pvac_dir, 'pvacseq'))
 from . import *

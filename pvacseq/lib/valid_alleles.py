@@ -1,8 +1,4 @@
 import sys
-from pathlib import Path # if you haven't already done so
-root = str(Path(__file__).resolve().parents[1])
-sys.path.append(root)
-
 import argparse
 from lib.prediction_class import *
 

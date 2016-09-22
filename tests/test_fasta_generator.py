@@ -4,11 +4,7 @@ import unittest
 import tempfile
 from filecmp import cmp
 import py_compile
-try:
-    from pvacseq import lib
-except ValueError:
-    import lib
-from lib.fasta_generator import *
+from pvacseq.lib.fasta_generator import *
 
 class FastaGeneratorTests(unittest.TestCase):
     @classmethod
@@ -501,9 +497,9 @@ class FastaGeneratorTests(unittest.TestCase):
             'output_key_file'           : generate_fasta_key_output_file.name,
             'downstream_sequence_length': None,
         }
-        generate_fasta_object = GenerateFasta(**generate_fasta_params)
+        generator = FastaGenerator(**generate_fasta_params)
 
-        self.assertFalse(generate_fasta_object.execute())
+        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_dnp.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_dnp.key')

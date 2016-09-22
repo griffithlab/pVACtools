@@ -1,15 +1,6 @@
 import sys
-from pathlib import Path # if you haven't already done so
-root = str(Path(__file__).resolve().parents[1])
-sys.path.append(root)
-
 import argparse
 import os
-
-try:
-    from .. import lib
-except ValueError:
-    import lib
 from lib.prediction_class import *
 from lib.pipeline import *
 from lib.config_files import additional_input_file_list_options

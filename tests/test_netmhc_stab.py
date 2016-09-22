@@ -6,8 +6,6 @@ import sys
 import tempfile
 import py_compile
 from filecmp import cmp
-pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(pvac_dir)
 import pvacseq.lib
 
 def make_response(data, files, path):
@@ -24,6 +22,7 @@ def make_response(data, files, path):
 class NetChopTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         cls.script_path = os.path.join(
             pvac_dir,
             'pvacseq',

@@ -1,4 +1,3 @@
-import argparse
 import vcf
 import csv
 import sys
