@@ -3,7 +3,7 @@ __all__ = [
     "call_iedb",
     "combine_parsed_outputs",
     "config_files",
-    "convert_vcf",
+    "input_file_converter",
     "coverage_filter",
     "download_example_data",
     "fasta_generator",

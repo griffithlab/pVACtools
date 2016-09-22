@@ -5,7 +5,7 @@ import sys
 import re
 from abc import ABCMeta
 
-class ConvertVcf(metaclass=ABCMeta):
+class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.input_file                  = kwargs['input_file']
         self.output_file                 = kwargs['output_file']

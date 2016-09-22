@@ -9,7 +9,7 @@ import yaml
 from collections import OrderedDict
 import lib
 from lib.fasta_generator import *
-from lib.convert_vcf import *
+from lib.input_file_converter import *
 
 def define_parser():
     parser = argparse.ArgumentParser("pvacseq generate_protein_fasta")
@@ -49,8 +49,8 @@ def convert_vcf(input_file, temp_dir):
         'trna_snvs_coverage_file'    : None,
         'trna_indels_coverage_file'  : None,
     }
-    convert_vcf_object = ConvertVcf(**convert_params)
-    convert_vcf_object.execute()
+    converter = InputFileConverter(**convert_params)
+    converter.execute()
     print("Completed")
 
 def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir):

@@ -10,7 +10,7 @@ try:
 except ValueError:
     import lib
 from lib.prediction_class import *
-from lib.convert_vcf import *
+from lib.input_file_converter import *
 from lib.fasta_generator import *
 from lib.output_parser import *
 import shutil
@@ -129,8 +129,8 @@ class Pipeline(metaclass=ABCMeta):
             else:
                 convert_params[attribute] = None
 
-        convert_vcf_object = ConvertVcf(**convert_params)
-        convert_vcf_object.execute()
+        converter = InputFileConverter(**convert_params)
+        converter.execute()
         print("Completed")
 
     def tsv_entry_count(self):
