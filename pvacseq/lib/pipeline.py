@@ -12,7 +12,7 @@ except ValueError:
 from lib.prediction_class import *
 from lib.convert_vcf import *
 from lib.generate_fasta import *
-from lib.parse_output import *
+from lib.output_parser import *
 import shutil
 import yaml
 import pkg_resources
@@ -450,8 +450,8 @@ class MHCIPipeline(Pipeline):
                             params['sample_name'] = self.sample_name
                         else:
                             params['sample_name'] = None
-                        parse_output_object = ParseOutput(**params)
-                        parse_output_object.execute()
+                        parser = OutputParser(**params)
+                        parser.execute()
                         status_message("Completed")
                         split_parsed_output_files.append(split_parsed_file_path)
         return split_parsed_output_files
@@ -554,8 +554,8 @@ class MHCIIPipeline(Pipeline):
                         params['sample_name'] = self.sample_name
                     else:
                         params['sample_name'] = None
-                    parse_output_object = ParseOutput(**params)
-                    parse_output_object.execute()
+                    parser = OutputParser(**params)
+                    parser.execute()
                     status_message("Completed")
                     split_parsed_output_files.append(split_parsed_file_path)
 

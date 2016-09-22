@@ -14,7 +14,7 @@ import yaml
 
 csv.field_size_limit(sys.maxsize)
 
-class ParseOutput(metaclass=ABCMeta):
+class OutputParser(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.input_iedb_files        = kwargs['input_iedb_files']
         self.input_tsv_file          = kwargs['input_tsv_file']

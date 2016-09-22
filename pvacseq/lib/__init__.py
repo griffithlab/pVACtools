@@ -10,7 +10,7 @@ __all__ = [
     "generate_protein_fasta",
     "install_vep_plugin",
     "main",
-    "parse_output",
+    "output_parser",
     "valid_alleles",
     'net_chop',
     "netmhc_stab"
