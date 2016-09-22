@@ -8,7 +8,7 @@ from abc import ABCMeta
 
 csv.field_size_limit(sys.maxsize)
 
-class GenerateFasta(metaclass=ABCMeta):
+class FastaGenerator(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.input_file                 = kwargs['input_file']
         self.peptide_sequence_length    = kwargs['peptide_sequence_length']

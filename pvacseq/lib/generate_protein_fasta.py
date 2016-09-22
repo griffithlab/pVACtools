@@ -8,7 +8,7 @@ import os
 import yaml
 from collections import OrderedDict
 import lib
-from lib.generate_fasta import *
+from lib.fasta_generator import *
 from lib.convert_vcf import *
 
 def define_parser():
@@ -66,8 +66,8 @@ def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir
         'output_key_file'           : fasta_key_file,
         'downstream_sequence_length': downstream_sequence_length
     }
-    generate_fasta_object = GenerateFasta(**generate_fasta_params)
-    generate_fasta_object.execute()
+    fasta_generator = FastaGenerator(**generate_fasta_params)
+    fasta_generator.execute()
     print("Completed")
 
 def parse_files(output_file, temp_dir):
