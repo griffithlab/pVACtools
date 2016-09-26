@@ -3,11 +3,44 @@ import csv
 import sys
 import re
 from abc import ABCMeta
+from collections import OrderedDict
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
-        self.input_file                  = kwargs['input_file']
-        self.output_file                 = kwargs['output_file']
+        self.input_file  = kwargs['input_file']
+        self.output_file = kwargs['output_file']
+
+    def output_headers(self):
+        return[
+            'chromosome_name',
+            'start',
+            'stop',
+            'reference',
+            'variant',
+            'gene_name',
+            'transcript_name',
+            'amino_acid_change',
+            'ensembl_gene_id',
+            'wildtype_amino_acid_sequence',
+            'downstream_amino_acid_sequence',
+            'fusion_amino_acid_sequence',
+            'variant_type',
+            'protein_position',
+            'fusion_position',
+            'transcript_expression',
+            'gene_expression',
+            'normal_depth',
+            'normal_vaf',
+            'tdna_depth',
+            'tdna_vaf',
+            'trna_depth',
+            'trna_vaf',
+            'index'
+        ]
+
+class VcfConverter(InputFileConverter):
+    def __init__(self, **kwargs):
+        InputFileConverter.__init__(self, **kwargs)
         self.gene_expn_file              = kwargs['gene_expn_file']
         self.transcript_expn_file        = kwargs['transcript_expn_file']
         self.normal_snvs_coverage_file   = kwargs['normal_snvs_coverage_file']
@@ -120,32 +153,6 @@ class InputFileConverter(metaclass=ABCMeta):
 
     def calculate_vaf(self, ref, var):
         return (var / (self.calculate_coverage(ref, var)+0.00001)) * 100
-
-    def output_headers(self):
-        return[
-            'chromosome_name',
-            'start',
-            'stop',
-            'reference',
-            'variant',
-            'gene_name',
-            'transcript_name',
-            'amino_acid_change',
-            'ensembl_gene_id',
-            'wildtype_amino_acid_sequence',
-            'downstream_amino_acid_sequence',
-            'variant_type',
-            'protein_position',
-            'transcript_expression',
-            'gene_expression',
-            'normal_depth',
-            'normal_vaf',
-            'tdna_depth',
-            'tdna_vaf',
-            'trna_depth',
-            'trna_vaf',
-            'index'
-        ]
 
     def execute(self):
         gene_expns = {}
@@ -297,6 +304,91 @@ class InputFileConverter(metaclass=ABCMeta):
                     output_row.update(coverage_for_entry)
 
                     tsv_writer.writerow(output_row)
+
+        writer.close()
+        reader.close()
+
+class IntegrateConverter(InputFileConverter):
+    def input_fieldnames(self):
+        return [
+            'chr 5p',
+            'start 5p',
+            'end 5p',
+            'chr 3p',
+            'start 3p',
+            'end 3p',
+            'name of fusion',
+            'tier of fusion',
+            'strand 5p',
+            'strand 3p',
+            'quantitation',
+            'is canonical boundary',
+            'can be in-frame',
+            'peptides',
+            'fusion positions',
+            'number of nucleotides in the break',
+            'transcripts',
+            'is canonical intron dinucleotide',
+        ]
+
+    def execute(self):
+        reader = open(self.input_file, 'r')
+        csv_reader = csv.DictReader(reader, delimiter='\t', fieldnames=self.input_fieldnames())
+        writer = open(self.output_file, 'w')
+        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers())
+        tsv_writer.writeheader()
+        transcript_count = {}
+        for entry in csv_reader:
+            output_row = {
+                'chromosome_name'            : entry['chr 5p'],
+                'start'                      : entry['start 5p'],
+                'stop'                       : entry['end 5p'],
+                'reference'                  : 'fusion',
+                'variant'                    : 'fusion',
+                'gene_name'                  : entry['name of fusion'],
+                'amino_acid_change'          : 'NA',
+                'ensembl_gene_id'            : 'NA',
+                'protein_position'           : 'NA',
+                'amino_acid_change'          : 'NA',
+                'transcript_expression'      : 'NA',
+                'gene_expression'            : 'NA',
+                'normal_depth'               : 'NA',
+                'normal_vaf'                 : 'NA',
+                'tdna_depth'                 : 'NA',
+                'tdna_vaf'                   : 'NA',
+                'trna_depth'                 : 'NA',
+                'trna_vaf'                   : 'NA',
+            }
+
+            count = 1
+            for (fusion_position, transcript_set, fusion_amino_acid_sequence) in zip(entry['fusion positions'].split(','), entry['transcripts'].split(','), entry['peptides'].split(',')):
+                (five_p_transcripts, three_p_inframe_transcripts, three_p_frameshift_transcripts) = transcript_set.split(';')
+                inframe_fusions    = []
+                frameshift_fusions = []
+                for five_p_transcript in five_p_transcripts.split('|'):
+                    if len(three_p_inframe_transcripts):
+                        for three_p_inframe_transcript in three_p_inframe_transcripts.split('|'):
+                            inframe_fusions.append("%s-%s" % (five_p_transcript, three_p_inframe_transcript))
+                    if len(three_p_frameshift_transcripts):
+                        for three_p_frameshift_transcript in three_p_frameshift_transcripts.split('|'):
+                            frameshift_fusions.append("%s-%s" % (five_p_transcript, three_p_frameshift_transcript))
+
+                if len(inframe_fusions):
+                    output_row['variant_type']               = 'inframe_fusion'
+                    output_row['fusion_position']            = fusion_position
+                    output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
+                    output_row['transcript_name']            = ';'.join(inframe_fusions)
+                    output_row['index']                      = '%s_%s.%s.%s' % (entry['name of fusion'], count, 'inframe_fusion', fusion_position)
+                    tsv_writer.writerow(output_row)
+                if len(frameshift_fusions):
+                    output_row['variant_type']               = 'frameshift_fusion'
+                    output_row['fusion_position']            = fusion_position
+                    output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
+                    output_row['transcript_name']            = ';'.join(frameshift_fusions)
+                    output_row['index']                      = '%s_%s.%s.%s' % (entry['name of fusion'], count, 'frameshift_fusion', fusion_position)
+                    tsv_writer.writerow(output_row)
+
+                count += 1
 
         writer.close()
         reader.close()

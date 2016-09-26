@@ -33,7 +33,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output.tsv')
@@ -57,7 +57,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_cufflinks.tsv')
@@ -81,7 +81,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_bam_readcount.tsv')
@@ -103,7 +103,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_multiple_transcripts.tsv')
@@ -125,7 +125,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_multiple_transcripts_per_alt.tsv')
@@ -147,7 +147,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutation_at_relative_beginning_of_full_sequence.tsv')
@@ -169,7 +169,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutation_at_relative_end_of_full_sequence.tsv')
@@ -191,7 +191,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_position_out_of_bounds.tsv')
@@ -213,7 +213,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_short_wildtype_sequence.tsv')
@@ -235,7 +235,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_elongation.tsv')
@@ -257,7 +257,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation.tsv')
@@ -279,7 +279,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_replacement.tsv')
@@ -301,7 +301,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_replacement.tsv')
@@ -323,7 +323,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_insertion.tsv')
@@ -345,7 +345,7 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.tsv')
@@ -367,12 +367,11 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_uncalled_genotype.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
-
 
     def test_input_vcf_with_hom_ref_genotype_generates_expected_tsv(self):
         convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_hom_ref_genotype.vcf')
@@ -390,8 +389,22 @@ class InputFileConverterTests(unittest.TestCase):
             'trna_snvs_coverage_file'    : None,
             'trna_indels_coverage_file'  : None,
         }
-        converter = InputFileConverter(**convert_vcf_params)
+        converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_hom_ref_genotype.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
+    def test_integrate_input_generates_expected_tsv(self):
+        convert_input_file  = os.path.join(self.test_data_dir, 'fusions_annotated.bedpe')
+        convert_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'                 : convert_input_file,
+            'output_file'                : convert_output_file.name,
+        }
+        converter = IntegrateConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_integrate.tsv')
+        self.assertTrue(cmp(convert_output_file.name, expected_output_file))

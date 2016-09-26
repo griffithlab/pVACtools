@@ -48,7 +48,7 @@ def convert_vcf(input_file, temp_dir):
         'trna_snvs_coverage_file'    : None,
         'trna_indels_coverage_file'  : None,
     }
-    converter = InputFileConverter(**convert_params)
+    converter = VcfConverter(**convert_params)
     converter.execute()
     print("Completed")
 
