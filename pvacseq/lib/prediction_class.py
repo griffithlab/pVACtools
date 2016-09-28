@@ -77,10 +77,7 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
 
     @classmethod
     def prediction_classes(cls):
-        prediction_classes = []
-        for prediction_class in cls.__subclasses__():
-            prediction_classes.append(prediction_class)
-        return prediction_classes
+        return cls.__subclasses__()
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
@@ -152,10 +149,7 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
 
     @classmethod
     def prediction_classes(cls):
-        prediction_classes = []
-        for prediction_class in cls.__subclasses__():
-            prediction_classes.append(prediction_class)
-        return prediction_classes
+        return cls.__subclasses__()
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
