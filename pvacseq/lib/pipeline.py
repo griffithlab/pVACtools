@@ -57,6 +57,10 @@ class Pipeline(metaclass=ABCMeta):
     def convert_vcf(self):
         print("Converting VCF to TSV")
         sys.stdout.flush()
+        if os.path.exists(self.tsv_file_path()):
+            print("TSV file already exists. Skipping.")
+            return
+
         convert_params = [
             self.input_file,
             self.tsv_file_path(),
