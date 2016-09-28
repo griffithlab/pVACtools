@@ -543,5 +543,29 @@ class FastaGeneratorTests(unittest.TestCase):
         position = 5
         self.assertEqual(generator.distance_from_end(position, sequence), 15)
 
+    def test_fusions_input_file_generates_expected_file(self):
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'fusions.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generator = FusionFastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_fusions.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(self.test_data_dir, 'output_fusions.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+
+
+#Test for fusion position at relative beginning or end of fusion sequence
+
 if __name__ == '__main__':
     unittest.main()

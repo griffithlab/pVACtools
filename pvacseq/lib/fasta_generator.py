@@ -161,3 +161,55 @@ class FastaGenerator(metaclass=ABCMeta):
         reader.close()
         writer.close()
         key_writer.close()
+
+class FusionFastaGenerator(FastaGenerator):
+    def execute(self):
+        peptide_sequence_length = self.peptide_sequence_length
+        reader                  = open(self.input_file, 'r')
+        tsvin                   = csv.DictReader(reader, delimiter='\t')
+        fasta_sequences         = OrderedDict()
+        for line in tsvin:
+            variant_type = line['variant_type']
+            position     = int(line['fusion_position'])
+            sequence     = line['fusion_amino_acid_sequence']
+            one_flanking_sequence_length = self.determine_flanking_sequence_length(len(sequence), peptide_sequence_length, line)
+            if position < one_flanking_sequence_length:
+                start_position = 0
+            else:
+                start_position = int(position - one_flanking_sequence_length)
+
+            if variant_type == 'inframe_fusion':
+                stop_position = int(position + one_flanking_sequence_length)
+                subsequence   = sequence[start_position:stop_position]
+            elif variant_type == 'frameshift_fusion':
+                subsequence = sequence[start_position:]
+                if subsequence.endswith('X'):
+                    subsequence = subsequence[:-1]
+
+            if '*' in subsequence:
+                continue
+
+            if 'X' in subsequence:
+                continue
+
+            if len(subsequence) < self.epitope_length:
+                continue
+
+            if subsequence in fasta_sequences:
+                fasta_sequences[subsequence].append(line['index'])
+            else:
+                fasta_sequences[subsequence] = [line['index']]
+
+        writer                  = open(self.output_file, 'w')
+        key_writer              = open(self.output_key_file, 'w')
+        count                   = 1
+        for (subsequence, keys) in fasta_sequences.items():
+            writer.writelines('>%s\n' % count)
+            writer.writelines('%s\n' % subsequence)
+            yaml.dump({count: keys}, key_writer, default_flow_style=False)
+            count += 1
+
+        reader.close()
+        writer.close()
+        key_writer.close()
+
