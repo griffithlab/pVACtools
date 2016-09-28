@@ -211,7 +211,7 @@ def main(args_input = sys.argv[1:]):
 
     class_i_alleles = []
     class_ii_alleles = []
-    for allele in args.allele:
+    for allele in set(args.allele):
         if allele in MHCI.all_valid_allele_names():
             class_i_alleles.append(allele)
         if allele in MHCII.all_valid_allele_names():
