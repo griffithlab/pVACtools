@@ -10,8 +10,7 @@ class PredictionClass(metaclass=ABCMeta):
     def prediction_classes(cls):
         prediction_classes = []
         for subclass in cls.__subclasses__():
-            for prediction_class in subclass.__subclasses__():
-                prediction_classes.append(prediction_class)
+            prediction_classes.extend(subclass.prediction_classes())
         return prediction_classes
 
     @classmethod
@@ -75,6 +74,13 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
     @property
     def url(self):
         return 'http://tools-api.iedb.org/tools_api/mhci/'
+
+    @classmethod
+    def prediction_classes(cls):
+        prediction_classes = []
+        for prediction_class in cls.__subclasses__():
+            prediction_classes.append(prediction_class)
+        return prediction_classes
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
@@ -143,6 +149,13 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
     def url(self):
         return 'http://tools-api.iedb.org/tools_api/mhcii/'
+
+    @classmethod
+    def prediction_classes(cls):
+        prediction_classes = []
+        for prediction_class in cls.__subclasses__():
+            prediction_classes.append(prediction_class)
+        return prediction_classes
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
