@@ -67,7 +67,7 @@ pVAC-Seq optionally accepts bam-readcount files as inputs to add coverage inform
 
 Follow the installation instructions on the `bam-readcount GitHub page <https://github.com/genome/bam-readcount#build-instructions>`_.
 
-bam-readcount uses a bam file as input, and the bam may either contain snvs or indels. Indel bams must be run in a special insertion-centric mode. Any mixed input bams must be split into snvs and indels, and bam-reacount must then be run on each file individually.
+bam-readcount uses a bam file and regions file as input, and the bam regions may either contain snvs or indels. Indel regions must be run in a special insertion-centric mode. Any mixed input regions must be split into snvs and indels, and bam-reacount must then be run on each file individually using the same bam.
 
 **Example bam-readcount command**
 
