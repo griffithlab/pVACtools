@@ -73,7 +73,7 @@ def define_parser():
     parser.add_argument(
         "-i", "--additional-input-file-list",
         help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
-             + "For an example of this yaml file run `pvacseq config additional_input_file_list`."
+             + "For an example of this yaml file run `pvacseq config_files additional_input_file_list`."
     )
     parser.add_argument(
         '--net-chop-method',
