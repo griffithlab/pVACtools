@@ -166,6 +166,12 @@ def define_parser():
              + "Needs to be an even number.",
     )
     parser.add_argument(
+        "-r", "--iedb-retries",type=int,
+        default=5,
+        help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100."
+             + "Default: 5"
+    )
+    parser.add_argument(
         "-d", "--downstream-sequence-length",
         default='1000',
         help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
@@ -189,6 +195,9 @@ def main(args_input = sys.argv[1:]):
 
     if args.fasta_size%2 != 0:
         sys.exit("The fasta size needs to be an even number")
+
+    if args.iedb_retries > 100:
+        sys.exit("The number of IEDB retries must be less than or equal to 100")
 
     if args.downstream_sequence_length == 'full':
         downstream_sequence_length = None
@@ -227,6 +236,7 @@ def main(args_input = sys.argv[1:]):
         'trna_vaf'                  : args.trna_vaf,
         'expn_val'                  : args.expn_val,
         'fasta_size'                : args.fasta_size,
+        'iedb_retries'              : args.iedb_retries,
         'downstream_sequence_length': downstream_sequence_length,
         'keep_tmp_files'            : args.keep_tmp_files,
     }

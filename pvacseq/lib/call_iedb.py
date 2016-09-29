@@ -22,6 +22,12 @@ def main(args_input = sys.argv[1:]):
                         help="Allele for which to make prediction")
     parser.add_argument('-l', '--epitope-length', type=int, choices=[8,9,10,11,12,13,14,15],
                         help="Length of subpeptides (epitopes) to predict")
+    parser.add_argument(
+        "-r", "--iedb-retries",type=int,
+        default=5,
+        help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100."
+             + "Default: 5"
+    )
     args = parser.parse_args(args_input)
 
     PredictionClass.check_alleles_valid([args.allele])
@@ -46,12 +52,12 @@ def main(args_input = sys.argv[1:]):
     url = prediction_class_object.url
 
     response = requests.post(url, data=data)
-    if response.status_code == 500:
-        #Retry once
+    retries = 0
+    while response.status_code == 500 and retries < args.iedb_retries:
         response = requests.post(url, data=data)
-        if response.status_code == 500:
-            #Retry a second time
-            response = requests.post(url, data=data)
+        print("Retries %s" % retries)
+        retries += 1
+
     if response.status_code != 200:
         sys.exit("Error posting request to IEDB.\n%s" % response.text)
 
