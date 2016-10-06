@@ -1,4 +1,4 @@
-allele	seq_num	start	end	length	peptide	ic50	rank
+allele	seq_num	start	end	length	peptide	ic50	percentile	rank
 HLA-G*01:09	32	2111	2119	9	KYQDVYVEL	323.04	0.2
 HLA-G*01:09	32	1542	1550	9	RMPGDRPTL	846.17	0.3
 HLA-G*01:09	32	1319	1327	9	SWHSGTPTA	864.68	0.3
