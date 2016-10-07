@@ -2,6 +2,8 @@ import argparse
 import csv
 import re
 import sys
+import yaml
+from collections import OrderedDict
 
 csv.field_size_limit(sys.maxsize)
 
@@ -80,12 +82,14 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('peptide_sequence_length', type=int, help='length of the peptide sequence')
     parser.add_argument('epitope_length', type=int, help='length of subpeptides(epitopes) to predict')
     parser.add_argument('output_file', type=argparse.FileType('w'), help='output FASTA file')
+    parser.add_argument('output_key_file', type=argparse.FileType('w'), help='output FASTA key file')
     parser.add_argument("-d", "--downstream-sequence-length", type=int, help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file.")
     args = parser.parse_args(args_input)
 
     peptide_sequence_length = args.peptide_sequence_length
     tsvin                   = csv.DictReader(args.input_file, delimiter='\t')
     pattern                 = re.compile('([A-Z])(\d+)([A-Z])')
+    fasta_sequences         = OrderedDict()
     for line in tsvin:
         variant_type = line['variant_type']
         full_wildtype_sequence = line['wildtype_amino_acid_sequence']
@@ -135,11 +139,22 @@ def main(args_input = sys.argv[1:]):
 
         variant_id = line['index']
         for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, mutant_subsequence]):
-            args.output_file.writelines('>%s.%s\n' % (designation, variant_id))
-            args.output_file.writelines('%s\n' % subsequence)
+            key = '%s.%s' % (designation, variant_id)
+            if subsequence in fasta_sequences:
+                fasta_sequences[subsequence].append(key)
+            else:
+                fasta_sequences[subsequence] = [key]
+
+    count = 1
+    for (subsequence, keys) in fasta_sequences.items():
+        args.output_file.writelines('>%s\n' % count)
+        args.output_file.writelines('%s\n' % subsequence)
+        yaml.dump({count: keys}, args.output_key_file, default_flow_style=False)
+        count += 1
 
     args.input_file.close()
     args.output_file.close()
+    args.output_key_file.close()
 
 if __name__ == '__main__':
     main()
