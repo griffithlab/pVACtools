@@ -11,20 +11,9 @@ import os
 from math import ceil
 from statistics import median
 from lib.prediction_class import *
+import yaml
 
 csv.field_size_limit(sys.maxsize)
-
-def protein_identifier_for_label(key_file):
-    tsv_reader = csv.reader(key_file, delimiter='\t')
-    pattern = re.compile('>')
-    key_hash = {}
-    for line in tsv_reader:
-        new_name      = line[0]
-        original_name = line[1]
-        original_name = pattern.sub('', original_name)
-        key_hash[new_name] = original_name
-
-    return key_hash
 
 def min_match_count(peptide_length):
     return ceil(peptide_length / 2)
@@ -87,14 +76,14 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
     return iedb_results
 
 def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
-    protein_identifier_from_label = protein_identifier_for_label(key_file)
+    protein_identifiers_from_label = yaml.load(key_file)
     iedb_results = {}
     wt_iedb_results = {}
     for input_iedb_file in input_iedb_files:
         iedb_tsv_reader = csv.DictReader(input_iedb_file, delimiter='\t')
         (sample, method, remainder) = os.path.basename(input_iedb_file.name).split(".", 2)
         for line in iedb_tsv_reader:
-            protein_label  = line['seq_num']
+            protein_label  = int(line['seq_num'])
             if 'core_peptide' in line:
                 position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
             else:
@@ -104,34 +93,35 @@ def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
             allele         = line['allele']
             peptide_length = len(epitope)
 
-            if protein_identifier_from_label[protein_label] is not None:
-                protein_identifier = protein_identifier_from_label[protein_label]
+            if protein_identifiers_from_label[protein_label] is not None:
+                protein_identifiers = protein_identifiers_from_label[protein_label]
 
-            (protein_type, tsv_index) = protein_identifier.split('.', 1)
-            if protein_type == 'MT':
-                tsv_entry = tsv_entries[tsv_index]
-                key = "%s|%s" % (tsv_index, position)
-                if key not in iedb_results:
-                    iedb_results[key] = {}
-                    iedb_results[key]['mt_scores']         = {}
-                    iedb_results[key]['mt_epitope_seq']    = epitope
-                    iedb_results[key]['gene_name']         = tsv_entry['gene_name']
-                    iedb_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
-                    iedb_results[key]['variant_type']      = tsv_entry['variant_type']
-                    iedb_results[key]['position']          = position
-                    iedb_results[key]['tsv_index']         = tsv_index
-                    iedb_results[key]['allele']            = allele
-                    iedb_results[key]['peptide_length']    = peptide_length
-                iedb_results[key]['mt_scores'][method] = float(score)
+            for protein_identifier in protein_identifiers:
+                (protein_type, tsv_index) = protein_identifier.split('.', 1)
+                if protein_type == 'MT':
+                    tsv_entry = tsv_entries[tsv_index]
+                    key = "%s|%s" % (tsv_index, position)
+                    if key not in iedb_results:
+                        iedb_results[key] = {}
+                        iedb_results[key]['mt_scores']         = {}
+                        iedb_results[key]['mt_epitope_seq']    = epitope
+                        iedb_results[key]['gene_name']         = tsv_entry['gene_name']
+                        iedb_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
+                        iedb_results[key]['variant_type']      = tsv_entry['variant_type']
+                        iedb_results[key]['position']          = position
+                        iedb_results[key]['tsv_index']         = tsv_index
+                        iedb_results[key]['allele']            = allele
+                        iedb_results[key]['peptide_length']    = peptide_length
+                    iedb_results[key]['mt_scores'][method] = float(score)
 
-            if protein_type == 'WT':
-                if tsv_index not in wt_iedb_results:
-                    wt_iedb_results[tsv_index] = {}
-                if position not in wt_iedb_results[tsv_index]:
-                    wt_iedb_results[tsv_index][position] = {}
-                    wt_iedb_results[tsv_index][position]['wt_scores']     = {}
-                wt_iedb_results[tsv_index][position]['wt_epitope_seq']    = epitope
-                wt_iedb_results[tsv_index][position]['wt_scores'][method] = float(score)
+                if protein_type == 'WT':
+                    if tsv_index not in wt_iedb_results:
+                        wt_iedb_results[tsv_index] = {}
+                    if position not in wt_iedb_results[tsv_index]:
+                        wt_iedb_results[tsv_index][position] = {}
+                        wt_iedb_results[tsv_index][position]['wt_scores']     = {}
+                    wt_iedb_results[tsv_index][position]['wt_epitope_seq']    = epitope
+                    wt_iedb_results[tsv_index][position]['wt_scores'][method] = float(score)
 
     return match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
 
