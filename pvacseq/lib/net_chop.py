@@ -6,11 +6,20 @@ import tempfile
 import re
 import os
 from time import sleep
-from lib.main import split_file
 import collections
 
 cycle = ['|', '/', '-', '\\']
 methods = ['cterm', '20s']
+
+def split_file(reader, lines=400):
+    from itertools import islice, chain
+    tmp = next(reader)
+    while tmp!="":
+        yield chain([tmp], islice(reader, lines-1))
+        try:
+            tmp = next(reader)
+        except StopIteration:
+            return
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq net_chop")

@@ -88,7 +88,6 @@ def main(args_input = sys.argv[1:]):
 
     peptide_sequence_length = args.peptide_sequence_length
     tsvin                   = csv.DictReader(args.input_file, delimiter='\t')
-    pattern                 = re.compile('([A-Z])(\d+)([A-Z])')
     fasta_sequences         = OrderedDict()
     for line in tsvin:
         variant_type = line['variant_type']
