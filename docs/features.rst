@@ -23,7 +23,7 @@ By using the IEDB RESTful web interface, pVAC-Seq leverages their extensive supp
 MHC Class I Prediction Algorithm  Version
 ================================= =======
 NetMHCpan                         2.8
-NetMHC                            3.4
+NetMHC                            4.0
 NetMHCcons                        1.1
 PickPocket                        1.1
 SMM
