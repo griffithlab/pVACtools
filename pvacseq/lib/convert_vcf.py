@@ -96,7 +96,7 @@ def resolve_consequence(consequence_string):
     elif 'inframe_deletion' in consequences:
         consequence = 'inframe_del'
     else:
-        consequence = consequence_string
+        consequence = None
     return consequence
 
 def calculate_coverage(ref, var):
@@ -212,7 +212,11 @@ def main(args_input = sys.argv[1:]):
                 coverage_for_entry[coverage_type + '_vaf'] = 'NA'
             if variant_type in coverage:
                 for coverage_type in coverage[variant_type]:
-                    if ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]:
+                    if (
+                        chromosome in coverage[variant_type][coverage_type]
+                        and str(bam_readcount_position) in coverage[variant_type][coverage_type][chromosome]
+                        and ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]
+                    ):
                         brct = parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base])
                         if ref_base in brct and var_base in brct:
                             coverage_for_entry[coverage_type + '_depth'] = calculate_coverage(int(brct[ref_base]), int(brct[var_base]))
@@ -227,7 +231,9 @@ def main(args_input = sys.argv[1:]):
                 else:
                     transcript_count[transcript_name] = 1
                 consequence = resolve_consequence(transcript['Consequence'])
-                if consequence == 'FS':
+                if consequence is None:
+                    continue
+                elif consequence == 'FS':
                     amino_acid_change_position = transcript['Protein_position']
                 else:
                     amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']

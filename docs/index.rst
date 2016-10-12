@@ -19,6 +19,13 @@ pVAC-Seq is a cancer immunotherapy pipeline for the identification of **p**\ ers
    additional_commands
    contact
 
+New in version |version|
+------------------------
+
+This version fixes compatibility issues with the new IEDB Analysis Resource v2.15 that was released on October 3rd 2016. Since pVAC-Seq uses the IEDB RESTful web interface, the new IEDB Analysis Resource version is being used natively. As a result, pVAC-Seq output for the NetMHC prediction algorithm is now NetMHC version 4.0. Some other changes in the output format from IEDB led to compatibility issues that are fixed in this new pVAC-Seq release.
+
+This release also fixes an error with bam-readcount input files that occurs when a variant does not have a bam readcount entry.
+
 Citation
 --------
 

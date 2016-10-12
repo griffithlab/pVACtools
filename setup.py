@@ -21,7 +21,7 @@ for dirpath, dirnames, filenames in os.walk("pvacseq/iedb_alleles"):
 
 setup(
     name="pvacseq",
-    version="4.0.0",
+    version="4.0.1",
     packages=["pvacseq", "pvacseq.lib"],
     entry_points={
         "console_scripts":[
