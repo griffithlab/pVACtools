@@ -1,4 +1,4 @@
-allele	seq_num	start	end	length	peptide	ic50	rank
+allele	seq_num	start	end	length	peptide	ic50	percentile	rank
 HLA-E*01:01	32	1542	1550	9	RMPGDRPTL	363.86	0.1
 HLA-E*01:01	32	1751	1759	9	RTPARTPDR	652.65	0.2
 HLA-E*01:01	32	1018	1026	9	SSPPRHPPS	759.40	0.2

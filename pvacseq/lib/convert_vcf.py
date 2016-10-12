@@ -96,7 +96,7 @@ def resolve_consequence(consequence_string):
     elif 'inframe_deletion' in consequences:
         consequence = 'inframe_del'
     else:
-        consequence = consequence_string
+        consequence = None
     return consequence
 
 def calculate_coverage(ref, var):
@@ -231,7 +231,9 @@ def main(args_input = sys.argv[1:]):
                 else:
                     transcript_count[transcript_name] = 1
                 consequence = resolve_consequence(transcript['Consequence'])
-                if consequence == 'FS':
+                if consequence is None:
+                    continue
+                elif consequence == 'FS':
                     amino_acid_change_position = transcript['Protein_position']
                 else:
                     amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
