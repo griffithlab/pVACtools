@@ -212,7 +212,11 @@ def main(args_input = sys.argv[1:]):
                 coverage_for_entry[coverage_type + '_vaf'] = 'NA'
             if variant_type in coverage:
                 for coverage_type in coverage[variant_type]:
-                    if ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]:
+                    if (
+                        chromosome in coverage[variant_type][coverage_type]
+                        and str(bam_readcount_position) in coverage[variant_type][coverage_type][chromosome]
+                        and ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]
+                    ):
                         brct = parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base])
                         if ref_base in brct and var_base in brct:
                             coverage_for_entry[coverage_type + '_depth'] = calculate_coverage(int(brct[ref_base]), int(brct[var_base]))
