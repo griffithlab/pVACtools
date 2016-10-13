@@ -201,7 +201,7 @@ def main(args_input = sys.argv[1:]):
 
     class_i_prediction_algorithms = []
     class_ii_prediction_algorithms = []
-    for prediction_algorithm in args.prediction_algorithms:
+    for prediction_algorithm in sorted(args.prediction_algorithms):
         prediction_class = globals()[prediction_algorithm]
         prediction_class_object = prediction_class()
         if isinstance(prediction_class_object, MHCI):
@@ -211,7 +211,7 @@ def main(args_input = sys.argv[1:]):
 
     class_i_alleles = []
     class_ii_alleles = []
-    for allele in set(args.allele):
+    for allele in sorted(set(args.allele)):
         if allele in MHCI.all_valid_allele_names():
             class_i_alleles.append(allele)
         if allele in MHCII.all_valid_allele_names():
