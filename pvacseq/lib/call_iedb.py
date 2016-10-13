@@ -8,6 +8,7 @@ import requests
 import re
 import os
 from lib.prediction_class import *
+import time
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq call_iedb')
@@ -54,6 +55,7 @@ def main(args_input = sys.argv[1:]):
     response = requests.post(url, data=data)
     retries = 0
     while response.status_code == 500 and retries < args.iedb_retries:
+        time.sleep(2 * retries)
         response = requests.post(url, data=data)
         print("IEDB: Retry %s of %s" % (retries, args.iedb_retries))
         retries += 1
