@@ -55,7 +55,7 @@ def main(args_input = sys.argv[1:]):
     retries = 0
     while response.status_code == 500 and retries < args.iedb_retries:
         response = requests.post(url, data=data)
-        print("Retries %s" % retries)
+        print("IEDB: Retry %s of %s" % (retries, args.iedb_retries))
         retries += 1
 
     if response.status_code != 200:
