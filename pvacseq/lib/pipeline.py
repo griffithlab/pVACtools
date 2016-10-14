@@ -131,7 +131,8 @@ class Pipeline(metaclass=ABCMeta):
                         split_tsv_writer.writeheader()
                         skip = 0
                 row_count += 1
-            split_tsv_file.close()
+            if skip == 0:
+                split_tsv_file.close()
         print("Completed")
         return chunks
 
