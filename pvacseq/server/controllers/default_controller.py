@@ -210,7 +210,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
           net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
           binding_threshold, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
-          expn_val, net_chop_threshold, fasta_size, downstream_sequence_length, keep_tmp_files):
+          expn_val, net_chop_threshold, fasta_size, iedb_retries, downstream_sequence_length, keep_tmp_files):
     """Stage input for a new pVAC-Seq run.  Generate a unique output directory and \
     save uploaded files to temporary locations (and give pVAC-Seq the filepaths). \
     Then forward the command to start()"""
@@ -285,7 +285,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
               binding_threshold, minimum_fold_change,
               normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
               expn_val, net_chop_threshold,
-              fasta_size, downstream_sequence_length, len(keep_tmp_files))
+              fasta_size, iedb_retries, downstream_sequence_length, len(keep_tmp_files))
 
 
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
@@ -294,7 +294,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
           binding_threshold, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
           expn_val, net_chop_threshold,
-          fasta_size, downstream_sequence_length, keep_tmp_files):
+          fasta_size, iedb_retries, downstream_sequence_length, keep_tmp_files):
     """Build the command for pVAC-Seq, then spawn a new process to run it"""
     command = [
         'pvacseq',
@@ -320,6 +320,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         '--trna-vaf', str(trna_vaf),
         '--expn-val', str(expn_val),
         '-s', str(fasta_size),
+        '-r', str(iedb_retries),
         '-d', str(downstream_sequence_length)
     ]
     if len(additional_input_file_list):

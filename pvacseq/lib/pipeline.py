@@ -44,6 +44,7 @@ class Pipeline(metaclass=ABCMeta):
         self.trna_vaf                    = kwargs['trna_vaf']
         self.expn_val                    = kwargs['expn_val']
         self.fasta_size                  = kwargs['fasta_size']
+        self.iedb_retries                = kwargs['iedb_retries']
         self.downstream_sequence_length  = kwargs['downstream_sequence_length']
         self.keep_tmp_files              = kwargs['keep_tmp_files']
         tmp_dir = os.path.join(self.output_dir, 'tmp')
@@ -362,6 +363,7 @@ class MHCIPipeline(Pipeline):
                             iedb_method,
                             a,
                             '-l', str(epl),
+                            '-r', str(self.iedb_retries),
                         ])
                         print("Completed")
                         split_iedb_output_files.append(split_iedb_out)
@@ -450,6 +452,7 @@ class MHCIIPipeline(Pipeline):
                         split_iedb_out,
                         iedb_method,
                         a,
+                        '-r', str(self.iedb_retries),
                     ])
                     print("Completed")
                     split_iedb_output_files.append(split_iedb_out)
