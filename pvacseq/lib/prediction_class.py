@@ -61,6 +61,11 @@ class PredictionClass(metaclass=ABCMeta):
 
     @property
     @abstractmethod
+    def needs_epitope_length(self):
+        pass
+
+    @property
+    @abstractmethod
     def iedb_prediction_method(self):
         pass
 
@@ -78,6 +83,10 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
     @property
     def url(self):
         return 'http://tools-api.iedb.org/tools_api/mhci/'
+
+    @property
+    def needs_epitope_length(self):
+        return True
 
     @classmethod
     def prediction_classes(cls):
@@ -160,6 +169,10 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
     def url(self):
         return 'http://tools-api.iedb.org/tools_api/mhcii/'
+
+    @property
+    def needs_epitope_length(self):
+        return False
 
     @classmethod
     def prediction_classes(cls):
