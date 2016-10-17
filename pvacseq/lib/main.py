@@ -71,6 +71,10 @@ def define_parser():
         help="Length of the peptide sequence to use when creating the FASTA. Default: 21",
     )
     parser.add_argument(
+        "--iedb-install-directory",
+        help="Directory that containst the local installation of IEDB MHC I and/or MHC II"
+    )
+    parser.add_argument(
         "-i", "--additional-input-file-list",
         help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
              + "For an example of this yaml file run `pvacseq config_files additional_input_file_list`."
@@ -254,6 +258,13 @@ def main(args_input = sys.argv[1:]):
         if args.epitope_length is None:
             sys.exit("Epitope length is required for class I binding predictions")
 
+        if args.iedb_install_directory:
+            iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
+            if not os.path.exists(iedb_mhc_i_executable):
+                sys.exit("IEDB MHC I executable path doesn't exist %s", iedb_mhc_i_executable)
+        else:
+            iedb_mhc_i_executable = None
+
         print("Executing MHC Class I predictions")
 
         output_dir = os.path.join(base_output_dir, 'MHC_Class_I')
@@ -262,6 +273,7 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments = shared_arguments.copy()
         class_i_arguments['alleles']                 = class_i_alleles
         class_i_arguments['peptide_sequence_length'] = args.peptide_sequence_length
+        class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
         class_i_arguments['epitope_lengths']         = args.epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
@@ -270,6 +282,13 @@ def main(args_input = sys.argv[1:]):
         pipeline.execute()
 
     if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+        if args.iedb_install_directory:
+            iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
+            if not os.path.exists(iedb_mhc_ii_executable):
+                sys.exit("IEDB MHC II executable path doesn't exist %s", iedb_mhc_ii_executable)
+        else:
+            iedb_mhc_ii_executable = None
+
         print("Executing MHC Class II predictions")
 
         output_dir = os.path.join(base_output_dir, 'MHC_Class_II')
@@ -278,6 +297,7 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments = shared_arguments.copy()
         class_ii_arguments['alleles']               = class_ii_alleles
         class_ii_arguments['prediction_algorithms'] = class_ii_prediction_algorithms
+        class_ii_arguments['iedb_executable']       = iedb_mhc_ii_executable
         class_ii_arguments['output_dir']            = output_dir
         class_ii_arguments['netmhc_stab']           = False
         pipeline = MHCIIPipeline(**class_ii_arguments)
