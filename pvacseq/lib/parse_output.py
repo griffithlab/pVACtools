@@ -49,28 +49,6 @@ def find_mutation_position_from_left(wt_epitope_seq, mt_epitope_seq):
             return i+1
     return 0
 
-def find_mutation_position_for_insertions(wt_epitope_seq, mt_epitope_seq):
-    while len(wt_epitope_seq) > 0:
-        wt_epitope_seq = wt_epitope_seq[1:]
-        mt_epitope_seq = mt_epitope_seq[:-1]
-        for i,(wt_aa,mt_aa) in enumerate(zip(wt_epitope_seq,mt_epitope_seq)):
-            if wt_aa != mt_aa:
-                mutation_position = i
-                break
-        if mutation_position != 0:
-            return mutation_position+1
-
-def find_mutation_position_for_deletions(wt_epitope_seq, mt_epitope_seq):
-    while len(wt_epitope_seq) > 0:
-        wt_epitope_seq = wt_epitope_seq[:-1]
-        mt_epitope_seq = mt_epitope_seq[1:]
-        for i,(wt_aa,mt_aa) in enumerate(zip(wt_epitope_seq,mt_epitope_seq)):
-            if wt_aa != mt_aa:
-                mutation_position = i
-                break
-        if mutation_position != 0:
-            return mutation_position+1
-
 def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
     for key in sorted(iedb_results.keys(), key = lambda x: int(x.split('|')[-1])):
         result = iedb_results[key]
@@ -148,7 +126,8 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
 
             #If the previous wt epitope was matched from the left use the wt epitope at the same position as the current mt eptiope as the baseline
             if iedb_results[previous_key]['match_direction'] == 'left':
-                best_match_count = determine_consecutive_matches_from_left(mt_epitope_seq, baseline_best_match_wt_epitope_seq)
+                mutation_position = find_mutation_position_from_left(baseline_best_match_wt_epitope_seq, mt_epitope_seq)
+                best_match_count  = determine_consecutive_matches_from_left(mt_epitope_seq, baseline_best_match_wt_epitope_seq)
                 #Check if the epitope from the right has more matching amino acids
                 iedb_results_for_wt_iedb_result_key = dict([(key,value) for key, value in iedb_results.items() if key.startswith(wt_iedb_result_key)])
                 if result['variant_type'] == 'inframe_ins':
@@ -166,15 +145,10 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
                     match_direction           = 'right'
                     best_match_position       = alternate_best_match_position
                     best_match_wt_result      = alternate_best_match_wt_result
-                    if result['variant_type'] == 'inframe_ins':
-                        mutation_position     = find_mutation_position_for_insertions(alternate_best_match_wt_epitope_seq, mt_epitope_seq)
-                    elif result['variant_type'] == 'inframe_del':
-                        mutation_position     = find_mutation_position_for_deletions(alternate_best_match_wt_epitope_seq, mt_epitope_seq)
                 else:
                     match_direction           = 'left'
                     best_match_position       = baseline_best_match_position
                     best_match_wt_result      = baseline_best_match_wt_result
-                    mutation_position         = find_mutation_position_from_left(baseline_best_match_wt_epitope_seq, mt_epitope_seq)
 
             #If the previous wt epitope was matched from the right use that position as the baseline
             elif iedb_results[previous_key]['match_direction'] == 'right':
