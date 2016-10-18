@@ -72,7 +72,7 @@ def define_parser():
     )
     parser.add_argument(
         "--iedb-install-directory",
-        help="Directory that containst the local installation of IEDB MHC I and/or MHC II"
+        help="Directory that contains the local installation of IEDB MHC I and/or MHC II"
     )
     parser.add_argument(
         "-i", "--additional-input-file-list",
