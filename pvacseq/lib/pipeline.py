@@ -286,9 +286,11 @@ class Pipeline(metaclass=ABCMeta):
             os.unlink(symlink)
 
 
-        status_message("\n")
-        status_message("Done: pvacseq has completed. File %s contains list of filtered putative neoantigens" % self.final_path())
-        status_message("We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information")
+        status_message(
+            "\n"
+            + "Done: pvacseq has completed. File %s contains list of filtered putative neoantigens" % self.final_path()
+            + "We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information"
+        )
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir)
 
