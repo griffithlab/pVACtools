@@ -53,6 +53,10 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
     for key in sorted(iedb_results.keys(), key = lambda x: int(x.split('|')[-1])):
         result = iedb_results[key]
         (wt_iedb_result_key, mt_position) = key.split('|', 1)
+        previous_mt_position = str(int(mt_position)-1)
+        previous_key = '|'.join([wt_iedb_result_key, previous_mt_position])
+        if previous_key in iedb_results:
+            previous_result = iedb_results[previous_key]
         wt_results = wt_iedb_results[wt_iedb_result_key]
         if result['variant_type'] == 'missense':
             result['wt_epitope_seq']    = wt_results[mt_position]['wt_epitope_seq']
@@ -62,10 +66,8 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
             if mt_position not in wt_results:
                 result['wt_epitope_seq']    = 'NA'
                 result['wt_scores']         = dict.fromkeys(result['mt_scores'].keys(), 'NA')
-                previous_mt_position = str(int(mt_position)-1)
-                previous_key = '|'.join([wt_iedb_result_key, str(int(mt_position)-1)])
-                if iedb_results[previous_key]['mutation_position'] > 0:
-                    result['mutation_position'] = iedb_results[previous_key]['mutation_position'] - 1
+                if previous_result['mutation_position'] > 0:
+                    result['mutation_position'] = previous_result['mutation_position'] - 1
                 else:
                     result['mutation_position'] = 0
                 continue
@@ -91,25 +93,21 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
                 if mutation_position > 1:
                     result['mutation_position'] = mutation_position
                 else:
-                    previous_mt_position = str(int(mt_position)-1)
-                    previous_key = '|'.join([wt_iedb_result_key, previous_mt_position])
-                    if iedb_results[previous_key]['mutation_position'] > 1:
+                    if previous_result['mutation_position'] > 1:
                         result['mutation_position'] = mutation_position
                     else:
                         result['mutation_position'] = 0
         elif result['variant_type'] == 'inframe_ins' or result['variant_type'] == 'inframe_del':
             mt_epitope_seq = result['mt_epitope_seq']
             baseline_best_match_position = mt_position
-            previous_mt_position = str(int(baseline_best_match_position)-1)
-            previous_key = '|'.join([wt_iedb_result_key, previous_mt_position])
             #The mt peptide is at the end of the sequence and has no matching wt peptide
             if baseline_best_match_position not in wt_results:
                 result['wt_epitope_seq']    = 'NA'
                 result['wt_scores']         = dict.fromkeys(result['mt_scores'].keys(), 'NA')
                 #we try to infer the mutation position and match direction from the previous mt peptide
-                result['match_direction']   = iedb_results[previous_key]['match_direction']
-                if iedb_results[previous_key]['mutation_position'] > 0:
-                    result['mutation_position'] = iedb_results[previous_key]['mutation_position'] - 1
+                result['match_direction']   = previous_result['match_direction']
+                if previous_result['mutation_position'] > 0:
+                    result['mutation_position'] = previous_result['mutation_position'] - 1
                 else:
                     result['mutation_position'] = 0
                 continue
@@ -125,7 +123,7 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
                 continue
 
             #If the previous wt epitope was matched from the left use the wt epitope at the same position as the current mt eptiope as the baseline
-            if iedb_results[previous_key]['match_direction'] == 'left':
+            if previous_result['match_direction'] == 'left':
                 mutation_position = find_mutation_position_from_left(baseline_best_match_wt_epitope_seq, mt_epitope_seq)
                 best_match_count  = determine_consecutive_matches_from_left(mt_epitope_seq, baseline_best_match_wt_epitope_seq)
                 #Check if the epitope from the right has more matching amino acids
@@ -151,13 +149,13 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
                     best_match_wt_result      = baseline_best_match_wt_result
 
             #If the previous wt epitope was matched from the right use that position as the baseline
-            elif iedb_results[previous_key]['match_direction'] == 'right':
-                best_match_position       = iedb_results[previous_key]['wt_epitope_position'] + 1
+            elif previous_result['match_direction'] == 'right':
+                best_match_position       = previous_result['wt_epitope_position'] + 1
                 best_match_wt_result      = wt_results[str(best_match_position)]
                 best_match_count          = determine_consecutive_matches_from_right(mt_epitope_seq, best_match_wt_result['wt_epitope_seq'])
                 match_direction           = 'right'
-                if iedb_results[previous_key]['mutation_position'] > 0:
-                    mutation_position     = iedb_results[previous_key]['mutation_position'] - 1
+                if previous_result['mutation_position'] > 0:
+                    mutation_position     = previous_result['mutation_position'] - 1
                 else:
                     mutation_position     = 0
             if best_match_count and best_match_count >= min_match_count(int(result['peptide_length'])):
