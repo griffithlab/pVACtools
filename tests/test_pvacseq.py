@@ -7,6 +7,7 @@ import tempfile
 import py_compile
 from subprocess import run, PIPE
 from filecmp import cmp
+import yaml
 pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
 import pvacseq.lib
@@ -144,6 +145,16 @@ class PVACTests(unittest.TestCase):
             "pvacseq.py"
             )
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+
+        additional_input_files = tempfile.NamedTemporaryFile('w')
+        additional_input_file_list = {
+            'gene_expn_file': os.path.join(self.test_data_directory, 'genes.fpkm_tracking'),
+            'transcript_expn_file': os.path.join(self.test_data_directory, 'isoforms.fpkm_tracking'),
+            'tdna_snvs_coverage_file': os.path.join(self.test_data_directory, 'snvs.bam_readcount'),
+            'tdna_indels_coverage_file': os.path.join(self.test_data_directory, 'indels.bam_readcount'),
+        }
+        yaml.dump(additional_input_file_list, additional_input_files, default_flow_style=False)
+
         pvacseq.lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
@@ -152,7 +163,7 @@ class PVACTests(unittest.TestCase):
             'PickPocket',
             output_dir.name,
             '-e', '9,10',
-            '-i', os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
+            '-i', additional_input_files.name,
             '--top-score-metric=lowest',
             '--keep-tmp-files',
             '--net-chop-method', 'cterm',
@@ -166,7 +177,7 @@ class PVACTests(unittest.TestCase):
             'H2-IAb',
             'NNalign',
             output_dir.name,
-            '-i', os.path.join(self.test_data_directory, "additional_input_file_list.yaml"),
+            '-i', additional_input_files.name,
             '--top-score-metric=lowest',
             '--keep-tmp-files',
             '-d', 'full',
