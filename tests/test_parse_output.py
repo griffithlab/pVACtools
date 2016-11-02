@@ -118,6 +118,24 @@ class ParseOutputTests(unittest.TestCase):
         expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_truncation.iedb.parsed.tsv")
         self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
 
+    def test_input_frameshift_variant_feature_truncation2_gets_parsed_correctly(self):
+        parse_output_input_iedb_file  = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation2.ann.HLA-E*01:01.9.tsv")
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation2.tsv")
+        parse_output_key_file  = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation2.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            parse_output_input_iedb_file,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
+        ], shell=False))
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_truncation2.iedb.parsed.tsv")
+        self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
+
     def test_input_inframe_deletion_aa_deletion_gets_parsed_correctly(self):
         parse_output_input_iedb_file  = os.path.join(self.test_data_dir, "input_inframe_deletion_aa_deletion.ann.HLA-A*29:02.9.tsv")
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_inframe_deletion_aa_deletion.tsv")

@@ -307,6 +307,26 @@ class GenerateFastaTests(unittest.TestCase):
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation.key')
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
+    def test_input_file_with_frameshift_variant_feature_truncation2_generates_expected_file(self):
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_frameshift_variant_feature_truncation2.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            generate_fasta_input_file,
+            self.peptide_sequence_length,
+            self.epitope_length,
+            generate_fasta_output_file.name,
+            generate_fasta_key_output_file.name,
+            '-d', '100',
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation2.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation2.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+
     def test_input_file_with_frameshift_variant_feature_elongation_generates_expected_file(self):
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_frameshift_variant_feature_elongation.tsv')
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
