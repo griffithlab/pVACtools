@@ -9,6 +9,7 @@ import re
 import os
 from lib.prediction_class import *
 import time
+from subprocess import run, PIPE
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq call_iedb')
@@ -29,6 +30,10 @@ def main(args_input = sys.argv[1:]):
         help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100."
              + "Default: 5"
     )
+    parser.add_argument(
+        "-e", "--iedb-executable-path",
+        help="The executable path of the local IEDB install"
+    )
     args = parser.parse_args(args_input)
 
     PredictionClass.check_alleles_valid([args.allele])
@@ -39,33 +44,40 @@ def main(args_input = sys.argv[1:]):
     if isinstance(prediction_class_object, MHCI):
         prediction_class.check_length_valid_for_allele(args.epitope_length, args.allele)
 
-    if args.epitope_length is None and isinstance(prediction_class_object, MHCI):
+    if args.epitope_length is None and prediction_class_object.needs_epitope_length:
         sys.exit("Epitope length is required for class I binding predictions")
 
-    data = {
-        'sequence_text': args.input_file.read(),
-        'method':        args.method,
-        'allele':        args.allele,
-    }
-    if args.epitope_length is not None:
-        data['length'] = args.epitope_length
+    if args.iedb_executable_path is not None:
+        response = run(prediction_class_object.iedb_executable_params(args), stdout=PIPE)
+        response_text = response.stdout
+        output_mode = 'wb'
+    else:
+        data = {
+            'sequence_text': args.input_file.read(),
+            'method':        args.method,
+            'allele':        args.allele,
+        }
+        if args.epitope_length is not None:
+            data['length'] = args.epitope_length
 
-    url = prediction_class_object.url
+        url = prediction_class_object.url
 
-    response = requests.post(url, data=data)
-    retries = 0
-    while response.status_code == 500 and retries < args.iedb_retries:
-        time.sleep(2 * retries)
         response = requests.post(url, data=data)
-        print("IEDB: Retry %s of %s" % (retries, args.iedb_retries))
-        retries += 1
+        retries = 0
+        while response.status_code == 500 and retries < args.iedb_retries:
+            time.sleep(2 * retries)
+            response = requests.post(url, data=data)
+            print("IEDB: Retry %s of %s" % (retries, args.iedb_retries))
+            retries += 1
 
-    if response.status_code != 200:
-        sys.exit("Error posting request to IEDB.\n%s" % response.text)
+        if response.status_code != 200:
+            sys.exit("Error posting request to IEDB.\n%s" % response.text)
+        response_text = response.text
+        output_mode = 'w'
 
     tmp_output_file = args.output_file + '.tmp'
-    tmp_output_filehandle = open(tmp_output_file, 'w')
-    tmp_output_filehandle.write(response.text)
+    tmp_output_filehandle = open(tmp_output_file, output_mode)
+    tmp_output_filehandle.write(response_text)
     tmp_output_filehandle.close()
     os.replace(tmp_output_file, args.output_file)
 

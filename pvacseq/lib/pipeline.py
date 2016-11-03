@@ -25,6 +25,7 @@ class Pipeline(metaclass=ABCMeta):
         self.alleles                     = kwargs['alleles']
         self.prediction_algorithms       = kwargs['prediction_algorithms']
         self.output_dir                  = kwargs['output_dir']
+        self.iedb_executable             = kwargs['iedb_executable']
         self.gene_expn_file              = kwargs['gene_expn_file']
         self.transcript_expn_file        = kwargs['transcript_expn_file']
         self.normal_snvs_coverage_file   = kwargs['normal_snvs_coverage_file']
@@ -360,6 +361,7 @@ class MHCIPipeline(Pipeline):
                             a,
                             '-l', str(epl),
                             '-r', str(self.iedb_retries),
+                            '-e', self.iedb_executable,
                         ])
                         status_message("Completed")
                         split_iedb_output_files.append(split_iedb_out)
@@ -447,6 +449,7 @@ class MHCIIPipeline(Pipeline):
                         iedb_method,
                         a,
                         '-r', str(self.iedb_retries),
+                        '-e', self.iedb_executable,
                     ])
                     status_message("Completed")
                     split_iedb_output_files.append(split_iedb_out)
