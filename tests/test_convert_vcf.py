@@ -172,7 +172,7 @@ class ConvertVcfTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_insertion.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
-    def test_input_vcf_with_inframe_deletion_amino_acid_deletion_expected_tsv(self):
+    def test_input_vcf_with_inframe_deletion_amino_acid_deletion_generates_expected_tsv(self):
         convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_inframe_deletion_aa_deletion.vcf')
         convert_vcf_output_file = tempfile.NamedTemporaryFile()
 
@@ -180,4 +180,25 @@ class ConvertVcfTests(unittest.TestCase):
             self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file.name
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
+    def test_input_vcf_with_uncalled_genotype_generates_expected_tsv(self):
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_uncalled_genotype.vcf')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file.name
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_uncalled_genotype.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
+
+    def test_input_vcf_with_hom_ref_genotype_generates_expected_tsv(self):
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_hom_ref_genotype.vcf')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python, self.executable, convert_vcf_input_file, convert_vcf_output_file.name
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_hom_ref_genotype.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
