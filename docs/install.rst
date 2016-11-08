@@ -30,3 +30,28 @@ If you have an old version of pVAC-Seq installed you might want to consider upgr
 .. code-block:: none
 
    pip install pvacseq --upgrade
+
+Installing IEDB binding prediction tools (optional)
+---------------------------------------------------
+
+You may create a local install of the IEDB binding prediction tools by first downloading the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ from the IEDB website. If using both the Class I and the Class II tools, they both need to be installed into the same parent directory.
+
+MHC Class I
+___________
+
+.. code-block:: none
+
+    tar -zxvf IEDB_MHC_I-2.15.tar.gz
+    cd mhc_i
+    ./configure
+
+Open ``method/netmhc_4_0_executable/__init__.py`` and delete the first line (``import pkg_resources``).
+
+MHC Class II
+____________
+
+.. code-block:: none
+
+    tar -zxvf IEDB_MHC_II-2.15.tar.gz
+    cd mhc_ii
+    ./configure.py
