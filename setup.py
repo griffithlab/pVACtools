@@ -11,30 +11,41 @@ if sys.version_info < (3,5):
 data_files = []
 for dirpath, dirnames, filenames in os.walk("pvacseq/example_data"):
     for filename in filenames:
-        data_files.append(os.path.join('..', dirpath, filename))
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            data_files.append(os.path.join('..', dirpath, filename))
 for dirpath, dirnames, filenames in os.walk("pvacseq/VEP_plugins"):
     for filename in filenames:
-        data_files.append(os.path.join('..', dirpath, filename))
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            data_files.append(os.path.join('..', dirpath, filename))
 for dirpath, dirnames, filenames in os.walk("pvacseq/iedb_alleles"):
     for filename in filenames:
-        data_files.append(os.path.join('..', dirpath, filename))
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            data_files.append(os.path.join('..', dirpath, filename))
+server_data = []
+for dirpath, dirnames, filenames in os.walk("pvacseq/server"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            server_data.append(os.path.join('..', dirpath, filename))
 
 setup(
     name="pvacseq",
-    version="4.0.1",
-    packages=["pvacseq", "pvacseq.lib"],
+    version="4.0.2",
+    packages=["pvacseq", "pvacseq.lib", "pvacseq.server"],
     entry_points={
         "console_scripts":[
-            "pvacseq = pvacseq.pvacseq:main"
+            "pvacseq = pvacseq.pvacseq:main",
+            "pvacseq-ui = pvacseq.server.app:main"
         ]
     },
     install_requires=[
         'PyVCF',
         'requests',
         'PyYAML',
+        'connexion'
     ],
     package_data={
-        'pvacseq' : data_files
+        'pvacseq' : data_files,
+        'pvacseq.server' : server_data,
     },
     classifiers=[
         'Development Status :: 4 - Beta',

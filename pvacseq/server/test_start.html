@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test pVAC-Seq web form</title>
+  </head>
+  <body>
+    <form action="/api/v1/staging" method="post" enctype="multipart/form-data">
+      Input VCF file: <input type="file" name="input" accept=".vcf" required><br>
+      Sample Name: <input type="text" name="samplename" required><br>
+      Alleles: <input type="text" name="alleles" pattern="(\S+,)*\S+" required><br>
+      Prediction Algorithms: <input type="text" name="prediction_algorithms" pattern="((SMM|NetMHCpan|PickPocket|NetMHCcons|NetMHC|SMMPMBEC|NetMHCIIpan|NNalign|SMMalign)+,)*(SMM|NetMHCpan|PickPocket|NetMHCcons|NetMHC|SMMPMBEC|NetMHCIIpan|NNalign|SMMalign)+" required><br>
+      <br><hr><br>
+      Epitope Lengths: <input type="text" name="epitope_lengths" pattern="(\d+,)*\d+" value="10"><br>
+      Peptide Sequence Length: <input type="number" name="peptide_sequence_length" value="21"><br>
+      Gene Expression File: <input type="file" name="gene_expn_file" accept=".fpkm_tracking"><br>
+      Transcript Expression File: <input type="file" name="transcript_expn_file" accept=".fpkm_tracking"><br>
+      Normal SNVs Coverage File: <input type="file" name="normal_snvs_coverage_file"><br>
+      Normal Indels Coverage File: <input type="file" name="normal_indels_coverage_file"><br>
+      Tumor DNA SNVs Coverage File: <input type="file" name="tdna_snvs_coverage_file"><br>
+      Tumor DNA Indels Coverage File: <input type="file" name="tdna_indels_coverage_file"><br>
+      Tumor RNA SNVs Coverage File: <input type="file" name="trna_snvs_coverage_file"><br>
+      Tumor RNA Indels Coverage File: <input type="file" name="trna_indels_coverage_file"><br>
+      NetChop Method: <select name="net_chop_method">
+        <option value="" selected>Skip NetChop</option>
+        <option value="cterm">C term 3.0</option>
+        <option value="20s">20S 3.0</option>
+      </select><br>
+      NetChop Prediction Threshold: <input type="number" name="net_chop_threshold" value="0.5" step="0.1"><br>
+      NetMHC Stabpan: <input type="checkbox" name="netmhc_stab"><br>
+      Top Result Per Mutation: <input type="checkbox" name="top_result_per_mutation"><br>
+      Top Score Metric: <select name="top_score_metric">
+        <option value="median" selected>Median Score</option>
+        <option value="lowest">Lowest Score</option>
+      </select><br>
+      Binding Threshold: <input type="number" name="binding_threshold" value="500" step="5"><br>
+      Minimum Fold Change: <input type="number" name="minimum_fold_change" value="0"><br>
+      Expression Value: <input type="number" name="expn_val" value="1"><br>
+      Normal Coverage Cutoff: <input type="number" name="normal_cov" value="5"><br>
+      Tumor DNA Coverage Cutoff: <input type="number" name="tdna_cov" value="5"><br>
+      Tumor RNA Coverage Cutoff: <input type="number" name="trna_cov" value="5"><br>
+      Normal VAF Cutoff: <input type="number" name="normal_vaf" value="5"><br>
+      Tumor DNA VAF Cutoff: <input type="number" name="tdna_vaf" value="5"><br>
+      Tumor RNA VAF Cutoff: <input type="number" name="trna_vaf" value="5"><br>
+      FASTA Size: <input type="number" name="fasta_size" value="200" step="2"><br>
+      IEDB Retries: <input type="number" name="iedb_retries" value="5"><br>
+      Downstream Sequence Length: <input type="text" name="downstream_sequence_length" value="1000"><br>
+      Keep Tmp Files: <input type="checkbox" name="keep_tmp_files"><br>
+
+      <input type="submit">
+    </form>
+  </body>
+</html>

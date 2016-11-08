@@ -9,9 +9,13 @@ pVAC-Seq offers epitope binding predictions for missense, inframe indel, and fra
 
 pVAC-Seq uses a single-sample VCF file as its input. This VCF file must be annotated with VEP. See the :ref:`prerequisites_label` for more information.
 
-**No local install of epitope prediction software**
+**No local install of epitope prediction software needed**
 
 pVAC-Seq utilizes the IEDB RESTful web interface. This means that none of the underlying prediction software, like NetMHC, needs to be installed locally.
+
+**Support for local installation of the IEDB Analysis Resources**
+
+pVAC-Seq provides the option of using a local installation of the IEDB MHC `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ binding prediction tools.
 
 **MHC Class I and Class II predictions**
 

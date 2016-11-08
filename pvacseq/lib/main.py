@@ -71,6 +71,10 @@ def define_parser():
         help="Length of the peptide sequence to use when creating the FASTA. Default: 21",
     )
     parser.add_argument(
+        "--iedb-install-directory",
+        help="Directory that contains the local installation of IEDB MHC I and/or MHC II"
+    )
+    parser.add_argument(
         "-i", "--additional-input-file-list",
         help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
              + "For an example of this yaml file run `pvacseq config_files additional_input_file_list`."
@@ -166,6 +170,12 @@ def define_parser():
              + "Needs to be an even number.",
     )
     parser.add_argument(
+        "-r", "--iedb-retries",type=int,
+        default=5,
+        help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100."
+             + "Default: 5"
+    )
+    parser.add_argument(
         "-d", "--downstream-sequence-length",
         default='1000',
         help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
@@ -190,6 +200,9 @@ def main(args_input = sys.argv[1:]):
     if args.fasta_size%2 != 0:
         sys.exit("The fasta size needs to be an even number")
 
+    if args.iedb_retries > 100:
+        sys.exit("The number of IEDB retries must be less than or equal to 100")
+
     if args.downstream_sequence_length == 'full':
         downstream_sequence_length = None
     elif args.downstream_sequence_length.isdigit():
@@ -201,7 +214,7 @@ def main(args_input = sys.argv[1:]):
 
     class_i_prediction_algorithms = []
     class_ii_prediction_algorithms = []
-    for prediction_algorithm in args.prediction_algorithms:
+    for prediction_algorithm in sorted(args.prediction_algorithms):
         prediction_class = globals()[prediction_algorithm]
         prediction_class_object = prediction_class()
         if isinstance(prediction_class_object, MHCI):
@@ -209,10 +222,17 @@ def main(args_input = sys.argv[1:]):
         elif isinstance(prediction_class_object, MHCII):
             class_ii_prediction_algorithms.append(prediction_algorithm)
 
+    class_i_alleles = []
+    class_ii_alleles = []
+    for allele in sorted(set(args.allele)):
+        if allele in MHCI.all_valid_allele_names():
+            class_i_alleles.append(allele)
+        if allele in MHCII.all_valid_allele_names():
+            class_ii_alleles.append(allele)
+
     shared_arguments = {
         'input_file'                : args.input_file,
         'sample_name'               : args.sample_name,
-        'alleles'                   : args.allele,
         'top_result_per_mutation'   : args.top_result_per_mutation,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
@@ -227,15 +247,23 @@ def main(args_input = sys.argv[1:]):
         'trna_vaf'                  : args.trna_vaf,
         'expn_val'                  : args.expn_val,
         'fasta_size'                : args.fasta_size,
+        'iedb_retries'              : args.iedb_retries,
         'downstream_sequence_length': downstream_sequence_length,
         'keep_tmp_files'            : args.keep_tmp_files,
     }
     additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
     shared_arguments.update(additional_input_files)
 
-    if len(class_i_prediction_algorithms) > 0:
+    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
         if args.epitope_length is None:
             sys.exit("Epitope length is required for class I binding predictions")
+
+        if args.iedb_install_directory:
+            iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
+            if not os.path.exists(iedb_mhc_i_executable):
+                sys.exit("IEDB MHC I executable path doesn't exist %s", iedb_mhc_i_executable)
+        else:
+            iedb_mhc_i_executable = None
 
         print("Executing MHC Class I predictions")
 
@@ -243,7 +271,9 @@ def main(args_input = sys.argv[1:]):
         os.makedirs(output_dir, exist_ok=True)
 
         class_i_arguments = shared_arguments.copy()
+        class_i_arguments['alleles']                 = class_i_alleles
         class_i_arguments['peptide_sequence_length'] = args.peptide_sequence_length
+        class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
         class_i_arguments['epitope_lengths']         = args.epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
@@ -251,14 +281,23 @@ def main(args_input = sys.argv[1:]):
         pipeline = MHCIPipeline(**class_i_arguments)
         pipeline.execute()
 
-    if len(class_ii_prediction_algorithms) > 0:
+    if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+        if args.iedb_install_directory:
+            iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
+            if not os.path.exists(iedb_mhc_ii_executable):
+                sys.exit("IEDB MHC II executable path doesn't exist %s", iedb_mhc_ii_executable)
+        else:
+            iedb_mhc_ii_executable = None
+
         print("Executing MHC Class II predictions")
 
         output_dir = os.path.join(base_output_dir, 'MHC_Class_II')
         os.makedirs(output_dir, exist_ok=True)
 
         class_ii_arguments = shared_arguments.copy()
+        class_ii_arguments['alleles']               = class_ii_alleles
         class_ii_arguments['prediction_algorithms'] = class_ii_prediction_algorithms
+        class_ii_arguments['iedb_executable']       = iedb_mhc_ii_executable
         class_ii_arguments['output_dir']            = output_dir
         class_ii_arguments['netmhc_stab']           = False
         pipeline = MHCIIPipeline(**class_ii_arguments)
