@@ -261,7 +261,7 @@ def main(args_input = sys.argv[1:]):
         if args.iedb_install_directory:
             iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
             if not os.path.exists(iedb_mhc_i_executable):
-                sys.exit("IEDB MHC I executable path doesn't exist %s", iedb_mhc_i_executable)
+                sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
         else:
             iedb_mhc_i_executable = None
 
@@ -285,7 +285,7 @@ def main(args_input = sys.argv[1:]):
         if args.iedb_install_directory:
             iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
             if not os.path.exists(iedb_mhc_ii_executable):
-                sys.exit("IEDB MHC II executable path doesn't exist %s", iedb_mhc_ii_executable)
+                sys.exit("IEDB MHC II executable path doesn't exist %s" % iedb_mhc_ii_executable)
         else:
             iedb_mhc_ii_executable = None
 
