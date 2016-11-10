@@ -7,6 +7,7 @@ __all__ = [
     "coverage_filter",
     "download_example_data",
     "generate_fasta",
+    "generate_protein_fasta",
     "install_vep_plugin",
     "main",
     "parse_output",

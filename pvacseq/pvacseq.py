@@ -35,6 +35,13 @@ def main():
     )
     coverage_filter_parser.set_defaults(func=lib.coverage_filter)
 
+    generate_protein_fasta_parser = subparsers.add_parser(
+        "generate_protein_fasta",
+        help="Generate a fasta file from a VCF with protein sequences of mutations and matching wildtypes",
+        add_help=False
+    )
+    generate_protein_fasta_parser.set_defaults(func=lib.generate_protein_fasta)
+
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
         help="Downloads example input and output files",
