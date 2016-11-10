@@ -17,6 +17,7 @@ pVAC-Seq is a cancer immunotherapy pipeline for the identification of **p**\ ers
    run
    filter_commands
    additional_commands
+   optional_downstream_analysis_tools
    contact
 
 New in version |version|
