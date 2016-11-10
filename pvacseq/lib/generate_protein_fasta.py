@@ -50,7 +50,7 @@ def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir
     generate_fasta_params = [
         tsv_file,
         str(peptide_sequence_length),
-        "15",
+        "0",
         fasta_file,
         fasta_key_file,
     ]
