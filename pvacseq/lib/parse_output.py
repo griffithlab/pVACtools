@@ -125,8 +125,8 @@ def match_wildtype_and_mutant_entry_for_inframe_indel(result, mt_position, wt_re
         result['match_direction']   = 'left'
         return
 
-    #If the previous WT epitope was matched "from the left" we start by comparing to the baseline match
-    if previous_result['match_direction'] == 'left':
+    #If there is no previous result or the previous WT epitope was matched "from the left" we start by comparing to the baseline match
+    if previous_result is None or previous_result['match_direction'] == 'left':
         mutation_position = find_mutation_position_from_left(baseline_best_match_wt_epitope_seq, mt_epitope_seq)
         best_match_count  = determine_consecutive_matches_from_left(mt_epitope_seq, baseline_best_match_wt_epitope_seq)
         #The alternate best match candidate "from the right" is inferred from the baseline best match position and the indel length
