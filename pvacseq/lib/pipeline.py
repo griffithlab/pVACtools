@@ -121,6 +121,8 @@ class Pipeline(metaclass=ABCMeta):
             for row in reader:
                 if skip == 0:
                     split_tsv_writer.writerow(row)
+                if row_count == total_row_count:
+                    break
                 if row_count % tsv_size == 0:
                     if skip == 0:
                         split_tsv_file.close()
