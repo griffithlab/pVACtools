@@ -292,7 +292,7 @@ class Pipeline(metaclass=ABCMeta):
 
         status_message(
             "\n"
-            + "Done: pvacseq has completed. File %s contains list of filtered putative neoantigens" % self.final_path()
+            + "Done: pvacseq has completed. File %s contains list of filtered putative neoantigens. " % self.final_path()
             + "We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information"
         )
         if self.keep_tmp_files is False:
