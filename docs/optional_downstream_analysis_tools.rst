@@ -1,3 +1,5 @@
+.. _optional_downstream_analysis_tools_label:
+
 Optional Downstream Analysis Tools
 ==================================
 

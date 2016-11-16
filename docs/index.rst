@@ -23,15 +23,12 @@ pVAC-Seq is a cancer immunotherapy pipeline for the identification of **p**\ ers
 New in version |version|
 ------------------------
 
-pVAC-Seq now supports local installs of IEDB MHC `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ binding prediction tools. This feature can be used by passing the directory that contains the local installations to the ``--iedb-install-directory`` parameter.
+We added an :ref:`optional downstream analysis tool<optional_downstream_analysis_tools_label>` to generate an annotated fasta file from a VCF with protein sequences of mutations and matching wildtypes. This tool can be run with the ``pvacseq generate_protein_fasta`` command.
 
-This version adds a new column ``Mutation Position`` to the report output. This column denotes the 1-based start position of the mutation in the ``MT Epitope Seq``. If the value is ``0`` the mutation start position is before the first position in the epitope.
+This release fixes a couple of errors that were introduced in the previous version which would occur during the processing of certain inframe indels.
 
-pVAC-Seq now allows the user to specify the number of retries after a request to the IEDB RESTful interface fails. The number of retries can be set by using the ``--iedb-retries`` parameter. Previously this number was hard-coded to 3. More retries might be necessary in order to get a successful response for complex queries (e.g., large number of variants, long frameshift downstream sequences, choice of compute-intensive prediction algorithms). This parameter should be used in conjunction with ``--fasta-size`` and ``--downstream-sequence-length`` for the highest likelihood of success of finishing a pVAC-Seq run.
-
-This release fixes an error that was introduced in the previous version which would occur when the user would try to rerun a process in the same output directory.
-
-This version also fixes a bug with how to handle variants that are no-call or homozygous-reference. These variants will now be skipped.
+This version also fixes an error that would occur if the number of variants to
+process was a multiple of the chosen ``--fasta-size``.
 
 Citation
 --------
