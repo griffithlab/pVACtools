@@ -115,6 +115,7 @@ class PVACTests(unittest.TestCase):
             "binding_filter",
             "coverage_filter",
             "run",
+            "generate_protein_fasta",
             "install_vep_plugin",
             "download_example_data",
             "valid_alleles",
