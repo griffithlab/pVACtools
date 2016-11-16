@@ -44,6 +44,10 @@ ___________
     tar -zxvf IEDB_MHC_I-2.15.tar.gz
     cd mhc_i
     ./configure
+    
+.. note::
+
+   Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.
 
 Open ``method/netmhc_4_0_executable/__init__.py`` and delete the first line (``import pkg_resources``).
 
@@ -55,3 +59,7 @@ ____________
     tar -zxvf IEDB_MHC_II-2.15.tar.gz
     cd mhc_ii
     ./configure.py
+    
+.. note::
+
+   Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.
