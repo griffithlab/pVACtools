@@ -43,7 +43,7 @@ def determine_consecutive_matches_from_right(mt_epitope_seq, wt_epitope_seq):
             break
     return consecutive_matches
 
-def find_mutation_position_from_left(wt_epitope_seq, mt_epitope_seq):
+def find_mutation_position(wt_epitope_seq, mt_epitope_seq):
     for i,(wt_aa,mt_aa) in enumerate(zip(wt_epitope_seq,mt_epitope_seq)):
         if wt_aa != mt_aa:
             return i+1
@@ -54,7 +54,7 @@ def match_wildtype_and_mutant_entry_for_missense(result, mt_position, wt_results
     match_position = mt_position
     result['wt_epitope_seq']    = wt_results[match_position]['wt_epitope_seq']
     result['wt_scores']         = wt_results[match_position]['wt_scores']
-    result['mutation_position'] = find_mutation_position_from_left(result['wt_epitope_seq'], result['mt_epitope_seq'])
+    result['mutation_position'] = find_mutation_position(result['wt_epitope_seq'], result['mt_epitope_seq'])
 
 def match_wildtype_and_mutant_entry_for_frameshift(result, mt_position, wt_results, previous_result):
     #The WT epitope at the same position is the match
@@ -91,18 +91,44 @@ def match_wildtype_and_mutant_entry_for_frameshift(result, mt_position, wt_resul
             #We don't include the matching WT epitope in the output
             result['wt_epitope_seq'] = 'NA'
             result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
-        mutation_position = find_mutation_position_from_left(wt_epitope_seq, mt_epitope_seq)
+        mutation_position = find_mutation_position(wt_epitope_seq, mt_epitope_seq)
         if mutation_position == 1 and int(previous_result['mutation_position']) <= 1:
             #The true mutation position is to the left of the current MT eptiope
             mutation_position = 0
         result['mutation_position'] = mutation_position
 
 def match_wildtype_and_mutant_entry_for_inframe_indel(result, mt_position, wt_results, previous_result, iedb_results_for_wt_iedb_result_key):
-    #The WT epitope at the same position is used as the baseline match
+    #If the previous WT epitope was matched "from the right" we can just use that position to infer the mutation position and match direction
+    if previous_result is not None and previous_result['match_direction'] == 'right':
+        best_match_position           = previous_result['wt_epitope_position'] + 1
+        result['wt_epitope_position'] = best_match_position
+        result['match_direction']     = 'right'
+        if previous_result['mutation_position'] > 0:
+            result['mutation_position'] = previous_result['mutation_position'] - 1
+        else:
+            result['mutation_position'] = 0
+
+        #We need to ensure that the matched WT eptiope has enough overlapping amino acids with the MT epitope
+        best_match_wt_result = wt_results[str(best_match_position)]
+        best_match_count     = determine_consecutive_matches_from_right(result['mt_epitope_seq'], best_match_wt_result['wt_epitope_seq'])
+        if best_match_count and best_match_count >= min_match_count(int(result['peptide_length'])):
+            #The minimum amino acid match count is met
+            result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
+            result['wt_scores']      = best_match_wt_result['wt_scores']
+        else:
+            #The minimum amino acid match count is not met
+            #Even though there is a matching WT epitope there are not enough overlapping amino acids
+            #We don't include the matching WT epitope in the output
+            result['wt_epitope_seq'] = 'NA'
+            result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+
+        return
+
+    #In all other cases the WT epitope at the same position is used as the baseline match
     baseline_best_match_position = mt_position
 
     #For an inframe insertion the MT sequence is longer than the WT sequence
-    #In this case not all MT epitopes have a baseline match
+    #In this case not all MT epitopes might have a baseline match
     if baseline_best_match_position not in wt_results:
         result['wt_epitope_seq'] = 'NA'
         result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
@@ -119,15 +145,14 @@ def match_wildtype_and_mutant_entry_for_inframe_indel(result, mt_position, wt_re
     baseline_best_match_wt_epitope_seq = baseline_best_match_wt_result['wt_epitope_seq']
     #The MT epitope does not overlap the indel mutation
     if baseline_best_match_wt_epitope_seq == mt_epitope_seq:
-        result['wt_epitope_seq']    = baseline_best_match_wt_result['wt_epitope_seq']
-        result['wt_scores']         = baseline_best_match_wt_result['wt_scores']
-        result['mutation_position'] = 'NA'
-        result['match_direction']   = 'left'
-        return
+        result['wt_epitope_seq']      = baseline_best_match_wt_result['wt_epitope_seq']
+        result['wt_scores']           = baseline_best_match_wt_result['wt_scores']
+        result['wt_epitope_position'] = int(baseline_best_match_position)
+        result['mutation_position']   = 'NA'
+        result['match_direction']     = 'left'
 
-    #If the previous WT epitope was matched "from the left" we start by comparing to the baseline match
-    if previous_result['match_direction'] == 'left':
-        mutation_position = find_mutation_position_from_left(baseline_best_match_wt_epitope_seq, mt_epitope_seq)
+    #If there is no previous result or the previous WT epitope was matched "from the left" we start by comparing to the baseline match
+    if previous_result is None or previous_result['match_direction'] == 'left':
         best_match_count  = determine_consecutive_matches_from_left(mt_epitope_seq, baseline_best_match_wt_epitope_seq)
         #The alternate best match candidate "from the right" is inferred from the baseline best match position and the indel length
         if result['variant_type'] == 'inframe_ins':
@@ -136,47 +161,41 @@ def match_wildtype_and_mutant_entry_for_inframe_indel(result, mt_position, wt_re
         elif result['variant_type'] == 'inframe_del':
             deletion_length                 = len(wt_results.keys()) - len(iedb_results_for_wt_iedb_result_key.keys())
             alternate_best_match_position   = int(baseline_best_match_position) + deletion_length
-        alternate_best_match_wt_result      = wt_results[str(alternate_best_match_position)]
-        alternate_best_match_wt_epitope_seq = alternate_best_match_wt_result['wt_epitope_seq']
-        consecutive_matches_from_right      = determine_consecutive_matches_from_right(mt_epitope_seq, alternate_best_match_wt_epitope_seq)
-        #We then check if the alternate best match epitope has more matching amino acids than the baseline best match epitope
-        #If it does, we pick it as the best match
-        if consecutive_matches_from_right > best_match_count:
-            best_match_count     = consecutive_matches_from_right
-            match_direction      = 'right'
-            best_match_position  = alternate_best_match_position
-            best_match_wt_result = alternate_best_match_wt_result
+        if alternate_best_match_position > 0:
+            alternate_best_match_wt_result      = wt_results[str(alternate_best_match_position)]
+            alternate_best_match_wt_epitope_seq = alternate_best_match_wt_result['wt_epitope_seq']
+            consecutive_matches_from_right      = determine_consecutive_matches_from_right(mt_epitope_seq, alternate_best_match_wt_epitope_seq)
+            #We then check if the alternate best match epitope has more matching amino acids than the baseline best match epitope
+            #If it does, we pick it as the best match
+            if consecutive_matches_from_right > best_match_count:
+                best_match_count     = consecutive_matches_from_right
+                match_direction      = 'right'
+                best_match_position  = alternate_best_match_position
+                best_match_wt_result = alternate_best_match_wt_result
+            else:
+                match_direction      = 'left'
+                best_match_position  = baseline_best_match_position
+                best_match_wt_result = baseline_best_match_wt_result
         else:
             match_direction      = 'left'
             best_match_position  = baseline_best_match_position
             best_match_wt_result = baseline_best_match_wt_result
 
-    #If the previous WT epitope was matched "from the right" we can just use that position to infer the mutation position and match direction
-    elif previous_result['match_direction'] == 'right':
-        best_match_position  = previous_result['wt_epitope_position'] + 1
-        best_match_wt_result = wt_results[str(best_match_position)]
-        best_match_count     = determine_consecutive_matches_from_right(mt_epitope_seq, best_match_wt_result['wt_epitope_seq'])
-        match_direction      = 'right'
-        if previous_result['mutation_position'] > 0:
-            mutation_position = previous_result['mutation_position'] - 1
+        #Now that we have found the matching WT epitope we still need to ensure that it has enough overlapping amino acids
+        if best_match_count and best_match_count >= min_match_count(int(result['peptide_length'])):
+            #The minimum amino acid match count is met
+            result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
+            result['wt_scores']      = best_match_wt_result['wt_scores']
         else:
-            mutation_position = 0
+            #The minimum amino acid match count is not met
+            #Even though there is a matching WT epitope there are not enough overlapping amino acids
+            #We don't include the matching WT epitope in the output
+            result['wt_epitope_seq'] = 'NA'
+            result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
 
-    #Now that we have found the matching WT epitope we still need to ensure that it has enough overlapping amino acids
-    if best_match_count and best_match_count >= min_match_count(int(result['peptide_length'])):
-        #The minimum amino acid match count is met
-        result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
-        result['wt_scores']      = best_match_wt_result['wt_scores']
-    else:
-        #The minimum amino acid match count is not met
-        #Even though there is a matching WT epitope there are not enough overlapping amino acids
-        #We don't include the matching WT epitope in the output
-        result['wt_epitope_seq'] = 'NA'
-        result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
-
-    result['match_direction']     = match_direction
-    result['mutation_position']   = mutation_position
-    result['wt_epitope_position'] = best_match_position
+        result['mutation_position']   = find_mutation_position(baseline_best_match_wt_epitope_seq, mt_epitope_seq)
+        result['match_direction']     = match_direction
+        result['wt_epitope_position'] = best_match_position
 
 def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
     for key in sorted(iedb_results.keys(), key = lambda x: int(x.split('|')[-1])):

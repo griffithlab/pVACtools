@@ -82,6 +82,42 @@ class ParseOutputTests(unittest.TestCase):
         expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.top.tsv")
         self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
 
+    def test_parse_output_runs_and_produces_expected_output_for_repetitive_deletion_at_beginning_of_sequence(self):
+        parse_output_input_iedb_file = os.path.join(self.test_data_dir, "pat27_4.ann.HLA-A*02:01.9.tsv")
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "pat27_4.tsv")
+        parse_output_key_file = os.path.join(self.test_data_dir, "pat27_4_18.fa.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            parse_output_input_iedb_file,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
+        ], shell=False))
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output_pat27_4_18.iedb.parsed.tsv")
+        self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
+
+    def test_parse_output_runs_and_produces_expected_output_for_repetitive_insertion_at_beginning_of_sequence(self):
+        parse_output_input_iedb_file = os.path.join(self.test_data_dir, "pat126.ann.HLA-A*01:01.9.tsv")
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "pat126.tsv")
+        parse_output_key_file = os.path.join(self.test_data_dir, "pat126_17.fa.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            parse_output_input_iedb_file,
+            parse_output_input_tsv_file,
+            parse_output_key_file,
+            parse_output_output_file.name,
+        ], shell=False))
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output_pat126_17.iedb.parsed.tsv")
+        self.assertTrue(cmp(parse_output_output_file.name, expected_output_file))
+
     def test_input_frameshift_variant_feature_elongation_gets_parsed_correctly(self):
         parse_output_input_iedb_file  = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_elongation.ann.HLA-A*29:02.9.tsv")
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_elongation.tsv")
