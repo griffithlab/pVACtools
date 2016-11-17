@@ -18,21 +18,20 @@ class InputFileConverter(metaclass=ABCMeta):
         self.trna_indels_coverage_file   = kwargs['trna_indels_coverage_file']
 
     def parse_bam_readcount_file(self, bam_readcount_file):
-        reader              = open(bam_readcount_file, 'r')
-        coverage_tsv_reader = csv.reader(reader, delimiter='\t')
-        coverage = {}
-        for row in coverage_tsv_reader:
-            chromosome     = row[0]
-            position       = row[1]
-            reference_base = row[2].upper()
-            depth          = row[3]
-            brct           = row[4:]
-            if chromosome not in coverage:
-                coverage[chromosome] = {}
-            if position not in coverage[chromosome]:
-                coverage[chromosome][position] = {}
-            coverage[chromosome][position][reference_base] = brct
-        reader.close()
+        with open(bam_readcount_file, 'r') as reader:
+            coverage_tsv_reader = csv.reader(reader, delimiter='\t')
+            coverage = {}
+            for row in coverage_tsv_reader:
+                chromosome     = row[0]
+                position       = row[1]
+                reference_base = row[2].upper()
+                depth          = row[3]
+                brct           = row[4:]
+                if chromosome not in coverage:
+                    coverage[chromosome] = {}
+                if position not in coverage[chromosome]:
+                    coverage[chromosome][position] = {}
+                coverage[chromosome][position][reference_base] = brct
         return coverage
 
     def parse_brct_field(self, brct_entry):
@@ -151,21 +150,19 @@ class InputFileConverter(metaclass=ABCMeta):
     def execute(self):
         gene_expns = {}
         if self.gene_expn_file is not None:
-            reader           = open(self.gene_expn_file, 'r')
-            genes_tsv_reader = csv.DictReader(reader, delimiter='\t')
-            for row in genes_tsv_reader:
-                if row['tracking_id'] not in gene_expns.keys():
-                    gene_expns[row['tracking_id']] = {}
-                gene_expns[row['tracking_id']][row['locus']] = row
-            reader.close()
+            with open(self.gene_expn_file, 'r') as reader:
+                genes_tsv_reader = csv.DictReader(reader, delimiter='\t')
+                for row in genes_tsv_reader:
+                    if row['tracking_id'] not in gene_expns.keys():
+                        gene_expns[row['tracking_id']] = {}
+                    gene_expns[row['tracking_id']][row['locus']] = row
 
         transcript_expns = {}
         if self.transcript_expn_file is not None:
-            reader              = open(self.transcript_expn_file, 'r')
-            isoforms_tsv_reader = csv.DictReader(reader, delimiter='\t')
-            for row in isoforms_tsv_reader:
-                transcript_expns[row['tracking_id']] = row
-            reader.close()
+            with open(self.transcript_expn_file, 'r') as reader:
+                isoforms_tsv_reader = csv.DictReader(reader, delimiter='\t')
+                for row in isoforms_tsv_reader:
+                    transcript_expns[row['tracking_id']] = row
 
         coverage = {}
         for variant_type in ['snvs', 'indels']:
@@ -179,11 +176,12 @@ class InputFileConverter(metaclass=ABCMeta):
 
         reader = open(self.input_file, 'r')
         vcf_reader = vcf.Reader(reader)
-        writer = open(self.output_file, 'w')
         if len(vcf_reader.samples) > 1:
             sys.exit('ERROR: VCF file contains more than one sample')
+        writer = open(self.output_file, 'w')
         tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
+
         csq_format = self.parse_csq_format(vcf_reader)
         transcript_count = {}
         for entry in vcf_reader:
