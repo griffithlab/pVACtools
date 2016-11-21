@@ -40,7 +40,7 @@ You may create a local install of the IEDB binding prediction tools by first dow
    
 .. note::
 
-   IEDB requires tcsh. You can install it by running ``sudo apt get install tcsh``.
+   IEDB requires tcsh. You can install it by running ``sudo apt-get install tcsh``.
 
 MHC Class I
 ___________
