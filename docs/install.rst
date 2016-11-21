@@ -68,4 +68,4 @@ ____________
    
 .. note::
 
-   IEDB requires tcsh. You can install it by running `sudo apt get install tcsh`.
+   IEDB requires tcsh. You can install it by running ``sudo apt get install tcsh``.
