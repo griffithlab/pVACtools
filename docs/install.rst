@@ -37,6 +37,10 @@ Installing IEDB binding prediction tools (optional)
 ---------------------------------------------------
 
 You may create a local install of the IEDB binding prediction tools by first downloading the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ from the IEDB website. If using both the Class I and the Class II tools, they both need to be installed into the same parent directory.
+   
+.. note::
+
+   IEDB requires tcsh. You can install it by running ``sudo apt get install tcsh``.
 
 MHC Class I
 ___________
@@ -65,7 +69,3 @@ ____________
 .. note::
 
    Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.
-   
-.. note::
-
-   IEDB requires tcsh. You can install it by running ``sudo apt get install tcsh``.
