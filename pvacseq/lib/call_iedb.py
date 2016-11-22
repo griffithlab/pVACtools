@@ -49,6 +49,8 @@ def main(args_input = sys.argv[1:]):
 
     if args.iedb_executable_path is not None:
         response = run(prediction_class_object.iedb_executable_params(args), stdout=PIPE)
+        if response.returncode == 2:
+            sys.exit("Call to local IEDB install failed:\n%s\nAborting." % ' '.join(prediction_class_object.iedb_executable_params(args)))
         response_text = response.stdout
         output_mode = 'wb'
     else:
