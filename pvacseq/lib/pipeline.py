@@ -447,7 +447,7 @@ class MHCIPipeline(Pipeline):
                             params['sample_name'] = self.sample_name
                         else:
                             params['sample_name'] = None
-                        parser = OutputParser(**params)
+                        parser = DefaultOutputParser(**params)
                         parser.execute()
                         status_message("Completed")
                         split_parsed_output_files.append(split_parsed_file_path)
@@ -548,7 +548,7 @@ class MHCIIPipeline(Pipeline):
                         params['sample_name'] = self.sample_name
                     else:
                         params['sample_name'] = None
-                    parser = OutputParser(**params)
+                    parser = DefaultOutputParser(**params)
                     parser.execute()
                     status_message("Completed")
                     split_parsed_output_files.append(split_parsed_file_path)
