@@ -57,6 +57,8 @@ ___________
 
 Open ``method/netmhc_4_0_executable/__init__.py`` and delete the first line (``import pkg_resources``).
 
+Open ``method/netMHCcons-1.1/bin/pseudofind`` and change the shebang line to ``#! /usr/bin/env python2.7``.
+
 MHC Class II
 ____________
 
