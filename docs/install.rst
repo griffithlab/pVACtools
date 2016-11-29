@@ -57,7 +57,12 @@ ___________
 
 Open ``method/netmhc_4_0_executable/__init__.py`` and delete the first line (``import pkg_resources``).
 
-Open ``method/netMHCcons-1.1/bin/pseudofind`` and change the shebang line to ``#! /usr/bin/env python2.7``.
+If you want to use the NerMHCcons prediction algorithm you will need to change the shebang line of certain files to explicitly use python2.7. The files in question are:
+
+* ``method/netMHCcons-1.1/bin/pseudofind``
+* ``method/netMHC-3.4/netMHC``
+
+In these files change the shebang line to ``#! /usr/bin/env python2.7``.
 
 MHC Class II
 ____________
