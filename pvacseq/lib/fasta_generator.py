@@ -185,6 +185,8 @@ class FusionFastaGenerator(FastaGenerator):
                 subsequence = sequence[start_position:]
                 if subsequence.endswith('X'):
                     subsequence = subsequence[:-1]
+            else:
+                continue
 
             if '*' in subsequence:
                 continue
