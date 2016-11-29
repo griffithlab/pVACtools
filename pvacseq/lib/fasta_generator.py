@@ -42,12 +42,12 @@ class FastaGenerator(metaclass=ABCMeta):
     def determine_flanking_sequence_length(self, full_wildtype_sequence_length, peptide_sequence_length, line):
         actual_peptide_sequence_length = self.determine_peptide_sequence_length(full_wildtype_sequence_length, peptide_sequence_length, line)
         if actual_peptide_sequence_length%2 == 0:
-            return (actual_peptide_sequence_length-2) / 2
+            return int((actual_peptide_sequence_length-2) / 2)
         else:
-            return (actual_peptide_sequence_length-1) / 2
+            return int((actual_peptide_sequence_length-1) / 2)
 
     def get_wildtype_subsequence(self, position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line):
-        one_flanking_sequence_length = int(self.determine_flanking_sequence_length(len(full_wildtype_sequence), peptide_sequence_length, line))
+        one_flanking_sequence_length = self.determine_flanking_sequence_length(len(full_wildtype_sequence), peptide_sequence_length, line)
         peptide_sequence_length = 2 * one_flanking_sequence_length + wildtype_amino_acid_length
 
         # We want to extract a subset from full_wildtype_sequence that is
@@ -78,9 +78,9 @@ class FastaGenerator(metaclass=ABCMeta):
         if position < one_flanking_sequence_length:
             start_position = 0
         else:
-            start_position = int(position - one_flanking_sequence_length)
-        wildtype_subsequence_stop_position = int(position + one_flanking_sequence_length)
-        mutation_subsequence_stop_position = int(position)
+            start_position = position - one_flanking_sequence_length
+        wildtype_subsequence_stop_position = position + one_flanking_sequence_length
+        mutation_subsequence_stop_position = position
         wildtype_subsequence = full_wildtype_sequence[start_position:wildtype_subsequence_stop_position]
         mutation_start_subsequence = full_wildtype_sequence[start_position:mutation_subsequence_stop_position]
         return wildtype_subsequence, mutation_start_subsequence
@@ -176,10 +176,10 @@ class FusionFastaGenerator(FastaGenerator):
             if position < one_flanking_sequence_length:
                 start_position = 0
             else:
-                start_position = int(position - one_flanking_sequence_length)
+                start_position = position - one_flanking_sequence_length
 
             if variant_type == 'inframe_fusion':
-                stop_position = int(position + one_flanking_sequence_length)
+                stop_position = position + one_flanking_sequence_length
                 subsequence   = sequence[start_position:stop_position]
             elif variant_type == 'frameshift_fusion':
                 subsequence = sequence[start_position:]
