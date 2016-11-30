@@ -87,7 +87,9 @@ def parse_csq_entries_for_allele(csq_entries, csq_format, csq_allele):
 
 def resolve_consequence(consequence_string):
     consequences = {consequence.lower() for consequence in consequence_string.split('&')}
-    if 'frameshift_variant' in consequences:
+    if 'start_lost' in consequences:
+        consequence = None
+    elif 'frameshift_variant' in consequences:
         consequence = 'FS'
     elif 'missense_variant' in consequences:
         consequence = 'missense'
