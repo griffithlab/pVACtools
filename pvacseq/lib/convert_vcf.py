@@ -87,7 +87,9 @@ def parse_csq_entries_for_allele(csq_entries, csq_format, csq_allele):
 
 def resolve_consequence(consequence_string):
     consequences = {consequence.lower() for consequence in consequence_string.split('&')}
-    if 'frameshift_variant' in consequences:
+    if 'start_lost' in consequences:
+        consequence = None
+    elif 'frameshift_variant' in consequences:
         consequence = 'FS'
     elif 'missense_variant' in consequences:
         consequence = 'missense'
@@ -186,10 +188,11 @@ def main(args_input = sys.argv[1:]):
         reference  = entry.REF
         alts       = entry.ALT
 
-        genotype = entry.genotype(vcf_reader.samples[0])
-        if genotype.gt_type is None or genotype.gt_type == 0:
-            #The genotype is uncalled or hom_ref
-            continue
+        if len(vcf_reader.samples) == 1:
+            genotype = entry.genotype(vcf_reader.samples[0])
+            if genotype.gt_type is None or genotype.gt_type == 0:
+                #The genotype is uncalled or hom_ref
+                continue
 
         alleles_dict = resolve_alleles(entry)
         for alt in alts:
