@@ -23,12 +23,7 @@ pVAC-Seq is a cancer immunotherapy pipeline for the identification of **p**\ ers
 New in version |version|
 ------------------------
 
-We added an :ref:`optional downstream analysis tool<optional_downstream_analysis_tools_label>` to generate an annotated fasta file from a VCF with protein sequences of mutations and matching wildtypes. This tool can be run with the ``pvacseq generate_protein_fasta`` command.
-
-This release fixes a couple of errors that were introduced in the previous version which would occur during the processing of certain inframe indels.
-
-This version also fixes an error that would occur if the number of variants to
-process was a multiple of the chosen ``--fasta-size``.
+This release fixes a couple of minor bugs. Firstly, the pipeline will now skip variants that result in the loss of a start codon. Secondly, this release fixes a bug that would result in an error when the input VCF doesn't contain any sample genotype information. VCFs with no samples will now be fully processed through the pipeline.
 
 Citation
 --------
