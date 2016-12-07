@@ -331,6 +331,13 @@ class IntegrateConverter(InputFileConverter):
             'is canonical intron dinucleotide',
         ]
 
+    def fusions_for_three_p_transcripts(self, five_p_transcript, three_p_transcripts):
+        fusions = []
+        if len(three_p_transcripts):
+            for three_p_transcript in three_p_transcripts.split('|'):
+                fusions.append("%s-%s"% (five_p_transcript, three_p_transcript))
+        return fusions
+
     def execute(self):
         reader = open(self.input_file, 'r')
         csv_reader = csv.DictReader(reader, delimiter='\t', fieldnames=self.input_fieldnames())
@@ -366,12 +373,8 @@ class IntegrateConverter(InputFileConverter):
                 inframe_fusions    = []
                 frameshift_fusions = []
                 for five_p_transcript in five_p_transcripts.split('|'):
-                    if len(three_p_inframe_transcripts):
-                        for three_p_inframe_transcript in three_p_inframe_transcripts.split('|'):
-                            inframe_fusions.append("%s-%s" % (five_p_transcript, three_p_inframe_transcript))
-                    if len(three_p_frameshift_transcripts):
-                        for three_p_frameshift_transcript in three_p_frameshift_transcripts.split('|'):
-                            frameshift_fusions.append("%s-%s" % (five_p_transcript, three_p_frameshift_transcript))
+                    inframe_fusions.extend(self.fusions_for_three_p_transcripts(five_p_transcript, three_p_inframe_transcripts))
+                    frameshift_fusions.extend(self.fusions_for_three_p_transcripts(five_p_transcript, three_p_frameshift_transcripts))
 
                 if len(inframe_fusions):
                     output_row['variant_type']               = 'inframe_fusion'
