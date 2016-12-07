@@ -201,8 +201,8 @@ class PVACTests(unittest.TestCase):
         for file_name in (
             'Test_21.fa.split_1-48',
             'Test_21.fa.split_1-48.key',
-            'Test.HLA-E*01:01.9.parsed.tsv_1-48',
-            'Test.HLA-E*01:01.10.parsed.tsv_1-48',
+            'Test.HLA-G*01:09.9.parsed.tsv_1-48',
+            'Test.HLA-G*01:09.10.parsed.tsv_1-48',
             'Test.HLA-E*01:01.9.parsed.tsv_1-48',
             'Test.HLA-E*01:01.10.parsed.tsv_1-48',
         ):
