@@ -59,12 +59,13 @@ def match_wildtype_and_mutant_entry_for_missense(result, mt_position, wt_results
 def match_wildtype_and_mutant_entry_for_frameshift(result, mt_position, wt_results, previous_result):
     #The WT epitope at the same position is the match
     match_position = mt_position
-
     #Since the MT sequence is longer than the WT sequence, not all MT epitopes have a match
     if match_position not in wt_results:
         result['wt_epitope_seq'] = 'NA'
         result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
-        if previous_result['mutation_position'] > 0:
+        if previous_result['mutation_position'] == 'NA':
+            result['mutation_position'] = 'NA'
+        elif previous_result['mutation_position'] > 0:
             result['mutation_position'] = previous_result['mutation_position'] - 1
         else:
             result['mutation_position'] = 0
