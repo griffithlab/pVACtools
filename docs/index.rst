@@ -23,7 +23,7 @@ pVAC-Seq is a cancer immunotherapy pipeline for the identification of **p**\ ers
 New in version |version|
 ------------------------
 
-This release fixes a couple of minor bugs. Firstly, the pipeline will now skip variants that result in the loss of a start codon. Secondly, this release fixes a bug that would result in an error when the input VCF doesn't contain any sample genotype information. VCFs with no samples will now be fully processed through the pipeline.
+This release fixes a couple of bugs related to the processing of frameshift variants.
 
 Citation
 --------
