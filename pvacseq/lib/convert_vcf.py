@@ -242,7 +242,10 @@ def main(args_input = sys.argv[1:]):
                 if consequence is None:
                     continue
                 elif consequence == 'FS':
-                    amino_acid_change_position = transcript['Protein_position']
+                    if transcript['DownstreamProtein'] == '':
+                        continue
+                    else:
+                        amino_acid_change_position = transcript['Protein_position']
                 else:
                     amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
                 gene_name = transcript['SYMBOL']
