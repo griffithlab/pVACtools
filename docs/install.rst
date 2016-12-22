@@ -45,17 +45,33 @@ You may create a local install of the IEDB binding prediction tools by first dow
 MHC Class I
 ___________
 
+Download the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and unpack them.
+
 .. code-block:: none
 
-    tar -zxvf IEDB_MHC_I-2.15.tar.gz
-    cd mhc_i
-    ./configure
+   tar -zxvf IEDB_MHC_I-2.15.2.tar.gz
+   cd mhc_i
+   ./configure
     
 .. note::
 
    Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.
 
-Open ``method/netmhc_4_0_executable/__init__.py`` and delete the first line (``import pkg_resources``).
+Open ``method/netmhc_4_0_executable/__init__.py`` and delete/comment out the first line (``import pkg_resources``). Also delete/comment out the same line of code from ``method/netmhcpan_3_0_executable/__init__.py`` on line 7.
+
+Open ``src/util.py`` and delete/comment out lines 64-66:
+
+.. code-block:: python
+   
+   if len(filter(None, input_sequences)) >= 2:
+       sys.stderr.write("ERROR: You can only submit one Fasta sequence.\n")
+       exit(1)
+        
+Open ``src/predict_binding.py`` and delete/comment out line 75:
+
+.. code-block:: python
+
+   assert (len(length) == len(proteins.sequences))
 
 If you want to use the NerMHCcons prediction algorithm you will need to change the shebang line of certain files to explicitly use python2.7. The files in question are:
 
@@ -69,9 +85,9 @@ ____________
 
 .. code-block:: none
 
-    tar -zxvf IEDB_MHC_II-2.15.tar.gz
-    cd mhc_ii
-    ./configure.py
+   tar -zxvf IEDB_MHC_II-2.16.tar.gz
+   cd mhc_ii
+   ./configure.py
     
 .. note::
 
