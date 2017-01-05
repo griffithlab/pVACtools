@@ -59,21 +59,7 @@ Download the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and 
 
 Open ``method/netmhc_4_0_executable/__init__.py`` and delete/comment out the first line (``import pkg_resources``). Also delete/comment out the same line of code from ``method/netmhcpan_3_0_executable/__init__.py`` on line 7.
 
-Open ``src/util.py`` and delete/comment out lines 64-66:
-
-.. code-block:: python
-   
-   if len(filter(None, input_sequences)) >= 2:
-       sys.stderr.write("ERROR: You can only submit one Fasta sequence.\n")
-       exit(1)
-        
-Open ``src/predict_binding.py`` and delete/comment out line 75:
-
-.. code-block:: python
-
-   assert (len(length) == len(proteins.sequences))
-
-If you want to use the NerMHCcons prediction algorithm you will need to change the shebang line of certain files to explicitly use python2.7. The files in question are:
+If you want to use the NetMHCcons prediction algorithm you will need to change the shebang line of certain files to explicitly use python2.7. The files in question are:
 
 * ``method/netMHCcons-1.1/bin/pseudofind``
 * ``method/netMHC-3.4/netMHC``
