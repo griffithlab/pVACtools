@@ -48,7 +48,7 @@ def generate_class_i_call(method, allele, length, path, input_path):
     ), mode='r')
     text = reader.read()
     reader.close()
-    return unittest.mock.call('http://tools-api.iedb.org/tools_api/mhci/', data={
+    return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhci/', data={
         'sequence_text': ""+text,
         'method':        method,
         'allele':        allele,
@@ -64,7 +64,7 @@ def generate_class_ii_call(method, allele, path, input_path):
     ), mode='r')
     text = reader.read()
     reader.close()
-    return unittest.mock.call('http://tools-api.iedb.org/tools_api/mhcii/', data={
+    return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhcii/', data={
         'sequence_text': ""+text,
         'method':        method,
         'allele':        allele,

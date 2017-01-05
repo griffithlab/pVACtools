@@ -82,7 +82,7 @@ class PredictionClass(metaclass=ABCMeta):
 class MHCI(PredictionClass, metaclass=ABCMeta):
     @property
     def url(self):
-        return 'http://tools-api.iedb.org/tools_api/mhci/'
+        return 'http://tools-cluster-interface.iedb.org/tools_api/mhci/'
 
     @property
     def needs_epitope_length(self):
@@ -168,7 +168,7 @@ class PickPocket(MHCI):
 class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
     def url(self):
-        return 'http://tools-api.iedb.org/tools_api/mhcii/'
+        return 'http://tools-cluster-interface.iedb.org/tools_api/mhcii/'
 
     @property
     def needs_epitope_length(self):

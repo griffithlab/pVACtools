@@ -64,7 +64,7 @@ class CallIEDBClassITests(CallIEDBTests):
                 '-l', str(self.epitope_length)
             ])
             reader = open(self.input_file, mode='r')
-            self.request_mock.assert_called_with('http://tools-api.iedb.org/tools_api/mhci/', data={
+            self.request_mock.assert_called_with('http://tools-cluster-interface.iedb.org/tools_api/mhci/', data={
                 'sequence_text':reader.read(),
                 'method': method,
                 'allele': self.allele,
@@ -96,7 +96,7 @@ class CallIEDBClassIITests(CallIEDBTests):
                 self.allele,
             ])
             reader = open(self.input_file, mode='r')
-            self.request_mock.assert_called_with('http://tools-api.iedb.org/tools_api/mhcii/', data={
+            self.request_mock.assert_called_with('http://tools-cluster-interface.iedb.org/tools_api/mhcii/', data={
                 'sequence_text':reader.read(),
                 'method': method,
                 'allele': self.allele,
