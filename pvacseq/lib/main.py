@@ -192,8 +192,6 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    PredictionClass.check_alleles_valid(args.allele)
-
     if "." in args.sample_name:
         sys.exit("Sample name cannot contain '.'")
 
@@ -229,6 +227,8 @@ def main(args_input = sys.argv[1:]):
             class_i_alleles.append(allele)
         if allele in MHCII.all_valid_allele_names():
             class_ii_alleles.append(allele)
+        if allele not in MHCI.all_valid_allele_names() and allele not in MHCII.all_valid_allele_names():
+            print("Allele %s not valid. Skipping." % allele)
 
     shared_arguments = {
         'input_file'                : args.input_file,
