@@ -223,11 +223,14 @@ def main(args_input = sys.argv[1:]):
     class_i_alleles = []
     class_ii_alleles = []
     for allele in sorted(set(args.allele)):
+        valid = 0
         if allele in MHCI.all_valid_allele_names():
             class_i_alleles.append(allele)
+            valid = 1
         if allele in MHCII.all_valid_allele_names():
             class_ii_alleles.append(allele)
-        if allele not in MHCI.all_valid_allele_names() and allele not in MHCII.all_valid_allele_names():
+            valid = 1
+        if not valid:
             print("Allele %s not valid. Skipping." % allele)
 
     shared_arguments = {
