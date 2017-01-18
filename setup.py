@@ -44,7 +44,7 @@ setup(
         'connexion'
     ],
     package_data={
-        'pvacseq' : data_files
+        'pvacseq' : data_files,
         'pvacseq.server': server_data
     },
     classifiers=[
