@@ -23,16 +23,19 @@ def main(args_input = sys.argv[1:]):
                     fieldnames.append(fieldname)
         input_file.seek(0)
 
-    tsv_writer = csv.DictWriter(args.output_file, list(fieldnames), delimiter = '\t', lineterminator = '\n')
-    tsv_writer.writeheader()
+    rows = []
     for input_file in args.input_files:
         reader = csv.DictReader(input_file, delimiter='\t')
         for row in reader:
             for fieldname in fieldnames:
                 if fieldname not in row:
                     row[fieldname] = 'NA'
-            tsv_writer.writerow(row)
+            rows.append(row)
         input_file.close()
+
+    tsv_writer = csv.DictWriter(args.output_file, list(fieldnames), delimiter = '\t', lineterminator = '\n')
+    tsv_writer.writeheader()
+    tsv_writer.writerows(rows)
 
     args.output_file.close()
 
