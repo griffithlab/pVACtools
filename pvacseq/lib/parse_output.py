@@ -506,8 +506,14 @@ def main(args_input = sys.argv[1:]):
             }
             for method in methods:
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-                row["%s WT Score" % pretty_method] = wt_scores[method]
-                row["%s MT Score" % pretty_method] = mt_scores[method]
+                if method in wt_scores:
+                    row["%s WT Score" % pretty_method] = wt_scores[method]
+                else:
+                    row["%s WT Score" % pretty_method] = 'NA'
+                if method in mt_scores:
+                    row["%s MT Score" % pretty_method] = mt_scores[method]
+                else:
+                    row["%s MT Score" % pretty_method] = 'NA'
             if 'gene_expression' in tsv_entry:
                 row['Gene Expression'] = tsv_entry['gene_expression']
             if 'transcript_expression' in tsv_entry:
