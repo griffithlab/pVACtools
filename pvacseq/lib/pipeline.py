@@ -166,7 +166,8 @@ class Pipeline(metaclass=ABCMeta):
         status_message("Combining Parsed IEDB Output Files")
         lib.combine_parsed_outputs.main([
             *split_parsed_output_files,
-            self.combined_parsed_path()
+            self.combined_parsed_path(),
+            '--top-score-metric', self.top_score_metric,
         ])
         status_message("Completed")
 
