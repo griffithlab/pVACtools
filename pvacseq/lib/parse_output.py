@@ -228,7 +228,9 @@ def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
         (sample, method, remainder) = os.path.basename(input_iedb_file.name).split(".", 2)
         for line in iedb_tsv_reader:
             protein_label  = int(line['seq_num'])
-            if 'core_peptide' in line:
+            if 'core_peptide' in line and int(line['end']) - int(line['start']) == 8:
+                #Start and end refer to the position of the core peptide
+                #Infer the (start) position of the peptide from the positions of the core peptide
                 position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
             else:
                 position   = line['start']
