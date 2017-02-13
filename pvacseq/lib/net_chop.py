@@ -104,21 +104,29 @@ def main(args_input = sys.argv[1:]):
             cleavage_scores = {}
             for line in results[i].split('\n'):
                 data = [word for word in line.strip().split(' ') if len(word)]
+                if not sequence_name:
+                    sequence_name = data[4]
                 currentPosition = data[0]
                 isCleavage = data[2]
                 if isCleavage is not 'S':
                     continue
                 currentScore = float(data[3])
-                if not sequence_name:
-                    sequence_name = data[4]
                 cleavage_scores[currentPosition] = currentScore
-            max_cleavage_score = max(cleavage_scores.items(), key=lambda x: x[1])
-            sorted_cleavage_scores = collections.OrderedDict(sorted(cleavage_scores.items()))
+            if len(cleavage_scores) == 0:
+                best_cleavage_position = 'NA'
+                best_cleavage_score = 'NA'
+                cleavage_sites = 'NA'
+            else:
+                max_cleavage_score = max(cleavage_scores.items(), key=lambda x: x[1])
+                best_cleavage_position = max_cleavage_score[0]
+                best_cleavage_score = max_cleavage_score[1]
+                sorted_cleavage_scores = collections.OrderedDict(sorted(cleavage_scores.items()))
+                cleavage_sites = ','.join(['%s:%s' % (key, value) for (key, value) in sorted_cleavage_scores.items()])
             line = current_buffer[sequence_name]
             line.update({
-                'Best Cleavage Position':max_cleavage_score[0],
-                'Best Cleavage Score'   :max_cleavage_score[1],
-                'Cleavage Sites'        :','.join(['%s:%s' % (key, value) for (key, value) in sorted_cleavage_scores.items()])
+                'Best Cleavage Position': best_cleavage_position,
+                'Best Cleavage Score'   : best_cleavage_score,
+                'Cleavage Sites'        : cleavage_sites,
             })
             writer.writerow(line)
     sys.stdout.write('\b\b')
