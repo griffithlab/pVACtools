@@ -25,7 +25,8 @@ pVAC-Seq provides the option of using a local installation of the IEDB MHC
 `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_
 binding prediction tools. Using a local IEDB installation is recommended for
 larger datasets or when the making predictions on many
-alleles, epitope lengths, or prediction algorithms.
+alleles, epitope lengths, or prediction algorithms. More information on
+how to install IEDB locally can be found on the :ref:`Installation <iedb_install>` page.
 
 **MHC Class I and Class II predictions**
 

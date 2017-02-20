@@ -33,6 +33,8 @@ If you have an old version of pVAC-Seq installed you might want to consider upgr
 
    pip install pvacseq --upgrade
 
+.. _iedb_install:
+
 Installing IEDB binding prediction tools (recommended)
 ---------------------------------------------------
 
