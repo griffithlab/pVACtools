@@ -12,6 +12,14 @@ pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
 import pvacseq.lib
 
+def compare(path1, path2):
+    r1 = open(path1)
+    r2 = open(path2)
+    result = not len(set(r1.readlines())^set(r2.readlines()))
+    r1.close()
+    r2.close()
+    return result
+
 def make_response(data, files, path):
     if not files:
         if 'length' in data:
@@ -201,6 +209,12 @@ class PVACTests(unittest.TestCase):
         for file_name in (
             'Test_21.fa.split_1-48',
             'Test_21.fa.split_1-48.key',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name)
+            self.assertTrue(cmp(output_file, expected_file))
+
+        for file_name in (
             'Test.HLA-G*01:09.9.parsed.tsv_1-48',
             'Test.HLA-G*01:09.10.parsed.tsv_1-48',
             'Test.HLA-E*01:01.9.parsed.tsv_1-48',
@@ -208,7 +222,7 @@ class PVACTests(unittest.TestCase):
         ):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
             expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name)
-            self.assertTrue(cmp(output_file, expected_file))
+            self.assertTrue(compare(output_file, expected_file))
 
         self.assertEqual(len(self.request_mock.mock_calls), 9)
         #Class I output files
@@ -240,11 +254,17 @@ class PVACTests(unittest.TestCase):
             'Test_31.fa.split_1-48',
             'Test_31.fa.split_1-48.key',
             'Test.nn_align.H2-IAb.tsv_1-48',
-            'Test.H2-IAb.parsed.tsv_1-48',
         ):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
             expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
             self.assertTrue(cmp(output_file, expected_file, False))
+
+        for file_name in (
+            'Test.H2-IAb.parsed.tsv_1-48',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
+            self.assertTrue(compare(output_file, expected_file))
 
         self.request_mock.assert_has_calls([
             generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name)
