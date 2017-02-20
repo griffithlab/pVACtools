@@ -14,7 +14,7 @@ pVAC-Seq uses a single-sample VCF file as its input. This VCF file must be annot
 pVAC-Seq utilizes the IEDB RESTful web interface. This means that none of the underlying prediction software, like NetMHC, needs to be installed locally.
 
 .. warning::
-   The IEDB RESTful API URLs are currently broken. Until this issue if fixed,
+   The IEDB RESTful API URLs are currently broken. Until this issue is fixed,
    you will need to use a local IEDB installation to run pVAC-Seq. IEDB has
    been informed of this issue. For more information on how to run pVAC-Seq
    with a local IEDB installation, please see the page on :ref:`run`.
