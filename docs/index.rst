@@ -25,12 +25,6 @@ New in version |version|
 
 This version updates the IEDB RESTful API URL to the new target announced in IEDB Analysis Resource v2.15.1.
 
-.. warning::
-   The IEDB RESTful API URLs are currently broken. Until this issue is fixed,
-   you will need to use a local IEDB installation to run pVAC-Seq. IEDB has
-   been informed of this issue. For more information on how to run pVAC-Seq
-   with a local IEDB installation, please see the page on :ref:`run`.
-
 This release introduces a change in how invalid alleles are handeled. Previously, the pipeline would throw a fatal error. The
 pipeline will now proceed but invalid alleles will be skipped.
 
