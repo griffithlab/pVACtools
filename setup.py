@@ -34,7 +34,7 @@ setup(
     entry_points={
         "console_scripts":[
             "pvacseq = pvacseq.pvacseq:main",
-            "pvacseq-ui = pvacseq.server.app:main"
+            "pvacseq-api = pvacseq.server.app:main"
         ]
     },
     install_requires=[
