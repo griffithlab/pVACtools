@@ -200,38 +200,38 @@ paths:
       - name: "minimum_fold_change"
         in: "formData"
         description: "Minimum Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
-        type: "integer"
+        type: "number"
         default: 0
       - name: "normal_cov"
         in: "formData"
         description: "Normal Coverage Cutoff: Sites above this cutoff will be considered"
         type: "integer"
-        default: "5"
+        default: 5
       - name: "tdna_cov"
         in: "formData"
         description: "Tumor DNA Coverage Cutoff: Sites above this cutoff will be considered"
         type: "integer"
-        default: "10"
+        default: 10
       - name: "trna_cov"
         in: "formData"
         description: "Tumor RNA Coverage Cutoff: Sites above this cutoff will be considered"
         type: "integer"
-        default: "10"
+        default: 10
       - name: "normal_vaf"
         in: "formData"
         description: "Normal VAF Cutoff: Sites below this cutoff will be considered"
         type: "integer"
-        default: "2"
+        default: 2
       - name: "tdna_vaf"
         in: "formData"
         description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
         type: "integer"
-        default: "40"
+        default: 40
       - name: "trna_vaf"
         in: "formData"
         description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
         type: "integer"
-        default: "40"
+        default: 40
       - name: "expn_val"
         in: "formData"
         description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
@@ -603,6 +603,63 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
+  /api/v1/dropbox:
+    get:
+      tags:
+        - "dropbox"
+      summary: "Get files currently in the dropbox"
+      description: "The dropbox endpoint returns a list of the files currently in\
+      the dropbox folder.  The user may drop result files into this folder to be\
+      displayed in the frontend UI"
+      operationId: "pvacseq.server.controllers.default_controller.list_dropbox"
+      responses:
+        200:
+          description: "Returns a list of files in the dropbox"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Result"
+  /api/v1/processes/{parentID}/results/{fileID}/filter:
+    get:
+      tags:
+        - "filterfile"
+      summary: "Get a filtered file"
+      description: "TBD"
+      operationId: "pvacseq.server.controllers.default_controller.filterfile"
+      parameters:
+        - name: "parentID"
+          in: "path"
+          description: "ProcessID or -1 for dropbox"
+          required: true
+          type: "integer"
+        - name: "fileID"
+          in: "path"
+          description: "Specific fileID to read"
+          required: true
+          type: "integer"
+        - name: "count"
+          in: "query"
+          description: "count"
+          type: "integer"
+          required: false
+          default: 0
+        - name: "page"
+          in: "query"
+          description: "page"
+          type: "integer"
+          required: false
+          default: 0
+        - name: "filters"
+          in: "query"
+          description: "filters"
+          type: "integer"
+          required: false
+          default: 0
+      responses:
+        200:
+          description: "Returns a list of files in the dropbox"
+          schema:
+            type: "object"
   /static/testpage:
     get:
       tags:
@@ -651,7 +708,7 @@ definitions:
   Result:
     type: "object"
     properties:
-      id:
+      fileID:
         type: "integer"
         description: "Unique identifier of the result file."
       description:

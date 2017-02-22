@@ -41,7 +41,8 @@ setup(
         'PyVCF',
         'requests',
         'PyYAML',
-        'connexion'
+        'connexion',
+        'watchdog'
     ],
     package_data={
         'pvacseq' : data_files,
