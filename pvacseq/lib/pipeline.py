@@ -361,11 +361,12 @@ class MHCIPipeline(Pipeline):
                             continue
                         status_message("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, fasta_chunk))
 
-                        if 'last_execute_timestamp' in locals() and not self.iedb_executable:
-                            elapsed_time = ( datetime.datetime.now() - last_execute_timestamp ).total_seconds()
-                            wait_time = 60 - elapsed_time
-                            if wait_time > 0:
-                                time.sleep(wait_time)
+                        if not os.environ.get('TEST_FLAG'):
+                            if 'last_execute_timestamp' in locals() and not self.iedb_executable:
+                                elapsed_time = ( datetime.datetime.now() - last_execute_timestamp ).total_seconds()
+                                wait_time = 60 - elapsed_time
+                                if wait_time > 0:
+                                    time.sleep(wait_time)
 
                         lib.call_iedb.main([
                             split_fasta_file_path,
@@ -458,11 +459,12 @@ class MHCIIPipeline(Pipeline):
                         continue
                     status_message("Running IEDB on Allele %s with Method %s - Entries %s" % (a, method, fasta_chunk))
 
-                    if 'last_execute_timestamp' in locals() and not self.iedb_executable:
-                        elapsed_time = ( datetime.datetime.now() - last_execute_timestamp ).total_seconds()
-                        wait_time = 60 - elapsed_time
-                        if wait_time > 0:
-                            time.sleep(wait_time)
+                    if not os.environ.get('TEST_FLAG'):
+                        if 'last_execute_timestamp' in locals() and not self.iedb_executable:
+                            elapsed_time = ( datetime.datetime.now() - last_execute_timestamp ).total_seconds()
+                            wait_time = 60 - elapsed_time
+                            if wait_time > 0:
+                                time.sleep(wait_time)
 
                     lib.call_iedb.main([
                         split_fasta_file_path,
