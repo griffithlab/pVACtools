@@ -215,6 +215,8 @@ def savedata():
 def results_get(id):
     """Get the list of result files from a specific pVAC-Seq run"""
     initialize()
+    if id == -1:
+        return list_dropbox()
     process = fetch_process(id)
     if not process[0]:
         return (
@@ -248,42 +250,70 @@ def results_get(id):
     return output
 
 
-def results_getfile(id, count = None, page = None, fileID = None):
-    """Read data directly from a specific output file"""
-    initialize()
-    process = fetch_process(id)
-    if not process[0]:
-        return (
-            {
-                "code": 400,
-                "message": "The requested process (%d) does not exist"%id,
-                "fields": "id"
-            },400
-        )
-    if is_running(id):
-        return []
-    gen_files_list(id)
-    if fileID not in range(len(process[0]['files'])):
-        return (
-            {
-                "code": 400,
-                "message": "The requested fileID (%d) does not exist for this process (%d)" %(fileID, id),
-                "fields": "fileID"
-            },400
-        )
-    raw_reader = open(process[0]['files'][fileID])
-    reader = csv.DictReader(raw_reader, delimiter='\t')
-    output = [
-        {column_filter(k):entry[k] for k in entry}
-        for entry in itertools.islice(reader, (page-1)*count, page*count)
-    ]
-    raw_reader.close()
-    return output
+def results_getfile(id, fileID, count, page, filters, sort, direction):
+    """(deprecated) Read data directly from a specific output file"""
+    return filterfile(
+        parentID = id,
+        fileID = fileID,
+        count = count,
+        page = page,
+        filters = filters,
+        sort = sort,
+        direction = direction
+    )
+    # initialize()
+    # process = fetch_process(id)
+    # if not process[0]:
+    #     return (
+    #         {
+    #             "code": 400,
+    #             "message": "The requested process (%d) does not exist"%id,
+    #             "fields": "id"
+    #         },400
+    #     )
+    # if is_running(id):
+    #     return []
+    # gen_files_list(id)
+    # if fileID not in range(len(process[0]['files'])):
+    #     return (
+    #         {
+    #             "code": 400,
+    #             "message": "The requested fileID (%d) does not exist for this process (%d)" %(fileID, id),
+    #             "fields": "fileID"
+    #         },400
+    #     )
+    # raw_reader = open(process[0]['files'][fileID])
+    # reader = csv.DictReader(raw_reader, delimiter='\t')
+    # output = [
+    #     {column_filter(k):entry[k] for k in entry}
+    #     for entry in itertools.islice(reader, (page-1)*count, page*count)
+    # ]
+    # raw_reader.close()
+    # return output
 
 
 def results_getcols(id, fileID):
     """Get a mapping of standardized column names -> original column names"""
     initialize()
+    if id==-1:
+        if str(fileID) not in data['dropbox']:
+            return {
+                'code':400,
+                'message':'The requested file (%d) does not exist'%fileID,
+                'fields':'fileID'
+            }
+        raw_reader = open(
+            os.path.join(
+                os.path.abspath(current_app.config['dropbox_dir']),
+                data['dropbox'][str(fileID)]
+            )
+        )
+        reader = csv.DictReader(raw_reader, delimiter='\t')
+        output = {
+            column_filter(field):field for field in reader.fieldnames
+        }
+        raw_reader.close()
+        return output
     process = fetch_process(id)
     if not process[0]:
         return (
@@ -677,11 +707,12 @@ def init_column_mapping(reader):
     for row in reader:
         i+=1
         for (col, val) in row.items():
-            if mapping[column_filter(col)] == 'text':
+            if mapping[column_filter(col)] != 'float':
                 try:
                     int(val)
-                    print("Assigning int to",col,"on pass",i,"based on",val)
-                    mapping[column_filter(col)]='integer'
+                    if mapping[column_filter(col)] == 'text':
+                        print("Assigning int to",col,"on pass",i,"based on",val)
+                        mapping[column_filter(col)]='integer'
                 except ValueError:
                     try:
                         float(val)
@@ -797,17 +828,13 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     column_defs = typequery(tablekey)
     column_maps = {}
     for (col, typ) in column_defs:
-        print(col,'->',typ)
         if 'int' in typ:
             column_maps[col] = int
         elif typ == 'numeric'or typ == 'decimal':
             column_maps[col] = float
         else:
             column_maps[col] = str
-    print("Filtering:", filters)
     formatted_filters = []
-    # if len(filters):
-    #     import pdb; pdb.set_trace()
     for i in range(len(filters)):
         f = filters[i].strip()
         if not len(f):

@@ -51,26 +51,48 @@ paths:
       parameters:
       - name: "id"
         in: "path"
-        description: "Process ID from which to read results"
+        description: "ProcessID or -1 for dropbox"
+        required: true
+        type: "integer"
+      - name: "fileID"
+        in: "path"
+        description: "Specific fileID to read"
         required: true
         type: "integer"
       - name: "count"
         in: "query"
-        description: "Number of results to return"
-        required: false
+        description: "Maximum number of rows to return"
         type: "integer"
-        default: 10
+        required: false
+        default: 50
       - name: "page"
         in: "query"
-        description: "Page number of results to return"
+        description: "Page offset (skip the first count*page results)"
+        type: "integer"
         required: false
-        type: "integer"
-        default: 1
-      - name: "fileID"
-        in: "path"
-        description: "File id from which to read data"
-        required: true
-        type: "integer"
+        default: 0
+      - name: "filters"
+        in: "query"
+        description: "A comma-separated list of filter parameters in the form of (column)(comparator)(value) ie: start>=8"
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        required: false
+        default: ''
+      - name: "sort"
+        in: "query"
+        description: "The column name to sort results by"
+        type: "string"
+        required: false
+        default: "rowid"
+      - name: 'direction'
+        in: 'query'
+        description: "Sort results in ascending or descending order"
+        type: 'string'
+        required: false
+        enum: ['ASC','DESC']
+        default: 'ASC'
       responses:
         200:
           description: "An array of entries"
@@ -639,19 +661,19 @@ paths:
           type: "integer"
         - name: "count"
           in: "query"
-          description: "count"
+          description: "Maximum number of rows to return"
           type: "integer"
           required: false
           default: 50
         - name: "page"
           in: "query"
-          description: "page"
+          description: "Page offset (skip the first count*page results)"
           type: "integer"
           required: false
           default: 0
         - name: "filters"
           in: "query"
-          description: "filters"
+          description: "A comma-separated list of filter parameters in the form of (column)(comparator)(value) ie: start>=8"
           type: "array"
           items:
             type: "string"
@@ -660,13 +682,13 @@ paths:
           default: ''
         - name: "sort"
           in: "query"
-          description: "sort"
+          description: "The column name to sort results by"
           type: "string"
           required: false
           default: "rowid"
         - name: 'direction'
           in: 'query'
-          description: 'sort direction'
+          description: "Sort results in ascending or descending order"
           type: 'string'
           required: false
           enum: ['ASC','DESC']
