@@ -22,7 +22,6 @@ def column_filter(column):
 
 def loaddata():
     configfile = os.path.join(os.path.expanduser('~'), '.pvacseq_ui')
-    reboot = subprocess.check_output(['last', 'reboot']).decode().split("\n")[0]
     if os.path.isfile(configfile):
         data = json.load(open(configfile))
     else:
@@ -50,7 +49,7 @@ def initialize():
         current_app.config['children'] = {}
         if 'filtertables' not in data:
             data['filtertables']={}
-
+        reboot = subprocess.check_output(['last', 'reboot']).decode().split("\n")[0]
         if 'reboot' in data and data['reboot'] != reboot:
             print("A reboot has occurred since the server was first started")
             print(
