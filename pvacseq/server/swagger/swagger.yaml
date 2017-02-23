@@ -19,7 +19,7 @@ paths:
       description: "The results endpoint returns a list of available pipeline data\
         \ files for generating reports.  If the requested process is still running \
         this endpoint returns an empty list. If the id is invalid it will return an error\n"
-      operationId: "pvacseq.server.controllers.default_controller.results_get"
+      operationId: "pvacseq.server.controllers.files.results_get"
       parameters:
       - name: "id"
         in: "path"
@@ -47,7 +47,7 @@ paths:
       description: "This endpoint returns raw data from the requested output file \
         from the requested pVAC-Seq run.  If the process is still running this will \
         return an empty list.  If the id or fileID is invalid, it will return an error\n"
-      operationId: "pvacseq.server.controllers.default_controller.results_getfile"
+      operationId: "pvacseq.server.controllers.files.results_getfile"
       parameters:
       - name: "id"
         in: "path"
@@ -116,7 +116,7 @@ paths:
         to their names as they appear in the source data of the specified file. \
         If the process is still running, this will return an empty object. \
         If the process id or fileID are invalid, it will return an error \n"
-      operationId: "pvacseq.server.controllers.default_controller.results_getcols"
+      operationId: "pvacseq.server.controllers.files.results_getcols"
       parameters:
       - name: "id"
         in: "path"
@@ -146,7 +146,7 @@ paths:
       summary: "Start a new pVAC-Seq run"
       description: "This endpoint initiates a new pVAC-Seq run and returns the \
         api process id (not an OS pid) for the new run.\n"
-      operationId: "pvacseq.server.controllers.default_controller.start"
+      operationId: "pvacseq.server.controllers.staging.start"
       parameters:
       - name: "input"
         in: "formData"
@@ -299,7 +299,7 @@ paths:
         and the start endpoint.  Uploaded files are saved to temporary locations \
         and their paths are forwarded to the start endpoint.  Additionally, an output \
         directory is automatically generated\n"
-      operationId: "pvacseq.server.controllers.default_controller.staging"
+      operationId: "pvacseq.server.controllers.staging.staging"
       parameters:
       - name: "input"
         in: "formData"
@@ -495,7 +495,7 @@ paths:
         - "processes"
       summary: "Get list of running processes"
       description: "This endpoint returns a list of active pvacseq runs\n"
-      operationId: "pvacseq.server.controllers.default_controller.processes"
+      operationId: "pvacseq.server.controllers.processes.processes"
       responses:
         200:
           description: "A list of active processes"
@@ -515,7 +515,7 @@ paths:
       summary: "Get info about a specific process"
       description: "This endpoint returns data about a currently running process. \
         If the process id is invalid, it returns an error.\n"
-      operationId: "pvacseq.server.controllers.default_controller.process_info"
+      operationId: "pvacseq.server.controllers.processes.process_info"
       parameters:
       - name: "id"
         in: "path"
@@ -538,7 +538,7 @@ paths:
       summary: "Terminate any running processes"
       description: "This endpoint handles the cleanup for closing any active \
         pvacseq runs\n"
-      operationId: "pvacseq.server.controllers.default_controller.shutdown"
+      operationId: "pvacseq.server.controllers.processes.shutdown"
       responses:
         200:
           description: "Returns a list of the process ID's for the terminated processes"
@@ -558,7 +558,7 @@ paths:
       summary: "Terminate the specified process"
       description: "This endpoint closes the requested process if it is still running. /
         id must refer to a valid process id started by the current user"
-      operationId: "pvacseq.server.controllers.default_controller.stop"
+      operationId: "pvacseq.server.controllers.processes.stop"
       parameters:
       - name: "id"
         in: "path"
@@ -581,7 +581,7 @@ paths:
       summary: "Verifies that the specified allele is supported"
       description: "Checks the supplied allele against the list of supported alleles \
         and returns a boolean indicating if the allele is supported or not"
-      operationId: "pvacseq.server.controllers.default_controller.check_allele"
+      operationId: "pvacseq.server.controllers.staging.check_allele"
       parameters:
         - name: "allele"
           in: "query"
@@ -605,7 +605,7 @@ paths:
       description: "Clears out processes which were started by previous instances \
         of the ui server.  Processes started by this instance will be kept unless \
         the clearall paramter is set to 1"
-      operationId: "pvacseq.server.controllers.default_controller.reset"
+      operationId: "pvacseq.server.controllers.processes.reset"
       parameters:
         - name: "clearall"
           in: "query"
@@ -633,7 +633,7 @@ paths:
       description: "The dropbox endpoint returns a list of the files currently in\
       the dropbox folder.  The user may drop result files into this folder to be\
       displayed in the frontend UI"
-      operationId: "pvacseq.server.controllers.default_controller.list_dropbox"
+      operationId: "pvacseq.server.controllers.files.list_dropbox"
       responses:
         200:
           description: "Returns a list of files in the dropbox"
@@ -647,7 +647,7 @@ paths:
         - "filterfile"
       summary: "Get a filtered file"
       description: "TBD"
-      operationId: "pvacseq.server.controllers.default_controller.filterfile"
+      operationId: "pvacseq.server.controllers.database.filterfile"
       parameters:
         - name: "parentID"
           in: "path"
@@ -711,7 +711,7 @@ paths:
         then forwarded to the /api/v1/start endpoint\n"
       produces:
         - "text/html"
-      operationId: "pvacseq.server.controllers.default_controller.test"
+      operationId: "pvacseq.server.controllers.staging.test"
       responses:
         200:
           description: "Returns a static page"
