@@ -699,44 +699,57 @@ def list_dropbox():
         )
     ]
 
-def init_column_mapping(reader):
-    mapping = {column_filter(col):'text' for col in reader.fieldnames}
+def init_column_mapping(row):
+    mapping = {column_filter(col):str for col in row}
+    defs = {column_filter(col):'text' for col in row}
+    for (col, val) in row.items():
+        col = column_filter(col)
+        if mapping[col] != float:
+            try:
+                int(val)
+                if mapping[col] == str:
+                    print("Assigning int to",col,"based on",val)
+                    mapping[col]=int
+                    defs[col] = 'integer'
+            except ValueError:
+                try:
+                    float(val)
+                    print("Assigning float to",col,"based on",val)
+                    mapping[col]=float
+                    defs[col] = 'decimal'
+                except ValueError:
+                    pass
+    defs['start'] = 'bigint'
+    defs['stop'] = 'bigint'
+    return (mapping, defs)
+
+def column_mapping(row, mapping):
     #we have to read the whole file, in case there's just a NA
     #in a normally numerical field on the first row
-    i = 0
-    for row in reader:
-        i+=1
-        for (col, val) in row.items():
-            if mapping[column_filter(col)] != 'float':
-                try:
-                    int(val)
-                    if mapping[column_filter(col)] == 'text':
-                        print("Assigning int to",col,"on pass",i,"based on",val)
-                        mapping[column_filter(col)]='integer'
-                except ValueError:
-                    try:
-                        float(val)
-                        print("Assigning float to",col,"on pass",i,"based on",val)
-                        mapping[column_filter(col)]="decimal"
-                    except ValueError:
-                        pass
-    mapping['start'] = 'bigint'
-    mapping['stop'] = 'bigint'
-    def converter(input):
-        output = {}
-        for (col, val) in input.items():
-            col_name = column_filter(col)
+    #ALTER TABLE ? ALTER COLUMN ? SET DATA TYPE ? USING null
+    output = {}
+    changes = {}
+    for (col, val) in row.items():
+        col = column_filter(col)
+        if mapping[col] == str:
             try:
-                if 'int' in mapping[col_name]: #integer or bigint
-                    output[col_name] = int(val)
-                elif mapping[col_name] == 'decimal':
-                    output[col_name] = float(val)
-                else:
-                    output[col_name] = ''+val
+                int(val)
+                print("Assigning int to",col,"based on",val)
+                mapping[col]=int
+                changes[col] = int
             except ValueError:
-                output[col_name] = None
-        return output.copy()
-    return (mapping, converter)
+                try:
+                    float(val)
+                    print("Assigning float to",col,"based on",val)
+                    mapping[col]=float
+                    changes[col] = float
+                except ValueError:
+                    pass
+        try:
+            output[col] = mapping[col](val)
+        except ValueError:
+            output[col] = None
+    return (mapping, output, changes)
 
 def filterfile(parentID, fileID, count, page, filters, sort, direction):
     """Gets the file ID belonging to the parent.\
@@ -793,14 +806,15 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
             ))
         reader = csv.DictReader(raw_reader, delimiter='\t')
 
-        tmp = open(raw_reader.name)
-        tmp_reader = csv.DictReader(tmp, delimiter='\t')
+        tmp_reader = open(raw_reader.name)
+        tmp = csv.DictReader(tmp_reader, delimiter='\t')
+        init = next(tmp)
+        tmp_reader.close()
 
-        (typeMap, converter) = init_column_mapping(tmp_reader)
-        tmp.close()
-        column_names = [column_filter(colname) for colname in reader.fieldnames]
-        tablecolumns = "\n".join(
-            "%s %s,"%(colname, typeMap[colname])
+        #Get an initial estimate of column datatypes from the first row
+        (mapping, column_names) = init_column_mapping(init)
+        tablecolumns = "\n".join( #use the estimated types to create the table
+            "%s %s,"%(colname, column_names[colname])
             for colname in column_names
         )[:-1]
         CREATE_TABLE = "CREATE TABLE %s (\
@@ -808,22 +822,50 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
             %s\
         )"%(tablekey, tablecolumns)
         db.execute(CREATE_TABLE)
+        #mark the table for deletion when the server shuts down
+        if 'db-clean' not in current_app.config:
+            current_app.config['db-clean'] = [tablekey]
+        else:
+            current_app.config['db-clean'].append(tablekey)
+        #prepare the insertion query
         insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" %(
             tablekey,
             ','.join(column_names),
             ','.join('$%d'%i for (_,i) in zip(column_names, range(1,sys.maxsize)))
         ))
+        update = "ALTER TABLE %s "%tablekey
         for row in reader:
-            for key in list(row.keys()):
-                row[column_filter(key)] = row[key]
-                del row[key]
-            row = converter(row)
-            insert(*[row[column] for column in column_names])
+            #process each row
+            #We format the data in the row and update column data types, if necessary
+            (mapping, formatted, changes) = column_mapping(row, mapping)
+            alter_cols = []
+            for (k,v) in changes.items():
+                #if there were any changes to the data type, update the table
+                #since we only ever update a text column to int/decimal, then
+                #it's okay to nullify the data
+                typ = ''
+                if v == int:
+                    typ = 'bigint' if k in {'start', 'stop'} else 'integer'
+                elif v == float:
+                    typ = 'decimal'
+                alter_cols.append(
+                    "ALTER COLUMN %s SET DATA TYPE %s USING null"%(
+                        k,
+                        typ
+                    )
+                )
+            if len(changes):
+                #Re-generate the insert statement since the data types changed
+                print("Alter:",update+','.join(alter_cols))
+                db.execute(update+','.join(alter_cols))
+                insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" %(
+                    tablekey,
+                    ','.join(column_names),
+                    ','.join('$%d'%i for (_,i) in zip(column_names, range(1,sys.maxsize)))
+                ))
+            #insert the row
+            insert(*[formatted[column] for column in column_names])
         raw_reader.close()
-        if 'db-clean' not in current_app.config:
-            current_app.config['db-clean'] = [tablekey]
-        else:
-            current_app.config['db-clean'].append(tablekey)
     typequery = db.prepare("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1")
     column_defs = typequery(tablekey)
     column_maps = {}
