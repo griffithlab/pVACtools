@@ -8,6 +8,7 @@ import socketserver
 from threading import Thread
 from webbrowser import open_new_tab
 import postgresql as psql
+from postgresql.exceptions import UndefinedTableError
 import atexit
 from .controllers import watchdir
 
@@ -29,6 +30,13 @@ def main():
             'swagger'
         ),
     )
+    from werkzeug.routing import IntegerConverter as BaseIntConverter
+
+    class IntConverter(BaseIntConverter):
+        regex = r'-?\d+'
+
+    # before routes are registered
+    app.app.url_map.converters['int'] = IntConverter
     app.app.config['dropbox_dir'] = os.path.expanduser("~/Desktop/PVACSEQ_TEST")
     os.makedirs(app.app.config['dropbox_dir'], exist_ok=True)
 
@@ -43,6 +51,12 @@ def main():
         print("Cleaning up observers and database connections")
         watcher.stop()
         watcher.join()
+        if 'db-clean' in app.app.config:
+            for table in app.app.config['db-clean']:
+                try:
+                    db.execute("DROP TABLE %s"%table)
+                except UndefinedTableError:
+                    pass
         db.close()
 
     atexit.register(cleanup)

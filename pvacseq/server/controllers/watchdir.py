@@ -13,7 +13,7 @@ class pvacseqHandler(watchdog.events.FileSystemEventHandler):
 
     def subscribe(self, fn, eventType = None):
         self.subscribers.append((eventType, fn))
-        return lambda:self.subscribers.remove((eventType, fn))
+        return lambda:self.subscribers.remove((eventType, fn)) #return unsubscribe function
 
     def _runner(self, event):
         for subscriber in self.subscribers:

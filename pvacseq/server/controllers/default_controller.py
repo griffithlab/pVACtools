@@ -12,6 +12,7 @@ from flask import current_app
 import watchdog.events
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
+queryfilters = re.compile(r'(.+)(<=?|>=?|!=|==)(.+)')
 allele_file = None
 
 children = {}  # Holds popen objects for processes spawned by this current session
@@ -45,6 +46,7 @@ def initialize():
     the context of the controllers"""
     if not current_app.config['initialized']:
         current_app.config['initialized'] = True
+        db = current_app.config['db']
 
         if 'filtertables' not in data:
             data['filtertables']={}
@@ -60,7 +62,12 @@ def initialize():
         if 'dropbox' not in data:
             data['dropbox'] = {}
         fileID = 0
-        for filename in set(os.listdir(current_app.config['dropbox_dir']))-set(data['dropbox'].values()):
+        current = set(os.listdir(current_app.config['dropbox_dir']))
+        recorded = set(data['dropbox'].values())
+        targets = {k for k in data['dropbox'] if data['dropbox'][k] in recorded-current}
+        for fileID in targets:
+            del data['dropbox'][fileID]
+        for filename in current-recorded:
             while str(fileID) in data['dropbox']:
                 fileID += 1
             print("Assigning file:", fileID,"-->",filename)
@@ -92,6 +99,9 @@ def initialize():
                 if data['dropbox'][key] == filename:
                     del data['dropbox'][key]
                     print("Deleting file:",key,'-->', filename)
+                    query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+                    if len(query('data_dropbox_'+str(key))):
+                        db.execute("DROP TABLE data_dropbox_"+str(key))
                     savedata()
                     return
         watcher.subscribe(
@@ -659,18 +669,59 @@ def list_dropbox():
         )
     ]
 
-def filterfile(parentID, fileID, count, page, filters):
+def init_column_mapping(reader):
+    mapping = {column_filter(col):'text' for col in reader.fieldnames}
+    #we have to read the whole file, in case there's just a NA
+    #in a normally numerical field on the first row
+    i = 0
+    for row in reader:
+        i+=1
+        for (col, val) in row.items():
+            if mapping[column_filter(col)] == 'text':
+                try:
+                    int(val)
+                    print("Assigning int to",col,"on pass",i,"based on",val)
+                    mapping[column_filter(col)]='integer'
+                except ValueError:
+                    try:
+                        float(val)
+                        print("Assigning float to",col,"on pass",i,"based on",val)
+                        mapping[column_filter(col)]="decimal"
+                    except ValueError:
+                        pass
+    mapping['start'] = 'bigint'
+    mapping['stop'] = 'bigint'
+    def converter(input):
+        output = {}
+        for (col, val) in input.items():
+            col_name = column_filter(col)
+            try:
+                if 'int' in mapping[col_name]: #integer or bigint
+                    output[col_name] = int(val)
+                elif mapping[col_name] == 'decimal':
+                    output[col_name] = float(val)
+                else:
+                    output[col_name] = ''+val
+            except ValueError:
+                output[col_name] = None
+        return output.copy()
+    return (mapping, converter)
+
+def filterfile(parentID, fileID, count, page, filters, sort, direction):
     """Gets the file ID belonging to the parent.\
     For result files, the parentID is the process ID that spawned them.\
     For dropbox files, the parentID is -1"""
+    print(parentID)
     initialize()
 
     #first, generate the key
-    tablekey = "data_%s_%s"%(parentID, fileID)
+    tablekey = "data_%s_%s"%(
+        (parentID if parentID >=0 else 'dropbox'),
+        fileID
+    )
 
     #check if the table exists:
     db = current_app.config['db']
-    print("PREPARING")
     query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     if not len(query(tablekey)): #table does not exist
         #Open a reader to cache the file in the database
@@ -701,7 +752,8 @@ def filterfile(parentID, fileID, count, page, filters):
                 return (
                     {
                         "code": 400,
-                        "message": "The requested fileID (%d) does not exist in the dropbox"%fileID
+                        "message": "The requested fileID (%d) does not exist in the dropbox"%fileID,
+                        "fields":"fileID"
                     }
                 )
             raw_reader = open(os.path.join(
@@ -710,9 +762,14 @@ def filterfile(parentID, fileID, count, page, filters):
             ))
         reader = csv.DictReader(raw_reader, delimiter='\t')
 
+        tmp = open(raw_reader.name)
+        tmp_reader = csv.DictReader(tmp, delimiter='\t')
+
+        (typeMap, converter) = init_column_mapping(tmp_reader)
+        tmp.close()
         column_names = [column_filter(colname) for colname in reader.fieldnames]
         tablecolumns = "\n".join(
-            "%s text NOT NULL,"%colname
+            "%s %s,"%(colname, typeMap[colname])
             for colname in column_names
         )[:-1]
         CREATE_TABLE = "CREATE TABLE %s (\
@@ -729,12 +786,104 @@ def filterfile(parentID, fileID, count, page, filters):
             for key in list(row.keys()):
                 row[column_filter(key)] = row[key]
                 del row[key]
+            row = converter(row)
             insert(*[row[column] for column in column_names])
         raw_reader.close()
-    query = db.prepare(
-        "SELECT * FROM %s WHERE" #???
+        if 'db-clean' not in current_app.config:
+            current_app.config['db-clean'] = [tablekey]
+        else:
+            current_app.config['db-clean'].append(tablekey)
+    typequery = db.prepare("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1")
+    column_defs = typequery(tablekey)
+    column_maps = {}
+    for (col, typ) in column_defs:
+        print(col,'->',typ)
+        if 'int' in typ:
+            column_maps[col] = int
+        elif typ == 'numeric'or typ == 'decimal':
+            column_maps[col] = float
+        else:
+            column_maps[col] = str
+    print("Filtering:", filters)
+    formatted_filters = []
+    # if len(filters):
+    #     import pdb; pdb.set_trace()
+    for i in range(len(filters)):
+        f = filters[i].strip()
+        if not len(f):
+            continue
+        result = queryfilters.match(f)
+        if not result:
+            return {
+                "code":400,
+                "message":"Encountered an invalid filter (%s)"%f,
+                "fields":"filters"
+            }
+        colname = column_filter(result.group(1))
+        if colname not in column_maps:
+            return {
+                "code":400,
+                "message":"Unknown column name %s"%result.group(1),
+                "fields":"filters"
+            }
+        op = result.group(2)
+        typ = column_maps[colname]
+        val = None
+        try:
+            val = column_maps[colname](result.group(3))
+        except ValueError:
+            return {
+                "code":400,
+                "message":"Value %s cannot be formatted to match the type of column %s (%s)"%(
+                    result.group(3),
+                    result.group(1),
+                    typ
+                )
+            }
+        if typ == str and (op in {'==', '!='}):
+            formatted_filters.append(
+                json.dumps(colname) + (' not ' if '!' in op else ' ') + "LIKE '%s'"%(
+                    json.dumps(val)[1:-1]
+                )
+            )
+        else: #type is numerical
+            op = op.replace('==', '=')
+            formatted_filters.append(
+                '%s %s %s'%(
+                    json.dumps(colname),
+                    op,
+                    json.dumps(val)
+                )
+            )
+    raw_query = "SELECT %s FROM %s"%(
+        ','.join([k[0] for k in column_defs]),
+        tablekey
     )
-
-
-    #ASK ADAM ABOUT THE SEARCH THING
-    #IT'S SEARCHING BY TEXT SORT
+    if len(formatted_filters):
+        raw_query += " WHERE "+" AND ".join(formatted_filters)
+    if sort:
+        if column_filter(sort) not in column_maps:
+            return {
+                'code':400,
+                'message':'Invalid column name %s'%sort,
+                'fields':'sort'
+            }
+        raw_query += " ORDER BY %s"%(column_filter(sort))
+        if direction:
+            raw_query += " "+direction
+    if count:
+        raw_query += " LIMIT %d"%count
+    if page:
+        raw_query += " OFFSET %d"%(page*count)
+    print("Query:",raw_query)
+    query = db.prepare(raw_query)
+    import decimal
+    decimalizer = lambda x:(float(x) if type(x) == decimal.Decimal else x)
+    return [
+        {
+            colname:decimalizer(value) for (colname, value) in zip(
+                [k[0] for k in column_defs],
+                [val for val in row]
+            )
+        } for row in query.rows()
+    ]
