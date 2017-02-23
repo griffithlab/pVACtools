@@ -699,52 +699,93 @@ def list_dropbox():
         )
     ]
 
+
+_f = re.compile(r'^\d*\.\d+$')
+_i = re.compile(r'^\d+$')
 def init_column_mapping(row):
     mapping = {column_filter(col):str for col in row}
     defs = {column_filter(col):'text' for col in row}
     for (col, val) in row.items():
         col = column_filter(col)
-        if mapping[col] != float:
+        if _f.match(val):
+            try:
+                float(val)
+                print("Assigning float to",col,"based on",val)
+                mapping[col]=float
+                defs[col] = 'decimal'
+            except ValueError:
+                print("ERROR: Float mismatch:", val)
+        elif _i.match(val):
             try:
                 int(val)
-                if mapping[col] == str:
-                    print("Assigning int to",col,"based on",val)
-                    mapping[col]=int
-                    defs[col] = 'integer'
+                print("Assigning int to",col,"based on",val)
+                mapping[col]=int
+                defs[col] = 'integer'
             except ValueError:
-                try:
-                    float(val)
-                    print("Assigning float to",col,"based on",val)
-                    mapping[col]=float
-                    defs[col] = 'decimal'
-                except ValueError:
-                    pass
+                print("ERROR: Int mismatch:", val)
+    mapping['start'] = int
     defs['start'] = 'bigint'
+    mapping['stop'] = int
     defs['stop'] = 'bigint'
     return (mapping, defs)
 
 def column_mapping(row, mapping):
-    #we have to read the whole file, in case there's just a NA
-    #in a normally numerical field on the first row
-    #ALTER TABLE ? ALTER COLUMN ? SET DATA TYPE ? USING null
+    #Apply filtering to the current row
+    #
     output = {}
     changes = {}
     for (col, val) in row.items():
         col = column_filter(col)
         if mapping[col] == str:
-            try:
-                int(val)
-                print("Assigning int to",col,"based on",val)
-                mapping[col]=int
-                changes[col] = int
-            except ValueError:
+            if _f.match(val):
                 try:
                     float(val)
                     print("Assigning float to",col,"based on",val)
                     mapping[col]=float
                     changes[col] = float
                 except ValueError:
-                    pass
+                    print("ERROR: Float mismatch:", val)
+            elif _i.match(val):
+                try:
+                    int(val)
+                    print("Assigning int to",col,"based on",val)
+                    mapping[col]=int
+                    changes[col] = int
+                except ValueError:
+                    print("ERROR: Int mismatch:", val)
+            # if _i.match(val):
+            #     try:
+            #         int(val)
+            #         print("Assigning int to",col,"based on",val)
+            #         mapping[col]=int
+            #         changes[col] = int
+            #     except ValueError:
+            #         print("ERROR: Int mismatch:", val)
+            # elif _f.match(val):
+            #     try:
+            #         float(val)
+            #         print("Assigning float to",col,"based on",val)
+            #         mapping[col]=float
+            #         changes[col] = float
+            #     except ValueError:
+            #         print("ERROR: Float mismatch:", val)
+            # try:
+            #     int(val)
+            #     if not _i.match(val):
+            #         print("ERROR: Int mismatch:", val)
+            #     print("Assigning int to",col,"based on",val)
+            #     mapping[col]=int
+            #     changes[col] = int
+            # except ValueError:
+            #     try:
+            #         float(val)
+            #         if not _f.match(val):
+            #             print("ERROR: Float mismatch:", val)
+            #         print("Assigning float to",col,"based on",val)
+            #         mapping[col]=float
+            #         changes[col] = float
+            #     except ValueError:
+            #         pass
         try:
             output[col] = mapping[col](val)
         except ValueError:
