@@ -72,7 +72,5 @@ def main():
     # Thread(target=lambda:open_new_tab("localhost:8080/static/testpage"), daemon=True).start()
     app.run(port=8080)
 
-
-
 if __name__ == '__main__':
     main()

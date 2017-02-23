@@ -10,8 +10,7 @@ class PredictionClass(metaclass=ABCMeta):
     def prediction_classes(cls):
         prediction_classes = []
         for subclass in cls.__subclasses__():
-            for prediction_class in subclass.__subclasses__():
-                prediction_classes.append(prediction_class)
+            prediction_classes.extend(subclass.prediction_classes())
         return prediction_classes
 
     @classmethod
@@ -56,6 +55,15 @@ class PredictionClass(metaclass=ABCMeta):
     def valid_allele_names(self):
         pass
 
+    @abstractmethod
+    def iedb_executable_params(self, args):
+        pass
+
+    @property
+    @abstractmethod
+    def needs_epitope_length(self):
+        pass
+
     @property
     @abstractmethod
     def iedb_prediction_method(self):
@@ -74,7 +82,15 @@ class PredictionClass(metaclass=ABCMeta):
 class MHCI(PredictionClass, metaclass=ABCMeta):
     @property
     def url(self):
-        return 'http://tools-api.iedb.org/tools_api/mhci/'
+        return 'http://tools-cluster-interface.iedb.org/tools_api/mhci/'
+
+    @property
+    def needs_epitope_length(self):
+        return True
+
+    @classmethod
+    def prediction_classes(cls):
+        return cls.__subclasses__()
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
@@ -109,6 +125,16 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
         if length not in valid_lengths:
             sys.exit("Length %s not valid for allele %s and method %s." % (length, allele, self.iedb_prediction_method))
 
+    def iedb_executable_params(self, args):
+        return [
+            'python2.7',
+            args.iedb_executable_path,
+            args.method,
+            args.allele,
+            str(args.epitope_length),
+            args.input_file.name,
+        ]
+
 class NetMHC(MHCI):
     @property
     def iedb_prediction_method(self):
@@ -142,7 +168,15 @@ class PickPocket(MHCI):
 class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
     def url(self):
-        return 'http://tools-api.iedb.org/tools_api/mhcii/'
+        return 'http://tools-cluster-interface.iedb.org/tools_api/mhcii/'
+
+    @property
+    def needs_epitope_length(self):
+        return False
+
+    @classmethod
+    def prediction_classes(cls):
+        return cls.__subclasses__()
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
@@ -161,6 +195,15 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
         if not self.valid_allele_names_dict:
             self.valid_allele_names_dict = self.parse_iedb_allele_file()
         return self.valid_allele_names_dict
+
+    def iedb_executable_params(self, args):
+        return [
+            'python2.7',
+            args.iedb_executable_path,
+            args.method,
+            args.allele,
+            args.input_file.name,
+        ]
 
 class NetMHCIIpan(MHCII):
     @property

@@ -29,7 +29,7 @@ for dirpath, dirnames, filenames in os.walk("pvacseq/server"):
 
 setup(
     name="pvacseq",
-    version="4.0.0",
+    version="4.0.6",
     packages=["pvacseq", "pvacseq.lib", "pvacseq.server"],
     entry_points={
         "console_scripts":[
@@ -46,7 +46,7 @@ setup(
     ],
     package_data={
         'pvacseq' : data_files,
-        'pvacseq.server': server_data
+        'pvacseq.server' : server_data,
     },
     classifiers=[
         'Development Status :: 4 - Beta',

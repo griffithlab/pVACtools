@@ -11,41 +11,9 @@ import os
 from math import ceil
 from statistics import median
 from lib.prediction_class import *
+import yaml
 
 csv.field_size_limit(sys.maxsize)
-
-def protein_identifier_for_label(key_file):
-    tsv_reader = csv.reader(key_file, delimiter='\t')
-    pattern = re.compile('>')
-    key_hash = {}
-    for line in tsv_reader:
-        new_name      = line[0]
-        original_name = line[1]
-        original_name = pattern.sub('', original_name)
-        key_hash[new_name] = original_name
-
-    return key_hash
-
-def min_match_count(peptide_length):
-    return ceil(peptide_length / 2)
-
-def determine_consecutive_matches(mt_epitope_seq, wt_epitope_seq):
-    consecutive_matches = 0
-    left_padding        = 0
-    #Count consecutive matches from the beginning of the epitope sequences
-    for a, b in zip(mt_epitope_seq, wt_epitope_seq):
-        if a == b:
-            consecutive_matches += 1
-            left_padding        += 1
-        else:
-            break
-    #Count consecutive matches from the end of the epitope sequences
-    for a, b in zip(reversed(mt_epitope_seq), reversed(wt_epitope_seq)):
-        if a == b:
-            consecutive_matches += 1
-        else:
-            break
-    return consecutive_matches, left_padding
 
 def parse_input_tsv_file(input_tsv_file):
     tsv_reader = csv.DictReader(input_tsv_file, delimiter='\t')
@@ -54,47 +22,212 @@ def parse_input_tsv_file(input_tsv_file):
         tsv_entries[line['index']] = line
     return tsv_entries
 
-def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
-    for key, result in iedb_results.items():
-        (wt_iedb_result_key, mt_position) = key.split('|', 1)
-        if result['variant_type'] == 'missense':
-            iedb_results[key]['wt_epitope_seq'] = wt_iedb_results[wt_iedb_result_key][mt_position]['wt_epitope_seq']
-            iedb_results[key]['wt_scores']      = wt_iedb_results[wt_iedb_result_key][mt_position]['wt_scores']
+def min_match_count(peptide_length):
+    return ceil(peptide_length / 2)
+
+def determine_consecutive_matches_from_left(mt_epitope_seq, wt_epitope_seq):
+    consecutive_matches = 0
+    for a, b in zip(mt_epitope_seq, wt_epitope_seq):
+        if a == b:
+            consecutive_matches += 1
         else:
-            wt_results        = wt_iedb_results[wt_iedb_result_key]
-            mt_epitope_seq    = result['mt_epitope_seq']
-            best_match_count  = 0
-            best_left_padding = 0
-            for wt_position, wt_result in wt_results.items():
-                wt_epitope_seq = wt_result['wt_epitope_seq']
+            break
+    return consecutive_matches
 
-                consecutive_matches, left_padding = determine_consecutive_matches(mt_epitope_seq, wt_epitope_seq)
-                if consecutive_matches > best_match_count:
-                    best_match_count    = consecutive_matches
-                    best_left_padding   = left_padding
-                    best_match_position = wt_position
-                elif consecutive_matches == best_match_count and left_padding > best_left_padding:
-                    best_left_padding   = left_padding
-                    best_match_position = wt_position
+def determine_consecutive_matches_from_right(mt_epitope_seq, wt_epitope_seq):
+    consecutive_matches = 0
+    for a, b in zip(reversed(mt_epitope_seq), reversed(wt_epitope_seq)):
+        if a == b:
+            consecutive_matches += 1
+        else:
+            break
+    return consecutive_matches
 
-            if best_match_count >= min_match_count(int(iedb_results[key]['peptide_length'])):
-                iedb_results[key]['wt_epitope_seq'] = wt_iedb_results[wt_iedb_result_key][best_match_position]['wt_epitope_seq']
-                iedb_results[key]['wt_scores']      = wt_iedb_results[wt_iedb_result_key][best_match_position]['wt_scores']
+def find_mutation_position(wt_epitope_seq, mt_epitope_seq):
+    for i,(wt_aa,mt_aa) in enumerate(zip(wt_epitope_seq,mt_epitope_seq)):
+        if wt_aa != mt_aa:
+            return i+1
+    return 0
+
+def match_wildtype_and_mutant_entry_for_missense(result, mt_position, wt_results):
+    #The WT epitope at the same position is the match
+    match_position = mt_position
+    result['wt_epitope_seq']    = wt_results[match_position]['wt_epitope_seq']
+    result['wt_scores']         = wt_results[match_position]['wt_scores']
+    result['mutation_position'] = find_mutation_position(result['wt_epitope_seq'], result['mt_epitope_seq'])
+
+def match_wildtype_and_mutant_entry_for_frameshift(result, mt_position, wt_results, previous_result):
+    #The WT epitope at the same position is the match
+    match_position = mt_position
+    #Since the MT sequence is longer than the WT sequence, not all MT epitopes have a match
+    if match_position not in wt_results:
+        result['wt_epitope_seq'] = 'NA'
+        result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+        if previous_result['mutation_position'] == 'NA':
+            result['mutation_position'] = 'NA'
+        elif previous_result['mutation_position'] > 0:
+            result['mutation_position'] = previous_result['mutation_position'] - 1
+        else:
+            result['mutation_position'] = 0
+        return
+
+    mt_epitope_seq = result['mt_epitope_seq']
+    wt_result      = wt_results[match_position]
+    wt_epitope_seq = wt_result['wt_epitope_seq']
+    if mt_epitope_seq == wt_epitope_seq:
+        #The MT epitope does not overlap the frameshift mutation
+        result['wt_epitope_seq']    = wt_result['wt_epitope_seq']
+        result['wt_scores']         = wt_result['wt_scores']
+        result['mutation_position'] = 'NA'
+    else:
+        #Determine how many consecutive amino acids are the same between the MT epitope and its matching WT epitope
+        consecutive_matches = determine_consecutive_matches_from_left(mt_epitope_seq, wt_epitope_seq)
+        if consecutive_matches >= min_match_count(int(result['peptide_length'])):
+            #The minimum amino acid match count is met
+            result['wt_epitope_seq'] = wt_result['wt_epitope_seq']
+            result['wt_scores']      = wt_result['wt_scores']
+        else:
+            #The minimum amino acid match count is not met
+            #Even though there is a matching WT epitope there are not enough overlapping amino acids
+            #We don't include the matching WT epitope in the output
+            result['wt_epitope_seq'] = 'NA'
+            result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+        mutation_position = find_mutation_position(wt_epitope_seq, mt_epitope_seq)
+        if mutation_position == 1 and int(previous_result['mutation_position']) <= 1:
+            #The true mutation position is to the left of the current MT eptiope
+            mutation_position = 0
+        result['mutation_position'] = mutation_position
+
+def match_wildtype_and_mutant_entry_for_inframe_indel(result, mt_position, wt_results, previous_result, iedb_results_for_wt_iedb_result_key):
+    #If the previous WT epitope was matched "from the right" we can just use that position to infer the mutation position and match direction
+    if previous_result is not None and previous_result['match_direction'] == 'right':
+        best_match_position           = previous_result['wt_epitope_position'] + 1
+        result['wt_epitope_position'] = best_match_position
+        result['match_direction']     = 'right'
+        if previous_result['mutation_position'] > 0:
+            result['mutation_position'] = previous_result['mutation_position'] - 1
+        else:
+            result['mutation_position'] = 0
+
+        #We need to ensure that the matched WT eptiope has enough overlapping amino acids with the MT epitope
+        best_match_wt_result = wt_results[str(best_match_position)]
+        best_match_count     = determine_consecutive_matches_from_right(result['mt_epitope_seq'], best_match_wt_result['wt_epitope_seq'])
+        if best_match_count and best_match_count >= min_match_count(int(result['peptide_length'])):
+            #The minimum amino acid match count is met
+            result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
+            result['wt_scores']      = best_match_wt_result['wt_scores']
+        else:
+            #The minimum amino acid match count is not met
+            #Even though there is a matching WT epitope there are not enough overlapping amino acids
+            #We don't include the matching WT epitope in the output
+            result['wt_epitope_seq'] = 'NA'
+            result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+
+        return
+
+    #In all other cases the WT epitope at the same position is used as the baseline match
+    baseline_best_match_position = mt_position
+
+    #For an inframe insertion the MT sequence is longer than the WT sequence
+    #In this case not all MT epitopes might have a baseline match
+    if baseline_best_match_position not in wt_results:
+        result['wt_epitope_seq'] = 'NA'
+        result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+        #We then infer the mutation position and match direction from the previous MT epitope
+        result['match_direction']= previous_result['match_direction']
+        if previous_result['mutation_position'] > 0:
+            result['mutation_position'] = previous_result['mutation_position'] - 1
+        else:
+            result['mutation_position'] = 0
+        return
+
+    mt_epitope_seq = result['mt_epitope_seq']
+    baseline_best_match_wt_result      = wt_results[baseline_best_match_position]
+    baseline_best_match_wt_epitope_seq = baseline_best_match_wt_result['wt_epitope_seq']
+    #The MT epitope does not overlap the indel mutation
+    if baseline_best_match_wt_epitope_seq == mt_epitope_seq:
+        result['wt_epitope_seq']      = baseline_best_match_wt_result['wt_epitope_seq']
+        result['wt_scores']           = baseline_best_match_wt_result['wt_scores']
+        result['wt_epitope_position'] = int(baseline_best_match_position)
+        result['mutation_position']   = 'NA'
+        result['match_direction']     = 'left'
+
+    #If there is no previous result or the previous WT epitope was matched "from the left" we start by comparing to the baseline match
+    if previous_result is None or previous_result['match_direction'] == 'left':
+        best_match_count  = determine_consecutive_matches_from_left(mt_epitope_seq, baseline_best_match_wt_epitope_seq)
+        #The alternate best match candidate "from the right" is inferred from the baseline best match position and the indel length
+        if result['variant_type'] == 'inframe_ins':
+            insertion_length              = len(iedb_results_for_wt_iedb_result_key.keys()) - len(wt_results.keys())
+            alternate_best_match_position = int(baseline_best_match_position) - insertion_length
+        elif result['variant_type'] == 'inframe_del':
+            deletion_length                 = len(wt_results.keys()) - len(iedb_results_for_wt_iedb_result_key.keys())
+            alternate_best_match_position   = int(baseline_best_match_position) + deletion_length
+        if alternate_best_match_position > 0:
+            alternate_best_match_wt_result      = wt_results[str(alternate_best_match_position)]
+            alternate_best_match_wt_epitope_seq = alternate_best_match_wt_result['wt_epitope_seq']
+            consecutive_matches_from_right      = determine_consecutive_matches_from_right(mt_epitope_seq, alternate_best_match_wt_epitope_seq)
+            #We then check if the alternate best match epitope has more matching amino acids than the baseline best match epitope
+            #If it does, we pick it as the best match
+            if consecutive_matches_from_right > best_match_count:
+                best_match_count     = consecutive_matches_from_right
+                match_direction      = 'right'
+                best_match_position  = alternate_best_match_position
+                best_match_wt_result = alternate_best_match_wt_result
             else:
-                iedb_results[key]['wt_epitope_seq'] = 'NA'
-                iedb_results[key]['wt_scores']      =  dict.fromkeys(iedb_results[key]['mt_scores'].keys(), 'NA')
+                match_direction      = 'left'
+                best_match_position  = baseline_best_match_position
+                best_match_wt_result = baseline_best_match_wt_result
+        else:
+            match_direction      = 'left'
+            best_match_position  = baseline_best_match_position
+            best_match_wt_result = baseline_best_match_wt_result
+
+        #Now that we have found the matching WT epitope we still need to ensure that it has enough overlapping amino acids
+        if best_match_count and best_match_count >= min_match_count(int(result['peptide_length'])):
+            #The minimum amino acid match count is met
+            result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
+            result['wt_scores']      = best_match_wt_result['wt_scores']
+        else:
+            #The minimum amino acid match count is not met
+            #Even though there is a matching WT epitope there are not enough overlapping amino acids
+            #We don't include the matching WT epitope in the output
+            result['wt_epitope_seq'] = 'NA'
+            result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+
+        result['mutation_position']   = find_mutation_position(baseline_best_match_wt_epitope_seq, mt_epitope_seq)
+        result['match_direction']     = match_direction
+        result['wt_epitope_position'] = best_match_position
+
+def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
+    for key in sorted(iedb_results.keys(), key = lambda x: int(x.split('|')[-1])):
+        result = iedb_results[key]
+        (wt_iedb_result_key, mt_position) = key.split('|', 1)
+        previous_mt_position = str(int(mt_position)-1)
+        previous_key = '|'.join([wt_iedb_result_key, previous_mt_position])
+        if previous_key in iedb_results:
+            previous_result = iedb_results[previous_key]
+        else:
+            previous_result = None
+        wt_results = wt_iedb_results[wt_iedb_result_key]
+        if result['variant_type'] == 'missense':
+            match_wildtype_and_mutant_entry_for_missense(result, mt_position, wt_results)
+        elif result['variant_type'] == 'FS':
+             match_wildtype_and_mutant_entry_for_frameshift(result, mt_position, wt_results, previous_result)
+        elif result['variant_type'] == 'inframe_ins' or result['variant_type'] == 'inframe_del':
+            iedb_results_for_wt_iedb_result_key = dict([(key,value) for key, value in iedb_results.items() if key.startswith(wt_iedb_result_key)])
+            match_wildtype_and_mutant_entry_for_inframe_indel(result, mt_position, wt_results, previous_result, iedb_results_for_wt_iedb_result_key)
 
     return iedb_results
 
 def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
-    protein_identifier_from_label = protein_identifier_for_label(key_file)
+    protein_identifiers_from_label = yaml.load(key_file)
     iedb_results = {}
     wt_iedb_results = {}
     for input_iedb_file in input_iedb_files:
         iedb_tsv_reader = csv.DictReader(input_iedb_file, delimiter='\t')
         (sample, method, remainder) = os.path.basename(input_iedb_file.name).split(".", 2)
         for line in iedb_tsv_reader:
-            protein_label  = line['seq_num']
+            protein_label  = int(line['seq_num'])
             if 'core_peptide' in line:
                 position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
             else:
@@ -104,34 +237,35 @@ def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
             allele         = line['allele']
             peptide_length = len(epitope)
 
-            if protein_identifier_from_label[protein_label] is not None:
-                protein_identifier = protein_identifier_from_label[protein_label]
+            if protein_identifiers_from_label[protein_label] is not None:
+                protein_identifiers = protein_identifiers_from_label[protein_label]
 
-            (protein_type, tsv_index) = protein_identifier.split('.', 1)
-            if protein_type == 'MT':
-                tsv_entry = tsv_entries[tsv_index]
-                key = "%s|%s" % (tsv_index, position)
-                if key not in iedb_results:
-                    iedb_results[key] = {}
-                    iedb_results[key]['mt_scores']         = {}
-                    iedb_results[key]['mt_epitope_seq']    = epitope
-                    iedb_results[key]['gene_name']         = tsv_entry['gene_name']
-                    iedb_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
-                    iedb_results[key]['variant_type']      = tsv_entry['variant_type']
-                    iedb_results[key]['position']          = position
-                    iedb_results[key]['tsv_index']         = tsv_index
-                    iedb_results[key]['allele']            = allele
-                    iedb_results[key]['peptide_length']    = peptide_length
-                iedb_results[key]['mt_scores'][method] = float(score)
+            for protein_identifier in protein_identifiers:
+                (protein_type, tsv_index) = protein_identifier.split('.', 1)
+                if protein_type == 'MT':
+                    tsv_entry = tsv_entries[tsv_index]
+                    key = "%s|%s" % (tsv_index, position)
+                    if key not in iedb_results:
+                        iedb_results[key] = {}
+                        iedb_results[key]['mt_scores']         = {}
+                        iedb_results[key]['mt_epitope_seq']    = epitope
+                        iedb_results[key]['gene_name']         = tsv_entry['gene_name']
+                        iedb_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
+                        iedb_results[key]['variant_type']      = tsv_entry['variant_type']
+                        iedb_results[key]['position']          = position
+                        iedb_results[key]['tsv_index']         = tsv_index
+                        iedb_results[key]['allele']            = allele
+                        iedb_results[key]['peptide_length']    = peptide_length
+                    iedb_results[key]['mt_scores'][method] = float(score)
 
-            if protein_type == 'WT':
-                if tsv_index not in wt_iedb_results:
-                    wt_iedb_results[tsv_index] = {}
-                if position not in wt_iedb_results[tsv_index]:
-                    wt_iedb_results[tsv_index][position] = {}
-                    wt_iedb_results[tsv_index][position]['wt_scores']     = {}
-                wt_iedb_results[tsv_index][position]['wt_epitope_seq']    = epitope
-                wt_iedb_results[tsv_index][position]['wt_scores'][method] = float(score)
+                if protein_type == 'WT':
+                    if tsv_index not in wt_iedb_results:
+                        wt_iedb_results[tsv_index] = {}
+                    if position not in wt_iedb_results[tsv_index]:
+                        wt_iedb_results[tsv_index][position] = {}
+                        wt_iedb_results[tsv_index][position]['wt_scores']     = {}
+                    wt_iedb_results[tsv_index][position]['wt_epitope_seq']    = epitope
+                    wt_iedb_results[tsv_index][position]['wt_scores'][method] = float(score)
 
     return match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
 
@@ -185,6 +319,7 @@ def flatten_iedb_results(iedb_results):
         value['gene_name'],
         value['amino_acid_change'],
         value['position'],
+        value['mutation_position'],
         value['mt_scores'],
         value['wt_scores'],
         value['wt_epitope_seq'],
@@ -208,7 +343,7 @@ def sort_iedb_results(flattened_iedb_results, top_score_metric):
             key=lambda flattened_iedb_results: (
                 flattened_iedb_results[0],
                 flattened_iedb_results[1],
-                flattened_iedb_results[13],
+                flattened_iedb_results[14],
                 " ".join(str(item) for item in flattened_iedb_results),
             )
         )
@@ -218,7 +353,7 @@ def sort_iedb_results(flattened_iedb_results, top_score_metric):
             key=lambda flattened_iedb_results: (
                 flattened_iedb_results[0],
                 flattened_iedb_results[1],
-                flattened_iedb_results[10],
+                flattened_iedb_results[11],
                 " ".join(str(item) for item in flattened_iedb_results),
             )
         )
@@ -253,6 +388,7 @@ def base_headers():
         'HLA Allele',
         'Peptide Length',
         'Sub-peptide Position',
+        'Mutation Position',
         'MT Epitope Seq',
         'WT Epitope Seq',
         'Best MT Score Method',
@@ -319,6 +455,7 @@ def main(args_input = sys.argv[1:]):
         gene_name,
         variant_aa,
         position,
+        mutation_position,
         mt_scores,
         wt_scores,
         wt_epitope_seq,
@@ -356,6 +493,7 @@ def main(args_input = sys.argv[1:]):
                 'HLA Allele'          : allele,
                 'Peptide Length'      : peptide_length,
                 'Sub-peptide Position': position,
+                'Mutation Position'   : mutation_position,
                 'MT Epitope Seq'      : mt_epitope_seq,
                 'WT Epitope Seq'      : wt_epitope_seq,
                 'Best MT Score Method': PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
