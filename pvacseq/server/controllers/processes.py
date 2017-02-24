@@ -50,7 +50,7 @@ def is_running(process):
         return False
     return True
 
-#ROUTE:
+
 def processes():
     """Returns a list of processes, and whether or not each process is running"""
     data = initialize()
@@ -59,7 +59,7 @@ def processes():
         'running':is_running(fetch_process(i, data, current_app.config['children']))
     } for i in range(data['processid']+1) if 'process-%d'%i in data]
 
-#ROUTE:
+
 def process_info(id):
     """Returns more detailed information about a specific process"""
     data = initialize()
@@ -96,7 +96,7 @@ def process_info(id):
         'running':is_running(process)
     }
 
-#ROUTE:
+
 def stop(id):
     """Stops the requested process.  This is only allowed if the child is still attached"""
     data = initialize()
@@ -106,7 +106,7 @@ def stop(id):
             current_app.config['children'][id].terminate()
     return status
 
-#ROUTE:
+
 def shutdown():
     """Stops all attached, running children"""
     data = initialize()
@@ -120,7 +120,7 @@ def shutdown():
                 current_app.config['children'][i].terminate()
     return output
 
-#ROUTE:
+
 def reset(clearall):
     """Clears out finished processes from the record"""
     data = initialize()

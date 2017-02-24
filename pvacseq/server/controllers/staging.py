@@ -4,7 +4,7 @@ from flask import current_app
 from yaml import dump
 from .utils import initialize, savedata
 
-#ROUTE:
+
 def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
           peptide_sequence_length, gene_expn_file, transcript_expn_file,
           normal_snvs_coverage_file, normal_indels_coverage_file,
@@ -90,7 +90,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
               expn_val, net_chop_threshold,
               fasta_size, downstream_sequence_length, len(keep_tmp_files))
 
-#ROUTE:
+
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
           peptide_sequence_length, additional_input_file_list,
           net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
@@ -225,7 +225,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
     writer.close()
     return data['processid']
 
-#ROUTE:
+
 def test():
     """Return the submission page (a stand-in until there is a proper ui for submission)"""
     reader = open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_start.html'))
@@ -233,7 +233,7 @@ def test():
     reader.close()
     return data
 
-#ROUTE:
+
 def check_allele(allele):
     """Checks if the requested allele is supported by pVAC-Seq or not"""
     data = initialize()

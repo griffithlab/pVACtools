@@ -5,7 +5,7 @@ from .processes import fetch_process, is_running, gen_files_list
 from .database import filterfile
 from .utils import initialize, savedata, descriptions, column_filter
 
-#ROUTE:
+
 def results_get(id):
     """Get the list of result files from a specific pVAC-Seq run"""
     data = initialize()
@@ -43,7 +43,7 @@ def results_get(id):
         })
     return output
 
-#ROUTE:
+
 def results_getfile(id, fileID, count, page, filters, sort, direction):
     """(DEPRECATED) Read data directly from a specific output file"""
     return filterfile(
@@ -57,7 +57,7 @@ def results_getfile(id, fileID, count, page, filters, sort, direction):
     )
 
 
-#ROUTE:
+
 def results_getcols(id, fileID):
     """Get a mapping of standardized column names -> original column names"""
     data = initialize()
