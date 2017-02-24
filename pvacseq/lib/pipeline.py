@@ -361,7 +361,7 @@ class MHCIPipeline(Pipeline):
                             continue
                         status_message("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, fasta_chunk))
 
-                        if not os.environ.get('TEST_FLAG'):
+                        if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
                             if 'last_execute_timestamp' in locals() and not self.iedb_executable:
                                 elapsed_time = ( datetime.datetime.now() - last_execute_timestamp ).total_seconds()
                                 wait_time = 60 - elapsed_time
@@ -459,7 +459,7 @@ class MHCIIPipeline(Pipeline):
                         continue
                     status_message("Running IEDB on Allele %s with Method %s - Entries %s" % (a, method, fasta_chunk))
 
-                    if not os.environ.get('TEST_FLAG'):
+                    if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
                         if 'last_execute_timestamp' in locals() and not self.iedb_executable:
                             elapsed_time = ( datetime.datetime.now() - last_execute_timestamp ).total_seconds()
                             wait_time = 60 - elapsed_time
