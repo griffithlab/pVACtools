@@ -56,7 +56,7 @@ def column_mapping(row, mapping, data):
     changes = {}
     for (col, val) in row.items():
         col = column_filter(col)
-        if col not in data['schema']:
+        if col not in data['schema'] and mapping[col]==str:
             if _f.match(val):
                 try:
                     float(val)
