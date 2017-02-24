@@ -148,7 +148,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
 
     data['processid']+=1
     os.makedirs(os.path.dirname(logfile), exist_ok = True)
-    current_app.config['children'][data['processid']] = subprocess.Popen(
+    current_app.config['storage']['children'][data['processid']] = subprocess.Popen(
         command,
         stdout=open(logfile, 'w'),  # capture stdout in the logfile
         stderr=subprocess.STDOUT,
@@ -162,7 +162,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         # The executed command is automatically escaped as part of Popen
         'command': " ".join(command),
         'logfile':logfile,
-        'pid':current_app.config['children'][data['processid']].pid,
+        'pid':current_app.config['storage']['children'][data['processid']].pid,
         'status': "Task Started",
         'output':os.path.abspath(output)
     }

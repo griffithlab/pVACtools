@@ -11,20 +11,13 @@ _f = re.compile(r'^\d*\.\d+$')
 _i = re.compile(r'^\d+$')
 queryfilters = re.compile(r'(.+)(<=?|>=?|!=|==)(.+)')
 
-def init_column_mapping(row, data):
+def init_column_mapping(row, schema):
     """Generate initial estimates of column data types"""
-    if 'schema' not in data:
-        data['schema'] = {
-            'chromosome':'text',
-            'start':'bigint',
-            'stop':'bigint'
-        }
-        savedata(data)
     defs = {column_filter(col):'text' for col in row}
-    defs.update(data['schema'])
+    defs.update(schema)
     for (col, val) in row.items():
         col = column_filter(col)
-        if col not in data['schema']:
+        if col not in schema:
             if _f.match(val):
                 try:
                     float(val)
@@ -49,14 +42,14 @@ def init_column_mapping(row, data):
             mapping[col] = str
     return (mapping, defs)
 
-def column_mapping(row, mapping, data):
+def column_mapping(row, mapping, schema):
     """Apply filtering to the current row.
     Detect if column data types need to be changed"""
     output = {}
     changes = {}
     for (col, val) in row.items():
         col = column_filter(col)
-        if col not in data['schema'] and mapping[col]==str:
+        if col not in schema and mapping[col]==str:
             if _f.match(val):
                 try:
                     float(val)
@@ -93,12 +86,12 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     )
 
     #check if the table exists:
-    db = current_app.config['db']
+    db = current_app.config['storage']['db']
     query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     if not len(query(tablekey)): #table does not exist
         #Open a reader to cache the file in the database
         if parentID != -1:
-            process = fetch_process(parentID, data, current_app.config['children'])
+            process = fetch_process(parentID, data, current_app.config['storage']['children'])
             if not process[0]:
                 return (
                     {
@@ -129,7 +122,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                     }
                 )
             raw_reader = open(os.path.join(
-                os.path.abspath(current_app.config['dropbox_dir']),
+                os.path.abspath(current_app.config['files']['dropbox-dir']),
                 data['dropbox'][str(fileID)]
             ))
         reader = csv.DictReader(raw_reader, delimiter='\t')
@@ -140,7 +133,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
         tmp_reader.close()
 
         #Get an initial estimate of column datatypes from the first row
-        (mapping, column_names) = init_column_mapping(init, data)
+        (mapping, column_names) = init_column_mapping(init, current_app.config['schema'])
         tablecolumns = "\n".join( #use the estimated types to create the table
             "%s %s,"%(colname, column_names[colname])
             for colname in column_names
@@ -165,7 +158,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
         for row in reader:
             #process each row
             #We format the data in the row and update column data types, if necessary
-            (mapping, formatted, changes) = column_mapping(row, mapping, data)
+            (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
             alter_cols = []
             for (k,v) in changes.items():
                 #if there were any changes to the data type, update the table

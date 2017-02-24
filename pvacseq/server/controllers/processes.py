@@ -56,14 +56,14 @@ def processes():
     data = initialize()
     return [{
         'id':i,
-        'running':is_running(fetch_process(i, data, current_app.config['children']))
+        'running':is_running(fetch_process(i, data, current_app.config['storage']['children']))
     } for i in range(data['processid']+1) if 'process-%d'%i in data]
 
 
 def process_info(id):
     """Returns more detailed information about a specific process"""
     data = initialize()
-    process = fetch_process(id, data, current_app.config['children'])
+    process = fetch_process(id, data, current_app.config['storage']['children'])
     if not process[0]:
         return (
             {
@@ -103,7 +103,7 @@ def stop(id):
     status = process_info(id)
     if type(status) == dict:  # status could be an error object if the id is invalid
         if status['running'] and status['pid']>1:
-            current_app.config['children'][id].terminate()
+            current_app.config['storage']['children'][id].terminate()
     return status
 
 
@@ -112,12 +112,12 @@ def shutdown():
     data = initialize()
     output = []
     for i in range(data['processid']+1):
-        proc = fetch_process(i, data, current_app.config['children'])
-        if is_running(proc) and i in current_app.config['children']:
+        proc = fetch_process(i, data, current_app.config['storage']['children'])
+        if is_running(proc) and i in current_app.config['storage']['children']:
             output.append(i)
-            current_app.config['children'][i].wait(.1)
+            current_app.config['storage']['children'][i].wait(.1)
             if is_running(proc):
-                current_app.config['children'][i].terminate()
+                current_app.config['storage']['children'][i].terminate()
     return output
 
 
@@ -126,16 +126,16 @@ def reset(clearall):
     data = initialize()
     output = []
     for i in range(data['processid']+1):
-        proc = fetch_process(i, data, current_app.config['children'])
+        proc = fetch_process(i, data, current_app.config['storage']['children'])
         if 'process-%d'%i in data and is_running(proc):
-            if i not in current_app.config['children']:
+            if i not in current_app.config['storage']['children']:
                 shutil.rmtree(data['process-%d'%i]['output'])
                 del data['process-%d'%i]
                 output.append(i)
             elif clearall:
                 shutil.rmtree(data['process-%d'%i]['output'])
                 del data['process-%d'%i]
-                del current_app.config['children'][i]
+                del current_app.config['storage']['children'][i]
                 output.append(i)
     # Set the processid to the highest child process from this session
     data['processid'] = max(i for i in range(data['processid']+1) if 'process-%d'%i in data)

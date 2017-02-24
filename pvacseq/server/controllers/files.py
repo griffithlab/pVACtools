@@ -11,7 +11,7 @@ def results_get(id):
     data = initialize()
     if id == -1:
         return list_dropbox()
-    process = fetch_process(id, data, current_app.config['children'])
+    process = fetch_process(id, data, current_app.config['storage']['children'])
     if not process[0]:
         return (
             {
@@ -70,7 +70,7 @@ def results_getcols(id, fileID):
             }
         raw_reader = open(
             os.path.join(
-                os.path.abspath(current_app.config['dropbox_dir']),
+                os.path.abspath(current_app.config['files']['dropbox-dir']),
                 data['dropbox'][str(fileID)]
             )
         )
@@ -80,7 +80,7 @@ def results_getcols(id, fileID):
         }
         raw_reader.close()
         return output
-    process = fetch_process(id, data, current_app.config['children'])
+    process = fetch_process(id, data, current_app.config['storage']['children'])
     if not process[0]:
         return (
             {
@@ -113,12 +113,12 @@ def list_dropbox():
             'fileID':key,
             'description':descriptions[ext] if ext in descriptions else "Unknown file",
             'display_name':os.path.relpath(
-                os.path.join(current_app.config['dropbox_dir'], data['dropbox'][key])
+                os.path.join(current_app.config['files']['dropbox-dir'], data['dropbox'][key])
             ),
             'url':'/api/v1/dropbox/files/%d'%(int(key)),
             'size':"%0.3f KB"%(
                 os.path.getsize(os.path.join(
-                    current_app.config['dropbox_dir'],
+                    current_app.config['files']['dropbox-dir'],
                     data['dropbox'][key]
                 ))/1024
             )
