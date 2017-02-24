@@ -88,7 +88,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
               binding_threshold, minimum_fold_change,
               normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
               expn_val, net_chop_threshold,
-              fasta_size, downstream_sequence_length, len(keep_tmp_files))
+              fasta_size, iedb_retries, downstream_sequence_length, len(keep_tmp_files))
 
 
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
