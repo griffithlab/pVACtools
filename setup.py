@@ -42,6 +42,7 @@ setup(
         'requests',
         'PyYAML',
         'connexion',
+        'py-postgresql',
         'watchdog'
     ],
     package_data={
