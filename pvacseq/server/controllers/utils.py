@@ -50,6 +50,7 @@ def initialize():
         if 'filtertables' not in data:
             data['filtertables']={}
         reboot = subprocess.check_output(['last', 'reboot']).decode().split("\n")[0]
+        current_app.config['reboot'] = reboot
         if 'reboot' in data and data['reboot'] != reboot:
             print("A reboot has occurred since the server was first started")
             print(

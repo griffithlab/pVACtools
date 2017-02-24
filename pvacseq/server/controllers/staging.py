@@ -166,7 +166,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         'output':os.path.abspath(output)
     }
     if 'reboot' not in data:
-        data['reboot'] = reboot
+        data['reboot'] = current_app.config['reboot']
     savedata(data)
     configObj = {
         'action':'run',
