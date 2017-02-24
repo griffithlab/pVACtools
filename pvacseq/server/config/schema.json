@@ -1,5 +1,5 @@
 {
-  "chromosome":"text",
+  "chromosome":"integer",
   "start":"bigint",
   "stop":"bigint"
 }

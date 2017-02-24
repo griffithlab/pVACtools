@@ -166,6 +166,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         'status': "Task Started",
         'output':os.path.abspath(output)
     }
+    data['_datafiles'][current_app.config['files']['processes']].append('process-%d'%(data['processid']))
     if 'reboot' not in data:
         data['reboot'] = current_app.config['reboot']
     savedata(data)
@@ -173,16 +174,16 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         'action':'run',
         'input_file': input,
         'sample_name':samplename,
-        'alleles':','.split(alleles),
-        'prediction_algorithms':','.split(prediction_algorithms),
+        'alleles':alleles.split(','),
+        'prediction_algorithms':prediction_algorithms.split(','),
         'output_directory':output
     }
     if epitope_lengths!=10:
-        configObj['epitope_lengths']=','.split(epitope_lengths)
+        configObj['epitope_lengths']=epitope_lengths.split(',')
     if peptide_sequence_length!=21:
         configObj['peptide_sequence_length']=peptide_sequence_length
     if additional_input_file_list!='':
-        configObj['additional_input_files']=','.split(additional_input_file_list)
+        configObj['additional_input_files']=additional_input_file_list.split(',')
     if net_chop_method!='':
         configObj['net_chop_method']=net_chop_method
     if netmhc_stab:
@@ -215,7 +216,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         configObj['fasta_size']=fasta_size
     if iedb_retries!=5:
         configObj['iedb_retries'] = iedb_retries
-    if downstream_sequence_length!="1000":
+    if downstream_sequence_length!=1000:
         configObj['downstream_sequence_length']=downstream_sequence_length
 
     writer = open(os.path.join(
@@ -229,6 +230,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
 
 def test():
     """Return the submission page (a stand-in until there is a proper ui for submission)"""
+    initialize() #we don't *need* to initialize here, but it avoids missing the opportunity if this route runs first
     reader = open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_start.html'))
     data = reader.read()
     reader.close()

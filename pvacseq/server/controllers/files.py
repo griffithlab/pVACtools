@@ -1,6 +1,7 @@
 import os
 import csv
 from flask import current_app
+import subprocess
 from .processes import fetch_process, is_running, gen_files_list
 from .database import filterfile
 from .utils import initialize, savedata, descriptions, column_filter
@@ -39,7 +40,11 @@ def results_get(id):
                     process[0]['output'],
                     process[0]['files'][fileID]
                 ))/1024
-            )
+            ),
+            'rows':int(subprocess.check_output(['wc', '-l', os.path.join(
+                process[0]['output'],
+                process[0]['files'][fileID]
+            )]).decode().split()[0])-1,
         })
     return output
 
@@ -115,13 +120,17 @@ def list_dropbox():
             'display_name':os.path.relpath(
                 os.path.join(current_app.config['files']['dropbox-dir'], data['dropbox'][key])
             ),
-            'url':'/api/v1/dropbox/files/%d'%(int(key)),
+            'url':'/api/v1/processes/-1/results/%d'%(int(key)),
             'size':"%0.3f KB"%(
                 os.path.getsize(os.path.join(
                     current_app.config['files']['dropbox-dir'],
                     data['dropbox'][key]
                 ))/1024
-            )
+            ),
+            'rows':int(subprocess.check_output(['wc', '-l', os.path.join(
+                current_app.config['files']['dropbox-dir'],
+                data['dropbox'][key]
+            )]).decode().split()[0])-1,
         } for (key, ext) in zip(
             data['dropbox'].keys(),
             ('.'.join(data['dropbox'][key].split('.')[1:]) for key in data['dropbox'])

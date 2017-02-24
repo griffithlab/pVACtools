@@ -277,8 +277,8 @@ paths:
       - name: "downstream_sequence_length"
         in : "formData"
         description: "Downstream Sequence Length: Cap to limit the downstream sequence length for frameshifts when creating the fasta file. Use 'full' to include the full downstream sequence"
-        type: "string"
-        default: "1000"
+        type: "integer"
+        default: 1000
       - name: "keep_tmp_files"
         in: "formData"
         description: "Keep Temp Files? Keep temporary files in the output directory after completion"
@@ -480,8 +480,8 @@ paths:
       - name: "downstream_sequence_length"
         in : "formData"
         description: "Downstream Sequence Length: Cap to limit the downstream sequence length for frameshifts when creating the fasta file. Use 'full' to include the full downstream sequence"
-        type: "string"
-        default: "1000"
+        type: "integer"
+        default: 1000
       - name: "keep_tmp_files"
         in: "formData"
         description: "Keep Temp Files? Keep temporary files in the output directory after completion"
@@ -711,6 +711,31 @@ paths:
             items: {
               type: "object"
             }
+  /api/v1/processes/{parentID}/results/{fileID}/schema:
+    get:
+      tags:
+        - "schema"
+      summary: "Returns the schema for the requested file"
+      description: "File schemas are inferred when loading a file into the database\
+      which means that columns may be assigned different types for two different files\
+      depending on the content"
+      operationId: "pvacseq.server.controllers.database.fileschema"
+      parameters:
+        - name: "parentID"
+          in: "path"
+          description: "ProcessID or -1 for dropbox"
+          required: true
+          type: "integer"
+        - name: "fileID"
+          in: "path"
+          description: "Specific fileID to read"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Returns a mapping of column names to data type"
+          schema:
+            type: "object"
   /static/testpage:
     get:
       tags:
@@ -774,6 +799,9 @@ definitions:
       size:
         type: "string"
         description: "Size of data file, in bytes"
+      rows:
+        type: "integer"
+        description: "Number of rows in the file"
   ProcessSummary:
     type: "object"
     properties:

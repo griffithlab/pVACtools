@@ -13,15 +13,6 @@ from postgresql.exceptions import UndefinedTableError
 import atexit
 from postgresql.exceptions import UndefinedTableError
 
-def check_is_directory(directory):
-    fullpath = os.path.abspath(directory)
-    if os.path.isfile(fullpath):
-        raise argparse.ArgumentTypeError("Path \"%s\" must be a directory"%directory)
-    if not os.path.isdir(fullpath):
-        os.makedirs(fullpath)
-        # raise argparse.ArgumentTypeError("Path \"%s\" must be a directory"%directory)
-    return fullpath
-
 def main():
 
     app = connexion.App(

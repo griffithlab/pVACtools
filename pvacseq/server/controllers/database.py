@@ -7,25 +7,26 @@ from flask import current_app
 from .processes import fetch_process, is_running, gen_files_list
 from .utils import initialize, savedata, column_filter
 
-_f = re.compile(r'^\d*\.\d+$')
-_i = re.compile(r'^\d+$')
+float_pattern = re.compile(r'^\d*\.\d+$')
+int_pattern = re.compile(r'^\d+$')
+NA_pattern = re.compile(r'^NA$')
 queryfilters = re.compile(r'(.+)(<=?|>=?|!=|==)(.+)')
 
 def init_column_mapping(row, schema):
     """Generate initial estimates of column data types"""
     defs = {column_filter(col):'text' for col in row}
-    defs.update(schema)
+    defs.update({k:v for (k,v) in schema.items() if k in defs}) #Apply predefined table schema
     for (col, val) in row.items():
         col = column_filter(col)
         if col not in schema:
-            if _f.match(val):
+            if float_pattern.match(val):
                 try:
                     float(val)
                     print("Assigning float to",col,"based on",val)
                     defs[col] = 'decimal'
                 except ValueError:
                     print("ERROR: Float mismatch:", val)
-            elif _i.match(val):
+            elif int_pattern.match(val):
                 try:
                     int(val)
                     print("Assigning int to",col,"based on",val)
@@ -49,8 +50,11 @@ def column_mapping(row, mapping, schema):
     changes = {}
     for (col, val) in row.items():
         col = column_filter(col)
+        if NA_pattern.match(val):
+            output[col] = None
+            continue
         if col not in schema and mapping[col]==str:
-            if _f.match(val):
+            if float_pattern.match(val):
                 try:
                     float(val)
                     print("Assigning float to",col,"based on",val)
@@ -58,7 +62,7 @@ def column_mapping(row, mapping, schema):
                     changes[col] = float
                 except ValueError:
                     print("ERROR: Float mismatch:", val)
-            elif _i.match(val):
+            elif int_pattern.match(val):
                 try:
                     int(val)
                     print("Assigning int to",col,"based on",val)
@@ -129,7 +133,10 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
 
         tmp_reader = open(raw_reader.name)
         tmp = csv.DictReader(tmp_reader, delimiter='\t')
-        init = next(tmp)
+        try:
+            init = next(tmp)
+        except StopIteration:
+            return []
         tmp_reader.close()
 
         #Get an initial estimate of column datatypes from the first row
@@ -220,7 +227,9 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
         typ = column_maps[colname]
         val = None
         try:
-            val = column_maps[colname](result.group(3))
+            val = column_maps[colname](
+                result.group(3)
+            )
         except ValueError:
             return {
                 "code":400,
@@ -277,3 +286,25 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
             )
         } for row in query.rows()
     ]
+
+
+def fileschema(parentID, fileID):
+    data = initialize()
+    tablekey = "data_%s_%s"%(
+        (parentID if parentID >=0 else 'dropbox'),
+        fileID
+    )
+
+    #check if the table exists:
+    db = current_app.config['storage']['db']
+    query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+    if not len(query(tablekey)): #table does not exist
+        return {
+            'code':400,
+            'message':"The requested file has not been loaded into the Postgres database",
+            'fields':"fileID"
+        }
+    typequery = db.prepare("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1")
+    return {
+        key:val for (key, val) in typequery(tablekey)
+    }

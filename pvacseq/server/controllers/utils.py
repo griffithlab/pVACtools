@@ -41,7 +41,7 @@ def savedata(data):
         writer = open(datafile, 'w')
         json.dump(
             {
-                key:data[key] for key in data['_datafiles'][datafile]
+                key:data[key] for key in data['_datafiles'][datafile] if key in data
             },
             writer,
             indent='\t'
@@ -80,7 +80,12 @@ def initialize():
             reader.close()
             try:
                 reader = open(os.path.expanduser(os.path.join(user_config_dir, config['_configroot'][key])))
-                config[key].update(json.load(reader))
+                if key == 'schema':
+                    config[key].update({
+                        column_filter(key):value for (key,value) in json.load(reader).items()
+                    })
+                else:
+                    config[key].update(json.load(reader))
                 reader.close()
             except FileNotFoundError:
                 pass
@@ -98,8 +103,7 @@ def initialize():
                 data['processid'],
                 "and lower may be innacurate"
             )
-        current_app.config['storage'] = {}
-
+        current_app.config['storage'] = {'children':{}}
 
         watcher = Observe(current_app.config['files']['dropbox-dir'])
         current_app.config['storage']['watcher'] = watcher

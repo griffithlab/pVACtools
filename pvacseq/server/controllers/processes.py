@@ -127,18 +127,24 @@ def reset(clearall):
     output = []
     for i in range(data['processid']+1):
         proc = fetch_process(i, data, current_app.config['storage']['children'])
-        if 'process-%d'%i in data and is_running(proc):
+        if 'process-%d'%i in data and not is_running(proc):
             if i not in current_app.config['storage']['children']:
-                shutil.rmtree(data['process-%d'%i]['output'])
+                try:
+                    shutil.rmtree(data['process-%d'%i]['output'])
+                except FileNotFoundError:
+                    pass
                 del data['process-%d'%i]
                 output.append(i)
             elif clearall:
-                shutil.rmtree(data['process-%d'%i]['output'])
+                try:
+                    shutil.rmtree(data['process-%d'%i]['output'])
+                except FileNotFoundError:
+                    pass
                 del data['process-%d'%i]
                 del current_app.config['storage']['children'][i]
                 output.append(i)
     # Set the processid to the highest child process from this session
-    data['processid'] = max(i for i in range(data['processid']+1) if 'process-%d'%i in data)
+    data['processid'] = max([0]+[i for i in range(data['processid']+1) if 'process-%d'%i in data])
     if clearall and 'reboot' in data:
         del data['reboot']
     savedata(data)
