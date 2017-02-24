@@ -11,42 +11,52 @@ _f = re.compile(r'^\d*\.\d+$')
 _i = re.compile(r'^\d+$')
 queryfilters = re.compile(r'(.+)(<=?|>=?|!=|==)(.+)')
 
-def init_column_mapping(row):
+def init_column_mapping(row, data):
     """Generate initial estimates of column data types"""
-    mapping = {column_filter(col):str for col in row}
+    if 'schema' not in data:
+        data['schema'] = {
+            'chromosome':'text',
+            'start':'bigint',
+            'stop':'bigint'
+        }
+        savedata(data)
     defs = {column_filter(col):'text' for col in row}
+    defs.update(data['schema'])
     for (col, val) in row.items():
         col = column_filter(col)
-        if _f.match(val):
-            try:
-                float(val)
-                print("Assigning float to",col,"based on",val)
-                mapping[col]=float
-                defs[col] = 'decimal'
-            except ValueError:
-                print("ERROR: Float mismatch:", val)
-        elif _i.match(val):
-            try:
-                int(val)
-                print("Assigning int to",col,"based on",val)
-                mapping[col]=int
-                defs[col] = 'integer'
-            except ValueError:
-                print("ERROR: Int mismatch:", val)
-    mapping['start'] = int
-    defs['start'] = 'bigint'
-    mapping['stop'] = int
-    defs['stop'] = 'bigint'
+        if col not in data['schema']:
+            if _f.match(val):
+                try:
+                    float(val)
+                    print("Assigning float to",col,"based on",val)
+                    defs[col] = 'decimal'
+                except ValueError:
+                    print("ERROR: Float mismatch:", val)
+            elif _i.match(val):
+                try:
+                    int(val)
+                    print("Assigning int to",col,"based on",val)
+                    defs[col] = 'integer'
+                except ValueError:
+                    print("ERROR: Int mismatch:", val)
+    mapping = {}
+    for (col, val) in defs.items():
+        if 'int' in val:
+            mapping[col] = int
+        elif val == 'decimal':
+            mapping[col] = float
+        else:
+            mapping[col] = str
     return (mapping, defs)
 
-def column_mapping(row, mapping):
+def column_mapping(row, mapping, data):
     """Apply filtering to the current row.
     Detect if column data types need to be changed"""
     output = {}
     changes = {}
     for (col, val) in row.items():
         col = column_filter(col)
-        if mapping[col] == str:
+        if col not in data['schema']:
             if _f.match(val):
                 try:
                     float(val)
@@ -130,7 +140,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
         tmp_reader.close()
 
         #Get an initial estimate of column datatypes from the first row
-        (mapping, column_names) = init_column_mapping(init)
+        (mapping, column_names) = init_column_mapping(init, data)
         tablecolumns = "\n".join( #use the estimated types to create the table
             "%s %s,"%(colname, column_names[colname])
             for colname in column_names
@@ -155,7 +165,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
         for row in reader:
             #process each row
             #We format the data in the row and update column data types, if necessary
-            (mapping, formatted, changes) = column_mapping(row, mapping)
+            (mapping, formatted, changes) = column_mapping(row, mapping, data)
             alter_cols = []
             for (k,v) in changes.items():
                 #if there were any changes to the data type, update the table

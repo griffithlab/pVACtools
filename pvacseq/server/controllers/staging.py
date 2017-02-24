@@ -221,7 +221,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         os.path.abspath(output),
         'config.json'
     ),'w')
-    json.dump(configObj)
+    json.dump(configObj, writer, indent='\t')
     writer.close()
     return data['processid']
 

@@ -21,7 +21,7 @@ def column_filter(column):
     return column.replace(' ', '_').replace('-', '_').lower().strip()
 
 def loaddata():
-    configfile = os.path.join(os.path.expanduser('~'), '.pvacseq_ui')
+    configfile = os.path.join(os.path.expanduser('~'), 'pvacseq_config.json')
     if os.path.isfile(configfile):
         data = json.load(open(configfile))
     else:
@@ -35,7 +35,7 @@ def loaddata():
 def savedata(data):
     """Saves the data object to the configfile"""
     writer = open(data['configfile'], 'w')
-    json.dump(data, writer)
+    json.dump(data, writer, indent='\t')
     writer.close()
 
 
