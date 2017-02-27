@@ -161,7 +161,9 @@ def initialize():
             data['dropbox'][str(fileID)] = filename
         data.save()
 
+        data_path = current_app.config['files']
         def _create(event):
+            data = loaddata(data_path)
             filename = os.path.relpath(
                 event.src_path,
                 dbr
@@ -178,6 +180,7 @@ def initialize():
         )
 
         def _delete(event):
+            data = loaddata(data_path)
             filename = os.path.relpath(
                 event.src_path,
                 dbr
@@ -197,6 +200,7 @@ def initialize():
         )
 
         def _move(event):
+            data = loaddata(data_path)
             filesrc = os.path.relpath(
                 event.src_path,
                 dbr
