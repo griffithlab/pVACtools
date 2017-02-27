@@ -2,7 +2,7 @@ import os
 import re
 import shutil
 from flask import current_app
-from .utils import initialize, savedata
+from .utils import initialize
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
 
@@ -22,7 +22,7 @@ def gen_files_list(id, data):
         for path in sorted(os.listdir(base_dir)):
             if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, path)):
                 data['process-%d'%id]['files'].append(os.path.join(base_dir, path))
-        savedata(data)
+        data.save()
     return data
 
 def fetch_process(id,data,children):
@@ -84,7 +84,7 @@ def process_info(id):
         # If there is a staging directory, remove it
         if os.path.isdir(os.path.join(process[0]['output'], 'Staging')):
             shutil.rmtree(os.path.join(process[0]['output'], 'Staging'))
-    savedata(data)
+    data.save()
     return {
         'pid':process[0]['pid'],
         'id':id,
@@ -147,5 +147,5 @@ def reset(clearall):
     data['processid'] = max([0]+[i for i in range(data['processid']+1) if 'process-%d'%i in data])
     if clearall and 'reboot' in data:
         del data['reboot']
-    savedata(data)
+    data.save()
     return output

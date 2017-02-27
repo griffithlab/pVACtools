@@ -4,7 +4,7 @@ from flask import current_app
 import subprocess
 from .processes import fetch_process, is_running, gen_files_list
 from .database import filterfile
-from .utils import initialize, savedata, descriptions, column_filter
+from .utils import initialize, descriptions, column_filter
 
 
 def results_get(id):

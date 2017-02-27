@@ -3,7 +3,7 @@ import subprocess
 import json
 from flask import current_app
 from yaml import dump
-from .utils import initialize, savedata
+from .utils import initialize
 
 
 def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
@@ -157,19 +157,24 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         preexec_fn=os.setpgrp
     )
     # Store some data about the child process
-    data['process-%d'%(data['processid'])] = {
-        # Do the replacement so that the displayed command is actually valid
-        # The executed command is automatically escaped as part of Popen
-        'command': " ".join(command),
-        'logfile':logfile,
-        'pid':current_app.config['storage']['children'][data['processid']].pid,
-        'status': "Task Started",
-        'output':os.path.abspath(output)
-    }
-    data['_datafiles'][current_app.config['files']['processes']].append('process-%d'%(data['processid']))
+    data.addKey(
+        'process-%d'%(data['processid']),
+        {
+            'command': " ".join(command),
+            'logfile':logfile,
+            'pid':current_app.config['storage']['children'][data['processid']].pid,
+            'status': "Task Started",
+            'output':os.path.abspath(output)
+        },
+        current_app.config['files']['processes']
+    )
     if 'reboot' not in data:
-        data['reboot'] = current_app.config['reboot']
-    savedata(data)
+        data.addKey(
+            'reboot',
+            current_app.config['reboot'],
+            current_app.config['files']['processes']
+        )
+    data.save()
     configObj = {
         'action':'run',
         'input_file': input,
