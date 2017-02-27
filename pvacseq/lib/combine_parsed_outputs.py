@@ -5,7 +5,7 @@ import csv
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq combine_parsed_outputs')
     parser.add_argument(
-        'input_files', type=argparse.FileType('r'),
+        'input_files',
         nargs="+",
         help="List of parsed epitope files for different allele-length combinations (same sample)"
     )
@@ -26,24 +26,24 @@ def main(args_input = sys.argv[1:]):
 
     fieldnames = []
     for input_file in args.input_files:
-        reader = csv.DictReader(input_file, delimiter='\t')
-        if len(fieldnames) == 0:
-            fieldnames = reader.fieldnames
-        else:
-            for fieldname in reader.fieldnames:
-                if fieldname not in fieldnames:
-                    fieldnames.append(fieldname)
-        input_file.seek(0)
+        with open(input_file, 'r') as input_file_handle:
+            reader = csv.DictReader(input_file_handle, delimiter='\t')
+            if len(fieldnames) == 0:
+                fieldnames = reader.fieldnames
+            else:
+                for fieldname in reader.fieldnames:
+                    if fieldname not in fieldnames:
+                        fieldnames.append(fieldname)
 
     rows = []
     for input_file in args.input_files:
-        reader = csv.DictReader(input_file, delimiter='\t')
-        for row in reader:
-            for fieldname in fieldnames:
-                if fieldname not in row:
-                    row[fieldname] = 'NA'
-            rows.append(row)
-        input_file.close()
+        with open(input_file, 'r') as input_file_handle:
+            reader = csv.DictReader(input_file_handle, delimiter='\t')
+            for row in reader:
+                for fieldname in fieldnames:
+                    if fieldname not in row:
+                        row[fieldname] = 'NA'
+                rows.append(row)
 
     sorted_rows = sorted(rows, key=lambda row: (int(row['Sub-peptide Position'])))
     sorted_rows = sorted(sorted_rows, key=lambda row: (float(row['Corresponding Fold Change']) if row['Corresponding Fold Change'].isdigit() else float('inf')), reverse=True)
