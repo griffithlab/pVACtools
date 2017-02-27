@@ -10,8 +10,6 @@ from webbrowser import open_new_tab
 import atexit
 from flask_cors import CORS
 from postgresql.exceptions import UndefinedTableError
-import atexit
-from postgresql.exceptions import UndefinedTableError
 
 def main():
 
