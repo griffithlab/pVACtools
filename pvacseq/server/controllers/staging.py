@@ -181,48 +181,28 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         'sample_name':samplename,
         'alleles':alleles.split(','),
         'prediction_algorithms':prediction_algorithms.split(','),
-        'output_directory':output
+        'output_directory':output,
+        'epitope_lengths':epitope_lengths.split(','),
+        'peptide_sequence_length':peptide_sequence_length,
+        'additional_input_files':additional_input_file_list.split(','),
+        'net_chop_method':net_chop_method,
+        'netmhc_stab':netmhc_stab,
+        'top_result_per_mutation':top_result_per_mutation,
+        'top_score_metric':top_score_metric,
+        'binding_threshold':binding_threshold,
+        'minimum_fold_change':minimum_fold_change,
+        'normal_coverage_cutoff':normal_cov,
+        'tumor_dna_coverage_cutoff':tdna_cov,
+        'tumor_rna_coverage_cutoff':trna_cov,
+        'normal_vaf_cutoff':normal_vaf,
+        'tumor_dna_vaf_cutoff':tdna_vaf,
+        'tumor_rna_vaf_cutoff':trna_vaf,
+        'expression_cutoff':expn_val,
+        'netchop_threshold':net_chop_threshold,
+        'fasta_size':fasta_size,
+        'iedb_retries':iedb_retries,
+        'downstream_sequence_length':downstream_sequence_length
     }
-    if epitope_lengths!=10:
-        configObj['epitope_lengths']=epitope_lengths.split(',')
-    if peptide_sequence_length!=21:
-        configObj['peptide_sequence_length']=peptide_sequence_length
-    if additional_input_file_list!='':
-        configObj['additional_input_files']=additional_input_file_list.split(',')
-    if net_chop_method!='':
-        configObj['net_chop_method']=net_chop_method
-    if netmhc_stab:
-        configObj['netmhc_stab']=True
-    if top_result_per_mutation:
-        configObj['top_result_per_mutation']=True
-    if top_score_metric!='median':
-        configObj['top_score_metric']=top_score_metric
-    if binding_threshold!=500:
-        configObj['binding_threshold']=binding_threshold
-    if minimum_fold_change!=0:
-        configObj['minimum_fold_change']=minimum_fold_change
-    if normal_cov!=5:
-        configObj['normal_coverage_cutoff']=normal_cov
-    if tdna_cov!=10:
-        configObj['tumor_dna_coverage_cutoff']=tdna_cov
-    if trna_cov!=10:
-        configObj['tumor_rna_coverage_cutoff']=trna_cov
-    if normal_vaf!=2:
-        configObj['normal_vaf_cutoff']=normal_vaf
-    if tdna_vaf!=40:
-        configObj['tumor_dna_vaf_cutoff']=tdna_vaf
-    if trna_vaf!=40:
-        configObj['tumor_rna_vaf_cutoff']=trna_vaf
-    if expn_val!=1:
-        configObj['expression_cutoff']=expn_val
-    if net_chop_threshold!=0.5:
-        configObj['netchop_threshold']=net_chop_threshold
-    if fasta_size!=200:
-        configObj['fasta_size']=fasta_size
-    if iedb_retries!=5:
-        configObj['iedb_retries'] = iedb_retries
-    if downstream_sequence_length!=1000:
-        configObj['downstream_sequence_length']=downstream_sequence_length
 
     writer = open(os.path.join(
         os.path.abspath(output),
