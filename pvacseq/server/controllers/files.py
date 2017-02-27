@@ -68,11 +68,11 @@ def results_getcols(id, fileID):
     data = initialize()
     if id==-1:
         if str(fileID) not in data['dropbox']:
-            return {
+            return ({
                 'code':400,
                 'message':'The requested file (%d) does not exist'%fileID,
                 'fields':'fileID'
-            }
+            },400)
         raw_reader = open(
             os.path.join(
                 os.path.abspath(current_app.config['files']['dropbox-dir']),

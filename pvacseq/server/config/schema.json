@@ -1,5 +1,6 @@
 {
   "chromosome":"integer",
   "start":"bigint",
-  "stop":"bigint"
+  "stop":"bigint",
+  "hla_allele":"text"
 }
