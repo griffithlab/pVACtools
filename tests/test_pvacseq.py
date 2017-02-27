@@ -11,6 +11,8 @@ import yaml
 pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
 import pvacseq.lib
+from pvacseq.lib.pipeline import *
+import datetime
 
 def compare(path1, path2):
     r1 = open(path1)
@@ -148,11 +150,6 @@ class PVACTests(unittest.TestCase):
         self.assertTrue(compiled_main_path)
 
     def test_pvacseq_pipeline(self):
-        pvac_script_path = os.path.join(
-            self.pVac_directory,
-            'pvacseq',
-            "pvacseq.py"
-            )
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
         additional_input_files = tempfile.NamedTemporaryFile('w')
@@ -271,3 +268,39 @@ class PVACTests(unittest.TestCase):
         ])
 
         output_dir.cleanup()
+
+    def test_pvacseq_pipeline_sleep(self):
+        output_dir_1 = tempfile.TemporaryDirectory()
+        params_1 = [
+            os.path.join(self.test_data_directory, "input.vcf"),
+            'Test',
+            'HLA-E*01:01',
+            'NetMHC',
+            output_dir_1.name,
+            '-e', '9,10',
+        ]
+        os.environ["TEST_FLAG"] = '0'
+        start_1 = datetime.datetime.now()
+        pvacseq.lib.main.main(params_1)
+        end_1 = datetime.datetime.now()
+        duration_1 = (end_1 - start_1).total_seconds()
+        output_dir_1.cleanup()
+
+        output_dir_2 = tempfile.TemporaryDirectory()
+        params_2 = [
+            os.path.join(self.test_data_directory, "input.vcf"),
+            'Test',
+            'HLA-E*01:01',
+            'NetMHC',
+            output_dir_2.name,
+            '-e', '9,10',
+        ]
+        os.environ["TEST_FLAG"] = '1'
+        start_2 = datetime.datetime.now()
+        pvacseq.lib.main.main(params_2)
+        end_2 = datetime.datetime.now()
+        duration_2 = (end_2 - start_2).total_seconds()
+        output_dir_2.cleanup()
+
+        self.assertTrue(duration_1 > duration_2)
+
