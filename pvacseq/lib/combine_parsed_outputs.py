@@ -53,7 +53,7 @@ def main(args_input = sys.argv[1:]):
             key=lambda row: (
                 row['Gene Name'],
                 row['Mutation'],
-                float(row['Median MT Score All Methods']),
+                float(row['Median MT Score']),
             )
         )
     elif args.top_score_metric == 'lowest':
