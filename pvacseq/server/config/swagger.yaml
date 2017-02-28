@@ -651,6 +651,10 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Result"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
   /api/v1/processes/{parentID}/results/{fileID}/filter:
     get:
       tags:
@@ -711,6 +715,10 @@ paths:
             items: {
               type: "object"
             }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
   /api/v1/processes/{parentID}/results/{fileID}/schema:
     get:
       tags:
@@ -736,6 +744,10 @@ paths:
           description: "Returns a mapping of column names to data type"
           schema:
             type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
   /static/testpage:
     get:
       tags:
@@ -752,6 +764,10 @@ paths:
           description: "Returns a static page"
           schema:
             type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
   Process:
     type: "object"

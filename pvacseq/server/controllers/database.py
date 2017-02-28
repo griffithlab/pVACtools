@@ -21,20 +21,20 @@ def init_column_mapping(row, schema):
     for (col, val) in row.items():
         col = column_filter(col)
         if col not in schema:
-            if float_pattern.match(val):
-                try:
-                    float(val)
-                    print("Assigning float to", col, "based on", val)
-                    defs[col] = 'decimal'
-                except ValueError:
-                    print("ERROR: Float mismatch:", val)
-            elif int_pattern.match(val):
+            if int_pattern.match(val):
                 try:
                     int(val)
                     print("Assigning int to", col, "based on", val)
                     defs[col] = 'integer'
                 except ValueError:
                     print("ERROR: Int mismatch:", val)
+            elif float_pattern.match(val):
+                try:
+                    float(val)
+                    print("Assigning float to", col, "based on", val)
+                    defs[col] = 'decimal'
+                except ValueError:
+                    print("ERROR: Float mismatch:", val)
     mapping = {}
     for (col, val) in defs.items():
         if 'int' in val:
@@ -57,15 +57,7 @@ def column_mapping(row, mapping, schema):
             output[col] = None
             continue
         if col not in schema and mapping[col] == str:
-            if float_pattern.match(val):
-                try:
-                    float(val)
-                    print("Assigning float to", col, "based on", val)
-                    mapping[col] = float
-                    changes[col] = float
-                except ValueError:
-                    print("ERROR: Float mismatch:", val)
-            elif int_pattern.match(val):
+            if int_pattern.match(val):
                 try:
                     int(val)
                     print("Assigning int to", col, "based on", val)
@@ -73,6 +65,14 @@ def column_mapping(row, mapping, schema):
                     changes[col] = int
                 except ValueError:
                     print("ERROR: Int mismatch:", val)
+            elif float_pattern.match(val):
+                try:
+                    float(val)
+                    print("Assigning float to", col, "based on", val)
+                    mapping[col] = float
+                    changes[col] = float
+                except ValueError:
+                    print("ERROR: Float mismatch:", val)
         try:
             output[col] = mapping[col](val)
         except ValueError:
@@ -172,23 +172,24 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
             # We format the data in the row and update column data types, if
             # necessary
             (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
-            alter_cols = []
-            for (k, v) in changes.items():
-                # if there were any changes to the data type, update the table
-                # since we only ever update a text column to int/decimal, then
-                # it's okay to nullify the data
-                typ = ''
-                if v == int:
-                    typ = 'bigint' if k in {'start', 'stop'} else 'integer'
-                elif v == float:
-                    typ = 'decimal'
-                alter_cols.append(
-                    "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
-                        k,
-                        typ
-                    )
-                )
             if len(changes):
+                #Generate a query to alter the table schema, if any changes are required
+                alter_cols = []
+                for (k, v) in changes.items():
+                    # if there were any changes to the data type, update the table
+                    # since we only ever update a text column to int/decimal, then
+                    # it's okay to nullify the data
+                    typ = ''
+                    if v == int:
+                        typ = 'bigint' if k in {'start', 'stop'} else 'integer'
+                    elif v == float:
+                        typ = 'decimal'
+                    alter_cols.append(
+                        "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
+                            k,
+                            typ
+                        )
+                    )
                 # Re-generate the insert statement since the data types changed
                 print("Alter:", update + ','.join(alter_cols))
                 db.execute(update + ','.join(alter_cols))
