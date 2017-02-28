@@ -123,8 +123,8 @@ def process_info(id):
             },400
         )
     reader = open(process[0]['logfile'])
-    log = spinner.sub('', reader.read()).strip()
-    process[0]['status'] = log.split("\n")[-1]
+    log = spinner.sub('', reader.read()).strip().split(os.linesep)
+    process[0]['status'] = log[-1]
     reader.close()
     if not is_running(process):
         if process[1]:

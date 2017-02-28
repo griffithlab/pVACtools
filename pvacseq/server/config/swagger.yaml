@@ -773,8 +773,11 @@ definitions:
         type: "string"
         description: "The most recent message sent by pVAC-Seq"
       log:
-        type: "string"
+        type: "array"
         description: "The full output transcript from pVAC-Seq"
+        items: {
+          type: "string"
+        }
       log_updated_at:
         type: "integer"
         description: "Time of the most recent modification of the logfile in epoch seconds.
