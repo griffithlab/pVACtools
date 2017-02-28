@@ -8,6 +8,8 @@ import socketserver
 from threading import Thread
 from webbrowser import open_new_tab
 import postgresql as psql
+import atexit
+from flask_cors import CORS
 from postgresql.exceptions import UndefinedTableError
 import atexit
 from .controllers import watchdir
@@ -67,6 +69,13 @@ def main():
 
     app.add_api('swagger.yaml', arguments={'title': 'API to support pVacSeq user interface for generating reports on pipeline results'})
     app.app.secret_key = os.urandom(1024)
+
+    #setup CORS
+    CORS(
+        app.app,
+        #should match localhost at with any port, path, or protocol
+        origins=r'^(.+://)?localhost(:\d+)?(/.*)?$'
+    )
 
     #Eventually, have this open a browser to whatever the main page is
     # Thread(target=lambda:open_new_tab("localhost:8080/static/testpage"), daemon=True).start()

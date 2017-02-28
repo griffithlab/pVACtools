@@ -43,7 +43,8 @@ setup(
         'PyYAML',
         'connexion',
         'py-postgresql',
-        'watchdog'
+        'watchdog',
+        'flask-cors'
     ],
     package_data={
         'pvacseq' : data_files,
