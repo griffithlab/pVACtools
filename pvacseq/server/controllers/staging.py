@@ -3,6 +3,7 @@ import subprocess
 import json
 from flask import current_app
 from yaml import dump
+from shlex import quote
 
 def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
           peptide_sequence_length, gene_expn_file, transcript_expn_file,
@@ -158,7 +159,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
     data.addKey(
         'process-%d'%(data['processid']),
         {
-            'command': " ".join(command),
+            'command': " ".join([quote(token) for token in command]),
             'logfile':logfile,
             'pid':current_app.config['storage']['children'][data['processid']].pid,
             'status': "Task Started",
