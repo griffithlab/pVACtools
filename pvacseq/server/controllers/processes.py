@@ -2,7 +2,9 @@ import os
 import re
 import shutil
 from flask import current_app
-from .utils import initialize
+import json
+import sys
+from .utils import initialize, descriptions
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
 
@@ -22,6 +24,7 @@ def gen_files_list(id, data):
         for path in sorted(os.listdir(base_dir)):
             if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, path)):
                 data['process-%d'%id]['files'].append(os.path.join(base_dir, path))
+        data['process-%d'%id]['files'].sort()
         data.save()
     return data
 
@@ -54,10 +57,57 @@ def is_running(process):
 def processes():
     """Returns a list of processes, and whether or not each process is running"""
     data = initialize()
-    return [{
-        'id':i,
-        'running':is_running(fetch_process(i, data, current_app.config['storage']['children']))
-    } for i in range(data['processid']+1) if 'process-%d'%i in data]
+    #Python comprehensions are great!
+    return [
+         {
+             'id':proc[0],
+             'running':is_running(proc[1]),
+             'url':'/api/v1/processes/%d'%proc[0],
+             'results_url':'api/v1/processes/%d/results'%proc[0],
+             'attached':bool(proc[1][1]),
+             'output':proc[1][0]['output'],
+             'pid':proc[1][0]['pid'],
+             'command':proc[1][0]['command'],
+             'files':([
+                 {
+                     'fileID':fileID,
+                     'url':'/api/v1/processes/%d/results/%d'%(
+                         proc[0],
+                         fileID
+                     ),
+                     'display_name':os.path.relpath(
+                         filename,
+                         proc[1][0]['output']
+                     ),
+                     'description':descriptions[
+                         '.'.join(os.path.basename(filename).split('.')[1:])
+                     ]
+                 }
+                 for (filename, fileID) in zip(
+                     gen_files_list(proc[0], data)['process-%d'%proc[0]]['files'],
+                     range(sys.maxsize)
+                 )
+             ] if not is_running(proc[1]) else []),
+             'parameters':(
+                 json.load(open(os.path.join(
+                     proc[1][0]['output'],
+                     'config.json'
+                 )))
+                 if os.path.isfile(os.path.join(
+                     proc[1][0]['output'],
+                     'config.json'
+                 )) else {}
+             )
+         } for proc in
+            map(
+                lambda x: (x,fetch_process(
+                    x,
+                    data,
+                    current_app.config['storage']['children']
+                )),
+                range(data['processid']+1)
+            ) if 'process-%d'%(proc[0]) in data
+    ]
 
 
 def process_info(id):
@@ -85,15 +135,50 @@ def process_info(id):
         if os.path.isdir(os.path.join(process[0]['output'], 'Staging')):
             shutil.rmtree(os.path.join(process[0]['output'], 'Staging'))
     data.save()
+    configfile = os.path.join(
+        process[0]['output'],
+        'config.json'
+    )
     return {
-        'pid':process[0]['pid'],
-        'id':id,
-        'attached': bool(process[1]),
-        'command':process[0]['command'],
+        'pid':process[0]['pid'],#
+        'id':id,#
+        'results_url':'/api/v1/processes/%d/results'%id,#
+        'attached': bool(process[1]),#
+        'command':process[0]['command'],#
         'status':process[0]['status'],
         'log':log,
-        'output':process[0]['output'],
-        'running':is_running(process)
+        'log_updated_at':(
+            int(os.stat(process[0]['logfile']).st_mtime)
+            if os.path.isfile(process[0]['logfile'])
+            else 0
+        ),
+        'output':process[0]['output'],#
+        'running':is_running(process),#
+        'files':([
+            {
+                'fileID':fileID,
+                'url':'/api/v1/processes/%d/results/%d'%(
+                    id,
+                    fileID
+                ),
+                'display_name':os.path.relpath(
+                    filename,
+                    process[0]['output']
+                ),
+                'description':descriptions[
+                    '.'.join(os.path.basename(filename).split('.')[1:])
+                ]
+            }
+            for (filename, fileID) in zip(
+                gen_files_list(id, data)['process-%d'%id]['files'],
+                range(sys.maxsize)
+            )
+        ] if not is_running(process) else []),
+        'parameters':(#
+            json.load(open(configfile))
+            if os.path.isfile(configfile)
+            else {}
+        )
     }
 
 

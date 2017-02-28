@@ -758,10 +758,14 @@ definitions:
     properties:
       pid:
         type: "integer"
-        description: "Actual pid assigned by the OS for this pVAC-Seq run"
+        description: "Actual pid assigned by the OS for this pVAC-Seq run.\
+        This is only accurate if the process is still attached"
       id:
         type: "integer"
         description: "Unique process ID used for accessing the process data through the api"
+      results_url:
+        type: "string"
+        description: "The URL to this process' results listing endpoint"
       command:
         type: "string"
         description: "The shell command issued to start this pVAC-Seq run"
@@ -771,12 +775,25 @@ definitions:
       log:
         type: "string"
         description: "The full output transcript from pVAC-Seq"
+      log_updated_at:
+        type: "integer"
+        description: "Time of the most recent modification of the logfile in epoch seconds.
+        Returns 0 if the logfile hasn't been created by the process yet"
       output:
         type: "string"
         description: "The output folder of the specified process"
       running:
         type: "boolean"
         description: "Indicates whether or not the process is still running"
+      files:
+        type: "array"
+        items:
+          $ref: "#/definitions/FileSummary"
+        description: "An array of basic info on the files output by this process.\
+        Returns an empty array if the process is still running"
+      parameters:
+        type: "object"
+        description: "An object listing the parameters issued to pVAC-Seq when starting this process"
       attached:
         type: "boolean"
         description: "Indicates whether or not the process is still directly attached \
@@ -811,6 +828,49 @@ definitions:
       running:
         type: "boolean"
         description: "Indicates whether or not the process is still running"
+      url:
+        type: "string"
+        description: "The URL to this process' information endpoint"
+      results_url:
+        type: "string"
+        description: "The URL to this process' results listing endpoint"
+      attached:
+        type: "boolean"
+        description: "Indicates whether or not the process was started by the current API.\
+        The API retains more control over attached processes via Python's Popen library"
+      output:
+        type: "string"
+        description: "The absolute path to the process' output directory"
+      pid:
+        type: "integer"
+        description: "The OS pid for the process.  This is only accurate iff the process is attached"
+      command:
+        type: "string"
+        description: "The shell command issued to start this pVAC-Seq run"
+      files:
+        type: "array"
+        items:
+          $ref: "#/definitions/FileSummary"
+        description: "An array of basic info on the files output by this process.\
+        Returns an empty array if the process is still running"
+      parameters:
+        type: "object"
+        description: "An object listing the parameters issued to pVAC-Seq when starting this process"
+  FileSummary:
+    type: "object"
+    properties:
+      fileID:
+        type: "integer"
+        description: "The unique fileID identifying an output file from a given process"
+      url:
+        type: "string"
+        description: "The URL to access this file's contents"
+      display_name:
+        type: "string"
+        description: "The path to the file relative to it's parent process' output directory"
+      description:
+        type: "string"
+        description: "A description of the file's contents in the context of pVAC-Seq"
   Error:
     type: "object"
     properties:
