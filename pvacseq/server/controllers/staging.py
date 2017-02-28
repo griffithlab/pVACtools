@@ -3,8 +3,6 @@ import subprocess
 import json
 from flask import current_app
 from yaml import dump
-from .utils import initialize
-
 
 def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
           peptide_sequence_length, gene_expn_file, transcript_expn_file,
@@ -18,7 +16,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
     """Stage input for a new pVAC-Seq run.  Generate a unique output directory and \
     save uploaded files to temporary locations (and give pVAC-Seq the filepaths). \
     Then forward the command to start()"""
-    data = initialize()
+    data = current_app.config['storage']['loader']()
     current_path = os.path.join(os.path.expanduser('~'), "Documents", "pVAC-Seq Output", samplename)
     if os.path.exists(current_path):
         i = 1
@@ -100,7 +98,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
           expn_val, net_chop_threshold,
           fasta_size, iedb_retries, downstream_sequence_length, keep_tmp_files):
     """Build the command for pVAC-Seq, then spawn a new process to run it"""
-    data = initialize()
+    data = current_app.config['storage']['loader']()
 
     command = [
         'pvacseq',
@@ -224,7 +222,7 @@ def test():
 
 def check_allele(allele):
     """Checks if the requested allele is supported by pVAC-Seq or not"""
-    data = initialize()
+    data = current_app.config['storage']['loader']()
     if 'allele_file' not in current_app.config:
         allele_file = tempfile.TemporaryFile('w+')
         subprocess.call(['pvacseq', 'valid_alleles'], stdout=allele_file)

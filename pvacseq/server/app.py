@@ -7,9 +7,8 @@ import http.server
 import socketserver
 from threading import Thread
 from webbrowser import open_new_tab
-import atexit
 from flask_cors import CORS
-from postgresql.exceptions import UndefinedTableError
+from .controllers.utils import initialize
 
 def main():
 
@@ -26,22 +25,7 @@ def main():
         regex = r'-?\d+'
 
     app.app.url_map.converters['int'] = IntConverter
-    app.app.config['initialized'] = False
-
-    def cleanup():
-        print("Cleaning up observers and database connections")
-        if app.app.config['initialized']:
-            app.app.config['storage']['watcher'].stop()
-            app.app.config['storage']['watcher'].join()
-            if 'db-clean' in app.app.config:
-                for table in app.app.config['db-clean']:
-                    try:
-                        app.app.config['storage']['db'].execute("DROP TABLE %s"%table)
-                    except UndefinedTableError:
-                        pass
-            app.app.config['storage']['db'].close()
-
-    atexit.register(cleanup)
+    initialize(app.app) #initialize the app configuration
     app.add_api('swagger.yaml', arguments={'title': 'API to support pVacSeq user interface for generating reports on pipeline results'})
     app.app.secret_key = os.urandom(1024)
 

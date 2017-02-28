@@ -4,7 +4,7 @@ import shutil
 from flask import current_app
 import json
 import sys
-from .utils import initialize, descriptions
+from .utils import descriptions
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
 
@@ -56,7 +56,7 @@ def is_running(process):
 
 def processes():
     """Returns a list of processes, and whether or not each process is running"""
-    data = initialize()
+    data = current_app.config['storage']['loader']()
     #Python comprehensions are great!
     return [
          {
@@ -112,7 +112,7 @@ def processes():
 
 def process_info(id):
     """Returns more detailed information about a specific process"""
-    data = initialize()
+    data = current_app.config['storage']['loader']()
     process = fetch_process(id, data, current_app.config['storage']['children'])
     if not process[0]:
         return (
@@ -184,7 +184,7 @@ def process_info(id):
 
 def stop(id):
     """Stops the requested process.  This is only allowed if the child is still attached"""
-    data = initialize()
+    data = current_app.config['storage']['loader']()
     status = process_info(id)
     if type(status) == dict:  # status could be an error object if the id is invalid
         if status['running'] and status['pid']>1:
@@ -194,7 +194,7 @@ def stop(id):
 
 def shutdown():
     """Stops all attached, running children"""
-    data = initialize()
+    data = current_app.config['storage']['loader']()
     output = []
     for i in range(data['processid']+1):
         proc = fetch_process(i, data, current_app.config['storage']['children'])
@@ -208,7 +208,7 @@ def shutdown():
 
 def reset(clearall):
     """Clears out finished processes from the record"""
-    data = initialize()
+    data = current_app.config['storage']['loader']()
     output = []
     for i in range(data['processid']+1):
         proc = fetch_process(i, data, current_app.config['storage']['children'])

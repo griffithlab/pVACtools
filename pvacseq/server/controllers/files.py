@@ -4,12 +4,12 @@ from flask import current_app
 import subprocess
 from .processes import fetch_process, is_running, gen_files_list
 from .database import filterfile
-from .utils import initialize, descriptions, column_filter
+from .utils import descriptions, column_filter
 
 
 def results_get(id):
     """Get the list of result files from a specific pVAC-Seq run"""
-    data = initialize()
+    data = current_app.config['storage']['loader']()
     if id == -1:
         return list_dropbox()
     process = fetch_process(id, data, current_app.config['storage']['children'])
@@ -65,7 +65,7 @@ def results_getfile(id, fileID, count, page, filters, sort, direction):
 
 def results_getcols(id, fileID):
     """Get a mapping of standardized column names -> original column names"""
-    data = initialize()
+    data = current_app.config['storage']['loader']()
     if id==-1:
         if str(fileID) not in data['dropbox']:
             return ({
@@ -112,7 +112,7 @@ def results_getcols(id, fileID):
     return output
 
 def list_dropbox():
-    data = initialize()
+    data = current_app.config['storage']['loader']()
     return [
         {
             'fileID':key,
