@@ -23,12 +23,17 @@ pVAC-Seq is a cancer immunotherapy pipeline for the identification of **p**\ ers
 New in version |version|
 ------------------------
 
-This version updates the IEDB RESTful API URL to the new target announced in IEDB Analysis Resource v2.15.1.
+This version improves the sorting of the final report file. The file will now be
+sorted by "Gene Name" and "Mutation" and within these categories by the MT score
+- either "Median MT Score" or "Best MT score" depending on the
+top-score-metric used.
 
-This release introduces a change in how invalid alleles are handeled. Previously, the pipeline would throw a fatal error. The
-pipeline will now proceed but invalid alleles will be skipped.
+This release implements a 60 second wait between each request to the IEDB
+RESTful API in order to decrease the load on their servers. We recommend the
+usage of the :ref:`standalone IEDB tools <iedb_install>` for long-running processes with many
+variants, prediction algorithm, epitope lengths, or alleles.
 
-This version also has improved error handling around calling standalone IEDB installations.
+There also have been various bugfixes in this release.
 
 Citation
 --------
