@@ -322,7 +322,7 @@ class MHCIPipeline(Pipeline):
             generate_fasta_params = [
                 split_tsv_file_path,
                 str(self.peptide_sequence_length),
-                str(min(self.epitope_lengths)),
+                str(max(self.epitope_lengths)),
                 split_fasta_file_path,
                 split_fasta_key_file_path,
             ]
