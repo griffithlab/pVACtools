@@ -213,7 +213,6 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
 
 def test():
     """Return the submission page (a stand-in until there is a proper ui for submission)"""
-    initialize() #we don't *need* to initialize here, but it avoids missing the opportunity if this route runs first
     reader = open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_start.html'))
     data = reader.read()
     reader.close()
