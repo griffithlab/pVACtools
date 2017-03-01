@@ -33,8 +33,16 @@ If you have an old version of pVAC-Seq installed you might want to consider upgr
 
    pip install pvacseq --upgrade
 
-Installing IEDB binding prediction tools (optional)
+.. _iedb_install:
+
+Installing IEDB binding prediction tools (strongly recommended)
 ---------------------------------------------------
+
+.. warning::
+   Using a local IEDB installation is strongly recommended for larger datasets
+   or when the making predictions for many alleles, epitope lengths, or
+   prediction algorithms. More information on how to install IEDB locally can
+   be found on the :ref:`Installation <iedb_install>` page.
 
 You may create a local install of the IEDB binding prediction tools by first downloading the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ from the IEDB website. If using both the Class I and the Class II tools, they both need to be installed into the same parent directory.
    
