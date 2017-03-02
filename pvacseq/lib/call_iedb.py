@@ -12,11 +12,11 @@ import time
 from subprocess import run, PIPE
 
 def filter_response(response_text):
-    lines = response_text.split("\n")
+    lines = response_text.splitlines()
     remaining_lines = lines.copy()
     for line in lines:
-        if line.startswith("allele"):
-            return "\n".join(remaining_lines)
+        if line.startswith(b"allele"):
+            return b"\n".join(remaining_lines)
         else:
             remaining_lines.pop(0)
 

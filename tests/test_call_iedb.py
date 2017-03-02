@@ -43,10 +43,10 @@ class FilterResponseTests(CallIEDBTests):
     def test_filter_response_ok(self):
         unfiltered_file = os.path.join(self.test_data_dir, 'unfiltered.txt')
         filtered_file   = os.path.join(self.test_data_dir, 'filtered.txt')
-        with open(unfiltered_file, 'r') as f:
-            unfiltered_file_contents = f.read()
-        with open(filtered_file, 'r') as f:
-            filtered_file_contents = f.read()
+        with open(unfiltered_file, 'rb') as f:
+            unfiltered_file_contents = f.read().rstrip()
+        with open(filtered_file, 'rb') as f:
+            filtered_file_contents = f.read().rstrip()
         filtered_response = pvacseq.lib.call_iedb.filter_response(unfiltered_file_contents)
         self.assertEqual(filtered_response, filtered_file_contents)
         filtered_response_on_filtered_file = pvacseq.lib.call_iedb.filter_response(filtered_file_contents)
