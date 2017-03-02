@@ -23,17 +23,11 @@ pVAC-Seq is a cancer immunotherapy pipeline for the identification of **p**\ ers
 New in version |version|
 ------------------------
 
-This version improves the sorting of the final report file. The file will now be
-sorted by "Gene Name" and "Mutation" and within these categories by the MT score
-- either "Median MT Score" or "Best MT score" depending on the
-top-score-metric used.
-
-This release implements a 60 second wait between each request to the IEDB
-RESTful API in order to decrease the load on their servers. We recommend the
-usage of the :ref:`standalone IEDB tools <iedb_install>` for long-running processes with many
-variants, prediction algorithm, epitope lengths, or alleles.
-
-There also have been various bugfixes in this release.
+This is a hotfix release. It fixes an error introduced in a previous version
+that would occur when using a local installation of the IEDB tools and is
+related to some filtering we do on the output from the IEDB tools. More
+information can be found on `GitHub issue 278
+<https://github.com/griffithlab/pVAC-Seq/issues/278>`_.
 
 Citation
 --------
