@@ -39,6 +39,25 @@ paths:
             $ref: "#/definitions/Error"
       x-tags:
       - tag: "results"
+  /api/v1/input:
+    get:
+      tags:
+        - "input"
+      summary: "Get a list of files staged for input"
+      description: "Queries the input folder for a list of files ready to be used\
+      in a new run of pVAC-Seq"
+      operationId: "pvacseq.server.controllers.files.list_input"
+      responses:
+        200:
+          description: "An array of input files"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Result"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
   /api/v1/processes/{id}/results/{fileID}:
     get:
       tags:

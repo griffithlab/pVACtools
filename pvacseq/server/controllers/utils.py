@@ -183,14 +183,14 @@ def initialize(current_app):
                 ),
                 'display_name':os.path.relpath(
                     filename,
-                    data[processkey]['output']
+                    dbr
                 ),
                 'description':descriptions(
                     '.'.join(os.path.basename(filename).split('.')[1:])
                 )
             }
     recorded = {item['fullname'] for item in data['dropbox'].values()}
-    targets = {k for k in data['dropbox'] if data['dropbox'][k] in recorded-current}
+    targets = {data['dropbox'][k]['fullname'] for k in data['dropbox'] if data['dropbox'][k]['fullname'] in recorded-current}
     for fileID in targets:
         del data['dropbox'][fileID]
     fileID = 0

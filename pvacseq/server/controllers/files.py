@@ -41,6 +41,34 @@ def results_get(id):
     return output
 
 
+def list_input(path = None):
+    """Fetches a list of input files from the input directory"""
+    data = current_app.config['storage']['loader']()
+    if not path:
+        path = os.path.join(current_app.config['files']['data-dir'], 'results')
+    output = []
+    for entity in os.listdir(path):
+        fullname = os.path.join(path, entity)
+        if os.path.isfile(fullname):
+            output.append({
+                'display_name':entity,
+                'name':fullname,
+                'type':'file',
+                'fileID':hash(fullname),
+                'description':descriptions(
+                    '.'.join(os.path.basename(entity).split('.')[1:])
+                ),
+            })
+        elif os.path.isdir(fullname):
+            output.append({
+                'name':fullname,
+                'display_name':entity,
+                'type':'directory',
+                'contents': list_input(fullname)
+            })
+    return output
+
+
 def results_getfile(id, fileID, count, page, filters, sort, direction):
     """(DEPRECATED) Read data directly from a specific output file"""
     return filterfile(

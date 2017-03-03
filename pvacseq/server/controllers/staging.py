@@ -163,6 +163,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
             'logfile':logfile,
             'pid':current_app.config['storage']['children'][data['processid']].pid,
             'status': "Task Started",
+            'files':[],
             'output':os.path.abspath(output)
         },
         current_app.config['files']['processes']
