@@ -94,6 +94,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
 
     # check if the table exists:
     db = current_app.config['storage']['db']
+    fileID = str(fileID)
     query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     if not len(query(tablekey)):  # table does not exist
         # Open a reader to cache the file in the database
@@ -110,28 +111,40 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
             if is_running(process):
                 return []
             data = gen_files_list(parentID, data)
-            if fileID not in range(len(process[0]['files'])):
+            if str(fileID) not in process[0]['files']:
                 return (
                     {
                         "code": 400,
-                        "message": "The requested fileID (%d) does not exist for this process (%d)" % (fileID, parentID),
+                        "message": "The requested fileID (%s) does not exist for this process (%d)" % (fileID, parentID),
                         "fields": "fileID"
                     }, 400
                 )
-            raw_reader = open(process[0]['files'][fileID])
+            raw_reader = open(process[0]['files'][fileID]['fullname'])
         else:
             if str(fileID) not in data['dropbox']:
                 return (
                     {
                         "code": 400,
-                        "message": "The requested fileID (%d) does not exist in the dropbox" % fileID,
+                        "message": "The requested fileID (%s) does not exist in the dropbox" % fileID,
                         "fields": "fileID"
                     }, 400
                 )
             raw_reader = open(os.path.join(
-                os.path.abspath(current_app.config['files']['dropbox-dir']),
-                data['dropbox'][str(fileID)]
+                os.path.abspath(current_app.config['files']['data-dir']),
+                'archive',
+                data['dropbox'][str(fileID)]['display_name']
             ))
+        if not raw_reader.name.endswith('.tsv'):
+            return (
+                {
+                    'code':400,
+                    'message':'The requested fileID (%s) is in an unsupported format (%s)'%(
+                        fileID,
+                        '.'.join(os.path.basename(raw_reader.name).split('.')[1:])
+                    ),
+                    'fields':'fileID'
+                }, 400
+            )
         reader = csv.DictReader(raw_reader, delimiter='\t')
 
         tmp_reader = open(raw_reader.name)

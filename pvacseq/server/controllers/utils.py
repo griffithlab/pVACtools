@@ -2,6 +2,7 @@
 import os
 from glob import iglob
 import json
+import sys
 import subprocess
 import watchdog.events
 import postgresql as psql
@@ -45,7 +46,7 @@ class dataObj(dict):
             )
             writer.close()
 
-descriptions = {
+_descriptions = {
     'json':"Metadata regarding a specific run of pVAC-Seq",
     'chop.tsv':"Processed and filtered data, with peptide cleavage data added",
     'combined.parsed.tsv':"Processed data from IEDB, but with no filtering or extra data",
@@ -55,6 +56,11 @@ descriptions = {
     'final.tsv':"Final output data",
     'tsv':"Raw input data parsed out of the input vcf"
 }
+
+def descriptions(ext):
+    if ext in _descriptions:
+        return _descriptions[ext]
+    return "Unknown File"
 
 def column_filter(column):
     """standardize column names"""
@@ -112,8 +118,6 @@ def initialize(current_app):
         data.addKey('processid', 0, current_app.config['files']['processes'])
     if 'dropbox' not in data:
         data.addKey('dropbox', {}, current_app.config['files']['dropbox'])
-    os.makedirs(current_app.config['files']['dropbox-dir'], exist_ok=True)
-
     #Check the last reboot (because pid's won't remain valid after a reboot)
     reboot = subprocess.check_output(['last', 'reboot']).decode().split("\n")[0]
     current_app.config['reboot'] = reboot
@@ -125,11 +129,6 @@ def initialize(current_app):
             "and lower may be innacurate"
         )
     current_app.config['storage']['children']={}
-
-    #Setup the watcher to observe the dropbox
-    watcher = Observe(current_app.config['files']['dropbox-dir'])
-    current_app.config['storage']['watcher'] = watcher
-    watcher.subscribe(lambda x:print("FS Event:", x))
 
     #Establish a connection to the local postgres database
     try:
@@ -143,21 +142,75 @@ def initialize(current_app):
     db = psql.open("localhost/pvacseq")
     current_app.config['storage']['db'] = db
 
+    #setup directory structure:
+    os.makedirs(
+        os.path.join(current_app.config['files']['data-dir'],'input'),
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(current_app.config['files']['data-dir'],'results'),
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(current_app.config['files']['data-dir'],'archive'),
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(current_app.config['files']['data-dir'],'.tmp'),
+        exist_ok=True
+    )
+
+    #Setup the watchers to observe the files
+    current_app.config['storage']['watchers'] = []
+
+    dbr = os.path.join(current_app.config['files']['data-dir'],'archive')
+    dropbox_watcher = Observe(dbr)
+    dropbox_watcher.subscribe(lambda x:print("Dropbox Event:", x))
     #Now we set up event handlers for the dropbox
     #This ensures that file ids are held consistent
-    dbr = current_app.config['files']['dropbox-dir']
-    fileID = 0
-    current = set(os.listdir(current_app.config['files']['dropbox-dir']))
-    recorded = set(data['dropbox'].values())
+    current = {
+        os.path.join(path, filename)
+        for (path, _, files) in os.walk(dbr)
+        for filename in files
+    }
+    for (key, filename) in data['dropbox'].items():
+        if type(data['dropbox'][key])==str:
+            print("Updating dropbox entry",key,"to new format")
+            data['dropbox'][key] = {
+                'fullname':os.path.join(
+                    dbr,
+                    filename
+                ),
+                'display_name':os.path.relpath(
+                    filename,
+                    data[processkey]['output']
+                ),
+                'description':descriptions(
+                    '.'.join(os.path.basename(filename).split('.')[1:])
+                )
+            }
+    recorded = {item['fullname'] for item in data['dropbox'].values()}
     targets = {k for k in data['dropbox'] if data['dropbox'][k] in recorded-current}
     for fileID in targets:
         del data['dropbox'][fileID]
+    fileID = 0
     for filename in current-recorded:
         while str(fileID) in data['dropbox']:
             fileID += 1
         print("Assigning file:", fileID,"-->",filename)
-        data['dropbox'][str(fileID)] = filename
-    data.save()
+        data['dropbox'][str(fileID)] = {
+            'fullname':os.path.abspath(os.path.join(
+                dbr,
+                filename
+            )),
+            'display_name':os.path.abspath(
+                filename,
+                dbr
+            ),
+            'description':descriptions(
+                '.'.join(os.path.basename(filename).split('.')[0b1:])
+            )
+        }
 
     data_path = current_app.config['files']
     def _create(event):
@@ -170,9 +223,21 @@ def initialize(current_app):
         while str(fileID) in data['dropbox']:
             fileID += 1
         print("Creating file:", fileID, "-->",filename)
-        data['dropbox'][str(fileID)] = filename
+        data['dropbox'][str(fileID)] = {
+            'fullname':os.path.abspath(os.path.join(
+                dbr,
+                filename
+            )),
+            'display_name':os.path.abspath(
+                filename,
+                dbr
+            ),
+            'description':descriptions(
+                '.'.join(os.path.basename(filename).split('.')[0b1:])
+            )
+        }
         data.save()
-    watcher.subscribe(
+    dropbox_watcher.subscribe(
         _create,
         watchdog.events.FileCreatedEvent
     )
@@ -192,7 +257,7 @@ def initialize(current_app):
                     db.execute("DROP TABLE data_dropbox_"+str(key))
                 data.save()
                 return
-    watcher.subscribe(
+    dropbox_watcher.subscribe(
         _delete,
         watchdog.events.FileDeletedEvent
     )
@@ -209,19 +274,190 @@ def initialize(current_app):
         )
         for key in data['dropbox']:
             if data['dropbox'][key] == filesrc:
-                data['dropbox'][key] = filedest
+                data['dropbox'][key] = {
+                    'fullname':os.path.abspath(os.path.join(
+                        dbr,
+                        filedest
+                    )),
+                    'display_name':os.path.abspath(
+                        filedest,
+                        dbr
+                    ),
+                    'description':descriptions(
+                        '.'.join(os.path.basename(filedest).split('.')[0b1:])
+                    )
+                }
                 print("Moving file:", key,'(',filesrc,'-->',filedest,')')
                 data.save()
                 return
-    watcher.subscribe(
+    dropbox_watcher.subscribe(
         _move,
         watchdog.events.FileMovedEvent
     )
+    current_app.config['storage']['watchers'].append(dropbox_watcher)
+
+    resultdir = os.path.join(current_app.config['files']['data-dir'], 'results')
+    results_watcher = Observe(resultdir)
+    results_watcher.subscribe(lambda x:print("Results Event:", x))
+    for processID in range(data['processid']+1):
+        processkey = 'process-%d'%processID
+        if processkey in data:
+            print("Checking files for process", processID)
+            if 'files' in data[processkey]:
+                if type(data[processkey]['files']) == list:
+                    print("Updating file manifest of process",processID,"to new format")
+                    data[processkey]['files']={
+                        fileID:{
+                            'fullname':filename,
+                            'display_name':os.path.relpath(
+                                filename,
+                                data[processkey]['output']
+                            ),
+                            'description':descriptions(
+                                '.'.join(os.path.basename(filename).split('.')[1:])
+                            )
+                        }
+                        for (filename, fileID) in zip(
+                            data[processkey]['files'],
+                            range(sys.maxsize)
+                        )
+                    }
+            else:
+                data[processkey]['files'] = {}
+            current = {
+                os.path.join(path, filename)
+                for (path, _, files) in os.walk(data[processkey]['output'])
+                for filename in files
+            }
+            recorded = {entry['fullname'] for entry in data[processkey]['files'].values()}
+            for fileID in recorded-current:
+                print("Deleting file",fileID,"from manifest")
+                del data[processkey]['files'][fileID]
+            fileID = len(data[processkey]['files'])
+            for filename in current-recorded:
+                while str(fileID) in data[processkey]['files']:
+                    fileID += 1
+                fileID = str(fileID)
+                print("Assigning file:",fileID,"-->",filename)
+                data[processkey]['files'][fileID] = {
+                    'fullname':filename,
+                    'display_name':os.path.relpath(
+                        filename,
+                        data[processkey]['output']
+                    ),
+                    'description':descriptions(
+                        '.'.join(os.path.basename(filename).split('.')[1:])
+                    )
+                }
+
+    def _create(event):
+        data = loaddata(data_path)
+        parentpaths = {
+            (data['process-%d'%i]['output'], i)
+            for i in range(data['processid']+1)
+            if 'process-%d'%i in data
+        }
+        filepath = event.src_path
+        for (parentpath, parentID) in parentpaths:
+            if os.path.commonpath(filepath, parentpath)==parentpath:
+                print("New output from process",parentID)
+                processkey = 'process-%d'%parentID
+                fileID = len(data[processkey]['files'])
+                while str(fileID) in data[processkey]['files']:
+                    fileID+=1
+                fileID = str(fileID)
+                display_name = os.path.relpath(
+                    filepath,
+                    data[processkey]['output']
+                )
+                print("Assigning id",fileID,'-->',display_name)
+                data[processkey]['files'][fileID] = {
+                    'fullname':filepath,
+                    'display_name':display_name,
+                    'description':descriptions(
+                        '.'.join(os.path.basename(filepath).split('.')[1:])
+                    )
+                }
+                data.save()
+                return
+    results_watcher.subscribe(
+        _create,
+        watchdog.events.FileCreatedEvent
+    )
+
+    def _delete(event):
+        data = loaddata(data_path)
+        parentpaths = {
+            (data['process-%d'%i]['output'], i)
+            for i in range(data['processid']+1)
+            if 'process-%d'%i in data
+        }
+        filepath = event.src_path
+        for (parentpath, parentID) in parentpaths:
+            if os.path.commonpath(filepath, parentpath)==parentpath:
+                print("Deleted output from process",parentID)
+                processkey = 'process-%d'%parentID
+                for (fileID, filedata) in data[processkey]['files'].items():
+                    if filedata['fullname'] == filepath:
+                        del data[processkey]['files'][fileID]
+                        print("Deleted file:", fileID,'-->',filepath)
+                        query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+                        if len(query('data_%d_%s'%(parentID, fileID))):
+                            db.execute("DROP TABLE data_%d_%s"%(parentID, fileID))
+                data.save()
+                return
+    results_watcher.subscribe(
+        _delete,
+        watchdog.events.FileDeletedEvent
+    )
+
+    def _move(event):
+        data = loaddata(data_path)
+        filesrc = event.src_path
+        filedest = event.dest_path
+        parentpaths = {
+            (data['process-%d'%i]['output'], i)
+            for i in range(data['processid']+1)
+            if 'process-%d'%i in data
+        }
+        srckey = ''
+        destkey = ''
+        for (parentpath, parentID) in parentpaths:
+            if os.path.commonpath(filesrc, parentpath)==parentpath:
+                srckey = 'process-%d'%parentID
+            elif os.path.commonpath(filedest, parentpath) == parentpath:
+                destkey = 'process-%d'%parentID
+
+        if srckey == destkey:
+            for (fileID, filedata) in data[srckey]['files'].items():
+                if filedata['fullname'] == filesrc:
+                    data[srckey]['files'][fileID] = {
+                        'fullname':filedest,
+                        'display_name':os.path.relpath(
+                            filedest,
+                            data[srckey]['output']
+                        ),
+                        'description':descriptions(
+                            '.'.join(os.path.basename(filedest).split('.')[1:])
+                        )
+                    }
+        else:
+            _delete(event)
+            event.src_path = event.dest_path
+            _create(event)
+    results_watcher.subscribe(
+        _move,
+        watchdog.events.FileMovedEvent
+    )
+    current_app.config['storage']['watchers'].append(results_watcher)
+
+
 
     def cleanup():
         print("Cleaning up observers and database connections")
-        current_app.config['storage']['watcher'].stop()
-        current_app.config['storage']['watcher'].join()
+        for watcher in current_app.config['storage']['watchers']:
+            watcher.stop()
+            watcher.join()
         if 'db-clean' in current_app.config:
             for table in current_app.config['db-clean']:
                 try:
@@ -232,5 +468,6 @@ def initialize(current_app):
 
     atexit.register(cleanup)
     current_app.config['storage']['loader'] = lambda:loaddata(data_path)
+    data.save()
 
     print("Initialization complete.  Booting API")

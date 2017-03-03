@@ -21,30 +21,22 @@ def results_get(id):
                 "fields":"id"
             },400
         )
-    if is_running(process):
-        return []
     data = gen_files_list(id, data)
     output = []
-    for fileID in range(len(process[0]['files'])):
-        extension = '.'.join(os.path.basename(process[0]['files'][fileID]).split('.')[1:])
+    for fileID in process[0]['files']:
         output.append({
             'fileID':fileID,
-            'description':descriptions[extension] if extension in descriptions else "Unknown file",
-            'display_name':os.path.relpath(
-                process[0]['files'][fileID],
-                process[0]['output']
-            ),
-            'url':'/api/v1/processes/%d/results/%d'%(id, fileID),
+            'description':process[0]['files'][fileID]['description'],
+            'display_name':process[0]['files'][fileID]['display_name'],
+            'url':'/api/v1/processes/%d/results/%s'%(id, fileID),
             'size':"%0.3f KB"%(
-                os.path.getsize(os.path.join(
-                    process[0]['output'],
-                    process[0]['files'][fileID]
-                ))/1024
+                os.path.getsize(process[0]['files'][fileID]['fullname'])/1024
             ),
-            'rows':int(subprocess.check_output(['wc', '-l', os.path.join(
-                process[0]['output'],
-                process[0]['files'][fileID]
-            )]).decode().split()[0])-1,
+            'rows':int(subprocess.check_output([
+                'wc',
+                '-l',
+                process[0]['files'][fileID]['fullname']
+            ]).decode().split()[0])-1,
         })
     return output
 
@@ -75,8 +67,9 @@ def results_getcols(id, fileID):
             },400)
         raw_reader = open(
             os.path.join(
-                os.path.abspath(current_app.config['files']['dropbox-dir']),
-                data['dropbox'][str(fileID)]
+                os.path.abspath(current_app.config['files']['data-dir']),
+                'archive',
+                data['dropbox'][str(fileID)]['display_name']
             )
         )
         reader = csv.DictReader(raw_reader, delimiter='\t')
@@ -94,10 +87,8 @@ def results_getcols(id, fileID):
                 "fields": "id"
             },400
         )
-    if is_running(process):
-        return {}
     data = gen_files_list(id, data)
-    if fileID not in range(len(process[0]['files'])):
+    if str(fileID) not in process[0]['files']:
         return (
             {
                 "code":400,
@@ -116,23 +107,26 @@ def list_dropbox():
     return [
         {
             'fileID':key,
-            'description':descriptions[ext] if ext in descriptions else "Unknown file",
+            'description':entry['description'],
             'display_name':os.path.relpath(
-                os.path.join(current_app.config['files']['dropbox-dir'], data['dropbox'][key])
+                os.path.join(
+                    current_app.config['files']['data-dir'],
+                    'archive',
+                    entry['display_name']
+                )
             ),
-            'url':'/api/v1/processes/-1/results/%d'%(int(key)),
+            'url':'/api/v1/processes/-1/results/%s'%(key),
             'size':"%0.3f KB"%(
                 os.path.getsize(os.path.join(
-                    current_app.config['files']['dropbox-dir'],
-                    data['dropbox'][key]
+                    current_app.config['files']['data-dir'],
+                    'archive',
+                    entry['display_name']
                 ))/1024
             ),
             'rows':int(subprocess.check_output(['wc', '-l', os.path.join(
-                current_app.config['files']['dropbox-dir'],
-                data['dropbox'][key]
+                current_app.config['files']['data-dir'],
+                'archive',
+                entry['display_name']
             )]).decode().split()[0])-1,
-        } for (key, ext) in zip(
-            data['dropbox'].keys(),
-            ('.'.join(data['dropbox'][key].split('.')[1:]) for key in data['dropbox'])
-        )
+        } for (key, entry) in data['dropbox'].items()
     ]

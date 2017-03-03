@@ -10,22 +10,23 @@ spinner = re.compile(r'[\\\b\-/|]{2,}')
 
 def gen_files_list(id, data):
     """Generate the list of result files for a given process.  Stash them for later use"""
-    if 'files' not in data['process-%d'%id]:
-        data['process-%d'%id]['files'] = []
-        base_dir = data['process-%d'%id]['output']
-        if os.path.isdir(os.path.join(base_dir, 'MHC_Class_I')):
-            for path in sorted(os.listdir(os.path.join(base_dir, 'MHC_Class_I'))):
-                if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'MHC_Class_I', path)):
-                    data['process-%d'%id]['files'].append(os.path.join(base_dir, 'MHC_Class_I', path))
-        if os.path.isdir(os.path.join(base_dir, 'MHC_Class_II')):
-            for path in sorted(os.listdir(os.path.join(base_dir, 'MHC_Class_II'))):
-                if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'MHC_Class_II', path)):
-                    data['process-%d'%id]['files'].append(os.path.join(base_dir, 'MHC_Class_II', path))
-        for path in sorted(os.listdir(base_dir)):
-            if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, path)):
-                data['process-%d'%id]['files'].append(os.path.join(base_dir, path))
-        data['process-%d'%id]['files'].sort()
-        data.save()
+    print("NOOP")
+    # if 'files' not in data['process-%d'%id]:
+    #     data['process-%d'%id]['files'] = []
+    #     base_dir = data['process-%d'%id]['output']
+    #     if os.path.isdir(os.path.join(base_dir, 'MHC_Class_I')):
+    #         for path in sorted(os.listdir(os.path.join(base_dir, 'MHC_Class_I'))):
+    #             if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'MHC_Class_I', path)):
+    #                 data['process-%d'%id]['files'].append(os.path.join(base_dir, 'MHC_Class_I', path))
+    #     if os.path.isdir(os.path.join(base_dir, 'MHC_Class_II')):
+    #         for path in sorted(os.listdir(os.path.join(base_dir, 'MHC_Class_II'))):
+    #             if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'MHC_Class_II', path)):
+    #                 data['process-%d'%id]['files'].append(os.path.join(base_dir, 'MHC_Class_II', path))
+    #     for path in sorted(os.listdir(base_dir)):
+    #         if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, path)):
+    #             data['process-%d'%id]['files'].append(os.path.join(base_dir, path))
+    #     data['process-%d'%id]['files'].sort()
+    #     data.save()
     return data
 
 def fetch_process(id,data,children):
@@ -68,26 +69,18 @@ def processes():
              'output':proc[1][0]['output'],
              'pid':proc[1][0]['pid'],
              'command':proc[1][0]['command'],
-             'files':([
+             'files':[
                  {
                      'fileID':fileID,
-                     'url':'/api/v1/processes/%d/results/%d'%(
+                     'url':'/api/v1/processes/%d/results/%s'%(
                          proc[0],
                          fileID
                      ),
-                     'display_name':os.path.relpath(
-                         filename,
-                         proc[1][0]['output']
-                     ),
-                     'description':descriptions[
-                         '.'.join(os.path.basename(filename).split('.')[1:])
-                     ]
+                     'display_name':filedata['display_name'],
+                     'description':filedata['description']
                  }
-                 for (filename, fileID) in zip(
-                     gen_files_list(proc[0], data)['process-%d'%proc[0]]['files'],
-                     range(sys.maxsize)
-                 )
-             ] if not is_running(proc[1]) else []),
+                 for (fileID, filedata) in data['process-%d'%proc[0]]['files'].items()
+             ],
              'parameters':(
                  json.load(open(os.path.join(
                      proc[1][0]['output'],
@@ -154,26 +147,18 @@ def process_info(id):
         ),
         'output':process[0]['output'],#
         'running':is_running(process),#
-        'files':([
+        'files':[
             {
                 'fileID':fileID,
-                'url':'/api/v1/processes/%d/results/%d'%(
+                'url':'/api/v1/processes/%d/results/%s'%(
                     id,
                     fileID
                 ),
-                'display_name':os.path.relpath(
-                    filename,
-                    process[0]['output']
-                ),
-                'description':descriptions[
-                    '.'.join(os.path.basename(filename).split('.')[1:])
-                ]
+                'display_name':filedata['display_name'],
+                'description':filedata['description']
             }
-            for (filename, fileID) in zip(
-                gen_files_list(id, data)['process-%d'%id]['files'],
-                range(sys.maxsize)
-            )
-        ] if not is_running(process) else []),
+            for (fileID, filedata) in data['process-%d'%id]['files'].items()
+        ],
         'parameters':(#
             json.load(open(configfile))
             if os.path.isfile(configfile)
