@@ -129,6 +129,7 @@ def initialize(current_app):
             "and lower may be innacurate"
         )
     current_app.config['storage']['children']={}
+    current_app.config['storage']['manifest']={}
 
     #Establish a connection to the local postgres database
     try:
@@ -136,7 +137,7 @@ def initialize(current_app):
     except psqlException as e:
         raise SystemExit("Unable to connect to your Postgres server.\
                          The pVAC-Seq API requires a running local Postgres server") from e
-    if not len(tmp.prepare("SELECT 1 FROM pg_database WHERE datname = 'pvacseq'")()):
+    if not len(tmp.prepare("SELECT 1 FROM pg_database WHERE datname = $1")('pvacseq')):
         tmp.execute("CREATE DATABASE pvacseq")
     tmp.close()
     db = psql.open("localhost/pvacseq")
@@ -203,7 +204,7 @@ def initialize(current_app):
                 dbr,
                 filename
             )),
-            'display_name':os.path.abspath(
+            'display_name':os.path.relpath(
                 filename,
                 dbr
             ),
@@ -228,10 +229,7 @@ def initialize(current_app):
                 dbr,
                 filename
             )),
-            'display_name':os.path.abspath(
-                filename,
-                dbr
-            ),
+            'display_name':filename,
             'description':descriptions(
                 '.'.join(os.path.basename(filename).split('.')[0b1:])
             )
@@ -279,7 +277,7 @@ def initialize(current_app):
                         dbr,
                         filedest
                     )),
-                    'display_name':os.path.abspath(
+                    'display_name':os.path.relpath(
                         filedest,
                         dbr
                     ),
@@ -333,8 +331,8 @@ def initialize(current_app):
             for fileID in recorded-current:
                 print("Deleting file",fileID,"from manifest")
                 del data[processkey]['files'][fileID]
-            fileID = len(data[processkey]['files'])
             for filename in current-recorded:
+                fileID = len(data[processkey]['files'])
                 while str(fileID) in data[processkey]['files']:
                     fileID += 1
                 fileID = str(fileID)
@@ -359,7 +357,7 @@ def initialize(current_app):
         }
         filepath = event.src_path
         for (parentpath, parentID) in parentpaths:
-            if os.path.commonpath(filepath, parentpath)==parentpath:
+            if os.path.commonpath([filepath, parentpath])==parentpath:
                 print("New output from process",parentID)
                 processkey = 'process-%d'%parentID
                 fileID = len(data[processkey]['files'])
@@ -394,7 +392,7 @@ def initialize(current_app):
         }
         filepath = event.src_path
         for (parentpath, parentID) in parentpaths:
-            if os.path.commonpath(filepath, parentpath)==parentpath:
+            if os.path.commonpath([filepath, parentpath])==parentpath:
                 print("Deleted output from process",parentID)
                 processkey = 'process-%d'%parentID
                 for (fileID, filedata) in data[processkey]['files'].items():
@@ -423,9 +421,9 @@ def initialize(current_app):
         srckey = ''
         destkey = ''
         for (parentpath, parentID) in parentpaths:
-            if os.path.commonpath(filesrc, parentpath)==parentpath:
+            if os.path.commonpath([filesrc, parentpath])==parentpath:
                 srckey = 'process-%d'%parentID
-            elif os.path.commonpath(filedest, parentpath) == parentpath:
+            elif os.path.commonpath([filedest, parentpath]) == parentpath:
                 destkey = 'process-%d'%parentID
 
         if srckey == destkey:

@@ -4,6 +4,22 @@ import json
 from flask import current_app
 from yaml import dump
 from shlex import quote
+from shutil import copyfile
+from .database import int_pattern
+from .files import list_input
+
+def resolve_filepath(filepath):
+    if int_pattern.match(filepath) and int(filepath) <= len(current_app.config['storage']['manifest']):
+        filepath = current_app.config['storage']['manifest'][int(filepath)]
+    if not os.path.isfile(filepath):
+        filepath = os.path.join(
+            current_app.config['files']['data-dir'],
+            'input',
+            filepath
+        )
+        if not os.path.isfile(filepath):
+            return None
+    return filepath
 
 def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
           peptide_sequence_length, gene_expn_file, transcript_expn_file,
@@ -17,8 +33,19 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
     """Stage input for a new pVAC-Seq run.  Generate a unique output directory and \
     save uploaded files to temporary locations (and give pVAC-Seq the filepaths). \
     Then forward the command to start()"""
+    ['input','gene_expn_file', 'transcript_expn_file',
+    'normal_snvs_coverage_file', 'normal_indels_coverage_file',
+    'tdna_snvs_coverage_file', 'tdna_indels_coverage_file',
+    'trna_snvs_coverage_file', 'trna_indels_coverage_file']
+    input_file = input
     data = current_app.config['storage']['loader']()
-    current_path = os.path.join(os.path.expanduser('~'), "Documents", "pVAC-Seq Output", samplename)
+    list_input() #update the manifest stored in current_app
+    # input_manifest = current_app.config['storage']['manifest']
+    current_path = os.path.join(
+        current_app.config['files']['data-dir'],
+        'results',
+        samplename
+    )
     if os.path.exists(current_path):
         i = 1
         while os.path.exists(current_path+"_"+str(i)):
@@ -27,62 +54,143 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
 
     os.makedirs(os.path.join(current_path, 'Staging'), exist_ok=True)
 
-    staged_input = open(os.path.join(current_path, "Staging", "input.vcf"), 'wb')
-    input.save(staged_input)
-    staged_input.flush()
+    input_path = resolve_filepath(input_file)
+    if not input_path:
+        return (
+            {
+                'code':400,
+                'message':'Unable to locate the given file: %s'%input_file,
+                'fields':'input'
+            },400
+        )
+    staged_input_path = os.path.join(current_path, "Staging", "input.vcf")
+    copyfile(input_path, staged_input_path)
 
     staged_additional_input_file_list = open(os.path.join(current_path, "Staging", "additional_input_file_list.yml"), 'w')
 
-    staged_gene_expn_file = open(os.path.join(current_path, "Staging", "genes.fpkm_tracking"), 'wb')
-    gene_expn_file.save(staged_gene_expn_file)
-    staged_gene_expn_file.flush()
-    if staged_gene_expn_file.tell():
-        dump({"gene_expn_file": staged_gene_expn_file.name}, staged_additional_input_file_list, default_flow_style=False)
+    if gene_expn_file:
+        gene_expn_file_path = resolve_filepath(gene_expn_file)
+        if not gene_expn_file_path:
+            return (
+                {
+                    'code':400,
+                    'message':'Unable to locate the given file: %s'%gene_expn_file,
+                    'fields':'gene_expn_file'
+                },400
+            )
+        staged_gene_expn_file_path = os.path.join(current_path, "Staging", "genes.fpkm_tracking")
+        copyfile(gene_expn_file_path, staged_gene_expn_file_path)
+        if os.path.getsize(staged_gene_expn_file_path):
+            dump({"gene_expn_file": staged_gene_expn_file_path}, staged_additional_input_file_list, default_flow_style=False)
 
-    staged_transcript_expn_file = open(os.path.join(current_path, "Staging", "transcript.fpkm_tracking"), 'wb')
-    transcript_expn_file.save(staged_transcript_expn_file)
-    staged_transcript_expn_file.flush()
-    if staged_transcript_expn_file.tell():
-        dump({"transcript_expn_file" : staged_transcript_expn_file.name}, staged_additional_input_file_list, default_flow_style=False)
+    if transcript_expn_file:
+        transcript_expn_file_path = resolve_filepath(transcript_expn_file)
+        if not transcript_expn_file_path:
+            return (
+                {
+                    'code':400,
+                    'message':'Unable to locate the given file: %s'%transcript_expn_file,
+                    'fields':'transcript_expn_file'
+                },400
+            )
+        staged_transcript_expn_file_path = os.path.join(current_path, "Staging", "transcript.fpkm_tracking")
+        copyfile(transcript_expn_file_path, staged_transcript_expn_file_path)
+        if os.path.getsize(staged_transcript_expn_file_path):
+            dump({"transcript_expn_file" :staged_transcript_expn_file_path}, staged_additional_input_file_list, default_flow_style=False)
 
-    staged_normal_snvs_coverage_file = open(os.path.join(current_path, "Staging", "normal_snvs.bam_readcount"), 'wb')
-    normal_snvs_coverage_file.save(staged_normal_snvs_coverage_file)
-    staged_normal_snvs_coverage_file.flush()
-    if staged_normal_snvs_coverage_file.tell():
-        dump({"normal_snvs_coverage_file" : staged_normal_snvs_coverage_file.name}, staged_additional_input_file_list, default_flow_style=False)
+    if normal_snvs_coverage_file:
+        normal_snvs_coverage_file_path = resolve_filepath(normal_snvs_coverage_file)
+        if not normal_snvs_coverage_file_path:
+            return (
+                {
+                    'code':400,
+                    'message':'Unable to locate the given file: %s'%normal_snvs_coverage_file,
+                    'fields':'normal_snvs_coverage_file'
+                },400
+            )
+        staged_normal_snvs_coverage_file_path = os.path.join(current_path, "Staging", "normal_snvs.bam_readcount")
+        copyfile(normal_snvs_coverage_file_path, staged_normal_snvs_coverage_file_path)
+        if os.path.getsize(staged_normal_snvs_coverage_file_path):
+            dump({"normal_snvs_coverage_file" :staged_normal_snvs_coverage_file_path}, staged_additional_input_file_list, default_flow_style=False)
 
-    staged_normal_indels_coverage_file = open(os.path.join(current_path, "Staging", "normal_indels.bam_readcount"), 'wb')
-    normal_indels_coverage_file.save(staged_normal_indels_coverage_file)
-    staged_normal_indels_coverage_file.flush()
-    if staged_normal_indels_coverage_file.tell():
-        dump({"normal_indels_coverage_file" : staged_normal_indels_coverage_file.name}, staged_additional_input_file_list, default_flow_style=False)
+    if normal_indels_coverage_file:
+        normal_indels_coverage_file_path = resolve_filepath(normal_indels_coverage_file)
+        if not normal_indels_coverage_file_path:
+            return (
+                {
+                    'code':400,
+                    'message':'Unable to locate the given file: %s'%normal_indels_coverage_file,
+                    'fields':'normal_indels_coverage_file'
+                },400
+            )
+        staged_normal_indels_coverage_file_path = os.path.join(current_path, "Staging", "normal_indels.bam_readcount")
+        copyfile(normal_indels_coverage_file_path, staged_normal_indels_coverage_file_path)
+        if os.path.getsize(staged_normal_indels_coverage_file_path):
+            dump({"normal_indels_coverage_file" :staged_normal_indels_coverage_file_path}, staged_additional_input_file_list, default_flow_style=False)
 
-    staged_tdna_snvs_coverage_file = open(os.path.join(current_path, "Staging", "tdna_snvs.bam_readcount"), 'wb')
-    tdna_snvs_coverage_file.save(staged_tdna_snvs_coverage_file)
-    staged_tdna_snvs_coverage_file.flush()
-    if staged_tdna_snvs_coverage_file.tell():
-        dump({"tdna_snvs_coverage_file" : staged_tdna_snvs_coverage_file.name}, staged_additional_input_file_list, default_flow_style=False)
+    if tdna_snvs_coverage_file:
+        tdna_snvs_coverage_file_path = resolve_filepath(tdna_snvs_coverage_file)
+        if not tdna_snvs_coverage_file_path:
+            return (
+                {
+                    'code':400,
+                    'message':'Unable to locate the given file: %s'%tdna_snvs_coverage_file,
+                    'fields':'tdna_snvs_coverage_file'
+                },400
+            )
+        staged_tdna_snvs_coverage_file_path = os.path.join(current_path, "Staging", "tdna_snvs.bam_readcount")
+        copyfile(tdna_snvs_coverage_file_path, staged_tdna_snvs_coverage_file_path)
+        if os.path.getsize(staged_tdna_snvs_coverage_file_path):
+            dump({"tdna_snvs_coverage_file" :staged_tdna_snvs_coverage_file_path}, staged_additional_input_file_list, default_flow_style=False)
 
-    staged_tdna_indels_coverage_file = open(os.path.join(current_path, "Staging", "tdna_indels.bam_readcount"), 'wb')
-    tdna_indels_coverage_file.save(staged_tdna_indels_coverage_file)
-    staged_tdna_indels_coverage_file.flush()
-    if staged_tdna_indels_coverage_file.tell():
-        dump({"tdna_indels_coverage_file" : staged_tdna_indels_coverage_file.name}, staged_additional_input_file_list, default_flow_style=False)
+    if tdna_indels_coverage_file:
+        tdna_indels_coverage_file_path = resolve_filepath(tdna_indels_coverage_file)
+        if not tdna_indels_coverage_file_path:
+            return (
+                {
+                    'code':400,
+                    'message':'Unable to locate the given file: %s'%tdna_indels_coverage_file,
+                    'fields':'tdna_indels_coverage_file'
+                },400
+            )
+        staged_tdna_indels_coverage_file_path = os.path.join(current_path, "Staging", "tdna_indels.bam_readcount")
+        copyfile(tdna_indels_coverage_file_path, staged_tdna_indels_coverage_file_path)
+        if os.path.getsize(staged_tdna_indels_coverage_file_path):
+            dump({"tdna_indels_coverage_file" :staged_tdna_indels_coverage_file_path}, staged_additional_input_file_list, default_flow_style=False)
 
-    staged_trna_snvs_coverage_file = open(os.path.join(current_path, "Staging", "trna_snvs.bam_readcount"), 'wb')
-    trna_snvs_coverage_file.save(staged_trna_snvs_coverage_file)
-    staged_trna_snvs_coverage_file.flush()
-    if staged_trna_snvs_coverage_file.tell():
-        dump({"trna_snvs_coverage_file" : staged_trna_snvs_coverage_file.name}, staged_additional_input_file_list, default_flow_style=False)
+    if trna_snvs_coverage_file:
+        trna_snvs_coverage_file_path = resolve_filepath(trna_snvs_coverage_file)
+        if not trna_snvs_coverage_file_path:
+            return (
+                {
+                    'code':400,
+                    'message':'Unable to locate the given file: %s'%trna_snvs_coverage_file,
+                    'fields':'trna_snvs_coverage_file'
+                },400
+            )
+        staged_trna_snvs_coverage_file_path = os.path.join(current_path, "Staging", "trna_snvs.bam_readcount")
+        copyfile(trna_snvs_coverage_file_path, staged_trna_snvs_coverage_file_path)
+        if os.path.getsize(staged_trna_snvs_coverage_file_path):
+            dump({"trna_snvs_coverage_file" :staged_trna_snvs_coverage_file_path}, staged_additional_input_file_list, default_flow_style=False)
 
-    staged_trna_indels_coverage_file = open(os.path.join(current_path, "Staging", "trna_indels.bam_readcount"), 'wb')
-    trna_indels_coverage_file.save(staged_trna_indels_coverage_file)
-    staged_trna_indels_coverage_file.flush()
-    if staged_trna_indels_coverage_file.tell():
-        dump({"trna_indels_coverage_file" : staged_trna_indels_coverage_file.name}, staged_additional_input_file_list)
+    if trna_indels_coverage_file:
+        trna_indels_coverage_file_path = resolve_filepath(trna_indels_coverage_file)
+        if not trna_indels_coverage_file_path:
+            return (
+                {
+                    'code':400,
+                    'message':'Unable to locate the given file: %s'%trna_indels_coverage_file,
+                    'fields':'trna_indels_coverage_file'
+                },400
+            )
+        staged_trna_indels_coverage_file_path = os.path.join(current_path, "Staging", "trna_indels.bam_readcount")
+        copyfile(trna_indels_coverage_file_path, staged_trna_indels_coverage_file_path)
+        if os.path.getsize(staged_trna_indels_coverage_file_path):
+            dump({"trna_indels_coverage_file" :staged_trna_indels_coverage_file_path}, staged_additional_input_file_list)
+
     staged_additional_input_file_list.flush()
 
-    return start(staged_input.name, samplename, alleles, epitope_lengths, prediction_algorithms, current_path,
+    return start(staged_input_path, samplename, alleles, epitope_lengths, prediction_algorithms, current_path,
               peptide_sequence_length, staged_additional_input_file_list.name if staged_additional_input_file_list.tell() else "", # check if any data written to file
               net_chop_method, len(netmhc_stab), len(top_result_per_mutation), top_score_metric,
               binding_threshold, minimum_fold_change,
@@ -163,7 +271,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
             'logfile':logfile,
             'pid':current_app.config['storage']['children'][data['processid']].pid,
             'status': "Task Started",
-            'files':[],
+            'files':{},
             'output':os.path.abspath(output)
         },
         current_app.config['files']['processes']

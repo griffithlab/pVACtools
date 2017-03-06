@@ -8,7 +8,7 @@ from .processes import fetch_process, is_running, gen_files_list
 from .utils import column_filter
 
 float_pattern = re.compile(r'^\d*\.\d+$')
-int_pattern = re.compile(r'^\d+$')
+int_pattern = re.compile(r'^-?\d+$')
 NA_pattern = re.compile(r'^NA$')
 queryfilters = re.compile(r'(.+)(<=?|>=?|!=|==)(.+)')
 

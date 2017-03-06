@@ -329,7 +329,7 @@ paths:
         in: "formData"
         description: "Input VCF File: Local VCF file"
         required: true
-        type: "file"
+        type: "string"
       - name: "samplename"
         in: "formData"
         description: "Sample Name: Your name for the sample"

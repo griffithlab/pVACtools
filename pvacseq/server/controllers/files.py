@@ -6,7 +6,6 @@ from .processes import fetch_process, is_running, gen_files_list
 from .database import filterfile
 from .utils import descriptions, column_filter
 
-
 def results_get(id):
     """Get the list of result files from a specific pVAC-Seq run"""
     data = current_app.config['storage']['loader']()
@@ -45,20 +44,22 @@ def list_input(path = None):
     """Fetches a list of input files from the input directory"""
     data = current_app.config['storage']['loader']()
     if not path:
-        path = os.path.join(current_app.config['files']['data-dir'], 'results')
+        path = os.path.join(current_app.config['files']['data-dir'], 'input')
+        current_app.config['storage']['manifest'] = []
     output = []
-    for entity in os.listdir(path):
+    for entity in sorted(os.listdir(path)):
         fullname = os.path.join(path, entity)
         if os.path.isfile(fullname):
             output.append({
                 'display_name':entity,
                 'name':fullname,
                 'type':'file',
-                'fileID':hash(fullname),
+                'fileID':len(current_app.config['storage']['manifest']),
                 'description':descriptions(
                     '.'.join(os.path.basename(entity).split('.')[1:])
                 ),
             })
+            current_app.config['storage']['manifest'].append(fullname)
         elif os.path.isdir(fullname):
             output.append({
                 'name':fullname,
@@ -67,7 +68,6 @@ def list_input(path = None):
                 'contents': list_input(fullname)
             })
     return output
-
 
 def results_getfile(id, fileID, count, page, filters, sort, direction):
     """(DEPRECATED) Read data directly from a specific output file"""
