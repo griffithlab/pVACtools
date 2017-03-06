@@ -75,7 +75,7 @@
             var output = [];
             for(var i = 0; i< obj.length; i++){
               if(obj[i]['type'] == 'file'){
-                output.push([obj[i]['fileID'], obj[i]['display_name']]);
+                output.push([obj[i]['fileID'], obj[i]['name']]);
               }
               else {
                 output = output.concat(parser(obj[i]['contents']));
@@ -84,7 +84,6 @@
             return output;
           };
           window.pvacseq_files = parser(JSON.parse(event.target.response));
-          event.target.close();
           Array.prototype.forEach.call(
             document.getElementsByClassName('selector'),
             function(elem){

@@ -246,7 +246,7 @@ def initialize(current_app):
             event.src_path,
             dbr
         )
-        for key in data['dropbox']:
+        for key in list(data['dropbox']):
             if data['dropbox'][key] == filename:
                 del data['dropbox'][key]
                 print("Deleting file:",key,'-->', filename)
@@ -327,11 +327,12 @@ def initialize(current_app):
                 for (path, _, files) in os.walk(data[processkey]['output'])
                 for filename in files
             }
-            recorded = {entry['fullname'] for entry in data[processkey]['files'].values()}
-            for fileID in recorded-current:
+            recorded = {entry['fullname']:k for k,entry in data[processkey]['files'].items()}
+            for fileID in recorded.keys()-current:
                 print("Deleting file",fileID,"from manifest")
+                fileID = recorded[fileID]
                 del data[processkey]['files'][fileID]
-            for filename in current-recorded:
+            for filename in current-recorded.keys():
                 fileID = len(data[processkey]['files'])
                 while str(fileID) in data[processkey]['files']:
                     fileID += 1
@@ -395,7 +396,7 @@ def initialize(current_app):
             if os.path.commonpath([filepath, parentpath])==parentpath:
                 print("Deleted output from process",parentID)
                 processkey = 'process-%d'%parentID
-                for (fileID, filedata) in data[processkey]['files'].items():
+                for (fileID, filedata) in list(data[processkey]['files'].items()):
                     if filedata['fullname'] == filepath:
                         del data[processkey]['files'][fileID]
                         print("Deleted file:", fileID,'-->',filepath)
@@ -441,8 +442,9 @@ def initialize(current_app):
                     }
         else:
             _delete(event)
-            event.src_path = event.dest_path
-            _create(event)
+            evt = lambda:None
+            evt.src_path = event.dest_path
+            _create(evt)
     results_watcher.subscribe(
         _move,
         watchdog.events.FileMovedEvent

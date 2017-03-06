@@ -9,7 +9,8 @@ class pvacseqHandler(watchdog.events.FileSystemEventHandler):
         self.subscribers = []
 
     def on_any_event(self, event):
-        threading.Thread(target=pvacseqHandler._runner, args=(self, event), daemon=True).start()
+        # threading.Thread(target=pvacseqHandler._runner, args=(self, event), daemon=True).start()
+        self._runner(event)
 
     def subscribe(self, fn, eventType = None):
         self.subscribers.append((eventType, fn))
