@@ -1,7 +1,10 @@
 import os
 import subprocess
 import json
+<<<<<<< 5eae7e69806756aec16a6ef91c091bc7fff14f5b
 import re
+=======
+>>>>>>> Adding unit tests for API
 import tempfile
 from flask import current_app
 from yaml import dump

@@ -5,6 +5,12 @@ before_install:
   - pip install PyVCF
   - pip install requests
   - pip install PyYAML
+  - pip install connexion
+  - pip install py-postgresql
+  - pip install watchdog
+  - pip install flask-cors
+services:
+  - postgresql
 install: true
 script:
   - TEST_FLAG=1 python3 -m unittest discover -v
