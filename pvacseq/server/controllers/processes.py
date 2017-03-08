@@ -67,7 +67,13 @@ def processes():
              'url':'/api/v1/processes/%d'%proc[0],
              'results_url':'/api/v1/processes/%d/results'%proc[0],
              'attached':bool(proc[1][1]),
-             'output':proc[1][0]['output'],
+             'output':os.path.relpath(
+                 proc[1][0]['output'],
+                 os.path.join(
+                     current_app.config['files']['data-dir'],
+                     'results'
+                 )
+             ),
              'pid':proc[1][0]['pid'],
              'command':proc[1][0]['command'],
              'files':[
@@ -146,7 +152,13 @@ def process_info(id):
             if os.path.isfile(process[0]['logfile'])
             else 0
         ),
-        'output':process[0]['output'],#
+        'output':os.path.relpath(
+            process[0]['output'],
+            os.path.join(
+                current_app.config['files']['data-dir'],
+                'results'
+            )
+        ),#
         'running':is_running(process),#
         'files':[
             {

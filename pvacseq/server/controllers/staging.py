@@ -1,6 +1,7 @@
 import os
 import subprocess
 import json
+import re
 import tempfile
 from flask import current_app
 from yaml import dump
@@ -40,6 +41,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
     'trna_snvs_coverage_file', 'trna_indels_coverage_file']
     input_file = input
     data = current_app.config['storage']['loader']()
+    samplename  = re.sub(r'[^\w\s.]', '_', samplename)
     list_input() #update the manifest stored in current_app
     # input_manifest = current_app.config['storage']['manifest']
     current_path = os.path.join(
@@ -53,8 +55,6 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
             i += 1
         current_path += "_"+str(i)
 
-    os.makedirs(os.path.join(current_path, 'Staging'), exist_ok=True)
-
     input_path = resolve_filepath(input_file)
     if not input_path:
         return (
@@ -64,10 +64,9 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                 'fields':'input'
             },400
         )
-    staged_input_path = os.path.join(current_path, "Staging", "input.vcf")
-    copyfile(input_path, staged_input_path)
 
-    staged_additional_input_file_list = open(os.path.join(current_path, "Staging", "additional_input_file_list.yml"), 'w')
+    os.makedirs(current_path)
+    additional_input_file_list = open(os.path.join(current_path, "additional_input_file_list.yml"), 'w')
 
     if gene_expn_file:
         gene_expn_file_path = resolve_filepath(gene_expn_file)
@@ -79,10 +78,8 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                     'fields':'gene_expn_file'
                 },400
             )
-        staged_gene_expn_file_path = os.path.join(current_path, "Staging", "genes.fpkm_tracking")
-        copyfile(gene_expn_file_path, staged_gene_expn_file_path)
-        if os.path.getsize(staged_gene_expn_file_path):
-            dump({"gene_expn_file": staged_gene_expn_file_path}, staged_additional_input_file_list, default_flow_style=False)
+        if os.path.getsize(gene_expn_file_path):
+            dump({"gene_expn_file": gene_expn_file_path}, additional_input_file_list, default_flow_style=False)
 
     if transcript_expn_file:
         transcript_expn_file_path = resolve_filepath(transcript_expn_file)
@@ -94,10 +91,8 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                     'fields':'transcript_expn_file'
                 },400
             )
-        staged_transcript_expn_file_path = os.path.join(current_path, "Staging", "transcript.fpkm_tracking")
-        copyfile(transcript_expn_file_path, staged_transcript_expn_file_path)
-        if os.path.getsize(staged_transcript_expn_file_path):
-            dump({"transcript_expn_file" :staged_transcript_expn_file_path}, staged_additional_input_file_list, default_flow_style=False)
+        if os.path.getsize(transcript_expn_file_path):
+            dump({"transcript_expn_file" :transcript_expn_file_path}, additional_input_file_list, default_flow_style=False)
 
     if normal_snvs_coverage_file:
         normal_snvs_coverage_file_path = resolve_filepath(normal_snvs_coverage_file)
@@ -109,10 +104,8 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                     'fields':'normal_snvs_coverage_file'
                 },400
             )
-        staged_normal_snvs_coverage_file_path = os.path.join(current_path, "Staging", "normal_snvs.bam_readcount")
-        copyfile(normal_snvs_coverage_file_path, staged_normal_snvs_coverage_file_path)
-        if os.path.getsize(staged_normal_snvs_coverage_file_path):
-            dump({"normal_snvs_coverage_file" :staged_normal_snvs_coverage_file_path}, staged_additional_input_file_list, default_flow_style=False)
+        if os.path.getsize(normal_snvs_coverage_file_path):
+            dump({"normal_snvs_coverage_file" :normal_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     if normal_indels_coverage_file:
         normal_indels_coverage_file_path = resolve_filepath(normal_indels_coverage_file)
@@ -124,10 +117,9 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                     'fields':'normal_indels_coverage_file'
                 },400
             )
-        staged_normal_indels_coverage_file_path = os.path.join(current_path, "Staging", "normal_indels.bam_readcount")
-        copyfile(normal_indels_coverage_file_path, staged_normal_indels_coverage_file_path)
-        if os.path.getsize(staged_normal_indels_coverage_file_path):
-            dump({"normal_indels_coverage_file" :staged_normal_indels_coverage_file_path}, staged_additional_input_file_list, default_flow_style=False)
+
+        if os.path.getsize(normal_indels_coverage_file_path):
+            dump({"normal_indels_coverage_file" :normal_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     if tdna_snvs_coverage_file:
         tdna_snvs_coverage_file_path = resolve_filepath(tdna_snvs_coverage_file)
@@ -139,10 +131,8 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                     'fields':'tdna_snvs_coverage_file'
                 },400
             )
-        staged_tdna_snvs_coverage_file_path = os.path.join(current_path, "Staging", "tdna_snvs.bam_readcount")
-        copyfile(tdna_snvs_coverage_file_path, staged_tdna_snvs_coverage_file_path)
-        if os.path.getsize(staged_tdna_snvs_coverage_file_path):
-            dump({"tdna_snvs_coverage_file" :staged_tdna_snvs_coverage_file_path}, staged_additional_input_file_list, default_flow_style=False)
+        if os.path.getsize(tdna_snvs_coverage_file_path):
+            dump({"tdna_snvs_coverage_file" :tdna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     if tdna_indels_coverage_file:
         tdna_indels_coverage_file_path = resolve_filepath(tdna_indels_coverage_file)
@@ -154,10 +144,9 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                     'fields':'tdna_indels_coverage_file'
                 },400
             )
-        staged_tdna_indels_coverage_file_path = os.path.join(current_path, "Staging", "tdna_indels.bam_readcount")
-        copyfile(tdna_indels_coverage_file_path, staged_tdna_indels_coverage_file_path)
-        if os.path.getsize(staged_tdna_indels_coverage_file_path):
-            dump({"tdna_indels_coverage_file" :staged_tdna_indels_coverage_file_path}, staged_additional_input_file_list, default_flow_style=False)
+
+        if os.path.getsize(tdna_indels_coverage_file_path):
+            dump({"tdna_indels_coverage_file" :tdna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     if trna_snvs_coverage_file:
         trna_snvs_coverage_file_path = resolve_filepath(trna_snvs_coverage_file)
@@ -169,10 +158,9 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                     'fields':'trna_snvs_coverage_file'
                 },400
             )
-        staged_trna_snvs_coverage_file_path = os.path.join(current_path, "Staging", "trna_snvs.bam_readcount")
-        copyfile(trna_snvs_coverage_file_path, staged_trna_snvs_coverage_file_path)
-        if os.path.getsize(staged_trna_snvs_coverage_file_path):
-            dump({"trna_snvs_coverage_file" :staged_trna_snvs_coverage_file_path}, staged_additional_input_file_list, default_flow_style=False)
+
+        if os.path.getsize(trna_snvs_coverage_file_path):
+            dump({"trna_snvs_coverage_file" :trna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     if trna_indels_coverage_file:
         trna_indels_coverage_file_path = resolve_filepath(trna_indels_coverage_file)
@@ -184,15 +172,14 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                     'fields':'trna_indels_coverage_file'
                 },400
             )
-        staged_trna_indels_coverage_file_path = os.path.join(current_path, "Staging", "trna_indels.bam_readcount")
-        copyfile(trna_indels_coverage_file_path, staged_trna_indels_coverage_file_path)
-        if os.path.getsize(staged_trna_indels_coverage_file_path):
-            dump({"trna_indels_coverage_file" :staged_trna_indels_coverage_file_path}, staged_additional_input_file_list)
 
-    staged_additional_input_file_list.flush()
+        if os.path.getsize(trna_indels_coverage_file_path):
+            dump({"trna_indels_coverage_file" :trna_indels_coverage_file_path}, additional_input_file_list)
 
-    return start(staged_input_path, samplename, alleles, epitope_lengths, prediction_algorithms, current_path,
-              peptide_sequence_length, staged_additional_input_file_list.name if staged_additional_input_file_list.tell() else "", # check if any data written to file
+    additional_input_file_list.flush()
+
+    return start(input_path, samplename, alleles, epitope_lengths, prediction_algorithms, current_path,
+              peptide_sequence_length, additional_input_file_list.name if additional_input_file_list.tell() else "", # check if any data written to file
               net_chop_method, len(netmhc_stab), len(top_result_per_mutation), top_score_metric,
               binding_threshold, minimum_fold_change,
               normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,

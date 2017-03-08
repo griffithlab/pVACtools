@@ -139,13 +139,7 @@ def list_dropbox():
         {
             'fileID':key,
             'description':entry['description'],
-            'display_name':os.path.relpath(
-                os.path.join(
-                    current_app.config['files']['data-dir'],
-                    'archive',
-                    entry['display_name']
-                )
-            ),
+            'display_name':entry['display_name'],
             'url':'/api/v1/processes/-1/results/%s'%(key),
             'size':"%0.3f KB"%(
                 os.path.getsize(os.path.join(

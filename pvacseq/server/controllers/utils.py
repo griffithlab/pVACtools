@@ -2,6 +2,7 @@
 import os
 from glob import iglob
 import json
+import re
 import sys
 import subprocess
 import watchdog.events
@@ -52,6 +53,9 @@ class dataObj(dict):
 
 _descriptions = {
     'json':"Metadata regarding a specific run of pVAC-Seq",
+    'yml':"Manifest of auxiliary files supplied to pVAC-Seq",
+    'yaml':"Manifest of auxiliary files supplied to pVAC-Seq",
+    'log':"Transcript of messages produced by pVAC-Seq",
     'chop.tsv':"Processed and filtered data, with peptide cleavage data added",
     'combined.parsed.tsv':"Processed data from IEDB, but with no filtering or extra data",
     'filtered.binding.tsv':"Processed data filtered by binding strength",
@@ -64,6 +68,10 @@ _descriptions = {
 def descriptions(ext):
     if ext in _descriptions:
         return _descriptions[ext]
+    elif re.search(r'tsv_\d+-\d+$', ext):
+        return "A temporary file containing a subset of the data"
+    elif re.search(r'key$', ext):
+        return "Data used by pVAC-Seq to parse results from IEDB"
     return "Unknown File"
 
 def column_filter(column):

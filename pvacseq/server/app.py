@@ -9,7 +9,7 @@ from threading import Thread
 from webbrowser import open_new_tab
 from flask_cors import CORS
 from .controllers.utils import initialize
-#FIXME: sanitize sample name
+
 def main():
 
     app = connexion.App(

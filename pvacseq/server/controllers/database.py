@@ -131,12 +131,13 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                         "fields": "fileID"
                     }, 400
                 )
-            raw_reader = open(os.path.join(
-                os.path.abspath(current_app.config['files']['data-dir']),
-                'archive',
-                data['dropbox'][str(fileID)]['display_name']
-            ))
+            raw_reader = open(data['dropbox'][str(fileID)]['fullname'])
         if not raw_reader.name.endswith('.tsv'):
+            #FIXME: add handlers to supply other files:
+            # Serve .log as raw text
+            # Serve .json as parsed json
+            # Serve .yml/.yaml as json parsed by yaml
+            # Possibly add a read-raw endpoint to access any type of file?
             return (
                 {
                     'code':400,
