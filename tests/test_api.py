@@ -9,6 +9,7 @@ import shutil
 import json
 import requests
 import time
+import random
 from subprocess import run, PIPE, Popen, DEVNULL
 from filecmp import cmp
 pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -17,9 +18,20 @@ sys.path.append(pvac_dir)
 #requests.get(, params={})
 #requests.post
 
+def standardize(data):
+    if data is None:
+        return 'NA'
+    if type(data) == float:
+        if data*100 - int(data*100):
+            return data
+        else:
+            return "%0.2f" % data
+    return data
+
 class APITests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        random.seed()
         cls.urlBase = 'http://localhost:8080/api/v1'
         cls.pVac_directory =  pvac_dir
         cls.server_directory = os.path.join(
@@ -76,6 +88,46 @@ class APITests(unittest.TestCase):
             shutil.copytree(app_data_dir+'.bak', app_data_dir)
             shutil.rmtree(app_data_dir+'.bak', ignore_errors=True)
 
+    def setUp(self):
+        if APITests.api_process is None:
+            print("Starting API...")
+            APITests.api_process = Popen(
+                [
+                    'python',
+                    '-m',
+                    os.path.relpath(os.path.join(
+                        self.server_directory,
+                        'app'
+                    ), pvac_dir).replace(os.sep, '.')
+                ],
+                # stdout = DEVNULL,
+                # stderr = DEVNULL
+            )
+            time.sleep(5)
+            requests.get(
+                self.urlBase+'/processes',
+                timeout = 10
+            )
+
+    def tearDown(self):
+        time.sleep(2.5)
+
+    def start_basic_run(self):
+        response = requests.post(
+            self.urlBase+'/staging',
+            timeout = 5,
+            data={
+                'input':os.path.join(
+                    self.test_data_directory,
+                    'input.vcf'
+                ),
+                'samplename':'basic_run',
+                'alleles':'HLA-E*01:01',
+                'prediction_algorithms':'NetMHC',
+            }
+        )
+        return response.json()
+
     def test_app_compiles(self):
         compiled_app_path = py_compile.compile(os.path.join(
             self.server_directory,
@@ -94,42 +146,7 @@ class APITests(unittest.TestCase):
                 ))
                 self.assertTrue(compiled_controller_path)
 
-    def setUp(self):
-        if APITests.api_process is None:
-            print("Starting API...")
-            APITests.api_process = Popen(
-                [
-                    'python',
-                    '-m',
-                    os.path.relpath(os.path.join(
-                        self.server_directory,
-                        'app'
-                    ), pvac_dir).replace(os.sep, '.')
-                ],
-                # stdout = DEVNULL,
-                # stderr = DEVNULL
-            )
-            time.sleep(5)
-
-    def tearDown(self):
-        time.sleep(2.5)
-
-    def start_basic_run(self):
-        response = requests.post(
-            self.urlBase+'/staging',
-            timeout = 5,
-            data={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
-                'samplename':'endpoint_input',
-                'alleles':'HLA-G*01:09',
-                'prediction_algorithms':'NetMHC',
-            }
-        )
-        return response.json()
-
+    @unittest.skip("disabled for full test")
     def test_app_startup(self):
         #test config dir exists
         self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
@@ -153,6 +170,7 @@ class APITests(unittest.TestCase):
             'results'
         ))))
 
+    @unittest.skip("disabled for full test")
     def test_endpoint_start(self):
         response = requests.post(
             self.urlBase + '/staging',
@@ -190,9 +208,10 @@ class APITests(unittest.TestCase):
 
             }
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertTrue(re.match(r'\d+', response.content.decode()))
 
+    @unittest.skip("disabled for full test")
     def test_endpoint_input(self):
         shutil.copyfile(
             os.path.join(
@@ -210,7 +229,7 @@ class APITests(unittest.TestCase):
             self.urlBase+'/input',
             timeout=5,
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertTrue(re.search(r'input\.vcf', response.content.decode()))
         input_manifest = response.json()
         vcf_id = list(filter(lambda x:x['name']=='input.vcf', input_manifest))[0]
@@ -224,9 +243,10 @@ class APITests(unittest.TestCase):
                 'prediction_algorithms':'NetMHC',
             }
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertTrue(re.match(r'\d+', response.content.decode()))
 
+    @unittest.skip("disabled for full test")
     def test_endpoint_processes(self):
         response = requests.post(
             self.urlBase + '/staging',
@@ -241,14 +261,14 @@ class APITests(unittest.TestCase):
                 'prediction_algorithms':'NetMHC',
             }
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertTrue(re.match(r'\d+', response.content.decode()))
         processID = response.json()
         response = requests.get(
             self.urlBase+'/processes',
             timeout = 5,
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         targetResult = [item for item in response.json() if item['id'] == processID]
         self.assertTrue(len(targetResult))
         targetResult = targetResult[0]
@@ -293,6 +313,7 @@ class APITests(unittest.TestCase):
         self.assertIsInstance(targetResult['url'], str)
         self.assertTrue(targetResult['url'])
 
+    @unittest.skip("disabled for full test")
     def test_endpoint_process_info(self):
         response = requests.get(
             self.urlBase + '/processes',
@@ -306,7 +327,7 @@ class APITests(unittest.TestCase):
             self.urlBase + '/processes/%d'%process_list[0]['id'],
             timeout=5,
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         process_data = response.json()
         self.assertIsInstance(process_data, dict)
 
@@ -356,6 +377,7 @@ class APITests(unittest.TestCase):
         self.assertIsInstance(process_data['status'], str)
         self.assertTrue(process_data['status'])
 
+    @unittest.skip("disabled for full test")
     def test_endpoint_process_results(self):
         response = requests.get(
             self.urlBase + '/processes',
@@ -385,7 +407,7 @@ class APITests(unittest.TestCase):
             'http://localhost:8080'+process_list[-1]['results_url'],
             timeout = 5
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         results = response.json()
         self.assertIsInstance(results, list)
         for item in results:
@@ -415,6 +437,7 @@ class APITests(unittest.TestCase):
             self.assertIsInstance(item['url'], str)
             self.assertTrue(item['url'])
 
+    @unittest.skip("disabled for full test")
     def test_endpoint_process_results_data(self):
         response = requests.get(
             self.urlBase + '/processes',
@@ -444,7 +467,7 @@ class APITests(unittest.TestCase):
             'http://localhost:8080'+process_list[-1]['results_url'],
             timeout = 5
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         results = response.json()
         for item in results:
             if item['display_name'].endswith('.tsv') and item['rows']>0:
@@ -452,53 +475,55 @@ class APITests(unittest.TestCase):
                     'http://localhost:8080'+item['url'],
                     timeout=5,
                 )
-                self.assertEqual(response.status_code, 200, response.content.decode())
+                self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
                 data = response.json()
                 self.assertIsInstance(data, list)
                 for row in data:
                     self.assertIsInstance(row, dict)
                     self.assertIn('rowid', row)
-        #check the column name endpoint
-        response = requests.get(
-            'http://localhost:8080'+process_list[-1]['results_url']+'/cols',
-            timeout = 5
-        )
-        self.assertEqual(response.status_code, 200, response.content.decode())
-        #check the schema endpoint
-        response = requests.get(
-            'http://localhost:8080'+process_list[-1]['results_url']+'/schema',
-            timeout = 5
-        )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+                #check the cols endpoint
+                response = requests.get(
+                    'http://localhost:8080'+item['url']+'/cols',
+                    timeout = 5
+                )
+                self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+                #check the schema endpoint
+                response = requests.get(
+                    'http://localhost:8080'+item['url']+'/schema',
+                    timeout = 5
+                )
+                self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
 
+    @unittest.skip("disabled for full test")
     def test_endpoint_stop(self):
         processID = self.start_basic_run()
         response = requests.get(
             self.urlBase+'/stop/%d'%processID,
             timeout = 5
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         response = requests.get(
             self.urlBase+'/processes/%d'%processID
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         data = response.json()
         self.assertIsInstance(data, dict)
         self.assertIn('running', data)
         self.assertFalse(data['running'])
 
-    @unittest.skip("Shutdown is disabled")
+    @unittest.skip("disabled for full test")
     def test_endpoint_shutdown(self):
         processID = self.start_basic_run()
         response = requests.get(
             self.urlBase+'/shutdown',
             timeout = 5
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         data = response.json()
         self.assertIsInstance(data, list)
         self.assertIn(processID, data)
 
+    @unittest.skip("disabled for full test")
     def test_full_api(self):
         response = requests.post(
             self.urlBase + '/staging',
@@ -532,18 +557,19 @@ class APITests(unittest.TestCase):
                 'keep_tmp_files':'on',
                 'netmhc_stab':'on',
                 'net_chop_method':'cterm',
-                'tdna_vaf':'40'
+                'tdna_vaf':'40',
+                'binding_threshold':3000
 
             }
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         processID = response.json()
         self.assertIsInstance(processID, int)
         response = requests.get(
             self.urlBase+'/processes/%d'%processID,
             timeout = 5
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         process_data = response.json()
         self.assertIsInstance(process_data, dict)
         self.assertIn('running', process_data)
@@ -553,8 +579,15 @@ class APITests(unittest.TestCase):
                 self.urlBase+'/processes/%d'%processID,
                 timeout = 5
             )
-            self.assertEqual(response.status_code, 200, response.content.decode())
+            self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
             process_data = response.json()
+        # time.sleep(1)
+        # response = requests.get(
+        #     self.urlBase+'/processes/%d'%processID,
+        #     timeout = 5
+        # )
+        # self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        # process_data = response.json()
         self.assertIn('files', process_data)
         self.assertIsInstance(process_data['files'], list)
         finaltsv = [item for item in process_data['files'] if item['display_name'].endswith('.final.tsv')]
@@ -572,9 +605,17 @@ class APITests(unittest.TestCase):
                 'count':10000
             }
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         content = response.json()
         self.assertIsInstance(content, list)
+        self.assertTrue(content)
+        response = requests.get(
+            'http://localhost:8080'+finaltsv['url']+'/cols',
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        mapping = response.json()
+        self.assertIsInstance(mapping, dict)
         output_file = tempfile.NamedTemporaryFile(mode='w+')
         writer = csv.DictWriter(
             output_file,
@@ -583,12 +624,14 @@ class APITests(unittest.TestCase):
             lineterminator='\n'
         )
         writer.writeheader()
-        writer.writerows(content)
+        writer.writerows({mapping[key]:standardize(val) for key, val in row.items() if key in mapping} for row in content)
         output_file.flush()
         output_file.seek(0,0)
-        raw_reader.seek(0,0)
-        testlines = set(raw_reader.readlines())
-        outputlines = set(raw_reader.readlines())
+        # raw_reader.seek(0,0)
+        # next(reader)
+        testlines = {tuple(row[item] for item in sorted(row)) for row in reader}
+        output_reader = csv.DictReader(output_file, delimiter='\t')
+        outputlines = {tuple(row[item] for item in sorted(row)) for row in output_reader}
         self.assertEqual(len(testlines), len(outputlines), "Line count mismatch")
         self.assertFalse(testlines-outputlines, "Missing lines")
         self.assertFalse(outputlines-testlines, "Extra lines")
@@ -596,6 +639,7 @@ class APITests(unittest.TestCase):
         raw_reader.close()
         output_file.close()
 
+    @unittest.skip("disabled for full test")
     def test_endpoint_allele(self):
         response = requests.get(
             self.urlBase+'/checkallele',
@@ -604,7 +648,7 @@ class APITests(unittest.TestCase):
                 'allele':'H2-IAb'
             }
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertTrue(response.json())
         response = requests.get(
             self.urlBase+'/checkallele',
@@ -613,12 +657,24 @@ class APITests(unittest.TestCase):
                 'allele':'NotARealAllele'
             }
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertFalse(response.json())
 
-    @unittest.skip("Reset is disabled")
+    @unittest.skip("disabled for full test")
     def test_endpoing_reset(self):
         processID = self.start_basic_run()
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout=5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        while response.json()['running']:
+            time.sleep(1)
+            response = requests.get(
+                self.urlBase+'/processes/%d'%processID,
+                timeout=5
+            )
+            self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         response = requests.get(
             self.urlBase+"/reset",
             timeout = 5,
@@ -626,15 +682,16 @@ class APITests(unittest.TestCase):
                 'clearall':1
             }
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertIn(processID, response.json())
         response = requests.get(
             self.urlBase+'/processes',
             timeout=5,
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertFalse(response.json())
 
+    @unittest.skip("disabled for full test")
     def test_endpoint_dropbox(self):
         shutil.copyfile(
             os.path.join(
@@ -653,7 +710,7 @@ class APITests(unittest.TestCase):
             self.urlBase+'/dropbox',
             timeout = 5
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         manifest = response.json()
         self.assertIsInstance(manifest, list)
         for item in manifest:
@@ -691,7 +748,7 @@ class APITests(unittest.TestCase):
             'http://localhost:8080'+target['url'],
             timeout=5
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         raw_reader = open(os.path.join(
             self.test_data_directory,
             'Test.final.tsv'
@@ -703,7 +760,7 @@ class APITests(unittest.TestCase):
             'http://localhost:8080'+target['url']+'/cols',
             timeout = 5
         )
-        self.assertEqual(response.status_code, 200, response.content.decode())
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         mapping = response.json()
         self.assertIsInstance(mapping, dict)
         output_file = tempfile.NamedTemporaryFile(mode='w+')
@@ -714,12 +771,14 @@ class APITests(unittest.TestCase):
             lineterminator='\n'
         )
         writer.writeheader()
-        writer.writerows({mapping[key]:val for key, val in row.items() if key in mapping} for row in content)
+        writer.writerows({mapping[key]:standardize(val) for key, val in row.items() if key in mapping} for row in content)
         output_file.flush()
         output_file.seek(0,0)
-        raw_reader.seek(0,0)
-        testlines = set(raw_reader.readlines())
-        outputlines = set(raw_reader.readlines())
+        # raw_reader.seek(0,0)
+        # next(reader)
+        testlines = {tuple(row[item] for item in sorted(row)) for row in reader}
+        output_reader = csv.DictReader(output_file, delimiter='\t')
+        outputlines = {tuple(row[item] for item in sorted(row)) for row in output_reader}
         self.assertEqual(len(testlines), len(outputlines), "Line count mismatch")
         self.assertFalse(testlines-outputlines, "Missing lines")
         self.assertFalse(outputlines-testlines, "Extra lines")
@@ -727,6 +786,97 @@ class APITests(unittest.TestCase):
         raw_reader.close()
         output_file.close()
 
-    @unittest.skip("Filter is not implimented")
+    # @unittest.skip("Filter is not implimented")
     def test_endpoint_filter(self):
-        print("Heyo")
+        processID = self.start_basic_run()
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout=5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        while response.json()['running']:
+            time.sleep(1)
+            response = requests.get(
+                self.urlBase+'/processes/%d'%processID,
+                timeout=5
+            )
+            self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        data = response.json()
+        self.assertTrue(data['files'])
+        target = [item for item in data['files'] if item['display_name'].endswith('.combined.parsed.tsv')]
+        self.assertTrue(target)
+        target = target[0]
+        time.sleep(2)
+        response = requests.get(
+            'http://localhost:8080'+target['url'],
+            timeout =5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        raw_reader = open(os.path.join(data['output'], target['display_name']))
+        reader = csv.DictReader(raw_reader, delimiter='\t')
+        time.sleep(2)
+        response = requests.get(
+            'http://localhost:8080'+target['url']+'/cols',
+            timeout=5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        mapping = response.json()
+        response = requests.get(
+            'http://localhost:8080'+target['url']+'/schema',
+            timeout=5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        valid_cols = {colname:typ for (colname, typ) in response.json().items() if typ != 'text'}
+        print(valid_cols)
+        #run 10 tests with randomized filters
+        for i in range(10):
+            time.sleep(1)
+            num_filters = random.randint(1,min(5, len(valid_cols)))
+            filter_cols = random.sample(valid_cols.keys(), num_filters)
+            url_filters = []
+            py_filters = []
+            for col in filter_cols:
+                val = random.random() * 5000 #random real between 0 and 5000
+                formatter = lambda x:float(x) if x!='NA' else None
+                if 'int' in valid_cols[col]:
+                    val = int(val)
+                    formatter = lambda x:int(x) if x!='NA' else None
+                operator = random.choice(
+                    [
+                        ('<', lambda x,y:(x is not None) and x<y),
+                        ('<=', lambda x,y:(x is not None) and x<=y),
+                        ('==', lambda x,y:(x is not None) and x==y),
+                        ('!=', lambda x,y:(x is not None) and x!=y),
+                        ('>', lambda x,y:(x is not None) and x>y),
+                        ('>=', lambda x,y:(x is not None) and x>=y)
+                    ]
+                )
+                py_filters.append(
+                    lambda x:operator[1](
+                        formatter(x[mapping[col]]),
+                        val
+                    )
+                )
+                url_filters.append('%s%s%s'%(
+                    col,
+                    operator[0],
+                    str(val) if isinstance(val, int) else '%0.3f'%val
+                ))
+            raw_reader.seek(0)
+            next(reader)
+            print("Filtering:", url_filters)
+            testcount = sum([
+                1 for row in reader
+                if sum(1 for filt in py_filters if filt(row))==num_filters
+            ])
+            response = requests.get(
+                'http://localhost:8080'+target['url'],
+                timeout = 5,
+                params = {
+                    'filters':','.join(url_filters)
+                }
+            )
+            self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+            contents = response.json()
+            self.assertIsInstance(contents, list)
+            self.assertEqual(len(contents), testcount)
