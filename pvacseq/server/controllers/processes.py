@@ -4,6 +4,7 @@ import shutil
 from flask import current_app
 import json
 import sys
+from subprocess import TimeoutExpired
 from .utils import descriptions
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
@@ -185,8 +186,9 @@ def shutdown():
         proc = fetch_process(i, data, current_app.config['storage']['children'])
         if is_running(proc) and i in current_app.config['storage']['children']:
             output.append(i)
-            current_app.config['storage']['children'][i].wait(.1)
-            if is_running(proc):
+            try:
+                current_app.config['storage']['children'][i].wait(.1)
+            except TimeoutExpired:
                 current_app.config['storage']['children'][i].terminate()
     return output
 

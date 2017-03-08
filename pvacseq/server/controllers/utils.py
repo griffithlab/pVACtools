@@ -9,15 +9,17 @@ import postgresql as psql
 from postgresql.exceptions import Exception as psqlException
 from .watchdir import Observe
 import atexit
+import threading
 from postgresql.exceptions import UndefinedTableError
 
 class dataObj(dict):
-    def __init__(self, datafiles):
+    def __init__(self, datafiles, sync):
         super().__init__()
         super().__setitem__(
             '_datafiles',
             {datafile:[] for datafile in datafiles}
         )
+        self.sync = sync
 
     def __setitem__(self, key, value):
         if key not in self and key not in {k for parent in self['_datafiles'] for k in parent}:
@@ -34,6 +36,7 @@ class dataObj(dict):
 
     def save(self):
         """Saves the data object to the various data files"""
+        self.sync.acquire()
         for datafile in self['_datafiles']:
             os.makedirs(os.path.dirname(datafile), exist_ok=True)
             writer = open(datafile, 'w')
@@ -45,6 +48,7 @@ class dataObj(dict):
                 indent='\t'
             )
             writer.close()
+        self.sync.release()
 
 _descriptions = {
     'json':"Metadata regarding a specific run of pVAC-Seq",
@@ -66,13 +70,23 @@ def column_filter(column):
     """standardize column names"""
     return column.replace(' ', '_').replace('-', '_').lower().strip()
 
-def loaddata(datafiles):
-    data = dataObj({datafiles[datafile] for datafile in datafiles if not datafile.endswith('-dir')})
+def loaddata(datafiles, sync):
+    sync.acquire()
+    data = dataObj({datafiles[datafile] for datafile in datafiles if not datafile.endswith('-dir')}, sync)
     for datafile in data['_datafiles']:
         if os.path.isfile(datafile):
-            current = json.load(open(datafile))
+            try:
+                current = json.load(open(datafile))
+            except json.JSONDecodeError as e:
+                import shutil
+                shutil.copyfile(datafile, os.path.join(
+                    os.path.dirname(__file__),
+                    'ERROR.txt'
+                ))
+                raise e
             for (key, value) in current.items():
                 data.addKey(key, value, datafile)
+    sync.release()
     return data
 
 def initialize(current_app):
@@ -113,7 +127,8 @@ def initialize(current_app):
     current_app.config.update(config) #save to the app configuration object
 
     #Now load the data object from the files specified in the configuration
-    data = loaddata(current_app.config['files'])
+    synchronizer = threading.RLock()
+    data = loaddata(current_app.config['files'], synchronizer)
     if 'processid' not in data:
         data.addKey('processid', 0, current_app.config['files']['processes'])
     if 'dropbox' not in data:
@@ -141,6 +156,7 @@ def initialize(current_app):
         tmp.execute("CREATE DATABASE pvacseq")
     tmp.close()
     db = psql.open("localhost/pvacseq")
+    db.synchronizer = threading.RLock()
     current_app.config['storage']['db'] = db
 
     #setup directory structure:
@@ -215,7 +231,7 @@ def initialize(current_app):
 
     data_path = current_app.config['files']
     def _create(event):
-        data = loaddata(data_path)
+        data = loaddata(data_path, synchronizer)
         filename = os.path.relpath(
             event.src_path,
             dbr
@@ -241,7 +257,7 @@ def initialize(current_app):
     )
 
     def _delete(event):
-        data = loaddata(data_path)
+        data = loaddata(data_path, synchronizer)
         filename = os.path.relpath(
             event.src_path,
             dbr
@@ -250,9 +266,11 @@ def initialize(current_app):
             if data['dropbox'][key] == filename:
                 del data['dropbox'][key]
                 print("Deleting file:",key,'-->', filename)
+                db.synchronizer.acquire()
                 query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
                 if len(query('data_dropbox_'+str(key))):
                     db.execute("DROP TABLE data_dropbox_"+str(key))
+                db.synchronizer.release()
                 data.save()
                 return
     dropbox_watcher.subscribe(
@@ -261,7 +279,7 @@ def initialize(current_app):
     )
 
     def _move(event):
-        data = loaddata(data_path)
+        data = loaddata(data_path, synchronizer)
         filesrc = os.path.relpath(
             event.src_path,
             dbr
@@ -350,7 +368,7 @@ def initialize(current_app):
                 }
 
     def _create(event):
-        data = loaddata(data_path)
+        data = loaddata(data_path, synchronizer)
         parentpaths = {
             (data['process-%d'%i]['output'], i)
             for i in range(data['processid']+1)
@@ -385,7 +403,7 @@ def initialize(current_app):
     )
 
     def _delete(event):
-        data = loaddata(data_path)
+        data = loaddata(data_path, synchronizer)
         parentpaths = {
             (data['process-%d'%i]['output'], i)
             for i in range(data['processid']+1)
@@ -400,9 +418,11 @@ def initialize(current_app):
                     if filedata['fullname'] == filepath:
                         del data[processkey]['files'][fileID]
                         print("Deleted file:", fileID,'-->',filepath)
+                        db.synchronizer.acquire()
                         query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
                         if len(query('data_%d_%s'%(parentID, fileID))):
                             db.execute("DROP TABLE data_%d_%s"%(parentID, fileID))
+                        db.synchronizer.release()
                 data.save()
                 return
     results_watcher.subscribe(
@@ -411,7 +431,7 @@ def initialize(current_app):
     )
 
     def _move(event):
-        data = loaddata(data_path)
+        data = loaddata(data_path, synchronizer)
         filesrc = event.src_path
         filedest = event.dest_path
         parentpaths = {
@@ -459,15 +479,17 @@ def initialize(current_app):
             watcher.stop()
             watcher.join()
         if 'db-clean' in current_app.config:
+            db.synchronizer.acquire()
             for table in current_app.config['db-clean']:
                 try:
                     current_app.config['storage']['db'].execute("DROP TABLE %s"%table)
                 except UndefinedTableError:
                     pass
+            db.synchronizer.release()
         current_app.config['storage']['db'].close()
 
     atexit.register(cleanup)
-    current_app.config['storage']['loader'] = lambda:loaddata(data_path)
+    current_app.config['storage']['loader'] = lambda:loaddata(data_path, synchronizer)
     data.save()
 
     print("Initialization complete.  Booting API")
