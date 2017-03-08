@@ -228,7 +228,9 @@ def parse_iedb_file(input_iedb_files, tsv_entries, key_file):
         (sample, method, remainder) = os.path.basename(input_iedb_file.name).split(".", 2)
         for line in iedb_tsv_reader:
             protein_label  = int(line['seq_num'])
-            if 'core_peptide' in line:
+            if 'core_peptide' in line and int(line['end']) - int(line['start']) == 8:
+                #Start and end refer to the position of the core peptide
+                #Infer the (start) position of the peptide from the positions of the core peptide
                 position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
             else:
                 position   = line['start']
@@ -336,30 +338,6 @@ def flatten_iedb_results(iedb_results):
 
     return flattened_iedb_results
 
-def sort_iedb_results(flattened_iedb_results, top_score_metric):
-    if top_score_metric == 'median':
-        sorted_iedb_results = sorted(
-            flattened_iedb_results,
-            key=lambda flattened_iedb_results: (
-                flattened_iedb_results[0],
-                flattened_iedb_results[1],
-                flattened_iedb_results[14],
-                " ".join(str(item) for item in flattened_iedb_results),
-            )
-        )
-    elif top_score_metric == 'lowest':
-        sorted_iedb_results = sorted(
-            flattened_iedb_results,
-            key=lambda flattened_iedb_results: (
-                flattened_iedb_results[0],
-                flattened_iedb_results[1],
-                flattened_iedb_results[11],
-                " ".join(str(item) for item in flattened_iedb_results),
-            )
-        )
-
-    return sorted_iedb_results
-
 def process_input_iedb_file(input_iedb_files, tsv_entries, key_file, top_result_per_mutation, top_score_metric):
     iedb_results              = parse_iedb_file(input_iedb_files, tsv_entries, key_file)
     iedb_results_with_metrics = add_summary_metrics(iedb_results)
@@ -368,9 +346,8 @@ def process_input_iedb_file(input_iedb_files, tsv_entries, key_file, top_result_
         flattened_iedb_results = flatten_iedb_results(filtered_iedb_results)
     else:
         flattened_iedb_results = flatten_iedb_results(iedb_results_with_metrics)
-    sorted_iedb_results       = sort_iedb_results(flattened_iedb_results, top_score_metric)
 
-    return sorted_iedb_results
+    return flattened_iedb_results
 
 def base_headers():
     return[
@@ -506,8 +483,14 @@ def main(args_input = sys.argv[1:]):
             }
             for method in methods:
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-                row["%s WT Score" % pretty_method] = wt_scores[method]
-                row["%s MT Score" % pretty_method] = mt_scores[method]
+                if method in wt_scores:
+                    row["%s WT Score" % pretty_method] = wt_scores[method]
+                else:
+                    row["%s WT Score" % pretty_method] = 'NA'
+                if method in mt_scores:
+                    row["%s MT Score" % pretty_method] = mt_scores[method]
+                else:
+                    row["%s MT Score" % pretty_method] = 'NA'
             if 'gene_expression' in tsv_entry:
                 row['Gene Expression'] = tsv_entry['gene_expression']
             if 'transcript_expression' in tsv_entry:

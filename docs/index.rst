@@ -23,12 +23,11 @@ pVAC-Seq is a cancer immunotherapy pipeline for the identification of **p**\ ers
 New in version |version|
 ------------------------
 
-This version updates the IEDB RESTful API URL to the new target announced in IEDB Analysis Resource v2.15.1.
-
-This release introduces a change in how invalid alleles are handeled. Previously, the pipeline would throw a fatal error. The
-pipeline will now proceed but invalid alleles will be skipped.
-
-This version also has improved error handling around calling standalone IEDB installations.
+This is a hotfix release. It fixes an error introduced in a previous version
+that would occur when using a local installation of the IEDB tools and is
+related to some filtering we do on the output from the IEDB tools. More
+information can be found on `GitHub issue 278
+<https://github.com/griffithlab/pVAC-Seq/issues/278>`_.
 
 Citation
 --------

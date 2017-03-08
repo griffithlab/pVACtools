@@ -11,6 +11,16 @@ import yaml
 pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
 import pvacseq.lib
+from pvacseq.lib.pipeline import *
+import datetime
+
+def compare(path1, path2):
+    r1 = open(path1)
+    r2 = open(path2)
+    result = not len(set(r1.readlines())^set(r2.readlines()))
+    r1.close()
+    r2.close()
+    return result
 
 def make_response(data, files, path):
     if not files:
@@ -140,11 +150,6 @@ class PVACTests(unittest.TestCase):
         self.assertTrue(compiled_main_path)
 
     def test_pvacseq_pipeline(self):
-        pvac_script_path = os.path.join(
-            self.pVac_directory,
-            'pvacseq',
-            "pvacseq.py"
-            )
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
         additional_input_files = tempfile.NamedTemporaryFile('w')
@@ -201,6 +206,12 @@ class PVACTests(unittest.TestCase):
         for file_name in (
             'Test_21.fa.split_1-48',
             'Test_21.fa.split_1-48.key',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name)
+            self.assertTrue(cmp(output_file, expected_file))
+
+        for file_name in (
             'Test.HLA-G*01:09.9.parsed.tsv_1-48',
             'Test.HLA-G*01:09.10.parsed.tsv_1-48',
             'Test.HLA-E*01:01.9.parsed.tsv_1-48',
@@ -208,7 +219,7 @@ class PVACTests(unittest.TestCase):
         ):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
             expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name)
-            self.assertTrue(cmp(output_file, expected_file))
+            self.assertTrue(compare(output_file, expected_file))
 
         self.assertEqual(len(self.request_mock.mock_calls), 9)
         #Class I output files
@@ -240,14 +251,56 @@ class PVACTests(unittest.TestCase):
             'Test_31.fa.split_1-48',
             'Test_31.fa.split_1-48.key',
             'Test.nn_align.H2-IAb.tsv_1-48',
-            'Test.H2-IAb.parsed.tsv_1-48',
         ):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
             expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
             self.assertTrue(cmp(output_file, expected_file, False))
+
+        for file_name in (
+            'Test.H2-IAb.parsed.tsv_1-48',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
+            self.assertTrue(compare(output_file, expected_file))
 
         self.request_mock.assert_has_calls([
             generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name)
         ])
 
         output_dir.cleanup()
+
+    def test_pvacseq_pipeline_sleep(self):
+        output_dir_1 = tempfile.TemporaryDirectory()
+        params_1 = [
+            os.path.join(self.test_data_directory, "input.vcf"),
+            'Test',
+            'HLA-E*01:01',
+            'NetMHC',
+            output_dir_1.name,
+            '-e', '9,10',
+        ]
+        os.environ["TEST_FLAG"] = '0'
+        start_1 = datetime.datetime.now()
+        pvacseq.lib.main.main(params_1)
+        end_1 = datetime.datetime.now()
+        duration_1 = (end_1 - start_1).total_seconds()
+        output_dir_1.cleanup()
+
+        output_dir_2 = tempfile.TemporaryDirectory()
+        params_2 = [
+            os.path.join(self.test_data_directory, "input.vcf"),
+            'Test',
+            'HLA-E*01:01',
+            'NetMHC',
+            output_dir_2.name,
+            '-e', '9,10',
+        ]
+        os.environ["TEST_FLAG"] = '1'
+        start_2 = datetime.datetime.now()
+        pvacseq.lib.main.main(params_2)
+        end_2 = datetime.datetime.now()
+        duration_2 = (end_2 - start_2).total_seconds()
+        output_dir_2.cleanup()
+
+        self.assertTrue(duration_1 > duration_2)
+

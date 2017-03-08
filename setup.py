@@ -29,7 +29,7 @@ for dirpath, dirnames, filenames in os.walk("pvacseq/server"):
 
 setup(
     name="pvacseq",
-    version="4.0.6",
+    version="4.0.8",
     packages=["pvacseq", "pvacseq.lib", "pvacseq.server"],
     entry_points={
         "console_scripts":[

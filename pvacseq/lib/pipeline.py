@@ -6,6 +6,8 @@ sys.path.append(root)
 from abc import ABCMeta, abstractmethod
 import os
 import csv
+import datetime
+import time
 
 try:
     from .. import lib
@@ -166,7 +168,8 @@ class Pipeline(metaclass=ABCMeta):
         status_message("Combining Parsed IEDB Output Files")
         lib.combine_parsed_outputs.main([
             *split_parsed_output_files,
-            self.combined_parsed_path()
+            self.combined_parsed_path(),
+            '--top-score-metric', self.top_score_metric,
         ])
         status_message("Completed")
 
@@ -319,7 +322,7 @@ class MHCIPipeline(Pipeline):
             generate_fasta_params = [
                 split_tsv_file_path,
                 str(self.peptide_sequence_length),
-                str(min(self.epitope_lengths)),
+                str(max(self.epitope_lengths)),
                 split_fasta_file_path,
                 split_fasta_key_file_path,
             ]
@@ -357,6 +360,14 @@ class MHCIPipeline(Pipeline):
                             split_iedb_output_files.append(split_iedb_out)
                             continue
                         status_message("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, fasta_chunk))
+
+                        if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
+                            if 'last_execute_timestamp' in locals() and not self.iedb_executable:
+                                elapsed_time = ( datetime.datetime.now() - last_execute_timestamp ).total_seconds()
+                                wait_time = 60 - elapsed_time
+                                if wait_time > 0:
+                                    time.sleep(wait_time)
+
                         lib.call_iedb.main([
                             split_fasta_file_path,
                             split_iedb_out,
@@ -366,6 +377,7 @@ class MHCIPipeline(Pipeline):
                             '-r', str(self.iedb_retries),
                             '-e', self.iedb_executable,
                         ])
+                        last_execute_timestamp = datetime.datetime.now()
                         status_message("Completed")
                         split_iedb_output_files.append(split_iedb_out)
 
@@ -446,6 +458,14 @@ class MHCIIPipeline(Pipeline):
                         split_iedb_output_files.append(split_iedb_out)
                         continue
                     status_message("Running IEDB on Allele %s with Method %s - Entries %s" % (a, method, fasta_chunk))
+
+                    if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
+                        if 'last_execute_timestamp' in locals() and not self.iedb_executable:
+                            elapsed_time = ( datetime.datetime.now() - last_execute_timestamp ).total_seconds()
+                            wait_time = 60 - elapsed_time
+                            if wait_time > 0:
+                                time.sleep(wait_time)
+
                     lib.call_iedb.main([
                         split_fasta_file_path,
                         split_iedb_out,
@@ -454,6 +474,7 @@ class MHCIIPipeline(Pipeline):
                         '-r', str(self.iedb_retries),
                         '-e', self.iedb_executable,
                     ])
+                    last_execute_timestamp = datetime.datetime.now()
                     status_message("Completed")
                     split_iedb_output_files.append(split_iedb_out)
 

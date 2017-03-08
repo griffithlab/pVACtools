@@ -11,6 +11,15 @@ from lib.prediction_class import *
 import time
 from subprocess import run, PIPE
 
+def filter_response(response_text):
+    lines = response_text.splitlines()
+    remaining_lines = lines.copy()
+    for line in lines:
+        if line.startswith(b"allele"):
+            return b"\n".join(remaining_lines)
+        else:
+            remaining_lines.pop(0)
+
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq call_iedb')
     parser.add_argument('input_file', type=argparse.FileType('r'),
@@ -49,7 +58,7 @@ def main(args_input = sys.argv[1:]):
 
     if args.iedb_executable_path is not None:
         response = run(prediction_class_object.iedb_executable_params(args), stdout=PIPE, check=True)
-        response_text = response.stdout
+        response_text = filter_response(response.stdout)
         output_mode = 'wb'
     else:
         data = {
@@ -65,7 +74,7 @@ def main(args_input = sys.argv[1:]):
         response = requests.post(url, data=data)
         retries = 0
         while response.status_code == 500 and retries < args.iedb_retries:
-            time.sleep(2 * retries)
+            time.sleep(60 * retries)
             response = requests.post(url, data=data)
             print("IEDB: Retry %s of %s" % (retries, args.iedb_retries))
             retries += 1

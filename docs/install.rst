@@ -36,7 +36,7 @@ If you have an old version of pVAC-Seq installed you might want to consider upgr
 .. _iedb_install:
 
 Installing IEDB binding prediction tools (strongly recommended)
----------------------------------------------------
+---------------------------------------------------------------
 
 .. warning::
    Using a local IEDB installation is strongly recommended for larger datasets
