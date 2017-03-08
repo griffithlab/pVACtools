@@ -124,7 +124,7 @@ def results_getcols(id, fileID):
                 "fields":"fileID"
             }, 400
         )
-    raw_reader = open(process[0]['files'][fileID])
+    raw_reader = open(process[0]['files'][str(fileID)])
     reader = csv.DictReader(raw_reader, delimiter='\t')
     output = {column_filter(field):field for field in reader.fieldnames}
     raw_reader.close()

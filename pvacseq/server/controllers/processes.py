@@ -64,7 +64,7 @@ def processes():
              'id':proc[0],
              'running':is_running(proc[1]),
              'url':'/api/v1/processes/%d'%proc[0],
-             'results_url':'api/v1/processes/%d/results'%proc[0],
+             'results_url':'/api/v1/processes/%d/results'%proc[0],
              'attached':bool(proc[1][1]),
              'output':proc[1][0]['output'],
              'pid':proc[1][0]['pid'],
