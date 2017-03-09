@@ -245,8 +245,6 @@ class APITests(unittest.TestCase):
 
         self.assertIn('files', targetResult)
         self.assertIsInstance(targetResult['files'], list)
-        self.assertTrue(targetResult['files'])
-        self.assertIsInstance(targetResult['files'][0], dict)
 
         self.assertIn('id', targetResult)
         self.assertIsInstance(targetResult['id'], int)
