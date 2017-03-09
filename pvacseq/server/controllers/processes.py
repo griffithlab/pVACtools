@@ -9,27 +9,6 @@ from .utils import descriptions
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
 
-def gen_files_list(id, data):
-    """Generate the list of result files for a given process.  Stash them for later use"""
-    print("NOOP")
-    # if 'files' not in data['process-%d'%id]:
-    #     data['process-%d'%id]['files'] = []
-    #     base_dir = data['process-%d'%id]['output']
-    #     if os.path.isdir(os.path.join(base_dir, 'MHC_Class_I')):
-    #         for path in sorted(os.listdir(os.path.join(base_dir, 'MHC_Class_I'))):
-    #             if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'MHC_Class_I', path)):
-    #                 data['process-%d'%id]['files'].append(os.path.join(base_dir, 'MHC_Class_I', path))
-    #     if os.path.isdir(os.path.join(base_dir, 'MHC_Class_II')):
-    #         for path in sorted(os.listdir(os.path.join(base_dir, 'MHC_Class_II'))):
-    #             if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, 'MHC_Class_II', path)):
-    #                 data['process-%d'%id]['files'].append(os.path.join(base_dir, 'MHC_Class_II', path))
-    #     for path in sorted(os.listdir(base_dir)):
-    #         if path.endswith('.tsv') and os.path.isfile(os.path.join(base_dir, path)):
-    #             data['process-%d'%id]['files'].append(os.path.join(base_dir, path))
-    #     data['process-%d'%id]['files'].sort()
-    #     data.save()
-    return data
-
 def fetch_process(id,data,children):
     """Fetch a tuple of available process info"""
     return (

@@ -3,8 +3,9 @@ import re
 import csv
 import sys
 import json
+import yaml
 from flask import current_app
-from .processes import fetch_process, is_running, gen_files_list
+from .processes import fetch_process, is_running
 from .utils import column_filter
 
 float_pattern = re.compile(r'^\d*\.\d+$')
@@ -112,7 +113,6 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                 )
             if is_running(process):
                 return []
-            data = gen_files_list(parentID, data)
             if str(fileID) not in process[0]['files']:
                 return (
                     {
@@ -133,21 +133,10 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                 )
             raw_reader = open(data['dropbox'][str(fileID)]['fullname'])
         if not raw_reader.name.endswith('.tsv'):
-            #FIXME: add handlers to supply other files:
-            # Serve .log as raw text
-            # Serve .json as parsed json
-            # Serve .yml/.yaml as json parsed by yaml
-            # Possibly add a read-raw endpoint to access any type of file?
-            return (
-                {
-                    'code':400,
-                    'message':'The requested fileID (%s) is in an unsupported format (%s)'%(
-                        fileID,
-                        '.'.join(os.path.basename(raw_reader.name).split('.')[1:])
-                    ),
-                    'fields':'fileID'
-                }, 400
-            )
+            ext = os.path.splitext(raw_reader.name)[1].lower()
+            if ext[0] == '.':
+                ext = ext[1:]
+            return serve_as(raw_reader, ext)
         reader = csv.DictReader(raw_reader, delimiter='\t')
 
         tmp_reader = open(raw_reader.name)
@@ -338,3 +327,25 @@ def fileschema(parentID, fileID):
     return {
         key: val for (key, val) in typequery(tablekey)
     }
+
+def serve_as(reader, filetype):
+    if filetype == 'json':
+        return {
+            'filetype':'json',
+            'content':json.load(reader)
+        }
+    elif filetype == 'yaml' or filetype == 'yml':
+        return {
+            'filetype':'yaml',
+            'content':yaml.load(reader.read())
+        }
+    elif filetype == 'log':
+        return {
+            'filetype':'log',
+            'content':[line.rstrip() for line in reader.readlines()]
+        }
+    else:
+        return {
+            'filetype':'raw',
+            'content':reader.read()
+        }

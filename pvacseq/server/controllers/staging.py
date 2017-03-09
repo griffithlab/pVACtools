@@ -195,8 +195,6 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
           expn_val, net_chop_threshold,
           fasta_size, iedb_retries, downstream_sequence_length, keep_tmp_files):
     """Build the command for pVAC-Seq, then spawn a new process to run it"""
-    data = current_app.config['storage']['loader']()
-
     command = [
         'pvacseq',
         'run',
@@ -240,7 +238,8 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
 
     # stdout and stderr from the child process will be directed to this file
     logfile = os.path.join(output, 'pVAC-Seq.log')
-
+    current_app.config['storage']['synchronizer'].acquire()
+    data = current_app.config['storage']['loader']()
     data['processid']+=1
     os.makedirs(os.path.dirname(logfile), exist_ok = True)
     current_app.config['storage']['children'][data['processid']] = subprocess.Popen(
@@ -271,6 +270,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
             current_app.config['files']['processes']
         )
     data.save()
+    current_app.config['storage']['synchronizer'].release()
     configObj = {
         'action':'run',
         'input_file': input,

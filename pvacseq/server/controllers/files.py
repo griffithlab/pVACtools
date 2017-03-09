@@ -2,7 +2,7 @@ import os
 import csv
 from flask import current_app
 import subprocess
-from .processes import fetch_process, is_running, gen_files_list
+from .processes import fetch_process, is_running
 from .database import filterfile
 from .utils import descriptions, column_filter
 
@@ -20,7 +20,6 @@ def results_get(id):
                 "fields":"id"
             },400
         )
-    data = gen_files_list(id, data)
     output = []
     for fileID in process[0]['files']:
         output.append({
@@ -115,7 +114,6 @@ def results_getcols(id, fileID):
                 "fields": "id"
             },400
         )
-    data = gen_files_list(id, data)
     if str(fileID) not in process[0]['files']:
         return (
             {

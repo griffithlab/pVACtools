@@ -68,8 +68,8 @@ _descriptions = {
 def descriptions(ext):
     if ext in _descriptions:
         return _descriptions[ext]
-    elif re.search(r'tsv_\d+-\d+$', ext):
-        return "A temporary file containing a subset of the data"
+    elif re.search(r'(split|tsv)_\d+-\d+$', ext):
+        return "A temporary file to cache a subset of the data when working with IEDB"
     elif re.search(r'key$', ext):
         return "Data used by pVAC-Seq to parse results from IEDB"
     return "Unknown File"
@@ -85,12 +85,9 @@ def loaddata(datafiles, sync):
         if os.path.isfile(datafile):
             try:
                 current = json.load(open(datafile))
-            except json.JSONDecodeError as e:
-                import shutil
-                shutil.copyfile(datafile, os.path.join(
-                    os.path.dirname(__file__),
-                    'ERROR.txt'
-                ))
+            except BaseException as e:
+                #got to make sure that lock is released so we don't stall the app
+                sync.release()
                 raise e
             for (key, value) in current.items():
                 data.addKey(key, value, datafile)
@@ -498,6 +495,7 @@ def initialize(current_app):
 
     atexit.register(cleanup)
     current_app.config['storage']['loader'] = lambda:loaddata(data_path, synchronizer)
+    current_app.config['storage']['synchronizer'] = synchronizer
     data.save()
 
     print("Initialization complete.  Booting API")
