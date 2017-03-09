@@ -2,13 +2,7 @@ language: python
 python:
   - "3.5"
 before_install:
-  - pip install PyVCF
-  - pip install requests
-  - pip install PyYAML
-  - pip install connexion
-  - pip install py-postgresql
-  - pip install watchdog
-  - pip install flask-cors
+  - pip install -e .
 services:
   - postgresql
 install: true

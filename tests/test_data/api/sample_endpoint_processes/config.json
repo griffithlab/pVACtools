@@ -1,0 +1,36 @@
+{
+	"fasta_size": 200,
+	"epitope_lengths": [
+		"10"
+	],
+	"netchop_threshold": 0.5,
+	"normal_coverage_cutoff": 5,
+	"tumor_dna_coverage_cutoff": 10,
+	"tumor_rna_vaf_cutoff": 40,
+	"prediction_algorithms": [
+		"NetMHC"
+	],
+	"input_file": "/Users/agrauber/Documents/pVAC-Seq/tests/test_data/api/input.vcf",
+	"output_directory": "/Users/agrauber/pVAC-Seq/results/endpoint_processes",
+	"sample_name": "endpoint_processes",
+	"binding_threshold": 500,
+	"netmhc_stab": 0,
+	"tumor_rna_coverage_cutoff": 10,
+	"minimum_fold_change": 0,
+	"downstream_sequence_length": 1000,
+	"iedb_retries": 5,
+	"action": "run",
+	"tumor_dna_vaf_cutoff": 40,
+	"alleles": [
+		"HLA-G*01:09"
+	],
+	"top_result_per_mutation": 0,
+	"expression_cutoff": 1,
+	"peptide_sequence_length": 21,
+	"net_chop_method": "",
+	"additional_input_files": [
+		""
+	],
+	"normal_vaf_cutoff": 2,
+	"top_score_metric": "median"
+}
