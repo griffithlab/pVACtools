@@ -139,6 +139,10 @@ def initialize(current_app):
     if 'dropbox' not in data:
         data.addKey('dropbox', {}, current_app.config['files']['dropbox'])
     #Check the last reboot (because pid's won't remain valid after a reboot)
+    current_app.config['storage']['data'] = data
+    import weakref
+    current_app.config['storage']['loader'] = weakref.ref(current_app.config['storage']['data'])
+    loader = current_app.config['storage']['loader']
     reboot = subprocess.check_output(['last', 'reboot']).decode().split("\n")[0]
     current_app.config['reboot'] = reboot
     if 'reboot' in data and data['reboot'] != reboot:
@@ -236,7 +240,7 @@ def initialize(current_app):
 
     data_path = current_app.config['files']
     def _create(event):
-        data = loaddata(data_path, synchronizer)
+        data = loader()
         filename = os.path.relpath(
             event.src_path,
             dbr
@@ -262,7 +266,7 @@ def initialize(current_app):
     )
 
     def _delete(event):
-        data = loaddata(data_path, synchronizer)
+        data = loader()
         filename = os.path.relpath(
             event.src_path,
             dbr
@@ -284,7 +288,7 @@ def initialize(current_app):
     )
 
     def _move(event):
-        data = loaddata(data_path, synchronizer)
+        data = loader()
         filesrc = os.path.relpath(
             event.src_path,
             dbr
@@ -373,7 +377,7 @@ def initialize(current_app):
                 }
 
     def _create(event):
-        data = loaddata(data_path, synchronizer)
+        data = loader()
         parentpaths = {
             (data['process-%d'%i]['output'], i)
             for i in range(data['processid']+1)
@@ -408,7 +412,7 @@ def initialize(current_app):
     )
 
     def _delete(event):
-        data = loaddata(data_path, synchronizer)
+        data = loader()
         parentpaths = {
             (data['process-%d'%i]['output'], i)
             for i in range(data['processid']+1)
@@ -436,7 +440,7 @@ def initialize(current_app):
     )
 
     def _move(event):
-        data = loaddata(data_path, synchronizer)
+        data = loader()
         filesrc = event.src_path
         filedest = event.dest_path
         parentpaths = {
@@ -494,7 +498,12 @@ def initialize(current_app):
         current_app.config['storage']['db'].close()
 
     atexit.register(cleanup)
-    current_app.config['storage']['loader'] = lambda:loaddata(data_path, synchronizer)
+    # current_app.config['storage']['data'] = data
+    # for (k,v) in current_app.config['storage']['data'].items():
+    #     print(k, ':', v)
+    # import weakref
+    # current_app.config['storage']['loader'] = weakref.ref(current_app.config['storage']['data'])
+    # current_app.config['storage']['loader'] = lambda:loaddata(data_path, synchronizer)
     current_app.config['storage']['synchronizer'] = synchronizer
     data.save()
 
