@@ -44,7 +44,8 @@ setup(
         'connexion',
         'py-postgresql',
         'watchdog',
-        'flask-cors'
+        'flask-cors',
+        'bokeh'
     ],
     package_data={
         'pvacseq' : data_files,

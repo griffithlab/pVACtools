@@ -116,7 +116,7 @@ class APITests(unittest.TestCase):
             )
 
     def tearDown(self):
-        time.sleep(2.5)
+        time.sleep(.5)
 
     def start_basic_run(self):
         response = requests.post(

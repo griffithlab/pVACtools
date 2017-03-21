@@ -6,6 +6,8 @@ import tempfile
 from flask import current_app
 from yaml import dump
 from shlex import quote
+from hashlib import md5
+import time
 from shutil import copyfile
 from .database import int_pattern
 from .files import list_input
@@ -314,7 +316,13 @@ def test():
     reader = open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_start.html'))
     data = reader.read()
     reader.close()
-    return data
+    from bokeh.embed import autoload_server
+    return data.replace('<!-- embed -->', autoload_server(
+        model=None,
+        app_path="/visapp",
+        session_id=md5(str(time.time()).encode()).hexdigest(),
+        url="http://localhost:5006"
+    ))
 
 
 def check_allele(allele):
