@@ -4,8 +4,12 @@ import csv
 import sys
 import json
 import yaml
+import time
 from flask import current_app
-from .processes import fetch_process, is_running
+from urllib.parse import urlencode
+from hashlib import md5
+from bokeh.embed import autoload_server
+from .processes import fetch_process, is_running, process_info
 from .utils import column_filter
 
 float_pattern = re.compile(r'^\d*\.\d+$')
@@ -349,3 +353,50 @@ def serve_as(reader, filetype):
             'filetype':'raw',
             'content':reader.read()
         }
+
+def visualize(parentID, fileID):
+    """Return an HTML document containing the requested table visualization"""
+    from .files import results_getcols
+    data = current_app.config['storage']['loader']()
+    #first call filterfile to load the table if it's not loaded already
+    result = filterfile(parentID, fileID, 1, 0, '', 'rowid', 'ASC')
+    if type(result) != list:
+        return (
+            {
+                'code':400,
+                'message':json.dumps(result),
+                'fields':'unknown',
+            },
+            400
+        )
+    cols = results_getcols(parentID, fileID)
+    if type(cols) != dict:
+        return (
+            {
+                'code':400,
+                'message':json.dumps(cols),
+                'fields':'unknown'
+            },
+            400
+        )
+    proc_data = process_info(parentID)['parameters']
+    sample = proc_data['sample_name'] if 'sample_name' in proc_data else 'Unknown Sample'
+    script = re.sub(
+        r'src="(.+)"',
+        r'src="\1&%s"'%(
+            urlencode([
+                ('target-process', str(parentID)),
+                ('target-file', str(fileID)),
+                ('cols', json.dumps(cols)),
+                ('samplename', sample)
+            ])
+        ),
+        autoload_server(
+            model=None,
+            app_path="/visapp",
+            session_id=md5(str(time.time()).encode()).hexdigest(),
+            url="http://localhost:5006"
+        )
+    )
+    template = "<html><head></head><body>%s</body></html>"%script
+    return template

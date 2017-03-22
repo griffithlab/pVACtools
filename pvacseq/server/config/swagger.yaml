@@ -787,6 +787,36 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
+  /api/v1/processes/{parentID}/results/{fileID}/visualize:
+    get:
+      tags:
+        - "visualize"
+      summary: "Get visualization of a table"
+      description: "Returns an iFrame containing an interactive visualization of the\
+        requested table's contents"
+      produces:
+        - "text/html"
+      operationId: "pvacseq.server.controllers.database.visualize"
+      parameters:
+        - name: "parentID"
+          in: "path"
+          description: "ProcessID or -1 for dropbox"
+          required: true
+          type: "integer"
+        - name: "fileID"
+          in: "path"
+          description: "Specific fileID to read"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Returns an iFrame"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
   Process:
     type: "object"

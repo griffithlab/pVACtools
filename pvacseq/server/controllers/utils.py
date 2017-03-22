@@ -6,6 +6,7 @@ import re
 import sys
 import subprocess
 import watchdog.events
+from shlex import quote
 import postgresql as psql
 from postgresql.exceptions import Exception as psqlException
 from .watchdir import Observe
@@ -154,6 +155,19 @@ def initialize(current_app):
         )
     current_app.config['storage']['children']={}
     current_app.config['storage']['manifest']={}
+    visapp_path = os.path.relpath(
+        os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            'visapp.py'
+        )
+    )
+    current_app.config['storage']['bokeh']=subprocess.Popen(
+        'bokeh serve %s --allow-websocket-origin=localhost:8080'%(
+            quote(visapp_path)
+        ),
+        shell=True,
+        stdout=subprocess.DEVNULL,
+    )
 
     #Establish a connection to the local postgres database
     try:
@@ -484,6 +498,7 @@ def initialize(current_app):
 
     def cleanup():
         print("Cleaning up observers and database connections")
+        import signal
         for watcher in current_app.config['storage']['watchers']:
             watcher.stop()
             watcher.join()
@@ -496,6 +511,11 @@ def initialize(current_app):
                     pass
             db.synchronizer.release()
         current_app.config['storage']['db'].close()
+        current_app.config['storage']['bokeh'].send_signal(signal.SIGINT)
+        try:
+            current_app.config['storage']['bokeh'].wait(1)
+        except subprocess.TimeoutExpired:
+            current_app.config['storage']['bokeh'].terminate()
 
     atexit.register(cleanup)
     # current_app.config['storage']['data'] = data
