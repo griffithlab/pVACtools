@@ -100,8 +100,12 @@ def main(args_input = sys.argv[1:]):
                 position = int(line['protein_position'].split('-', 1)[0])
                 wildtype_amino_acid_length = 0
             else:
-                position = int(line['protein_position']) - 1
-                wildtype_amino_acid_length = len(wildtype_amino_acid)
+                if '-' in line['protein_position']:
+                    position = int(line['protein_position'].split('-', 1)[0]) - 1
+                    wildtype_amino_acid_length = len(wildtype_amino_acid)
+                else:
+                    position = int(line['protein_position']) - 1
+                    wildtype_amino_acid_length = len(wildtype_amino_acid)
         elif variant_type == 'inframe_del':
             variant_type = 'inframe_del'
             wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')

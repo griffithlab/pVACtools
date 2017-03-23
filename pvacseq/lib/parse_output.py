@@ -49,12 +49,31 @@ def find_mutation_position(wt_epitope_seq, mt_epitope_seq):
             return i+1
     return 0
 
-def match_wildtype_and_mutant_entry_for_missense(result, mt_position, wt_results):
+def match_wildtype_and_mutant_entry_for_missense(result, mt_position, wt_results, previous_result):
     #The WT epitope at the same position is the match
     match_position = mt_position
-    result['wt_epitope_seq']    = wt_results[match_position]['wt_epitope_seq']
-    result['wt_scores']         = wt_results[match_position]['wt_scores']
-    result['mutation_position'] = find_mutation_position(result['wt_epitope_seq'], result['mt_epitope_seq'])
+    mt_epitope_seq = result['mt_epitope_seq']
+    wt_result      = wt_results[match_position]
+    wt_epitope_seq = wt_result['wt_epitope_seq']
+    consecutive_matches = determine_consecutive_matches_from_left(mt_epitope_seq, wt_epitope_seq) + determine_consecutive_matches_from_right(mt_epitope_seq, wt_epitope_seq)
+    minimum_match_count = min_match_count(int(result['peptide_length']))
+    if consecutive_matches >= minimum_match_count:
+        result['wt_epitope_seq'] = wt_epitope_seq
+        result['wt_scores']      = wt_result['wt_scores']
+    else:
+        result['wt_epitope_seq'] = 'NA'
+        result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+
+    if mt_epitope_seq == wt_epitope_seq:
+        result['mutation_position'] = 'NA'
+    else:
+        previous_mutation_position = previous_result['mutation_position']
+        if previous_mutation_position == 'NA':
+            result['mutation_position'] = find_mutation_position(wt_epitope_seq, mt_epitope_seq)
+        elif previous_mutation_position > 0:
+            result['mutation_position'] = previous_mutation_position - 1
+        else:
+            result['mutation_position'] = 0
 
 def match_wildtype_and_mutant_entry_for_frameshift(result, mt_position, wt_results, previous_result):
     #The WT epitope at the same position is the match
@@ -210,7 +229,7 @@ def match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results):
             previous_result = None
         wt_results = wt_iedb_results[wt_iedb_result_key]
         if result['variant_type'] == 'missense':
-            match_wildtype_and_mutant_entry_for_missense(result, mt_position, wt_results)
+            match_wildtype_and_mutant_entry_for_missense(result, mt_position, wt_results, previous_result)
         elif result['variant_type'] == 'FS':
              match_wildtype_and_mutant_entry_for_frameshift(result, mt_position, wt_results, previous_result)
         elif result['variant_type'] == 'inframe_ins' or result['variant_type'] == 'inframe_del':
