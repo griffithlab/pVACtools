@@ -442,6 +442,26 @@ class GenerateFastaTests(unittest.TestCase):
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_downstream_sequence_length_limit.key')
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
+    def test_dnp_generates_expected_file(self):
+        peptide_sequence_length        = '21'
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_dnp.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            generate_fasta_input_file,
+            peptide_sequence_length,
+            self.epitope_length,
+            generate_fasta_output_file.name,
+            generate_fasta_key_output_file.name,
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_dnp.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(self.test_data_dir, 'output_dnp.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+
     def test_distance_from_start_works_as_expected(self):
         sequence = 'KKLKILGMPFRNIRSILKMVN'
         position = 5
