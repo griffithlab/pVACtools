@@ -273,6 +273,12 @@ class APITests(unittest.TestCase):
         self.assertIsInstance(targetResult['url'], str)
         self.assertTrue(targetResult['url'])
 
+        self.assertIn('returncode', targetResult)
+        self.assertIsInstance(targetResult['returncode'], int)
+
+        self.assertIn('status', targetResult)
+        self.assertIsInstance(targetResult['status'], int)
+
     def test_endpoint_process_info(self):
         response = requests.get(
             self.urlBase + '/processes',
@@ -329,12 +335,18 @@ class APITests(unittest.TestCase):
         self.assertIsInstance(process_data['results_url'], str)
         self.assertTrue(process_data['results_url'])
 
+        self.assertIn('last_message', process_data)
+        self.assertIsInstance(process_data['last_message'], str)
+        self.assertTrue(process_data['last_message'])
+
         self.assertIn('running', process_data)
         self.assertIsInstance(process_data['running'], bool)
 
         self.assertIn('status', process_data)
-        self.assertIsInstance(process_data['status'], str)
-        self.assertTrue(process_data['status'])
+        self.assertIsInstance(process_data['status'], int)
+
+        self.assertIn('returncode', process_data)
+        self.assertIsInstance(process_data['returncode'], int)
 
     def test_endpoint_process_results(self):
         response = requests.get(

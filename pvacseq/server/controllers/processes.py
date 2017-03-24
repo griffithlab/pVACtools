@@ -43,6 +43,8 @@ def processes():
          {
              'id':proc[0],
              'running':is_running(proc[1]),
+             'returncode':proc[1][0]['returncode'] if 'returncode' in proc[1][0] else 0,
+             'status':0 if is_running(proc[1]) else (proc[1][0]['status'] if 'status' in proc[1][0] else 1),
              'url':'/api/v1/processes/%d'%proc[0],
              'results_url':'/api/v1/processes/%d/results'%proc[0],
              'attached':bool(proc[1][1]),
@@ -103,13 +105,17 @@ def process_info(id):
         )
     reader = open(process[0]['logfile'])
     log = spinner.sub('', reader.read()).strip().split(os.linesep)
-    process[0]['status'] = log[-1]
+    process[0]['last_message'] = log[-1]
     reader.close()
     if not is_running(process):
         if process[1]:
-            process[0]['status'] = "Process Complete: %d"%process[1].returncode
+            process[0]['last_message'] = "Process Complete: %d"%process[1].returncode
+            data['process-%d'%id]['returncode'] = process[1].returncode
+            data['process-%d'%id]['status'] = 1 if process[1].returncode == 0 else -1
+        elif 'returncode' in process[0]:
+            process[0]['last_message'] = "Process Complete: %d"%process[0]["returncode"]
         else:
-            process[0]['status'] = "Process Complete"
+            process[0]['last_message'] = "Process Complete"
         # If there is a staging directory, remove it
         if os.path.isdir(os.path.join(process[0]['output'], 'Staging')):
             shutil.rmtree(os.path.join(process[0]['output'], 'Staging'))
@@ -124,7 +130,9 @@ def process_info(id):
         'results_url':'/api/v1/processes/%d/results'%id,#
         'attached': bool(process[1]),#
         'command':process[0]['command'],#
-        'status':process[0]['status'],
+        'returncode':process['returncode'] if 'returncode' in process else 0,
+        'status':0 if is_running(process) else (process['status'] if 'status' in process else 0),
+        'last_message':process[0]['last_message'],
         'log':log,
         'log_updated_at':(
             int(os.stat(process[0]['logfile']).st_mtime)
