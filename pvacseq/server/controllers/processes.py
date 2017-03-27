@@ -131,7 +131,7 @@ def process_info(id):
         'attached': bool(process[1]),#
         'command':process[0]['command'],#
         'returncode':process['returncode'] if 'returncode' in process else 0,
-        'status':0 if is_running(process) else (process['status'] if 'status' in process else 0),
+        'status':0 if is_running(process) else (process[0]['status'] if 'status' in process[0] else 0),
         'last_message':process[0]['last_message'],
         'log':log,
         'log_updated_at':(
