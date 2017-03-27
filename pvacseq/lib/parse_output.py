@@ -45,7 +45,7 @@ def determine_consecutive_matches_from_right(mt_epitope_seq, wt_epitope_seq):
 
 def determine_total_matches(mt_epitope_seq, wt_epitope_seq):
     matches = 0
-    for a, b in zip(reversed(mt_epitope_seq), reversed(wt_epitope_seq)):
+    for a, b in zip(mt_epitope_seq, wt_epitope_seq):
         if a == b:
             matches += 1
     return matches
