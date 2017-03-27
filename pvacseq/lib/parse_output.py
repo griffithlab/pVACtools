@@ -43,6 +43,13 @@ def determine_consecutive_matches_from_right(mt_epitope_seq, wt_epitope_seq):
             break
     return consecutive_matches
 
+def determine_total_matches(mt_epitope_seq, wt_epitope_seq):
+    matches = 0
+    for a, b in zip(reversed(mt_epitope_seq), reversed(wt_epitope_seq)):
+        if a == b:
+            matches += 1
+    return matches
+
 def find_mutation_position(wt_epitope_seq, mt_epitope_seq):
     for i,(wt_aa,mt_aa) in enumerate(zip(wt_epitope_seq,mt_epitope_seq)):
         if wt_aa != mt_aa:
@@ -55,9 +62,8 @@ def match_wildtype_and_mutant_entry_for_missense(result, mt_position, wt_results
     mt_epitope_seq = result['mt_epitope_seq']
     wt_result      = wt_results[match_position]
     wt_epitope_seq = wt_result['wt_epitope_seq']
-    consecutive_matches = determine_consecutive_matches_from_left(mt_epitope_seq, wt_epitope_seq) + determine_consecutive_matches_from_right(mt_epitope_seq, wt_epitope_seq)
-    minimum_match_count = min_match_count(int(result['peptide_length']))
-    if consecutive_matches >= minimum_match_count:
+    total_matches  = determine_total_matches(mt_epitope_seq, wt_epitope_seq)
+    if total_matches >= min_match_count(int(result['peptide_length'])):
         result['wt_epitope_seq'] = wt_epitope_seq
         result['wt_scores']      = wt_result['wt_scores']
     else:
@@ -99,9 +105,9 @@ def match_wildtype_and_mutant_entry_for_frameshift(result, mt_position, wt_resul
         result['wt_scores']         = wt_result['wt_scores']
         result['mutation_position'] = 'NA'
     else:
-        #Determine how many consecutive amino acids are the same between the MT epitope and its matching WT epitope
-        consecutive_matches = determine_consecutive_matches_from_left(mt_epitope_seq, wt_epitope_seq)
-        if consecutive_matches >= min_match_count(int(result['peptide_length'])):
+        #Determine how many amino acids are the same between the MT epitope and its matching WT epitope
+        total_matches = determine_total_matches(mt_epitope_seq, wt_epitope_seq)
+        if total_matches >= min_match_count(int(result['peptide_length'])):
             #The minimum amino acid match count is met
             result['wt_epitope_seq'] = wt_result['wt_epitope_seq']
             result['wt_scores']      = wt_result['wt_scores']
@@ -130,8 +136,8 @@ def match_wildtype_and_mutant_entry_for_inframe_indel(result, mt_position, wt_re
 
         #We need to ensure that the matched WT eptiope has enough overlapping amino acids with the MT epitope
         best_match_wt_result = wt_results[str(best_match_position)]
-        best_match_count     = determine_consecutive_matches_from_right(result['mt_epitope_seq'], best_match_wt_result['wt_epitope_seq'])
-        if best_match_count and best_match_count >= min_match_count(int(result['peptide_length'])):
+        total_matches        = determine_total_matches(result['mt_epitope_seq'], best_match_wt_result['wt_epitope_seq'])
+        if total_matches and total_matches >= min_match_count(int(result['peptide_length'])):
             #The minimum amino acid match count is met
             result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
             result['wt_scores']      = best_match_wt_result['wt_scores']
@@ -188,7 +194,6 @@ def match_wildtype_and_mutant_entry_for_inframe_indel(result, mt_position, wt_re
             #We then check if the alternate best match epitope has more matching amino acids than the baseline best match epitope
             #If it does, we pick it as the best match
             if consecutive_matches_from_right > best_match_count:
-                best_match_count     = consecutive_matches_from_right
                 match_direction      = 'right'
                 best_match_position  = alternate_best_match_position
                 best_match_wt_result = alternate_best_match_wt_result
@@ -202,7 +207,8 @@ def match_wildtype_and_mutant_entry_for_inframe_indel(result, mt_position, wt_re
             best_match_wt_result = baseline_best_match_wt_result
 
         #Now that we have found the matching WT epitope we still need to ensure that it has enough overlapping amino acids
-        if best_match_count and best_match_count >= min_match_count(int(result['peptide_length'])):
+        total_matches = determine_total_matches(mt_epitope_seq, best_match_wt_result['wt_epitope_seq'])
+        if total_matches and total_matches >= min_match_count(int(result['peptide_length'])):
             #The minimum amino acid match count is met
             result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
             result['wt_scores']      = best_match_wt_result['wt_scores']
