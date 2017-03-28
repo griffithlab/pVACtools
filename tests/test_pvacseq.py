@@ -221,6 +221,12 @@ class PVACTests(unittest.TestCase):
             expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name)
             self.assertTrue(compare(output_file, expected_file))
 
+        for file_name in (
+            'inputs.yml',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'log', file_name)
+            self.assertTrue(os.path.exists(output_file))
+
         self.assertEqual(len(self.request_mock.mock_calls), 9)
         #Class I output files
         methods = self.methods
@@ -262,6 +268,12 @@ class PVACTests(unittest.TestCase):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
             expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
             self.assertTrue(compare(output_file, expected_file))
+
+        for file_name in (
+            'inputs.yml',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'log', file_name)
+            self.assertTrue(os.path.exists(output_file))
 
         self.request_mock.assert_has_calls([
             generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name)

@@ -15,6 +15,7 @@ except ValueError:
     import lib
 from lib.prediction_class import *
 import shutil
+import yaml
 
 def status_message(msg):
     print(msg)
@@ -57,6 +58,16 @@ class Pipeline(metaclass=ABCMeta):
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
+
+    def log_dir(self):
+        dir = os.path.join(self.output_dir, 'log')
+        os.makedirs(dir, exist_ok=True)
+        return dir
+
+    def print_log(self):
+        log_file = os.path.join(self.log_dir(), 'inputs.yml')
+        with open(log_file, 'w') as log_fh:
+            yaml.dump(self.__dict__, log_fh, default_flow_style=False)
 
     def tsv_file_path(self):
         tsv_file = self.sample_name + '.tsv'
@@ -245,6 +256,7 @@ class Pipeline(metaclass=ABCMeta):
         return os.path.join(self.output_dir, self.sample_name+".final.tsv")
 
     def execute(self):
+        self.print_log()
         self.convert_vcf()
 
         total_row_count = self.tsv_entry_count()
