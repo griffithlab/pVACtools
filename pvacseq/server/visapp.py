@@ -38,7 +38,7 @@ def validate_column(iterable):
 def create_filters(filters):
     def apply_filters(entry):
         return functools.reduce(
-            lambda x,y: x and y(entry),
+            lambda x,y: x and (entry is None or y(entry)),
             filters,
             True
         )
@@ -50,11 +50,14 @@ def make_filter(colname, getter):
         lambda x:x[colname] <= getter()[1]
     ]
 
+def stepUp(val, step):
+    return step * (int(val/step)+1)
+
 def range_column_filter(colname, stepsize, title=None):
     if colname in entries[0]:
         column_data = [entry[colname] for entry in entries]
         if validate_column(column_data):
-            top = max(column_data)
+            top = stepUp(max(column_data), stepsize)
             col_filter = RangeSlider(
                 title = cols[colname] if title is None else title,
                 range=(0, top),
@@ -106,7 +109,8 @@ del raw_data
 ### From here to the bottom, the code can be changed to modify the plotted data
 from bokeh.layouts import row, widgetbox, column
 from bokeh.charts import Scatter
-from bokeh.models import ColumnDataSource, PanTool, HoverTool, Slider, RangeSlider, TableColumn
+from bokeh.models import ColumnDataSource, PanTool, HoverTool, Slider, RangeSlider
+from bokeh.models import TableColumn, TapTool
 from bokeh.models.ranges import Range1d as Range
 from bokeh.models.widgets import Select, DataTable
 from bokeh.plotting import figure
@@ -144,6 +148,7 @@ p = figure(
 #if given a column name, it will use the values of that column in the data source
 #for each point
 p.circle(x="_x", y="_y", source=source, size=7, color="blue", line_color=None, fill_alpha=1)
+p.add_tools(TapTool())
 
 table = DataTable(
     columns = [
@@ -156,6 +161,7 @@ table = DataTable(
             )
         )
         for colname in sorted(cols)
+        if validate_column((entry[colname] for entry in entries))
     ],
     fit_columns = False,
     selectable = True,
@@ -211,6 +217,10 @@ getters.append((
 getters.append((
     'tumor_dna_depth',
     range_column_filter('tumor_dna_depth', 5)
+))
+getters.append((
+    'tumor_dna_vaf',
+    range_column_filter('tumor_dna_vaf', .5)
 ))
 getters.append((
     'tumor_rna_depth',
