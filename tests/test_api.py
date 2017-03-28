@@ -167,6 +167,11 @@ class APITests(unittest.TestCase):
         self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
             '~',
             'pVAC-Seq',
+            'dropbox'
+        ))))
+        self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
+            '~',
+            'pVAC-Seq',
             'input'
         ))))
         self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
@@ -479,6 +484,32 @@ class APITests(unittest.TestCase):
         self.assertIn('running', data)
         self.assertFalse(data['running'])
 
+    def test_endpoint_archive(self):
+        processID = self.start_basic_run()
+        time.sleep(1)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        process_data = response.json()
+        self.assertIsInstance(process_data, dict)
+        self.assertIn('running', process_data)
+        while process_data['running']:
+            time.sleep(5)
+            response = requests.get(
+                self.urlBase+'/processes/%d'%processID,
+                timeout = 5
+            )
+            self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+            process_data = response.json()
+        response = requests.get(
+            self.urlBase+'/archive/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        self.assertIsInstance(response.json(), str)
+
     def test_full_api_pipeline(self):
         response = requests.post(
             self.urlBase + '/staging',
@@ -610,7 +641,7 @@ class APITests(unittest.TestCase):
             os.path.expanduser(os.path.join(
                 '~',
                 'pVAC-Seq',
-                'archive',
+                'dropbox',
                 'Test.final.tsv'
             ))
         )

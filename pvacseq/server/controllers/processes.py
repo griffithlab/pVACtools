@@ -6,6 +6,7 @@ import json
 import sys
 from subprocess import TimeoutExpired
 from .utils import descriptions
+from shutil import move as movetree
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
 
@@ -193,30 +194,78 @@ def shutdown():
 
 
 def reset(clearall):
-    """Clears out finished processes from the record"""
+    """Clears out and archives finished processes from the record"""
+    current_app.config['storage']['synchronizer'].acquire()
     data = current_app.config['storage']['loader']()
     output = []
     for i in range(data['processid']+1):
         proc = fetch_process(i, data, current_app.config['storage']['children'])
         if 'process-%d'%i in data and not is_running(proc):
             if i not in current_app.config['storage']['children']:
-                try:
-                    shutil.rmtree(data['process-%d'%i]['output'])
-                except FileNotFoundError:
-                    pass
-                del data['process-%d'%i]
+                result = archive(i)
+                if type(result) == tuple:
+                    current_app.config['storage']['synchronizer'].release()
+                    return result
                 output.append(i)
             elif clearall:
-                try:
-                    shutil.rmtree(data['process-%d'%i]['output'])
-                except FileNotFoundError:
-                    pass
-                del data['process-%d'%i]
-                del current_app.config['storage']['children'][i]
+                stop(i)
+                result = archive(i)
+                if type(result) == tuple:
+                    current_app.config['storage']['synchronizer'].release()
+                    return result
                 output.append(i)
-    # Set the processid to the highest child process from this session
-    data['processid'] = max([0]+[i for i in range(data['processid']+1) if 'process-%d'%i in data])
     if clearall and 'reboot' in data:
         del data['reboot']
     data.save()
+    current_app.config['storage']['synchronizer'].release()
     return output
+
+def archive(processID):
+    """Archives the results from the given process"""
+    current_app.config['storage']['synchronizer'].acquire()
+    data = current_app.config['storage']['loader']()
+    if 'process-%d'%processID not in data:
+        current_app.config['storage']['synchronizer'].release()
+        return (
+            {
+                'code':400,
+                'message': "The requested process (%d) does not exist"%processID,
+                'fields':"processID"
+            },
+            400
+        )
+    proc = fetch_process(processID, data, current_app.config['storage']['children'])
+    if is_running(proc):
+        current_app.config['storage']['synchronizer'].release()
+        return (
+            {
+                'code':400,
+                'message': "The requested process (%d) is still running.\
+                Stop the process or wait for it to finish before archiving"%processID,
+                'fields':"processID"
+            },
+            400
+        )
+    dirname = os.path.basename(proc[0]['output'])
+    archive = os.path.join(
+        current_app.config['files']['data-dir'],
+        'archive'
+    )
+    destpath = os.path.join(archive, dirname)
+    if os.path.exists:
+        i = 1
+        while os.path.exists(destpath+'_%d'%i):
+            i+=1
+        destpath += '_%d'%i
+    movetree(
+        proc[0]['output'],
+        destpath
+    )
+    del data['process-%d'%processID]
+    if processID in current_app.config['storage']['children']:
+        del current_app.config['storage']['children'][processID]
+    # Set the processid to the highest child process from this session
+    data['processid'] = max([0]+[i for i in range(data['processid']+1) if 'process-%d'%i in data])
+    data.save()
+    current_app.config['storage']['synchronizer'].release()
+    return "OK"

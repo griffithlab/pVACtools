@@ -1,11 +1,10 @@
 language: python
 python:
   - "3.5"
-before_install:
+install:
   - pip install -e .
 services:
   - postgresql
-install: true
 script:
   - TEST_FLAG=1 python3 -m unittest discover -v
   - prove --recurse --verbose

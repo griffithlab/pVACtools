@@ -627,18 +627,18 @@ paths:
           schema:
             $ref: "#/definitions/Error"
   /api/v1/reset:
-    get:
+    post:
       tags:
         - "reset"
       summary: "Resets the log of old processes"
-      description: "Clears out processes which were started by previous instances \
-        of the ui server.  Processes started by this instance will be kept unless \
-        the clearall paramter is set to 1"
+      description: "Clears out the records of all processes on the server.\
+        Results from old processes will be archived.  Any processes still running\
+        will be kept unless the clearall parameter is set to 1"
       operationId: "pvacseq.server.controllers.processes.reset"
       parameters:
         - name: "clearall"
-          in: "query"
-          description: "Informs the controller to drop all processes, not just old ones"
+          in: "formData"
+          description: "Informs the controller to drop all processes, terminating processes that haven't finished"
           type: "integer"
           default: 0
       responses:
@@ -811,6 +811,28 @@ paths:
       responses:
         200:
           description: "Returns an iFrame"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/archive/{processID}:
+    get:
+      tags:
+        - "archive"
+      summary: "Archive a process"
+      description: "Moves the results of a process to the archive"
+      operationId: "pvacseq.server.controllers.processes.archive"
+      parameters:
+        - name: "processID"
+          in: "path"
+          description: "Id of the process to archive"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "No meaningful data to return"
           schema:
             type: "string"
         default:

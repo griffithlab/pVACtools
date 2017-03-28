@@ -196,6 +196,10 @@ def initialize(current_app):
         exist_ok=True
     )
     os.makedirs(
+        os.path.join(current_app.config['files']['data-dir'],'dropbox'),
+        exist_ok=True
+    )
+    os.makedirs(
         os.path.join(current_app.config['files']['data-dir'],'.tmp'),
         exist_ok=True
     )
@@ -203,7 +207,7 @@ def initialize(current_app):
     #Setup the watchers to observe the files
     current_app.config['storage']['watchers'] = []
 
-    dbr = os.path.join(current_app.config['files']['data-dir'],'archive')
+    dbr = os.path.join(current_app.config['files']['data-dir'],'dropbox')
     dropbox_watcher = Observe(dbr)
     dropbox_watcher.subscribe(lambda x:print("Dropbox Event:", x))
     #Now we set up event handlers for the dropbox

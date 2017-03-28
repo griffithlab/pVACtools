@@ -138,7 +138,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
             raw_reader = open(data['dropbox'][str(fileID)]['fullname'])
         if not raw_reader.name.endswith('.tsv'):
             ext = os.path.splitext(raw_reader.name)[1].lower()
-            if ext[0] == '.':
+            if len(ext) and ext[0] == '.':
                 ext = ext[1:]
             return serve_as(raw_reader, ext)
         reader = csv.DictReader(raw_reader, delimiter='\t')

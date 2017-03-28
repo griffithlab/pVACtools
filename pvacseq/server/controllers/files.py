@@ -95,7 +95,7 @@ def results_getcols(id, fileID):
         raw_reader = open(
             os.path.join(
                 os.path.abspath(current_app.config['files']['data-dir']),
-                'archive',
+                'dropbox',
                 data['dropbox'][str(fileID)]['display_name']
             )
         )
@@ -142,13 +142,13 @@ def list_dropbox():
             'size':"%0.3f KB"%(
                 os.path.getsize(os.path.join(
                     current_app.config['files']['data-dir'],
-                    'archive',
+                    'dropbox',
                     entry['display_name']
                 ))/1024
             ),
             'rows':int(subprocess.check_output(['wc', '-l', os.path.join(
                 current_app.config['files']['data-dir'],
-                'archive',
+                'dropbox',
                 entry['display_name']
             )]).decode().split()[0])-1,
         } for (key, entry) in data['dropbox'].items()
