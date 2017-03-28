@@ -73,13 +73,16 @@ def match_wildtype_and_mutant_entry_for_missense(result, mt_position, wt_results
     if mt_epitope_seq == wt_epitope_seq:
         result['mutation_position'] = 'NA'
     else:
-        previous_mutation_position = previous_result['mutation_position']
-        if previous_mutation_position == 'NA':
-            result['mutation_position'] = find_mutation_position(wt_epitope_seq, mt_epitope_seq)
-        elif previous_mutation_position > 0:
-            result['mutation_position'] = previous_mutation_position - 1
+        if previous_result:
+            previous_mutation_position = previous_result['mutation_position']
+            if previous_mutation_position == 'NA':
+                result['mutation_position'] = find_mutation_position(wt_epitope_seq, mt_epitope_seq)
+            elif previous_mutation_position > 0:
+                result['mutation_position'] = previous_mutation_position - 1
+            else:
+                result['mutation_position'] = 0
         else:
-            result['mutation_position'] = 0
+            result['mutation_position'] = find_mutation_position(wt_epitope_seq, mt_epitope_seq)
 
 def match_wildtype_and_mutant_entry_for_frameshift(result, mt_position, wt_results, previous_result):
     #The WT epitope at the same position is the match
