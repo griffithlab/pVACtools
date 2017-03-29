@@ -161,6 +161,7 @@ def initialize(current_app):
             'visapp.py'
         )
     )
+    #Check if the bokeh port is already in use.  Attempt to reconnect?
     current_app.config['storage']['bokeh']=subprocess.Popen(
         'bokeh serve %s --allow-websocket-origin=localhost:8080'%(
             quote(visapp_path)

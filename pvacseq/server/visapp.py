@@ -27,7 +27,7 @@ def autosize(name, iterable):
         else:
             cur_size = 1
         size = max(size, cur_size)
-    return 10 + (8*size)
+    return 12 + (6*size)
 
 def validate_column(iterable):
     return functools.reduce(
@@ -229,7 +229,7 @@ getters.append((
 
 x_field.on_change('value', lambda a,r,g: update())
 y_field.on_change('value', lambda a,r,g: update())
-box = widgetbox(*widgets)
+box = widgetbox(*widgets, sizing_mode='stretch_both')
 figure = column(
     row(box, p),
     table,

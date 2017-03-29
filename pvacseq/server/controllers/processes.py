@@ -110,13 +110,8 @@ def process_info(id):
     reader.close()
     if not is_running(process):
         if process[1]:
-            process[0]['last_message'] = "Process Complete: %d"%process[1].returncode
             data['process-%d'%id]['returncode'] = process[1].returncode
             data['process-%d'%id]['status'] = 1 if process[1].returncode == 0 else -1
-        elif 'returncode' in process[0]:
-            process[0]['last_message'] = "Process Complete: %d"%process[0]["returncode"]
-        else:
-            process[0]['last_message'] = "Process Complete"
         # If there is a staging directory, remove it
         if os.path.isdir(os.path.join(process[0]['output'], 'Staging')):
             shutil.rmtree(os.path.join(process[0]['output'], 'Staging'))

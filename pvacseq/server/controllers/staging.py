@@ -257,7 +257,7 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
             'command': " ".join([quote(token) for token in command]),
             'logfile':logfile,
             'pid':current_app.config['storage']['children'][data['processid']].pid,
-            'status': "Task Started",
+            'status': 0,
             'files':{},
             'output':os.path.abspath(output)
         },
