@@ -16,6 +16,7 @@ except ValueError:
 from lib.prediction_class import *
 import shutil
 import yaml
+import pkg_resources
 
 def status_message(msg):
     print(msg)
@@ -66,8 +67,38 @@ class Pipeline(metaclass=ABCMeta):
 
     def print_log(self):
         log_file = os.path.join(self.log_dir(), 'inputs.yml')
-        with open(log_file, 'w') as log_fh:
-            yaml.dump(self.__dict__, log_fh, default_flow_style=False)
+        if os.path.exists(log_file):
+            with open(log_file, 'r') as log_fh:
+                past_inputs = yaml.load(log_fh)
+                current_inputs = self.__dict__
+                current_inputs['pvacseq_version'] = pkg_resources.get_distribution("pvacseq").version
+                if past_inputs['pvacseq_version'] != current_inputs['pvacseq_version']:
+                    status_message(
+                        "Restart to be executed with a different pVAC-Seq version:\n" +
+                        "Past version: %s\n" % past_inputs['pvacseq_version'] +
+                        "Current version: %s" % current_inputs['pvacseq_version']
+                    )
+                for key in current_inputs.keys():
+                    if key == 'pvacseq_version':
+                        continue
+                    if key not in past_inputs.keys() and current_inputs[key] is not None:
+                        sys.exit(
+                            "Restart inputs are different from past inputs: \n" +
+                            "Additional input: %s - %s\n" % (key, current_inputs[key]) +
+                            "Aborting."
+                        )
+                    elif current_inputs[key] != past_inputs[key]:
+                        sys.exit(
+                            "Restart inputs are different from past inputs: \n" +
+                            "Past input: %s - %s\n" % (key, past_inputs[key]) +
+                            "Current input: %s - %s\n" % (key, current_inputs[key]) +
+                            "Aborting."
+                        )
+        else:
+            with open(log_file, 'w') as log_fh:
+                inputs = self.__dict__
+                inputs['pvacseq_version'] = pkg_resources.get_distribution("pvacseq").version
+                yaml.dump(inputs, log_fh, default_flow_style=False)
 
     def tsv_file_path(self):
         tsv_file = self.sample_name + '.tsv'

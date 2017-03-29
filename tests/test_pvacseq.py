@@ -279,6 +279,24 @@ class PVACTests(unittest.TestCase):
             generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name)
         ])
 
+        with self.assertRaises(SystemExit) as cm:
+            pvacseq.lib.main.main([
+                os.path.join(self.test_data_directory, "input.vcf"),
+                'Test',
+                'H2-IAb',
+                'NNalign',
+                output_dir.name,
+                '-i', additional_input_files.name,
+                '--top-score-metric=lowest',
+                '--keep-tmp-files',
+            ])
+            self.assertEqual(
+                cm.exception,
+                "Restart inputs are different from past inputs: \n" +
+                "Past input: downstream_sequence_length - None\n" +
+                "Current input: downstream_sequence_length - 1000"
+            )
+
         output_dir.cleanup()
 
     def test_pvacseq_pipeline_sleep(self):
