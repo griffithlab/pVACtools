@@ -50,8 +50,7 @@ def list_input(path = None):
         fullname = os.path.join(path, entity)
         if os.path.isfile(fullname):
             output.append({
-                # 'display_name':entity,
-                'name':entity, #not using fullname anymore for security reasons
+                'display_name':entity,
                 'type':'file',
                 'fileID':len(current_app.config['storage']['manifest']),
                 'description':descriptions(
@@ -61,8 +60,7 @@ def list_input(path = None):
             current_app.config['storage']['manifest'].append(fullname)
         elif os.path.isdir(fullname):
             output.append({
-                'name':entity, #not using fullname anymore for security reasons
-                # 'display_name':entity,
+                'display_name':entity,
                 'type':'directory',
                 'contents': list_input(fullname)
             })

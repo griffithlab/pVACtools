@@ -200,7 +200,7 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertTrue(re.search(r'input\.vcf', response.content.decode()))
         input_manifest = response.json()
-        vcf_id = list(filter(lambda x:x['name']=='input.vcf', input_manifest))[0]
+        vcf_id = list(filter(lambda x:x['display_name']=='input.vcf', input_manifest))[0]
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,

@@ -396,7 +396,7 @@ def visualize(parentID, fileID):
         ),
         autoload_server(
             model=None,
-            app_path="/visapp",
+            app_path="/visualizations",
             session_id=md5(str(time.time()).encode()).hexdigest(),
             url="http://localhost:5006"
         )
