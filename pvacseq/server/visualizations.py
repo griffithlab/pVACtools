@@ -127,7 +127,7 @@ del raw_data
 from bokeh.layouts import row, widgetbox, column
 from bokeh.charts import Scatter
 from bokeh.models import ColumnDataSource, PanTool, HoverTool, Slider, RangeSlider
-from bokeh.models import TableColumn, TapTool
+from bokeh.models import TableColumn, TapTool, BoxSelectTool, ResizeTool
 from bokeh.models.ranges import Range1d as Range
 from bokeh.models.widgets import Select, DataTable, Toggle
 from bokeh.plotting import figure
@@ -174,6 +174,8 @@ p = figure(
 #for each point
 p.circle(x="_x", y="_y", source=source, size=7, color="blue", line_color=None, fill_alpha=1)
 p.add_tools(TapTool())
+p.add_tools(BoxSelectTool())
+p.add_tools(ResizeTool())
 hover = HoverTool()
 hover.tooltips = [
     ('Row', '@rowid'),
