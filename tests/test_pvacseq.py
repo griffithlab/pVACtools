@@ -269,6 +269,22 @@ class PVACTests(unittest.TestCase):
 
         output_dir.cleanup()
 
+    def test_pvacseq_pipeline_additional_report_columns(self):
+        output_dir = tempfile.TemporaryDirectory()
+        params = [
+            os.path.join(self.test_data_directory, "input.vcf"),
+            'Test',
+            'HLA-E*01:01',
+            'NetMHC',
+            output_dir.name,
+            '-e', '9,10',
+            '-a', 'sample_name',
+        ]
+        pvacseq.lib.main.main(params)
+        output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.final.tsv')
+        expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
+        self.assertTrue(cmp(output_file, expected_file, False))
+
     def test_pvacseq_pipeline_sleep(self):
         output_dir_1 = tempfile.TemporaryDirectory()
         params_1 = [
