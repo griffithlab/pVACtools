@@ -76,7 +76,12 @@
             var output = [];
             for(var i = 0; i< obj.length; i++){
               if(obj[i]['type'] == 'file'){
-                output.push([obj[i]['fileID'], obj[i]['name']]);
+                  var display_name = obj[i]['display_name'];
+                  if(display_name.charAt(0) !== '.') {
+                    output.push([obj[i]['fileID'], obj[i]['display_name']]);
+                  } else {
+                    console.log('Ignoring hidden input file ' + display_name);
+                  }
               }
               else {
                 output = output.concat(parser(obj[i]['contents']));
