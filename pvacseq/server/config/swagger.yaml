@@ -849,6 +849,28 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
+  /api/v1/restart/{processID}:
+    get:
+      tags:
+        - "restart"
+      summary: "Restart an old process"
+      description: "Restarts a previously run process using the exact same parameters"
+      operationId: "pvacseq.server.controllers.processes.restart"
+      parameters:
+        - name: "processID"
+          in: "path"
+          description: "ID of the process to restart"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Returns the Process Object (from /api/v1/processes/{processID})"
+          schema:
+            $ref: "#/definitions/Process"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
   Process:
     type: "object"

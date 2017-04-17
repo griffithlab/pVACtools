@@ -632,6 +632,54 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertFalse(response.json())
 
+    def test_endpoint_restart(self):
+        processID = self.start_basic_run()
+        time.sleep(1)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        old_data = response.json()
+        self.assertIsInstance(old_data, dict)
+        self.assertIn('running', old_data)
+        while old_data['running']:
+            time.sleep(5)
+            response = requests.get(
+                self.urlBase+'/processes/%d'%processID,
+                timeout = 5
+            )
+            self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+            old_data = response.json()
+        response = requests.get(
+            self.urlBase+'/restart/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        process_data = response.json()
+        self.assertIsInstance(process_data, dict)
+
+        self.assertIn('attached', process_data)
+        self.assertTrue(process_data['attached'])
+
+        self.assertIn('command', process_data)
+        self.assertEqual(process_data['command'], old_data['command'])
+
+        self.assertIn('id', process_data)
+        self.assertEqual(process_data['id'], old_data['id'])
+
+        self.assertIn('output', process_data)
+        self.assertEqual(process_data['output'], old_data['output'])
+
+        self.assertIn('parameters', process_data)
+        self.assertDictEqual(process_data['parameters'], old_data['parameters'])
+
+        self.assertIn('pid', process_data)
+        self.assertNotEqual(process_data['pid'], old_data['pid'])
+
+        self.assertIn('results_url', process_data)
+        self.assertEqual(process_data['results_url'], old_data['results_url'])
+
     def test_endpoint_dropbox(self):
         shutil.copyfile(
             os.path.join(

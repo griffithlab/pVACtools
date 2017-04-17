@@ -173,6 +173,16 @@ def initialize(current_app):
         stdout=subprocess.DEVNULL,
     )
 
+    @atexit.register
+    def cleanup_bokeh():
+        print("Cleaning up visualization server")
+        import signal
+        current_app.config['storage']['bokeh'].send_signal(signal.SIGINT)
+        try:
+            current_app.config['storage']['bokeh'].wait(1)
+        except subprocess.TimeoutExpired:
+            current_app.config['storage']['bokeh'].terminate()
+
     #Establish a connection to the local postgres database
     try:
         tmp = psql.open("localhost/postgres")
@@ -185,6 +195,19 @@ def initialize(current_app):
     db = psql.open("localhost/pvacseq")
     db.synchronizer = threading.RLock()
     current_app.config['storage']['db'] = db
+
+    @atexit.register
+    def cleanup_database():
+        print("Cleaning up database connections")
+        if 'db-clean' in current_app.config:
+            db.synchronizer.acquire()
+            for table in current_app.config['db-clean']:
+                try:
+                    current_app.config['storage']['db'].execute("DROP TABLE %s"%table)
+                except UndefinedTableError:
+                    pass
+            db.synchronizer.release()
+        current_app.config['storage']['db'].close()
 
     #setup directory structure:
     os.makedirs(
@@ -503,35 +526,13 @@ def initialize(current_app):
     current_app.config['storage']['watchers'].append(results_watcher)
 
 
-
-    def cleanup():
-        print("Cleaning up observers and database connections")
-        import signal
+    @atexit.register
+    def cleanup_watchers():
+        print("Cleaning up observers")
         for watcher in current_app.config['storage']['watchers']:
             watcher.stop()
             watcher.join()
-        if 'db-clean' in current_app.config:
-            db.synchronizer.acquire()
-            for table in current_app.config['db-clean']:
-                try:
-                    current_app.config['storage']['db'].execute("DROP TABLE %s"%table)
-                except UndefinedTableError:
-                    pass
-            db.synchronizer.release()
-        current_app.config['storage']['db'].close()
-        current_app.config['storage']['bokeh'].send_signal(signal.SIGINT)
-        try:
-            current_app.config['storage']['bokeh'].wait(1)
-        except subprocess.TimeoutExpired:
-            current_app.config['storage']['bokeh'].terminate()
 
-    atexit.register(cleanup)
-    # current_app.config['storage']['data'] = data
-    # for (k,v) in current_app.config['storage']['data'].items():
-    #     print(k, ':', v)
-    # import weakref
-    # current_app.config['storage']['loader'] = weakref.ref(current_app.config['storage']['data'])
-    # current_app.config['storage']['loader'] = lambda:loaddata(data_path, synchronizer)
     current_app.config['storage']['synchronizer'] = synchronizer
     data.save()
 

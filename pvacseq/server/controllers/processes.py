@@ -1,10 +1,11 @@
 import os
 import re
 import shutil
-from flask import current_app
+from flask import current_app, redirect
 import json
 import sys
-from subprocess import TimeoutExpired
+import subprocess
+from shlex import split
 from .utils import descriptions
 from shutil import move as movetree
 
@@ -183,7 +184,7 @@ def shutdown():
             output.append(i)
             try:
                 current_app.config['storage']['children'][i].wait(.1)
-            except TimeoutExpired:
+            except subprocess.TimeoutExpired:
                 current_app.config['storage']['children'][i].terminate()
     return output
 
@@ -264,3 +265,53 @@ def archive(processID):
     data.save()
     current_app.config['storage']['synchronizer'].release()
     return "OK"
+
+def restart(processID):
+    """Restart a previously started process"""
+    data = current_app.config['storage']['loader']()
+    key = 'process-%d' % processID
+    if key not in data:
+        return (
+            {
+                'code':400,
+                'message':"Invalid ProcessID: %d"%processID,
+                'fields':"processID"
+            },
+            400
+        )
+    proc = fetch_process(processID, data, current_app.config['storage']['children'])
+    if is_running(proc):
+        return (
+            {
+                'code':400,
+                'message':"The requested process (%d) is still running"%processID,
+                'fields':"processID"
+            },
+            400
+        )
+    current_app.config['storage']['synchronizer'].acquire()
+    data = current_app.config['storage']['loader']() #refresh the data
+    logfile = data[key]['logfile']
+    os.makedirs(os.path.dirname(logfile), exist_ok = True)
+    print("CMD:", split(data[key]['command']))
+    current_app.config['storage']['children'][data['processid']] = subprocess.Popen(
+        split(data[key]['command']),
+        stdout=open(logfile, 'w'),  # capture stdout in the logfile
+        stderr=subprocess.STDOUT,
+        # isolate the child in a new process group
+        # this way it will remainin running no matter what happens to this process
+        preexec_fn=os.setpgrp
+    )
+    # Store some data about the child process
+    data[key]['files']={}
+    data[key]['status']=0
+    data[key]['pid']=current_app.config['storage']['children'][processID].pid
+    if 'reboot' not in data:
+        data.addKey(
+            'reboot',
+            current_app.config['reboot'],
+            current_app.config['files']['processes']
+        )
+    data.save()
+    current_app.config['storage']['synchronizer'].release()
+    return redirect("/api/v1/processes/%d"%processID, 302)
