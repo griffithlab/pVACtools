@@ -293,6 +293,11 @@ paths:
         description: "IEDB Retries: Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100"
         type: "integer"
         default: 5
+      - name: "iedb_install_dir"
+        in: "formData"
+        description: "Path to a local install of IEDB (if available)"
+        type: "string"
+        default: ""
       - name: "downstream_sequence_length"
         in : "formData"
         description: "Downstream Sequence Length: Cap to limit the downstream sequence length for frameshifts when creating the fasta file. Use 'full' to include the full downstream sequence"
@@ -496,6 +501,11 @@ paths:
         description: "IEDB Retries: Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100"
         type: "integer"
         default: 5
+      - name: "iedb_install_dir"
+        in: "formData"
+        description: "Path to a local install of IEDB (if available)"
+        type: "string"
+        default: ""
       - name: "downstream_sequence_length"
         in : "formData"
         description: "Downstream Sequence Length: Cap to limit the downstream sequence length for frameshifts when creating the fasta file. Use 'full' to include the full downstream sequence"
