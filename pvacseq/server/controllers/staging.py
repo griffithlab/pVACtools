@@ -3,10 +3,12 @@ import subprocess
 import json
 import re
 import tempfile
+from functools import reduce
+import hashlib
 from flask import current_app
-from yaml import dump
+import yaml
 from shlex import quote
-from shutil import copyfile
+from shutil import copyfile, copytree
 from .database import int_pattern
 from .files import list_input
 
@@ -23,6 +25,76 @@ def resolve_filepath(filepath):
             return None
     return filepath
 
+def hashfile(filepath):
+    try:
+        reader = open(filepath, mode='rb')
+    except FileNotFoundError:
+        return False
+    chunk = reader.read(4096)
+    hasher = hashlib.md5()
+    while chunk:
+        hasher.update(chunk)
+        chunk = reader.read(4096)
+    reader.close()
+    return hasher.digest()
+
+def precheck(configObj, data):
+    """Check if a process with these same parameters has already been run successfully"""
+    #This is a temprary stand-in until https://github.com/griffithlab/pVAC-Seq/pull/292 is merged
+    input_hash = hashfile(configObj['input'])
+    additional_hashes = {}
+    if configObj['additional_input_file_list'] != "":
+        additional_hashes = {
+            key:hashfile(path)
+            for (key, path) in yaml.load(
+                open(configObj['additional_input_file_list'])
+            ).items()
+        }
+    for i in range(data['processid']+1):
+        key = 'process-%d'%i
+        if key in data:
+            reader = open(os.path.join(
+                data[key]['output'],
+                'config.json'
+            ))
+            current_config = json.load(reader)
+            reader.close()
+            #input
+            if len(set(configObj)^set(current_config)):
+                #if there are keys in one set and not the other
+                continue
+            #otherwise, check every key except input, output, and additional files
+            failed = False
+            for param in configObj:
+                if param in {'input', 'output', 'additional_input_file_list'}:
+                    #Skip for now, because these will need a longer check
+                    continue
+                if configObj[param] != current_config[param]:
+                    failed = True
+                    break
+            if not failed:
+                #do longer checks on input and additional files
+                current_hash = hashfile(current_config['input'])
+                if current_hash is None or current_hash != input_hash:
+                    continue
+                current_input_hashes = {}
+                if current_config['additional_input_file_list'] != "":
+                    current_input_hashes = {
+                        key:hashfile(path)
+                        for (key, path) in yaml.load(
+                            open(current_config['additional_input_file_list'])
+                        ).items()
+                    }
+                if len(set(additional_hashes)^set(current_input_hashes)):
+                    continue
+                if reduce(
+                    lambda x,y: x and additional_hashes[y]==current_input_hashes[y],
+                    current_input_hashes,
+                    True
+                ):
+                    return i
+    return None
+
 def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
           peptide_sequence_length, gene_expn_file, transcript_expn_file,
           normal_snvs_coverage_file, normal_indels_coverage_file,
@@ -32,14 +104,10 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
           binding_threshold, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
-          downstream_sequence_length, keep_tmp_files):
+          downstream_sequence_length, keep_tmp_files, force):
     """Stage input for a new pVAC-Seq run.  Generate a unique output directory and \
     save uploaded files to temporary locations (and give pVAC-Seq the filepaths). \
     Then forward the command to start()"""
-    ['input','gene_expn_file', 'transcript_expn_file',
-    'normal_snvs_coverage_file', 'normal_indels_coverage_file',
-    'tdna_snvs_coverage_file', 'tdna_indels_coverage_file',
-    'trna_snvs_coverage_file', 'trna_indels_coverage_file']
     input_file = input
     data = current_app.config['storage']['loader']()
     samplename  = re.sub(r'[^\w\s.]', '_', samplename)
@@ -56,6 +124,8 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
             i += 1
         current_path += "_"+str(i)
 
+    temp_path = tempfile.TemporaryDirectory()
+
     input_path = resolve_filepath(input_file)
     if not input_path:
         return (
@@ -66,8 +136,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
             },400
         )
 
-    os.makedirs(current_path)
-    additional_input_file_list = open(os.path.join(current_path, "additional_input_file_list.yml"), 'w')
+    additional_input_file_list = open(os.path.join(temp_path.name, "additional_input_file_list.yml"), 'w')
 
     if gene_expn_file:
         gene_expn_file_path = resolve_filepath(gene_expn_file)
@@ -80,7 +149,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                 },400
             )
         if os.path.getsize(gene_expn_file_path):
-            dump({"gene_expn_file": gene_expn_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"gene_expn_file": gene_expn_file_path}, additional_input_file_list, default_flow_style=False)
 
     if transcript_expn_file:
         transcript_expn_file_path = resolve_filepath(transcript_expn_file)
@@ -93,7 +162,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                 },400
             )
         if os.path.getsize(transcript_expn_file_path):
-            dump({"transcript_expn_file" :transcript_expn_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"transcript_expn_file" :transcript_expn_file_path}, additional_input_file_list, default_flow_style=False)
 
     if normal_snvs_coverage_file:
         normal_snvs_coverage_file_path = resolve_filepath(normal_snvs_coverage_file)
@@ -106,7 +175,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                 },400
             )
         if os.path.getsize(normal_snvs_coverage_file_path):
-            dump({"normal_snvs_coverage_file" :normal_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"normal_snvs_coverage_file" :normal_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     if normal_indels_coverage_file:
         normal_indels_coverage_file_path = resolve_filepath(normal_indels_coverage_file)
@@ -120,7 +189,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
             )
 
         if os.path.getsize(normal_indels_coverage_file_path):
-            dump({"normal_indels_coverage_file" :normal_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"normal_indels_coverage_file" :normal_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     if tdna_snvs_coverage_file:
         tdna_snvs_coverage_file_path = resolve_filepath(tdna_snvs_coverage_file)
@@ -133,7 +202,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
                 },400
             )
         if os.path.getsize(tdna_snvs_coverage_file_path):
-            dump({"tdna_snvs_coverage_file" :tdna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"tdna_snvs_coverage_file" :tdna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     if tdna_indels_coverage_file:
         tdna_indels_coverage_file_path = resolve_filepath(tdna_indels_coverage_file)
@@ -147,7 +216,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
             )
 
         if os.path.getsize(tdna_indels_coverage_file_path):
-            dump({"tdna_indels_coverage_file" :tdna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"tdna_indels_coverage_file" :tdna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     if trna_snvs_coverage_file:
         trna_snvs_coverage_file_path = resolve_filepath(trna_snvs_coverage_file)
@@ -161,7 +230,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
             )
 
         if os.path.getsize(trna_snvs_coverage_file_path):
-            dump({"trna_snvs_coverage_file" :trna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"trna_snvs_coverage_file" :trna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     if trna_indels_coverage_file:
         trna_indels_coverage_file_path = resolve_filepath(trna_indels_coverage_file)
@@ -175,17 +244,78 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
             )
 
         if os.path.getsize(trna_indels_coverage_file_path):
-            dump({"trna_indels_coverage_file" :trna_indels_coverage_file_path}, additional_input_file_list)
+            yaml.dump({"trna_indels_coverage_file" :trna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     additional_input_file_list.flush()
 
-    return start(input_path, samplename, alleles, epitope_lengths, prediction_algorithms, current_path,
-              peptide_sequence_length, additional_input_file_list.name if additional_input_file_list.tell() else "", # check if any data written to file
-              net_chop_method, len(netmhc_stab), len(top_result_per_mutation), top_score_metric,
-              binding_threshold, minimum_fold_change,
-              normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
-              expn_val, net_chop_threshold,
-              fasta_size, iedb_retries, iedb_install_dir, downstream_sequence_length, len(keep_tmp_files))
+    configObj = {
+        'input': input_path, #input
+        'samplename':samplename, #samplename
+        'alleles':alleles.split(','),
+        'output':current_path,
+        'epitope_lengths':epitope_lengths.split(','),
+        'prediction_algorithms':prediction_algorithms.split(','),
+        'peptide_sequence_length':peptide_sequence_length,
+        'additional_input_file_list':(
+            additional_input_file_list.name if additional_input_file_list.tell() else '' #check if any data was written to file
+        ),
+        'net_chop_method':net_chop_method,
+        'netmhc_stab':bool(netmhc_stab),
+        'top_result_per_mutation':bool(top_result_per_mutation),
+        'top_score_metric':top_score_metric,
+        'binding_threshold':binding_threshold,
+        'minimum_fold_change':minimum_fold_change,
+        'normal_cov':normal_cov, #normal_cov
+        'tdna_cov':tdna_cov, #tdna_cov
+        'trna_cov':trna_cov, #trna_cov
+        'normal_vaf':normal_vaf, #normal_vaf
+        'tdna_vaf':tdna_vaf, #tdna_vaf
+        'trna_vaf':trna_vaf, #trna_vaf
+        'expn_val':expn_val, #expn_val
+        'net_chop_threshold':net_chop_threshold,
+        'fasta_size':fasta_size,
+        'iedb_retries':iedb_retries,
+        'iedb_install_dir':iedb_install_dir,
+        'keep_tmp_files':bool(keep_tmp_files),
+        'downstream_sequence_length':downstream_sequence_length
+    }
+    checkOK = precheck(configObj, data) if not force else None
+    if checkOK is None:
+        # os.makedirs(current_path) ##COPY
+        copytree(temp_path.name, current_path)
+        configObj['alleles']=alleles
+        configObj['epitope_lengths']=epitope_lengths
+        configObj['prediction_algorithms']=prediction_algorithms
+        if additional_input_file_list.tell(): #not sure what's wrong here.  It's not updating
+            configObj['additional_input_file_list'] = os.path.join(
+                current_path,
+                os.path.basename(additional_input_file_list.name)
+            )
+        writer = open(os.path.join(
+            os.path.abspath(current_path),
+            'config.json'
+        ),'w')
+        json.dump(configObj, writer, indent='\t')
+        writer.close()
+        temp_path.cleanup()
+        return start(**configObj)
+    return (
+        {
+            'code':400,
+            'message':"The given parameters match process %d"%checkOK,
+            'fields':"N/A"
+        },
+        400
+    )
+
+
+    # return start(input_path, samplename, alleles, epitope_lengths, prediction_algorithms, current_path,
+    #           peptide_sequence_length, additional_input_file_list.name if additional_input_file_list.tell() else "", # check if any data written to file
+    #           net_chop_method, bool(netmhc_stab), bool(top_result_per_mutation), top_score_metric,
+    #           binding_threshold, minimum_fold_change,
+    #           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
+    #           expn_val, net_chop_threshold,
+    #           fasta_size, iedb_retries, iedb_install_dir, downstream_sequence_length, bool(keep_tmp_files))
 
 
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
@@ -277,41 +407,41 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         )
     data.save()
     current_app.config['storage']['synchronizer'].release()
-    configObj = {
-        'action':'run',
-        'input_file': input,
-        'sample_name':samplename,
-        'alleles':alleles.split(','),
-        'prediction_algorithms':prediction_algorithms.split(','),
-        'output_directory':output,
-        'epitope_lengths':epitope_lengths.split(','),
-        'peptide_sequence_length':peptide_sequence_length,
-        'additional_input_files':additional_input_file_list.split(','),
-        'net_chop_method':net_chop_method,
-        'netmhc_stab':netmhc_stab,
-        'top_result_per_mutation':top_result_per_mutation,
-        'top_score_metric':top_score_metric,
-        'binding_threshold':binding_threshold,
-        'minimum_fold_change':minimum_fold_change,
-        'normal_coverage_cutoff':normal_cov,
-        'tumor_dna_coverage_cutoff':tdna_cov,
-        'tumor_rna_coverage_cutoff':trna_cov,
-        'normal_vaf_cutoff':normal_vaf,
-        'tumor_dna_vaf_cutoff':tdna_vaf,
-        'tumor_rna_vaf_cutoff':trna_vaf,
-        'expression_cutoff':expn_val,
-        'netchop_threshold':net_chop_threshold,
-        'fasta_size':fasta_size,
-        'iedb_retries':iedb_retries,
-        'downstream_sequence_length':downstream_sequence_length
-    }
-
-    writer = open(os.path.join(
-        os.path.abspath(output),
-        'config.json'
-    ),'w')
-    json.dump(configObj, writer, indent='\t')
-    writer.close()
+    # configObj = {
+    #     'action':'run',
+    #     'input_file': input,
+    #     'sample_name':samplename,
+    #     'alleles':alleles.split(','),
+    #     'prediction_algorithms':prediction_algorithms.split(','),
+    #     'output_directory':output,
+    #     'epitope_lengths':epitope_lengths.split(','),
+    #     'peptide_sequence_length':peptide_sequence_length,
+    #     'additional_input_files':additional_input_file_list.split(','),
+    #     'net_chop_method':net_chop_method,
+    #     'netmhc_stab':netmhc_stab,
+    #     'top_result_per_mutation':top_result_per_mutation,
+    #     'top_score_metric':top_score_metric,
+    #     'binding_threshold':binding_threshold,
+    #     'minimum_fold_change':minimum_fold_change,
+    #     'normal_coverage_cutoff':normal_cov,
+    #     'tumor_dna_coverage_cutoff':tdna_cov,
+    #     'tumor_rna_coverage_cutoff':trna_cov,
+    #     'normal_vaf_cutoff':normal_vaf,
+    #     'tumor_dna_vaf_cutoff':tdna_vaf,
+    #     'tumor_rna_vaf_cutoff':trna_vaf,
+    #     'expression_cutoff':expn_val,
+    #     'netchop_threshold':net_chop_threshold,
+    #     'fasta_size':fasta_size,
+    #     'iedb_retries':iedb_retries,
+    #     'downstream_sequence_length':downstream_sequence_length
+    # }
+    #
+    # writer = open(os.path.join(
+    #     os.path.abspath(output),
+    #     'config.json'
+    # ),'w')
+    # json.dump(configObj, writer, indent='\t')
+    # writer.close()
     return data['processid']
 
 

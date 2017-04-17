@@ -517,6 +517,12 @@ paths:
         required: false
         type: "string"
         default: ""
+      - name: "force"
+        in: "formData"
+        description: "Bypass the check for duplicate processes"
+        required: false
+        type: "boolean"
+        default: false
       responses:
         200:
           description: "Returns the process ID of the newly started pVAC-Seq run"
