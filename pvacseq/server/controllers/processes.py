@@ -287,7 +287,7 @@ def restart(processID):
         data = current_app.config['storage']['loader']() #refresh the data
         logfile = data[key]['logfile']
         os.makedirs(os.path.dirname(logfile), exist_ok = True)
-        current_app.config['storage']['children'][data['processid']] = subprocess.Popen(
+        current_app.config['storage']['children'][processID] = subprocess.Popen(
             split(data[key]['command']),
             stdout=open(logfile, 'w'),  # capture stdout in the logfile
             stderr=subprocess.STDOUT,

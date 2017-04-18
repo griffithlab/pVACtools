@@ -1,39 +1,38 @@
 {
-	"fasta_size": 200,
-	"epitope_lengths": [
-		"9",
-		"10"
-	],
-	"netchop_threshold": 0.5,
-	"normal_coverage_cutoff": 5,
-	"tumor_dna_coverage_cutoff": 10,
-	"tumor_rna_vaf_cutoff": 40,
-	"prediction_algorithms": [
-		"NetMHC",
-		"PickPocket"
-	],
-	"input_file": "/Users/agrauber/Documents/pVAC-Seq/tests/test_data/api/input.vcf",
-	"output_directory": "/Users/agrauber/pVAC-Seq/results/endpoint_full",
-	"sample_name": "endpoint_full",
-	"binding_threshold": 3000,
-	"netmhc_stab": 0,
-	"tumor_rna_coverage_cutoff": 10,
-	"minimum_fold_change": 0,
+	"output": "/Users/agrauber/pVAC-Seq/results/sample_endpoint_full",
+	"net_chop_method": "cterm",
+	"normal_cov": 5,
+	"input": "/Users/agrauber/pVAC-Seq/input/input.vcf",
 	"downstream_sequence_length": 1000,
+	"minimum_fold_change": 0,
+	"top_score_metric": "lowest",
+	"net_chop_threshold": 0.5,
 	"iedb_retries": 5,
-	"action": "run",
-	"tumor_dna_vaf_cutoff": 40,
 	"alleles": [
 		"HLA-G*01:09",
 		"HLA-E*01:01"
 	],
-	"top_result_per_mutation": 0,
-	"expression_cutoff": 1,
+	"fasta_size": 200,
+	"netmhc_stab": false,
 	"peptide_sequence_length": 21,
-	"net_chop_method": "cterm",
-	"additional_input_files": [
-		"/Users/agrauber/pVAC-Seq/results/endpoint_full/additional_input_file_list.yml"
+	"additional_input_file_list": "/Users/agrauber/pVAC-Seq/results/sample_endpoint_full/additional_input_file_list.yml",
+	"expn_val": 1,
+	"binding_threshold": 3000,
+	"epitope_lengths": [
+		9,
+		10
 	],
-	"normal_vaf_cutoff": 2,
-	"top_score_metric": "lowest"
+	"samplename": "sample_endpoint_full",
+	"trna_cov": 10,
+	"top_result_per_mutation": false,
+	"keep_tmp_files": false,
+	"normal_vaf": 2,
+	"trna_vaf": 40,
+	"prediction_algorithms": [
+		"NetMHC",
+		"PickPocket"
+	],
+	"iedb_install_dir": "",
+	"tdna_vaf": 40,
+	"tdna_cov": 10
 }

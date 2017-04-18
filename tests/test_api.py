@@ -130,8 +130,10 @@ class APITests(unittest.TestCase):
                 'samplename':'basic_run',
                 'alleles':'HLA-E*01:01',
                 'prediction_algorithms':'NetMHC',
+                'force':True
             }
         )
+        self.assertEqual(response.status_code, 200)
         return response.json()
 
     def test_app_compiles(self):
@@ -209,6 +211,7 @@ class APITests(unittest.TestCase):
                 'samplename':'endpoint_input',
                 'alleles':'HLA-G*01:09',
                 'prediction_algorithms':'NetMHC',
+                'force':True
             }
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
@@ -226,6 +229,7 @@ class APITests(unittest.TestCase):
                 'samplename':'endpoint_processes',
                 'alleles':'HLA-G*01:09',
                 'prediction_algorithms':'NetMHC',
+                'force':True
             }
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
@@ -544,7 +548,8 @@ class APITests(unittest.TestCase):
                 'netmhc_stab':'on',
                 'net_chop_method':'cterm',
                 'tdna_vaf':'40',
-                'binding_threshold':3000
+                'binding_threshold':3000,
+                'force':True
 
             }
         )
