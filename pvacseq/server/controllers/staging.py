@@ -282,11 +282,8 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
     checkOK = precheck(configObj, data) if not force else None
     if checkOK is None:
         copytree(temp_path.name, current_path)
-        configObj['alleles']=alleles
-        configObj['epitope_lengths']=epitope_lengths
-        configObj['prediction_algorithms']=prediction_algorithms
         print(additional_input_file_list.tell())
-        if additional_input_file_list.tell(): #not sure what's wrong here.  It's not updating
+        if configObj['additional_input_file_list']:
             configObj['additional_input_file_list'] = os.path.join(
                 current_path,
                 os.path.basename(additional_input_file_list.name)
@@ -317,8 +314,12 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
           downstream_sequence_length, keep_tmp_files):
     """Build the command for pVAC-Seq, then spawn a new process to run it"""
-    if type(epitope_lengths) == str and epitope_lengths[0] == int:
-        ','.join(str(item) for item in epitope_lengths)
+    if type(epitope_lengths) == list:
+        epitope_lengths = ','.join(str(item) for item in epitope_lengths)
+    if type(alleles) == list:
+        alleles = ','.join(str(item) for item in alleles)
+    if type(prediction_algorithms) == list:
+        prediction_algorithms = ','.join(str(item) for item in prediction_algorithms)
     command = [
         'pvacseq',
         'run',
