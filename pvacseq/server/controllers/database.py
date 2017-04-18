@@ -100,10 +100,10 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     # check if the table exists:
     db = current_app.config['storage']['db']
     fileID = str(fileID)
-    db.synchronizer.acquire()
-    query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
-    if not len(query(tablekey)):  # table does not exist
-        db.synchronizer.release()
+    with db.synchronizer:
+        query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+        response = query(tablekey)
+    if not len(response):  # table does not exist
         # Open a reader to cache the file in the database
         if parentID != -1:
             process = fetch_process(parentID, data, current_app.config['storage']['children'])
@@ -213,8 +213,6 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                 # insert the row
                 insert(*[formatted[column] for column in column_names])
             raw_reader.close()
-    else:
-        db.synchronizer.release()
     typequery = db.prepare(
         "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1"
     )

@@ -253,7 +253,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
         'samplename':samplename, #samplename
         'alleles':alleles.split(','),
         'output':current_path,
-        'epitope_lengths':epitope_lengths.split(','),
+        'epitope_lengths':[int(item) for item in epitope_lengths.split(',')],
         'prediction_algorithms':prediction_algorithms.split(','),
         'peptide_sequence_length':peptide_sequence_length,
         'additional_input_file_list':(
@@ -281,11 +281,11 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
     }
     checkOK = precheck(configObj, data) if not force else None
     if checkOK is None:
-        # os.makedirs(current_path) ##COPY
         copytree(temp_path.name, current_path)
         configObj['alleles']=alleles
         configObj['epitope_lengths']=epitope_lengths
         configObj['prediction_algorithms']=prediction_algorithms
+        print(additional_input_file_list.tell())
         if additional_input_file_list.tell(): #not sure what's wrong here.  It's not updating
             configObj['additional_input_file_list'] = os.path.join(
                 current_path,
@@ -309,15 +309,6 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
     )
 
 
-    # return start(input_path, samplename, alleles, epitope_lengths, prediction_algorithms, current_path,
-    #           peptide_sequence_length, additional_input_file_list.name if additional_input_file_list.tell() else "", # check if any data written to file
-    #           net_chop_method, bool(netmhc_stab), bool(top_result_per_mutation), top_score_metric,
-    #           binding_threshold, minimum_fold_change,
-    #           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
-    #           expn_val, net_chop_threshold,
-    #           fasta_size, iedb_retries, iedb_install_dir, downstream_sequence_length, bool(keep_tmp_files))
-
-
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
           peptide_sequence_length, additional_input_file_list,
           net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
@@ -326,6 +317,8 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
           downstream_sequence_length, keep_tmp_files):
     """Build the command for pVAC-Seq, then spawn a new process to run it"""
+    if type(epitope_lengths) == str and epitope_lengths[0] == int:
+        ','.join(str(item) for item in epitope_lengths)
     command = [
         'pvacseq',
         'run',
@@ -374,75 +367,39 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
 
     # stdout and stderr from the child process will be directed to this file
     logfile = os.path.join(output, 'pVAC-Seq.log')
-    current_app.config['storage']['synchronizer'].acquire()
-    data = current_app.config['storage']['loader']()
-    data['processid']+=1
-    os.makedirs(os.path.dirname(logfile), exist_ok = True)
-    current_app.config['storage']['children'][data['processid']] = subprocess.Popen(
-        command,
-        stdout=open(logfile, 'w'),  # capture stdout in the logfile
-        stderr=subprocess.STDOUT,
-        # isolate the child in a new process group
-        # this way it will remainin running no matter what happens to this process
-        preexec_fn=os.setpgrp
-    )
-    # Store some data about the child process
-    data.addKey(
-        'process-%d'%(data['processid']),
-        {
-            'command': " ".join([quote(token) for token in command]),
-            'logfile':logfile,
-            'pid':current_app.config['storage']['children'][data['processid']].pid,
-            'status': 0,
-            'files':{},
-            'output':os.path.abspath(output)
-        },
-        current_app.config['files']['processes']
-    )
-    if 'reboot' not in data:
+    with current_app.config['storage']['synchronizer']:
+        data = current_app.config['storage']['loader']()
+        data['processid']+=1
+        os.makedirs(os.path.dirname(logfile), exist_ok = True)
+        current_app.config['storage']['children'][data['processid']] = subprocess.Popen(
+            command,
+            stdout=open(logfile, 'w'),  # capture stdout in the logfile
+            stderr=subprocess.STDOUT,
+            # isolate the child in a new process group
+            # this way it will remainin running no matter what happens to this process
+            preexec_fn=os.setpgrp
+        )
+        # Store some data about the child process
         data.addKey(
-            'reboot',
-            current_app.config['reboot'],
+            'process-%d'%(data['processid']),
+            {
+                'command': " ".join([quote(token) for token in command]),
+                'logfile':logfile,
+                'pid':current_app.config['storage']['children'][data['processid']].pid,
+                'status': 0,
+                'files':{},
+                'output':os.path.abspath(output)
+            },
             current_app.config['files']['processes']
         )
-    data.save()
-    current_app.config['storage']['synchronizer'].release()
-    # configObj = {
-    #     'action':'run',
-    #     'input_file': input,
-    #     'sample_name':samplename,
-    #     'alleles':alleles.split(','),
-    #     'prediction_algorithms':prediction_algorithms.split(','),
-    #     'output_directory':output,
-    #     'epitope_lengths':epitope_lengths.split(','),
-    #     'peptide_sequence_length':peptide_sequence_length,
-    #     'additional_input_files':additional_input_file_list.split(','),
-    #     'net_chop_method':net_chop_method,
-    #     'netmhc_stab':netmhc_stab,
-    #     'top_result_per_mutation':top_result_per_mutation,
-    #     'top_score_metric':top_score_metric,
-    #     'binding_threshold':binding_threshold,
-    #     'minimum_fold_change':minimum_fold_change,
-    #     'normal_coverage_cutoff':normal_cov,
-    #     'tumor_dna_coverage_cutoff':tdna_cov,
-    #     'tumor_rna_coverage_cutoff':trna_cov,
-    #     'normal_vaf_cutoff':normal_vaf,
-    #     'tumor_dna_vaf_cutoff':tdna_vaf,
-    #     'tumor_rna_vaf_cutoff':trna_vaf,
-    #     'expression_cutoff':expn_val,
-    #     'netchop_threshold':net_chop_threshold,
-    #     'fasta_size':fasta_size,
-    #     'iedb_retries':iedb_retries,
-    #     'downstream_sequence_length':downstream_sequence_length
-    # }
-    #
-    # writer = open(os.path.join(
-    #     os.path.abspath(output),
-    #     'config.json'
-    # ),'w')
-    # json.dump(configObj, writer, indent='\t')
-    # writer.close()
-    return data['processid']
+        if 'reboot' not in data:
+            data.addKey(
+                'reboot',
+                current_app.config['reboot'],
+                current_app.config['files']['processes']
+            )
+        data.save()
+        return data['processid']
 
 
 def test():

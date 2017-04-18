@@ -191,80 +191,74 @@ def shutdown():
 
 def reset(clearall):
     """Clears out and archives finished processes from the record"""
-    current_app.config['storage']['synchronizer'].acquire()
-    data = current_app.config['storage']['loader']()
-    output = []
-    for i in range(data['processid']+1):
-        proc = fetch_process(i, data, current_app.config['storage']['children'])
-        if 'process-%d'%i in data and not is_running(proc):
-            if i not in current_app.config['storage']['children']:
-                result = archive(i)
-                if type(result) == tuple:
-                    current_app.config['storage']['synchronizer'].release()
-                    return result
-                output.append(i)
-            elif clearall:
-                stop(i)
-                result = archive(i)
-                if type(result) == tuple:
-                    current_app.config['storage']['synchronizer'].release()
-                    return result
-                output.append(i)
-    if clearall and 'reboot' in data:
-        del data['reboot']
-    data.save()
-    current_app.config['storage']['synchronizer'].release()
-    return output
+    with current_app.config['storage']['synchronizer']:
+        data = current_app.config['storage']['loader']()
+        output = []
+        for i in range(data['processid']+1):
+            proc = fetch_process(i, data, current_app.config['storage']['children'])
+            if 'process-%d'%i in data and not is_running(proc):
+                if i not in current_app.config['storage']['children']:
+                    result = archive(i)
+                    if type(result) == tuple:
+                        return result
+                    output.append(i)
+                elif clearall:
+                    stop(i)
+                    result = archive(i)
+                    if type(result) == tuple:
+                        return result
+                    output.append(i)
+        if clearall and 'reboot' in data:
+            del data['reboot']
+        data.save()
+        return output
 
 def archive(processID):
     """Archives the results from the given process"""
-    current_app.config['storage']['synchronizer'].acquire()
-    data = current_app.config['storage']['loader']()
-    if 'process-%d'%processID not in data:
-        current_app.config['storage']['synchronizer'].release()
-        return (
-            {
-                'code':400,
-                'message': "The requested process (%d) does not exist"%processID,
-                'fields':"processID"
-            },
-            400
+    with current_app.config['storage']['synchronizer']:
+        data = current_app.config['storage']['loader']()
+        if 'process-%d'%processID not in data:
+            return (
+                {
+                    'code':400,
+                    'message': "The requested process (%d) does not exist"%processID,
+                    'fields':"processID"
+                },
+                400
+            )
+        proc = fetch_process(processID, data, current_app.config['storage']['children'])
+        if is_running(proc):
+            return (
+                {
+                    'code':400,
+                    'message': "The requested process (%d) is still running.\
+                    Stop the process or wait for it to finish before archiving"%processID,
+                    'fields':"processID"
+                },
+                400
+            )
+        dirname = os.path.basename(proc[0]['output'])
+        archive = os.path.join(
+            current_app.config['files']['data-dir'],
+            'archive'
         )
-    proc = fetch_process(processID, data, current_app.config['storage']['children'])
-    if is_running(proc):
-        current_app.config['storage']['synchronizer'].release()
-        return (
-            {
-                'code':400,
-                'message': "The requested process (%d) is still running.\
-                Stop the process or wait for it to finish before archiving"%processID,
-                'fields':"processID"
-            },
-            400
+        destpath = os.path.join(archive, dirname)
+        if os.path.exists:
+            i = 1
+            while os.path.exists(destpath+'_%d'%i):
+                i+=1
+            destpath += '_%d'%i
+        movetree(
+            proc[0]['output'],
+            destpath
         )
-    dirname = os.path.basename(proc[0]['output'])
-    archive = os.path.join(
-        current_app.config['files']['data-dir'],
-        'archive'
-    )
-    destpath = os.path.join(archive, dirname)
-    if os.path.exists:
-        i = 1
-        while os.path.exists(destpath+'_%d'%i):
-            i+=1
-        destpath += '_%d'%i
-    movetree(
-        proc[0]['output'],
-        destpath
-    )
-    del data['process-%d'%processID]
-    if processID in current_app.config['storage']['children']:
-        del current_app.config['storage']['children'][processID]
-    # Set the processid to the highest child process from this session
-    data['processid'] = max([0]+[i for i in range(data['processid']+1) if 'process-%d'%i in data])
-    data.save()
-    current_app.config['storage']['synchronizer'].release()
-    return "OK"
+        del data['process-%d'%processID]
+        if processID in current_app.config['storage']['children']:
+            del current_app.config['storage']['children'][processID]
+        # Set the processid to the highest child process from this session
+        data['processid'] = max([0]+[i for i in range(data['processid']+1) if 'process-%d'%i in data])
+        data.save()
+        return "OK"
 
 def restart(processID):
     """Restart a previously started process"""
@@ -289,29 +283,27 @@ def restart(processID):
             },
             400
         )
-    current_app.config['storage']['synchronizer'].acquire()
-    data = current_app.config['storage']['loader']() #refresh the data
-    logfile = data[key]['logfile']
-    os.makedirs(os.path.dirname(logfile), exist_ok = True)
-    print("CMD:", split(data[key]['command']))
-    current_app.config['storage']['children'][data['processid']] = subprocess.Popen(
-        split(data[key]['command']),
-        stdout=open(logfile, 'w'),  # capture stdout in the logfile
-        stderr=subprocess.STDOUT,
-        # isolate the child in a new process group
-        # this way it will remainin running no matter what happens to this process
-        preexec_fn=os.setpgrp
-    )
-    # Store some data about the child process
-    data[key]['files']={}
-    data[key]['status']=0
-    data[key]['pid']=current_app.config['storage']['children'][processID].pid
-    if 'reboot' not in data:
-        data.addKey(
-            'reboot',
-            current_app.config['reboot'],
-            current_app.config['files']['processes']
+    with current_app.config['storage']['synchronizer']:
+        data = current_app.config['storage']['loader']() #refresh the data
+        logfile = data[key]['logfile']
+        os.makedirs(os.path.dirname(logfile), exist_ok = True)
+        current_app.config['storage']['children'][data['processid']] = subprocess.Popen(
+            split(data[key]['command']),
+            stdout=open(logfile, 'w'),  # capture stdout in the logfile
+            stderr=subprocess.STDOUT,
+            # isolate the child in a new process group
+            # this way it will remainin running no matter what happens to this process
+            preexec_fn=os.setpgrp
         )
-    data.save()
-    current_app.config['storage']['synchronizer'].release()
-    return redirect("/api/v1/processes/%d"%processID, 302)
+        # Store some data about the child process
+        data[key]['files']={}
+        data[key]['status']=0
+        data[key]['pid']=current_app.config['storage']['children'][processID].pid
+        if 'reboot' not in data:
+            data.addKey(
+                'reboot',
+                current_app.config['reboot'],
+                current_app.config['files']['processes']
+            )
+        data.save()
+        return redirect("/api/v1/processes/%d"%processID, 302)

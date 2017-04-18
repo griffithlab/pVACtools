@@ -14,7 +14,7 @@ class pvacseqHandler(watchdog.events.FileSystemEventHandler):
 
     def subscribe(self, fn, eventType = None):
         self.subscribers.append((eventType, fn))
-        return lambda:self.subscribers.remove((eventType, fn)) #return unsubscribe function        
+        return lambda:self.subscribers.remove((eventType, fn)) #return unsubscribe function
 
 def Observe(path):
     observer = watchdog.observers.Observer()

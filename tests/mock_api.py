@@ -18,7 +18,7 @@ def mock_process(args, *others, **kwargs):
         dest = args[args.index('-e')-1]
         return popen_mock.__class__(
             [
-                'python',
+                sys.executable,
                 '-c',
                 "import shutil; shutil.rmtree('%s', ignore_errors=True); shutil.copytree('%s', '%s')"%(
                     dest,

@@ -200,13 +200,12 @@ def initialize(current_app):
     def cleanup_database():
         print("Cleaning up database connections")
         if 'db-clean' in current_app.config:
-            db.synchronizer.acquire()
-            for table in current_app.config['db-clean']:
-                try:
-                    current_app.config['storage']['db'].execute("DROP TABLE %s"%table)
-                except UndefinedTableError:
-                    pass
-            db.synchronizer.release()
+            with db.synchronizer:
+                for table in current_app.config['db-clean']:
+                    try:
+                        current_app.config['storage']['db'].execute("DROP TABLE %s"%table)
+                    except UndefinedTableError:
+                        pass
         current_app.config['storage']['db'].close()
 
     #setup directory structure:
@@ -320,11 +319,10 @@ def initialize(current_app):
             if data['dropbox'][key] == filename:
                 del data['dropbox'][key]
                 print("Deleting file:",key,'-->', filename)
-                db.synchronizer.acquire()
-                query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
-                if len(query('data_dropbox_'+str(key))):
-                    db.execute("DROP TABLE data_dropbox_"+str(key))
-                db.synchronizer.release()
+                with db.synchronizer:
+                    query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+                    if len(query('data_dropbox_'+str(key))):
+                        db.execute("DROP TABLE data_dropbox_"+str(key))
                 data.save()
                 return
     dropbox_watcher.subscribe(
@@ -472,11 +470,10 @@ def initialize(current_app):
                     if filedata['fullname'] == filepath:
                         del data[processkey]['files'][fileID]
                         print("Deleted file:", fileID,'-->',filepath)
-                        db.synchronizer.acquire()
-                        query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
-                        if len(query('data_%d_%s'%(parentID, fileID))):
-                            db.execute("DROP TABLE data_%d_%s"%(parentID, fileID))
-                        db.synchronizer.release()
+                        with db.synchronizer:
+                            query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+                            if len(query('data_%d_%s'%(parentID, fileID))):
+                                db.execute("DROP TABLE data_%d_%s"%(parentID, fileID))
                 data.save()
                 return
     results_watcher.subscribe(
