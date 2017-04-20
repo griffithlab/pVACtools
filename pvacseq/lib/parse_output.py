@@ -413,12 +413,14 @@ def base_headers():
         'Median Fold Change',
     ]
 
-def output_headers(methods):
+def output_headers(methods, sample_name):
     headers = base_headers()
     for method in methods:
         pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
         headers.append("%s WT Score" % pretty_method)
         headers.append("%s MT Score" % pretty_method)
+    if sample_name:
+        headers.append("Sample Name")
 
     return headers
 
@@ -446,12 +448,13 @@ def main(args_input = sys.argv[1:]):
         "median: Median MT Score All Methods - median MT ic50 binding score of all chosen prediction methods. " +
         "Default: median"
     )
+    parser.add_argument('-s', '--sample-name', help='Sample name')
     args = parser.parse_args(args_input)
 
     methods = determine_prediction_methods(args.input_iedb_files)
     tmp_output_file = args.output_file + '.tmp'
     tmp_output_filehandle = open(tmp_output_file, 'w')
-    tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=output_headers(methods))
+    tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=output_headers(methods, args.sample_name))
     tsv_writer.writeheader()
 
     tsv_entries  = parse_input_tsv_file(args.input_tsv_file)
@@ -535,6 +538,8 @@ def main(args_input = sys.argv[1:]):
                 row['Tumor RNA Depth'] = tsv_entry['trna_depth']
             if 'trna_vaf' in tsv_entry:
                 row['Tumor RNA VAF'] = tsv_entry['trna_vaf']
+            if args.sample_name:
+                row['Sample Name'] = args.sample_name
             tsv_writer.writerow(row)
 
     tmp_output_filehandle.close()

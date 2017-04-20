@@ -163,6 +163,11 @@ def define_parser():
         help="NetChop prediction threshold. Default: 0.5",
     )
     parser.add_argument(
+        '-a', '--additional-report-columns',
+        choices=['sample_name'],
+        help="Additional columns to output in the final report"
+    )
+    parser.add_argument(
         "-s", "--fasta-size",type=int,
         default=200,
         help="Number of fasta entries per IEDB request. "
@@ -249,6 +254,7 @@ def main(args_input = sys.argv[1:]):
         'trna_cov'                  : args.trna_cov,
         'trna_vaf'                  : args.trna_vaf,
         'expn_val'                  : args.expn_val,
+        'additional_report_columns' : args.additional_report_columns,
         'fasta_size'                : args.fasta_size,
         'iedb_retries'              : args.iedb_retries,
         'downstream_sequence_length': downstream_sequence_length,

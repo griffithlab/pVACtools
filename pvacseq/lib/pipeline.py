@@ -52,6 +52,7 @@ class Pipeline(metaclass=ABCMeta):
         self.trna_cov                    = kwargs['trna_cov']
         self.trna_vaf                    = kwargs['trna_vaf']
         self.expn_val                    = kwargs['expn_val']
+        self.additional_report_columns   = kwargs['additional_report_columns']
         self.fasta_size                  = kwargs['fasta_size']
         self.iedb_retries                = kwargs['iedb_retries']
         self.downstream_sequence_length  = kwargs['downstream_sequence_length']
@@ -443,6 +444,8 @@ class MHCIPipeline(Pipeline):
                         ]
                         if self.top_result_per_mutation == True:
                             params.append('-t')
+                        if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
+                            params.extend(["--sample-name", self.sample_name])
                         lib.parse_output.main(params)
                         status_message("Completed")
                         split_parsed_output_files.append(split_parsed_file_path)
@@ -540,6 +543,8 @@ class MHCIIPipeline(Pipeline):
                     ]
                     if self.top_result_per_mutation == True:
                         params.append('-t')
+                    if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
+                        params.extend(["--sample-name", self.sample_name])
                     lib.parse_output.main(params)
                     status_message("Completed")
                     split_parsed_output_files.append(split_parsed_file_path)
