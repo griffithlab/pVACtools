@@ -63,6 +63,7 @@ def generate_class_i_call(method, allele, length, path, input_path):
         'method':        method,
         'allele':        allele,
         'length':        length,
+        'user_tool':     'pVac-seq',
     })
 
 def generate_class_ii_call(method, allele, path, input_path):
@@ -78,6 +79,7 @@ def generate_class_ii_call(method, allele, path, input_path):
         'sequence_text': ""+text,
         'method':        method,
         'allele':        allele,
+        'user_tool':     'pVac-seq',
     })
 
 class PVACTests(unittest.TestCase):
