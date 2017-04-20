@@ -65,6 +65,7 @@ def main(args_input = sys.argv[1:]):
             'sequence_text': args.input_file.read(),
             'method':        args.method,
             'allele':        args.allele,
+            'user_tool':     'pVac-seq',
         }
         if args.epitope_length is not None:
             data['length'] = args.epitope_length
