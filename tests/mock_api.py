@@ -43,6 +43,10 @@ def mock_api():
     sys.path.append(pvac_dir)
     import pvacseq.server.controllers.staging
     pvacseq.server.controllers.staging.subprocess.Popen = popen_mock
+    pvacseq.server.controllers.staging.hashfile = unittest.mock.create_autospec(
+        pvacseq.server.controllers.staging.hashfile,
+        return_value = b'Probably going to cause some collisions'
+    )
     import pvacseq.server
     import pvacseq.server.app
     pvacseq.server.app.main()

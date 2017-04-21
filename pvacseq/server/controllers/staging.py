@@ -29,7 +29,7 @@ def hashfile(filepath):
     try:
         reader = open(filepath, mode='rb')
     except FileNotFoundError:
-        return False
+        return None
     chunk = reader.read(4096)
     hasher = hashlib.md5()
     while chunk:
@@ -75,7 +75,7 @@ def precheck(configObj, data):
             if not failed:
                 #do longer checks on input and additional files
                 current_hash = hashfile(current_config['input'])
-                if current_hash is None or current_hash != input_hash:
+                if current_hash != input_hash:
                     continue
                 current_input_hashes = {}
                 if current_config['additional_input_file_list'] != "":
