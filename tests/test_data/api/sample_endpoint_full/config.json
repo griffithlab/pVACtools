@@ -2,7 +2,7 @@
 	"output": "/Users/agrauber/pVAC-Seq/results/sample_endpoint_full",
 	"net_chop_method": "cterm",
 	"normal_cov": 5,
-	"input": "/Users/agrauber/pVAC-Seq/input/input.vcf",
+	"input": "/Users/agrauber/Documents/pVAC-Seq/tests/test_data/api/input.vcf",
 	"downstream_sequence_length": 1000,
 	"minimum_fold_change": 0,
 	"top_score_metric": "lowest",
@@ -22,7 +22,7 @@
 		9,
 		10
 	],
-	"samplename": "sample_endpoint_full",
+	"samplename": "endpoint_full",
 	"trna_cov": 10,
 	"top_result_per_mutation": false,
 	"keep_tmp_files": false,

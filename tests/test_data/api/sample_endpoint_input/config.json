@@ -20,7 +20,7 @@
 	"epitope_lengths": [
 		10
 	],
-	"samplename": "sample_endpoint_input",
+	"samplename": "endpoint_input",
 	"trna_cov": 10,
 	"top_result_per_mutation": false,
 	"keep_tmp_files": false,

@@ -637,6 +637,40 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertFalse(response.json())
 
+    def test_duplicate_check(self):
+        processID = self.start_basic_run()
+        time.sleep(1)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200)
+        while response.json()['running']:
+            time.sleep(2)
+            response = requests.get(
+                self.urlBase+'/processes/%d'%processID,
+                timeout = 5
+            )
+            self.assertEqual(response.status_code, 200)
+        response = requests.post(
+            self.urlBase+'/staging',
+            timeout = 5,
+            data={
+                'input':os.path.join(
+                    self.test_data_directory,
+                    'input.vcf'
+                ),
+                'samplename':'basic_run',
+                'alleles':'HLA-E*01:01',
+                'prediction_algorithms':'NetMHC',
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertRegex(
+            response.json()['message'],
+            re.compile(r"The given parameters match process \d+")
+        )
+
     def test_endpoint_restart(self):
         processID = self.start_basic_run()
         time.sleep(1)
