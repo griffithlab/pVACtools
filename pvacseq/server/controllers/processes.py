@@ -36,17 +36,25 @@ def is_running(process):
         return False
     return True
 
-
 def processes():
     """Returns a list of processes, and whether or not each process is running"""
     data = current_app.config['storage']['loader']()
     #Python comprehensions are great!
+    # data['process-%d'%id]['returncode'] = process[1].returncode
+    # data['process-%d'%id]['status'] = 1 if process[1].returncode == 0 else -1
     return [
          {
              'id':proc[0],
              'running':is_running(proc[1]),
-             'returncode':proc[1][0]['returncode'] if 'returncode' in proc[1][0] else 0,
-             'status':0 if is_running(proc[1]) else (proc[1][0]['status'] if 'status' in proc[1][0] else 1),
+             'returncode':proc[1][1].returncode if (not is_running(proc[1])) and proc[1][1] else (
+                 proc[1][0]['returncode'] if 'returncode' in proc[1][0] else 0
+             ),
+             'status':0 if is_running(proc[1]) else (
+                -1 if (
+                    (proc[1][1] and proc[1][1].returncode != 0) or
+                    ('returncode' in proc[1][0] and proc[1][0]['returncode'] != 0)
+                ) else 1
+             ),
              'url':'/api/v1/processes/%d'%proc[0],
              'results_url':'/api/v1/processes/%d/results'%proc[0],
              'attached':bool(proc[1][1]),
