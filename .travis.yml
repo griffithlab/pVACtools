@@ -1,11 +1,8 @@
 language: python
 python:
   - "3.5"
-before_install:
-  - pip install PyVCF
-  - pip install requests
-  - pip install PyYAML
-install: true
+install:
+  - pip install -e .
 script:
   - TEST_FLAG=1 python3 -m unittest discover -v
   - prove --recurse --verbose
