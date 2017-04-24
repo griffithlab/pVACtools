@@ -23,11 +23,28 @@ pVAC-Seq is a cancer immunotherapy pipeline for the identification of **p**\ ers
 New in version |version|
 ------------------------
 
-This is a hotfix release. It fixes an error introduced in a previous version
-that would occur when using a local installation of the IEDB tools and is
-related to some filtering we do on the output from the IEDB tools. More
-information can be found on `GitHub issue 278
-<https://github.com/griffithlab/pVAC-Seq/issues/278>`_.
+This release adds handling for DNPs and MNPs missense mutations.
+
+This version adds a new option ``--additonal-report-columns`` to the ``pvacseq
+run`` command which can be use
+to append additional columns of data to the report. Right now the only value
+supported for this option is ``sample_name`` which appends a column with the
+sample name to the final report.
+
+We updated the logic that determines whether or not a corresponding wildtype
+epitope for a mutant epitope is included in the report. Previously, we would only
+include the corresponding wildtype epitope if the number of **consecutive**
+matching amino acids between mutant and wildtype epitope was larger then half
+of the total number of amino acids in the epitope. We now use the **total** number of
+matching amino acids between the mutant epitope and the corespondig wildtype epitope
+across the whole length of the epitope to make that determination. The total
+number of matching amino acids needs to be larger than half of the length of
+the epitope. Otherwise the corresponding wildtype epitope is reported as "NA".
+
+With this release any execution of ``pvacseq run`` will create a log file of the
+inputs used. This log file is then used when executing another run
+with the same output directory. This ensures that you can only write to the same
+output directory if identical parameters are used.
 
 Citation
 --------

@@ -3,6 +3,8 @@ Additional Commands
 
 To make using pVAC-Seq easier several convenience methods are included in the package.
 
+.. _example_data:
+
 Download Example Data
 ---------------------
 
