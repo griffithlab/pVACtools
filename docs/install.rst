@@ -41,8 +41,10 @@ Installing IEDB binding prediction tools (strongly recommended)
 .. warning::
    Using a local IEDB installation is strongly recommended for larger datasets
    or when the making predictions for many alleles, epitope lengths, or
-   prediction algorithms. More information on how to install IEDB locally can
-   be found on the :ref:`Installation <iedb_install>` page.
+   prediction algorithms.
+
+.. warning::
+   The IEDB binding prediction tools are only compatible with Linux.
 
 You may create a local install of the IEDB binding prediction tools by first downloading the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ from the IEDB website. If using both the Class I and the Class II tools, they both need to be installed into the same parent directory.
    
@@ -86,3 +88,24 @@ ____________
 .. note::
 
    Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.
+
+Getting Started
+---------------
+
+pVAC-Seq provides a set of example data to show the expected input and output files. You can download the data set by running the ``pvacseq download_example_data`` :ref:`command <example_data>`.
+
+The example data output can be reproduced by running the following command:
+
+.. code-block:: none
+
+   pvacseq run \
+   <example_data_dir>/input.vcf \
+   Test \
+   HLA-G*01:09,HLA-E*01:01,H2-IAb \
+   NetMHC PickPocket NNalign <output_dir> \
+   -e 9,10 \
+   -i <example_data_dir>/additional_input_file_list.yaml --tdna-vaf 20 \
+   --net-chop-method cterm --netmhc-stab \
+   --top-score-metric=lowest -d full --keep-tmp-files
+
+A detailed description of all command options can be found on the :ref:`Usage <run>` page.
