@@ -36,6 +36,19 @@ def is_running(process):
         return False
     return True
 
+def fixpath(src, root, *keys):
+    if type(src) == 'str':
+        return os.path.relpath(
+            src,
+            root
+        )
+    for key in keys:
+        src[key] = os.path.relpath(
+            src[key],
+            root,
+        )
+    return src
+
 def processes():
     """Returns a list of processes, and whether or not each process is running"""
     data = current_app.config['storage']['loader']()
@@ -60,10 +73,7 @@ def processes():
              'attached':bool(proc[1][1]),
              'output':os.path.relpath(
                  proc[1][0]['output'],
-                 os.path.join(
-                     current_app.config['files']['data-dir'],
-                     'results'
-                 )
+                 current_app.config['files']['data-dir']
              ),
              'pid':proc[1][0]['pid'],
              'command':proc[1][0]['command'],
@@ -80,10 +90,10 @@ def processes():
                  for (fileID, filedata) in data['process-%d'%proc[0]]['files'].items()
              ],
              'parameters':(
-                 json.load(open(os.path.join(
+                 fixpath(json.load(open(os.path.join(
                      proc[1][0]['output'],
                      'config.json'
-                 )))
+                 ))), current_app.config['files']['data-dir'], 'output')
                  if os.path.isfile(os.path.join(
                      proc[1][0]['output'],
                      'config.json'
@@ -129,6 +139,13 @@ def process_info(id):
         process[0]['output'],
         'config.json'
     )
+    params = {}
+    if os.path.isfile(configfile):
+        params = json.load(open(configfile))
+        params['output'] = os.path.relpath(
+            params['output'],
+            current_app.config['files']['data-dir']
+        )
     return {
         'pid':process[0]['pid'],#
         'id':id,#
@@ -146,10 +163,7 @@ def process_info(id):
         ),
         'output':os.path.relpath(
             process[0]['output'],
-            os.path.join(
-                current_app.config['files']['data-dir'],
-                'results'
-            )
+            current_app.config['files']['data-dir']
         ),#
         'running':is_running(process),#
         'files':[
@@ -164,11 +178,7 @@ def process_info(id):
             }
             for (fileID, filedata) in data['process-%d'%id]['files'].items()
         ],
-        'parameters':(#
-            json.load(open(configfile))
-            if os.path.isfile(configfile)
-            else {}
-        )
+        'parameters':params
     }
 
 
