@@ -409,8 +409,7 @@ class APITests(unittest.TestCase):
             self.assertGreaterEqual(item['rows'], -1)
 
             self.assertIn('size', item)
-            self.assertIsInstance(item['size'], str)
-            self.assertRegex(item['size'], r'\d+\.\d\d\d KB')
+            self.assertIsInstance(item['size'], int)
 
             self.assertIn('url', item)
             self.assertIsInstance(item['url'], str)
@@ -760,8 +759,7 @@ class APITests(unittest.TestCase):
             self.assertGreaterEqual(item['rows'], -1)
 
             self.assertIn('size', item)
-            self.assertIsInstance(item['size'], str)
-            self.assertRegex(item['size'], r'\d+\.\d\d\d KB')
+            self.assertIsInstance(item['size'], int)
 
             self.assertIn('url', item)
             self.assertIsInstance(item['url'], str)

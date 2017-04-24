@@ -942,7 +942,7 @@ definitions:
         type: "string"
         description: "URL of results file"
       size:
-        type: "string"
+        type: "integer"
         description: "Size of data file, in bytes"
       rows:
         type: "integer"

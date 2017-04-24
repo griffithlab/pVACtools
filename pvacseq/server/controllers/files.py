@@ -27,9 +27,7 @@ def results_get(id):
             'description':process[0]['files'][fileID]['description'],
             'display_name':process[0]['files'][fileID]['display_name'],
             'url':'/api/v1/processes/%d/results/%s'%(id, fileID),
-            'size':"%0.3f KB"%(
-                os.path.getsize(process[0]['files'][fileID]['fullname'])/1024
-            ),
+            'size':os.path.getsize(process[0]['files'][fileID]['fullname']),
             'rows':int(subprocess.check_output([
                 'wc',
                 '-l',
@@ -137,12 +135,12 @@ def list_dropbox():
             'description':entry['description'],
             'display_name':entry['display_name'],
             'url':'/api/v1/processes/-1/results/%s'%(key),
-            'size':"%0.3f KB"%(
+            'size':(
                 os.path.getsize(os.path.join(
                     current_app.config['files']['data-dir'],
                     'dropbox',
                     entry['display_name']
-                ))/1024
+                ))
             ),
             'rows':int(subprocess.check_output(['wc', '-l', os.path.join(
                 current_app.config['files']['data-dir'],
