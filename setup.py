@@ -25,12 +25,18 @@ server_data = []
 for dirpath, dirnames, filenames in os.walk("pvacseq/server"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            server_data.append(os.path.join('..', dirpath, filename))
+            server_data.append(os.path.join(
+                os.path.relpath(
+                    dirpath,
+                    'pvacseq/server'
+                ),
+                filename
+            ))
 
 setup(
     name="pvacseq",
-    version="4.1.0b2",
-    packages=["pvacseq", "pvacseq.lib", "pvacseq.server"],
+    version="4.1.0b4",
+    packages=["pvacseq", "pvacseq.lib", "pvacseq.server", "pvacseq.server.controllers"],
     entry_points={
         "console_scripts":[
             "pvacseq = pvacseq.pvacseq:main",
