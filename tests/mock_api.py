@@ -49,6 +49,7 @@ def mock_api():
     )
     import pvacseq.server
     import pvacseq.server.app
+    pvacseq.server.app.sys.argv.append('--nogui')
     pvacseq.server.app.main()
 
 if __name__ == '__main__':

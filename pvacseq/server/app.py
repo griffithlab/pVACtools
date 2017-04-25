@@ -5,7 +5,6 @@ import os
 import sys
 import http.server
 import socketserver
-from threading import Thread
 from webbrowser import open_new_tab
 from flask_cors import CORS
 from .controllers.utils import initialize
@@ -36,9 +35,7 @@ def main():
         origins=r'^(.+://)?localhost(:\d+)?(/.*)?$'
     )
 
-    #Eventually, have this open a browser to whatever the main page is
-    # Thread(target=lambda:open_new_tab("localhost:8080/static/testpage"), daemon=True).start()
-    app.run(port=8080)
+    app.run(port=8080, threaded=True)
 
 if __name__ == '__main__':
     main()

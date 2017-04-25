@@ -12,6 +12,7 @@ from postgresql.exceptions import Exception as psqlException
 from .watchdir import Observe
 import atexit
 import site
+import webbrowser
 import threading
 from postgresql.exceptions import UndefinedTableError
 
@@ -159,39 +160,6 @@ def initialize(current_app, args):
         )
     current_app.config['storage']['children']={}
     current_app.config['storage']['manifest']={}
-
-    if '--nogui' not in args:
-        #Attempt to boot the frontend api
-        site_dirs = site.getsitepackages()
-        for path in site_dirs:
-            tmp_path = os.path.join(
-                path,
-                'pvacseq-client'
-            )
-            if os.path.isdir(tmp_path):
-                current_app.config['storage']['client-dir'] = tmp_path
-                break
-        if 'client-dir' not in current_app.config['storage']:
-            sys.exit("Unable to locate the frontend!")
-        current_app.config['storage']['frontend']=subprocess.Popen(
-            [
-                sys.executable,
-                '-m',
-                'http.server',
-                '8000'
-            ],
-            cwd=current_app.config['storage']['client-dir']
-        )
-
-        @atexit.register
-        def cleanup_frontend():
-            print("Cleaning up frontend server")
-            import signal
-            current_app.config['storage']['frontend'].send_signal(signal.SIGINT)
-            try:
-                current_app.config['storage']['frontend'].wait(1)
-            except subprocess.TimeoutExpired:
-                current_app.config['storage']['frontend'].terminate()
 
     visapp_path = os.path.relpath(
         os.path.join(
@@ -567,5 +535,42 @@ def initialize(current_app, args):
 
     current_app.config['storage']['synchronizer'] = synchronizer
     data.save()
+
+    if '--nogui' not in args:
+        #Attempt to boot the frontend api
+        site_dirs = site.getsitepackages()
+        for path in site_dirs:
+            tmp_path = os.path.join(
+                path,
+                'pvacseq-client'
+            )
+            if os.path.isdir(tmp_path):
+                current_app.config['storage']['client-dir'] = tmp_path
+                break
+        if 'client-dir' not in current_app.config['storage']:
+            sys.exit("Unable to locate the frontend!")
+        print("Launching Frontend Server")
+        current_app.config['storage']['frontend']=subprocess.Popen(
+            [
+                sys.executable,
+                '-m',
+                'http.server',
+                '8000'
+            ],
+            cwd=current_app.config['storage']['client-dir']
+        )
+
+        @atexit.register
+        def cleanup_frontend():
+            print("Cleaning up frontend server")
+            import signal
+            current_app.config['storage']['frontend'].send_signal(signal.SIGINT)
+            try:
+                current_app.config['storage']['frontend'].wait(1)
+            except subprocess.TimeoutExpired:
+                current_app.config['storage']['frontend'].terminate()
+
+        #Uncomment if we want to open a browser in the frontend
+        # threading.Timer(2.5, lambda :webbrowser.open('http://localhost:8000')).start()
 
     print("Initialization complete.  Booting API")
