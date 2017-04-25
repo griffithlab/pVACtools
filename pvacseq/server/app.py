@@ -25,7 +25,7 @@ def main():
         regex = r'-?\d+'
 
     app.app.url_map.converters['int'] = IntConverter
-    initialize(app.app) #initialize the app configuration
+    initialize(app.app, set(sys.argv)) #initialize the app configuration
     app.add_api('swagger.yaml', arguments={'title': 'API to support pVacSeq user interface for generating reports on pipeline results'})
     app.app.secret_key = os.urandom(1024)
 

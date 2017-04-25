@@ -29,7 +29,7 @@ for dirpath, dirnames, filenames in os.walk("pvacseq/server"):
 
 setup(
     name="pvacseq",
-    version="4.0.8",
+    version="4.1.0b2",
     packages=["pvacseq", "pvacseq.lib", "pvacseq.server"],
     entry_points={
         "console_scripts":[
@@ -41,12 +41,13 @@ setup(
         'PyVCF',
         'requests',
         'PyYAML',
+        'pandas',
         'connexion',
         'py-postgresql',
         'watchdog',
         'flask-cors',
         'bokeh',
-        'pandas'
+        'pvacseq-client'
     ],
     package_data={
         'pvacseq' : data_files,
@@ -60,7 +61,6 @@ setup(
 
         "Programming Language :: Python :: 3.5"
     ],
-
     author = "Jasreet Hundal, Susanna Kiwala, Aaron Graubert, Jason Walker, Chris Miller, Malachi Griffith and Elaine Mardis",
     author_email = "pvacseq-support@genome.wustl.edu",
     description = "Personalized Variant Antigens by Cancer Sequencing (pVAC-Seq)",
