@@ -3,7 +3,7 @@ python:
   - "3.5"
 install:
   #Remove the following line when pvacseq-client is first pushed to the live pypi site
-  - pip install -i https://testpypi.python.org/python pvacseq-client
+  - pip install -i https://testpypi.python.org/pypi pvacseq-client
   - pip install -e .[API]
 services:
   - postgresql
