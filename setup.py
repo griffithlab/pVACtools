@@ -40,7 +40,7 @@ setup(
     entry_points={
         "console_scripts":[
             "pvacseq = pvacseq.pvacseq:main",
-            "pvacseq-api = pvacseq.server.app:main"
+            "pvacseq-api = pvacseq.server.app:main [API]"
         ]
     },
     install_requires=[
@@ -48,16 +48,20 @@ setup(
         'requests',
         'PyYAML',
         'pandas',
-        'connexion',
-        'py-postgresql',
-        'watchdog',
-        'flask-cors',
-        'bokeh',
-        'pvacseq-client'
     ],
     package_data={
         'pvacseq' : data_files,
         'pvacseq.server' : server_data,
+    },
+    extras_require={
+        'API':[
+            'connexion',
+            'py-postgresql',
+            'watchdog',
+            'flask-cors',
+            'bokeh',
+            'pvacseq-client'
+        ]
     },
     classifiers=[
         'Development Status :: 4 - Beta',
