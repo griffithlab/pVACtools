@@ -38,7 +38,7 @@ def main():
 
     #Eventually, have this open a browser to whatever the main page is
     # Thread(target=lambda:open_new_tab("localhost:8080/static/testpage"), daemon=True).start()
-    app.run(port=8080)
+    app.run(port=8080, debug='--debug' in sys.argv)
 
 if __name__ == '__main__':
     main()

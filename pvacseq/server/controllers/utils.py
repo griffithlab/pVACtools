@@ -172,6 +172,10 @@ def initialize(current_app):
         shell=True,
         stdout=subprocess.DEVNULL,
     )
+    print(
+        "Visualization server started on PID",
+        current_app.config['storage']['bokeh'].pid
+    )
 
     @atexit.register
     def cleanup_bokeh():
