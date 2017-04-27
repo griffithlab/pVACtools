@@ -25,32 +25,43 @@ server_data = []
 for dirpath, dirnames, filenames in os.walk("pvacseq/server"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            server_data.append(os.path.join('..', dirpath, filename))
+            server_data.append(os.path.join(
+                os.path.relpath(
+                    dirpath,
+                    'pvacseq/server'
+                ),
+                filename
+            ))
 
 setup(
     name="pvacseq",
-    version="4.0.8",
-    packages=["pvacseq", "pvacseq.lib", "pvacseq.server"],
+    version="4.1.0b4",
+    packages=["pvacseq", "pvacseq.lib", "pvacseq.server", "pvacseq.server.controllers"],
     entry_points={
         "console_scripts":[
             "pvacseq = pvacseq.pvacseq:main",
-            "pvacseq-api = pvacseq.server.app:main"
+            "pvacseq-api = pvacseq.server.app:main [API]"
         ]
     },
     install_requires=[
         'PyVCF',
         'requests',
         'PyYAML',
-        'connexion',
-        'py-postgresql',
-        'watchdog',
-        'flask-cors',
-        'bokeh',
-        'pandas'
+        'pandas',
     ],
     package_data={
         'pvacseq' : data_files,
         'pvacseq.server' : server_data,
+    },
+    extras_require={
+        'API':[
+            'connexion',
+            'py-postgresql',
+            'watchdog',
+            'flask-cors',
+            'bokeh',
+            'pvacseq-client'
+        ]
     },
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -60,7 +71,6 @@ setup(
 
         "Programming Language :: Python :: 3.5"
     ],
-
     author = "Jasreet Hundal, Susanna Kiwala, Aaron Graubert, Jason Walker, Chris Miller, Malachi Griffith and Elaine Mardis",
     author_email = "pvacseq-support@genome.wustl.edu",
     description = "Personalized Variant Antigens by Cancer Sequencing (pVAC-Seq)",

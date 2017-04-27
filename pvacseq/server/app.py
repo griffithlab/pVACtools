@@ -5,7 +5,6 @@ import os
 import sys
 import http.server
 import socketserver
-from threading import Thread
 from webbrowser import open_new_tab
 from flask_cors import CORS
 from .controllers.utils import initialize
@@ -25,7 +24,7 @@ def main():
         regex = r'-?\d+'
 
     app.app.url_map.converters['int'] = IntConverter
-    initialize(app.app) #initialize the app configuration
+    initialize(app.app, set(sys.argv)) #initialize the app configuration
     app.add_api('swagger.yaml', arguments={'title': 'API to support pVacSeq user interface for generating reports on pipeline results'})
     app.app.secret_key = os.urandom(1024)
 
@@ -36,9 +35,7 @@ def main():
         origins=r'^(.+://)?localhost(:\d+)?(/.*)?$'
     )
 
-    #Eventually, have this open a browser to whatever the main page is
-    # Thread(target=lambda:open_new_tab("localhost:8080/static/testpage"), daemon=True).start()
-    app.run(port=8080, debug='--debug' in sys.argv)
+    app.run(port=8080, debug='--debug' in sys.argv, threaded=True)
 
 if __name__ == '__main__':
     main()
