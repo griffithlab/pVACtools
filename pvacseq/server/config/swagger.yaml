@@ -833,7 +833,7 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/processes/{parentID}/results/{fileID}/visualize-page:
+  /api/v1/processes/{parentID}/results/{fileID}/visualize-script:
     get:
       tags:
         - "visualize"
@@ -842,7 +842,7 @@ paths:
         requested table's contents"
       produces:
         - "text/html"
-      operationId: "pvacseq.server.controllers.database.visualize_page"
+      operationId: "pvacseq.server.controllers.database.visualize_script"
       parameters:
         - name: "parentID"
           in: "path"

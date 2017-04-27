@@ -352,10 +352,10 @@ def serve_as(reader, filetype):
             'content':reader.read()
         }
 
-def visualize_page(parentID, fileID):
-    return '<html><head></head><body>%s</body></html'%visualize(parentID, fileID)
-    
 def visualize(parentID, fileID):
+    return '<html><head></head><body>%s</body></html'%visualize_script(parentID, fileID)
+
+def visualize_script(parentID, fileID):
     """Return an HTML document containing the requested table visualization"""
     from .files import results_getcols
     data = current_app.config['storage']['loader']()
