@@ -352,6 +352,9 @@ def serve_as(reader, filetype):
             'content':reader.read()
         }
 
+def visualize_page(parentID, fileID):
+    return '<html><head></head><body>%s</body></html'%visualize(parentID, fileID)
+    
 def visualize(parentID, fileID):
     """Return an HTML document containing the requested table visualization"""
     from .files import results_getcols
