@@ -382,7 +382,7 @@ def visualize(parentID, fileID):
         sample = proc_data['parameters']['sample_name']
     else:
         sample = 'Unknown Sample'
-    script = re.sub(
+    return re.sub(
         r'src="(.+)"',
         r'src="\1&%s"'%(
             urlencode([
@@ -399,5 +399,3 @@ def visualize(parentID, fileID):
             url="http://localhost:5006"
         )
     )
-    template = "<html><head></head><body>%s</body></html>"%script
-    return template

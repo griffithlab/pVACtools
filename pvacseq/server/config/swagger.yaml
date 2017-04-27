@@ -808,7 +808,7 @@ paths:
       tags:
         - "visualize"
       summary: "Get visualization of a table"
-      description: "Returns an iFrame containing an interactive visualization of the\
+      description: "Returns an HTML script tag containing an interactive visualization of the\
         requested table's contents"
       produces:
         - "text/html"
@@ -826,7 +826,7 @@ paths:
           type: "integer"
       responses:
         200:
-          description: "Returns an iFrame"
+          description: "Returns an HTML script tag"
           schema:
             type: "string"
         default:
