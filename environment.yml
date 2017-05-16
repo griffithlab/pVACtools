@@ -18,3 +18,7 @@ dependencies:
   - PyVCF
   - requests
   - PyYAML
+  - biopython
+  - simanneal
+  - networkx
+  - pandas
