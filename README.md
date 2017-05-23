@@ -30,5 +30,5 @@ If you have an old version of pVAC-Seq installed you might want to consider upgr
 
 `pip install pvacseq --upgrade`
 
-##Documentation
+## Documentation
 The pVAC-Seq documentation can be found on <a href="http://pvac-seq.readthedocs.io/">ReadTheDocs</a>.
