@@ -295,7 +295,15 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
         json.dump(configObj, writer, indent='\t')
         writer.close()
         temp_path.cleanup()
-        return start(**configObj)
+        new_id = start(**configObj)
+
+        return ({
+            'code':201,
+            'message': "Process started.",
+            'processid': new_id
+        },
+        201)
+    
     return (
         {
             'code':400,
@@ -401,7 +409,6 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
             )
         data.save()
         return data['processid']
-
 
 def test():
     """Return the submission page (a stand-in until there is a proper ui for submission)"""
