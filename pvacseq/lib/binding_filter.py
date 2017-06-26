@@ -56,7 +56,6 @@ def main(args_input = sys.argv[1:]):
     writer.writeheader()
 
     for entry in reader:
-        name = entry['Gene Name']
         if args.top_score_metric == 'median':
             score = float(entry['Median MT Score'])
             fold_change = sys.maxsize if entry['Median Fold Change'] == 'NA' else float(entry['Median Fold Change'])
