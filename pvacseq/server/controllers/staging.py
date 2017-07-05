@@ -430,3 +430,14 @@ def check_allele(allele):
         if line.strip() == allele:
             return True
     return False
+
+# takes in comma delimited string of prediction algorithms,
+# returns map of algorithms to valid alleles for that algorithm
+def valid_alleles(prediction_algorithms):
+    valid_allele_list = {}
+    for algorithm in prediction_algorithms.split(","):
+        alleles = subprocess.run(['pvacseq', 'valid_alleles', '-p', algorithm], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        # need to get rid of the \n at the end of the alleles string so that there's no
+        # empty term at the end of the array once it's split
+        valid_allele_list[algorithm] = alleles[:-1].split('\n')
+    return valid_allele_list
