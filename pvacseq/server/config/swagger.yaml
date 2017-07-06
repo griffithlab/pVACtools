@@ -8,6 +8,9 @@ info:
 host: "localhost"
 schemes:
 - "https"
+consumes:
+- "application/json"
+- "multipart/form-data"
 produces:
 - "application/json"
 paths:
@@ -642,6 +645,52 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
+  /api/v1/validalleles:
+    get:
+      tags: 
+        - "allele"
+      summary: "Lists valid alleles for specified prediction algorithms"
+      description: "Takes a string of prediction algorithms and returns an object mapping each algorithm to valid alleles for that algorithm"
+      operationId: "pvacseq.server.controllers.staging.valid_alleles"
+      parameters: 
+        - name: "prediction_algorithms"
+          in: "query"
+          description: "Prediction algorithms to find valid alleles for"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Returns object mapping each algorithm to an array of valid alleles for that algorithm"
+          schema:
+            type: "object"
+            properties:
+              default:
+                $ref: "#/definitions/MapItem"
+            additionalProperties:
+              $ref: "#/definitions/MapItem"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/validalgorithms:
+    get:
+      tags:
+        - "algorithms"
+      summary: "Gets a list of valid prediction algorithms"
+      description: "Returns list of valid prediction algorithms"
+      operationId: "pvacseq.server.controllers.staging.prediction_algorithms"
+      responses:
+        200:
+          description: "Returns list of valid prediction algorithms"
+          schema:
+            type: "array"
+            items: {
+              type: "string"
+            }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
   /api/v1/reset:
     post:
       tags:
@@ -1029,6 +1078,16 @@ definitions:
       description:
         type: "string"
         description: "A description of the file's contents in the context of pVAC-Seq"
+  MapItem:
+    type: "object"
+    properties:
+      algorithm:
+        type: "string"
+      alleles:
+        type: "array"
+        items: {
+          type: "string"
+        }
   Error:
     type: "object"
     properties:

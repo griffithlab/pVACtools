@@ -11,6 +11,7 @@ from shlex import quote
 from shutil import copyfile, copytree
 from .database import int_pattern
 from .files import list_input
+from pvacseq.lib.prediction_class import *
 
 def resolve_filepath(filepath):
     if int_pattern.match(filepath) and int(filepath) <= len(current_app.config['storage']['manifest']):
@@ -441,3 +442,7 @@ def valid_alleles(prediction_algorithms):
         # empty term at the end of the array once it's split
         valid_allele_list[algorithm] = alleles[:-1].split('\n')
     return valid_allele_list
+
+# naming prediction_algorithms to keep consistent with the pVac-Seq documentation
+def prediction_algorithms():
+    return PredictionClass.prediction_methods()
