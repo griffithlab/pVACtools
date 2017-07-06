@@ -46,6 +46,8 @@ def list_input(path = None):
     output = []
     for entity in sorted(os.listdir(path)):
         fullname = os.path.join(path, entity)
+	if (fullname[fullname.rfind('/')+1] == '.'):
+            continue
         if os.path.isfile(fullname):
             output.append({
                 'display_name':entity,
