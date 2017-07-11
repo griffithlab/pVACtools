@@ -11,7 +11,6 @@ import requests
 import signal
 import time
 import random
-import pdb
 import postgresql as psql
 from socket import *
 from . import mock_api
@@ -29,6 +28,7 @@ def parsedata(data):
         return None
     return data
 
+# checks if server has been successfully started
 def check_opened():
     s = socket(AF_INET, SOCK_STREAM, 0)
     result = s.connect_ex(("127.0.0.1", 8080))
