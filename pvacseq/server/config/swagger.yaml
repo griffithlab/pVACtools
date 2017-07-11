@@ -527,10 +527,17 @@ paths:
         type: "boolean"
         default: false
       responses:
-        200:
-          description: "Returns the process ID of the newly started pVAC-Seq run"
+        201:
+          description: "Returns object with code 201, message, and  process ID of the newly started pVAC-Seq run"
           schema:
-            type: "integer"
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+              message:
+                type: "string"
+              processid:
+                type: "integer"
         default:
           description: "Unexpected error"
           schema:
