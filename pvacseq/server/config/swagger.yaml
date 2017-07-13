@@ -29,6 +29,14 @@ paths:
         description: "Process ID from which to fetch results"
         required: true
         type: "integer"
+      - name: "type"
+        in: "query"
+        description: "Type of file to display"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        default: "default"
       responses:
         200:
           description: "An array of results"
