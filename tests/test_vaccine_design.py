@@ -47,5 +47,10 @@ class TestVaccineDesign(unittest.TestCase):
             os.path.join(self.test_data_dir, "Test.vaccine.results.output.fa")
         ))
 
+        pdf_out = os.path.join(output_dir.name,self.test_run_name, 'vaccine.pdf')
+
+        self.assertTrue(os.path.exists(pdf_out))
+        self.assertTrue(os.stat(pdf_out).st_size > 0)
+
         output_dir.cleanup()
         
