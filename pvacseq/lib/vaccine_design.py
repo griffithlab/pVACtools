@@ -255,8 +255,6 @@ def draw_arc_junct(peptide, length, t, conversion_factor, junct_seq_space, circl
 def output_screen(t, pdf_out):
     ps_file = "/".join((pdf_out, "vaccine.ps"))
     pdf_file = "/".join((pdf_out, "vaccine.pdf"))
-    print(ps_file)
-    print(pdf_file)
     ts = t.getscreen()
     ts.getcanvas().postscript(file=ps_file)
     os.system('convert -density 100 -quality 200 ' + ps_file + " " + pdf_file)
@@ -349,8 +347,9 @@ def output_vaccine_pdf(input_file, pdf_out):
     draw_junction(t, pen_thin)
     draw_wht_space(t, circle_radius, wht_space_angle)
     output_screen(t, pdf_out)
-
-    turtle.mainloop()
+    
+    #keeps turtle screen open until closed by user
+    #turtle.mainloop()
 
 def main(args_input=sys.argv[1:]):
 
