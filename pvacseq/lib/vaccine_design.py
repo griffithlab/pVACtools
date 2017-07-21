@@ -23,6 +23,9 @@ from lib.prediction_class import *
 
 import turtle
 
+#gives graphics layer when running on a headless system
+os.environ["DISPLAY"] = ':0.0'
+
 def define_parser():
 
     parser = argparse.ArgumentParser('pvacseq vaccine_design')
@@ -187,10 +190,15 @@ def get_color(count):
     #option 2: 6 color scheme
     scheme = [(31,120,180),(51,160,44),(227,26,28),(255,127,0),(106,61,154),(177,89,40)]
     count =  count % len(scheme)
-    return scheme[count]
+    return scheme[count]\
+
+def write_junct_score(t, junct_score, size):
+    t.back(size)
+    t.write(junct_score + 'nM', align="center")
+    t.forward(size)
 
 #draw perpindicular line to arc to mark junction
-def draw_junction_w_label(junct_score, t, pen_thin, junct_score_space):
+def draw_junction_w_label(junct_score, t, pen_thin, angle):
     reset = t.heading()
     t.rt(90)
     t.pencolor("black")
@@ -198,9 +206,20 @@ def draw_junction_w_label(junct_score, t, pen_thin, junct_score_space):
     t.forward(10)
     t.back(20)
     t.pu()
-    t.back(junct_score_space)
-    t.write(junct_score, align="center")
-    t.forward(junct_score_space)
+    if (angle >= 0 and angle < 70):
+        write_junct_score(t, junct_score, 15)
+    elif (angle >= 65 and angle < 115):
+        write_junct_score(t, junct_score, 10)
+    elif (angle >= 115 and angle < 165):
+        write_junct_score(t, junct_score, 20)
+    elif (angle >= 165 and angle < 195):
+        write_junct_score(t, junct_score, 25)
+    elif (angle >= 195 and angle < 245):
+        write_junct_score(t, junct_score, 35)
+    elif (angle >= 245 and angle < 295):
+        write_junct_score(t, junct_score, 15)
+    else:
+        write_junct_score(t, junct_score, 20)
     t.pd()
     t.forward(10)
     t.setheading(reset)
@@ -252,16 +271,16 @@ def draw_arc_junct(peptide, length, t, conversion_factor, junct_seq_space, circl
     t.circle(circle_radius, (conversion_factor * length) / 2)
 
 #print turtle screen to a postscript file, convert to pdf
-def output_screen(t, pdf_out):
-    ps_file = "/".join((pdf_out, "vaccine.ps"))
-    pdf_file = "/".join((pdf_out, "vaccine.pdf"))
+def output_screen(t, out_f):
+    ps_file = "/".join((out_f, "vaccine.ps"))
+    out_file = "/".join((out_f, "vaccine.jpg"))
     ts = t.getscreen()
     ts.getcanvas().postscript(file=ps_file)
-    os.system('convert -density 100 -quality 200 ' + ps_file + " " + pdf_file)
+    os.system('convert -density 300 -quality 100 ' + ps_file + " " + out_file)
     os.system('rm ' + ps_file)
     return()
 
-def output_vaccine_pdf(input_file, pdf_out):
+def output_vaccine_png(input_file, out_f):
     min_pep_length = 8
     max_pep_length = 100
 
@@ -290,6 +309,14 @@ def output_vaccine_pdf(input_file, pdf_out):
 
     conversion_factor = get_conversion_factor(pep_seqs)
 
+    #determine number of peptides (not including junction additions)
+    num_peptides = 0
+    for pep in pep_seqs:
+        length = len(pep)
+        if length > 8 and length < 25:
+            num_peptides += 1
+            
+
     #draw vaccine
     t = turtle.Turtle()
     myWin = turtle.Screen()
@@ -305,9 +332,8 @@ def output_vaccine_pdf(input_file, pdf_out):
     wht_space_angle = 15
     pen_thick = 5
     pen_thin = 2
-    pep_id_space = 65
+    pep_id_space = 45 + num_peptides
     junct_seq_space = 25
-    junct_score_space = 22
 
     draw_header(t, header_pos)
     t.pu()
@@ -332,7 +358,7 @@ def output_vaccine_pdf(input_file, pdf_out):
         if pep_length > min_pep_length and pep_length < max_pep_length:
             draw_arc_peptide(peptide, pep_length, junctions_parsed, angle_parsed, t, circle_radius, conversion_factor, pep_id_space)
             if junctions_parsed < len(junct_scores):
-                draw_junction_w_label(junct_scores[junctions_parsed], t, pen_thin, junct_score_space)
+                draw_junction_w_label(junct_scores[junctions_parsed], t, pen_thin, angle_parsed)
                 junctions_parsed += 1
     #if length is less than minimum peptide length, assume amino acid addition to junction
         elif pep_length < min_pep_length:
@@ -346,7 +372,7 @@ def output_vaccine_pdf(input_file, pdf_out):
     #add white space in circle after genes    
     draw_junction(t, pen_thin)
     draw_wht_space(t, circle_radius, wht_space_angle)
-    output_screen(t, pdf_out)
+    output_screen(t, out_f)
     
     #keeps turtle screen open until closed by user
     #turtle.mainloop()
@@ -575,9 +601,9 @@ def main(args_input=sys.argv[1:]):
     if not args.keep_tmp:
         shutil.rmtree(tmp_dir)
 
-    pdf_out = "/".join((base_output_dir, runname)) 
+    out_f = "/".join((base_output_dir, runname)) 
 
-    output_vaccine_pdf(results_file, pdf_out)
+    output_vaccine_png(results_file, out_f)
 
 if __name__ == "__main__":
     main()
