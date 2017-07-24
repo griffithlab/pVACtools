@@ -23,9 +23,6 @@ from lib.prediction_class import *
 
 import turtle
 
-#gives graphics layer when running on a headless system
-os.environ["DISPLAY"] = ':0.0'
-
 def define_parser():
 
     parser = argparse.ArgumentParser('pvacseq vaccine_design')
@@ -318,6 +315,7 @@ def output_vaccine_png(input_file, out_f):
             
 
     #draw vaccine
+    turtle.setup(750,600)
     t = turtle.Turtle()
     myWin = turtle.Screen()
     turtle.colormode(255)
