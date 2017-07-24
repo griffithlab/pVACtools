@@ -12,6 +12,7 @@ import signal
 import time
 import random
 import postgresql as psql
+from socket import *
 from . import mock_api
 from subprocess import run, PIPE, Popen, DEVNULL, TimeoutExpired
 from filecmp import cmp
@@ -26,6 +27,16 @@ def parsedata(data):
     if data == 'NA':
         return None
     return data
+
+# checks if server has been successfully started
+def check_opened():
+    s = socket(AF_INET, SOCK_STREAM, 0)
+    result = s.connect_ex(("127.0.0.1", 8080))
+    if result == 0:
+        s.close()
+        return True
+    s.close()
+    return False
 
 class APITests(unittest.TestCase):
     @classmethod
@@ -110,6 +121,12 @@ class APITests(unittest.TestCase):
                 stderr = DEVNULL,
             )
             time.sleep(5)
+            total_time = 5
+            while not check_opened():
+                if (total_time > 30):
+                    break
+                time.sleep(5)
+                total_time += 5
             requests.get(
                 self.urlBase+'/processes',
                 timeout = 10
@@ -133,7 +150,7 @@ class APITests(unittest.TestCase):
                 'force':True
             }
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         return response.json()
 
     def test_app_compiles(self):
@@ -214,9 +231,12 @@ class APITests(unittest.TestCase):
                 'force':True
             }
         )
-        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-        self.assertTrue(re.match(r'\d+', response.content.decode()))
-
+        self.assertEqual(response.status_code, 201, response.url+' : '+response.content.decode())
+        result = response.json()
+        self.assertTrue(re.match(r'\d+', str(result['processid'])))
+        self.assertTrue(re.match(r'\d+', str(result['code'])))
+        self.assertTrue(re.match(r'\S+', result['message']))
+    
     def test_endpoint_processes(self):
         response = requests.post(
             self.urlBase + '/staging',
@@ -232,9 +252,12 @@ class APITests(unittest.TestCase):
                 'force':True
             }
         )
-        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-        self.assertTrue(re.match(r'\d+', response.content.decode()))
-        processID = response.json()
+        self.assertEqual(response.status_code, 201, response.url+' : '+response.content.decode())
+        result = response.json()
+        self.assertTrue(re.match(r'\d+', str(result['processid'])))
+        self.assertTrue(re.match(r'\d+', str(result['code'])))
+        self.assertTrue(re.match(r'\S+', result['message']))     
+        processID = result['processid']
         response = requests.get(
             self.urlBase+'/processes',
             timeout = 5,
@@ -472,7 +495,7 @@ class APITests(unittest.TestCase):
                 self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
 
     def test_endpoint_stop(self):
-        processID = self.start_basic_run()
+        processID = self.start_basic_run()['processid']
         response = requests.get(
             self.urlBase+'/stop/%d'%processID,
             timeout = 5
@@ -488,7 +511,7 @@ class APITests(unittest.TestCase):
         self.assertFalse(data['running'])
 
     def test_endpoint_archive(self):
-        processID = self.start_basic_run()
+        processID = self.start_basic_run()['processid']
         time.sleep(1)
         response = requests.get(
             self.urlBase+'/processes/%d'%processID,
@@ -552,8 +575,8 @@ class APITests(unittest.TestCase):
 
             }
         )
-        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-        processID = response.json()
+        self.assertEqual(response.status_code, 201, response.url+' : '+response.content.decode())
+        processID = response.json()['processid']
         self.assertIsInstance(processID, int)
         response = requests.get(
             self.urlBase+'/processes/%d'%processID,
@@ -637,7 +660,7 @@ class APITests(unittest.TestCase):
         self.assertFalse(response.json())
 
     def test_duplicate_check(self):
-        processID = self.start_basic_run()
+        processID = self.start_basic_run()['processid']
         time.sleep(1)
         response = requests.get(
             self.urlBase+'/processes/%d'%processID,
@@ -671,7 +694,7 @@ class APITests(unittest.TestCase):
         )
 
     def test_endpoint_restart(self):
-        processID = self.start_basic_run()
+        processID = self.start_basic_run()['processid']
         time.sleep(1)
         response = requests.get(
             self.urlBase+'/processes/%d'%processID,

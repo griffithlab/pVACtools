@@ -8,6 +8,9 @@ info:
 host: "localhost"
 schemes:
 - "https"
+consumes:
+- "application/json"
+- "multipart/form-data"
 produces:
 - "application/json"
 paths:
@@ -26,6 +29,14 @@ paths:
         description: "Process ID from which to fetch results"
         required: true
         type: "integer"
+      - name: "type"
+        in: "query"
+        description: "Type of file to display"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        default: "default"
       responses:
         200:
           description: "An array of results"
@@ -524,10 +535,17 @@ paths:
         type: "boolean"
         default: false
       responses:
-        200:
-          description: "Returns the process ID of the newly started pVAC-Seq run"
+        201:
+          description: "Returns object with code 201, message, and  process ID of the newly started pVAC-Seq run"
           schema:
-            type: "integer"
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+              message:
+                type: "string"
+              processid:
+                type: "integer"
         default:
           description: "Unexpected error"
           schema:
@@ -638,6 +656,52 @@ paths:
           description: "Returns a boolean indicating if the allele is supported or not"
           schema:
             type: "boolean"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/validalleles:
+    get:
+      tags: 
+        - "allele"
+      summary: "Lists valid alleles for specified prediction algorithms"
+      description: "Takes a string of prediction algorithms and returns an object mapping each algorithm to valid alleles for that algorithm"
+      operationId: "pvacseq.server.controllers.staging.valid_alleles"
+      parameters: 
+        - name: "prediction_algorithms"
+          in: "query"
+          description: "Prediction algorithms to find valid alleles for"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Returns object mapping each algorithm to an array of valid alleles for that algorithm"
+          schema:
+            type: "object"
+            properties:
+              default:
+                $ref: "#/definitions/MapItem"
+            additionalProperties:
+              $ref: "#/definitions/MapItem"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/validalgorithms:
+    get:
+      tags:
+        - "algorithms"
+      summary: "Gets a list of valid prediction algorithms"
+      description: "Returns list of valid prediction algorithms"
+      operationId: "pvacseq.server.controllers.staging.prediction_algorithms"
+      responses:
+        200:
+          description: "Returns list of valid prediction algorithms"
+          schema:
+            type: "array"
+            items: {
+              type: "string"
+            }
         default:
           description: "Unexpected error"
           schema:
@@ -1029,6 +1093,16 @@ definitions:
       description:
         type: "string"
         description: "A description of the file's contents in the context of pVAC-Seq"
+  MapItem:
+    type: "object"
+    properties:
+      algorithm:
+        type: "string"
+      alleles:
+        type: "array"
+        items: {
+          type: "string"
+        }
   Error:
     type: "object"
     properties:
