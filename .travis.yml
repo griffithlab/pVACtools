@@ -4,7 +4,7 @@ python:
 addons:
   apt:
    packages:
-     -xvfb
+     - xvfb
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y ghostscript
