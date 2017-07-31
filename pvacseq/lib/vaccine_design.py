@@ -386,7 +386,7 @@ def output_vaccine_png(input_file, out_f):
     output_screen(t, out_f)
     
     #keeps turtle screen open until closed by user
-    turtle.mainloop()
+    #turtle.mainloop()
 
 def main(args_input=sys.argv[1:]):
 
