@@ -159,6 +159,35 @@ class OptimalPeptide(Annealer):
         # Return best state and energy
         return self.best_state, self.best_energy
 
+def parse_input(input_file):
+    pep_seqs = []
+    with open(input_file, 'r') as input_f:
+        header = input_f.readline().strip()
+        for line in input_f:
+            pep_seqs.append(line.strip())
+    #remove >, get peptide names and junction scores from FASTA input
+    edited_header = header[1:]
+    fields = edited_header.split("|")
+    pep_ids_joined = fields[0].split(",")
+    pep_ids = []
+    for pep_id in pep_ids_joined:
+        if "." in pep_id:
+            mt, gene, var = pep_id.split(".")
+            pep_id = "-".join((gene,var))
+        pep_ids.append(pep_id)
+    junct_scores = fields[3].split(":")
+    junct_scores = junct_scores[1].split(",")
+    return(pep_seqs, pep_ids, junct_scores)
+
+#determine number of peptides (not including junction additions)
+def get_peptide_num(pep_seqs, min_pep_length, max_pep_length):    
+    num_peptides = 0
+    for pep in pep_seqs:
+        length = len(pep)
+        if length > min_pep_length and length < max_pep_length:
+            num_peptides += 1
+    return(num_peptides)
+
 #determine what proportion of circle each peptide should take up
 def get_conversion_factor(pep_seqs):
     total_len = 0
@@ -267,6 +296,27 @@ def draw_arc_junct(peptide, length, t, conversion_factor, junct_seq_space, circl
     t.pd()
     t.circle(circle_radius, (conversion_factor * length) / 2)
 
+def draw_peptide(t, pep, pep_ids, peptides_parsed, pen_thick, angle_parsed, conversion_factor, min_pep_length, max_pep_length, junctions_parsed, junct_scores, circle_radius, pep_id_space, junct_seq_space, pen_thin):
+    junction_parsed = 0
+    pep_length = len(pep)
+    peptide = pep_ids[peptides_parsed]
+    t.pensize(pen_thick)
+    angle_parsed += conversion_factor * pep_length
+    #if length within reasonable range, draw and label arc for peptide
+    if pep_length > min_pep_length and pep_length < max_pep_length:
+        draw_arc_peptide(peptide, pep_length, junctions_parsed, angle_parsed, t, circle_radius, conversion_factor, pep_id_space)
+        if junctions_parsed < len(junct_scores):
+            draw_junction_w_label(junct_scores[junctions_parsed], t, pen_thin, angle_parsed)
+            junction_parsed += 1
+    #if length is less than minimum peptide length, assume amino acid addition to junction
+    elif pep_length < min_pep_length:
+        draw_arc_junct(peptide, pep_length, t, conversion_factor, junct_seq_space, circle_radius)
+        draw_junction(t, pen_thin)
+    else:
+        print("Error: Peptide sequence over 100 amino acids inputted")
+        sys.exit()
+    return(junction_parsed, angle_parsed)
+
 #print turtle screen to a postscript file, convert to pdf
 def output_screen(t, out_f):
     ps_file = "/".join((out_f, "vaccine.ps"))
@@ -281,23 +331,7 @@ def output_vaccine_png(input_file, out_f):
     min_pep_length = 8
     max_pep_length = 100
 
-    pep_seqs = []
-    with open(input_file, 'r') as input_f:
-        header = input_f.readline().strip()
-        for line in input_f:
-            pep_seqs.append(line.strip())
-    #remove >, get peptide names and junction scores from FASTA input
-    edited_header = header[1:]
-    fields = edited_header.split("|")
-    pep_ids_joined = fields[0].split(",")
-    pep_ids = []
-    for pep_id in pep_ids_joined:
-        if "." in pep_id:
-            mt, gene, var = pep_id.split(".")
-            pep_id = "-".join((gene,var))
-        pep_ids.append(pep_id)
-    junct_scores = fields[3].split(":")
-    junct_scores = junct_scores[1].split(",")
+    pep_seqs, pep_ids, junct_scores = parse_input(input_file)
 
     #Error if not a peptide sequence for every peptide ID
     if len(pep_ids) != len(pep_seqs):
@@ -305,17 +339,11 @@ def output_vaccine_png(input_file, out_f):
         sys.exit()
 
     conversion_factor = get_conversion_factor(pep_seqs)
-
-    #determine number of peptides (not including junction additions)
-    num_peptides = 0
-    for pep in pep_seqs:
-        length = len(pep)
-        if length > 8 and length < 25:
-            num_peptides += 1
-            
+    num_peptides = get_peptide_num(pep_seqs, min_pep_length, max_pep_length)
 
     #draw vaccine
-    turtle.setup(750,600)
+    #800,600
+    turtle.setup(800,600)
     t = turtle.Turtle()
     myWin = turtle.Screen()
     turtle.colormode(255)
@@ -348,23 +376,8 @@ def output_vaccine_png(input_file, out_f):
     junctions_parsed = 0
     peptides_parsed = 0
     for pep in pep_seqs:
-        pep_length = len(pep)
-        peptide = pep_ids[peptides_parsed]
-        t.pensize(pen_thick)
-        angle_parsed += conversion_factor * pep_length
-    #if length within reasonable range, draw and label arc for peptide
-        if pep_length > min_pep_length and pep_length < max_pep_length:
-            draw_arc_peptide(peptide, pep_length, junctions_parsed, angle_parsed, t, circle_radius, conversion_factor, pep_id_space)
-            if junctions_parsed < len(junct_scores):
-                draw_junction_w_label(junct_scores[junctions_parsed], t, pen_thin, angle_parsed)
-                junctions_parsed += 1
-    #if length is less than minimum peptide length, assume amino acid addition to junction
-        elif pep_length < min_pep_length:
-                draw_arc_junct(peptide, pep_length, t, conversion_factor, junct_seq_space, circle_radius)
-                draw_junction(t, pen_thin)
-        else:
-                print("Error: Peptide sequence over 100 amino acids inputted")
-                sys.exit()
+        junction_parsed, angle_parsed = draw_peptide(t, pep, pep_ids, peptides_parsed, pen_thick, angle_parsed, conversion_factor, min_pep_length, max_pep_length, junctions_parsed, junct_scores, circle_radius, pep_id_space, junct_seq_space, pen_thin)
+        junctions_parsed += junction_parsed 
         peptides_parsed += 1
 
     #add white space in circle after genes    
@@ -373,7 +386,7 @@ def output_vaccine_png(input_file, out_f):
     output_screen(t, out_f)
     
     #keeps turtle screen open until closed by user
-    #turtle.mainloop()
+    turtle.mainloop()
 
 def main(args_input=sys.argv[1:]):
 
@@ -599,7 +612,7 @@ def main(args_input=sys.argv[1:]):
     if not args.keep_tmp:
         shutil.rmtree(tmp_dir)
 
-    out_f = "/".join((base_output_dir, runname)) 
+    out_f = os.path.join(base_output_dir, runname) 
 
     output_vaccine_png(results_file, out_f)
 
