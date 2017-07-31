@@ -6,7 +6,7 @@ import json
 import sys
 import subprocess
 from shlex import split
-from .utils import descriptions
+from .utils import descriptions, fullresponse
 from shutil import move as movetree
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
@@ -49,13 +49,13 @@ def fixpath(src, root, *keys):
         )
     return src
 
-def processes():
+def processes(page, per_page):
     """Returns a list of processes, and whether or not each process is running"""
     data = current_app.config['storage']['loader']()
     #Python comprehensions are great!
     # data['process-%d'%id]['returncode'] = process[1].returncode
     # data['process-%d'%id]['status'] = 1 if process[1].returncode == 0 else -1
-    return [
+    return fullresponse([
          {
              'id':proc[0],
              'running':is_running(proc[1]),
@@ -108,7 +108,7 @@ def processes():
                 )),
                 range(data['processid']+1)
             ) if 'process-%d'%(proc[0]) in data
-    ]
+    ], page, per_page)
 
 
 def process_info(id):
