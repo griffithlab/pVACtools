@@ -598,6 +598,25 @@ paths:
       description: "This endpoint returns a list of active pvacseq runs\n"
       operationId: "pvacseq.server.controllers.processes.processes"
       parameters:
+      - name: "filters"
+        in: "query"
+        description: "Array of filters to be applied. ex: size>200"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "sorting"
+        in: "query"
+        description: "Ordered array of ways to sort data, + before property name\
+        indicating ascending, - indicating descending. ex: +size,-fileID"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
       - name: "page"
         in: "query"
         description: "Page of information to return"

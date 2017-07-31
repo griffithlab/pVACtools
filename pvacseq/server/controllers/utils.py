@@ -17,6 +17,7 @@ import threading
 from postgresql.exceptions import UndefinedTableError
 from math import ceil
 import operator
+import pdb
 
 class dataObj(dict):
     def __init__(self, datafiles, sync):
@@ -618,7 +619,7 @@ def fullresponse(data, page, count):
     })
 
 def sort(data, sorting, page, count, columns):
-    if not len(sorting):
+    if not len(sorting) or sorting[0]=="none":
         return fullresponse(data, page, count)
     i = len(sorting)-1
     while i > -1:
@@ -640,7 +641,7 @@ def sort(data, sorting, page, count, columns):
     return fullresponse(data, page, count)
 
 def filterdata(data, filters, sorting, page, count):
-    if not len(data):
+    if not len(data) or filters[0]=="none":
         return fullresponse(data, page, count)
     columns = [name for name in data[0]]
     if not len(filters):

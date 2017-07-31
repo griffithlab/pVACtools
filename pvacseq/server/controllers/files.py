@@ -49,11 +49,6 @@ def results_get(id, type, filters, sorting, page, count):
             for fileID in process[0]['files']:
                 if (re.search('%s.tsv'%filter, process[0]['files'][fileID]['display_name'])):
                     output.append(resultfile(id,process,fileID))
-    # can specify default filter and sorting per endpoint
-    if filters[0] == "none":
-        filters = []
-    if sorting[0] == "none":
-        sorting = []
     return filterdata(output, filters, sorting, page, count)
 
 
