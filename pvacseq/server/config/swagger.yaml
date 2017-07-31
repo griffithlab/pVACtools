@@ -62,7 +62,7 @@ paths:
         required: false
         type: "integer"
         default: 1
-      - name: "per_page"
+      - name: "count"
         in: "query"
         description: "Number of results to return per page"
         required: false
@@ -604,7 +604,7 @@ paths:
         required: false
         type: "integer"
         default: 1
-      - name: "per_page"
+      - name: "count"
         in: "query"
         description: "Number of objects to return per page"
         required: false
@@ -1160,7 +1160,7 @@ definitions:
       current_page:
         type: "integer"
         description: "The page of information being returned"
-      per_page:
+      count:
         type: "integer"
         description: "The number of items to return per page"
       total_pages:

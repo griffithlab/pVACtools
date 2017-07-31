@@ -49,7 +49,7 @@ def fixpath(src, root, *keys):
         )
     return src
 
-def processes(page, per_page):
+def processes(page, count):
     """Returns a list of processes, and whether or not each process is running"""
     data = current_app.config['storage']['loader']()
     #Python comprehensions are great!
@@ -108,7 +108,7 @@ def processes(page, per_page):
                 )),
                 range(data['processid']+1)
             ) if 'process-%d'%(proc[0]) in data
-    ], page, per_page)
+    ], page, count)
 
 
 def process_info(id):

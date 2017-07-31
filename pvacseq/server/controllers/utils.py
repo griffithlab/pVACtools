@@ -606,20 +606,20 @@ def cmp(arg1, op, arg2):
     operation = ops.get(op)
     return operation(arg1,arg2)
 
-def fullresponse(data, page, per_page):
+def fullresponse(data, page, count):
     return ({
         "_meta": {
             "current_page":page,
-            "per_page":per_page,
-            "total_pages":ceil(len(data)/per_page),
+            "per_page":count,
+            "total_pages":ceil(len(data)/count),
             "total_count":len(data)
         },
-        "result": data[(per_page*(page-1)):((per_page*page)) if (per_page*page)<len(data) else len(data)]
+        "result": data[(count*(page-1)):((count*page)) if (count*page)<len(data) else len(data)]
     })
 
-def sort(data, sorting, page, per_page, columns):
+def sort(data, sorting, page, count, columns):
     if not len(sorting):
-        return fullresponse(data, page, per_page)
+        return fullresponse(data, page, count)
     i = len(sorting)-1
     while i > -1:
         col = sorting[i]
@@ -637,14 +637,14 @@ def sort(data, sorting, page, per_page, columns):
             }, 400)
         data = sorted(data, key=operator.itemgetter(col[1:]), reverse=True if col.startswith('-') else False)
         i-=1
-    return fullresponse(data, page, per_page)
+    return fullresponse(data, page, count)
 
-def filterdata(data, filters, sorting, page, per_page):
+def filterdata(data, filters, sorting, page, count):
     if not len(data):
-        return fullresponse(data, page, per_page)
+        return fullresponse(data, page, count)
     columns = [name for name in data[0]]
     if not len(filters):
-        return sort(data, sorting, page, per_page, columns)
+        return sort(data, sorting, page, count, columns)
     filteredlist = []
     for i in range(len(data)):
         comparisons = []
@@ -680,4 +680,4 @@ def filterdata(data, filters, sorting, page, per_page):
                 break
             if j == len(filters)-1:
                 filteredlist.append(data[i])
-    return sort(filteredlist, sorting, page, per_page, columns)
+    return sort(filteredlist, sorting, page, count, columns)

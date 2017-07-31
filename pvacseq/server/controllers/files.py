@@ -22,7 +22,7 @@ def resultfile(id, process, fileID):
         ]).decode().split()[0])-1,
     })
 
-def results_get(id, type, filters, sorting, page, per_page):
+def results_get(id, type, filters, sorting, page, count):
     """Get the list of result files from a specific pVAC-Seq run"""
     data = current_app.config['storage']['loader']()
     if id == -1:
@@ -54,7 +54,7 @@ def results_get(id, type, filters, sorting, page, per_page):
         filters = []
     if sorting[0] == "none":
         sorting = []
-    return filterdata(output, filters, sorting, page, per_page)
+    return filterdata(output, filters, sorting, page, count)
 
 
 def list_input(path = None):
