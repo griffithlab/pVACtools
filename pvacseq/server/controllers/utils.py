@@ -17,7 +17,6 @@ import threading
 from postgresql.exceptions import UndefinedTableError
 from math import ceil
 import operator
-import pdb
 
 class dataObj(dict):
     def __init__(self, datafiles, sync):
@@ -176,7 +175,7 @@ def initialize(current_app, args):
             quote(visapp_path)
         ),
         shell=True,
-        #stdout=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL
     )
     print(
         "Visualization server started on PID",
@@ -641,10 +640,10 @@ def sort(data, sorting, page, count, columns):
     return fullresponse(data, page, count)
 
 def filterdata(data, filters, sorting, page, count):
-    if not len(data) or filters[0]=="none":
+    if not len(data):
         return fullresponse(data, page, count)
     columns = [name for name in data[0]]
-    if not len(filters):
+    if not len(filters) or filters[0]=="none":
         return sort(data, sorting, page, count, columns)
     filteredlist = []
     for i in range(len(data)):
