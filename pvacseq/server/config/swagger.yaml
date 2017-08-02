@@ -794,11 +794,6 @@ paths:
           description: "Returns object mapping each algorithm to an array of valid alleles for that algorithm"
           schema:
             type: "object"
-            properties:
-              default:
-                $ref: "#/definitions/MapItem"
-            additionalProperties:
-              $ref: "#/definitions/MapItem"
         default:
           description: "Unexpected error"
           schema:
@@ -1248,16 +1243,6 @@ definitions:
       description:
         type: "string"
         description: "A description of the file's contents in the context of pVAC-Seq"
-  MapItem:
-    type: "object"
-    properties:
-      algorithm:
-        type: "string"
-      alleles:
-        type: "array"
-        items: {
-          type: "string"
-        }
   MetaData:
     type: "object"
     properties:
