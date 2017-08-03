@@ -263,7 +263,7 @@ class APITests(unittest.TestCase):
             timeout = 5,
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-        targetResult = [item for item in response.json() if item['id'] == processID]
+        targetResult = [item for item in response.json()['result'] if item['id'] == processID]
         self.assertTrue(len(targetResult))
         targetResult = targetResult[0]
         self.assertIsInstance(targetResult, dict)
@@ -318,10 +318,10 @@ class APITests(unittest.TestCase):
         )
         self.assertEqual(response.status_code,200)
         process_list = response.json()
-        if not len(process_list):
+        if not len(process_list['result']):
             process_list = [{'id':self.start_basic_run()}]
         response = requests.get(
-            self.urlBase + '/processes/%d'%process_list[0]['id'],
+            self.urlBase + '/processes/%d'%process_list['result'][0]['id'],
             timeout=5,
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
@@ -341,7 +341,7 @@ class APITests(unittest.TestCase):
         self.assertIsInstance(process_data['files'][0], dict)
 
         self.assertIn('id', process_data)
-        self.assertEqual(process_data['id'], process_list[0]['id'])
+        self.assertEqual(process_data['id'], process_list['result'][0]['id'])
 
         self.assertIn('log', process_data)
         self.assertIsInstance(process_data['log'], list)
@@ -387,7 +387,7 @@ class APITests(unittest.TestCase):
         )
         self.assertEqual(response.status_code,200)
         process_list = response.json()
-        if not len(process_list):
+        if not len(process_list['result']):
             self.start_basic_run()
             response = requests.get(
                 self.urlBase + '/processes',
@@ -395,8 +395,8 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
-        process_list.sort(key = lambda x:x['id'])
-        while process_list[-1]['running']:
+        process_list['result'].sort(key = lambda x:x['id'])
+        while process_list['result'][-1]['running']:
             time.sleep(1)
             response = requests.get(
                 self.urlBase + '/processes',
@@ -404,15 +404,16 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
-            process_list.sort(key = lambda x:x['id'])
+            process_list['result'].sort(key = lambda x:x['id'])
         response = requests.get(
-            'http://localhost:8080'+process_list[-1]['results_url'],
+            'http://localhost:8080'+process_list['result'][-1]['results_url'],
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         results = response.json()
-        self.assertIsInstance(results, list)
-        for item in results:
+        self.assertIsInstance(results, dict)
+        self.assertIsInstance(results['result'], list)
+        for item in results['result']:
             self.assertIsInstance(item, dict)
 
             self.assertIn('description', item)
@@ -424,7 +425,7 @@ class APITests(unittest.TestCase):
             self.assertTrue(item['display_name'])
 
             self.assertIn('fileID', item)
-            self.assertIsInstance(item['fileID'], str)
+            self.assertIsInstance(item['fileID'], int)
             self.assertGreaterEqual(int(item['fileID']), 0)
 
             self.assertIn('rows', item)
@@ -445,7 +446,7 @@ class APITests(unittest.TestCase):
         )
         self.assertEqual(response.status_code,200)
         process_list = response.json()
-        if not len(process_list):
+        if not len(process_list['result']):
             self.start_basic_run()
             response = requests.get(
                 self.urlBase + '/processes',
@@ -453,8 +454,8 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
-        process_list.sort(key = lambda x:x['id'])
-        while process_list[-1]['running']:
+        process_list['result'].sort(key = lambda x:x['id'])
+        while process_list['result'][-1]['running']:
             time.sleep(1)
             response = requests.get(
                 self.urlBase + '/processes',
@@ -462,14 +463,14 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
-            process_list.sort(key = lambda x:x['id'])
+            process_list['result'].sort(key = lambda x:x['id'])
         response = requests.get(
-            'http://localhost:8080'+process_list[-1]['results_url'],
+            'http://localhost:8080'+process_list['result'][-1]['results_url'],
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         results = response.json()
-        for item in results:
+        for item in results['result']:
             if item['display_name'].endswith('.tsv') and item['rows']>0:
                 response = requests.get(
                     'http://localhost:8080'+item['url'],

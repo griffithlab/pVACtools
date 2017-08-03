@@ -52,7 +52,7 @@ def results_get(id, type, filters, sorting, page, count):
     return filterdata(output, filters, sorting, page, count)
 
 
-def list_input(filters, sorting, page, count, path = None):
+def list_input(path = None):
     """Fetches a list of input files from the input directory"""
     data = current_app.config['storage']['loader']()
     if not path:
@@ -79,7 +79,7 @@ def list_input(filters, sorting, page, count, path = None):
                 'type':'directory',
                 'contents': list_input(fullname)
             })
-    return filterdata(output, filters, sorting, page, count)
+    return output
 
 def results_getfile(id, fileID, count, page, filters, sort, direction):
     """(DEPRECATED) Read data directly from a specific output file"""
@@ -144,9 +144,9 @@ def results_getcols(id, fileID):
     raw_reader.close()
     return output
 
-def list_dropbox(filters, sorting, page, count):
+def list_dropbox():
     data = current_app.config['storage']['loader']()
-    return filterdata([
+    return [
         {
             'fileID':key,
             'description':entry['description'],
@@ -165,4 +165,4 @@ def list_dropbox(filters, sorting, page, count):
                 entry['display_name']
             )]).decode().split()[0])-1,
         } for (key, entry) in data['dropbox'].items()
-    ], filters, sorting, page, count)
+    ]

@@ -96,52 +96,13 @@ paths:
       description: "Queries the input folder for a list of files ready to be used\
       in a new run of pVAC-Seq"
       operationId: "pvacseq.server.controllers.files.list_input"
-      parameters:
-      - name: "filters"
-        in: "query"
-        description: "Array of filters to be applied. ex: size>200"
-        required: false
-        type: "array"
-        items:
-          type: "string"
-        collectionFormat: 'csv'
-        default: "none"
-      - name: "sorting"
-        in: "query"
-        description: "Ordered array of ways to sort data, + before property name\
-        indicating ascending, - indicating descending. ex: +size,-fileID"
-        required: false
-        type: "array"
-        items:
-          type: "string"
-        collectionFormat: 'csv'
-        default: "none"
-      - name: "page"
-        in: "query"
-        description: "Page of information to return"
-        required: false
-        type: "integer"
-        default: 1
-      - name: "count"
-        in: "query"
-        description: "Number of objects to return per page"
-        required: false
-        type: "integer"
-        default: 10
       responses:
         200:
           description: "An object containing metadata and an array of input files"
           schema:
             type: "array"
             items:
-              type: "object"
-              properties:
-                _meta:
-                  $ref: "#/definitions/MetaData"
-                results:
-                  type: "array"
-                  items:
-                    $ref: "#/definitions/Result"
+              $ref: "#/definitions/Result"
         default:
           description: "Unexpected error"
           schema:
@@ -854,52 +815,13 @@ paths:
       the dropbox folder.  The user may drop result files into this folder to be\
       displayed in the frontend UI"
       operationId: "pvacseq.server.controllers.files.list_dropbox"
-      parameters:
-      - name: "filters"
-        in: "query"
-        description: "Array of filters to be applied. ex: size>200"
-        required: false
-        type: "array"
-        items:
-          type: "string"
-        collectionFormat: 'csv'
-        default: "none"
-      - name: "sorting"
-        in: "query"
-        description: "Ordered array of ways to sort data, + before property name\
-        indicating ascending, - indicating descending. ex: +size,-fileID"
-        required: false
-        type: "array"
-        items:
-          type: "string"
-        collectionFormat: 'csv'
-        default: "+fileID"
-      - name: "page"
-        in: "query"
-        description: "Page of information to return"
-        required: false
-        type: "integer"
-        default: 1
-      - name: "count"
-        in: "query"
-        description: "Number of objects to return per page"
-        required: false
-        type: "integer"
-        default: 10
       responses:
         200:
           description: "An object containing metadata and a list of files in the dropbox"
           schema:
             type: "array"
             items:
-              type: "object"
-              properties:
-                _meta:
-                  $ref: "#/definitions/MetaData"
-                results:
-                  type: "array"
-                  items:
-                    $ref: "#/definitions/Result"
+              $ref: "#/definitions/Result"
         default:
           description: "Unexpected error"
           schema:
