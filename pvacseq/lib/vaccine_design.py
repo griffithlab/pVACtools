@@ -1,4 +1,4 @@
-#  Input would be a protein fasta
+#  Input would be a protein fasta or both pvac-seq run output final.tsv and input annotated vcf
 # python pvacseq/lib/vaccine_design.py test --generate-input-fasta -t tests/test_data/vaccine_design/input_parse_test_input.tsv -v tests/test_data/vaccine_design/input_parse_test_input.vcf ann H-2-Kb -o . -n 25 -l 8
 # python pvacseq/lib/vaccine_design.py test -f tests/test_data/vaccine_design/Test.vaccine.results.input.fa ann H-2-Kb -o . -n 25 -l 8
 
@@ -86,7 +86,7 @@ def tsvToFasta(n_mer, input_tsv, input_vcf, output_dir):
     def parse_choosen_epitopes(input_tsv):
         with open(input_tsv, 'r') as input_f:
             next(input_f)
-            mut_IDs, positions, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = [], [], [], [], [], [], []
+            mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = [], [], [], [], [], []
             for line in input_f:
                 fields = line.split("\t")
                 mut_type, mutation, pos, gene_name = fields[7], fields[8], fields[9], fields[10]
@@ -105,13 +105,11 @@ def tsvToFasta(n_mer, input_tsv, input_vcf, output_dir):
                 elif mut_type == "missense": 
                     mut_ID = "MT." + gene_name + "."  + old_AA + pos + new_AA
                 mut_IDs.append(mut_ID)
-                positions.append(pos)
                 mt_epitope_seqs.append(mt_epitope_seq)
                 wt_epitope_seqs.append(wt_epitope_seq)
                 transcript_IDs.append(fields[5])
-            print(transcript_IDs)
         input_f.close()
-        return mut_IDs, positions, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs
+        return mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs
 
 #get necessary data from initial pvacseq input vcf
     def parse_original_vcf(input_vcf):
@@ -138,60 +136,48 @@ def tsvToFasta(n_mer, input_tsv, input_vcf, output_dir):
             initial = parts[0]
             final = parts[1]
 
-        ##handle -/X mutations by appending downstr_seq to next position, instead of overwriting last position
-        #if initial == "-":
-        #    new_end_of_full_seq = len(full_seq) + len_change - len(downstr_seq)
-        #else:
-        #    new_end_of_full_seq = len(full_seq) + len_change - len(downstr_seq) - 1
-        ##above not currently done, check to see if needed
-
-        #overwrites last position of seq with first position of predicted downstr seq
-            new_end_of_full_seq = len(full_seq) + len_change - len(downstr_seq) - 1
+            #handle -/X mutations by appending downstr_seq to next position, instead of overwriting last position
+            if initial == "-":
+                new_end_of_full_seq = len(full_seq) + len_change - len(downstr_seq)
+            #overwrites last position of seq with first position of
+            #predicted downstr seq
+            else:
+                new_end_of_full_seq = len(full_seq) + len_change - len(downstr_seq) - 1
             full_seq = full_seq[:new_end_of_full_seq]
-            print("shortened seq: " + full_seq)
-        #handles ex: L/LX mutations by adding sequence that is preserved before teh downstr predicted sequence
+        #handles ex: L/LX mutations by adding sequence that is preserved
+        #before the downstr predicted sequence
             if len(final) > 1:
-                print("Add in whatever is before the X")
                 final = final.replace("X", "")
                 full_seq = full_seq + final
             full_seq = full_seq + downstr_seq
-
-            print("final edited sequence: " + full_seq)
         elif mut_types[i] == "missense":
             full_seq = full_seq.replace(wt_epitope_seqs[i], mt_epitope_seqs[i])
         else:
             sys.exit("Mutation not yet handled by this parser")
         return(full_seq)
 
-#get flanking peptides for the epitope chosen
+    #get flanking peptides for the epitope chosen
     def get_sub_seq(full_seq, mt_seq, n_mer):
         beginning = full_seq.find(mt_seq)
         if beginning == -1:
-            sys.exit("Error: could not find mutant seq in edited sequence")
+            sys.exit("Error: could not find mutant epitope sequence in mutant full sequence")
         length = len(mt_seq)
         end = beginning + length
-    #if eptitope sequence is too close to the beginning or end to get the
-    #right amount of flanking peptides, get appropriate length from solely
-    #ahead or behind
+        #if eptitope sequence is too close to the beginning or end to get the
+        #right amount of flanking peptides, get appropriate length from solely
+        #ahead or behind
         len_needed = n_mer - length
-        print("length needed: " + str(len_needed))
         if len_needed % 2 != 0:
             front = int(beginning - len_needed / 2)
             back = int(end + len_needed / 2)
         else:
             front = int(beginning - len_needed / 2)
             back = int(end + len_needed / 2)
-            print(beginning, end, front, back) 
         if front < 0:
-            print(1)
             sub_seq = full_seq[beginning:(beginning + n_mer)]
         elif back > len(full_seq):
-            print(2)
             sub_seq = full_seq[(end - n_mer):end]
         else:
-            print(3)
-            print(front)
-            print(back)
             sub_seq = full_seq[front:back]
         return(sub_seq)
 
@@ -202,22 +188,20 @@ def tsvToFasta(n_mer, input_tsv, input_vcf, output_dir):
             n_mer = int(n_mer)
             for i in range(len(transcript_IDs)):
                 full_seq = (transcripts_dict[transcript_IDs[i]])[0] 
-                print(transcript_IDs[i])
-                print(full_seq)
             
                 full_seq = edit_full_seq(i, mut_types, mutations, wt_epitope_seqs, mt_epitope_seqs, sub_seq, full_seq, transcripts_dict)
 
                 sub_seq = get_sub_seq(full_seq, mt_epitope_seqs[i], n_mer)
-                print("subseq: " + sub_seq)
-                print("length: " + str(len(sub_seq)))
                 out_f.write(">" + mut_IDs[i] + "\n")
                 out_f.write(sub_seq + "\n")
+                print("ID: " + mut_IDs[i] + ", sequence: " + sub_seq)
         out_f.close()
+        print("FASTA file written")
         return()
 
     output_f = os.path.join(output_dir, "vaccine_design_input.fa")
 
-    mut_IDs, positions, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = parse_choosen_epitopes(input_tsv)
+    mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = parse_choosen_epitopes(input_tsv)
 
     transcripts_dict = parse_original_vcf(input_vcf)
 
