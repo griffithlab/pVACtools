@@ -1,8 +1,19 @@
 language: python
 python:
   - "3.5"
+addons:
+  apt:
+   packages:
+     - xvfb
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y ghostscript
 install:
   - pip install -e .
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 
 script:
   - TEST_FLAG=1 python3 -m unittest discover -v
   - prove --recurse --verbose

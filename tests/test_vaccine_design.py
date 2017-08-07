@@ -47,5 +47,10 @@ class TestVaccineDesign(unittest.TestCase):
             os.path.join(self.test_data_dir, "Test.vaccine.results.output.fa")
         ))
 
+        image_out = os.path.join(output_dir.name,self.test_run_name, 'vaccine.jpg')
+
+        self.assertTrue(os.path.exists(image_out))
+        self.assertTrue(os.stat(image_out).st_size > 0)
+
         output_dir.cleanup()
         
