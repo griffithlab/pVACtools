@@ -607,6 +607,8 @@ def cmp(arg1, op, arg2):
     return operation(arg1,arg2)
 
 def fullresponse(data, page, count):
+    if count == -1:
+        count = len(data)
     return ({
         "_meta": {
             "current_page":page,
