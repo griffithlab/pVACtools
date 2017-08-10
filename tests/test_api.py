@@ -382,7 +382,7 @@ class APITests(unittest.TestCase):
 
     def test_endpoint_process_results(self):
         response = requests.get(
-            self.urlBase + '/processes',
+            self.urlBase + '/processes?count=-1',
             timeout = 5
         )
         self.assertEqual(response.status_code,200)
@@ -390,7 +390,7 @@ class APITests(unittest.TestCase):
         if not len(process_list['result']):
             self.start_basic_run()
             response = requests.get(
-                self.urlBase + '/processes',
+                self.urlBase + '/processes?count=-1',
                 timeout = 5
             )
             self.assertEqual(response.status_code,200)
@@ -399,14 +399,14 @@ class APITests(unittest.TestCase):
         while process_list['result'][-1]['running']:
             time.sleep(1)
             response = requests.get(
-                self.urlBase + '/processes',
+                self.urlBase + '/processes?count=-1',
                 timeout = 5
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
             process_list['result'].sort(key = lambda x:x['id'])
         response = requests.get(
-            'http://localhost:8080'+process_list['result'][-1]['results_url'],
+            'http://localhost:8080'+process_list['result'][-1]['results_url'] + '?count=-1',
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
@@ -438,6 +438,17 @@ class APITests(unittest.TestCase):
             self.assertIn('url', item)
             self.assertIsInstance(item['url'], str)
             self.assertTrue(item['url'])
+
+        for process in process_list['result']:
+            response = requests.get(
+                # %2B = '+', %2C = ','
+                'http://localhost:8080' + process['results_url'] + '?type=final',
+                timeout = 5
+            )
+            self.assertEqual(response.status_code,200)
+            results = response.json()
+            for item in results['result']:
+                self.assertTrue(re.search('final.tsv$', item['display_name']))
 
     def test_endpoint_process_results_data(self):
         response = requests.get(
