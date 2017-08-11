@@ -671,6 +671,30 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertFalse(response.json())
 
+    def test_endpoint_validallele(self):
+        response = requests.get(
+            self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'prediction_algorithms':'NetMHC'
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('NetMHC' in results)
+        self.assertTrue(len(results['NetMHC']))
+
+    def test_endpoint_validalgorithms(self):
+        response = requests.get(
+            self.urlBase+'/validalgorithms',
+            timeout=5
+        )
+        self.assertEqual(response.status_code, 200)
+        algorithms = response.json()
+        self.assertIsInstance(algorithms, list)
+        self.assertTrue('NetMHC' in algorithms)
+
     def test_duplicate_check(self):
         processID = self.start_basic_run()['processid']
         time.sleep(1)
@@ -847,7 +871,6 @@ class APITests(unittest.TestCase):
 
         for process in process_list['result']:
             response = requests.get(
-                # %2B = '+', %2C = ','
                 'http://localhost:8080' + process['results_url'],
                 timeout = 5,
                 params={
