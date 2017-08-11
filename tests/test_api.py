@@ -814,24 +814,33 @@ class APITests(unittest.TestCase):
     # In the future, maybe add more thorough testing of these
     def test_sort(self):
         response = requests.get(
-            self.urlBase + '/processes?count=-1',
-            timeout = 5
+            self.urlBase + '/processes',
+            timeout = 5,
+            params={
+                'count':-1
+            }
         )
         self.assertEqual(response.status_code,200)
         process_list = response.json()
         if not len(process_list['result']):
             self.start_basic_run()
             response = requests.get(
-                self.urlBase + '/processes?count=-1',
-                timeout = 5
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
         while process_list['result'][-1]['running']:
             time.sleep(1)
             response = requests.get(
-                self.urlBase + '/processes?count=-1',
-                timeout = 5
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
@@ -839,48 +848,69 @@ class APITests(unittest.TestCase):
         for process in process_list['result']:
             response = requests.get(
                 # %2B = '+', %2C = ','
-                'http://localhost:8080' + process['results_url'] + '?sorting=%2Bsize%2C%2BfileID&count=-1',
-                timeout = 5
+                'http://localhost:8080' + process['results_url'],
+                timeout = 5,
+                params={
+                    'sorting':'+size,+fileID',
+                    'count':-1
+                }
             )
-            result_list = response.json()
             self.assertEqual(response.status_code,200)
+            result_list = response.json()
+
             response2 = requests.get(
-                'http://localhost:8080' + process['results_url'] + '?count=-1',
-                timeout = 5
+                'http://localhost:8080' + process['results_url'],
+                timeout = 5,
+                params={
+                    'count':-1
+                }
             )
-            normal_result_list = response2.json()
             self.assertEqual(response2.status_code,200)
+            normal_result_list = response2.json()
             normal_result_list['result'].sort(key = lambda x: (x['size'], x['fileID']))
             self.assertEqual(result_list['result'], normal_result_list['result'])
 
     def test_filter(self):
         response = requests.get(
-            self.urlBase + '/processes?count=-1',
-            timeout = 5
+            self.urlBase + '/processes',
+            timeout = 5,
+            params={
+                'count':-1
+            }
         )
         self.assertEqual(response.status_code,200)
         process_list = response.json()
         if not len(process_list['result']):
             self.start_basic_run()
             response = requests.get(
-                self.urlBase + '/processes?count=-1',
-                timeout = 5
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
         while process_list['result'][-1]['running']:
             time.sleep(1)
             response = requests.get(
-                self.urlBase + '/processes?count=-1',
-                timeout = 5
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
-        for process in process_list['result']:
 
+        for process in process_list['result']:
             response = requests.get(
-                'http://localhost:8080' + process['results_url'] + '?filters=fileID>2',
-                timeout = 5
+                'http://localhost:8080' + process['results_url'],
+                timeout = 5,
+                params={
+                    'filters':'fileID>2'#,
+                    #'count':-1
+                }
             )
             filtered_results = response.json()
             self.assertEqual(response.status_code,200)
@@ -889,45 +919,62 @@ class APITests(unittest.TestCase):
 
     def test_pagination(self):
         response = requests.get(
-            self.urlBase + '/processes?count=-1',
-            timeout = 5
+            self.urlBase + '/processes',
+            timeout = 5,
+            params={
+                'count':-1
+            }
         )
         self.assertEqual(response.status_code,200)
         process_list = response.json()
         if not len(process_list['result']):
             self.start_basic_run()
             response = requests.get(
-                self.urlBase + '/processes?count=-1',
-                timeout = 5
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
         while process_list['result'][-1]['running']:
             time.sleep(1)
             response = requests.get(
-                self.urlBase + '/processes?count=-1',
-                timeout = 5
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
+
         for process in process_list['result']:
             response = requests.get(
-                'http://localhost:8080' + process['results_url'] + '?count=-1',
-                timeout = 5
+                'http://localhost:8080' + process['results_url'],
+                timeout = 5,
+                params={
+                    'count':-1
+                }
             )
-            full_result_list = response.json()
             self.assertEqual(response.status_code,200)
+            full_result_list = response.json()
             response = requests.get(
-                'http://localhost:8080' + process['results_url'] + '?count=3&page=2',
-                timeout = 5
+                'http://localhost:8080' + process['results_url'],
+                timeout = 5,
+                params={
+                    'count':3,
+                    'page':2
+                }
             )
             self.assertEqual(response.status_code,200)
             paged_result = response.json()
 
             self.assertEqual(len(paged_result['result']), 3 if len(full_result_list['result']) >= 6 else len(full_result_list['result']) - 3)
+            self.assertEqual(paged_result['result'][0] if len(paged_result['result']) else [], full_result_list['result'][3] if len(full_result_list['result']) > 3 else [])
             self.assertEqual(paged_result['_meta']['per_page'], 3)
             self.assertEqual(paged_result['_meta']['current_page'], 2)
             self.assertEqual(paged_result['_meta']['total_count'], len(full_result_list['result']))
-            self.assertEqual(paged_result['result'][0] if len(paged_result['result']) else [], full_result_list['result'][3] if len(full_result_list['result']) > 3 else [])
 
 
