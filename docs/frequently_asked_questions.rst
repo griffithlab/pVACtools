@@ -76,6 +76,15 @@ There are a number of factors that determine the number of IEDB calls to be made
 
   **Speedup suggestion**: Reduce the value of this parameter.
 
+:large:`My pVAC-Seq output file does not contain entries for all of the
+alleles I chose. Why is that?`
+
+There could be a few reasoans why the pVAC-Seq output does not contain
+predictions for alleles:
+
+- The alleles you picked might've not been compatible with the prediction algorithm and/or epitope lengths chosen. In that case no calls for that allele would've been made and a status message would've printed to the screen.
+
+- It could be that all epitope predictions for some alleles got filtered out. You can check the ``<sample_name>.combined.parsed.tsv`` file to see all called epitopes before filtering.
 
 :large:`Why are some values in the` :large-code:`WT Epitope Seq` :large:`column` :large-code:`NA` :large:`?`
 
@@ -87,6 +96,19 @@ meaningful:
 
 - An epitope that overlaps an inframe indel or multinucleotide polymorphism (MNP) might have a large number of amino acids that are different from the wildtype epitope at the corresponding position. If less than half of the amino acids between the mutant epitope sequence and the corresponding wildtype sequence match, the corresponding wildtype sequence in the report is set to ``NA``.
 
+:large:`What filters are applied during a pVAC-Seq run?`
+
+By default we filter the neoepitopes on their binding score. If bam-readcount
+files and/or cufflinks files are provided we also filter on the depth, VAF,
+and FPKM. In addition, candidates where the mutant epitope sequence is the
+same as the wildtype epitope sequence will also be filtered out.
+
+:large:`How can I see all of the candidate epitopes without any filters
+applied?`
+
+The ``<sample_name>.combined.parsed.tsv`` will contain all of the epitopes predicted
+before filters are applied.
+
 :large:`Why have some of my epitopes been filtered out even though the` :large-code:`Best MT Score` :large:`is below 500?`
 
 By default, the binding filter will be applied to the ``Median MT Score``
@@ -95,6 +117,13 @@ The ``Best MT Score`` column shows the lowest score among all
 chosen prediction algorithms. To change this behavior and apply the binding
 filter to the ``Best MT Score`` column you may set the ``--top-score-metric``
 parameter to ``lowest``.
+
+:large:`Why are entries with` :large-code:`NA` :large:`in the`
+:large-code:`VAF` :large:`and` :large-code:`depth` :large:`columns not
+filtered?`
+
+We do not filter out ``NA`` entries for depth and VAF since there is not
+enough information to determine whether the cutoff has been met one way or another.
 
 :large:`Why don't some of my epitopes have score predictions for certain prediction methods?`
 
