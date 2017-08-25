@@ -84,7 +84,14 @@ ____________
    tar -zxvf IEDB_MHC_II-2.16.tar.gz
    cd mhc_ii
    ./configure.py
-    
+
+Open the ``configure.py`` file and update the lines that set the ``smm`` and ``nn`` variables to use relative paths like so:
+
+.. code-block:: none
+
+   smm = re.compile(curDir + "/netMHCII-1.1")
+   nn = re.compile(curDir + "/netMHCII-2.2")
+
 .. note::
 
    Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.

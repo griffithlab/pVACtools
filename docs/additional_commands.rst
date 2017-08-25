@@ -23,6 +23,8 @@ Install VEP Plugin
     :func: define_parser
     :prog: pvacseq install_vep_plugin
 
+.. _valid_alleles:
+
 List Valid Alleles
 ------------------
 
