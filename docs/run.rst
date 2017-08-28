@@ -9,7 +9,11 @@ Usage
    prediction algorithms. More information on how to install IEDB locally can
    be found on the :ref:`Installation <iedb_install>` page.
 
-.. argparse::
-    :module: lib.main
-    :func: define_parser
-    :prog: pvacseq run
+.. topic:: For usage instructions run
+   
+   ``pvacseq run --help``
+
+.. .. argparse::
+        :module: lib.main
+        :func: define_parser
+        :prog: pvacseq run

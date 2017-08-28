@@ -31,6 +31,12 @@ To create a VCF for use with pVAC-Seq follow these steps:
 
 The ``--dir_plugins <VEP_plugins directory>`` option may need to be set depending on where the VEP_plugins were installed to.
 
+The ``--pick`` option might be useful to limit the annotation to the top
+transcripts. Otherwise, VEP will annotate each variant with all possible
+transcripts. pVAC-Seq will provide predictions for all transcripts in the VEP
+CSQ field. Running VEP without the ``--pick`` option can therefor drasticly
+increase the runtime of pVAC-Seq.
+
 Additional VEP options that might be desired can be found `here <http://useast.ensembl.org/info/docs/tools/vep/script/vep_options.html>`_.
 
 **Example VEP Command**
@@ -44,6 +50,9 @@ Additional VEP options that might be desired can be found `here <http://useast.e
 
 Optional Preprocessing
 ----------------------
+
+Coverage and Expression Data
+############################
 
 Coverage and expression data can be added to the pVAC-Seq processing by providing bam-readcount and/or Cufflinks output files as additional input files. These additional input files must be provided as a yaml file in the following structure:
 
@@ -91,3 +100,17 @@ Installation instructions for Cufflinks can be found on their `GitHub page <http
 .. code-block:: none
 
    cufflinks <sam_file>
+
+You may also provide FPKM values from other sources by creating
+cufflinks-formatted input files.
+
+**For transcript FPKM**: a tab-separated file with a ``tracking_id`` column
+containing Ensembl transcript IDs and a ``FPKM`` column containing
+FPKM values.
+
+**For gene FPKM**: a tab-separated file with a ``tracking_id`` column
+containing Ensembl gene IDs, a ``locus`` column describing the
+region within the gene, and a ``FPKM`` column containing FPKM values. In the
+pVAC-Seq pipeline the FPKM values will be summed for all loci of a gene. You
+may also provide already summed FPKM values. In that case you will still need
+to provide a ``locus`` column but the values in that column can be empty.

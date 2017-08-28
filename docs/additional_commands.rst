@@ -8,7 +8,11 @@ To make using pVAC-Seq easier several convenience methods are included in the pa
 Download Example Data
 ---------------------
 
-.. argparse::
+.. topic:: For usage instructions run
+
+   ``pvacseq download_example_data --help``
+
+.. .. argparse::
     :module: lib.download_example_data
     :func: define_parser
     :prog: pvacseq download_example_data
@@ -18,15 +22,25 @@ Download Example Data
 Install VEP Plugin
 ------------------
 
-.. argparse::
+.. topic:: For usage instructions run
+
+   ``pvacseq install_vep_plugin --help``
+
+.. .. argparse::
     :module: lib.install_vep_plugin
     :func: define_parser
     :prog: pvacseq install_vep_plugin
 
+.. _valid_alleles:
+
 List Valid Alleles
 ------------------
 
-.. argparse::
+.. topic:: For usage instructions run
+
+   ``pvacseq valid_alleles --help``
+
+.. .. argparse::
     :module: lib.valid_alleles
     :func: define_parser
     :prog: pvacseq valid_alleles
@@ -34,7 +48,11 @@ List Valid Alleles
 Documentation For Configuration Files
 -------------------------------------
 
-.. argparse::
+.. topic:: For usage instructions run
+
+   ``pvacseq config_files --help``
+
+.. .. argparse::
     :module: lib.config_files
     :func: define_parser
     :prog: pvacseq config_files

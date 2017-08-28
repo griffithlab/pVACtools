@@ -5,7 +5,7 @@ import os
 import pkg_resources
 try:
     from . import lib
-except SystemError:
+except (SystemError, ImportError):
     import lib
 
 def main():
