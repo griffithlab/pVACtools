@@ -79,7 +79,7 @@ There are a number of factors that determine the number of IEDB calls to be made
 :large:`My pVAC-Seq output file does not contain entries for all of the
 alleles I chose. Why is that?`
 
-There could be a few reasoans why the pVAC-Seq output does not contain
+There could be a few reasons why the pVAC-Seq output does not contain
 predictions for alleles:
 
 - The alleles you picked might've not been compatible with the prediction algorithm and/or epitope lengths chosen. In that case no calls for that allele would've been made and a status message would've printed to the screen.
