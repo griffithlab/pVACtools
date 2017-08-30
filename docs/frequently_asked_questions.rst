@@ -10,6 +10,15 @@ Frequently Asked Questions
 .. role:: large
 .. role:: large-code
 
+:large:`What type of variants does pVAC-Seq support?`
+
+pVAC-Seq makes predictions for all transcripts of a variant that were annotated
+as ``missense_variant``, ``inframe_insertions``, ``inframe_deletion``, or
+``frameshift_variant`` by VEP as long as the transcript was not also annotated
+as ``start_lost``. In addition, pVAC-Seq only includes variants that were
+called as homozygous or heterozygous variant. Variants that were not called
+are skipped.
+
 :large:`My pVAC-Seq command has been running for a long time. Why is
 that?`
 
