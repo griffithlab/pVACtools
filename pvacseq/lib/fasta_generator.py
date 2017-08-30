@@ -94,7 +94,10 @@ class FastaGenerator(metaclass=ABCMeta):
             variant_type = line['variant_type']
             full_wildtype_sequence = line['wildtype_amino_acid_sequence']
             if variant_type == 'FS':
-                position = int(line['protein_position'].split('-', 1)[0]) - 1
+                if line['amino_acid_change'] is not None and line['amino_acid_change'].split('/')[0] == '-':
+                    position = int(line['protein_position'].split('-', 1)[0])
+                else:
+                    position = int(line['protein_position'].split('-', 1)[0]) - 1
             elif variant_type == 'missense' or variant_type == 'inframe_ins':
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
                 if wildtype_amino_acid == '-':
@@ -130,6 +133,8 @@ class FastaGenerator(metaclass=ABCMeta):
             else:
                 mutation_start_position, wildtype_subsequence = self.get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line)
                 mutation_end_position = mutation_start_position + wildtype_amino_acid_length
+                if wildtype_amino_acid != '-' and wildtype_amino_acid != wildtype_subsequence[mutation_start_position:mutation_end_position]:
+                    sys.exit("ERROR: There was a mismatch between the actual wildtype amino acid and the expected amino acid. Did you use the same reference build version for VEP that you used for creating the VCF?\n%s" % line)
                 mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
 
             if '*' in wildtype_subsequence or '*' in mutant_subsequence:
