@@ -132,6 +132,8 @@ def main(args_input = sys.argv[1:]):
         else:
             mutation_start_position, wildtype_subsequence = get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line)
             mutation_end_position = mutation_start_position + wildtype_amino_acid_length
+            if wildtype_amino_acid != '-' and wildtype_amino_acid != wildtype_subsequence[mutation_start_position:mutation_end_position]:
+                sys.exit("ERROR: There was a mismatch between the actual wildtype amino acid and the expected amino acid. Did you use the same reference build version for VEP that you used for creating the VCF?\n%s" % line)
             mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
 
         if '*' in wildtype_subsequence or '*' in mutant_subsequence:
