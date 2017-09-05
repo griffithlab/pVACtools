@@ -22,7 +22,7 @@ output_dir: /home/archive/ssiebert/pVAC-Seq.new/pvacseq/example_data/MHC_Class_I
 peptide_sequence_length: 31
 prediction_algorithms:
 - NNalign
-pvacseq_version: 4.0.9
+pvacseq_version: 4.0.10
 sample_name: Test
 tdna_cov: 10
 tdna_indels_coverage_file: tests/test_data/pvacseq/indels.bam_readcount
