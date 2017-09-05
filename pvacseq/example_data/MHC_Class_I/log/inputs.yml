@@ -27,7 +27,7 @@ peptide_sequence_length: 21
 prediction_algorithms:
 - NetMHC
 - PickPocket
-pvacseq_version: 4.0.9
+pvacseq_version: 4.0.10
 sample_name: Test
 tdna_cov: 10
 tdna_indels_coverage_file: tests/test_data/pvacseq/indels.bam_readcount
