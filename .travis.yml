@@ -9,11 +9,15 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y ghostscript
 install:
-  - pip install -e .
+  #Remove the following line when pvacseq-client is first pushed to the live pypi site
+  - pip install -i https://testpypi.python.org/pypi pvacseq-client
+  - pip install -e .[API]
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 
+  - sleep 3
+services:
+  - postgresql
 script:
   - TEST_FLAG=1 python3 -m unittest discover -v
   - prove --recurse --verbose

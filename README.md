@@ -30,5 +30,23 @@ If you have an old version of pVAC-Seq installed you might want to consider upgr
 
 `pip install pvacseq --upgrade`
 
+## Web Client
+
+If you would like to run pVAC-Seq with a user interface and built-in data visualizations,
+install pVAC-Seq with the `API` extra:
+
+`pip install pvacseq[API] --upgrade`
+
+Then you can start the pVAC-Seq server by running the command:
+
+`pvacseq-api`
+
+Then navigate to `localhost:8000` in your web browser to manage pVAC-Seq.
+
+###### Note: The pVAC-Seq Web Client (_pvacseq-api_) requires the following ports:
+ * Port 8080 for operating the internal api
+ * Port 8000 for serving the web client to your browser
+ * Port 5006 for rendering data visualizations
+
 ## Documentation
 The pVAC-Seq documentation can be found on <a href="http://pvac-seq.readthedocs.io/">ReadTheDocs</a>.

@@ -25,16 +25,22 @@ server_data = []
 for dirpath, dirnames, filenames in os.walk("pvacseq/server"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            server_data.append(os.path.join('..', dirpath, filename))
+            server_data.append(os.path.join(
+                os.path.relpath(
+                    dirpath,
+                    'pvacseq/server'
+                ),
+                filename
+            ))
 
 setup(
     name="pvacseq",
-    version="4.0.10",
-    packages=["pvacseq", "pvacseq.lib", "pvacseq.server"],
+    version="4.1.0b4",
+    packages=["pvacseq", "pvacseq.lib", "pvacseq.server", "pvacseq.server.controllers"],
     entry_points={
         "console_scripts":[
             "pvacseq = pvacseq.pvacseq:main",
-            "pvacseq-ui = pvacseq.server.app:main"
+            "pvacseq-api = pvacseq.server.app:main [API]"
         ]
     },
     install_requires=[
@@ -51,6 +57,16 @@ setup(
         'pvacseq' : data_files,
         'pvacseq.server' : server_data,
     },
+    extras_require={
+        'API':[
+            'connexion',
+            'py-postgresql',
+            'watchdog',
+            'flask-cors',
+            'bokeh',
+            'pvacseq-client'
+        ]
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
 
@@ -59,12 +75,11 @@ setup(
 
         "Programming Language :: Python :: 3.5"
     ],
-
     author = "Jasreet Hundal, Susanna Kiwala, Aaron Graubert, Jason Walker, Chris Miller, Malachi Griffith and Elaine Mardis",
     author_email = "pvacseq-support@genome.wustl.edu",
     description = "Personalized Variant Antigens by Cancer Sequencing (pVAC-Seq)",
     long_description = "A cancer immunotherapy pipeline for the identification of personalized Variant Antigens by Cancer Sequencing (pVAC-Seq)",
     license = "NPOSL-3.0",
     keywords = "antigens neoantigens cancer sequencing variant variants",
-    url = "https://github.com/griffithlab/pVAC-Seq",   #
+    url = "https://github.com/griffithlab/pVAC-Seq",
 )
