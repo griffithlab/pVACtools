@@ -5,12 +5,12 @@ from flask import current_app
 import subprocess
 from .processes import fetch_process, is_running
 from .database import filterfile
-from .utils import descriptions, column_filter
+from .utils import descriptions, column_filter, filterdata, sort, fullresponse
 
 # details for each file to be appended to the output of results_get
 def resultfile(id, process, fileID):
     return({
-        'fileID':fileID,
+        'fileID':int(fileID),
         'description':process[0]['files'][fileID]['description'],
         'display_name':process[0]['files'][fileID]['display_name'],
         'url':'/api/v1/processes/%d/results/%s'%(id, fileID),
@@ -22,7 +22,7 @@ def resultfile(id, process, fileID):
         ]).decode().split()[0])-1,
     })
 
-def results_get(id, type):
+def results_get(id, type, filters, sorting, page, count):
     """Get the list of result files from a specific pVAC-Seq run"""
     data = current_app.config['storage']['loader']()
     if id == -1:
@@ -49,7 +49,7 @@ def results_get(id, type):
             for fileID in process[0]['files']:
                 if (re.search('%s.tsv'%filter, process[0]['files'][fileID]['display_name'])):
                     output.append(resultfile(id,process,fileID))
-    return output
+    return filterdata(output, filters, sorting, page, count)
 
 
 def list_input(path = None):

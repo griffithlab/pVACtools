@@ -15,6 +15,8 @@ import site
 import webbrowser
 import threading
 from postgresql.exceptions import UndefinedTableError
+from math import ceil
+import operator
 
 class dataObj(dict):
     def __init__(self, datafiles, sync):
@@ -156,7 +158,7 @@ def initialize(current_app, args):
         print(
             "pid's of old pVAC-Seq runs with id's",
             data['processid'],
-            "and lower may be innacurate"
+            "and lower may be inaccurate"
         )
     current_app.config['storage']['children']={}
     current_app.config['storage']['manifest']={}
@@ -173,7 +175,7 @@ def initialize(current_app, args):
             quote(visapp_path)
         ),
         shell=True,
-        stdout=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL
     )
     print(
         "Visualization server started on PID",
@@ -578,3 +580,106 @@ def initialize(current_app, args):
         # threading.Timer(2.5, lambda :webbrowser.open('http://localhost:8000')).start()
 
     print("Initialization complete.  Booting API")
+
+
+### filtering, sorting, and paging functions shared by multiple files ###
+queryfilters = re.compile(r'(.+)(<=?|>=?|!=|==)(.+)')
+
+ops = {
+    '<': operator.lt,
+    '<=': operator.le,
+    '==': operator.eq,
+    '!=': operator.ne,
+    '>=': operator.ge,
+    '>': operator.gt
+}
+
+# see if string is a number
+def is_number(string):
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
+
+def cmp(arg1, op, arg2):
+    operation = ops.get(op)
+    return operation(arg1,arg2)
+
+def fullresponse(data, page, count):
+    if count == -1:
+        count = len(data)
+    return ({
+        "_meta": {
+            "current_page":page,
+            "per_page":count,
+            "total_pages":ceil(len(data)/count),
+            "total_count":len(data)
+        },
+        "result": data[(count*(page-1)):((count*page)) if (count*page)<len(data) else len(data)]
+    })
+
+def sort(data, sorting, page, count, columns):
+    if not len(sorting) or sorting[0]=="none":
+        return fullresponse(data, page, count)
+    i = len(sorting)-1
+    while i > -1:
+        col = sorting[i]
+        if not col.startswith('-') and not col.startswith('+'):
+            return ({
+                "code": 400,
+                "message": "Please indicate which direction you'd like to sort by by putting a + or - in front of the column name",
+                "fields": "sorting"
+            }, 400)
+        if col[1:] not in columns:
+            return ({
+                "code": 400,
+                "message": "Unknown column name %s" % col[1:],
+                "fields": "sorting"
+            }, 400)
+        data = sorted(data, key=operator.itemgetter(col[1:]), reverse=True if col.startswith('-') else False)
+        i-=1
+    return fullresponse(data, page, count)
+
+def filterdata(data, filters, sorting, page, count):
+    if not len(data):
+        return fullresponse(data, page, count)
+    columns = [name for name in data[0]]
+    if not len(filters) or filters[0]=="none":
+        return sort(data, sorting, page, count, columns)
+    filteredlist = []
+    for i in range(len(data)):
+        comparisons = []
+        for j in range(len(filters)):
+            f = filters[j].strip()
+            if not len(f):
+                continue
+            result = queryfilters.match(f)
+            if not result:
+                return ({
+                    "code":400,
+                    "message": "Encountered an invalid filter (%s)" % f,
+                    "fields": "filtering"
+                }, 400)
+            colname = result.group(1)
+            if colname not in columns:
+                return ({
+                    "code": 400,
+                    "message": "Unknown column name %s" % result.group(1),
+                    "fields": "filtering"
+                }, 400)
+            op = result.group(2)
+            val = result.group(3)
+            comp = data[i][colname]
+            if type(comp) == int:
+                val = int(val)
+            # see if string is actually a number for accurate number comparisons,
+            # avoiding string comparisons of numbers in cmp() function
+            elif is_number(comp):
+                data[i]
+                val = float(val)
+            if not cmp(comp, op, val):
+                break
+            if j == len(filters)-1:
+                filteredlist.append(data[i])
+    return sort(filteredlist, sorting, page, count, columns)

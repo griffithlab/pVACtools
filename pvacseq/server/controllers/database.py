@@ -17,7 +17,6 @@ int_pattern = re.compile(r'^-?\d+$')
 NA_pattern = re.compile(r'^NA$')
 queryfilters = re.compile(r'(.+)(<=?|>=?|!=|==)(.+)')
 
-
 def init_column_mapping(row, schema):
     """Generate initial estimates of column data types"""
     defs = {column_filter(col): 'text' for col in row}

@@ -263,7 +263,7 @@ class APITests(unittest.TestCase):
             timeout = 5,
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-        targetResult = [item for item in response.json() if item['id'] == processID]
+        targetResult = [item for item in response.json()['result'] if item['id'] == processID]
         self.assertTrue(len(targetResult))
         targetResult = targetResult[0]
         self.assertIsInstance(targetResult, dict)
@@ -318,10 +318,10 @@ class APITests(unittest.TestCase):
         )
         self.assertEqual(response.status_code,200)
         process_list = response.json()
-        if not len(process_list):
+        if not len(process_list['result']):
             process_list = [{'id':self.start_basic_run()}]
         response = requests.get(
-            self.urlBase + '/processes/%d'%process_list[0]['id'],
+            self.urlBase + '/processes/%d'%process_list['result'][0]['id'],
             timeout=5,
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
@@ -341,7 +341,7 @@ class APITests(unittest.TestCase):
         self.assertIsInstance(process_data['files'][0], dict)
 
         self.assertIn('id', process_data)
-        self.assertEqual(process_data['id'], process_list[0]['id'])
+        self.assertEqual(process_data['id'], process_list['result'][0]['id'])
 
         self.assertIn('log', process_data)
         self.assertIsInstance(process_data['log'], list)
@@ -382,37 +382,38 @@ class APITests(unittest.TestCase):
 
     def test_endpoint_process_results(self):
         response = requests.get(
-            self.urlBase + '/processes',
+            self.urlBase + '/processes?count=-1',
             timeout = 5
         )
         self.assertEqual(response.status_code,200)
         process_list = response.json()
-        if not len(process_list):
+        if not len(process_list['result']):
             self.start_basic_run()
             response = requests.get(
-                self.urlBase + '/processes',
+                self.urlBase + '/processes?count=-1',
                 timeout = 5
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
-        process_list.sort(key = lambda x:x['id'])
-        while process_list[-1]['running']:
+        process_list['result'].sort(key = lambda x:x['id'])
+        while process_list['result'][-1]['running']:
             time.sleep(1)
             response = requests.get(
-                self.urlBase + '/processes',
+                self.urlBase + '/processes?count=-1',
                 timeout = 5
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
-            process_list.sort(key = lambda x:x['id'])
+            process_list['result'].sort(key = lambda x:x['id'])
         response = requests.get(
-            'http://localhost:8080'+process_list[-1]['results_url'],
+            'http://localhost:8080'+process_list['result'][-1]['results_url'] + '?count=-1',
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         results = response.json()
-        self.assertIsInstance(results, list)
-        for item in results:
+        self.assertIsInstance(results, dict)
+        self.assertIsInstance(results['result'], list)
+        for item in results['result']:
             self.assertIsInstance(item, dict)
 
             self.assertIn('description', item)
@@ -424,7 +425,7 @@ class APITests(unittest.TestCase):
             self.assertTrue(item['display_name'])
 
             self.assertIn('fileID', item)
-            self.assertIsInstance(item['fileID'], str)
+            self.assertIsInstance(item['fileID'], int)
             self.assertGreaterEqual(int(item['fileID']), 0)
 
             self.assertIn('rows', item)
@@ -438,6 +439,17 @@ class APITests(unittest.TestCase):
             self.assertIsInstance(item['url'], str)
             self.assertTrue(item['url'])
 
+        for process in process_list['result']:
+            response = requests.get(
+                # %2B = '+', %2C = ','
+                'http://localhost:8080' + process['results_url'] + '?type=final',
+                timeout = 5
+            )
+            self.assertEqual(response.status_code,200)
+            results = response.json()
+            for item in results['result']:
+                self.assertTrue(re.search('final.tsv$', item['display_name']))
+
     def test_endpoint_process_results_data(self):
         response = requests.get(
             self.urlBase + '/processes',
@@ -445,7 +457,7 @@ class APITests(unittest.TestCase):
         )
         self.assertEqual(response.status_code,200)
         process_list = response.json()
-        if not len(process_list):
+        if not len(process_list['result']):
             self.start_basic_run()
             response = requests.get(
                 self.urlBase + '/processes',
@@ -453,8 +465,8 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
-        process_list.sort(key = lambda x:x['id'])
-        while process_list[-1]['running']:
+        process_list['result'].sort(key = lambda x:x['id'])
+        while process_list['result'][-1]['running']:
             time.sleep(1)
             response = requests.get(
                 self.urlBase + '/processes',
@@ -462,14 +474,14 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code,200)
             process_list = response.json()
-            process_list.sort(key = lambda x:x['id'])
+            process_list['result'].sort(key = lambda x:x['id'])
         response = requests.get(
-            'http://localhost:8080'+process_list[-1]['results_url'],
+            'http://localhost:8080'+process_list['result'][-1]['results_url'],
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         results = response.json()
-        for item in results:
+        for item in results['result']:
             if item['display_name'].endswith('.tsv') and item['rows']>0:
                 response = requests.get(
                     'http://localhost:8080'+item['url'],
@@ -659,6 +671,30 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertFalse(response.json())
 
+    def test_endpoint_validallele(self):
+        response = requests.get(
+            self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'prediction_algorithms':'NetMHC'
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('NetMHC' in results)
+        self.assertTrue(len(results['NetMHC']))
+
+    def test_endpoint_validalgorithms(self):
+        response = requests.get(
+            self.urlBase+'/validalgorithms',
+            timeout=5
+        )
+        self.assertEqual(response.status_code, 200)
+        algorithms = response.json()
+        self.assertIsInstance(algorithms, list)
+        self.assertTrue('NetMHC' in algorithms)
+
     def test_duplicate_check(self):
         processID = self.start_basic_run()['processid']
         time.sleep(1)
@@ -797,3 +833,171 @@ class APITests(unittest.TestCase):
             timeout=5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+
+    # Some simple testing of filtering, sorting, and paging.
+    # In the future, maybe add more thorough testing of these
+    def test_sort(self):
+        response = requests.get(
+            self.urlBase + '/processes',
+            timeout = 5,
+            params={
+                'count':-1
+            }
+        )
+        self.assertEqual(response.status_code,200)
+        process_list = response.json()
+        if not len(process_list['result']):
+            self.start_basic_run()
+            response = requests.get(
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
+            )
+            self.assertEqual(response.status_code,200)
+            process_list = response.json()
+        while process_list['result'][-1]['running']:
+            time.sleep(1)
+            response = requests.get(
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
+            )
+            self.assertEqual(response.status_code,200)
+            process_list = response.json()
+
+        for process in process_list['result']:
+            response = requests.get(
+                'http://localhost:8080' + process['results_url'],
+                timeout = 5,
+                params={
+                    'sorting':'+size,+fileID',
+                    'count':-1
+                }
+            )
+            self.assertEqual(response.status_code,200)
+            result_list = response.json()
+
+            response2 = requests.get(
+                'http://localhost:8080' + process['results_url'],
+                timeout = 5,
+                params={
+                    'count':-1
+                }
+            )
+            self.assertEqual(response2.status_code,200)
+            normal_result_list = response2.json()
+            normal_result_list['result'].sort(key = lambda x: (x['size'], x['fileID']))
+            self.assertEqual(result_list['result'], normal_result_list['result'])
+
+    def test_filter(self):
+        response = requests.get(
+            self.urlBase + '/processes',
+            timeout = 5,
+            params={
+                'count':-1
+            }
+        )
+        self.assertEqual(response.status_code,200)
+        process_list = response.json()
+        if not len(process_list['result']):
+            self.start_basic_run()
+            response = requests.get(
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
+            )
+            self.assertEqual(response.status_code,200)
+            process_list = response.json()
+        while process_list['result'][-1]['running']:
+            time.sleep(1)
+            response = requests.get(
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
+            )
+            self.assertEqual(response.status_code,200)
+            process_list = response.json()
+
+        for process in process_list['result']:
+            response = requests.get(
+                'http://localhost:8080' + process['results_url'],
+                timeout = 5,
+                params={
+                    'filters':'fileID>2'#,
+                    #'count':-1
+                }
+            )
+            filtered_results = response.json()
+            self.assertEqual(response.status_code,200)
+            for item in filtered_results['result']:
+                self.assertGreater(item['fileID'], 2)
+
+    def test_pagination(self):
+        response = requests.get(
+            self.urlBase + '/processes',
+            timeout = 5,
+            params={
+                'count':-1
+            }
+        )
+        self.assertEqual(response.status_code,200)
+        process_list = response.json()
+        if not len(process_list['result']):
+            self.start_basic_run()
+            response = requests.get(
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
+            )
+            self.assertEqual(response.status_code,200)
+            process_list = response.json()
+        while process_list['result'][-1]['running']:
+            time.sleep(1)
+            response = requests.get(
+                self.urlBase + '/processes',
+                timeout = 5,
+                params={
+                    'count':-1
+                }
+            )
+            self.assertEqual(response.status_code,200)
+            process_list = response.json()
+
+        for process in process_list['result']:
+            response = requests.get(
+                'http://localhost:8080' + process['results_url'],
+                timeout = 5,
+                params={
+                    'count':-1
+                }
+            )
+            self.assertEqual(response.status_code,200)
+            full_result_list = response.json()
+            response = requests.get(
+                'http://localhost:8080' + process['results_url'],
+                timeout = 5,
+                params={
+                    'count':3,
+                    'page':2
+                }
+            )
+            self.assertEqual(response.status_code,200)
+            paged_result = response.json()
+
+            self.assertEqual(len(paged_result['result']), 3 if len(full_result_list['result']) >= 6 else len(full_result_list['result']) - 3)
+            self.assertEqual(paged_result['result'][0] if len(paged_result['result']) else [], full_result_list['result'][3] if len(full_result_list['result']) > 3 else [])
+            self.assertEqual(paged_result['_meta']['per_page'], 3)
+            self.assertEqual(paged_result['_meta']['current_page'], 2)
+            self.assertEqual(paged_result['_meta']['total_count'], len(full_result_list['result']))
+
+
