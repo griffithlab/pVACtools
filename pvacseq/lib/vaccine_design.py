@@ -1,5 +1,7 @@
-#  Input would be a protein fasta
-# python vaccine_design.py test peptides.fa ann H-2-Kb -o /Users/user/Desktop -l 8
+#  Input would be a protein fasta or both pvac-seq run output final.tsv and input annotated vcf
+# python pvacseq/lib/vaccine_design.py test --generate-input-fasta -t tests/test_data/vaccine_design/input_parse_test_input.tsv -v tests/test_data/vaccine_design/input_parse_test_input.vcf ann H-2-Kb -o . -n 25 -l 8
+# python pvacseq/lib/vaccine_design.py test -f tests/test_data/vaccine_design/Test.vaccine.results.input.fa ann H-2-Kb -o . -n 25 -l 8
+
 import shutil
 import sys
 import argparse
@@ -31,8 +33,13 @@ def define_parser():
         help="The name of the run being processed." +
              " This will be used as a prefix for output files."
     )
-    parser.add_argument('input_file', type=argparse.FileType('r'),
-                        help="Path to input FASTA file")
+    parser.add_argument('-g', "--generate-input-fasta", action="store_true")
+    parser.add_argument('-f', "--input-fa", type=argparse.FileType('r'),
+                       help="Path to input fasta file. " + "Required if not generating input fasta")
+    parser.add_argument('-t', "--input_tsv",
+                        help="Path to input tsv file with the epitopes selected for vaccine design. " + "Required if generating input fasta. ")
+    parser.add_argument('-v', "--input_vcf",
+                        help="Path to original pVAC-Seq input vcf file" + "Requiired if generating input fasta. ")
     parser.add_argument('method',
                         choices=PredictionClass.iedb_prediction_methods(),
                         help="The iedb analysis method to use")
@@ -41,6 +48,8 @@ def define_parser():
     parser.add_argument('-o', "--outdir", help="Output directory")
     parser.add_argument('-k', "--keep-tmp",
                         help="Option to store tmp files. ", action="store_true")
+    parser.add_argument('-n', "--input-n-mer", default='25',
+                        help="Length of peptide sequence to be generated for use in input to main vaccine design algorithm. " + "Default: 25")
     parser.add_argument(
         "-l", "--epitope-length",
         type=lambda s: [int(epl) for epl in s.split(',')],
@@ -70,9 +79,135 @@ def define_parser():
         "-s", "--seed-rng", action="store_true",
         help="Seed random number generator with default value 0.5 for unit test." +
         " Default: False")
-    
     return parser
 
+def tsvToFasta(n_mer, input_tsv, input_vcf, output_dir):
+
+    def parse_choosen_epitopes(input_tsv):
+        with open(input_tsv, 'r') as input_f:
+            next(input_f)
+            mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = [], [], [], [], [], []
+            for line in input_f:
+                fields = line.split("\t")
+                mut_type, mutation, pos, gene_name = fields[7], fields[8], fields[9], fields[10]
+                mt_epitope_seq, wt_epitope_seq = fields[15], fields[16]
+                mutations.append(mutation)
+                mut_types.append(mut_type)
+                mutation = mutation.split("/")
+                #if position presented as a range, use higher end of range
+                old_AA, new_AA = mutation[0], mutation[1]
+                if "-" in pos:
+                    pos = pos.split("-")
+                    pos = pos[1]
+                    mut_ID = ("MT." + gene_name + "." +  pos + "fs")
+                elif mut_type == "FS":
+                    mut_ID = "MT." + gene_name + "." + old_AA + pos + "fs"
+                elif mut_type == "missense": 
+                    mut_ID = "MT." + gene_name + "."  + old_AA + pos + new_AA
+                mut_IDs.append(mut_ID)
+                mt_epitope_seqs.append(mt_epitope_seq)
+                wt_epitope_seqs.append(wt_epitope_seq)
+                transcript_IDs.append(fields[5])
+        input_f.close()
+        return mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs
+
+#get necessary data from initial pvacseq input vcf
+    def parse_original_vcf(input_vcf):
+        with open(input_vcf, 'r') as input_f:
+            transcripts_dict = {}
+            for line in input_f:
+                attributes = []
+                if line[0] != "#":
+                    fields = line.split("\t")
+                    info = fields[7]
+                    info = info.split("|")
+                    transcript_ID, downstr_seq, len_change, full_seq = info[6], info[23], info[24], info[25]
+                    attributes.append(full_seq)
+                    attributes.append(downstr_seq)
+                    attributes.append(len_change)
+                    transcripts_dict[transcript_ID] = attributes
+        input_f.close()
+        return(transcripts_dict)
+
+    def edit_full_seq(i, mut_types, mutations, wt_epitope_seqs, mt_epitope_seqs, sub_seq, full_seq, transcripts_dict):
+        if mut_types[i] == "FS":
+            downstr_seq, len_change = transcripts_dict[transcript_IDs[i]][1], int(transcripts_dict[transcript_IDs[i]][2])
+            parts = mutations[i].split("/")
+            initial = parts[0]
+            final = parts[1]
+
+            #handle -/X mutations by appending downstr_seq to next position, instead of overwriting last position
+            if initial == "-":
+                new_end_of_full_seq = len(full_seq) + len_change - len(downstr_seq)
+            #overwrites last position of seq with first position of
+            #predicted downstr seq
+            else:
+                new_end_of_full_seq = len(full_seq) + len_change - len(downstr_seq) - 1
+            full_seq = full_seq[:new_end_of_full_seq]
+        #handles ex: L/LX mutations by adding sequence that is preserved
+        #before the downstr predicted sequence
+            if len(final) > 1:
+                final = final.replace("X", "")
+                full_seq = full_seq + final
+            full_seq = full_seq + downstr_seq
+        elif mut_types[i] == "missense":
+            full_seq = full_seq.replace(wt_epitope_seqs[i], mt_epitope_seqs[i])
+        else:
+            sys.exit("Mutation not yet handled by this parser")
+        return(full_seq)
+
+    #get flanking peptides for the epitope chosen
+    def get_sub_seq(full_seq, mt_seq, n_mer):
+        beginning = full_seq.find(mt_seq)
+        if beginning == -1:
+            sys.exit("Error: could not find mutant epitope sequence in mutant full sequence")
+        length = len(mt_seq)
+        end = beginning + length
+        #if eptitope sequence is too close to the beginning or end to get the
+        #right amount of flanking peptides, get appropriate length from solely
+        #ahead or behind
+        len_needed = n_mer - length
+        if len_needed % 2 != 0:
+            front = int(beginning - len_needed / 2)
+            back = int(end + len_needed / 2)
+        else:
+            front = int(beginning - len_needed / 2)
+            back = int(end + len_needed / 2)
+        if front < 0:
+            sub_seq = full_seq[beginning:(beginning + n_mer)]
+        elif back > len(full_seq):
+            sub_seq = full_seq[(end - n_mer):end]
+        else:
+            sub_seq = full_seq[front:back]
+        return(sub_seq)
+
+    def write_output_fasta(output_f, n_mer, mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs, transcripts_dict):
+        with open(output_f, 'w') as out_f:
+            sub_seq = ""
+            full_seq = ""
+            n_mer = int(n_mer)
+            for i in range(len(transcript_IDs)):
+                full_seq = (transcripts_dict[transcript_IDs[i]])[0] 
+            
+                full_seq = edit_full_seq(i, mut_types, mutations, wt_epitope_seqs, mt_epitope_seqs, sub_seq, full_seq, transcripts_dict)
+
+                sub_seq = get_sub_seq(full_seq, mt_epitope_seqs[i], n_mer)
+                out_f.write(">" + mut_IDs[i] + "\n")
+                out_f.write(sub_seq + "\n")
+                print("ID: " + mut_IDs[i] + ", sequence: " + sub_seq)
+        out_f.close()
+        print("FASTA file written")
+        return()
+
+    output_f = os.path.join(output_dir, "vaccine_design_input.fa")
+
+    mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = parse_choosen_epitopes(input_tsv)
+
+    transcripts_dict = parse_original_vcf(input_vcf)
+
+    write_output_fasta(output_f, n_mer, mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs, transcripts_dict)
+    return(output_f)
+    
 
 #https://github.com/perrygeo/simanneal/blob/master/simanneal/anneal.py
 class OptimalPeptide(Annealer):
@@ -399,7 +534,10 @@ def main(args_input=sys.argv[1:]):
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
 
-    input_file = args.input_file
+    input_tsv = args.input_tsv
+    input_vcf = args.input_vcf
+    input_file = args.input_fa
+    input_n_mer = args.input_n_mer
     iedb_method = args.method
     ic50_cutoff = args.cutoff
     alleles = args.allele.split(',')
@@ -407,13 +545,17 @@ def main(args_input=sys.argv[1:]):
     print("IC50 cutoff: " + str(ic50_cutoff))
     runname = args.run_name
     outdir = args.outdir
+    generate_input_fasta = args.generate_input_fasta
 
     base_output_dir = os.path.abspath(outdir)
-    tmp_dir = os.path.join(base_output_dir, runname, runname + '_tmp')
+    base_output_dir = os.path.join(base_output_dir, runname)
+    tmp_dir = os.path.join(base_output_dir, runname + '_tmp')
     os.makedirs(tmp_dir, exist_ok=True)
 
     if args.seed_rng:
         random.seed(0.5)
+    if generate_input_fasta:
+        input_file = tsvToFasta(input_n_mer, input_tsv, input_vcf, base_output_dir)
 
     peptides = SeqIO.parse(input_file, "fasta")
    
@@ -570,7 +712,7 @@ def main(args_input=sys.argv[1:]):
     for id in state:
         print("\t", id)
 
-    results_file = os.path.join(base_output_dir, runname, runname + '_results.fa')
+    results_file = os.path.join(base_output_dir, runname + '_results.fa')
     with open(results_file, 'w') as f:
         name = list()
         min_score = Paths[state[0]][state[1]]['weight']
@@ -610,11 +752,10 @@ def main(args_input=sys.argv[1:]):
         f.write(''.join(output))
 
     if not args.keep_tmp:
-        shutil.rmtree(tmp_dir)
+        shutil.rmtree(tmp_dir) 
 
-    out_f = os.path.join(base_output_dir, runname) 
-
-    output_vaccine_png(results_file, out_f)
+    #keep this change when merging
+    output_vaccine_png(results_file, base_output_dir)
 
 if __name__ == "__main__":
     main()
