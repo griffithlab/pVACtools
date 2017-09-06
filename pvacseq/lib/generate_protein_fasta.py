@@ -7,7 +7,8 @@ import tempfile
 import os
 import yaml
 from collections import OrderedDict
-import lib
+from lib.fasta_generator import *
+from lib.input_file_converter import *
 
 def define_parser():
     parser = argparse.ArgumentParser("pvacseq generate_protein_fasta")
@@ -35,11 +36,20 @@ def define_parser():
 def convert_vcf(input_file, temp_dir):
     print("Converting VCF to TSV")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
-    convert_params = [
-        input_file,
-        tsv_file,
-    ]
-    lib.convert_vcf.main(convert_params)
+    convert_params = {
+        'input_file' : input_file,
+        'output_file': tsv_file,
+        'gene_expn_file'             : None,
+        'transcript_expn_file'       : None,
+        'normal_snvs_coverage_file'  : None,
+        'normal_indels_coverage_file': None,
+        'tdna_snvs_coverage_file'    : None,
+        'tdna_indels_coverage_file'  : None,
+        'trna_snvs_coverage_file'    : None,
+        'trna_indels_coverage_file'  : None,
+    }
+    converter = VcfConverter(**convert_params)
+    converter.execute()
     print("Completed")
 
 def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir):
@@ -47,16 +57,16 @@ def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     fasta_file = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file = os.path.join(temp_dir, 'tmp.fasta.key')
-    generate_fasta_params = [
-        tsv_file,
-        str(peptide_sequence_length),
-        "0",
-        fasta_file,
-        fasta_key_file,
-    ]
-    if downstream_sequence_length:
-        generate_fasta_params.extend(['-d', downstream_sequence_length,])
-    lib.generate_fasta.main(generate_fasta_params)
+    generate_fasta_params = {
+        'input_file'                : tsv_file,
+        'peptide_sequence_length'   : peptide_sequence_length,
+        'epitope_length'            : 0,
+        'output_file'               : fasta_file,
+        'output_key_file'           : fasta_key_file,
+        'downstream_sequence_length': downstream_sequence_length
+    }
+    fasta_generator = FastaGenerator(**generate_fasta_params)
+    fasta_generator.execute()
     print("Completed")
 
 def parse_files(output_file, temp_dir):

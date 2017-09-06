@@ -1,0 +1,20 @@
+Executing MHC Class I predictions
+Converting VCF to TSV
+Completed
+Splitting TSV into smaller chunks
+Splitting TSV into smaller chunks - Entries 1-24
+Completed
+Generating Variant Peptide FASTA and Key Files
+Generating Variant Peptide FASTA and Key Files - Entries 1-48
+Completed
+Processing entries for Allele HLA-E*01:01 and Epitope Length 10 - Entries 1-48
+Running IEDB on Allele HLA-E*01:01 and Epitope Length 10 with Method NetMHC - Entries 1-48
+Completed
+Parsing IEDB Output for Allele HLA-E*01:01 and Epitope Length 10 - Entries 1-48
+Completed
+Combining Parsed IEDB Output Files
+Completed
+Running Binding Filters
+Completed
+
+Done: pvacseq has completed. File /Users/agrauber/pVAC-Seq/results/basic_run_2/MHC_Class_I/basic_run.final.tsv contains list of filtered putative neoantigens. We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information

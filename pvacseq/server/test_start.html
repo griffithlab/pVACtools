@@ -6,21 +6,38 @@
   </head>
   <body>
     <form action="/api/v1/staging" method="post" enctype="multipart/form-data">
-      Input VCF file: <input type="file" name="input" accept=".vcf" required><br>
+      Input VCF file: <select required name="input" class="selector">
+      </select><br>
       Sample Name: <input type="text" name="samplename" required><br>
       Alleles: <input type="text" name="alleles" pattern="(\S+,)*\S+" required><br>
       Prediction Algorithms: <input type="text" name="prediction_algorithms" pattern="((SMM|NetMHCpan|PickPocket|NetMHCcons|NetMHC|SMMPMBEC|NetMHCIIpan|NNalign|SMMalign)+,)*(SMM|NetMHCpan|PickPocket|NetMHCcons|NetMHC|SMMPMBEC|NetMHCIIpan|NNalign|SMMalign)+" required><br>
       <br><hr><br>
       Epitope Lengths: <input type="text" name="epitope_lengths" pattern="(\d+,)*\d+" value="10"><br>
       Peptide Sequence Length: <input type="number" name="peptide_sequence_length" value="21"><br>
-      Gene Expression File: <input type="file" name="gene_expn_file" accept=".fpkm_tracking"><br>
-      Transcript Expression File: <input type="file" name="transcript_expn_file" accept=".fpkm_tracking"><br>
-      Normal SNVs Coverage File: <input type="file" name="normal_snvs_coverage_file"><br>
-      Normal Indels Coverage File: <input type="file" name="normal_indels_coverage_file"><br>
-      Tumor DNA SNVs Coverage File: <input type="file" name="tdna_snvs_coverage_file"><br>
-      Tumor DNA Indels Coverage File: <input type="file" name="tdna_indels_coverage_file"><br>
-      Tumor RNA SNVs Coverage File: <input type="file" name="trna_snvs_coverage_file"><br>
-      Tumor RNA Indels Coverage File: <input type="file" name="trna_indels_coverage_file"><br>
+      Gene Expression File: <select name="gene_expn_file" class="selector">
+        <option selected value>Select a file</option>
+      </select><br>
+      Transcript Expression File: <select name="transcript_expn_file" class="selector">
+        <option selected value>Select a file</option>
+      </select><br>
+      Normal SNVs Coverage File: <select name="normal_snvs_coverage_file" class="selector">
+        <option selected value>Select a file</option>
+      </select><br>
+      Normal Indels Coverage File: <select name="normal_indels_coverage_file" class="selector">
+        <option selected value>Select a file</option>
+      </select><br>
+      Tumor DNA SNVs Coverage File: <select name="tdna_snvs_coverage_file" class="selector">
+        <option selected value>Select a file</option>
+      </select><br>
+      Tumor DNA Indels Coverage File: <select name="tdna_indels_coverage_file" class="selector">
+        <option selected value>Select a file</option>
+      </select><br>
+      Tumor RNA SNVs Coverage File: <select name="trna_snvs_coverage_file" class="selector">
+        <option selected value>Select a file</option>
+      </select><br>
+      Tumor RNA Indels Coverage File: <select name="trna_indels_coverage_file" class="selector">
+        <option selected value>Select a file</option>
+      </select><br>
       NetChop Method: <select name="net_chop_method">
         <option value="" selected>Skip NetChop</option>
         <option value="cterm">C term 3.0</option>
@@ -49,5 +66,45 @@
 
       <input type="submit">
     </form>
+    <!-- embed -->
+    <script>
+      window.onload=function(){
+        var req = new XMLHttpRequest();
+        req.addEventListener('load', function(event){
+          console.log('Response recieved');
+          var parser = function(obj){
+            var output = [];
+            for(var i = 0; i< obj.length; i++){
+              if(obj[i]['type'] == 'file'){
+                  var display_name = obj[i]['display_name'];
+                  if(display_name.charAt(0) !== '.') {
+                    output.push([obj[i]['fileID'], obj[i]['display_name']]);
+                  } else {
+                    console.log('Ignoring hidden input file ' + display_name);
+                  }
+              }
+              else {
+                output = output.concat(parser(obj[i]['contents']));
+              }
+            }
+            return output;
+          };
+          window.pvacseq_files = parser(JSON.parse(event.target.response));
+          Array.prototype.forEach.call(
+            document.getElementsByClassName('selector'),
+            function(elem){
+              window.pvacseq_files.forEach(function(spec){
+                var node = document.createElement('option');
+                node.setAttribute('value', spec[0]);
+                node.innerText = spec[1];
+                elem.appendChild(node);
+              })
+            }
+          )
+        });
+        req.open('GET', '/api/v1/input');
+        req.send();
+      }
+    </script>
   </body>
 </html>

@@ -8,8 +8,6 @@ import py_compile
 from subprocess import run, PIPE
 from filecmp import cmp
 import yaml
-pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(pvac_dir)
 import pvacseq.lib
 from pvacseq.lib.pipeline import *
 import datetime
@@ -49,13 +47,8 @@ def make_response(data, files, path):
         reader.close()
         return response_obj
 
-def generate_class_i_call(method, allele, length, path, input_path):
-    reader = open(os.path.join(
-        input_path,
-        "MHC_Class_I",
-        "tmp",
-        "Test_21.fa.split_1-48"
-    ), mode='r')
+def generate_class_i_call(method, allele, length, input_file):
+    reader = open(input_file, mode='r')
     text = reader.read()
     reader.close()
     return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhci/', data={
@@ -85,7 +78,7 @@ def generate_class_ii_call(method, allele, path, input_path):
 class PVACTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.pVac_directory =  pvac_dir
+        cls.pVac_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         cls.test_data_directory = os.path.join(
             cls.pVac_directory,
             'tests',
@@ -132,6 +125,7 @@ class PVACTests(unittest.TestCase):
             "download_example_data",
             "valid_alleles",
             "config_files",
+            "vaccine_design"
             ]:
             result = run([
                 sys.executable,
@@ -179,6 +173,8 @@ class PVACTests(unittest.TestCase):
             '--tdna-vaf', '20',
             '-d', 'full',
         ])
+        self.assertEqual(len(self.request_mock.mock_calls), 8)
+
         pvacseq.lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
@@ -190,6 +186,7 @@ class PVACTests(unittest.TestCase):
             '--keep-tmp-files',
             '-d', 'full',
         ])
+        self.assertEqual(len(self.request_mock.mock_calls), 9)
 
         for file_name in (
             'Test.tsv',
@@ -229,14 +226,13 @@ class PVACTests(unittest.TestCase):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'log', file_name)
             self.assertTrue(os.path.exists(output_file))
 
-        self.assertEqual(len(self.request_mock.mock_calls), 9)
         #Class I output files
         methods = self.methods
         for method in methods.keys():
             for allele in methods[method].keys():
                 for length in methods[method][allele]:
                     self.request_mock.assert_has_calls([
-                        generate_class_i_call(method, allele, length, self.test_data_directory, output_dir.name)
+                        generate_class_i_call(method, allele, length, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-48"))
                     ])
                     output_file   = os.path.join(output_dir.name, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
                     expected_file = os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
@@ -352,3 +348,48 @@ class PVACTests(unittest.TestCase):
 
         self.assertTrue(duration_1 > duration_2)
 
+    def test_pvacseq_pipeline_for_fusions(self):
+        pvac_script_path = os.path.join(
+            self.pVac_directory,
+            'pvacseq',
+            "pvacseq.py"
+            )
+        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+
+        pvacseq.lib.main.main([
+            os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
+            'Test',
+            'HLA-A*29:02',
+            'NetMHC',
+            output_dir.name,
+            '-e', '9',
+            '--top-score-metric=lowest',
+            '--keep-tmp-files',
+        ])
+
+        for file_name in (
+            'Test.tsv',
+            'Test.tsv_1-5',
+            'Test.combined.parsed.tsv',
+            'Test.filtered.binding.tsv',
+            'Test.final.tsv',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', file_name)
+            self.assertTrue(compare(output_file, expected_file))
+
+        for file_name in (
+            'Test_21.fa.split_1-10',
+            'Test_21.fa.split_1-10.key',
+            'Test.ann.HLA-A*29:02.9.tsv_1-10',
+            'Test.HLA-A*29:02.9.parsed.tsv_1-10',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'tmp', file_name)
+            self.assertTrue(compare(output_file, expected_file))
+
+        self.request_mock.assert_has_calls([
+            generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-10"))
+        ])
+
+        output_dir.cleanup()

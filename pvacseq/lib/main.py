@@ -1,15 +1,6 @@
 import sys
-from pathlib import Path # if you haven't already done so
-root = str(Path(__file__).resolve().parents[1])
-sys.path.append(root)
-
 import argparse
 import os
-
-try:
-    from .. import lib
-except ValueError:
-    import lib
 from lib.prediction_class import *
 from lib.pipeline import *
 from lib.config_files import additional_input_file_list_options
@@ -36,7 +27,9 @@ def define_parser():
 
     parser.add_argument(
         "input_file",
-        help="A VEP-annotated single-sample VCF containing transcript, Wildtype protein sequence, and Downstream protein sequence information"
+        help="The variant input file to process. This can either be a VEP-annotated single-sample VCF "
+             + "containing transcript, Wildtype protein sequence, and Downstream protein sequence information, "
+             + "or a INTEGRATE-Neo bedpe file with fusions."
     )
     parser.add_argument(
         "sample_name",
@@ -197,6 +190,13 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
+    if args.input_file.endswith('.vcf'):
+        input_file_type = 'vcf'
+    elif args.input_file.endswith('.bedpe'):
+        input_file_type = 'bedpe'
+    else:
+        sys.exit("Unknown input file type for file (%s). Input file must be either a VCF (.vcf) or a bedpe (.bedpe) file." % input_file)
+
     if "." in args.sample_name:
         sys.exit("Sample name cannot contain '.'")
 
@@ -209,7 +209,7 @@ def main(args_input = sys.argv[1:]):
     if args.downstream_sequence_length == 'full':
         downstream_sequence_length = None
     elif args.downstream_sequence_length.isdigit():
-        downstream_sequence_length = args.downstream_sequence_length
+        downstream_sequence_length = int(args.downstream_sequence_length)
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
@@ -240,6 +240,7 @@ def main(args_input = sys.argv[1:]):
 
     shared_arguments = {
         'input_file'                : args.input_file,
+        'input_file_type'           : input_file_type,
         'sample_name'               : args.sample_name,
         'top_result_per_mutation'   : args.top_result_per_mutation,
         'top_score_metric'          : args.top_score_metric,

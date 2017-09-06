@@ -7,8 +7,6 @@ import tempfile
 from subprocess import call
 from filecmp import cmp
 import py_compile
-base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-sys.path.append(base_dir)
 import pvacseq.lib.call_iedb
 
 def make_response(method, path):
@@ -26,6 +24,7 @@ class CallIEDBTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.python = sys.executable
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
         cls.executable_dir = os.path.join(base_dir, 'pvacseq', 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'call_iedb.py')
         cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'call_iedb')

@@ -1,0 +1,5 @@
+{
+  "processes":"~/.pvacseq/processes.json",
+  "dropbox":"~/.pvacseq/dropbox.json",
+  "data-dir":"~/pVAC-Seq"
+}
