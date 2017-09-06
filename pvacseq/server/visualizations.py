@@ -129,7 +129,7 @@ from bokeh.charts import Scatter
 from bokeh.models import ColumnDataSource, PanTool, HoverTool, Slider, RangeSlider
 from bokeh.models import TableColumn, TapTool, BoxSelectTool, ResizeTool
 from bokeh.models.ranges import Range1d as Range
-from bokeh.models.widgets import Select, DataTable, Toggle
+from bokeh.models.widgets import Select, DataTable, Toggle, RadioButtonGroup
 from bokeh.plotting import figure
 #Set up the x/y axis selectors and the toggle to hide null entries
 widgets = []
@@ -155,6 +155,22 @@ hide_null = Toggle(
     label="Hide 0 results with null X or Y axis values"
 )
 widgets.append(hide_null)
+
+presets = RadioButtonGroup(
+    labels=["MT vs WT Epitope Affinity", "Tumor Clonality and Expression"], active=0)
+
+def available(x):
+    for entry in entries:
+        if x in entry and entry[x] is not None:
+            return True
+    return False
+
+if not available('corresponding_wt_score') or not available('best_mt_score'):
+    presets.labels.remove('MT vs WT Epitope Affinity')
+if not available('tumor_dna_vaf') or not available('tumor_rna_vaf'):
+    presets.labels.remove('Tumor Clonality and Expression')
+widgets.append(presets)
+
 #Set up the data dictionary (a transposed version of entries)
 data_dict = {
     key:[] for key in cols
@@ -164,6 +180,7 @@ data_dict.update({
     '_y':[],
 })
 source = ColumnDataSource(data=data_dict) #wrap a datasource around the dictionary
+
 p = figure(
     title = sample,
     # sizing_mode='stretch_both',
@@ -310,9 +327,31 @@ getters.append((
     range_column_filter('transcript_expression', 1)
 ))
 
+def change_preset():
+    if presets.labels[presets.active] == "MT vs WT Epitope Affinity":
+        for item in widgets:
+            try:
+                if item.title == 'X-Axis Value':
+                    item.value = 'corresponding_wt_score'
+                elif item.title == 'Y-Axis Value':
+                    item.value = 'best_mt_score'
+            except AttributeError:
+                continue
+
+    if presets.labels[presets.active] == "Tumor Clonality and Expression":
+        for item in widgets:
+            try:
+                if item.title == 'X-Axis Value':
+                    item.value = 'tumor_dna_vaf'
+                elif item.title == 'Y-Axis Value':
+                    item.value = 'tumor_rna_vaf'
+            except AttributeError:
+                continue
+
 #Add callbacks to the 3 widgets manually created back at the start
 x_field.on_change('value', lambda a,r,g: update())
 y_field.on_change('value', lambda a,r,g: update())
+presets.on_change('active', lambda a,r,g: change_preset())
 hide_null.on_click(lambda arg: update())
 
 #Add all models and widgets to the document
