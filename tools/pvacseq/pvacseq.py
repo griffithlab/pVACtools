@@ -3,11 +3,10 @@ import sys
 from subprocess import call
 import os
 import pkg_resources
-import lib
-# try:
-#     from . import lib
-# except (SystemError, ImportError):
-#     import lib
+try:
+    from ... import lib
+except (SystemError, ImportError):
+    import lib
 
 def main():
     parser = argparse.ArgumentParser()
