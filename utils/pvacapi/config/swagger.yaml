@@ -1,10 +1,10 @@
 ---
 swagger: "2.0"
 info:
-  description: "API to support pVacSeq user interface for generating reports on pipeline\
+  description: "API to support pVAC-Seq user interface for generating reports on pipeline\
     \ results"
   version: "1.0.0"
-  title: "pVacSeq Server Schema"
+  title: "pVAC-Seq Server Schema"
 host: "localhost"
 schemes:
 - "https"
@@ -22,7 +22,7 @@ paths:
       description: "The results endpoint returns a list of available pipeline data\
         \ files for generating reports.  If the requested process is still running \
         this endpoint returns an empty list. If the id is invalid it will return an error\n"
-      operationId: "pvacseq.server.controllers.files.results_get"
+      operationId: "utils.pvacapi.controllers.files.results_get"
       parameters:
       - name: "id"
         in: "path"
@@ -95,7 +95,7 @@ paths:
       summary: "Get a list of files staged for input"
       description: "Queries the input folder for a list of files ready to be used\
       in a new run of pVAC-Seq"
-      operationId: "pvacseq.server.controllers.files.list_input"
+      operationId: "utils.pvacapi.controllers.files.list_input"
       responses:
         200:
           description: "An object containing metadata and an array of input files"
@@ -115,7 +115,7 @@ paths:
       description: "This endpoint returns raw data from the requested output file \
         from the requested pVAC-Seq run.  If the process is still running this will \
         return an empty list.  If the id or fileID is invalid, it will return an error\n"
-      operationId: "pvacseq.server.controllers.files.results_getfile"
+      operationId: "utils.pvacapi.controllers.files.results_getfile"
       parameters:
       - name: "id"
         in: "path"
@@ -184,7 +184,7 @@ paths:
         to their names as they appear in the source data of the specified file. \
         If the process is still running, this will return an empty object. \
         If the process id or fileID are invalid, it will return an error \n"
-      operationId: "pvacseq.server.controllers.files.results_getcols"
+      operationId: "utils.pvacapi.controllers.files.results_getcols"
       parameters:
       - name: "id"
         in: "path"
@@ -214,7 +214,7 @@ paths:
       summary: "Start a new pVAC-Seq run"
       description: "This endpoint initiates a new pVAC-Seq run and returns the \
         api process id (not an OS pid) for the new run.\n"
-      operationId: "pvacseq.server.controllers.staging.start"
+      operationId: "utils.pvacapi.controllers.staging.start"
       parameters:
       - name: "input"
         in: "formData"
@@ -377,7 +377,7 @@ paths:
         and the start endpoint.  Uploaded files are saved to temporary locations \
         and their paths are forwarded to the start endpoint.  Additionally, an output \
         directory is automatically generated\n"
-      operationId: "pvacseq.server.controllers.staging.staging"
+      operationId: "utils.pvacapi.controllers.staging.staging"
       parameters:
       - name: "input"
         in: "formData"
@@ -596,7 +596,7 @@ paths:
         - "processes"
       summary: "Get list of running processes"
       description: "This endpoint returns a list of active pvacseq runs\n"
-      operationId: "pvacseq.server.controllers.processes.processes"
+      operationId: "utils.pvacapi.controllers.processes.processes"
       parameters:
       - name: "filters"
         in: "query"
@@ -655,7 +655,7 @@ paths:
       summary: "Get info about a specific process"
       description: "This endpoint returns data about a currently running process. \
         If the process id is invalid, it returns an error.\n"
-      operationId: "pvacseq.server.controllers.processes.process_info"
+      operationId: "utils.pvacapi.controllers.processes.process_info"
       parameters:
       - name: "id"
         in: "path"
@@ -678,7 +678,7 @@ paths:
       summary: "Terminate any running processes"
       description: "This endpoint handles the cleanup for closing any active \
         pvacseq runs\n"
-      operationId: "pvacseq.server.controllers.processes.shutdown"
+      operationId: "utils.pvacapi.controllers.processes.shutdown"
       responses:
         200:
           description: "Returns a list of the process ID's for the terminated processes"
@@ -698,7 +698,7 @@ paths:
       summary: "Terminate the specified process"
       description: "This endpoint closes the requested process if it is still running. /
         id must refer to a valid process id started by the current user"
-      operationId: "pvacseq.server.controllers.processes.stop"
+      operationId: "utils.pvacapi.controllers.processes.stop"
       parameters:
       - name: "id"
         in: "path"
@@ -721,7 +721,7 @@ paths:
       summary: "Verifies that the specified allele is supported"
       description: "Checks the supplied allele against the list of supported alleles \
         and returns a boolean indicating if the allele is supported or not"
-      operationId: "pvacseq.server.controllers.staging.check_allele"
+      operationId: "utils.pvacapi.controllers.staging.check_allele"
       parameters:
         - name: "allele"
           in: "query"
@@ -743,7 +743,7 @@ paths:
         - "allele"
       summary: "Lists valid alleles for specified prediction algorithms"
       description: "Takes a string of prediction algorithms and returns an object mapping each algorithm to valid alleles for that algorithm"
-      operationId: "pvacseq.server.controllers.staging.valid_alleles"
+      operationId: "utils.pvacapi.controllers.staging.valid_alleles"
       parameters: 
         - name: "prediction_algorithms"
           in: "query"
@@ -765,7 +765,7 @@ paths:
         - "algorithms"
       summary: "Gets a list of valid prediction algorithms"
       description: "Returns list of valid prediction algorithms"
-      operationId: "pvacseq.server.controllers.staging.prediction_algorithms"
+      operationId: "utils.pvacapi.controllers.staging.prediction_algorithms"
       responses:
         200:
           description: "Returns list of valid prediction algorithms"
@@ -786,7 +786,7 @@ paths:
       description: "Clears out the records of all processes on the server.\
         Results from old processes will be archived.  Any processes still running\
         will be kept unless the clearall parameter is set to 1"
-      operationId: "pvacseq.server.controllers.processes.reset"
+      operationId: "utils.pvacapi.controllers.processes.reset"
       parameters:
         - name: "clearall"
           in: "formData"
@@ -814,7 +814,7 @@ paths:
       description: "The dropbox endpoint returns a list of the files currently in\
       the dropbox folder.  The user may drop result files into this folder to be\
       displayed in the frontend UI"
-      operationId: "pvacseq.server.controllers.files.list_dropbox"
+      operationId: "utils.pvacapi.controllers.files.list_dropbox"
       responses:
         200:
           description: "An object containing metadata and a list of files in the dropbox"
@@ -832,7 +832,7 @@ paths:
         - "filterfile"
       summary: "Get a filtered file"
       description: "TBD"
-      operationId: "pvacseq.server.controllers.database.filterfile"
+      operationId: "utils.pvacapi.controllers.database.filterfile"
       parameters:
         - name: "parentID"
           in: "path"
@@ -898,7 +898,7 @@ paths:
       description: "File schemas are inferred when loading a file into the database\
       which means that columns may be assigned different types for two different files\
       depending on the content"
-      operationId: "pvacseq.server.controllers.database.fileschema"
+      operationId: "utils.pvacapi.controllers.database.fileschema"
       parameters:
         - name: "parentID"
           in: "path"
@@ -929,7 +929,7 @@ paths:
         then forwarded to the /api/v1/start endpoint\n"
       produces:
         - "text/html"
-      operationId: "pvacseq.server.controllers.staging.test"
+      operationId: "utils.pvacapi.controllers.staging.test"
       responses:
         200:
           description: "Returns a static page"
@@ -948,7 +948,7 @@ paths:
         requested table's contents"
       produces:
         - "text/html"
-      operationId: "pvacseq.server.controllers.database.visualize"
+      operationId: "utils.pvacapi.controllers.database.visualize"
       parameters:
         - name: "parentID"
           in: "path"
@@ -978,7 +978,7 @@ paths:
         requested table's contents"
       produces:
         - "text/html"
-      operationId: "pvacseq.server.controllers.database.visualize_script"
+      operationId: "utils.pvacapi.controllers.database.visualize_script"
       parameters:
         - name: "parentID"
           in: "path"
@@ -1005,7 +1005,7 @@ paths:
         - "archive"
       summary: "Archive a process"
       description: "Moves the results of a process to the archive"
-      operationId: "pvacseq.server.controllers.processes.archive"
+      operationId: "utils.pvacapi.controllers.processes.archive"
       parameters:
         - name: "processID"
           in: "path"
@@ -1027,7 +1027,7 @@ paths:
         - "restart"
       summary: "Restart an old process"
       description: "Restarts a previously run process using the exact same parameters"
-      operationId: "pvacseq.server.controllers.processes.restart"
+      operationId: "utils.pvacapi.controllers.processes.restart"
       parameters:
         - name: "processID"
           in: "path"

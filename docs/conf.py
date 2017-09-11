@@ -19,7 +19,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../pvacseq'))
+sys.path.insert(0, os.path.abspath('../tools/pvacseq'))
 
 # -- General configuration ------------------------------------------------
 

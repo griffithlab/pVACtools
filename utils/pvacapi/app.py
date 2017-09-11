@@ -7,7 +7,7 @@ import http.server
 import socketserver
 from webbrowser import open_new_tab
 from flask_cors import CORS
-from pvacseq.server.controllers.utils import initialize
+from utils.pvacapi.controllers.utils import initialize
 #FIXME: sanitize sample name
 def main():
 

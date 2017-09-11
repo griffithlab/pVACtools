@@ -12,7 +12,7 @@ class BindingFilterTests(unittest.TestCase):
     def setUpClass(cls):
         #locate the bin and test_data directories
         cls.pVac_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        cls.binding_filter_path = os.path.join(cls.pVac_directory, "pvacseq", "lib", "binding_filter.py")
+        cls.binding_filter_path = os.path.join(cls.pVac_directory, "lib", "binding_filter.py")
         cls.test_data_path= os.path.join(cls.pVac_directory, "tests", "test_data", "binding_filter")
 
     def test_binding_filter_runs_and_produces_expected_output(self):

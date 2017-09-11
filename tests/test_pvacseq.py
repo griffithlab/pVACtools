@@ -8,8 +8,8 @@ import py_compile
 from subprocess import run, PIPE
 from filecmp import cmp
 import yaml
-import pvacseq.lib
-from pvacseq.lib.pipeline import *
+import lib
+from lib.pipeline import *
 import datetime
 
 def compare(path1, path2):
@@ -99,11 +99,12 @@ class PVACTests(unittest.TestCase):
             files,
             cls.test_data_directory
         ))
-        pvacseq.lib.call_iedb.requests.post = cls.request_mock
+        lib.call_iedb.requests.post = cls.request_mock
 
     def test_pvacseq_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
             self.pVac_directory,
+            'tools',
             'pvacseq',
             "pvacseq.py"
         ))
@@ -112,6 +113,7 @@ class PVACTests(unittest.TestCase):
     def test_pvacseq_commands(self):
         pvac_script_path = os.path.join(
             self.pVac_directory,
+            'tools',
             'pvacseq',
             "pvacseq.py"
             )
@@ -139,7 +141,6 @@ class PVACTests(unittest.TestCase):
     def test_main_compiles(self):
         compiled_main_path = py_compile.compile(os.path.join(
             self.pVac_directory,
-            'pvacseq',
             "lib",
             "main.py"
         ))
@@ -157,7 +158,7 @@ class PVACTests(unittest.TestCase):
         }
         yaml.dump(additional_input_file_list, additional_input_files, default_flow_style=False)
 
-        pvacseq.lib.main.main([
+        lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
             'HLA-G*01:09,HLA-E*01:01',
@@ -175,7 +176,7 @@ class PVACTests(unittest.TestCase):
         ])
         self.assertEqual(len(self.request_mock.mock_calls), 8)
 
-        pvacseq.lib.main.main([
+        lib.main.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
             'H2-IAb',
@@ -278,7 +279,7 @@ class PVACTests(unittest.TestCase):
         ])
 
         with self.assertRaises(SystemExit) as cm:
-            pvacseq.lib.main.main([
+            lib.main.main([
                 os.path.join(self.test_data_directory, "input.vcf"),
                 'Test',
                 'H2-IAb',
@@ -308,7 +309,7 @@ class PVACTests(unittest.TestCase):
             '-e', '9,10',
             '-a', 'sample_name',
         ]
-        pvacseq.lib.main.main(params)
+        lib.main.main(params)
         output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.final.tsv')
         expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
         self.assertTrue(cmp(output_file, expected_file, False))
@@ -325,7 +326,7 @@ class PVACTests(unittest.TestCase):
         ]
         os.environ["TEST_FLAG"] = '0'
         start_1 = datetime.datetime.now()
-        pvacseq.lib.main.main(params_1)
+        lib.main.main(params_1)
         end_1 = datetime.datetime.now()
         duration_1 = (end_1 - start_1).total_seconds()
         output_dir_1.cleanup()
@@ -341,7 +342,7 @@ class PVACTests(unittest.TestCase):
         ]
         os.environ["TEST_FLAG"] = '1'
         start_2 = datetime.datetime.now()
-        pvacseq.lib.main.main(params_2)
+        lib.main.main(params_2)
         end_2 = datetime.datetime.now()
         duration_2 = (end_2 - start_2).total_seconds()
         output_dir_2.cleanup()
@@ -351,12 +352,13 @@ class PVACTests(unittest.TestCase):
     def test_pvacseq_pipeline_for_fusions(self):
         pvac_script_path = os.path.join(
             self.pVac_directory,
+            'tools',
             'pvacseq',
             "pvacseq.py"
             )
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
-        pvacseq.lib.main.main([
+        lib.main.main([
             os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
             'Test',
             'HLA-A*29:02',

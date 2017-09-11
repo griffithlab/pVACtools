@@ -4,13 +4,13 @@ import sys
 import tempfile
 from filecmp import cmp
 import py_compile
-from pvacseq.lib.input_file_converter import *
+from lib.input_file_converter import *
 
 class InputFileConverterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'pvacseq', 'lib')
+        cls.executable_dir = os.path.join(base_dir, 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'input_file_converter.py')
         cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'input_file_converter')
 
