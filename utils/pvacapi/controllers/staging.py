@@ -11,7 +11,7 @@ from shlex import quote
 from shutil import copyfile, copytree
 from .database import int_pattern
 from .files import list_input
-from pvacseq.lib.prediction_class import *
+from lib.prediction_class import *
 
 def resolve_filepath(filepath):
     if int_pattern.match(filepath) and int(filepath) <= len(current_app.config['storage']['manifest']):

@@ -21,5 +21,5 @@ import os
 import sys
 pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
-sys.path.append(os.path.join(pvac_dir, 'pvacseq'))
+sys.path.append(os.path.join(pvac_dir, 'tools', 'pvacseq'))
 from . import *

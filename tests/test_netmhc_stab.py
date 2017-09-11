@@ -6,7 +6,7 @@ import sys
 import tempfile
 import py_compile
 from filecmp import cmp
-import pvacseq.lib
+import lib
 
 def make_response(data, files, path):
     reader = open(os.path.join(
@@ -25,7 +25,6 @@ class NetChopTest(unittest.TestCase):
         pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         cls.script_path = os.path.join(
             pvac_dir,
-            'pvacseq',
             'lib',
             'netmhc_stab.py'
         )
@@ -40,7 +39,7 @@ class NetChopTest(unittest.TestCase):
             files,
             cls.test_data_directory
         ))
-        pvacseq.lib.netmhc_stab.requests.post = cls.request_mock
+        lib.netmhc_stab.requests.post = cls.request_mock
 
     def test_netmhc_stab_compiles(self):
         compiled_script_path = py_compile.compile(self.script_path)
@@ -48,7 +47,7 @@ class NetChopTest(unittest.TestCase):
 
     def test_netmhc_stab_runs(self):
         output_file = tempfile.NamedTemporaryFile()
-        pvacseq.lib.netmhc_stab.main([
+        lib.netmhc_stab.main([
             os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
             output_file.name
         ])
