@@ -46,8 +46,8 @@ class APITests(unittest.TestCase):
         cls.pVac_directory =  pvac_dir
         cls.server_directory = os.path.join(
             pvac_dir,
-            'pvacseq',
-            'server'
+            'utils',
+            'pvacapi'
         )
         cls.test_data_directory = os.path.join(
             cls.pVac_directory,

@@ -6,7 +6,7 @@ import sys
 import tempfile
 import py_compile
 from filecmp import cmp
-import pvacseq.lib
+import lib
 
 def make_response(data, files, path):
     reader = open(os.path.join(
@@ -37,7 +37,6 @@ class NetChopTest(unittest.TestCase):
         pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         cls.script_path = os.path.join(
             pvac_dir,
-            'pvacseq',
             'lib',
             'net_chop.py'
         )
@@ -59,10 +58,10 @@ class NetChopTest(unittest.TestCase):
             files,
             self.test_data_directory
         ))
-        pvacseq.lib.net_chop.requests.post = self.request_mock
+        lib.net_chop.requests.post = self.request_mock
         for method in self.methods:
             output_file = tempfile.NamedTemporaryFile()
-            pvacseq.lib.net_chop.main([
+            lib.net_chop.main([
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 output_file.name,
                 '--method',
@@ -79,9 +78,9 @@ class NetChopTest(unittest.TestCase):
             files,
             self.test_data_directory
         ))
-        pvacseq.lib.net_chop.requests.post = self.request_mock
+        lib.net_chop.requests.post = self.request_mock
         output_file = tempfile.NamedTemporaryFile()
-        pvacseq.lib.net_chop.main([
+        lib.net_chop.main([
             os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
             output_file.name,
             '--method',

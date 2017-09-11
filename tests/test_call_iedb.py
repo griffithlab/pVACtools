@@ -7,7 +7,7 @@ import tempfile
 from subprocess import call
 from filecmp import cmp
 import py_compile
-import pvacseq.lib.call_iedb
+import lib.call_iedb
 
 def make_response(method, path):
     reader = open(os.path.join(
@@ -25,7 +25,7 @@ class CallIEDBTests(unittest.TestCase):
     def setUpClass(cls):
         cls.python = sys.executable
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'pvacseq', 'lib')
+        cls.executable_dir = os.path.join(base_dir, 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'call_iedb.py')
         cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'call_iedb')
         cls.additional_setup()
@@ -46,9 +46,9 @@ class FilterResponseTests(CallIEDBTests):
             unfiltered_file_contents = f.read().rstrip()
         with open(filtered_file, 'rb') as f:
             filtered_file_contents = f.read().rstrip()
-        filtered_response = pvacseq.lib.call_iedb.filter_response(unfiltered_file_contents)
+        filtered_response = lib.call_iedb.filter_response(unfiltered_file_contents)
         self.assertEqual(filtered_response, filtered_file_contents)
-        filtered_response_on_filtered_file = pvacseq.lib.call_iedb.filter_response(filtered_file_contents)
+        filtered_response_on_filtered_file = lib.call_iedb.filter_response(filtered_file_contents)
         self.assertEqual(filtered_response_on_filtered_file, filtered_file_contents)
 
 class CallIEDBClassITests(CallIEDBTests):
@@ -61,14 +61,14 @@ class CallIEDBClassITests(CallIEDBTests):
         cls.request_mock = unittest.mock.Mock(side_effect = (
             make_response(method, cls.test_data_dir) for method in cls.methods
         ))
-        pvacseq.lib.call_iedb.requests.post = cls.request_mock
+        lib.call_iedb.requests.post = cls.request_mock
 
     def test_iedb_methods_generate_expected_files(self):
         #netmhcpan, netmhccons, and pickpocket are slow so we won't run them in the tests
         for method in self.methods:
             call_iedb_output_file = tempfile.NamedTemporaryFile()
 
-            pvacseq.lib.call_iedb.main([
+            lib.call_iedb.main([
                 self.input_file,
                 call_iedb_output_file.name,
                 method,
@@ -96,13 +96,13 @@ class CallIEDBClassIITests(CallIEDBTests):
         cls.request_mock = unittest.mock.Mock(side_effect = (
             make_response(method, cls.test_data_dir) for method in cls.methods
         ))
-        pvacseq.lib.call_iedb.requests.post = cls.request_mock
+        lib.call_iedb.requests.post = cls.request_mock
 
     def test_iedb_methods_generate_expected_files(self):
         for method in self.methods:
             call_iedb_output_file = tempfile.NamedTemporaryFile()
 
-            pvacseq.lib.call_iedb.main([
+            lib.call_iedb.main([
                 self.input_file,
                 call_iedb_output_file.name,
                 method,

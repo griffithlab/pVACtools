@@ -41,16 +41,16 @@ def mock_api():
     print("starting mock api...")
     pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     sys.path.append(pvac_dir)
-    import pvacseq.server.controllers.staging
-    pvacseq.server.controllers.staging.subprocess.Popen = popen_mock
-    pvacseq.server.controllers.staging.hashfile = unittest.mock.create_autospec(
-        pvacseq.server.controllers.staging.hashfile,
+    import utils.pvacapi.controllers.staging
+    utils.pvacapi.controllers.staging.subprocess.Popen = popen_mock
+    utils.pvacapi.controllers.staging.hashfile = unittest.mock.create_autospec(
+        utils.pvacapi.controllers.staging.hashfile,
         return_value = b'Probably going to cause some collisions'
     )
-    import pvacseq.server
-    import pvacseq.server.app
-    pvacseq.server.app.sys.argv.append('--nogui')
-    pvacseq.server.app.main()
+    import utils.pvacapi
+    import utils.pvacapi.app
+    utils.pvacapi.app.sys.argv.append('--nogui')
+    utils.pvacapi.app.main()
 
 if __name__ == '__main__':
     mock_api()

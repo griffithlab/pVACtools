@@ -1,0 +1,1192 @@
+---
+swagger: "2.0"
+info:
+  description: "API to support pVAC-Seq user interface for generating reports on pipeline\
+    \ results"
+  version: "1.0.0"
+  title: "pVAC-Seq Server Schema"
+host: "localhost"
+schemes:
+- "https"
+consumes:
+- "application/json"
+- "multipart/form-data"
+produces:
+- "application/json"
+paths:
+  /api/v1/processes/{id}/results:
+    get:
+      tags:
+      - "results"
+      summary: "Get available output files from the requested pVAC-Seq run"
+      description: "The results endpoint returns a list of available pipeline data\
+        \ files for generating reports.  If the requested process is still running \
+        this endpoint returns an empty list. If the id is invalid it will return an error\n"
+      operationId: "utils.pvacapi.controllers.files.results_get"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Process ID from which to fetch results"
+        required: true
+        type: "integer"
+      - name: "type"
+        in: "query"
+        description: "Type of file to display"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        default: "default"
+      - name: "filters"
+        in: "query"
+        description: "Array of filters to be applied. ex: size>200"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "sorting"
+        in: "query"
+        description: "Ordered array of ways to sort data, + before property name\
+        indicating ascending, - indicating descending. ex: +size,-fileID"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "page"
+        in: "query"
+        description: "Page of results to return"
+        required: false
+        type: "integer"
+        default: 1
+      - name: "count"
+        in: "query"
+        description: "Number of results to return per page"
+        required: false
+        type: "integer"
+        default: 10
+      responses:
+        200:
+          description: "An object containing metadata and an array of results"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                _meta:
+                  $ref: "#/definitions/MetaData"
+                results:
+                  type: "array"
+                  items:
+                    $ref: "#/definitions/Result"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-tags:
+      - tag: "results"
+  /api/v1/input:
+    get:
+      tags:
+        - "input"
+      summary: "Get a list of files staged for input"
+      description: "Queries the input folder for a list of files ready to be used\
+      in a new run of pVAC-Seq"
+      operationId: "utils.pvacapi.controllers.files.list_input"
+      responses:
+        200:
+          description: "An object containing metadata and an array of input files"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Result"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{id}/results/{fileID}:
+    get:
+      tags:
+      - "file"
+      summary: "Get pipeline output data"
+      description: "This endpoint returns raw data from the requested output file \
+        from the requested pVAC-Seq run.  If the process is still running this will \
+        return an empty list.  If the id or fileID is invalid, it will return an error\n"
+      operationId: "utils.pvacapi.controllers.files.results_getfile"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ProcessID or -1 for dropbox"
+        required: true
+        type: "integer"
+      - name: "fileID"
+        in: "path"
+        description: "Specific fileID to read"
+        required: true
+        type: "integer"
+      - name: "count"
+        in: "query"
+        description: "Maximum number of rows to return"
+        type: "integer"
+        required: false
+        default: 50
+      - name: "page"
+        in: "query"
+        description: "Page offset (skip the first count*page results)"
+        type: "integer"
+        required: false
+        default: 0
+      - name: "filters"
+        in: "query"
+        description: "A comma-separated list of filter parameters in the form of (column)(comparator)(value) ie: start>=8"
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        required: false
+        default: ''
+      - name: "sort"
+        in: "query"
+        description: "The column name to sort results by"
+        type: "string"
+        required: false
+        default: "rowid"
+      - name: 'direction'
+        in: 'query'
+        description: "Sort results in ascending or descending order"
+        type: 'string'
+        required: false
+        enum: ['ASC','DESC']
+        default: 'ASC'
+      responses:
+        200:
+          description: "An array of entries"
+          schema:
+            type: "array"
+            items: {
+              type: "object"
+            }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-tags:
+      - tag: "file"
+  /api/v1/processes/{id}/results/{fileID}/cols:
+    get:
+      tags:
+      - "columns"
+      summary: "Get column mappings"
+      description: "This endpoint returns mappings from standardized column names\
+        to their names as they appear in the source data of the specified file. \
+        If the process is still running, this will return an empty object. \
+        If the process id or fileID are invalid, it will return an error \n"
+      operationId: "utils.pvacapi.controllers.files.results_getcols"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Process ID from which to read results"
+        required: true
+        type: "integer"
+      - name: "fileID"
+        in: "path"
+        description: "File id from which to read data"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "An object mapping the columns"
+          schema:
+            type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-tags:
+      - tag: "cols"
+  /api/v1/start:
+    post:
+      tags:
+      - "start"
+      summary: "Start a new pVAC-Seq run"
+      description: "This endpoint initiates a new pVAC-Seq run and returns the \
+        api process id (not an OS pid) for the new run.\n"
+      operationId: "utils.pvacapi.controllers.staging.start"
+      parameters:
+      - name: "input"
+        in: "formData"
+        description: "Input VCF File: Filepath to the input VCF file"
+        required: true
+        type: "string"
+      - name: "samplename"
+        in: "formData"
+        description: "Sample Name: Name for your sample"
+        required: true
+        type: "string"
+      - name: "alleles"
+        in: "formData"
+        description: "Alleles: A comma-separated list of alleles to run the sequences against"
+        required: true
+        type: "string"
+      - name: "epitope_lengths"
+        in: "formData"
+        description: "Epitope Lengths: A comma-separated list of epitope lengths to produce"
+        required: false
+        type: "string"
+        default: "10"
+      - name: "prediction_algorithms"
+        in: "formData"
+        description: "Prediction Algorithms: A comma-separated list of prediction algorithms to use"
+        required: true
+        type: "string"
+      - name: "output"
+        in: "formData"
+        description: "Output Directory: The directory to which output will be written"
+        required: true
+        type: "string"
+      - name: "peptide_sequence_length"
+        in: "formData"
+        description: "Peptide Sequence Length: Length of the peptide sequences to produce in the FASTA"
+        required: false
+        type: "integer"
+        default: 21
+      - name: "additional_input_file_list"
+        in: "formData"
+        description: "Additional Input File List: yaml file of additional files to be used as inputs, e.g. cufflinks output files"
+        required: false
+        type: "string"
+        default: ""
+      - name: "net_chop_method"
+        in: "formData"
+        description: "Net Chop Method: Run NetChop using the specified method"
+        type: "string"
+        enum: ["cterm", "20s"]
+        required: false
+        default: ''
+      - name: "netmhc_stab"
+        in: "formData"
+        description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
+        type: "boolean"
+        default: false
+      - name: "top_result_per_mutation"
+        in: "formData"
+        description: "Top Result Per Mutation: Output top scoring candidate per allele-length per mutation"
+        type: "boolean"
+        default: false
+      - name: "top_score_metric"
+        in: "formData"
+        description: "Top Score Metric: ic50 metric for choosing best epitopes during binding filtering"
+        type: "string"
+        enum: ["lowest", "median"]
+        default: "median"
+      - name: "binding_threshold"
+        in: "formData"
+        description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
+        type: "integer"
+        default: 500
+      - name: "minimum_fold_change"
+        in: "formData"
+        description: "Minimum Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
+        type: "number"
+        default: 0
+      - name: "normal_cov"
+        in: "formData"
+        description: "Normal Coverage Cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: 5
+      - name: "tdna_cov"
+        in: "formData"
+        description: "Tumor DNA Coverage Cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: 10
+      - name: "trna_cov"
+        in: "formData"
+        description: "Tumor RNA Coverage Cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: 10
+      - name: "normal_vaf"
+        in: "formData"
+        description: "Normal VAF Cutoff: Sites below this cutoff will be considered"
+        type: "integer"
+        default: 2
+      - name: "tdna_vaf"
+        in: "formData"
+        description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: 40
+      - name: "trna_vaf"
+        in: "formData"
+        description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: 40
+      - name: "expn_val"
+        in: "formData"
+        description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: 1
+      - name: "net_chop_threshold"
+        in: "formData"
+        description: "NetChop Threshold: NetChop prediction threshold"
+        type: "number"
+        default: 0.5
+      - name: "fasta_size"
+        in: "formData"
+        description: "FASTA Size: Number of entries submitted to IEDB in each request.  Must be an even number"
+        type: "integer"
+        default: 200
+      - name: "iedb_retries"
+        in: "formData"
+        description: "IEDB Retries: Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100"
+        type: "integer"
+        default: 5
+      - name: "iedb_install_dir"
+        in: "formData"
+        description: "Path to a local install of IEDB (if available)"
+        type: "string"
+        default: ""
+      - name: "downstream_sequence_length"
+        in : "formData"
+        description: "Downstream Sequence Length: Cap to limit the downstream sequence length for frameshifts when creating the fasta file. Use 'full' to include the full downstream sequence"
+        type: "integer"
+        default: 1000
+      - name: "keep_tmp_files"
+        in: "formData"
+        description: "Keep Temp Files? Keep temporary files in the output directory after completion"
+        type: "boolean"
+        default: false
+      responses:
+        200:
+          description: "Returns the process ID of the newly started pVAC-Seq run"
+          schema:
+            type: "integer"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-tags:
+      - tag: "test"
+  /api/v1/staging:
+    post:
+      tags:
+      - "staging"
+      summary: "Start a new pVAC-Seq run from a web form"
+      description: "This endpoint serves as an intermediary between a web form \
+        and the start endpoint.  Uploaded files are saved to temporary locations \
+        and their paths are forwarded to the start endpoint.  Additionally, an output \
+        directory is automatically generated\n"
+      operationId: "utils.pvacapi.controllers.staging.staging"
+      parameters:
+      - name: "input"
+        in: "formData"
+        description: "Input VCF File: Local VCF file"
+        required: true
+        type: "string"
+      - name: "samplename"
+        in: "formData"
+        description: "Sample Name: Your name for the sample"
+        required: true
+        type: "string"
+      - name: "alleles"
+        in: "formData"
+        description: "Alleles: A comma-separated list of alleles to run the sequences against"
+        required: true
+        type: "string"
+      - name: "epitope_lengths"
+        in: "formData"
+        description: "Epitope Lengths: A comma-separated list of epitope lengths to produce"
+        required: false
+        type: "string"
+        default: "10"
+      - name: "prediction_algorithms"
+        in: "formData"
+        description: "Prediction Algorithm: A comma-separated list of prediction algorithms to use"
+        required: true
+        type: "string"
+      - name: "peptide_sequence_length"
+        in: "formData"
+        description: "Peptide Sequence Length: Length of the peptide sequences to produce in the FASTA"
+        required: false
+        type: "integer"
+        default: 21
+      - name: "gene_expn_file"
+        in: "formData"
+        description: "Gene Expression File: Filepath to the genes.fpkm_tracking file from Cufflinks"
+        required: false
+        type: "string"
+        default: ""
+      - name: "transcript_expn_file"
+        in: "formData"
+        description: "Transcript Expression File: Filepath to the isoforms.fpkm_tracking file from Cufflinks"
+        required: false
+        type: "string"
+        default: ""
+      - name: "normal_snvs_coverage_file"
+        in: "formData"
+        description: "Normal SNVs Coverage File: Filepath to bam-readcount output file for normal BAM and snvs"
+        required: false
+        type: "string"
+        default: ""
+      - name: "normal_indels_coverage_file"
+        in: "formData"
+        description: "Normal Indels Coverage File: Filepath to bam-readcount output file for normal BAM and indels"
+        required: false
+        type: "string"
+        default: ""
+      - name: "tdna_snvs_coverage_file"
+        in: "formData"
+        description: "Tumor DNA Coverage File: Filepath to bam-readcount output file for tumor DNA BAM and snvs"
+        required: false
+        type: "string"
+        default: ""
+      - name: "tdna_indels_coverage_file"
+        in: "formData"
+        description: "Tumor DNA Coverage File: Filepath to bam-readcount output file for tumor DNA BAM and indels"
+        required: false
+        type: "string"
+        default: ""
+      - name: "trna_snvs_coverage_file"
+        in: "formData"
+        description: "Tumor RNA Coverage File: Filepath to bam-readcount output file for tumor RNA BAM and snvs"
+        required: false
+        type: "string"
+        default: ""
+      - name: "trna_indels_coverage_file"
+        in: "formData"
+        description: "Tumor RNA Coverage File: Filepath to bam-readcount output file for tumor RNA BAM and indels"
+        required: false
+        type: "string"
+        default: ""
+      - name: "net_chop_method"
+        in: "formData"
+        description: "Net Chop Method: Run NetChop using the specified method"
+        type: "string"
+        enum: ["cterm", "20s", ""]
+        required: false
+        default: ''
+      - name: "netmhc_stab"
+        in: "formData"
+        description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
+        required: false
+        type: "string"
+        default: ""
+      - name: "top_result_per_mutation"
+        in: "formData"
+        description: "Top Results per Mutation: Output top scoring candidate per allele-length per mutation"
+        required: false
+        type: "string"
+        default: ""
+      - name: "top_score_metric"
+        in: "formData"
+        description: "Top Score Metric: ic50 metric for choosing best epitopes during binding filtering"
+        required: false
+        type: "string"
+        enum: ["lowest", "median"]
+        default: "median"
+      - name: "binding_threshold"
+        in: "formData"
+        description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
+        required: false
+        type: "integer"
+        default: 500
+      - name: "minimum_fold_change"
+        in: "formData"
+        description: "Medium Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
+        required: false
+        type: "integer"
+        default: 0
+      - name: "normal_cov"
+        in: "formData"
+        description: "Normal Coverage Cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: "5"
+      - name: "tdna_cov"
+        in: "formData"
+        description: "Tumor DNA Coverage Cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: "10"
+      - name: "trna_cov"
+        in: "formData"
+        description: "Tumor RNA Coverage Cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: "10"
+      - name: "normal_vaf"
+        in: "formData"
+        description: "Normal VAF Cutoff: Sites below this cutoff will be considered"
+        type: "integer"
+        default: "2"
+      - name: "tdna_vaf"
+        in: "formData"
+        description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: "40"
+      - name: "trna_vaf"
+        in: "formData"
+        description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
+        type: "integer"
+        default: "40"
+      - name: "expn_val"
+        in: "formData"
+        description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
+        required: false
+        type: "integer"
+        default: 1
+      - name: "net_chop_threshold"
+        in: "formData"
+        description: "NetChop Threshold: NetChop prediction threshold"
+        required: false
+        type: "number"
+        default: 0.5
+      - name: "fasta_size"
+        in: "formData"
+        description: "FASTA Size: Number of entries submitted to IEDB in each request.  Must be an even number"
+        required: false
+        type: "integer"
+        default: 200
+      - name: "iedb_retries"
+        in: "formData"
+        description: "IEDB Retries: Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100"
+        type: "integer"
+        default: 5
+      - name: "iedb_install_dir"
+        in: "formData"
+        description: "Path to a local install of IEDB (if available)"
+        type: "string"
+        default: ""
+      - name: "downstream_sequence_length"
+        in : "formData"
+        description: "Downstream Sequence Length: Cap to limit the downstream sequence length for frameshifts when creating the fasta file. Use 'full' to include the full downstream sequence"
+        type: "integer"
+        default: 1000
+      - name: "keep_tmp_files"
+        in: "formData"
+        description: "Keep Temp Files? Keep temporary files in the output directory after completion"
+        required: false
+        type: "string"
+        default: ""
+      - name: "force"
+        in: "formData"
+        description: "Bypass the check for duplicate processes"
+        required: false
+        type: "boolean"
+        default: false
+      responses:
+        201:
+          description: "Returns object with code 201, message, and  process ID of the newly started pVAC-Seq run"
+          schema:
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+              message:
+                type: "string"
+              processid:
+                type: "integer"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-tags:
+      - tag: "staging"
+  /api/v1/processes:
+    get:
+      tags:
+        - "processes"
+      summary: "Get list of running processes"
+      description: "This endpoint returns a list of active pvacseq runs\n"
+      operationId: "utils.pvacapi.controllers.processes.processes"
+      parameters:
+      - name: "filters"
+        in: "query"
+        description: "Array of filters to be applied. ex: size>200"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "sorting"
+        in: "query"
+        description: "Ordered array of ways to sort data, + before property name\
+        indicating ascending, - indicating descending. ex: +size,-fileID"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "page"
+        in: "query"
+        description: "Page of information to return"
+        required: false
+        type: "integer"
+        default: 1
+      - name: "count"
+        in: "query"
+        description: "Number of objects to return per page"
+        required: false
+        type: "integer"
+        default: 10
+      responses:
+        200:
+          description: "An object containing metadata and a list of active processes"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                _meta:
+                  $ref: "#/definitions/MetaData"
+                results:
+                  type: "array"
+                  items: {
+                    $ref: "#/definitions/ProcessSummary"
+                  }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{id}:
+    get:
+      tags:
+        - "processes"
+      summary: "Get info about a specific process"
+      description: "This endpoint returns data about a currently running process. \
+        If the process id is invalid, it returns an error.\n"
+      operationId: "utils.pvacapi.controllers.processes.process_info"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Process id of an active pVAC-Seq run"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Returns all data collected about the requested process"
+          schema:
+            $ref: "#/definitions/Process"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/shutdown:
+    get:
+      tags:
+        - "shutdown"
+      summary: "Terminate any running processes"
+      description: "This endpoint handles the cleanup for closing any active \
+        pvacseq runs\n"
+      operationId: "utils.pvacapi.controllers.processes.shutdown"
+      responses:
+        200:
+          description: "Returns a list of the process ID's for the terminated processes"
+          schema:
+            type: "array"
+            items: {
+              type: "integer"
+            }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/stop/{id}:
+    get:
+      tags:
+        - "stop"
+      summary: "Terminate the specified process"
+      description: "This endpoint closes the requested process if it is still running. /
+        id must refer to a valid process id started by the current user"
+      operationId: "utils.pvacapi.controllers.processes.stop"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Process id of an active pVAC-Seq run"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Returns the status of the process just before termination"
+          schema:
+            $ref: "#/definitions/Process"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/checkallele:
+    get:
+      tags:
+        - "allele"
+      summary: "Verifies that the specified allele is supported"
+      description: "Checks the supplied allele against the list of supported alleles \
+        and returns a boolean indicating if the allele is supported or not"
+      operationId: "utils.pvacapi.controllers.staging.check_allele"
+      parameters:
+        - name: "allele"
+          in: "query"
+          description: "Allele name to check"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Returns a boolean indicating if the allele is supported or not"
+          schema:
+            type: "boolean"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/validalleles:
+    get:
+      tags: 
+        - "allele"
+      summary: "Lists valid alleles for specified prediction algorithms"
+      description: "Takes a string of prediction algorithms and returns an object mapping each algorithm to valid alleles for that algorithm"
+      operationId: "utils.pvacapi.controllers.staging.valid_alleles"
+      parameters: 
+        - name: "prediction_algorithms"
+          in: "query"
+          description: "Prediction algorithms to find valid alleles for"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Returns object mapping each algorithm to an array of valid alleles for that algorithm"
+          schema:
+            type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/validalgorithms:
+    get:
+      tags:
+        - "algorithms"
+      summary: "Gets a list of valid prediction algorithms"
+      description: "Returns list of valid prediction algorithms"
+      operationId: "utils.pvacapi.controllers.staging.prediction_algorithms"
+      responses:
+        200:
+          description: "Returns list of valid prediction algorithms"
+          schema:
+            type: "array"
+            items: {
+              type: "string"
+            }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/reset:
+    post:
+      tags:
+        - "reset"
+      summary: "Resets the log of old processes"
+      description: "Clears out the records of all processes on the server.\
+        Results from old processes will be archived.  Any processes still running\
+        will be kept unless the clearall parameter is set to 1"
+      operationId: "utils.pvacapi.controllers.processes.reset"
+      parameters:
+        - name: "clearall"
+          in: "formData"
+          description: "Informs the controller to drop all processes, terminating processes that haven't finished"
+          type: "integer"
+          default: 0
+      responses:
+        200:
+          description: "Returns a list of cleared process id's (which are now \
+            invalid until reassigned by starting new runs)"
+          schema:
+            type: "array"
+            items: {
+              type: "integer"
+            }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/dropbox:
+    get:
+      tags:
+        - "dropbox"
+      summary: "Get files currently in the dropbox"
+      description: "The dropbox endpoint returns a list of the files currently in\
+      the dropbox folder.  The user may drop result files into this folder to be\
+      displayed in the frontend UI"
+      operationId: "utils.pvacapi.controllers.files.list_dropbox"
+      responses:
+        200:
+          description: "An object containing metadata and a list of files in the dropbox"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Result"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{parentID}/results/{fileID}/filter:
+    get:
+      tags:
+        - "filterfile"
+      summary: "Get a filtered file"
+      description: "TBD"
+      operationId: "utils.pvacapi.controllers.database.filterfile"
+      parameters:
+        - name: "parentID"
+          in: "path"
+          description: "ProcessID or -1 for dropbox"
+          required: true
+          type: "integer"
+        - name: "fileID"
+          in: "path"
+          description: "Specific fileID to read"
+          required: true
+          type: "integer"
+        - name: "count"
+          in: "query"
+          description: "Maximum number of rows to return"
+          type: "integer"
+          required: false
+          default: 50
+        - name: "page"
+          in: "query"
+          description: "Page offset (skip the first count*page results)"
+          type: "integer"
+          required: false
+          default: 0
+        - name: "filters"
+          in: "query"
+          description: "A comma-separated list of filter parameters in the form of (column)(comparator)(value) ie: start>=8"
+          type: "array"
+          items:
+            type: "string"
+          collectionFormat: 'csv'
+          required: false
+          default: ''
+        - name: "sort"
+          in: "query"
+          description: "The column name to sort results by"
+          type: "string"
+          required: false
+          default: "rowid"
+        - name: 'direction'
+          in: 'query'
+          description: "Sort results in ascending or descending order"
+          type: 'string'
+          required: false
+          enum: ['ASC','DESC']
+          default: 'ASC'
+      responses:
+        200:
+          description: "Returns a list of files in the dropbox"
+          schema:
+            type: "array"
+            items: {
+              type: "object"
+            }
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{parentID}/results/{fileID}/schema:
+    get:
+      tags:
+        - "schema"
+      summary: "Returns the schema for the requested file"
+      description: "File schemas are inferred when loading a file into the database\
+      which means that columns may be assigned different types for two different files\
+      depending on the content"
+      operationId: "utils.pvacapi.controllers.database.fileschema"
+      parameters:
+        - name: "parentID"
+          in: "path"
+          description: "ProcessID or -1 for dropbox"
+          required: true
+          type: "integer"
+        - name: "fileID"
+          in: "path"
+          description: "Specific fileID to read"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Returns a mapping of column names to data type"
+          schema:
+            type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /static/testpage:
+    get:
+      tags:
+        - "test"
+      summary: "A test submission form"
+      description: "Returns a web page containing a form for submitting a new pVAC-Seq run. \
+        Submission is sent to the /api/v1/staging endpoint, where it is processed \
+        then forwarded to the /api/v1/start endpoint\n"
+      produces:
+        - "text/html"
+      operationId: "utils.pvacapi.controllers.staging.test"
+      responses:
+        200:
+          description: "Returns a static page"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{parentID}/results/{fileID}/visualize:
+    get:
+      tags:
+        - "visualize"
+      summary: "Get visualization of a table"
+      description: "Returns an HTML script tag containing an interactive visualization of the\
+        requested table's contents"
+      produces:
+        - "text/html"
+      operationId: "utils.pvacapi.controllers.database.visualize"
+      parameters:
+        - name: "parentID"
+          in: "path"
+          description: "ProcessID or -1 for dropbox"
+          required: true
+          type: "integer"
+        - name: "fileID"
+          in: "path"
+          description: "Specific fileID to read"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Returns an HTML script tag"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{parentID}/results/{fileID}/visualize-script:
+    get:
+      tags:
+        - "visualize"
+      summary: "Get visualization of a table"
+      description: "Returns an HTML script tag containing an interactive visualization of the\
+        requested table's contents"
+      produces:
+        - "text/html"
+      operationId: "utils.pvacapi.controllers.database.visualize_script"
+      parameters:
+        - name: "parentID"
+          in: "path"
+          description: "ProcessID or -1 for dropbox"
+          required: true
+          type: "integer"
+        - name: "fileID"
+          in: "path"
+          description: "Specific fileID to read"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Returns an HTML script tag"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/archive/{processID}:
+    get:
+      tags:
+        - "archive"
+      summary: "Archive a process"
+      description: "Moves the results of a process to the archive"
+      operationId: "utils.pvacapi.controllers.processes.archive"
+      parameters:
+        - name: "processID"
+          in: "path"
+          description: "Id of the process to archive"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "No meaningful data to return"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/restart/{processID}:
+    get:
+      tags:
+        - "restart"
+      summary: "Restart an old process"
+      description: "Restarts a previously run process using the exact same parameters"
+      operationId: "utils.pvacapi.controllers.processes.restart"
+      parameters:
+        - name: "processID"
+          in: "path"
+          description: "ID of the process to restart"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Returns the Process Object (from /api/v1/processes/{processID})"
+          schema:
+            $ref: "#/definitions/Process"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Process:
+    type: "object"
+    properties:
+      pid:
+        type: "integer"
+        description: "Actual pid assigned by the OS for this pVAC-Seq run.\
+        This is only accurate if the process is still attached"
+      id:
+        type: "integer"
+        description: "Unique process ID used for accessing the process data through the api"
+      results_url:
+        type: "string"
+        description: "The URL to this process' results listing endpoint"
+      command:
+        type: "string"
+        description: "The shell command issued to start this pVAC-Seq run"
+      status:
+        type: "string"
+        description: "The most recent message sent by pVAC-Seq"
+      log:
+        type: "array"
+        description: "The full output transcript from pVAC-Seq"
+        items: {
+          type: "string"
+        }
+      log_updated_at:
+        type: "integer"
+        description: "Time of the most recent modification of the logfile in epoch seconds.
+        Returns 0 if the logfile hasn't been created by the process yet"
+      output:
+        type: "string"
+        description: "The output folder of the specified process"
+      running:
+        type: "boolean"
+        description: "Indicates whether or not the process is still running"
+      files:
+        type: "array"
+        items:
+          $ref: "#/definitions/FileSummary"
+        description: "An array of basic info on the files output by this process.\
+        Returns an empty array if the process is still running"
+      parameters:
+        type: "object"
+        description: "An object listing the parameters issued to pVAC-Seq when starting this process"
+      attached:
+        type: "boolean"
+        description: "Indicates whether or not the process is still directly attached \
+          to the server, or if the process has become orphaned"
+  Result:
+    type: "object"
+    properties:
+      fileID:
+        type: "integer"
+        description: "Unique identifier of the result file."
+      description:
+        type: "string"
+        description: "Description of result file"
+      display_name:
+        type: "string"
+        description: "Display name of result file (try to keep under 32 chars or so)"
+      url:
+        type: "string"
+        description: "URL of results file"
+      size:
+        type: "integer"
+        description: "Size of data file, in bytes"
+      rows:
+        type: "integer"
+        description: "Number of rows in the file"
+  ProcessSummary:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        description: "Unique process ID used for accessing the process data through the api"
+      running:
+        type: "boolean"
+        description: "Indicates whether or not the process is still running"
+      url:
+        type: "string"
+        description: "The URL to this process' information endpoint"
+      results_url:
+        type: "string"
+        description: "The URL to this process' results listing endpoint"
+      attached:
+        type: "boolean"
+        description: "Indicates whether or not the process was started by the current API.\
+        The API retains more control over attached processes via Python's Popen library"
+      output:
+        type: "string"
+        description: "The absolute path to the process' output directory"
+      pid:
+        type: "integer"
+        description: "The OS pid for the process.  This is only accurate iff the process is attached"
+      command:
+        type: "string"
+        description: "The shell command issued to start this pVAC-Seq run"
+      files:
+        type: "array"
+        items:
+          $ref: "#/definitions/FileSummary"
+        description: "An array of basic info on the files output by this process.\
+        Returns an empty array if the process is still running"
+      parameters:
+        type: "object"
+        description: "An object listing the parameters issued to pVAC-Seq when starting this process"
+  FileSummary:
+    type: "object"
+    properties:
+      fileID:
+        type: "integer"
+        description: "The unique fileID identifying an output file from a given process"
+      url:
+        type: "string"
+        description: "The URL to access this file's contents"
+      display_name:
+        type: "string"
+        description: "The path to the file relative to it's parent process' output directory"
+      description:
+        type: "string"
+        description: "A description of the file's contents in the context of pVAC-Seq"
+  MetaData:
+    type: "object"
+    properties:
+      current_page:
+        type: "integer"
+        description: "The page of information being returned"
+      count:
+        type: "integer"
+        description: "The number of items to return per page"
+      total_pages:
+        type: "integer"
+        description: "The total number of pages of data"
+      total_count:
+        type: "integer"
+        description: "The total number of items"
+  Error:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+      fields:
+        type: "string"
