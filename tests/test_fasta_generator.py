@@ -4,13 +4,13 @@ import unittest
 import tempfile
 from filecmp import cmp
 import py_compile
-from pvacseq.lib.fasta_generator import *
+from lib.fasta_generator import *
 
 class FastaGeneratorTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'pvacseq', 'lib')
+        cls.executable_dir = os.path.join(base_dir, 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'fasta_generator.py')
         cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'fasta_generator')
         cls.peptide_sequence_length = 21
