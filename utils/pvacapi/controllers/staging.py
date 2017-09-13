@@ -423,10 +423,7 @@ def check_allele(allele):
     """Checks if the requested allele is supported by pVAC-Seq or not"""
     data = current_app.config['storage']['loader']()
     if 'allele_file' not in current_app.config:
-        allele_file = tempfile.TemporaryFile('w+')
-        subprocess.call(['pvacseq', 'valid_alleles'], stdout=allele_file)
-        current_app.config['allele_file'] = allele_file
-    current_app.config['allele_file'].seek(0)
+        current_app.config['allele_file'] = list(PredictionClass.all_valid_allele_names())
     for line in current_app.config['allele_file']:
         if line.strip() == allele:
             return True
