@@ -120,7 +120,7 @@ entries = [
 entries.sort(key=lambda x:x['rowid'])
 del raw_data
 ### The data is stored in entries.
-# Entries is a list of dicts, where each dict maps a cloumn name to a value
+# Entries is a list of dicts, where each dict maps a column name to a value
 # cols is a dict mapping the column names to a display name
 # sample is the sample name of the requested file
 ### From here to the bottom, the code can be changed to modify the plotted data
@@ -129,7 +129,7 @@ from bokeh.charts import Scatter
 from bokeh.models import ColumnDataSource, PanTool, HoverTool, Slider, RangeSlider
 from bokeh.models import TableColumn, TapTool, BoxSelectTool, ResizeTool
 from bokeh.models.ranges import Range1d as Range
-from bokeh.models.widgets import Select, DataTable, Toggle
+from bokeh.models.widgets import Select, DataTable, Toggle, RadioButtonGroup
 from bokeh.plotting import figure
 #Set up the x/y axis selectors and the toggle to hide null entries
 widgets = []
@@ -164,6 +164,25 @@ data_dict.update({
     '_y':[],
 })
 source = ColumnDataSource(data=data_dict) #wrap a datasource around the dictionary
+
+presets = RadioButtonGroup(
+    labels=["MT vs WT Epitope Affinity", "Tumor Clonality and Expression"], active=0)
+
+def available(x, y):
+    for entry in entries:
+        if x in entry and entry[x] is not None:
+            return True
+        if y in entry and entry[y] is not None:
+            return True
+    return False
+
+if not available('corresponding_wt_score','best_mt_score'):
+    presets.labels.remove('MT vs WT Epitope Affinity')
+if not available('tumor_dna_vaf', 'tumor_rna_vaf'):
+    presets.labels.remove('Tumor Clonality and Expression')
+
+widgets.append(presets)
+
 p = figure(
     title = sample,
     # sizing_mode='stretch_both',
@@ -204,6 +223,7 @@ table = DataTable(
     # sizing_mode = 'scale_width',
     width = 1200
 )
+
 #Update function
 def update():
     """Updates the data in the datasource for the graph and table based on\
@@ -310,9 +330,31 @@ getters.append((
     range_column_filter('transcript_expression', 1)
 ))
 
+def change_set():
+    if presets.labels[presets.active] == "MT vs WT Epitope Affinity":
+        for item in widgets:
+            try:
+                if item.title == 'X-Axis Value':
+                    item.value = 'corresponding_wt_score'
+                elif item.title == 'Y-Axis Value':
+                    item.value = 'best_mt_score'
+            except AttributeError:
+                continue
+
+    if presets.labels[presets.active] == "Tumor Clonality and Expression":
+        for item in widgets:
+            try:
+                if item.title == 'X-Axis Value':
+                    item.value = 'tumor_dna_vaf'
+                elif item.title == 'Y-Axis Value':
+                    item.value = 'tumor_rna_vaf'
+            except AttributeError:
+                continue
+
 #Add callbacks to the 3 widgets manually created back at the start
 x_field.on_change('value', lambda a,r,g: update())
 y_field.on_change('value', lambda a,r,g: update())
+presets.on_change('active', lambda a,r,g: change_set())
 hide_null.on_click(lambda arg: update())
 
 #Add all models and widgets to the document
