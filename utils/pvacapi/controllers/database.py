@@ -352,7 +352,10 @@ def serve_as(reader, filetype):
         }
 
 def visualize(parentID, fileID):
-    return '<html><head></head><body>%s</body></html'%visualize_script(parentID, fileID)
+    script = visualize_script(parentID, fileID)
+    if type(script) is not str:
+        return script
+    return '<html><head></head><body>%s</body></html>'%script
 
 def visualize_script(parentID, fileID):
     """Return an HTML document containing the requested table visualization"""
@@ -379,6 +382,20 @@ def visualize_script(parentID, fileID):
             },
             400
         )
+    if 'corresponding_wt_score' not in cols:
+        return (
+            {
+                'code':400,
+                'message':'File must contain the corresponding_wt_score column',
+                'fields':'visualization'
+            }, 400)
+    elif 'best_mt_score' not in cols:
+        return (
+            {
+                'code':400,
+                'message':'File must contain the best_mt_score column',
+                'fields':'visualization'
+            }, 400)
     proc_data = process_info(parentID)
     if type(proc_data)==dict and 'parameters' in proc_data and 'sample_name' in proc_data['parameters']:
         sample = proc_data['parameters']['sample_name']
