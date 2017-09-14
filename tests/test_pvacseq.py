@@ -5,12 +5,14 @@ import re
 import sys
 import tempfile
 import py_compile
-from subprocess import run, PIPE
+from subprocess import PIPE
+from subprocess import run as subprocess_run
 from filecmp import cmp
 import yaml
 import lib
 from lib.pipeline import *
 import datetime
+from tools.pvacseq import *
 
 def compare(path1, path2):
     r1 = open(path1)
@@ -106,7 +108,7 @@ class PVACTests(unittest.TestCase):
             self.pVac_directory,
             'tools',
             'pvacseq',
-            "pvacseq.py"
+            "main.py"
         ))
         self.assertTrue(compiled_pvac_path)
 
@@ -115,7 +117,7 @@ class PVACTests(unittest.TestCase):
             self.pVac_directory,
             'tools',
             'pvacseq',
-            "pvacseq.py"
+            "main.py"
             )
         usage_search = re.compile(r"usage: ")
         for command in [
@@ -129,7 +131,7 @@ class PVACTests(unittest.TestCase):
             "config_files",
             "vaccine_design"
             ]:
-            result = run([
+            result = subprocess_run([
                 sys.executable,
                 pvac_script_path,
                 command,
@@ -138,13 +140,14 @@ class PVACTests(unittest.TestCase):
             self.assertFalse(result.returncode)
             self.assertRegex(result.stdout.decode(), usage_search)
 
-    def test_main_compiles(self):
-        compiled_main_path = py_compile.compile(os.path.join(
+    def test_run_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
             self.pVac_directory,
-            "lib",
-            "main.py"
+            "tools",
+            "pvacseq",
+            "run.py"
         ))
-        self.assertTrue(compiled_main_path)
+        self.assertTrue(compiled_run_path)
 
     def test_pvacseq_pipeline(self):
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
@@ -158,7 +161,7 @@ class PVACTests(unittest.TestCase):
         }
         yaml.dump(additional_input_file_list, additional_input_files, default_flow_style=False)
 
-        lib.main.main([
+        run.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
             'HLA-G*01:09,HLA-E*01:01',
@@ -176,7 +179,7 @@ class PVACTests(unittest.TestCase):
         ])
         self.assertEqual(len(self.request_mock.mock_calls), 8)
 
-        lib.main.main([
+        run.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
             'H2-IAb',
@@ -279,7 +282,7 @@ class PVACTests(unittest.TestCase):
         ])
 
         with self.assertRaises(SystemExit) as cm:
-            lib.main.main([
+            run.main([
                 os.path.join(self.test_data_directory, "input.vcf"),
                 'Test',
                 'H2-IAb',
@@ -309,7 +312,7 @@ class PVACTests(unittest.TestCase):
             '-e', '9,10',
             '-a', 'sample_name',
         ]
-        lib.main.main(params)
+        run.main(params)
         output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.final.tsv')
         expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
         self.assertTrue(cmp(output_file, expected_file, False))
@@ -326,7 +329,7 @@ class PVACTests(unittest.TestCase):
         ]
         os.environ["TEST_FLAG"] = '0'
         start_1 = datetime.datetime.now()
-        lib.main.main(params_1)
+        run.main(params_1)
         end_1 = datetime.datetime.now()
         duration_1 = (end_1 - start_1).total_seconds()
         output_dir_1.cleanup()
@@ -342,56 +345,9 @@ class PVACTests(unittest.TestCase):
         ]
         os.environ["TEST_FLAG"] = '1'
         start_2 = datetime.datetime.now()
-        lib.main.main(params_2)
+        run.main(params_2)
         end_2 = datetime.datetime.now()
         duration_2 = (end_2 - start_2).total_seconds()
         output_dir_2.cleanup()
 
         self.assertTrue(duration_1 > duration_2)
-
-    def test_pvacseq_pipeline_for_fusions(self):
-        pvac_script_path = os.path.join(
-            self.pVac_directory,
-            'tools',
-            'pvacseq',
-            "pvacseq.py"
-            )
-        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
-
-        lib.main.main([
-            os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
-            'Test',
-            'HLA-A*29:02',
-            'NetMHC',
-            output_dir.name,
-            '-e', '9',
-            '--top-score-metric=lowest',
-            '--keep-tmp-files',
-        ])
-
-        for file_name in (
-            'Test.tsv',
-            'Test.tsv_1-5',
-            'Test.combined.parsed.tsv',
-            'Test.filtered.binding.tsv',
-            'Test.final.tsv',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', file_name)
-            self.assertTrue(compare(output_file, expected_file))
-
-        for file_name in (
-            'Test_21.fa.split_1-10',
-            'Test_21.fa.split_1-10.key',
-            'Test.ann.HLA-A*29:02.9.tsv_1-10',
-            'Test.HLA-A*29:02.9.parsed.tsv_1-10',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'tmp', file_name)
-            self.assertTrue(compare(output_file, expected_file))
-
-        self.request_mock.assert_has_calls([
-            generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-10"))
-        ])
-
-        output_dir.cleanup()
