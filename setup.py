@@ -40,7 +40,8 @@ setup(
     entry_points={
         "console_scripts":[
             "pvacseq = tools.pvacseq.pvacseq:main",
-            "pvacseq-api = utils.pvacapi.app:main [API]"
+            "pvacseq-api = utils.pvacapi.app:main [API]",
+            "pvacclient = utils.pvacclient.client:main [API]"
         ]
     },
     install_requires=[
@@ -68,7 +69,7 @@ setup(
         ]
     },
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 4 - beta',
 
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
