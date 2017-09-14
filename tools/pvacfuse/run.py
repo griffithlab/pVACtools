@@ -1,0 +1,248 @@
+import sys
+import argparse
+import os
+from lib.prediction_class import *
+from lib.pipeline import *
+from lib.config_files import additional_input_file_list_options
+
+def define_parser():
+    parser = argparse.ArgumentParser("pvacfuse run")
+
+    parser.add_argument(
+        "input_file",
+        help="The variant input file to process. This is a INTEGRATE-Neo bedpe file with fusions."
+    )
+    parser.add_argument(
+        "sample_name",
+        help="The name of the sample being processed. This will be used as a prefix for output files"
+    )
+    parser.add_argument(
+        "allele", type=lambda s:[a for a in s.split(',')],
+        help="Name of the allele to use for epitope prediction. "
+             + "Multiple alleles can be specified using a comma-separated list. "
+             + "For a list of available alleles, use: `pvacseq valid_alleles`",
+    )
+    parser.add_argument(
+        "prediction_algorithms",
+        choices=PredictionClass.prediction_methods(),
+        nargs="+",
+        help="The epitope prediction algorithms to use. Multiple prediction algorithms can be specified, separated by spaces",
+    )
+    parser.add_argument(
+        "output_dir",
+        help="The directory for writing all result files"
+    )
+    parser.add_argument(
+        "-e", "--epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+        help="Length of subpeptides (neoepitopes) to predict. "
+             + "Multiple epitope lengths can be specified using a comma-separated list. "
+             + "Typical epitope lengths vary between 8-11. " 
+             + "Required for Class I prediction algorithms",
+    )
+    parser.add_argument(
+        "-l", "--peptide-sequence-length", type=int,
+        default=21,
+        help="Length of the peptide sequence to use when creating the FASTA. Default: 21",
+    )
+    parser.add_argument(
+        "--iedb-install-directory",
+        help="Directory that contains the local installation of IEDB MHC I and/or MHC II"
+    )
+    parser.add_argument(
+        '--net-chop-method',
+        choices=lib.net_chop.methods,
+        default=None,
+        help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0). ",
+    )
+    parser.add_argument(
+        '--netmhc-stab',
+        action='store_true',
+        help="Run NetMHCStabPan after all filtering and add stability predictions to predicted epitopes"
+    )
+    parser.add_argument(
+        '-t', '--top-result-per-mutation',
+        action='store_true',
+        help='Output only the top scoring result for each allele-peptide length combination for each variant. Default: False'
+    )
+    parser.add_argument(
+        '-m', '--top-score-metric',
+        choices=['lowest', 'median'],
+        default='median',
+        help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
+             + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
+             + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. "
+             + "Default: median"
+        )
+    parser.add_argument(
+        "-b","--binding-threshold", type=int,
+        default=500,
+        help="Report only epitopes where the mutant allele has ic50 binding scores below this value. Default: 500",
+    )
+    parser.add_argument(
+        "-c", "--minimum-fold-change", type=int,
+        default=0,
+        help="Minimum fold change between mutant binding score and wild-type score. "
+             + "The default is 0, which filters no results, but 1 is often a sensible choice "
+             + "(requiring that binding is better to the MT than WT). Default: 0",
+    )
+    parser.add_argument(
+        '--net-chop-threshold', type=float,
+        default=0.5,
+        help="NetChop prediction threshold. Default: 0.5",
+    )
+    parser.add_argument(
+        '-a', '--additional-report-columns',
+        choices=['sample_name'],
+        help="Additional columns to output in the final report"
+    )
+    parser.add_argument(
+        "-s", "--fasta-size",type=int,
+        default=200,
+        help="Number of fasta entries per IEDB request. "
+             + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
+             + "Needs to be an even number.",
+    )
+    parser.add_argument(
+        "-r", "--iedb-retries",type=int,
+        default=5,
+        help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100."
+             + "Default: 5"
+    )
+    parser.add_argument(
+        "-d", "--downstream-sequence-length",
+        default='1000',
+        help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
+            + "Use 'full' to include the full downstream sequence. Default: 1000"
+    )
+    parser.add_argument(
+        "-k", "--keep-tmp-files",
+        action='store_true',
+        help="Keep intermediate output files. This migt be useful for debugging purposes.",
+    )
+    return parser
+
+def main(args_input = sys.argv[1:]):
+    parser = define_parser()
+    args = parser.parse_args(args_input)
+
+    if "." in args.sample_name:
+        sys.exit("Sample name cannot contain '.'")
+
+    if args.fasta_size%2 != 0:
+        sys.exit("The fasta size needs to be an even number")
+
+    if args.iedb_retries > 100:
+        sys.exit("The number of IEDB retries must be less than or equal to 100")
+
+    if args.downstream_sequence_length == 'full':
+        downstream_sequence_length = None
+    elif args.downstream_sequence_length.isdigit():
+        downstream_sequence_length = int(args.downstream_sequence_length)
+    else:
+        sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
+
+    input_file_type = 'bedpe'
+    base_output_dir = os.path.abspath(args.output_dir)
+
+    class_i_prediction_algorithms = []
+    class_ii_prediction_algorithms = []
+    for prediction_algorithm in sorted(args.prediction_algorithms):
+        prediction_class = globals()[prediction_algorithm]
+        prediction_class_object = prediction_class()
+        if isinstance(prediction_class_object, MHCI):
+            class_i_prediction_algorithms.append(prediction_algorithm)
+        elif isinstance(prediction_class_object, MHCII):
+            class_ii_prediction_algorithms.append(prediction_algorithm)
+
+    class_i_alleles = []
+    class_ii_alleles = []
+    for allele in sorted(set(args.allele)):
+        valid = 0
+        if allele in MHCI.all_valid_allele_names():
+            class_i_alleles.append(allele)
+            valid = 1
+        if allele in MHCII.all_valid_allele_names():
+            class_ii_alleles.append(allele)
+            valid = 1
+        if not valid:
+            print("Allele %s not valid. Skipping." % allele)
+
+    shared_arguments = {
+        'input_file'                : args.input_file,
+        'input_file_type'           : input_file_type,
+        'sample_name'               : args.sample_name,
+        'top_result_per_mutation'   : args.top_result_per_mutation,
+        'top_score_metric'          : args.top_score_metric,
+        'binding_threshold'         : args.binding_threshold,
+        'minimum_fold_change'       : args.minimum_fold_change,
+        'net_chop_method'           : args.net_chop_method,
+        'net_chop_threshold'        : args.net_chop_threshold,
+        'normal_cov'                : None,
+        'normal_vaf'                : None,
+        'tdna_cov'                  : None,
+        'tdna_vaf'                  : None,
+        'trna_cov'                  : None,
+        'trna_vaf'                  : None,
+        'expn_val'                  : None,
+        'additional_report_columns' : args.additional_report_columns,
+        'fasta_size'                : args.fasta_size,
+        'iedb_retries'              : args.iedb_retries,
+        'downstream_sequence_length': downstream_sequence_length,
+        'keep_tmp_files'            : args.keep_tmp_files,
+    }
+    additional_input_files = {}
+    for additional_input_file_list_option in additional_input_file_list_options().keys():
+        additional_input_files[additional_input_file_list_option] = None
+    shared_arguments.update(additional_input_files)
+
+    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
+        if args.epitope_length is None:
+            sys.exit("Epitope length is required for class I binding predictions")
+
+        if args.iedb_install_directory:
+            iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
+            if not os.path.exists(iedb_mhc_i_executable):
+                sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
+        else:
+            iedb_mhc_i_executable = None
+
+        print("Executing MHC Class I predictions")
+
+        output_dir = os.path.join(base_output_dir, 'MHC_Class_I')
+        os.makedirs(output_dir, exist_ok=True)
+
+        class_i_arguments = shared_arguments.copy()
+        class_i_arguments['alleles']                 = class_i_alleles
+        class_i_arguments['peptide_sequence_length'] = args.peptide_sequence_length
+        class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
+        class_i_arguments['epitope_lengths']         = args.epitope_length
+        class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
+        class_i_arguments['output_dir']              = output_dir
+        class_i_arguments['netmhc_stab']             = args.netmhc_stab
+        pipeline = MHCIPipeline(**class_i_arguments)
+        pipeline.execute()
+
+    if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+        if args.iedb_install_directory:
+            iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
+            if not os.path.exists(iedb_mhc_ii_executable):
+                sys.exit("IEDB MHC II executable path doesn't exist %s" % iedb_mhc_ii_executable)
+        else:
+            iedb_mhc_ii_executable = None
+
+        print("Executing MHC Class II predictions")
+
+        output_dir = os.path.join(base_output_dir, 'MHC_Class_II')
+        os.makedirs(output_dir, exist_ok=True)
+
+        class_ii_arguments = shared_arguments.copy()
+        class_ii_arguments['alleles']               = class_ii_alleles
+        class_ii_arguments['prediction_algorithms'] = class_ii_prediction_algorithms
+        class_ii_arguments['iedb_executable']       = iedb_mhc_ii_executable
+        class_ii_arguments['output_dir']            = output_dir
+        class_ii_arguments['netmhc_stab']           = False
+        pipeline = MHCIIPipeline(**class_ii_arguments)
+        pipeline.execute()
+
+if __name__ == '__main__':
+    main()

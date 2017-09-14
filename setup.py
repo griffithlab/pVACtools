@@ -40,6 +40,7 @@ setup(
     entry_points={
         "console_scripts":[
             "pvacseq = tools.pvacseq.main:main",
+            "pvacfuse = tools.pvacfuse.main:main",
             "pvacseq-api = utils.pvacapi.app:main [API]"
         ]
     },
