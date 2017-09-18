@@ -29,6 +29,13 @@ def main():
     )
     binding_filter_parser.set_defaults(func=binding_filter)
 
+    valid_alleles_parser = subparsers.add_parser(
+        "valid_alleles",
+        help="Shows a list of valid allele names",
+        add_help=False
+    )
+    valid_alleles_parser.set_defaults(func=lib.valid_alleles)
+
     args = parser.parse_known_args()
     try:
         args[0].func.main(args[1])
