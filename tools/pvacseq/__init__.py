@@ -1,5 +1,6 @@
 __all__ = [
-    'run'
+    'run',
+    'binding_filter',
 ]
 
 from . import *
