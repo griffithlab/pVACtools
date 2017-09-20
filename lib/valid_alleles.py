@@ -12,3 +12,13 @@ class ValidAlleles:
         else:
             prediction_class = globals()[self.prediction_algorithm]
             print("\n".join(sorted(prediction_class().valid_allele_names())))
+
+    @classmethod
+    def parser(cls, tool):
+        parser = argparse.ArgumentParser("%s valid_alleles" % tool)
+        parser.add_argument(
+            "-p", "--prediction-algorithm",
+            choices=PredictionClass.prediction_methods(),
+            help="The epitope prediction algorithms to use",
+        )
+        return parser

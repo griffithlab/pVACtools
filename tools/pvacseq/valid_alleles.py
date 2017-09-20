@@ -1,16 +1,9 @@
 import sys
 import argparse
-from lib.prediction_class import *
 from lib.valid_alleles import *
 
 def define_parser():
-    parser = argparse.ArgumentParser('pvacseq valid_alleles')
-    parser.add_argument(
-        "-p", "--prediction-algorithm",
-        choices=PredictionClass.prediction_methods(),
-        help="The epitope prediction algorithms to use",
-    )
-    return parser
+    return ValidAlleles.parser('pvacseq')
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
