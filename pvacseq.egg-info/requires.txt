@@ -1,0 +1,16 @@
+PyVCF
+requests
+PyYAML
+connexion
+biopython
+networkx
+simanneal
+pandas
+
+[API]
+connexion
+py-postgresql
+watchdog
+flask-cors
+bokeh
+pvacseq-client

@@ -1,0 +1,4 @@
+[console_scripts]
+pvacseq = pvacseq.pvacseq:main
+pvacseq-api = pvacseq.server.app:main [api]
+
