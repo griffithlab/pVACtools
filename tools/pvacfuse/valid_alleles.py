@@ -1,6 +1,3 @@
-import sys
-import argparse
-from lib.prediction_class import *
 from lib.valid_alleles import *
 
 def define_parser():

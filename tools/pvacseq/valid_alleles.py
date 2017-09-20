@@ -1,5 +1,3 @@
-import sys
-import argparse
 from lib.valid_alleles import *
 
 def define_parser():
