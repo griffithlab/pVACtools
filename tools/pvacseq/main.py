@@ -63,7 +63,7 @@ def main():
         help="Shows a list of valid allele names",
         add_help=False
     )
-    valid_alleles_parser.set_defaults(func=lib.valid_alleles)
+    valid_alleles_parser.set_defaults(func=valid_alleles)
 
     config_files_parser = subparsers.add_parser(
         "config_files",
