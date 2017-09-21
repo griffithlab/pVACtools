@@ -13,6 +13,7 @@ from lib.prediction_class import *
 from lib.input_file_converter import *
 from lib.fasta_generator import *
 from lib.output_parser import *
+from lib.binding_filter import *
 import shutil
 import yaml
 import pkg_resources
@@ -253,15 +254,13 @@ class Pipeline(metaclass=ABCMeta):
 
     def binding_filter(self):
         status_message("Running Binding Filters")
-        lib.binding_filter.main(
-            [
-                self.combined_parsed_path(),
-                self.binding_filter_out_path(),
-                '-c', str(self.minimum_fold_change),
-                '-b', str(self.binding_threshold),
-                '-m', str(self.top_score_metric),
-            ]
-        )
+        BindingFilter(
+            self.combined_parsed_path(),
+            self.binding_filter_out_path(),
+            self.binding_threshold,
+            self.minimum_fold_change,
+            self.top_score_metric,
+        ).execute()
         status_message("Completed")
 
     def coverage_filter_out_path(self):

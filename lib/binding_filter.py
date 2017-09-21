@@ -12,42 +12,41 @@ class BindingFilter:
         self.top_score_metric = top_score_metric
 
     def execute(self):
-        reader = csv.DictReader(self.input_file, delimiter='\t')
-        fieldnames = reader.fieldnames
+        with open(self.input_file, 'r') as csv_input_file:
+            reader = csv.DictReader(csv_input_file, delimiter='\t')
+            fieldnames = reader.fieldnames
 
-        writer = csv.DictWriter(
-            self.output_file,
-            fieldnames,
-            delimiter = '\t',
-            lineterminator = '\n'
-        )
-        writer.writeheader()
+            with open(self.output_file, 'w') as csv_output_file:
+                writer = csv.DictWriter(
+                    csv_output_file,
+                    fieldnames,
+                    delimiter = '\t',
+                    lineterminator = '\n'
+                )
+                writer.writeheader()
 
-        for entry in reader:
-            if self.top_score_metric == 'median':
-                score = float(entry['Median MT Score'])
-                fold_change = sys.maxsize if entry['Median Fold Change'] == 'NA' else float(entry['Median Fold Change'])
-            elif self.top_score_metric == 'lowest':
-                score = float(entry['Best MT Score'])
-                fold_change = sys.maxsize if entry['Corresponding Fold Change'] == 'NA' else float(entry['Corresponding Fold Change'])
+                for entry in reader:
+                    if self.top_score_metric == 'median':
+                        score = float(entry['Median MT Score'])
+                        fold_change = sys.maxsize if entry['Median Fold Change'] == 'NA' else float(entry['Median Fold Change'])
+                    elif self.top_score_metric == 'lowest':
+                        score = float(entry['Best MT Score'])
+                        fold_change = sys.maxsize if entry['Corresponding Fold Change'] == 'NA' else float(entry['Corresponding Fold Change'])
 
-            if score > self.binding_threshold or fold_change < self.minimum_fold_change:
-                continue
+                    if score > self.binding_threshold or fold_change < self.minimum_fold_change:
+                        continue
 
-            writer.writerow(entry)
-
-        self.input_file.close()
-        self.output_file.close()
+                    writer.writerow(entry)
 
     @classmethod
     def parser(cls, tool):
         parser = argparse.ArgumentParser('%s binding_filter' % tool)
         parser.add_argument(
-            'input_file', type=argparse.FileType('r'),
+            'input_file',
             help="The final report .tsv file to filter"
         )
         parser.add_argument(
-            'output_file', type=argparse.FileType('w'),
+            'output_file',
             help="Output .tsv file containing list of filtered "
                  + "epitopes based on binding affinity"
         )
