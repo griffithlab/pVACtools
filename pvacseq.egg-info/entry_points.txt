@@ -1,5 +1,0 @@
-[console_scripts]
-pvacfuse = tools.pvacfuse.main:main
-pvacseq = tools.pvacseq.main:main
-pvacseq-api = utils.pvacapi.app:main [api]
-
