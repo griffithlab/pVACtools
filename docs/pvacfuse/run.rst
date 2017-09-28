@@ -1,4 +1,4 @@
-.. _run:
+.. _pvacfuse_run:
 
 Usage
 ====================================
@@ -11,9 +11,9 @@ Usage
 
 .. topic:: For usage instructions run
    
-   ``pvacseq run --help``
+   ``pvafuse run --help``
 
 .. .. argparse::
-        :module: lib.main
+        :module: tools.pvacfuse.run
         :func: define_parser
-        :prog: pvacseq run
+        :prog: pvacfuse run
