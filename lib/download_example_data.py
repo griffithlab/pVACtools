@@ -3,18 +3,18 @@ import os
 import sys
 from shutil import copytree
 
-def define_parser():
-    parser = argparse.ArgumentParser('pvacseq download_example_data')
-    parser.add_argument('destination_directory', help='Directory for downloading example data',)
-    return parser
+class DownloadExampleData:
+    def __init__(self, destination_directory, tool):
+        self.destination_directory = destination_directory
+        self.tool = tool
 
-def main(args_input = sys.argv[1:]):
-    parser = define_parser()
-    args = parser.parse_args(args_input)
+    def execute(self):
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        source_directory = os.path.join(base_dir, 'tools', self.tool, 'example_data')
+        copytree(source_directory, os.path.join(self.destination_directory, 'example_data'))
 
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-    source_directory = os.path.join(base_dir, 'tools', 'pvacseq', 'example_data')
-    copytree(source_directory, os.path.join(args.destination_directory, 'example_data'))
-
-if __name__ == '__main__':
-    main()
+    @classmethod
+    def parser(cls, tool):
+        parser = argparse.ArgumentParser('%s download_example_data' % tool)
+        parser.add_argument('destination_directory', help='Directory for downloading example data',)
+        return parser
