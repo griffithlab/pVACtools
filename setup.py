@@ -43,6 +43,7 @@ setup(
     packages=["tools.pvacseq", "lib", "utils.pvacapi", "utils.pvacapi.controllers"],
     entry_points={
         "console_scripts":[
+            "pvactools = tools.main:main",
             "pvacseq = tools.pvacseq.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacseq-api = utils.pvacapi.app:main [API]"
