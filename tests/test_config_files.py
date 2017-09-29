@@ -9,7 +9,7 @@ class ConfigFilesTests(unittest.TestCase):
     def setUpClass(cls):
         cls.python = sys.executable
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'lib')
+        cls.executable_dir = os.path.join(base_dir, 'tools', 'pvacseq')
         cls.executable     = os.path.join(cls.executable_dir, 'config_files.py')
 
     def test_source_compiles(self):

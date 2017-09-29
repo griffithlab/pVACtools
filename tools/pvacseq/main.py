@@ -70,7 +70,7 @@ def main():
         help="Documentation for the configuration files",
         add_help=False
     )
-    config_files_parser.set_defaults(func=lib.config_files)
+    config_files_parser.set_defaults(func=config_files)
 
     args = parser.parse_known_args()
     try:
