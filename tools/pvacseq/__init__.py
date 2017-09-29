@@ -5,6 +5,7 @@ __all__ = [
     'download_example_data',
     'coverage_filter',
     'generate_protein_fasta',
+    'install_vep_plugin',
 ]
 
 from . import *

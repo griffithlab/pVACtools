@@ -56,7 +56,7 @@ def main():
         help="Installs the Wildtype VEP plugin into your VEP_plugins directory",
         add_help=False
     )
-    install_vep_plugin_parser.set_defaults(func=lib.install_vep_plugin)
+    install_vep_plugin_parser.set_defaults(func=install_vep_plugin)
 
     valid_alleles_parser = subparsers.add_parser(
         "valid_alleles",

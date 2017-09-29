@@ -6,7 +6,6 @@ __all__ = [
     "input_file_converter",
     "download_example_data",
     "fasta_generator",
-    "install_vep_plugin",
     "output_parser",
     "valid_alleles",
     'net_chop',
