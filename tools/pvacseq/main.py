@@ -42,7 +42,7 @@ def main():
         help="Generate an annotated fasta file from a VCF with protein sequences of mutations and matching wildtypes",
         add_help=False
     )
-    generate_protein_fasta_parser.set_defaults(func=lib.generate_protein_fasta)
+    generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
 
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
