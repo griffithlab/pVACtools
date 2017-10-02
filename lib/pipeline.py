@@ -269,17 +269,19 @@ class Pipeline(metaclass=ABCMeta):
 
     def coverage_filter(self):
         status_message("Running Coverage Filters")
-        filter_criteria = []
-        filter_criteria.append({'column': "Normal_Depth", 'operator': '>=', 'threshold': self.normal_cov})
-        filter_criteria.append({'column': "Normal_VAF", 'operator': '<=', 'threshold': self.normal_vaf})
-        filter_criteria.append({'column': "Tumor_DNA_Depth", 'operator': '>=', 'threshold': self.tdna_cov})
-        filter_criteria.append({'column': "Tumor_DNA_VAF", 'operator': '>=', 'threshold': self.tdna_vaf})
-        filter_criteria.append({'column': "Tumor_RNA_Depth", 'operator': '>=', 'threshold': self.trna_cov})
-        filter_criteria.append({'column': "Tumor_RNA_VAF", 'operator': '>=', 'threshold': self.trna_vaf})
-        filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': self.expn_val})
-        filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': self.expn_val})
-
-        Filter(self.binding_filter_out_path(), self.coverage_filter_out_path(), filter_criteria).execute()
+        if self.input_file_type == 'vcf':
+            filter_criteria = []
+            filter_criteria.append({'column': "Normal_Depth", 'operator': '>=', 'threshold': self.normal_cov})
+            filter_criteria.append({'column': "Normal_VAF", 'operator': '<=', 'threshold': self.normal_vaf})
+            filter_criteria.append({'column': "Tumor_DNA_Depth", 'operator': '>=', 'threshold': self.tdna_cov})
+            filter_criteria.append({'column': "Tumor_DNA_VAF", 'operator': '>=', 'threshold': self.tdna_vaf})
+            filter_criteria.append({'column': "Tumor_RNA_Depth", 'operator': '>=', 'threshold': self.trna_cov})
+            filter_criteria.append({'column': "Tumor_RNA_VAF", 'operator': '>=', 'threshold': self.trna_vaf})
+            filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': self.expn_val})
+            filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': self.expn_val})
+            Filter(self.binding_filter_out_path(), self.coverage_filter_out_path(), filter_criteria).execute()
+        elif self.input_file_type == 'bedpe':
+            shutil.copy(self.binding_filter_out_path(), self.coverage_filter_out_path())
         status_message("Completed")
 
     def net_chop_out_path(self):
