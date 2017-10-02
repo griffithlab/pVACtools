@@ -6,6 +6,9 @@ import shutil
 from filecmp import cmp
 import os
 import sys
+import re
+from subprocess import PIPE
+from subprocess import run as subprocess_run
 
 #python -m unittest tests/test_vaccine_design.py
 class TestVaccineDesign(unittest.TestCase):
@@ -29,6 +32,35 @@ class TestVaccineDesign(unittest.TestCase):
 
     def test_vaccine_design_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
+
+    def test_pvacvector_compiles(self):
+        compiled_path = py_compile.compile(os.path.join(
+            self.base_dir,
+            'tools',
+            'pvacvector',
+            'main.py'
+        ))
+        self.assertTrue(compiled_path)
+
+    def test_pvacvectory_commands(self):
+        pvac_script_path = os.path.join(
+            self.base_dir,
+            'tools',
+            'pvacvector',
+            'main.py'
+            )
+        usage_search = re.compile(r"usage: ")
+        for command in [
+            "run",
+            ]:
+            result = subprocess_run([
+                sys.executable,
+                pvac_script_path,
+                command,
+                '-h'
+            ], shell=False, stdout=PIPE)
+            self.assertFalse(result.returncode)
+            self.assertRegex(result.stdout.decode(), usage_search)
 
     def test_vaccine_design_fa_input_runs_and_produces_expected_output(self):
         output_dir = tempfile.TemporaryDirectory()
