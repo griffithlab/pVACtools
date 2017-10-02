@@ -2,12 +2,6 @@ import argparse
 import sys
 import os
 import pkg_resources
-pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-sys.path.append(pvac_dir)
-try:
-    from . import lib
-except (SystemError, ImportError):
-    import lib
 from tools.pvacfuse import *
 
 def main():
