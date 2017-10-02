@@ -27,9 +27,8 @@ def define_parser():
 
     parser.add_argument(
         "input_file",
-        help="The variant input file to process. This can either be a VEP-annotated single-sample VCF "
-             + "containing transcript, Wildtype protein sequence, and Downstream protein sequence information, "
-             + "or a INTEGRATE-Neo bedpe file with fusions."
+        help="The variant input file to process. This is a VEP-annotated single-sample VCF "
+             + "containing transcript, Wildtype protein sequence, and Downstream protein sequence information."
     )
     parser.add_argument(
         "sample_name",
@@ -190,13 +189,6 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    if args.input_file.endswith('.vcf'):
-        input_file_type = 'vcf'
-    elif args.input_file.endswith('.bedpe'):
-        input_file_type = 'bedpe'
-    else:
-        sys.exit("Unknown input file type for file (%s). Input file must be either a VCF (.vcf) or a bedpe (.bedpe) file." % input_file)
-
     if "." in args.sample_name:
         sys.exit("Sample name cannot contain '.'")
 
@@ -213,6 +205,7 @@ def main(args_input = sys.argv[1:]):
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
+    input_file_type = 'vcf'
     base_output_dir = os.path.abspath(args.output_dir)
 
     class_i_prediction_algorithms = []

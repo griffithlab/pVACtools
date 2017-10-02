@@ -9,7 +9,6 @@ __all__ = [
     "fasta_generator",
     "generate_protein_fasta",
     "install_vep_plugin",
-    "main",
     "output_parser",
     "valid_alleles",
     'net_chop',

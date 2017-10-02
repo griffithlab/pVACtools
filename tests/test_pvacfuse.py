@@ -1,0 +1,173 @@
+import unittest
+import unittest.mock
+import os
+import re
+import sys
+import tempfile
+import py_compile
+from subprocess import PIPE
+from subprocess import run as subprocess_run
+from filecmp import cmp
+import yaml
+import lib
+import datetime
+from tools.pvacfuse import *
+
+def compare(path1, path2):
+    r1 = open(path1)
+    r2 = open(path2)
+    result = not len(set(r1.readlines())^set(r2.readlines()))
+    r1.close()
+    r2.close()
+    return result
+
+def make_response(data, files, path):
+    if not files:
+        if 'length' in data:
+            filename = 'response_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'])
+        else:
+            filename = 'response_%s_%s.tsv' % (data['allele'], data['method'])
+        reader = open(os.path.join(
+            path,
+            filename
+        ), mode='r')
+        response_obj = lambda :None
+        response_obj.status_code = 200
+        response_obj.text = reader.read()
+        reader.close()
+        return response_obj
+    else:
+        basefile = os.path.basename(data['configfile'])
+        reader = open(os.path.join(
+            path,
+            'net_chop.html' if basefile == 'NetChop.cf' else 'Netmhcstab.html'
+        ), mode='rb')
+        response_obj = lambda :None
+        response_obj.status_code = 200
+        response_obj.content = reader.read()
+        reader.close()
+        return response_obj
+
+def generate_class_i_call(method, allele, length, input_file):
+    reader = open(input_file, mode='r')
+    text = reader.read()
+    reader.close()
+    return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhci/', data={
+        'sequence_text': ""+text,
+        'method':        method,
+        'allele':        allele,
+        'length':        length,
+        'user_tool':     'pVac-seq',
+    })
+
+def generate_class_ii_call(method, allele, path, input_path):
+    reader = open(os.path.join(
+        input_path,
+        "MHC_Class_II",
+        "tmp",
+        "Test_31.fa.split_1-48"
+    ), mode='r')
+    text = reader.read()
+    reader.close()
+    return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhcii/', data={
+        'sequence_text': ""+text,
+        'method':        method,
+        'allele':        allele,
+        'user_tool':     'pVac-seq',
+    })
+
+class PVACTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.pVac_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+        cls.test_data_directory = os.path.join(
+            cls.pVac_directory,
+            'tests',
+            'test_data',
+            'pvacfuse'
+        )
+        cls.request_mock = unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            cls.test_data_directory
+        ))
+        lib.call_iedb.requests.post = cls.request_mock
+
+    def test_pvacfuse_compiles(self):
+        compiled_pvac_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            'tools',
+            'pvacfuse',
+            'main.py'
+        ))
+        self.assertTrue(compiled_pvac_path)
+
+    def test_pvacfuse_commands(self):
+        pvac_script_path = os.path.join(
+            self.pVac_directory,
+            'tools',
+            'pvacfuse',
+            'main.py'
+            )
+        usage_search = re.compile(r"usage: ")
+        for command in [
+            "run",
+            ]:
+            result = subprocess_run([
+                sys.executable,
+                pvac_script_path,
+                command,
+                '-h'
+            ], shell=False, stdout=PIPE)
+            self.assertFalse(result.returncode)
+            self.assertRegex(result.stdout.decode(), usage_search)
+
+    def test_run_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacfuse",
+            "run.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_pvacfuse_pipeline(self):
+        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+
+        run.main([
+            os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
+            'Test',
+            'HLA-A*29:02',
+            'NetMHC',
+            output_dir.name,
+            '-e', '9',
+            '--top-score-metric=lowest',
+            '--keep-tmp-files',
+        ])
+
+        for file_name in (
+            'Test.tsv',
+            'Test.tsv_1-5',
+            'Test.combined.parsed.tsv',
+            'Test.filtered.binding.tsv',
+            'Test.final.tsv',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', file_name)
+            self.assertTrue(compare(output_file, expected_file))
+
+        for file_name in (
+            'Test_21.fa.split_1-10',
+            'Test_21.fa.split_1-10.key',
+            'Test.ann.HLA-A*29:02.9.tsv_1-10',
+            'Test.HLA-A*29:02.9.parsed.tsv_1-10',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'tmp', file_name)
+            self.assertTrue(compare(output_file, expected_file))
+
+        self.request_mock.assert_has_calls([
+            generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-10"))
+        ])
+
+        output_dir.cleanup()

@@ -9,19 +9,19 @@ try:
     from . import lib
 except (SystemError, ImportError):
     import lib
+from tools.pvacseq import *
 
 def main():
     parser = argparse.ArgumentParser()
-
     subparsers = parser.add_subparsers()
 
     #add subcommands
     run_main_program_parser = subparsers.add_parser(
         "run",
-        help="Runs the pVAC-Seq pipeline",
+        help="Runs the pVACseq pipeline",
         add_help=False
     )
-    run_main_program_parser.set_defaults(func=lib.main)
+    run_main_program_parser.set_defaults(func=run)
 
     binding_filter_parser = subparsers.add_parser(
         "binding_filter",
