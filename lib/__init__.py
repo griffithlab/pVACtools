@@ -13,7 +13,6 @@ __all__ = [
     "valid_alleles",
     'net_chop',
     "netmhc_stab",
-    "vaccine_design"
 ]
 
 import os
