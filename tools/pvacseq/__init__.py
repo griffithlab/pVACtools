@@ -3,6 +3,7 @@ __all__ = [
     'binding_filter',
     'valid_alleles',
     'download_example_data',
+    'coverage_filter',
 ]
 
 from . import *

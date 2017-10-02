@@ -2,6 +2,7 @@ import argparse
 import sys
 import re
 import csv
+from lib.filter import *
 
 class BindingFilter:
     def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric):
@@ -12,31 +13,16 @@ class BindingFilter:
         self.top_score_metric = top_score_metric
 
     def execute(self):
-        with open(self.input_file, 'r') as csv_input_file:
-            reader = csv.DictReader(csv_input_file, delimiter='\t')
-            fieldnames = reader.fieldnames
+        if self.top_score_metric == 'median':
+            column = 'Median MT Score'
+        elif self.top_score_metric == 'lowest':
+            column = 'Best MT Score'
 
-            with open(self.output_file, 'w') as csv_output_file:
-                writer = csv.DictWriter(
-                    csv_output_file,
-                    fieldnames,
-                    delimiter = '\t',
-                    lineterminator = '\n'
-                )
-                writer.writeheader()
+        filter_criteria = []
+        filter_criteria.append({'column': column, 'operator': '<=', 'threshold': self.binding_threshold})
+        filter_criteria.append({'column': column, 'operator': '>=', 'threshold': self.minimum_fold_change})
 
-                for entry in reader:
-                    if self.top_score_metric == 'median':
-                        score = float(entry['Median MT Score'])
-                        fold_change = sys.maxsize if entry['Median Fold Change'] == 'NA' else float(entry['Median Fold Change'])
-                    elif self.top_score_metric == 'lowest':
-                        score = float(entry['Best MT Score'])
-                        fold_change = sys.maxsize if entry['Corresponding Fold Change'] == 'NA' else float(entry['Corresponding Fold Change'])
-
-                    if score > self.binding_threshold or fold_change < self.minimum_fold_change:
-                        continue
-
-                    writer.writerow(entry)
+        Filter(self.input_file, self.output_file, filter_criteria).execute()
 
     @classmethod
     def parser(cls, tool):
