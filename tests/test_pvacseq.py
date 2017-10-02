@@ -129,7 +129,6 @@ class PVACTests(unittest.TestCase):
             "download_example_data",
             "valid_alleles",
             "config_files",
-            "vaccine_design"
             ]:
             result = subprocess_run([
                 sys.executable,

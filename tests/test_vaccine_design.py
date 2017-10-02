@@ -13,8 +13,7 @@ class TestVaccineDesign(unittest.TestCase):
     def setUpClass(cls):
         cls.base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
         cls.python = sys.executable
-        cls.executable_dir = os.path.join(cls.base_dir, 'lib')
-        cls.executable = os.path.join(cls.executable_dir, 'vaccine_design.py')
+        cls.executable = os.path.join(cls.base_dir, 'tools', 'pvacvector', 'run.py')
         cls.test_run_name = 'test_vaccine_design_produces_expected_output'
         cls.test_data_dir = os.path.join(cls.base_dir, 'tests', 'test_data', 'vaccine_design')
         cls.test_data_temp_dir = os.path.join(cls.test_data_dir, 'tmp')
