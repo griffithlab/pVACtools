@@ -9,6 +9,7 @@ tools:
 
    pvacseq
    pvacfuse
+   pvacvector
 
 .. toctree::
    :maxdepth: 1
