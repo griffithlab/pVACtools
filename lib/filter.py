@@ -12,5 +12,8 @@ class Filter:
         clean_header = header.map(lambda x: x.replace(' ', '_') if isinstance(x, str) else x)
         data.columns = clean_header
         for criteria in self.filter_criteria:
-            data = data.query(criteria)
+            clean_column = criteria['column'].replace(' ', '_')
+#           #clean_column != clean_column is a hacky way to keep all NA values
+            expression = "(%s %s %s) | (%s != %s)" % (clean_column, criteria['operator'], criteria['threshold'], clean_column, clean_column)
+            data = data.query(expression)
         data.to_csv(self.output_file, sep='\t', header=header, index=False, na_rep='NA')

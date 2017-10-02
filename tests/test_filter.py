@@ -23,7 +23,11 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            ["Median_MT_Score<500"],
+            [{
+                'column': "Median MT Score",
+                'operator': "<",
+                'threshold': "500",
+            }],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -39,7 +43,11 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            ["Median_MT_Score<=500"],
+            [{
+                'column': "Median MT Score",
+                'operator': "<=",
+                'threshold': "500",
+            }],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -55,7 +63,11 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            ["Median_MT_Score==500"],
+            [{
+                'column': "Median MT Score",
+                'operator': "==",
+                'threshold': "500",
+            }],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -71,7 +83,11 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            ["Median_MT_Score>=500"],
+            [{
+                'column': "Median MT Score",
+                'operator': ">=",
+                'threshold': "500",
+            }],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -87,10 +103,34 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            ["Median_MT_Score>500"],
+            [{
+                'column': "Median MT Score",
+                'operator': ">",
+                'threshold': "500",
+            }],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_path, "Test.filtered.gt.tsv"),
+            False
+        ))
+
+    def test_NA(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(Filter(
+            os.path.join(
+                self.test_data_path,
+                'Test.combined.parsed.tsv'
+            ),
+            output_file.name,
+            [{
+                'column': "Tumor RNA Depth",
+                'operator': ">",
+                'threshold': "100",
+            }],
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_path, "Test.filtered.NA.tsv"),
             False
         ))
