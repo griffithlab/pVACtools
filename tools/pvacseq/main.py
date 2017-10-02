@@ -49,7 +49,7 @@ def main():
         help="Downloads example input and output files",
         add_help=False
     )
-    download_example_data_parser.set_defaults(func=lib.download_example_data)
+    download_example_data_parser.set_defaults(func=download_example_data)
 
     install_vep_plugin_parser = subparsers.add_parser(
         "install_vep_plugin",
