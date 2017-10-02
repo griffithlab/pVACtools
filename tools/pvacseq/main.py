@@ -28,7 +28,7 @@ def main():
         help="Filters variants processed by IEDB by binding score",
         add_help=False
     )
-    binding_filter_parser.set_defaults(func=lib.binding_filter)
+    binding_filter_parser.set_defaults(func=binding_filter)
 
     coverage_filter_parser = subparsers.add_parser(
         "coverage_filter",

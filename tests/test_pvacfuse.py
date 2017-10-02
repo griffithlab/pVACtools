@@ -112,6 +112,7 @@ class PVACTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
+            "binding_filter",
             ]:
             result = subprocess_run([
                 sys.executable,

@@ -1,5 +1,13 @@
 import argparse
 import sys
+import os
+import pkg_resources
+pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+sys.path.append(pvac_dir)
+try:
+    from . import lib
+except (SystemError, ImportError):
+    import lib
 from tools.pvacfuse import *
 
 def main():
@@ -13,6 +21,13 @@ def main():
         add_help=False
     )
     run_main_program_parser.set_defaults(func=run)
+
+    binding_filter_parser = subparsers.add_parser(
+        "binding_filter",
+        help="Filters variants processed by IEDB by binding score",
+        add_help=False
+    )
+    binding_filter_parser.set_defaults(func=binding_filter)
 
     args = parser.parse_known_args()
     try:
