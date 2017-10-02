@@ -14,6 +14,7 @@ from lib.input_file_converter import *
 from lib.fasta_generator import *
 from lib.output_parser import *
 from lib.binding_filter import *
+from lib.filter import *
 import shutil
 import yaml
 import pkg_resources
@@ -268,25 +269,17 @@ class Pipeline(metaclass=ABCMeta):
 
     def coverage_filter(self):
         status_message("Running Coverage Filters")
-        coverage_params = [
-            self.binding_filter_out_path(),
-            self.coverage_filter_out_path(),
-            '--expn-val', str(self.expn_val),
-        ]
-        for attribute in [
-            'expn_val',
-            'normal_cov',
-            'normal_vaf',
-            'tdna_cov',
-            'tdna_vaf',
-            'trna_cov',
-            'trna_vaf',
-        ]:
-            if getattr(self, attribute):
-                param = '--' + attribute
-                param = param.replace('_', '-')
-                coverage_params.extend([param, str(getattr(self, attribute))])
-        lib.coverage_filter.main(coverage_params)
+        filter_criteria = []
+        filter_criteria.append({'column': "Normal_Depth", 'operator': '>=', 'threshold': self.normal_cov})
+        filter_criteria.append({'column': "Normal_VAF", 'operator': '<=', 'threshold': self.normal_vaf})
+        filter_criteria.append({'column': "Tumor_DNA_Depth", 'operator': '>=', 'threshold': self.tdna_cov})
+        filter_criteria.append({'column': "Tumor_DNA_VAF", 'operator': '>=', 'threshold': self.tdna_vaf})
+        filter_criteria.append({'column': "Tumor_RNA_Depth", 'operator': '>=', 'threshold': self.trna_cov})
+        filter_criteria.append({'column': "Tumor_RNA_VAF", 'operator': '>=', 'threshold': self.trna_vaf})
+        filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': self.expn_val})
+        filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': self.expn_val})
+
+        Filter(self.binding_filter_out_path(), self.coverage_filter_out_path(), filter_criteria).execute()
         status_message("Completed")
 
     def net_chop_out_path(self):
