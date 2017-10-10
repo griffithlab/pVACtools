@@ -1,7 +1,6 @@
 import unittest
 import tempfile
 import py_compile
-import subprocess
 import shutil
 from filecmp import cmp
 import os
@@ -9,6 +8,7 @@ import sys
 import re
 from subprocess import PIPE
 from subprocess import run as subprocess_run
+from tools.pvacvector import *
 
 #python -m unittest tests/test_pvacvector.py
 class TestPvacvector(unittest.TestCase):
@@ -27,7 +27,6 @@ class TestPvacvector(unittest.TestCase):
         cls.keep_tmp = 'True'
         cls.allele = 'H-2-Kb'
         cls.epitope_length = '8'
-        cls.seed = 'True'
         cls.input_n_mer = '25'
 
     def test_run_compiles(self):
@@ -65,17 +64,16 @@ class TestPvacvector(unittest.TestCase):
     def test_pvacvector_fa_input_runs_and_produces_expected_output(self):
         output_dir = tempfile.TemporaryDirectory()
 
-        call = subprocess.call([self.python,
-                           self.executable,
-                           self.input_file,
-                           self.test_run_name,
-                           self.allele,
-                           self.method,
-                           output_dir.name,
-                           '-e', self.epitope_length,
-                           '-n', self.input_n_mer,
-                           '-k',
-                           '-s'], shell=False)
+        run.main([
+            self.input_file,
+            self.test_run_name,
+            self.allele,
+            self.method,
+            output_dir.name,
+            '-e', self.epitope_length,
+            '-n', self.input_n_mer,
+            '-k'
+        ])
 
         #vaccine design algorithm producing correct output with fasta input
         self.assertTrue(cmp(
@@ -93,18 +91,17 @@ class TestPvacvector(unittest.TestCase):
     def test_pvacvector_generate_fa_runs_and_produces_expected_output(self):
         output_dir = tempfile.TemporaryDirectory()
 
-        call = subprocess.call([self.python,
-                           self.executable,
-                           self.input_tsv,
-                           self.test_run_name,
-                           self.allele,
-                           self.method,
-                           output_dir.name,
-                           '-v', self.input_vcf,
-                           '-e', self.epitope_length,
-                           '-n', self.input_n_mer,
-                           '-k',
-                           '-s'], shell=False)
+        run.main([
+            self.input_tsv,
+            self.test_run_name,
+            self.allele,
+            self.method,
+            output_dir.name,
+            '-v', self.input_vcf,
+            '-e', self.epitope_length,
+            '-n', self.input_n_mer,
+            '-k'
+        ])
 
         #conversion from vcf to fasta file producing correct output, input file for vaccine design algorithm
         self.assertTrue(cmp(

@@ -199,8 +199,3 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
             '-n', "--input-n-mer", default='25',
             help="Length of the peptide sequence to use when creating the FASTA from the pVACseq TSV. Default: 21",
         )
-        self.parser.add_argument(
-            "-s", "--seed-rng", action="store_true",
-            help="Seed random number generator with default value 0.5 for unit test." +
-            " Default: False"
-        )

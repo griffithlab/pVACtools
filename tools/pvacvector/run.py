@@ -188,7 +188,7 @@ def main(args_input=sys.argv[1:]):
     tmp_dir = os.path.join(base_output_dir, runname + '_tmp')
     os.makedirs(tmp_dir, exist_ok=True)
 
-    if args.seed_rng:
+    if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
         random.seed(0.5)
     if generate_input_fasta:
         input_file = tsvToFasta(input_n_mer, input_tsv, input_vcf, base_output_dir)
@@ -338,8 +338,8 @@ def main(args_input=sys.argv[1:]):
             distance_matrix[ID_1][ID_2] = Paths[ID_1][ID_2]['weight']
 
     init_state = seq_keys
-    if not args.seed_rng:
-        random.shuffle(init_state)   
+    if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
+        random.shuffle(init_state)
     peptide = OptimalPeptide(init_state, distance_matrix)
     peptide.copy_strategy = "slice"
     peptide.save_state_on_exit = False
