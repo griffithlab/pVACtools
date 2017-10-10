@@ -170,7 +170,8 @@ def main(args_input=sys.argv[1:]):
     elif (os.path.splitext(args.input_file))[1] == '.tsv':
         input_tsv = args.input_file
         input_vcf = args.input_vcf
-        #error if tsv not provided
+        if input_vcf is None:
+            sys.exit("Input VCF is required when using a pVACseq TSV as input file")
         generate_input_fasta = True
     else:
         sys.exit("Input file type not as expected. Needs to be a .fa or a .vcf file")
