@@ -194,22 +194,12 @@ def main(args_input=sys.argv[1:]):
     if generate_input_fasta:
         input_file = tsvToFasta(input_n_mer, input_tsv, input_vcf, base_output_dir)
 
-    peptides = SeqIO.parse(input_file, "fasta")
-   
     seq_dict = dict()
-    for record in peptides:
+    for record in SeqIO.parse(input_file, "fasta"):
         seq_dict[record.id] = str(record.seq)
-
     seq_keys = sorted(seq_dict)
-    seq_tuples = list(itertools.combinations_with_replacement(seq_keys, 2))
-    combinations = list()
 
-    for key in seq_tuples:
-        if key[0] != key[1]:
-            combinations.append((key[0], key[1]))
-            combinations.append((key[1], key[0]))
-    
-    seq_tuples = combinations
+    seq_tuples = list(itertools.permutations(seq_keys, 2))
     epitopes = dict()
     rev_lookup = dict()
 
@@ -300,7 +290,7 @@ def main(args_input=sys.argv[1:]):
 
     Paths = nx.DiGraph()
     spacers = [None, "HH", "HHC", "HHH", "HHHD", "HHHC", "AAY", "HHHH", "HHAA", "HHL", "AAL"]
-    for ep in combinations:
+    for ep in seq_tuples:
         ID_1 = ep[0]
         ID_2 = ep[1]
         Paths.add_node(ID_1)
@@ -338,7 +328,7 @@ def main(args_input=sys.argv[1:]):
         for ID_2 in Paths[ID_1]:
             distance_matrix[ID_1][ID_2] = Paths[ID_1][ID_2]['weight']
 
-    init_state = seq_keys
+    init_state = sorted(seq_dict)
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
     peptide = OptimalPeptide(init_state, distance_matrix)
