@@ -21,62 +21,10 @@ from lib.vector_visualization import *
 import random
 
 from lib.prediction_class import *
+from lib.run_argument_parser import *
 
 def define_parser():
-
-    parser = argparse.ArgumentParser('pvacvector run')
-    parser.add_argument(
-        "run_name",
-        help="The name of the run being processed." +
-             " This will be used as a prefix for output files."
-    )
-    parser.add_argument('-g', "--generate-input-fasta", action="store_true")
-    parser.add_argument('-f', "--input-fa", type=argparse.FileType('r'),
-                       help="Path to input fasta file. " + "Required if not generating input fasta")
-    parser.add_argument('-t', "--input_tsv",
-                        help="Path to input tsv file with the epitopes selected for vector design. " + "Required if generating input fasta. ")
-    parser.add_argument('-v', "--input_vcf",
-                        help="Path to original pVAC-Seq input vcf file" + "Requiired if generating input fasta. ")
-    parser.add_argument('method',
-                        choices=PredictionClass.iedb_prediction_methods(),
-                        help="The iedb analysis method to use")
-    parser.add_argument('allele',
-                        help="Allele for which to make prediction")
-    parser.add_argument('-o', "--outdir", help="Output directory")
-    parser.add_argument('-k', "--keep-tmp",
-                        help="Option to store tmp files. ", action="store_true")
-    parser.add_argument('-n', "--input-n-mer", default='25',
-                        help="Length of peptide sequence to be generated for use in input to main vector design algorithm. " + "Default: 25")
-    parser.add_argument(
-        "-l", "--epitope-length",
-        type=lambda s: [int(epl) for epl in s.split(',')],
-        help="Length of subpeptides (neoepitopes) to predict. " +
-             "Multiple epitope lengths can be specified " +
-             "using a comma-separated list. " +
-             "Typical epitope lengths vary between 8-11. " +
-             "Required for Class I prediction algorithms",
-    )
-    parser.add_argument("-c", "--cutoff", type=int,
-                        default=500,
-                        help="Optional ic50 cutoff value." +
-                             " Junctional neoepitopes with IC50 values below this " +
-                             " value will be excluded. Default: 500")
-    parser.add_argument(
-        "-r", "--iedb-retries", type=int,
-        default=5,
-        help="Number of retries when making requests to the IEDB RESTful web interface. " +
-             " Must be less than or equal to 100." +
-             "Default: 5"
-    )
-    parser.add_argument(
-        "-e", "--iedb-executable-path",
-        help="The executable path of the local IEDB install"
-    )
-    parser.add_argument(
-        "-s", "--seed-rng", action="store_true",
-        help="Seed random number generator with default value 0.5 for unit test." +
-        " Default: False")
-    return parser
+    return PvacvectorRunArgumentParser().parser
 
 def tsvToFasta(n_mer, input_tsv, input_vcf, output_dir):
 
@@ -210,24 +158,30 @@ def main(args_input=sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    if "." in args.run_name:
+    if "." in args.sample_name:
         sys.exit("Run name cannot contain '.'")
 
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
 
-    input_tsv = args.input_tsv
-    input_vcf = args.input_vcf
-    input_file = args.input_fa
+    if (os.path.splitext(args.input_file))[1] == '.fa':
+        input_file = args.input_file
+        generate_input_fasta = False
+    elif (os.path.splitext(args.input_file))[1] == '.tsv':
+        input_tsv = args.input_file
+        input_vcf = args.input_vcf
+        #error if tsv not provided
+        generate_input_fasta = True
+    else:
+        sys.exit("Input file type not as expected. Needs to be a .fa or a .vcf file")
     input_n_mer = args.input_n_mer
-    iedb_method = args.method
-    ic50_cutoff = args.cutoff
-    alleles = args.allele.split(',')
+    iedb_method = args.prediction_algorithms[0]
+    ic50_cutoff = args.binding_threshold
+    alleles = args.allele
     epl = args.epitope_length
     print("IC50 cutoff: " + str(ic50_cutoff))
-    runname = args.run_name
-    outdir = args.outdir
-    generate_input_fasta = args.generate_input_fasta
+    runname = args.sample_name
+    outdir = args.output_dir
 
     base_output_dir = os.path.abspath(outdir)
     base_output_dir = os.path.join(base_output_dir, runname)
@@ -285,14 +239,17 @@ def main(args_input=sys.argv[1:]):
     for a in alleles:
         for l in epl:
             print ("Calling iedb for " + a + " of length " + str(l))
+            prediction_class = globals()[iedb_method]
+            prediction = prediction_class()
+            translated_iedb_method = prediction.iedb_prediction_method
             lib.call_iedb.main([
                 epitopes_file,
                 outfile,
-                iedb_method,
+                translated_iedb_method,
                 a,
                 '-l', str(l),
                 '-r', str(args.iedb_retries), 
-                '-e', args.iedb_executable_path
+                '-e', args.iedb_install_directory
             ])
             with open(outfile, 'rU') as sheet:
                 split_out.append(pandas.read_csv(sheet, delimiter='\t'))
@@ -433,8 +390,8 @@ def main(args_input=sys.argv[1:]):
             output.append("\n")
         f.write(''.join(output))
 
-    if not args.keep_tmp:
-        shutil.rmtree(tmp_dir) 
+    if not args.keep_tmp_files:
+        shutil.rmtree(tmp_dir)
 
     VectorVisualization(results_file, base_output_dir).draw()
 

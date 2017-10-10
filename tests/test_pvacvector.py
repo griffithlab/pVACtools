@@ -23,7 +23,7 @@ class TestPvacvector(unittest.TestCase):
         cls.input_tsv = os.path.join(cls.test_data_dir, 'input_parse_test_input.tsv')
         cls.input_vcf = os.path.join(cls.test_data_dir, 'input_parse_test_input.vcf')
         cls.input_file = os.path.join(cls.test_data_dir, 'Test.vector.results.input.fa')
-        cls.method = 'ann'
+        cls.method = 'NetMHC'
         cls.keep_tmp = 'True'
         cls.allele = 'H-2-Kb'
         cls.epitope_length = '8'
@@ -48,7 +48,7 @@ class TestPvacvector(unittest.TestCase):
             'tools',
             'pvacvector',
             'main.py'
-            )
+        )
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
@@ -67,12 +67,12 @@ class TestPvacvector(unittest.TestCase):
 
         call = subprocess.call([self.python,
                            self.executable,
+                           self.input_file,
                            self.test_run_name,
-                           self.method,
                            self.allele,
-                           '-f', self.input_file,
-                           '-o', output_dir.name,
-                           '-l', self.epitope_length,
+                           self.method,
+                           output_dir.name,
+                           '-e', self.epitope_length,
                            '-n', self.input_n_mer,
                            '-k',
                            '-s'], shell=False)
@@ -95,14 +95,13 @@ class TestPvacvector(unittest.TestCase):
 
         call = subprocess.call([self.python,
                            self.executable,
+                           self.input_tsv,
                            self.test_run_name,
-                           self.method,
                            self.allele,
-                           '-g',
-                           '-t', self.input_tsv,
+                           self.method,
+                           output_dir.name,
                            '-v', self.input_vcf,
-                           '-o', output_dir.name,
-                           '-l', self.epitope_length,
+                           '-e', self.epitope_length,
                            '-n', self.input_n_mer,
                            '-k',
                            '-s'], shell=False)
