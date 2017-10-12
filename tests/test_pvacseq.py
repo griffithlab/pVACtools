@@ -13,6 +13,7 @@ import lib
 from lib.pipeline import *
 import datetime
 from tools.pvacseq import *
+from mock import patch
 
 def compare(path1, path2):
     r1 = open(path1)
@@ -77,16 +78,22 @@ def generate_class_ii_call(method, allele, path, input_path):
         'user_tool':     'pVac-seq',
     })
 
-class PVACTests(unittest.TestCase):
+def pvac_directory():
+    return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
+def test_data_directory():
+    return os.path.join(
+        pvac_directory(),
+        'tests',
+        'test_data',
+        'pvacseq'
+    )
+
+class PvacseqTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.pVac_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        cls.test_data_directory = os.path.join(
-            cls.pVac_directory,
-            'tests',
-            'test_data',
-            'pvacseq'
-        )
+        cls.pVac_directory = pvac_directory()
+        cls.test_data_directory = test_data_directory()
         cls.methods = {
             'ann': {
                 'HLA-E*01:01': [9, 10]
@@ -96,12 +103,6 @@ class PVACTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
-        cls.request_mock = unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            cls.test_data_directory
-        ))
-        lib.call_iedb.requests.post = cls.request_mock
 
     def test_pvacseq_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -149,138 +150,39 @@ class PVACTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_pvacseq_pipeline(self):
-        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            test_data_directory()
+        ))) as mock_request:
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
-        additional_input_files = tempfile.NamedTemporaryFile('w')
-        additional_input_file_list = {
-            'gene_expn_file': os.path.join(self.test_data_directory, 'genes.fpkm_tracking'),
-            'transcript_expn_file': os.path.join(self.test_data_directory, 'isoforms.fpkm_tracking'),
-            'tdna_snvs_coverage_file': os.path.join(self.test_data_directory, 'snvs.bam_readcount'),
-            'tdna_indels_coverage_file': os.path.join(self.test_data_directory, 'indels.bam_readcount'),
-        }
-        yaml.dump(additional_input_file_list, additional_input_files, default_flow_style=False)
+            additional_input_files = tempfile.NamedTemporaryFile('w')
+            additional_input_file_list = {
+                'gene_expn_file': os.path.join(self.test_data_directory, 'genes.fpkm_tracking'),
+                'transcript_expn_file': os.path.join(self.test_data_directory, 'isoforms.fpkm_tracking'),
+                'tdna_snvs_coverage_file': os.path.join(self.test_data_directory, 'snvs.bam_readcount'),
+                'tdna_indels_coverage_file': os.path.join(self.test_data_directory, 'indels.bam_readcount'),
+            }
+            yaml.dump(additional_input_file_list, additional_input_files, default_flow_style=False)
 
-        run.main([
-            os.path.join(self.test_data_directory, "input.vcf"),
-            'Test',
-            'HLA-G*01:09,HLA-E*01:01',
-            'NetMHC',
-            'PickPocket',
-            output_dir.name,
-            '-e', '9,10',
-            '-i', additional_input_files.name,
-            '--top-score-metric=lowest',
-            '--keep-tmp-files',
-            '--net-chop-method', 'cterm',
-            '--netmhc-stab',
-            '--tdna-vaf', '20',
-            '-d', 'full',
-        ])
-        self.assertEqual(len(self.request_mock.mock_calls), 8)
+            run.main([
+                os.path.join(self.test_data_directory, "input.vcf"),
+                'Test',
+                'HLA-G*01:09,HLA-E*01:01',
+                'NetMHC',
+                'PickPocket',
+                output_dir.name,
+                '-e', '9,10',
+                '-i', additional_input_files.name,
+                '--top-score-metric=lowest',
+                '--keep-tmp-files',
+                '--net-chop-method', 'cterm',
+                '--netmhc-stab',
+                '--tdna-vaf', '20',
+                '-d', 'full',
+            ])
 
-        run.main([
-            os.path.join(self.test_data_directory, "input.vcf"),
-            'Test',
-            'H2-IAb',
-            'NNalign',
-            output_dir.name,
-            '-i', additional_input_files.name,
-            '--top-score-metric=lowest',
-            '--keep-tmp-files',
-            '-d', 'full',
-        ])
-        self.assertEqual(len(self.request_mock.mock_calls), 9)
-
-        for file_name in (
-            'Test.tsv',
-            'Test.tsv_1-24',
-            'Test.combined.parsed.tsv',
-            'Test.filtered.binding.tsv',
-            'Test.filtered.coverage.tsv',
-            'Test.chop.tsv',
-            'Test.stab.tsv',
-            'Test.final.tsv',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name)
-            self.assertTrue(cmp(output_file, expected_file))
-
-        for file_name in (
-            'Test_21.fa.split_1-48',
-            'Test_21.fa.split_1-48.key',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name)
-            self.assertTrue(cmp(output_file, expected_file))
-
-        for file_name in (
-            'Test.HLA-G*01:09.9.parsed.tsv_1-48',
-            'Test.HLA-G*01:09.10.parsed.tsv_1-48',
-            'Test.HLA-E*01:01.9.parsed.tsv_1-48',
-            'Test.HLA-E*01:01.10.parsed.tsv_1-48',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name)
-            self.assertTrue(compare(output_file, expected_file))
-
-        for file_name in (
-            'inputs.yml',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'log', file_name)
-            self.assertTrue(os.path.exists(output_file))
-
-        #Class I output files
-        methods = self.methods
-        for method in methods.keys():
-            for allele in methods[method].keys():
-                for length in methods[method][allele]:
-                    self.request_mock.assert_has_calls([
-                        generate_class_i_call(method, allele, length, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-48"))
-                    ])
-                    output_file   = os.path.join(output_dir.name, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
-                    expected_file = os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
-                    self.assertTrue(cmp(output_file, expected_file, False))
-
-        #Class II output files
-        for file_name in (
-            'Test.tsv',
-            'Test.tsv_1-24',
-            'Test.combined.parsed.tsv',
-            'Test.filtered.binding.tsv',
-            'Test.filtered.coverage.tsv',
-            'Test.final.tsv',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name)
-            self.assertTrue(cmp(output_file, expected_file, False))
-
-        for file_name in (
-            'Test_31.fa.split_1-48',
-            'Test_31.fa.split_1-48.key',
-            'Test.nn_align.H2-IAb.tsv_1-48',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
-            self.assertTrue(cmp(output_file, expected_file, False))
-
-        for file_name in (
-            'Test.H2-IAb.parsed.tsv_1-48',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
-            self.assertTrue(compare(output_file, expected_file))
-
-        for file_name in (
-            'inputs.yml',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'log', file_name)
-            self.assertTrue(os.path.exists(output_file))
-
-        self.request_mock.assert_has_calls([
-            generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name)
-        ])
-
-        with self.assertRaises(SystemExit) as cm:
             run.main([
                 os.path.join(self.test_data_directory, "input.vcf"),
                 'Test',
@@ -290,16 +192,123 @@ class PVACTests(unittest.TestCase):
                 '-i', additional_input_files.name,
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
+                '-d', 'full',
             ])
-            self.assertEqual(
-                cm.exception,
-                "Restart inputs are different from past inputs: \n" +
-                "Past input: downstream_sequence_length - None\n" +
-                "Current input: downstream_sequence_length - 1000"
-            )
 
-        output_dir.cleanup()
+            for file_name in (
+                'Test.tsv',
+                'Test.tsv_1-24',
+                'Test.combined.parsed.tsv',
+                'Test.filtered.binding.tsv',
+                'Test.filtered.coverage.tsv',
+                'Test.chop.tsv',
+                'Test.stab.tsv',
+                'Test.final.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name)
+                self.assertTrue(cmp(output_file, expected_file))
 
+            for file_name in (
+                'Test_21.fa.split_1-48',
+                'Test_21.fa.split_1-48.key',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name)
+                self.assertTrue(cmp(output_file, expected_file))
+
+            for file_name in (
+                'Test.HLA-G*01:09.9.parsed.tsv_1-48',
+                'Test.HLA-G*01:09.10.parsed.tsv_1-48',
+                'Test.HLA-E*01:01.9.parsed.tsv_1-48',
+                'Test.HLA-E*01:01.10.parsed.tsv_1-48',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name)
+                self.assertTrue(compare(output_file, expected_file))
+
+            for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
+
+            #Class I output files
+            methods = self.methods
+            for method in methods.keys():
+                for allele in methods[method].keys():
+                    for length in methods[method][allele]:
+                        mock_request.assert_has_calls([
+                            generate_class_i_call(method, allele, length, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-48"))
+                        ])
+                        output_file   = os.path.join(output_dir.name, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
+                        expected_file = os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
+                        self.assertTrue(cmp(output_file, expected_file, False))
+
+            #Class II output files
+            for file_name in (
+                'Test.tsv',
+                'Test.tsv_1-24',
+                'Test.combined.parsed.tsv',
+                'Test.filtered.binding.tsv',
+                'Test.filtered.coverage.tsv',
+                'Test.final.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name)
+                self.assertTrue(cmp(output_file, expected_file, False))
+
+            for file_name in (
+                'Test_31.fa.split_1-48',
+                'Test_31.fa.split_1-48.key',
+                'Test.nn_align.H2-IAb.tsv_1-48',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
+                self.assertTrue(cmp(output_file, expected_file, False))
+
+            for file_name in (
+                'Test.H2-IAb.parsed.tsv_1-48',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
+                self.assertTrue(compare(output_file, expected_file))
+
+            for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
+
+            mock_request.assert_has_calls([
+                generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name)
+            ])
+
+            with self.assertRaises(SystemExit) as cm:
+                run.main([
+                    os.path.join(self.test_data_directory, "input.vcf"),
+                    'Test',
+                    'H2-IAb',
+                    'NNalign',
+                    output_dir.name,
+                    '-i', additional_input_files.name,
+                    '--top-score-metric=lowest',
+                    '--keep-tmp-files',
+                ])
+                self.assertEqual(
+                    cm.exception,
+                    "Restart inputs are different from past inputs: \n" +
+                    "Past input: downstream_sequence_length - None\n" +
+                    "Current input: downstream_sequence_length - 1000"
+                )
+
+            output_dir.cleanup()
+
+    @patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        data,
+        files,
+        test_data_directory()
+    )))
     def test_pvacseq_pipeline_additional_report_columns(self):
         output_dir = tempfile.TemporaryDirectory()
         params = [
@@ -316,6 +325,11 @@ class PVACTests(unittest.TestCase):
         expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
         self.assertTrue(cmp(output_file, expected_file, False))
 
+    @patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        data,
+        files,
+        test_data_directory()
+    )))
     def test_pvacseq_pipeline_sleep(self):
         output_dir_1 = tempfile.TemporaryDirectory()
         params_1 = [

@@ -12,6 +12,7 @@ import yaml
 import lib
 import datetime
 from tools.pvacfuse import *
+from mock import patch
 
 def compare(path1, path2):
     r1 = open(path1)
@@ -76,22 +77,22 @@ def generate_class_ii_call(method, allele, path, input_path):
         'user_tool':     'pVac-seq',
     })
 
-class PVACTests(unittest.TestCase):
+def pvac_directory():
+    return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
+def test_data_directory():
+    return os.path.join(
+        pvac_directory(),
+        'tests',
+        'test_data',
+        'pvacfuse'
+    )
+
+class PvacfuseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.pVac_directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        cls.test_data_directory = os.path.join(
-            cls.pVac_directory,
-            'tests',
-            'test_data',
-            'pvacfuse'
-        )
-        cls.request_mock = unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            cls.test_data_directory
-        ))
-        lib.call_iedb.requests.post = cls.request_mock
+        cls.pVac_directory = pvac_directory()
+        cls.test_data_directory = test_data_directory()
 
     def test_pvacfuse_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -134,42 +135,47 @@ class PVACTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_pvacfuse_pipeline(self):
-        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            test_data_directory()
+        ))) as mock_request:
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
-        run.main([
-            os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
-            'Test',
-            'HLA-A*29:02',
-            'NetMHC',
-            output_dir.name,
-            '-e', '9',
-            '--top-score-metric=lowest',
-            '--keep-tmp-files',
-        ])
+            run.main([
+                os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
+                'Test',
+                'HLA-A*29:02',
+                'NetMHC',
+                output_dir.name,
+                '-e', '9',
+                '--top-score-metric=lowest',
+                '--keep-tmp-files',
+            ])
 
-        for file_name in (
-            'Test.tsv',
-            'Test.tsv_1-5',
-            'Test.combined.parsed.tsv',
-            'Test.filtered.binding.tsv',
-            'Test.final.tsv',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', file_name)
-            self.assertTrue(compare(output_file, expected_file))
+            for file_name in (
+                'Test.tsv',
+                'Test.tsv_1-5',
+                'Test.combined.parsed.tsv',
+                'Test.filtered.binding.tsv',
+                'Test.final.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', file_name)
+                self.assertTrue(compare(output_file, expected_file))
 
-        for file_name in (
-            'Test_21.fa.split_1-10',
-            'Test_21.fa.split_1-10.key',
-            'Test.ann.HLA-A*29:02.9.tsv_1-10',
-            'Test.HLA-A*29:02.9.parsed.tsv_1-10',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'tmp', file_name)
-            self.assertTrue(compare(output_file, expected_file))
+            for file_name in (
+                'Test_21.fa.split_1-10',
+                'Test_21.fa.split_1-10.key',
+                'Test.ann.HLA-A*29:02.9.tsv_1-10',
+                'Test.HLA-A*29:02.9.parsed.tsv_1-10',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'tmp', file_name)
+                self.assertTrue(compare(output_file, expected_file))
 
-        self.request_mock.assert_has_calls([
-            generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-10"))
-        ])
+            mock_request.assert_has_calls([
+                generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-10"))
+            ])
 
-        output_dir.cleanup()
+            output_dir.cleanup()
