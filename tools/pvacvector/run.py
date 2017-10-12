@@ -11,6 +11,7 @@ root = str(Path(__file__).resolve().parents[1])
 sys.path.append(root)
 
 import pandas
+import csv
 import networkx as nx
 import itertools
 from Bio import SeqIO
@@ -29,18 +30,21 @@ def define_parser():
 def tsvToFasta(n_mer, input_tsv, input_vcf, output_dir):
 
     def parse_choosen_epitopes(input_tsv):
+        mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = [],[],[],[],[],[]
         with open(input_tsv, 'r') as input_f:
-            next(input_f)
-            mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = [], [], [], [], [], []
-            for line in input_f:
-                fields = line.split("\t")
-                mut_type, mutation, pos, gene_name = fields[7], fields[8], fields[9], fields[10]
-                mt_epitope_seq, wt_epitope_seq = fields[15], fields[16]
+            reader = csv.DictReader(input_f, delimiter = "\t")
+            for line in reader:
+                mut_type = line['Variant Type']
+                mutation = line['Mutation']
+                pos = line['Protein Position']
+                gene_name = line['Gene Name']
+                mt_epitope_seq = line['MT Epitope Seq']
+                wt_epitope_seq = line['WT Epitope Seq']
+
                 mutations.append(mutation)
                 mut_types.append(mut_type)
-                mutation = mutation.split("/")
+                (old_AA, new_AA) = mutation.split("/")
                 #if position presented as a range, use higher end of range
-                old_AA, new_AA = mutation[0], mutation[1]
                 if "-" in pos:
                     pos = pos.split("-")
                     pos = pos[1]
@@ -52,8 +56,7 @@ def tsvToFasta(n_mer, input_tsv, input_vcf, output_dir):
                 mut_IDs.append(mut_ID)
                 mt_epitope_seqs.append(mt_epitope_seq)
                 wt_epitope_seqs.append(wt_epitope_seq)
-                transcript_IDs.append(fields[5])
-        input_f.close()
+                transcript_IDs.append(line['Transcript'])
         return mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs
 
 #get necessary data from initial pvacseq input vcf
