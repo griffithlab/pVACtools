@@ -20,6 +20,7 @@ from lib.prediction_class import *
 from lib.run_argument_parser import *
 from lib.pvacvector_input_fasta_generator import *
 from lib.fasta_generator import *
+from lib.pipeline import *
 
 def define_parser():
     return PvacvectorRunArgumentParser().parser
@@ -66,6 +67,65 @@ def main(args_input=sys.argv[1:]):
         generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, input_n_mer)
         generator.execute()
         input_file = generator.output_file
+
+    class_i_prediction_algorithms = []
+    class_ii_prediction_algorithms = []
+    for prediction_algorithm in sorted(args.prediction_algorithms):
+        prediction_class = globals()[prediction_algorithm]
+        prediction_class_object = prediction_class()
+        if isinstance(prediction_class_object, MHCI):
+            class_i_prediction_algorithms.append(prediction_algorithm)
+        elif isinstance(prediction_class_object, MHCII):
+            class_ii_prediction_algorithms.append(prediction_algorithm)
+
+    class_i_alleles = []
+    class_ii_alleles = []
+    for allele in sorted(set(args.allele)):
+        valid = 0
+        if allele in MHCI.all_valid_allele_names():
+            class_i_alleles.append(allele)
+            valid = 1
+        if allele in MHCII.all_valid_allele_names():
+            class_ii_alleles.append(allele)
+            valid = 1
+        if not valid:
+            print("Allele %s not valid. Skipping." % allele)
+
+    shared_arguments = {
+        'input_file'      : input_file,
+        'input_file_type' : 'pvacvector_input_fasta',
+        'sample_name'     : args.sample_name,
+    }
+
+    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
+        if args.epitope_length is None:
+            sys.exit("Epitope length is required for class I binding predictions")
+
+        if args.iedb_install_directory:
+            iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
+            if not os.path.exists(iedb_mhc_i_executable):
+                sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
+        else:
+            iedb_mhc_i_executable = None
+
+        print("Executing MHC Class I predictions")
+
+        output_dir = os.path.join(base_output_dir, 'MHC_Class_I')
+        os.makedirs(output_dir, exist_ok=True)
+
+        class_i_arguments = shared_arguments.copy()
+        class_i_arguments['alleles']                 = class_i_alleles
+        class_i_arguments['peptide_sequence_length'] = ""
+        class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
+        class_i_arguments['epitope_lengths']         = args.epitope_length
+        class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
+        class_i_arguments['output_dir']              = output_dir
+        pipeline = MHCIPipeline(**class_i_arguments)
+        pipeline.generate_fasta(["", ""])
+        #pipeline.call_iedb_and_parse_outputs([input_file]
+
+
+
 
     epitopes_file = os.path.join(tmp_dir, runname + "_epitopes.fa")
     params = {

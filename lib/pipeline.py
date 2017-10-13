@@ -103,8 +103,11 @@ class Pipeline(metaclass=ABCMeta):
                 yaml.dump(inputs, log_fh, default_flow_style=False)
 
     def tsv_file_path(self):
-        tsv_file = self.sample_name + '.tsv'
-        return os.path.join(self.output_dir, tsv_file)
+        if self.input_file_type == 'pvacvector_input_fasta':
+            return self.input_file
+        else:
+            tsv_file = self.sample_name + '.tsv'
+            return os.path.join(self.output_dir, tsv_file)
 
     def converter(self, params):
         converter_types = {
@@ -117,8 +120,9 @@ class Pipeline(metaclass=ABCMeta):
 
     def fasta_generator(self, params):
         generator_types = {
-            'vcf'  : 'FastaGenerator',
-            'bedpe': 'FusionFastaGenerator',
+            'vcf'                   : 'FastaGenerator',
+            'bedpe'                 : 'FusionFastaGenerator',
+            'pvacvector_input_fasta': 'VectorFastaGenerator',
         }
         generator_type = generator_types[self.input_file_type]
         generator = getattr(sys.modules[__name__], generator_type)
@@ -128,14 +132,11 @@ class Pipeline(metaclass=ABCMeta):
         parser_types = {
             'vcf'  : 'DefaultOutputParser',
             'bedpe': 'FusionOutputParser',
+            'pvacvector_input_fasta': 'DefaultOutputParser',
         }
         parser_type = parser_types[self.input_file_type]
         parser = getattr(sys.modules[__name__], parser_type)
         return parser(**params)
-
-    def tsv_file_path(self):
-        tsv_file = self.sample_name + '.tsv'
-        return os.path.join(self.output_dir, tsv_file)
 
     def convert_vcf(self):
         status_message("Converting .%s to TSV" % self.input_file_type)
@@ -390,7 +391,10 @@ class MHCIPipeline(Pipeline):
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
             fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
-            split_tsv_file_path       = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
+            if self.input_file_type == 'pvacvector_input_fasta':
+                split_tsv_file_path = self.tsv_file_path()
+            else:
+                split_tsv_file_path       = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
             split_fasta_file_path     = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
             if os.path.exists(split_fasta_file_path):
                 status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
