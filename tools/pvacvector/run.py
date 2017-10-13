@@ -12,8 +12,6 @@ sys.path.append(root)
 
 import pandas
 import networkx as nx
-import itertools
-from Bio import SeqIO
 import random
 import lib
 from lib.optimal_peptide import *
@@ -21,6 +19,7 @@ from lib.vector_visualization import *
 from lib.prediction_class import *
 from lib.run_argument_parser import *
 from lib.pvacvector_input_fasta_generator import *
+from lib.fasta_generator import *
 
 def define_parser():
     return PvacvectorRunArgumentParser().parser
@@ -68,35 +67,17 @@ def main(args_input=sys.argv[1:]):
         generator.execute()
         input_file = generator.output_file
 
-    seq_dict = dict()
-    for record in SeqIO.parse(input_file, "fasta"):
-        seq_dict[record.id] = str(record.seq)
-    seq_keys = sorted(seq_dict)
-
-    seq_tuples = list(itertools.permutations(seq_keys, 2))
-    epitopes = dict()
-    rev_lookup = dict()
-
-    for comb in seq_tuples:
-        seq1 = comb[0]
-        seq2 = comb[1]
-        for length in range(8, 11):
-            seq_ID = seq1 + "|" + seq2
-            trunc_seq1 = seq_dict[seq1][(len(seq_dict[seq1]) - length):len(seq_dict[seq1])]
-            trunc_seq2 = seq_dict[seq2][0:(length - 1)]
-            epitopes[seq_ID] = trunc_seq1 + trunc_seq2
-            rev_lookup[(trunc_seq1 + trunc_seq2)] = seq_ID
-
-            spacers = ["HH", "HHC", "HHH", "HHHD", "HHHC", "AAY", "HHHH", "HHAA", "HHL", "AAL"]
-            for this_spacer in spacers:
-                seq_ID = seq1 + "|" + this_spacer + "|" + seq2
-                epitopes[seq_ID] = (trunc_seq1 + this_spacer + trunc_seq2)
-                rev_lookup[(trunc_seq1 + this_spacer + trunc_seq2)] = seq_ID
-
     epitopes_file = os.path.join(tmp_dir, runname + "_epitopes.fa")
-    with open(epitopes_file, "w") as tmp:
-        for each in epitopes:
-            tmp.write(">" + each + "\n" + epitopes[each] + "\n")
+    params = {
+        'input_file': input_file,
+        'output_file': epitopes_file,
+    }
+    generator= VectorFastaGenerator(**params)
+    generator.execute()
+    epitopes = generator.epitopes
+    seq_tuples = generator.seq_tuples
+    seq_dict = generator.seq_dict
+    seq_keys = generator.seq_keys
 
     outfile = os.path.join(tmp_dir, runname + '_iedb_out.csv')
     split_out = []
