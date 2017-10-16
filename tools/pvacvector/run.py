@@ -121,91 +121,32 @@ def main(args_input=sys.argv[1:]):
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
         pipeline = MHCIPipeline(**class_i_arguments)
-        pipeline.generate_fasta(["", ""])
-        #pipeline.call_iedb_and_parse_outputs([input_file]
+        pipeline.generate_fasta([[1, 1]])
+        parsed_output_files = pipeline.call_iedb_and_parse_outputs([[1, 1]])
 
-
-
-
-    epitopes_file = os.path.join(tmp_dir, runname + "_epitopes.fa")
-    params = {
-        'input_file': input_file,
-        'output_file': epitopes_file,
-    }
-    generator= VectorFastaGenerator(**params)
-    generator.execute()
-    epitopes = generator.epitopes
-    seq_tuples = generator.seq_tuples
-    seq_dict = generator.seq_dict
-    seq_keys = generator.seq_keys
-
-    outfile = os.path.join(tmp_dir, runname + '_iedb_out.csv')
-    split_out = []
-
-    for a in alleles:
-        for l in epl:
-            print ("Calling iedb for " + a + " of length " + str(l))
-            prediction_class = globals()[iedb_method]
-            prediction = prediction_class()
-            translated_iedb_method = prediction.iedb_prediction_method
-            lib.call_iedb.main([
-                epitopes_file,
-                outfile,
-                translated_iedb_method,
-                a,
-                '-l', str(l),
-                '-r', str(args.iedb_retries), 
-                '-e', args.iedb_install_directory
-            ])
-            with open(outfile, 'rU') as sheet:
-                split_out.append(pandas.read_csv(sheet, delimiter='\t'))
-
-    print("IEDB calls complete. Merging data.")
-
-    with open(outfile, 'rU') as sheet:
-        split_out.append(pandas.read_csv(sheet, delimiter='\t'))
-    epitope_binding = pandas.concat(split_out)
-    problematic_neoepitopes = epitope_binding[epitope_binding.ic50 < ic50_cutoff]
-    merged = pandas.DataFrame(pandas.merge(epitope_binding, problematic_neoepitopes, how='outer',
-                                           indicator=True).query('_merge == "left_only"').drop(['_merge'], axis=1))
-    merged = merged.sort_values('ic50', ascending=False)
-    peptides = merged.set_index('peptide').T.to_dict('dict')
-
-    keyErrorCount = 0
-    successCount = 0
-    iedb_results = dict()
-    for seqID in epitopes:
-        for l in epl:
-            for i in range(0, len(epitopes[seqID]) - (l-1)):
-                key = epitopes[seqID][i:i+l]
-                try:
-                    peptides[key]
-                except KeyError:
-                    keyErrorCount += 1
-                    continue
-
-                if seqID not in iedb_results:
-                    iedb_results[seqID] = {}
-                allele = peptides[key]['allele']
-                if allele not in iedb_results[seqID]:
-                    iedb_results[seqID][allele] = {}
-                    if 'total_score' not in iedb_results[seqID][allele]:
-                        iedb_results[seqID][allele]['total_score'] = list()
-                        iedb_results[seqID][allele]['total_score'].append(peptides[key]['ic50'])
-                    else:
-                        iedb_results[seqID][allele]['total_score'].append(peptides[key]['ic50'])
-
-                if 'min_score' in iedb_results[seqID][allele]:
-                    iedb_results[seqID][allele]['min_score'] = min(iedb_results[seqID][allele]['min_score'], peptides[key]['ic50'])
-                else:
-                    iedb_results[seqID][allele]['min_score'] = peptides[key]['ic50']
-                    successCount += 1
-
-    print("Successful ic50 mappings: " + str(successCount) + " errors: " + str(keyErrorCount))
+    iedb_results = {}
+    epitopes = []
+    with open(parsed_output_files[0], 'r') as parsed:
+        reader = csv.DictReader(parsed, delimiter="\t")
+        for row in reader:
+            index = row['Index']
+            allele = row['HLA Allele']
+            score = float(row['Best MT Score'])
+            if score < float(ic50_cutoff):
+                continue
+            if index not in iedb_results:
+                iedb_results[index] = {}
+            if allele not in iedb_results[index]:
+                iedb_results[index][allele] = {}
+            if 'min_score' in iedb_results[index][allele]:
+                iedb_results[index][allele]['min_score'] = min(iedb_results[index][allele]['min_score'], score)
+            else:
+                iedb_results[index][allele]['min_score'] = score
+            epitopes.append(row['MT Epitope Seq'])
 
     Paths = nx.DiGraph()
     spacers = [None, "HH", "HHC", "HHH", "HHHD", "HHHC", "AAY", "HHHH", "HHAA", "HHL", "AAL"]
-    for ep in seq_tuples:
+    for ep in pipeline.seq_tuples:
         ID_1 = ep[0]
         ID_2 = ep[1]
         Paths.add_node(ID_1)
@@ -243,14 +184,14 @@ def main(args_input=sys.argv[1:]):
         for ID_2 in Paths[ID_1]:
             distance_matrix[ID_1][ID_2] = Paths[ID_1][ID_2]['weight']
 
-    init_state = sorted(seq_dict)
+    init_state = sorted(pipeline.seq_dict)
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
     peptide = OptimalPeptide(init_state, distance_matrix)
     peptide.copy_strategy = "slice"
     peptide.save_state_on_exit = False
     state, e = peptide.anneal()
-    while state[0] != seq_keys[0]:
+    while state[0] != pipeline.seq_keys[0]:
         state = state[1:] + state[:1] 
     print("%i distance :" % e)
 
@@ -290,7 +231,7 @@ def main(args_input=sys.argv[1:]):
         output.append("\n")
         for id in name:
             try:
-                output.append(seq_dict[id])
+                output.append(pipeline.seq_dict[id])
             except KeyError:
                 output.append(id)
             output.append("\n")
