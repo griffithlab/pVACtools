@@ -389,3 +389,23 @@ class OutputParserTests(unittest.TestCase):
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output_fusions.iedb.parsed.tsv")
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+
+    def test_parse_output_runs_and_produces_expected_output_for_pvacvector(self):
+        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_pvacvector.ann.H-2-Kb.8.tsv")]
+        parse_output_key_file = os.path.join(self.test_data_dir, "input_pvacvector.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'input_iedb_files'       : parse_output_input_iedb_file,
+            'input_tsv_file'         : None,
+            'key_file'               : parse_output_key_file,
+            'output_file'            : parse_output_output_file.name,
+            'top_result_per_mutation': False,
+            'top_score_metric'       : 'median',
+            'sample_name'            : None,
+        }
+        parser = VectorOutputParser(**parse_output_params)
+
+        self.assertFalse(parser.execute())
+        expected_output_file  = os.path.join(self.test_data_dir, "output_pvacvector.iedb.parsed.tsv")
+        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))

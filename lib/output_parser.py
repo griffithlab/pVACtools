@@ -549,7 +549,6 @@ class FusionOutputParser(OutputParser):
         with open(self.key_file, 'r') as key_file_reader:
             tsv_indices_from_label = yaml.load(key_file_reader)
         iedb_results = {}
-        wt_iedb_results = {}
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
@@ -589,3 +588,117 @@ class FusionOutputParser(OutputParser):
                         iedb_results[key]['wt_scores'][method] = 'NA'
 
         return iedb_results
+
+class VectorOutputParser(OutputParser):
+    def parse_iedb_file(self):
+        with open(self.key_file, 'r') as key_file_reader:
+            tsv_indices_from_label = yaml.load(key_file_reader)
+        iedb_results = {}
+        for input_iedb_file in self.input_iedb_files:
+            with open(input_iedb_file, 'r') as reader:
+                iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
+                (sample, method, remainder) = os.path.basename(input_iedb_file).split(".", 2)
+                for line in iedb_tsv_reader:
+                    protein_label  = int(line['seq_num'])
+                    if 'core_peptide' in line:
+                        position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
+                    else:
+                        position   = line['start']
+                    epitope        = line['peptide']
+                    score          = line['ic50']
+                    allele         = line['allele']
+                    peptide_length = len(epitope)
+
+                    if tsv_indices_from_label[protein_label] is not None:
+                        tsv_indices = tsv_indices_from_label[protein_label]
+
+                    for index in tsv_indices:
+                        key = '|'.join([index, position])
+                        if key not in iedb_results:
+                            iedb_results[key]                      = {}
+                            iedb_results[key]['mt_scores']         = {}
+                            iedb_results[key]['mt_epitope_seq']    = epitope
+                            iedb_results[key]['position']          = position
+                            iedb_results[key]['tsv_index']         = index
+                            iedb_results[key]['allele']            = allele
+                        iedb_results[key]['mt_scores'][method] = float(score)
+        return iedb_results
+
+    def add_summary_metrics(self, iedb_results):
+        iedb_results_with_metrics = {}
+        for key, value in iedb_results.items():
+            mt_scores     = value['mt_scores']
+            best_mt_score = sys.maxsize
+            for method, score in mt_scores.items():
+                if score < best_mt_score:
+                    best_mt_score        = score
+                    best_mt_score_method = method
+            value['best_mt_score']          = best_mt_score
+            value['best_mt_score_method']   = best_mt_score_method
+            iedb_results_with_metrics[key]  = value
+        return iedb_results_with_metrics
+
+    def flatten_iedb_results(self, iedb_results):
+        #transform the iedb_results dictionary into a two-dimensional list
+        flattened_iedb_results = list((
+            value['position'],
+            value['mt_scores'],
+            value['mt_epitope_seq'],
+            value['tsv_index'],
+            value['allele'],
+            value['best_mt_score'],
+            value['best_mt_score_method'],
+        ) for value in iedb_results.values())
+        return flattened_iedb_results
+
+    def process_input_iedb_file(self):
+        iedb_results              = self.parse_iedb_file()
+        iedb_results_with_metrics = self.add_summary_metrics(iedb_results)
+        flattened_iedb_results    = self.flatten_iedb_results(iedb_results_with_metrics)
+        return flattened_iedb_results
+
+    def base_headers(self):
+        return[
+            'HLA Allele',
+            'Sub-peptide Position',
+            'MT Epitope Seq',
+            'Best MT Score Method',
+            'Best MT Score',
+            'Index',
+        ]
+
+    def execute(self):
+        tmp_output_file = self.output_file + '.tmp'
+        tmp_output_filehandle = open(tmp_output_file, 'w')
+        tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
+        tsv_writer.writeheader()
+
+        iedb_results = self.process_input_iedb_file()
+        for (
+            position,
+            mt_scores,
+            mt_epitope_seq,
+            tsv_index,
+            allele,
+            best_mt_score,
+            best_mt_score_method,
+        ) in iedb_results:
+            row = {
+                'HLA Allele'          : allele,
+                'Sub-peptide Position': position,
+                'MT Epitope Seq'      : mt_epitope_seq,
+                'Best MT Score Method': PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
+                'Best MT Score'       : best_mt_score,
+                'Index'               : tsv_index,
+            }
+            for method in self.prediction_methods():
+                pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
+                if method in mt_scores:
+                    row["%s MT Score" % pretty_method] = mt_scores[method]
+                else:
+                    row["%s MT Score" % pretty_method] = 'NA'
+            tsv_writer.writerow(row)
+
+        tmp_output_filehandle.close()
+        os.replace(tmp_output_file, self.output_file)
+
