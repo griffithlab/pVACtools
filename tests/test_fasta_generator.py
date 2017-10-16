@@ -585,6 +585,28 @@ class FastaGeneratorTests(unittest.TestCase):
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_fusions.key')
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
+    def test_pvacvector_input_fasta_generates_expected_file(self):
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'pvacvector.fa')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generator = VectorFastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_pvacvector.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(self.test_data_dir, 'output_pvacvector.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+
+
 
 #Test for fusion position at relative beginning or end of fusion sequence
 

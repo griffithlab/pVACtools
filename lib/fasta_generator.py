@@ -226,7 +226,7 @@ class VectorFastaGenerator():
     def __init__(self, **kwargs):
         self.input_file       = kwargs['input_file']
         self.output_file      = kwargs['output_file']
-        #self.output_key_file  = kwargs['output_key_file']
+        self.output_key_file  = kwargs['output_key_file']
 
     def execute(self):
         seq_dict = dict()
@@ -238,6 +238,7 @@ class VectorFastaGenerator():
         epitopes = dict()
         rev_lookup = dict()
 
+        fasta_sequences = {}
         for comb in seq_tuples:
             seq1 = comb[0]
             seq2 = comb[1]
@@ -254,10 +255,24 @@ class VectorFastaGenerator():
                     epitopes[seq_ID] = (trunc_seq1 + this_spacer + trunc_seq2)
                     rev_lookup[(trunc_seq1 + this_spacer + trunc_seq2)] = seq_ID
 
-        with open(self.output_file, "w") as tmp:
-            for each in epitopes:
-                tmp.write(">" + each + "\n" + epitopes[each] + "\n")
+        for seq_id in epitopes:
+            sequence = epitopes[seq_id]
+            if sequence in fasta_sequences:
+                fasta_sequences[sequence].append(seq_id)
+            else:
+                fasta_sequences[sequence] = [seq_id]
 
+        writer = open(self.output_file, 'w')
+        key_writer = open(self.output_key_file, 'w')
+        count  = 1
+        for (subsequence, keys) in sorted(fasta_sequences.items()):
+            writer.writelines('>%s\n' % count)
+            writer.writelines('%s\n' % subsequence)
+            yaml.dump({count: keys}, key_writer, default_flow_style=False)
+            count += 1
+
+        writer.close()
+        key_writer.close()
         self.epitopes = epitopes
         self.seq_tuples = seq_tuples
         self.seq_dict = seq_dict
