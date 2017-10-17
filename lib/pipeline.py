@@ -411,10 +411,6 @@ class MHCIPipeline(Pipeline):
             }
             fasta_generator = self.fasta_generator(generate_fasta_params)
             fasta_generator.execute()
-            if self.input_file_type == 'pvacvector_input_fasta':
-                self.seq_tuples = fasta_generator.seq_tuples
-                self.seq_dict = fasta_generator.seq_dict
-                self.seq_keys = fasta_generator.seq_keys
         status_message("Completed")
 
     def call_iedb_and_parse_outputs(self, chunks):
@@ -521,10 +517,6 @@ class MHCIIPipeline(Pipeline):
                 'downstream_sequence_length': self.downstream_sequence_length,
             }
             fasta_generator = self.fasta_generator(generate_fasta_params)
-            if self.input_file_type == 'pvacvector_input_fasta':
-                self.seq_tuples = fasta_generator.seq_tuples
-                self.seq_dict = fasta_generator.seq_dict
-                self.seq_keys = fasta_generator.seq_keys
             fasta_generator.execute()
         status_message("Completed")
 

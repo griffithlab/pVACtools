@@ -13,6 +13,8 @@ sys.path.append(root)
 import pandas
 import networkx as nx
 import random
+from Bio import SeqIO
+
 import lib
 from lib.optimal_peptide import *
 from lib.vector_visualization import *
@@ -149,7 +151,7 @@ def main(args_input=sys.argv[1:]):
 
     Paths = nx.DiGraph()
     spacers = [None, "HH", "HHC", "HHH", "HHHD", "HHHC", "AAY", "HHHH", "HHAA", "HHL", "AAL"]
-    for ep in pipeline.seq_tuples:
+    for ep in seq_tuples:
         ID_1 = ep[0]
         ID_2 = ep[1]
         Paths.add_node(ID_1)
@@ -187,14 +189,14 @@ def main(args_input=sys.argv[1:]):
         for ID_2 in Paths[ID_1]:
             distance_matrix[ID_1][ID_2] = Paths[ID_1][ID_2]['weight']
 
-    init_state = sorted(pipeline.seq_dict)
+    init_state = sorted(seq_dict)
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
     peptide = OptimalPeptide(init_state, distance_matrix)
     peptide.copy_strategy = "slice"
     peptide.save_state_on_exit = False
     state, e = peptide.anneal()
-    while state[0] != pipeline.seq_keys[0]:
+    while state[0] != seq_keys[0]:
         state = state[1:] + state[:1] 
     print("%i distance :" % e)
 
@@ -234,7 +236,7 @@ def main(args_input=sys.argv[1:]):
         output.append("\n")
         for id in name:
             try:
-                output.append(pipeline.seq_dict[id])
+                output.append(seq_dict[id])
             except KeyError:
                 output.append(id)
             output.append("\n")
