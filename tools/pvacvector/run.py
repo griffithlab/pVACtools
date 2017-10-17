@@ -18,10 +18,8 @@ from Bio import SeqIO
 import lib
 from lib.optimal_peptide import *
 from lib.vector_visualization import *
-from lib.prediction_class import *
 from lib.run_argument_parser import *
 from lib.pvacvector_input_fasta_generator import *
-from lib.fasta_generator import *
 from lib.pipeline import *
 
 def define_parser():
@@ -49,12 +47,6 @@ def main(args_input=sys.argv[1:]):
         generate_input_fasta = True
     else:
         sys.exit("Input file type not as expected. Needs to be a .fa or a .vcf file")
-    input_n_mer = args.input_n_mer
-    iedb_method = args.prediction_algorithms[0]
-    ic50_cutoff = args.binding_threshold
-    alleles = args.allele
-    epl = args.epitope_length
-    print("IC50 cutoff: " + str(ic50_cutoff))
 
     base_output_dir = os.path.abspath(args.output_dir)
     tmp_dir = os.path.join(base_output_dir, 'tmp')
@@ -102,6 +94,7 @@ def main(args_input=sys.argv[1:]):
         'sample_name'     : args.sample_name,
     }
 
+    parsed_output_files = []
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
         if args.epitope_length is None:
             sys.exit("Epitope length is required for class I binding predictions")
@@ -125,29 +118,53 @@ def main(args_input=sys.argv[1:]):
         class_i_arguments['epitope_lengths']         = args.epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
-        pipeline = MHCIPipeline(**class_i_arguments)
-        pipeline.generate_fasta([[1, 1]])
-        parsed_output_files = pipeline.call_iedb_and_parse_outputs([[1, 1]])
+        pipeline_i = MHCIPipeline(**class_i_arguments)
+        pipeline_i.generate_fasta([[1, 1]])
+        parsed_output_files.extend(pipeline_i.call_iedb_and_parse_outputs([[1, 1]]))
+
+    if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+        if args.iedb_install_directory:
+            iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
+            if not os.path.exists(iedb_mhc_ii_executable):
+                sys.exit("IEDB MHC II executable path doesn't exist %s" % iedb_mhc_ii_executable)
+        else:
+            iedb_mhc_ii_executable = None
+
+        print("Executing MHC Class II predictions")
+
+        output_dir = os.path.join(base_output_dir, 'MHC_Class_II')
+        os.makedirs(output_dir, exist_ok=True)
+
+        class_ii_arguments = shared_arguments.copy()
+        class_ii_arguments['alleles']               = class_ii_alleles
+        class_ii_arguments['prediction_algorithms'] = class_ii_prediction_algorithms
+        class_ii_arguments['iedb_executable']       = iedb_mhc_ii_executable
+        class_ii_arguments['output_dir']            = output_dir
+        class_ii_arguments['netmhc_stab']           = False
+        pipeline_ii = MHCIIPipeline(**class_ii_arguments)
+        pipeline_ii.generate_fasta([[1, 1]])
+        parsed_output_files.extend(pipeline_ii.call_iedb_and_parse_outputs([[1, 1]]))
 
     iedb_results = {}
     epitopes = []
-    with open(parsed_output_files[0], 'r') as parsed:
-        reader = csv.DictReader(parsed, delimiter="\t")
-        for row in reader:
-            index = row['Index']
-            allele = row['HLA Allele']
-            score = float(row['Best MT Score'])
-            if score < float(ic50_cutoff):
-                continue
-            if index not in iedb_results:
-                iedb_results[index] = {}
-            if allele not in iedb_results[index]:
-                iedb_results[index][allele] = {}
-            if 'min_score' in iedb_results[index][allele]:
-                iedb_results[index][allele]['min_score'] = min(iedb_results[index][allele]['min_score'], score)
-            else:
-                iedb_results[index][allele]['min_score'] = score
-            epitopes.append(row['MT Epitope Seq'])
+    for parsed_output_file in parsed_output_files:
+        with open(parsed_output_file, 'r') as parsed:
+            reader = csv.DictReader(parsed, delimiter="\t")
+            for row in reader:
+                index = row['Index']
+                allele = row['HLA Allele']
+                score = float(row['Best MT Score'])
+                if score < float(args.binding_threshold):
+                    continue
+                if index not in iedb_results:
+                    iedb_results[index] = {}
+                if allele not in iedb_results[index]:
+                    iedb_results[index][allele] = {}
+                if 'min_score' in iedb_results[index][allele]:
+                    iedb_results[index][allele]['min_score'] = min(iedb_results[index][allele]['min_score'], score)
+                else:
+                    iedb_results[index][allele]['min_score'] = score
+                epitopes.append(row['MT Epitope Seq'])
 
     Paths = nx.DiGraph()
     spacers = [None, "HH", "HHC", "HHH", "HHHD", "HHHC", "AAY", "HHHH", "HHAA", "HHL", "AAL"]

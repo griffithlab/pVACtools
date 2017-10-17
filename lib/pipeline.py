@@ -501,7 +501,10 @@ class MHCIIPipeline(Pipeline):
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
             fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
-            split_tsv_file_path       = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
+            if self.input_file_type == 'pvacvector_input_fasta':
+                split_tsv_file_path = self.tsv_file_path()
+            else:
+                split_tsv_file_path       = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
             split_fasta_file_path     = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
             if os.path.exists(split_fasta_file_path):
                 status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
