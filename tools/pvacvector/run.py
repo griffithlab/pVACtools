@@ -6,16 +6,11 @@ import shutil
 import sys
 import argparse
 import os
-from pathlib import Path
-root = str(Path(__file__).resolve().parents[1])
-sys.path.append(root)
-
 import pandas
 import networkx as nx
 import random
 from Bio import SeqIO
 
-import lib
 from lib.optimal_peptide import *
 from lib.vector_visualization import *
 from lib.run_argument_parser import *
