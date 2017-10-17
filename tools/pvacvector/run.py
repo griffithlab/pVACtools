@@ -53,20 +53,23 @@ def main(args_input=sys.argv[1:]):
     alleles = args.allele
     epl = args.epitope_length
     print("IC50 cutoff: " + str(ic50_cutoff))
-    runname = args.sample_name
-    outdir = args.output_dir
 
-    base_output_dir = os.path.abspath(outdir)
-    base_output_dir = os.path.join(base_output_dir, runname)
-    tmp_dir = os.path.join(base_output_dir, runname + '_tmp')
+    base_output_dir = os.path.abspath(args.output_dir)
+    tmp_dir = os.path.join(base_output_dir, 'tmp')
     os.makedirs(tmp_dir, exist_ok=True)
 
     if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
         random.seed(0.5)
     if generate_input_fasta:
-        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, input_n_mer)
+        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, args.input_n_mer)
         generator.execute()
         input_file = generator.output_file
+
+    seq_dict = dict()
+    for record in SeqIO.parse(input_file, "fasta"):
+        seq_dict[record.id] = str(record.seq)
+    seq_keys = sorted(seq_dict)
+    seq_tuples = list(itertools.permutations(seq_keys, 2))
 
     class_i_prediction_algorithms = []
     class_ii_prediction_algorithms = []
@@ -198,7 +201,7 @@ def main(args_input=sys.argv[1:]):
     for id in state:
         print("\t", id)
 
-    results_file = os.path.join(base_output_dir, runname + '_results.fa')
+    results_file = os.path.join(base_output_dir, args.sample_name + '_results.fa')
     with open(results_file, 'w') as f:
         name = list()
         min_score = Paths[state[0]][state[1]]['weight']
@@ -237,10 +240,12 @@ def main(args_input=sys.argv[1:]):
             output.append("\n")
         f.write(''.join(output))
 
+    VectorVisualization(results_file, base_output_dir).draw()
+
     if not args.keep_tmp_files:
         shutil.rmtree(tmp_dir)
-
-    VectorVisualization(results_file, base_output_dir).draw()
+        shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_I'), ignore_errors=True)
+        shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_II'), ignore_errors=True)
 
 if __name__ == "__main__":
     main()

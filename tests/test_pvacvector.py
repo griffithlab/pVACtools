@@ -100,11 +100,11 @@ class TestPvacvector(unittest.TestCase):
 
             #vaccine design algorithm producing correct output with fasta input
             self.assertTrue(cmp(
-                os.path.join(output_dir.name, self.test_run_name, self.test_run_name + '_results.fa'),
+                os.path.join(output_dir.name, self.test_run_name + '_results.fa'),
                 os.path.join(self.test_data_dir, "Test.vector.results.output.fa")
             ))
 
-            image_out = os.path.join(output_dir.name, self.test_run_name, 'vector.jpg')
+            image_out = os.path.join(output_dir.name, 'vector.jpg')
             #vaccine visualization producing image
             self.assertTrue(os.path.exists(image_out))
             self.assertTrue(os.stat(image_out).st_size > 0)
@@ -133,14 +133,13 @@ class TestPvacvector(unittest.TestCase):
 
             #conversion from vcf to fasta file producing correct output, input file for vaccine design algorithm
             self.assertTrue(cmp(
-                    os.path.join(output_dir.name, self.test_run_name, "vector_input.fa"),
+                    os.path.join(output_dir.name, "vector_input.fa"),
                     os.path.join(self.test_data_dir, "input_parse_test_output.fa")
                     ))
 
-            image_out = os.path.join(output_dir.name, self.test_run_name, 'vector.jpg')
+            image_out = os.path.join(output_dir.name, 'vector.jpg')
             #vaccine visualization producing image
             self.assertTrue(os.path.exists(image_out))
             self.assertTrue(os.stat(image_out).st_size > 0)
 
             output_dir.cleanup()
-            
