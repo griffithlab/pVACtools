@@ -25,46 +25,7 @@ from lib.pipeline import *
 def define_parser():
     return PvacvectorRunArgumentParser().parser
 
-def main(args_input=sys.argv[1:]):
-
-    parser = define_parser()
-    args = parser.parse_args(args_input)
-
-    if "." in args.sample_name:
-        sys.exit("Run name cannot contain '.'")
-
-    if args.iedb_retries > 100:
-        sys.exit("The number of IEDB retries must be less than or equal to 100")
-
-    if (os.path.splitext(args.input_file))[1] == '.fa':
-        input_file = args.input_file
-        generate_input_fasta = False
-    elif (os.path.splitext(args.input_file))[1] == '.tsv':
-        input_tsv = args.input_file
-        input_vcf = args.input_vcf
-        if input_vcf is None:
-            sys.exit("Input VCF is required when using a pVACseq TSV as input file")
-        generate_input_fasta = True
-    else:
-        sys.exit("Input file type not as expected. Needs to be a .fa or a .vcf file")
-
-    base_output_dir = os.path.abspath(args.output_dir)
-    tmp_dir = os.path.join(base_output_dir, 'tmp')
-    os.makedirs(tmp_dir, exist_ok=True)
-
-    if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
-        random.seed(0.5)
-    if generate_input_fasta:
-        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, args.input_n_mer)
-        generator.execute()
-        input_file = generator.output_file
-
-    seq_dict = dict()
-    for record in SeqIO.parse(input_file, "fasta"):
-        seq_dict[record.id] = str(record.seq)
-    seq_keys = sorted(seq_dict)
-    seq_tuples = list(itertools.permutations(seq_keys, 2))
-
+def run_pipelines(input_file, base_output_dir, args):
     class_i_prediction_algorithms = []
     class_ii_prediction_algorithms = []
     for prediction_algorithm in sorted(args.prediction_algorithms):
@@ -145,6 +106,9 @@ def main(args_input=sys.argv[1:]):
         pipeline_ii.generate_fasta([[1, 1]])
         parsed_output_files.extend(pipeline_ii.call_iedb_and_parse_outputs([[1, 1]]))
 
+    return parsed_output_files
+
+def find_min_scores(parsed_output_files, args):
     iedb_results = {}
     epitopes = []
     for parsed_output_file in parsed_output_files:
@@ -165,7 +129,9 @@ def main(args_input=sys.argv[1:]):
                 else:
                     iedb_results[index][allele]['min_score'] = score
                 epitopes.append(row['MT Epitope Seq'])
+    return (iedb_results, epitopes)
 
+def create_graph(iedb_results, seq_tuples):
     Paths = nx.DiGraph()
     spacers = [None, "HH", "HHC", "HHH", "HHHD", "HHHC", "AAY", "HHHH", "HHAA", "HHL", "AAL"]
     for ep in seq_tuples:
@@ -195,8 +161,10 @@ def main(args_input=sys.argv[1:]):
                     Paths.add_edge(ID_1, ID_2, weight=worst_case, spacer='')
 
     print("Graph contains " + str(len(Paths)) + " nodes and " + str(Paths.size()) + " edges.")
-    print("Finding path.")
+    return Paths
 
+def create_distance_matrix(Paths):
+    print("Finding path.")
     distance_matrix = {}
     for ID_1 in Paths:
         try:
@@ -205,7 +173,9 @@ def main(args_input=sys.argv[1:]):
             distance_matrix[ID_1] = {}
         for ID_2 in Paths[ID_1]:
             distance_matrix[ID_1][ID_2] = Paths[ID_1][ID_2]['weight']
+    return distance_matrix
 
+def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args):
     init_state = sorted(seq_dict)
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
@@ -258,7 +228,53 @@ def main(args_input=sys.argv[1:]):
                 output.append(id)
             output.append("\n")
         f.write(''.join(output))
+    return results_file
 
+def main(args_input=sys.argv[1:]):
+
+    parser = define_parser()
+    args = parser.parse_args(args_input)
+
+    if "." in args.sample_name:
+        sys.exit("Run name cannot contain '.'")
+
+    if args.iedb_retries > 100:
+        sys.exit("The number of IEDB retries must be less than or equal to 100")
+
+    if (os.path.splitext(args.input_file))[1] == '.fa':
+        input_file = args.input_file
+        generate_input_fasta = False
+    elif (os.path.splitext(args.input_file))[1] == '.tsv':
+        input_tsv = args.input_file
+        input_vcf = args.input_vcf
+        if input_vcf is None:
+            sys.exit("Input VCF is required when using a pVACseq TSV as input file")
+        generate_input_fasta = True
+    else:
+        sys.exit("Input file type not as expected. Needs to be a .fa or a .vcf file")
+
+    base_output_dir = os.path.abspath(args.output_dir)
+    tmp_dir = os.path.join(base_output_dir, 'tmp')
+    os.makedirs(tmp_dir, exist_ok=True)
+
+    if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
+        random.seed(0.5)
+    if generate_input_fasta:
+        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, args.input_n_mer)
+        generator.execute()
+        input_file = generator.output_file
+
+    seq_dict = dict()
+    for record in SeqIO.parse(input_file, "fasta"):
+        seq_dict[record.id] = str(record.seq)
+    seq_keys = sorted(seq_dict)
+    seq_tuples = list(itertools.permutations(seq_keys, 2))
+
+    parsed_output_files = run_pipelines(input_file, base_output_dir, args)
+    (iedb_scores, epitopes) = find_min_scores(parsed_output_files, args)
+    Paths = create_graph(iedb_scores, seq_tuples)
+    distance_matrix = create_distance_matrix(Paths)
+    results_file = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
     VectorVisualization(results_file, base_output_dir).draw()
 
     if not args.keep_tmp_files:
