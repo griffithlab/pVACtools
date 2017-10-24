@@ -43,8 +43,10 @@ class VectorVisualization:
         pep_ids = []
         for pep_id in pep_ids_joined:
             if "." in pep_id:
-                mt, gene, var = pep_id.split(".")
-                pep_id = "-".join((gene,var))
+                desc = pep_id.split(".")
+                if len(desc) == 3: #if in expected "MT.GENE.AACHANGE" format, simplify
+                    mt, gene, var = pep_id.split(".")
+                    pep_id = "-".join((gene,var))
             pep_ids.append(pep_id)
         junct_scores = fields[3].split(":")
         junct_scores = junct_scores[1].split(",")
