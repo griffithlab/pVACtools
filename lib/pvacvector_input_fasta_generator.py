@@ -1,5 +1,7 @@
 import os
 import csv
+import tempfile
+from .input_file_converter import *
 
 class PvacvectorInputFastaGenerator():
     def __init__(self, pvacseq_tsv, input_vcf, output_dir, n_mer):
@@ -41,20 +43,22 @@ class PvacvectorInputFastaGenerator():
 
     #get necessary data from initial pvacseq input vcf
     def parse_original_vcf(self):
-        with open(self.input_vcf, 'r') as input_f:
+        tmp_file = tempfile.NamedTemporaryFile()
+        VcfConverter(**{'input_file': self.input_vcf, 'output_file': tmp_file.name}).execute()
+        with open(tmp_file.name, 'r') as input_f:
+            reader = csv.DictReader(input_f, delimiter = "\t")
             transcripts_dict = {}
-            for line in input_f:
+            for line in reader:
                 attributes = []
-                if line[0] != "#":
-                    fields = line.split("\t")
-                    info = fields[7]
-                    info = info.split("|")
-                    transcript_ID, downstr_seq, len_change, full_seq = info[6], info[23], info[24], info[25]
-                    attributes.append(full_seq)
-                    attributes.append(downstr_seq)
-                    attributes.append(len_change)
-                    transcripts_dict[transcript_ID] = attributes
-        input_f.close()
+                transcript_ID = line['transcript_name']
+                downstr_seq = line['downstream_amino_acid_sequence']
+                len_change = line['protein_length_change']
+                full_seq = line['wildtype_amino_acid_sequence']
+                attributes.append(full_seq)
+                attributes.append(downstr_seq)
+                attributes.append(len_change)
+                transcripts_dict[transcript_ID] = attributes
+        tmp_file.close()
         return(transcripts_dict)
 
     def edit_full_seq(self, i, mut_types, mutations, wt_epitope_seqs, mt_epitope_seqs, sub_seq, full_seq, transcripts_dict, transcript_IDs):

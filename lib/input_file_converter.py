@@ -35,20 +35,21 @@ class InputFileConverter(metaclass=ABCMeta):
             'tdna_vaf',
             'trna_depth',
             'trna_vaf',
-            'index'
+            'index',
+            'protein_length_change',
         ]
 
 class VcfConverter(InputFileConverter):
     def __init__(self, **kwargs):
         InputFileConverter.__init__(self, **kwargs)
-        self.gene_expn_file              = kwargs['gene_expn_file']
-        self.transcript_expn_file        = kwargs['transcript_expn_file']
-        self.normal_snvs_coverage_file   = kwargs['normal_snvs_coverage_file']
-        self.normal_indels_coverage_file = kwargs['normal_indels_coverage_file']
-        self.tdna_snvs_coverage_file     = kwargs['tdna_snvs_coverage_file']
-        self.tdna_indels_coverage_file   = kwargs['tdna_indels_coverage_file']
-        self.trna_snvs_coverage_file     = kwargs['trna_snvs_coverage_file']
-        self.trna_indels_coverage_file   = kwargs['trna_indels_coverage_file']
+        self.gene_expn_file              = kwargs.pop('gene_expn_file', None)
+        self.transcript_expn_file        = kwargs.pop('transcript_expn_file', None)
+        self.normal_snvs_coverage_file   = kwargs.pop('normal_snvs_coverage_file', None)
+        self.normal_indels_coverage_file = kwargs.pop('normal_indels_coverage_file', None)
+        self.tdna_snvs_coverage_file     = kwargs.pop('tdna_snvs_coverage_file', None)
+        self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
+        self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
+        self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
 
     def parse_bam_readcount_file(self, bam_readcount_file):
         with open(bam_readcount_file, 'r') as reader:
@@ -280,7 +281,8 @@ class VcfConverter(InputFileConverter):
                         'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
                         'variant_type'                   : consequence,
                         'protein_position'               : transcript['Protein_position'],
-                        'index'                          : index
+                        'index'                          : index,
+                        'protein_length_change'          : transcript['ProteinLengthChange'],
                     }
                     if transcript['Amino_acids']:
                         output_row['amino_acid_change'] = transcript['Amino_acids']
