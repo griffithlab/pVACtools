@@ -22,6 +22,7 @@ class PvacvectorInputFastaGenerator():
                 gene_name = line['Gene Name']
                 mt_epitope_seq = line['MT Epitope Seq']
                 wt_epitope_seq = line['WT Epitope Seq']
+                transcript = line['Transcript']
 
                 mutations.append(mutation)
                 mut_types.append(mut_type)
@@ -30,15 +31,15 @@ class PvacvectorInputFastaGenerator():
                 if "-" in pos:
                     pos = pos.split("-")
                     pos = pos[1]
-                    mut_ID = ("MT." + gene_name + "." +  pos + "fs")
+                    mut_ID = '.'.join(["MT", gene_name, transcript, (pos + "fs")])
                 elif mut_type == "FS":
-                    mut_ID = "MT." + gene_name + "." + old_AA + pos + "fs"
-                elif mut_type == "missense": 
-                    mut_ID = "MT." + gene_name + "."  + old_AA + pos + new_AA
+                    mut_ID = '.'.join(["MT", gene_name, transcript, (old_AA + pos + "fs")])
+                elif mut_type == "missense":
+                    mut_ID = '.'.join(["MT", gene_name, transcript, (old_AA + pos + new_AA)])
                 mut_IDs.append(mut_ID)
                 mt_epitope_seqs.append(mt_epitope_seq)
                 wt_epitope_seqs.append(wt_epitope_seq)
-                transcript_IDs.append(line['Transcript'])
+                transcript_IDs.append(transcript)
         return mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs
 
     #get necessary data from initial pvacseq input vcf
@@ -49,21 +50,36 @@ class PvacvectorInputFastaGenerator():
             reader = csv.DictReader(input_f, delimiter = "\t")
             transcripts_dict = {}
             for line in reader:
-                attributes = []
+                mut_type = line['variant_type']
+                mutation = line['amino_acid_change']
+                pos = line['protein_position']
+                gene_name = line['gene_name']
                 transcript_ID = line['transcript_name']
+                (old_AA, new_AA) = mutation.split("/")
+                #if position presented as a range, use higher end of range
+                if "-" in pos:
+                    pos = pos.split("-")
+                    pos = pos[1]
+                    mut_ID = '.'.join(["MT", gene_name, transcript_ID, (pos + "fs")])
+                elif mut_type == "FS":
+                    mut_ID = '.'.join(["MT", gene_name, transcript_ID, (old_AA + pos + "fs")])
+                elif mut_type == "missense":
+                    mut_ID = '.'.join(["MT", gene_name, transcript_ID, (old_AA + pos + new_AA)])
+
+                attributes = []
                 downstr_seq = line['downstream_amino_acid_sequence']
                 len_change = line['protein_length_change']
                 full_seq = line['wildtype_amino_acid_sequence']
                 attributes.append(full_seq)
                 attributes.append(downstr_seq)
                 attributes.append(len_change)
-                transcripts_dict[transcript_ID] = attributes
+                transcripts_dict[mut_ID] = attributes
         tmp_file.close()
         return(transcripts_dict)
 
-    def edit_full_seq(self, i, mut_types, mutations, wt_epitope_seqs, mt_epitope_seqs, sub_seq, full_seq, transcripts_dict, transcript_IDs):
+    def edit_full_seq(self, i, mut_types, mutations, wt_epitope_seqs, mt_epitope_seqs, sub_seq, full_seq, transcripts_dict, transcript_IDs, mut_IDs):
         if mut_types[i] == "FS":
-            downstr_seq, len_change = transcripts_dict[transcript_IDs[i]][1], int(transcripts_dict[transcript_IDs[i]][2])
+            downstr_seq, len_change = transcripts_dict[mut_IDs[i]][1], int(transcripts_dict[mut_IDs[i]][2])
             parts = mutations[i].split("/")
             initial = parts[0]
             final = parts[1]
@@ -118,9 +134,9 @@ class PvacvectorInputFastaGenerator():
             sub_seq = ""
             full_seq = ""
             for i in range(len(transcript_IDs)):
-                full_seq = (transcripts_dict[transcript_IDs[i]])[0] 
+                full_seq = (transcripts_dict[mut_IDs[i]])[0] 
 
-                full_seq = self.edit_full_seq(i, mut_types, mutations, wt_epitope_seqs, mt_epitope_seqs, sub_seq, full_seq, transcripts_dict, transcript_IDs)
+                full_seq = self.edit_full_seq(i, mut_types, mutations, wt_epitope_seqs, mt_epitope_seqs, sub_seq, full_seq, transcripts_dict, transcript_IDs, mut_IDs)
 
                 sub_seq = self.get_sub_seq(full_seq, mt_epitope_seqs[i])
                 out_f.write(">" + mut_IDs[i] + "\n")
