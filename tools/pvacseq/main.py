@@ -35,7 +35,7 @@ def main():
         help="Filters variants processed by IEDB by coverage, vaf, and gene expression",
         add_help=False
     )
-    coverage_filter_parser.set_defaults(func=lib.coverage_filter)
+    coverage_filter_parser.set_defaults(func=coverage_filter)
 
     generate_protein_fasta_parser = subparsers.add_parser(
         "generate_protein_fasta",

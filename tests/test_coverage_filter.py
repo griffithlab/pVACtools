@@ -13,7 +13,7 @@ class CoverageFilterTests(unittest.TestCase):
         #locate the bin and test_data directories
         cls.python        = sys.executable
         cls.base_dir      = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        cls.executable    = os.path.join(cls.base_dir, "lib", "coverage_filter.py")
+        cls.executable    = os.path.join(cls.base_dir, "tools", "pvacseq", "coverage_filter.py")
         cls.test_data_dir = os.path.join(cls.base_dir, "tests", "test_data", "coverage_filter")
 
     def test_coverage_filter_runs_and_produces_expected_output(self):

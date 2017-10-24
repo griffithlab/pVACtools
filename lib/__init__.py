@@ -4,7 +4,6 @@ __all__ = [
     "combine_parsed_outputs",
     "config_files",
     "input_file_converter",
-    "coverage_filter",
     "download_example_data",
     "fasta_generator",
     "generate_protein_fasta",
@@ -13,6 +12,7 @@ __all__ = [
     "valid_alleles",
     'net_chop',
     "netmhc_stab",
+    "filter"
 ]
 
 import os
