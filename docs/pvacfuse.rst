@@ -1,3 +1,7 @@
+.. image:: images/pVACfuse_logo_trans-bg_sm_v4b.png
+    :align: right
+    :alt: pVACfuse logo
+
 pVACfuse
 ====================================
 

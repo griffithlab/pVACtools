@@ -1,3 +1,7 @@
+.. image:: ../images/pVACvector_logo_trans-bg_sm_v4b.png
+    :align: right
+    :alt: pVACvector logo
+
 .. _pvacvector_run:
 
 Usage
