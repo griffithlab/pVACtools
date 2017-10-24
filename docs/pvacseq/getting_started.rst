@@ -17,4 +17,4 @@ The example data output can be reproduced by running the following command:
    --net-chop-method cterm --netmhc-stab \
    --top-score-metric=lowest -d full --keep-tmp-files
 
-A detailed description of all command options can be found on the :ref:`Usage <run>` page.
+A detailed description of all command options can be found on the :ref:`Usage <pvacseq_run>` page.
