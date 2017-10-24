@@ -3,7 +3,7 @@ import argparse
 import os
 from lib.prediction_class import *
 from lib.pipeline import *
-from lib.config_files import additional_input_file_list_options
+from config_files import additional_input_file_list_options
 from lib.run_argument_parser import *
 
 import shutil

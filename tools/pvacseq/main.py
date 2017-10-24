@@ -3,12 +3,6 @@ import sys
 from subprocess import call
 import os
 import pkg_resources
-pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-sys.path.append(pvac_dir)
-try:
-    from . import lib
-except (SystemError, ImportError):
-    import lib
 from tools.pvacseq import *
 
 def main():
@@ -42,7 +36,7 @@ def main():
         help="Generate an annotated fasta file from a VCF with protein sequences of mutations and matching wildtypes",
         add_help=False
     )
-    generate_protein_fasta_parser.set_defaults(func=lib.generate_protein_fasta)
+    generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
 
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
@@ -56,7 +50,7 @@ def main():
         help="Installs the Wildtype VEP plugin into your VEP_plugins directory",
         add_help=False
     )
-    install_vep_plugin_parser.set_defaults(func=lib.install_vep_plugin)
+    install_vep_plugin_parser.set_defaults(func=install_vep_plugin)
 
     valid_alleles_parser = subparsers.add_parser(
         "valid_alleles",
@@ -70,24 +64,15 @@ def main():
         help="Documentation for the configuration files",
         add_help=False
     )
-    config_files_parser.set_defaults(func=lib.config_files)
-
-    parser.add_argument(
-        "-v", "--version",
-        action="store_true",
-        help="Display the currently installed pvacseq version",
-    )
+    config_files_parser.set_defaults(func=config_files)
 
     args = parser.parse_known_args()
-    if args[0].version is True:
-        print(pkg_resources.get_distribution("pvacseq").version)
-    else:
-        try:
-            args[0].func.main(args[1])
-        except AttributeError as e:
-            parser.print_help()
-            print("Error: No command specified")
-            sys.exit(-1)
+    try:
+        args[0].func.main(args[1])
+    except AttributeError as e:
+        parser.print_help()
+        print("Error: No command specified")
+        sys.exit(-1)
 
 
 if __name__ == '__main__':

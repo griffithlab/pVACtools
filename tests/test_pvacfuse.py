@@ -114,6 +114,7 @@ class PVACTests(unittest.TestCase):
             "run",
             "binding_filter",
             "valid_alleles",
+            "download_example_data",
             ]:
             result = subprocess_run([
                 sys.executable,

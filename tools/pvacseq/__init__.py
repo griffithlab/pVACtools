@@ -4,6 +4,9 @@ __all__ = [
     'valid_alleles',
     'download_example_data',
     'coverage_filter',
+    'generate_protein_fasta',
+    'install_vep_plugin',
+    'config_files',
 ]
 
 from . import *

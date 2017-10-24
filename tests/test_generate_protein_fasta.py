@@ -5,14 +5,14 @@ import tempfile
 from subprocess import call
 from filecmp import cmp
 import py_compile
-from lib import generate_protein_fasta
+from tools.pvacseq import generate_protein_fasta
 
 class GenerateFastaTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.python = sys.executable
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'lib')
+        cls.executable_dir = os.path.join(base_dir, 'tools', 'pvacseq')
         cls.executable     = os.path.join(cls.executable_dir, 'generate_protein_fasta.py')
         cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'generate_protein_fasta')
 
