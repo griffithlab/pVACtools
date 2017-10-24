@@ -27,7 +27,7 @@ import turtle
 
 def define_parser():
 
-    parser = argparse.ArgumentParser('pvacseq vaccine_design')
+    parser = argparse.ArgumentParser('pvacvector run')
     parser.add_argument(
         "run_name",
         help="The name of the run being processed." +
@@ -37,7 +37,7 @@ def define_parser():
     parser.add_argument('-f', "--input-fa", type=argparse.FileType('r'),
                        help="Path to input fasta file. " + "Required if not generating input fasta")
     parser.add_argument('-t', "--input_tsv",
-                        help="Path to input tsv file with the epitopes selected for vaccine design. " + "Required if generating input fasta. ")
+                        help="Path to input tsv file with the epitopes selected for vector design. " + "Required if generating input fasta. ")
     parser.add_argument('-v', "--input_vcf",
                         help="Path to original pVAC-Seq input vcf file" + "Requiired if generating input fasta. ")
     parser.add_argument('method',
@@ -49,7 +49,7 @@ def define_parser():
     parser.add_argument('-k', "--keep-tmp",
                         help="Option to store tmp files. ", action="store_true")
     parser.add_argument('-n', "--input-n-mer", default='25',
-                        help="Length of peptide sequence to be generated for use in input to main vaccine design algorithm. " + "Default: 25")
+                        help="Length of peptide sequence to be generated for use in input to main vector design algorithm. " + "Default: 25")
     parser.add_argument(
         "-l", "--epitope-length",
         type=lambda s: [int(epl) for epl in s.split(',')],
@@ -199,7 +199,7 @@ def tsvToFasta(n_mer, input_tsv, input_vcf, output_dir):
         print("FASTA file written")
         return()
 
-    output_f = os.path.join(output_dir, "vaccine_design_input.fa")
+    output_f = os.path.join(output_dir, "vector_input.fa")
 
     mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = parse_choosen_epitopes(input_tsv)
 
@@ -335,7 +335,7 @@ def get_conversion_factor(pep_seqs):
 def draw_header(t, header_pos):
     t.pu()
     t.setpos(header_pos)
-    t.write("Vaccine Design", align="center", font=("Arial", 18, "bold"))
+    t.write("Vector Design", align="center", font=("Arial", 18, "bold"))
     t.pd()
     return()
 
@@ -454,8 +454,8 @@ def draw_peptide(t, pep, pep_ids, peptides_parsed, pen_thick, angle_parsed, conv
 
 #print turtle screen to a postscript file, convert to pdf
 def output_screen(t, out_f):
-    ps_file = "/".join((out_f, "vaccine.ps"))
-    out_file = "/".join((out_f, "vaccine.jpg"))
+    ps_file = "/".join((out_f, "vector.ps"))
+    out_file = "/".join((out_f, "vector.jpg"))
     ts = t.getscreen()
     ts.getcanvas().postscript(file=ps_file)
     os.system('convert -density 300 -quality 100 ' + ps_file + " " + out_file)

@@ -46,6 +46,7 @@ setup(
             "pvactools = tools.main:main",
             "pvacseq = tools.pvacseq.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
+            "pvacvector = tools.pvacvector.main:main",
             "pvacseq-api = utils.pvacapi.app:main [API]"
         ]
     },
