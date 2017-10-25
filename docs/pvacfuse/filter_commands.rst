@@ -7,9 +7,7 @@ Filtering Commands
 
 pVACfuse currently offers a binding filter.
 
-The binding filter is always run automatically as part of the pVACfuse pipeline.  The coverage filter is run automatically if bam-readcount or cufflinks file are provided as additional input files to a pVACfuse run.
-
-Both filters can also be run manually to narrow the final results down further.
+The binding filter is always run automatically as part of the pVACfuse pipeline. It can also be run manually to narrow the final results down further.
 
 Binding Filter
 --------------
