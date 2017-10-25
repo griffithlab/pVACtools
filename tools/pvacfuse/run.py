@@ -65,23 +65,12 @@ def main(args_input = sys.argv[1:]):
         'minimum_fold_change'       : args.minimum_fold_change,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
-        'normal_cov'                : None,
-        'normal_vaf'                : None,
-        'tdna_cov'                  : None,
-        'tdna_vaf'                  : None,
-        'trna_cov'                  : None,
-        'trna_vaf'                  : None,
-        'expn_val'                  : None,
         'additional_report_columns' : args.additional_report_columns,
         'fasta_size'                : args.fasta_size,
         'iedb_retries'              : args.iedb_retries,
         'downstream_sequence_length': downstream_sequence_length,
         'keep_tmp_files'            : args.keep_tmp_files,
     }
-    additional_input_files = {}
-    for additional_input_file_list_option in additional_input_file_list_options().keys():
-        additional_input_files[additional_input_file_list_option] = None
-    shared_arguments.update(additional_input_files)
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
         if args.epitope_length is None:

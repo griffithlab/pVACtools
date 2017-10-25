@@ -31,34 +31,34 @@ class Pipeline(metaclass=ABCMeta):
         self.alleles                     = kwargs['alleles']
         self.prediction_algorithms       = kwargs['prediction_algorithms']
         self.output_dir                  = kwargs['output_dir']
-        self.iedb_executable             = kwargs['iedb_executable']
-        self.gene_expn_file              = kwargs['gene_expn_file']
-        self.transcript_expn_file        = kwargs['transcript_expn_file']
-        self.normal_snvs_coverage_file   = kwargs['normal_snvs_coverage_file']
-        self.normal_indels_coverage_file = kwargs['normal_indels_coverage_file']
-        self.tdna_snvs_coverage_file     = kwargs['tdna_snvs_coverage_file']
-        self.tdna_indels_coverage_file   = kwargs['tdna_indels_coverage_file']
-        self.trna_snvs_coverage_file     = kwargs['trna_snvs_coverage_file']
-        self.trna_indels_coverage_file   = kwargs['trna_indels_coverage_file']
-        self.net_chop_method             = kwargs['net_chop_method']
-        self.net_chop_threshold          = kwargs['net_chop_threshold']
-        self.netmhc_stab                 = kwargs['netmhc_stab']
-        self.top_result_per_mutation     = kwargs['top_result_per_mutation']
-        self.top_score_metric            = kwargs['top_score_metric']
-        self.binding_threshold           = kwargs['binding_threshold']
-        self.minimum_fold_change         = kwargs['minimum_fold_change']
-        self.normal_cov                  = kwargs['normal_cov']
-        self.normal_vaf                  = kwargs['normal_vaf']
-        self.tdna_cov                    = kwargs['tdna_cov']
-        self.tdna_vaf                    = kwargs['tdna_vaf']
-        self.trna_cov                    = kwargs['trna_cov']
-        self.trna_vaf                    = kwargs['trna_vaf']
-        self.expn_val                    = kwargs['expn_val']
-        self.additional_report_columns   = kwargs['additional_report_columns']
-        self.fasta_size                  = kwargs['fasta_size']
-        self.iedb_retries                = kwargs['iedb_retries']
-        self.downstream_sequence_length  = kwargs['downstream_sequence_length']
-        self.keep_tmp_files              = kwargs['keep_tmp_files']
+        self.iedb_executable             = kwargs.pop('iedb_executable', None)
+        self.gene_expn_file              = kwargs.pop('gene_expn_file', None)
+        self.transcript_expn_file        = kwargs.pop('transcript_expn_file', None)
+        self.normal_snvs_coverage_file   = kwargs.pop('normal_snvs_coverage_file', None)
+        self.normal_indels_coverage_file = kwargs.pop('normal_indels_coverage_file', None)
+        self.tdna_snvs_coverage_file     = kwargs.pop('tdna_snvs_coverage_file', None)
+        self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
+        self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
+        self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
+        self.net_chop_method             = kwargs.pop('net_chop_method', None)
+        self.net_chop_threshold          = kwargs.pop('net_chop_threshold', 0.5)
+        self.netmhc_stab                 = kwargs.pop('netmhc_stab', False)
+        self.top_result_per_mutation     = kwargs.pop('top_result_per_mutation', False)
+        self.top_score_metric            = kwargs.pop('top_score_metric', 'median')
+        self.binding_threshold           = kwargs.pop('binding_threshold', 500)
+        self.minimum_fold_change         = kwargs.pop('minimum_fold_change', 0)
+        self.normal_cov                  = kwargs.pop('normal_cov', None)
+        self.normal_vaf                  = kwargs.pop('normal_vaf', None)
+        self.tdna_cov                    = kwargs.pop('tdna_cov', None)
+        self.tdna_vaf                    = kwargs.pop('tdna_vaf', None)
+        self.trna_cov                    = kwargs.pop('trna_cov', None)
+        self.trna_vaf                    = kwargs.pop('trna_vaf', None)
+        self.expn_val                    = kwargs.pop('expn_val', None)
+        self.additional_report_columns   = kwargs.pop('additional_report_columns', None)
+        self.fasta_size                  = kwargs.pop('fasta_size', 200)
+        self.iedb_retries                = kwargs.pop('iedb_retries', 5)
+        self.downstream_sequence_length  = kwargs.pop('downstream_sequence_length', 1000)
+        self.keep_tmp_files              = kwargs.pop('keep_tmp_files', False)
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
@@ -104,8 +104,11 @@ class Pipeline(metaclass=ABCMeta):
                 yaml.dump(inputs, log_fh, default_flow_style=False)
 
     def tsv_file_path(self):
-        tsv_file = self.sample_name + '.tsv'
-        return os.path.join(self.output_dir, tsv_file)
+        if self.input_file_type == 'pvacvector_input_fasta':
+            return self.input_file
+        else:
+            tsv_file = self.sample_name + '.tsv'
+            return os.path.join(self.output_dir, tsv_file)
 
     def converter(self, params):
         converter_types = {
@@ -118,8 +121,9 @@ class Pipeline(metaclass=ABCMeta):
 
     def fasta_generator(self, params):
         generator_types = {
-            'vcf'  : 'FastaGenerator',
-            'bedpe': 'FusionFastaGenerator',
+            'vcf'                   : 'FastaGenerator',
+            'bedpe'                 : 'FusionFastaGenerator',
+            'pvacvector_input_fasta': 'VectorFastaGenerator',
         }
         generator_type = generator_types[self.input_file_type]
         generator = getattr(sys.modules[__name__], generator_type)
@@ -129,14 +133,11 @@ class Pipeline(metaclass=ABCMeta):
         parser_types = {
             'vcf'  : 'DefaultOutputParser',
             'bedpe': 'FusionOutputParser',
+            'pvacvector_input_fasta': 'VectorOutputParser',
         }
         parser_type = parser_types[self.input_file_type]
         parser = getattr(sys.modules[__name__], parser_type)
         return parser(**params)
-
-    def tsv_file_path(self):
-        tsv_file = self.sample_name + '.tsv'
-        return os.path.join(self.output_dir, tsv_file)
 
     def convert_vcf(self):
         status_message("Converting .%s to TSV" % self.input_file_type)
@@ -377,7 +378,7 @@ class Pipeline(metaclass=ABCMeta):
 class MHCIPipeline(Pipeline):
     def __init__(self, **kwargs):
         Pipeline.__init__(self, **kwargs)
-        self.peptide_sequence_length = kwargs['peptide_sequence_length']
+        self.peptide_sequence_length = kwargs.pop('peptide_sequence_length', 21)
         self.epitope_lengths         = kwargs['epitope_lengths']
 
     def generate_fasta(self, chunks):
@@ -385,7 +386,10 @@ class MHCIPipeline(Pipeline):
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
             fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
-            split_tsv_file_path       = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
+            if self.input_file_type == 'pvacvector_input_fasta':
+                split_tsv_file_path = self.tsv_file_path()
+            else:
+                split_tsv_file_path       = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
             split_fasta_file_path     = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
             if os.path.exists(split_fasta_file_path):
                 status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
@@ -492,7 +496,10 @@ class MHCIIPipeline(Pipeline):
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
             fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
-            split_tsv_file_path       = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
+            if self.input_file_type == 'pvacvector_input_fasta':
+                split_tsv_file_path = self.tsv_file_path()
+            else:
+                split_tsv_file_path       = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
             split_fasta_file_path     = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
             if os.path.exists(split_fasta_file_path):
                 status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))

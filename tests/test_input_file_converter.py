@@ -24,14 +24,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -50,12 +42,6 @@ class InputFileConverterTests(unittest.TestCase):
             'output_file'                : convert_vcf_output_file.name,
             'gene_expn_file'             : convert_vcf_cufflinks_genes_file,
             'transcript_expn_file'       : convert_vcf_cufflinks_isoforms_file,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -72,14 +58,8 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
             'tdna_snvs_coverage_file'    : convert_vcf_tdna_snvs_file,
             'tdna_indels_coverage_file'  : convert_vcf_tdna_indels_file,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -94,14 +74,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -116,14 +88,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -138,14 +102,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -160,14 +116,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -182,14 +130,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -204,14 +144,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -226,14 +158,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -248,14 +172,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -270,14 +186,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -292,14 +200,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -314,14 +214,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -336,14 +228,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -358,14 +242,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -380,14 +256,6 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'                 : convert_vcf_input_file,
             'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : None,
-            'transcript_expn_file'       : None,
-            'normal_snvs_coverage_file'  : None,
-            'normal_indels_coverage_file': None,
-            'tdna_snvs_coverage_file'    : None,
-            'tdna_indels_coverage_file'  : None,
-            'trna_snvs_coverage_file'    : None,
-            'trna_indels_coverage_file'  : None,
         }
         converter = VcfConverter(**convert_vcf_params)
 

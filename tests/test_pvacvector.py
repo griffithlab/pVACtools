@@ -1,7 +1,6 @@
 import unittest
 import tempfile
 import py_compile
-import subprocess
 import shutil
 from filecmp import cmp
 import os
@@ -9,6 +8,25 @@ import sys
 import re
 from subprocess import PIPE
 from subprocess import run as subprocess_run
+from tools.pvacvector import *
+import unittest.mock
+from mock import patch
+
+def make_response(data, path, test_name):
+    filename = 'response_%s_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'], test_name)
+    reader = open(os.path.join(
+        path,
+        filename
+    ), mode='r')
+    response_obj = lambda :None
+    response_obj.status_code = 200
+    response_obj.text = reader.read()
+    reader.close()
+    return response_obj
+
+def test_data_directory():
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+    return os.path.join(base_dir, 'tests', 'test_data', 'pvacvector')
 
 #python -m unittest tests/test_pvacvector.py
 class TestPvacvector(unittest.TestCase):
@@ -18,16 +36,15 @@ class TestPvacvector(unittest.TestCase):
         cls.python = sys.executable
         cls.executable = os.path.join(cls.base_dir, 'tools', 'pvacvector', 'run.py')
         cls.test_run_name = 'test_pvacvector_produces_expected_output'
-        cls.test_data_dir = os.path.join(cls.base_dir, 'tests', 'test_data', 'pvacvector')
+        cls.test_data_dir = test_data_directory()
         cls.test_data_temp_dir = os.path.join(cls.test_data_dir, 'tmp')
         cls.input_tsv = os.path.join(cls.test_data_dir, 'input_parse_test_input.tsv')
         cls.input_vcf = os.path.join(cls.test_data_dir, 'input_parse_test_input.vcf')
         cls.input_file = os.path.join(cls.test_data_dir, 'Test.vector.results.input.fa')
-        cls.method = 'ann'
+        cls.method = 'NetMHC'
         cls.keep_tmp = 'True'
         cls.allele = 'H-2-Kb'
         cls.epitope_length = '8'
-        cls.seed = 'True'
         cls.input_n_mer = '25'
 
     def test_run_compiles(self):
@@ -48,7 +65,7 @@ class TestPvacvector(unittest.TestCase):
             'tools',
             'pvacvector',
             'main.py'
-            )
+        )
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
@@ -63,60 +80,66 @@ class TestPvacvector(unittest.TestCase):
             self.assertRegex(result.stdout.decode(), usage_search)
 
     def test_pvacvector_fa_input_runs_and_produces_expected_output(self):
-        output_dir = tempfile.TemporaryDirectory()
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data: make_response(
+            data,
+            test_data_directory(),
+            'fa_input',
+        ))) as mock_request:
+            output_dir = tempfile.TemporaryDirectory()
 
-        call = subprocess.call([self.python,
-                           self.executable,
-                           self.test_run_name,
-                           self.method,
-                           self.allele,
-                           '-f', self.input_file,
-                           '-o', output_dir.name,
-                           '-l', self.epitope_length,
-                           '-n', self.input_n_mer,
-                           '-k',
-                           '-s'], shell=False)
+            run.main([
+                self.input_file,
+                self.test_run_name,
+                self.allele,
+                self.method,
+                output_dir.name,
+                '-e', self.epitope_length,
+                '-n', self.input_n_mer,
+                '-k'
+            ])
 
-        #vaccine design algorithm producing correct output with fasta input
-        self.assertTrue(cmp(
-            os.path.join(output_dir.name, self.test_run_name, self.test_run_name + '_results.fa'),
-            os.path.join(self.test_data_dir, "Test.vector.results.output.fa")
-        ))
+            #vaccine design algorithm producing correct output with fasta input
+            self.assertTrue(cmp(
+                os.path.join(output_dir.name, self.test_run_name + '_results.fa'),
+                os.path.join(self.test_data_dir, "Test.vector.results.output.fa")
+            ))
 
-        image_out = os.path.join(output_dir.name, self.test_run_name, 'vector.jpg')
-        #vaccine visualization producing image
-        self.assertTrue(os.path.exists(image_out))
-        self.assertTrue(os.stat(image_out).st_size > 0)
+            image_out = os.path.join(output_dir.name, 'vector.jpg')
+            #vaccine visualization producing image
+            self.assertTrue(os.path.exists(image_out))
+            self.assertTrue(os.stat(image_out).st_size > 0)
 
-        output_dir.cleanup()
+            output_dir.cleanup()
 
     def test_pvacvector_generate_fa_runs_and_produces_expected_output(self):
-        output_dir = tempfile.TemporaryDirectory()
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            test_data_directory(),
+            'generate_fa',
+        ))) as mock_request:
+            output_dir = tempfile.TemporaryDirectory()
 
-        call = subprocess.call([self.python,
-                           self.executable,
-                           self.test_run_name,
-                           self.method,
-                           self.allele,
-                           '-g',
-                           '-t', self.input_tsv,
-                           '-v', self.input_vcf,
-                           '-o', output_dir.name,
-                           '-l', self.epitope_length,
-                           '-n', self.input_n_mer,
-                           '-k',
-                           '-s'], shell=False)
+            run.main([
+                self.input_tsv,
+                self.test_run_name,
+                self.allele,
+                self.method,
+                output_dir.name,
+                '-v', self.input_vcf,
+                '-e', self.epitope_length,
+                '-n', self.input_n_mer,
+                '-k'
+            ])
 
-        #conversion from vcf to fasta file producing correct output, input file for vaccine design algorithm
-        self.assertTrue(cmp(
-                os.path.join(output_dir.name, self.test_run_name, "vector_input.fa"),
-                os.path.join(self.test_data_dir, "input_parse_test_output.fa")
-                ))
+            #conversion from vcf to fasta file producing correct output, input file for vaccine design algorithm
+            self.assertTrue(cmp(
+                    os.path.join(output_dir.name, "vector_input.fa"),
+                    os.path.join(self.test_data_dir, "input_parse_test_output.fa")
+                    ))
 
-        image_out = os.path.join(output_dir.name, self.test_run_name, 'vector.jpg')
-        #vaccine visualization producing image
-        self.assertTrue(os.path.exists(image_out))
-        self.assertTrue(os.stat(image_out).st_size > 0)
+            image_out = os.path.join(output_dir.name, 'vector.jpg')
+            #vaccine visualization producing image
+            self.assertTrue(os.path.exists(image_out))
+            self.assertTrue(os.stat(image_out).st_size > 0)
 
-        output_dir.cleanup()
-        
+            output_dir.cleanup()
