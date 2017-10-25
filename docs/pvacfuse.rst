@@ -13,4 +13,7 @@ IEDB-supported prediction softwares can be reported.
 .. toctree::
    :glob:
 
-   pvacfuse/*
+   pvacfuse/getting_started
+   pvacfuse/run
+   pvacfuse/filter_commands
+   pvacfuse/additional_commands
