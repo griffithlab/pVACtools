@@ -20,4 +20,5 @@ solution, when one exists.
 .. toctree::
    :glob:
 
-   pvacvector/*
+   pvacvector/prerequisites
+   pvacvector/run

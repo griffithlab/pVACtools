@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACseq logo
 
+.. _pvacseq:
+
 pVACseq
 =======
 
