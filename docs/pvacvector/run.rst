@@ -15,7 +15,7 @@ Usage
 
 .. topic:: For usage instructions run
    
-   ``pvavector run --help``
+   ``pvacvector run --help``
 
 .. .. argparse::
         :module: tools.pvacvector.run
