@@ -31,6 +31,13 @@ def main():
     )
     coverage_filter_parser.set_defaults(func=coverage_filter)
 
+    top_score_filter_parser = subparsers.add_parser(
+        "top_score_filter",
+        help="Pick the best neoepitope for each variant",
+        add_help=False,
+    )
+    top_score_filter_parser.set_defaults(func=top_score_filter)
+
     generate_protein_fasta_parser = subparsers.add_parser(
         "generate_protein_fasta",
         help="Generate an annotated fasta file from a VCF with protein sequences of mutations and matching wildtypes",

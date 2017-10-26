@@ -1,4 +1,5 @@
 import csv
+import argparse
 
 class TopScoreFilter:
     def __init__(self, input_file, output_file, top_score_metric):
@@ -29,3 +30,26 @@ class TopScoreFilter:
                         filtered_results[index] = line
 
             writer.writerows(filtered_results.values())
+
+    @classmethod
+    def parser(cls, tool):
+        parser = argparse.ArgumentParser('%s top_score_filter' % tool)
+        parser.add_argument(
+            'input_file',
+            help="The final report .tsv file to filter"
+        )
+        parser.add_argument(
+            'output_file',
+            help="Output .tsv file containing only the list of the top "
+                 + "epitope per variant"
+        )
+        parser.add_argument(
+            '-m', '--top-score-metric',
+            choices=['lowest', 'median'],
+            default='median',
+            help="The ic50 scoring metric to use for filtering. "
+                 + "lowest: Best MT Score - lowest MT ic50 binding score of all chosen prediction methods. "
+                 + "median: Median MT Score - median MT ic50 binding score of all chosen prediction methods. "
+                 + "Default: median"
+        )
+        return parser
