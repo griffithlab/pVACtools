@@ -25,6 +25,8 @@ class OutputParser(metaclass=ABCMeta):
             tsv_reader = csv.DictReader(reader, delimiter='\t')
             tsv_entries = {}
             for line in tsv_reader:
+                if line['index'] in tsv_entries:
+                    sys.exit('Duplicate TSV indexes')
                 tsv_entries[line['index']] = line
             return tsv_entries
 
