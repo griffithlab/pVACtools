@@ -17,6 +17,7 @@ pVACseq is a cancer immunotherapy pipeline for the identification of **p**\ erso
    pvacseq/prerequisites
    pvacseq/getting_started
    pvacseq/run
+   pvacseq/output_files
    pvacseq/filter_commands
    pvacseq/additional_commands
    pvacseq/optional_downstream_analysis_tools
