@@ -19,6 +19,8 @@ class TopScoreFilter:
                 consequence = line['Variant Type']
                 if consequence == 'FS':
                     amino_acid_change_position = "%s%s/%s" % (line['Protein Position'], line['Reference'], line ['Variant'])
+                elif 'fusion' in consequence:
+                    amino_acid_change_position = line['Fusion Position']
                 else:
                     amino_acid_change_position = line['Protein Position'] + line['Mutation']
                 index = '%s.%s.%s.%s' % (gene_name, transcript_name, consequence, amino_acid_change_position)
