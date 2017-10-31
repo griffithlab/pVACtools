@@ -39,3 +39,17 @@ The binding filter also offers the option to filter on Fold Change columns, whic
 .. If a pVACfuse process has been run with bam-readcount or Cufflinks input files then the coverage_filter can be run again on the final report file to narrow down the results even further.
 
 .. If no additional coverage input files have been provided to the main pVACfuse run then this information would need to be manually added to the report in order to run this filter.
+
+Top Score Filter
+----------------
+
+.. topic:: For usage instructions run
+
+   ``pvacfuse top_score_filter --help``
+
+This filter picks the top epitope for a variant. By default the
+``--top-score-metric`` option is set to ``median`` which will apply this
+filter to the ``Median MT Score`` column and pick the epitope with the lowest
+median mutant ic50 score for each variant. If the ``--top-score-metric``
+option is set to ``lowest``, the ``Best MT Score`` column is instead used to
+make this determination.
