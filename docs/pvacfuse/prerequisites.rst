@@ -9,3 +9,4 @@ INTEGRATE-Neo
 -------------
 
 Describe how to install and run INTEGRATE-Neo
+Describe input file format
