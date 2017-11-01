@@ -191,7 +191,6 @@ class VcfConverter(InputFileConverter):
         tsv_writer.writeheader()
 
         csq_format = self.parse_csq_format(vcf_reader)
-        transcript_count = {}
         for entry in vcf_reader:
             chromosome = entry.CHROM
             start      = entry.affected_start
@@ -211,8 +210,12 @@ class VcfConverter(InputFileConverter):
                     continue
 
             alleles_dict = self.resolve_alleles(entry)
+            indexes = []
             for alt in alts:
                 alt = str(alt)
+                if genotype.gt_bases and alt not in genotype.gt_bases.split('/'):
+                    continue
+
                 if entry.is_indel:
                     if self.is_deletion(reference, alt):
                         bam_readcount_position = start + 1
@@ -250,10 +253,6 @@ class VcfConverter(InputFileConverter):
                 transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
-                    if transcript_name in transcript_count:
-                        transcript_count[transcript_name] += 1
-                    else:
-                        transcript_count[transcript_name] = 1
                     consequence = self.resolve_consequence(transcript['Consequence'])
                     if consequence is None:
                         continue
@@ -261,11 +260,15 @@ class VcfConverter(InputFileConverter):
                         if transcript['DownstreamProtein'] == '':
                             continue
                         else:
-                            amino_acid_change_position = transcript['Protein_position']
+                            amino_acid_change_position = "%s%s/%s" % (transcript['Protein_position'], entry.REF, alt)
                     else:
                         amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
-                    index = '%s_%s_%s.%s.%s' % (gene_name, transcript_name, transcript_count[transcript_name], consequence, amino_acid_change_position)
+                    index = '%s.%s.%s.%s' % (gene_name, transcript_name, consequence, amino_acid_change_position)
+                    if index in indexes:
+                        sys.exit("TSV index already exists")
+                    else:
+                        indexes.append(index)
                     ensembl_gene_id = transcript['Gene']
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
@@ -275,7 +278,6 @@ class VcfConverter(InputFileConverter):
                         'variant'                        : alt,
                         'gene_name'                      : gene_name,
                         'transcript_name'                : transcript_name,
-                        'amino_acid_change'              : transcript['Amino_acids'],
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
                         'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
@@ -346,7 +348,6 @@ class IntegrateConverter(InputFileConverter):
         writer = open(self.output_file, 'w')
         tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
-        transcript_count = {}
         for entry in csv_reader:
             output_row = {
                 'chromosome_name'            : entry['chr 5p'],
@@ -370,6 +371,8 @@ class IntegrateConverter(InputFileConverter):
             }
 
             count = 1
+            if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':
+                continue
             for (fusion_position, transcript_set, fusion_amino_acid_sequence) in zip(entry['fusion positions'].split(','), entry['transcripts'].split(','), entry['peptides'].split(',')):
                 (five_p_transcripts, three_p_inframe_transcripts, three_p_frameshift_transcripts) = transcript_set.split(';')
                 inframe_fusions    = []

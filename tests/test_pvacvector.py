@@ -12,6 +12,14 @@ from tools.pvacvector import *
 import unittest.mock
 from mock import patch
 
+def compare(path1, path2):
+    r1 = open(path1)
+    r2 = open(path2)
+    result = not len(set(r1.readlines())^set(r2.readlines()))
+    r1.close()
+    r2.close()
+    return result
+
 def make_response(data, path, test_name):
     filename = 'response_%s_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'], test_name)
     reader = open(os.path.join(
@@ -59,7 +67,7 @@ class TestPvacvector(unittest.TestCase):
         ))
         self.assertTrue(compiled_path)
 
-    def test_pvacvectory_commands(self):
+    def test_pvacvector_commands(self):
         pvac_script_path = os.path.join(
             self.base_dir,
             'tools',
@@ -132,7 +140,7 @@ class TestPvacvector(unittest.TestCase):
             ])
 
             #conversion from vcf to fasta file producing correct output, input file for vaccine design algorithm
-            self.assertTrue(cmp(
+            self.assertTrue(compare(
                     os.path.join(output_dir.name, "vector_input.fa"),
                     os.path.join(self.test_data_dir, "input_parse_test_output.fa")
                     ))
