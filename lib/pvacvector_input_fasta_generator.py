@@ -1,7 +1,10 @@
 import os
 import csv
+import re
 import tempfile
 from .input_file_converter import *
+from .fasta_generator import *
+import math
 
 class PvacvectorInputFastaGenerator():
     def __init__(self, pvacseq_tsv, input_vcf, output_dir, n_mer):
@@ -12,142 +15,110 @@ class PvacvectorInputFastaGenerator():
         self.n_mer = int(n_mer)
 
     def parse_choosen_epitopes(self):
-        mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = [],[],[],[],[],[]
+        epitopes = {}
         with open(self.input_tsv, 'r') as input_f:
             reader = csv.DictReader(input_f, delimiter = "\t")
             for line in reader:
-                mut_type = line['Variant Type']
+                consequence = line['Variant Type']
                 mutation = line['Mutation']
                 pos = line['Protein Position']
+                subpeptide_pos = line['Sub-peptide Position']
                 gene_name = line['Gene Name']
                 mt_epitope_seq = line['MT Epitope Seq']
-                wt_epitope_seq = line['WT Epitope Seq']
                 transcript = line['Transcript']
 
-                mutations.append(mutation)
-                mut_types.append(mut_type)
-                (old_AA, new_AA) = mutation.split("/")
-                #if position presented as a range, use higher end of range
-                if "-" in pos:
-                    pos = pos.split("-")
-                    pos = pos[1]
-                    mut_ID = '.'.join(["MT", gene_name, transcript, (pos + "fs")])
-                elif mut_type == "FS":
-                    mut_ID = '.'.join(["MT", gene_name, transcript, (old_AA + pos + "fs")])
-                elif mut_type == "missense":
-                    mut_ID = '.'.join(["MT", gene_name, transcript, (old_AA + pos + new_AA)])
-                mut_IDs.append(mut_ID)
-                mt_epitope_seqs.append(mt_epitope_seq)
-                wt_epitope_seqs.append(wt_epitope_seq)
-                transcript_IDs.append(transcript)
-        return mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs
+                if consequence == 'FS':
+                    amino_acid_change_position = "%s%s/%s" % (pos, line['Reference'], line['Variant'])
+                else:
+                    amino_acid_change_position = pos + mutation
+                index = '%s.%s.%s.%s_pos%s_len%s' % (gene_name, transcript, consequence, amino_acid_change_position, line['Sub-peptide Position'], line['Peptide Length'])
+                epitopes[index] = mt_epitope_seq
+        return epitopes
 
     #get necessary data from initial pvacseq input vcf
     def parse_original_vcf(self):
-        tmp_file = tempfile.NamedTemporaryFile()
-        VcfConverter(**{'input_file': self.input_vcf, 'output_file': tmp_file.name}).execute()
-        with open(tmp_file.name, 'r') as input_f:
-            reader = csv.DictReader(input_f, delimiter = "\t")
-            transcripts_dict = {}
-            for line in reader:
-                mut_type = line['variant_type']
-                mutation = line['amino_acid_change']
-                pos = line['protein_position']
-                gene_name = line['gene_name']
-                transcript_ID = line['transcript_name']
-                (old_AA, new_AA) = mutation.split("/")
-                #if position presented as a range, use higher end of range
-                if "-" in pos:
-                    pos = pos.split("-")
-                    pos = pos[1]
-                    mut_ID = '.'.join(["MT", gene_name, transcript_ID, (pos + "fs")])
-                elif mut_type == "FS":
-                    mut_ID = '.'.join(["MT", gene_name, transcript_ID, (old_AA + pos + "fs")])
-                elif mut_type == "missense":
-                    mut_ID = '.'.join(["MT", gene_name, transcript_ID, (old_AA + pos + new_AA)])
+        tsv_file = tempfile.NamedTemporaryFile()
+        VcfConverter(**{'input_file': self.input_vcf, 'output_file': tsv_file.name}).execute()
+        fasta_file = tempfile.NamedTemporaryFile()
+        key_file = tempfile.NamedTemporaryFile()
+        FastaGenerator(**{
+            'input_file': tsv_file.name,
+            'peptide_sequence_length': self.n_mer + 2 * 8,
+            'epitope_length': 8,
+            'output_file': fasta_file.name,
+            'output_key_file': key_file.name,
+        }).execute()
 
-                attributes = []
-                downstr_seq = line['downstream_amino_acid_sequence']
-                len_change = line['protein_length_change']
-                full_seq = line['wildtype_amino_acid_sequence']
-                attributes.append(full_seq)
-                attributes.append(downstr_seq)
-                attributes.append(len_change)
-                transcripts_dict[mut_ID] = attributes
-        tmp_file.close()
-        return(transcripts_dict)
+        with open(key_file.name, 'r') as fasta_key_file:
+            keys = yaml.load(fasta_key_file)
 
-    def edit_full_seq(self, i, mut_types, mutations, wt_epitope_seqs, mt_epitope_seqs, sub_seq, full_seq, transcripts_dict, transcript_IDs, mut_IDs):
-        if mut_types[i] == "FS":
-            downstr_seq, len_change = transcripts_dict[mut_IDs[i]][1], int(transcripts_dict[mut_IDs[i]][2])
-            parts = mutations[i].split("/")
-            initial = parts[0]
-            final = parts[1]
+        dataframe = OrderedDict()
+        with open(fasta_file.name, 'r') as fasta_file:
+            for line in fasta_file:
+                key      = line.rstrip().replace(">","")
+                sequence = fasta_file.readline().rstrip()
+                if key.startswith('WT'):
+                    continue
+                ids      = keys[int(key)]
+                for id in ids:
+                    (type, index) = id.split('.', 1)
+                    dataframe[index] = sequence
+        return dataframe
 
-            #handle -/X mutations by appending downstr_seq to next position, instead of overwriting last position
-            if initial == "-":
-                new_end_of_full_seq = len(full_seq) + len_change - len(downstr_seq)
-            #overwrites last position of seq with first position of
-            #predicted downstr seq
-            else:
-                new_end_of_full_seq = len(full_seq) + len_change - len(downstr_seq) - 1
-            full_seq = full_seq[:new_end_of_full_seq]
-        #handles ex: L/LX mutations by adding sequence that is preserved
-        #before the downstr predicted sequence
-            if len(final) > 1:
-                final = final.replace("X", "")
-                full_seq = full_seq + final
-            full_seq = full_seq + downstr_seq
-        elif mut_types[i] == "missense":
-            full_seq = full_seq.replace(wt_epitope_seqs[i], mt_epitope_seqs[i])
-        else:
-            sys.exit("Mutation not yet handled by this parser")
-        return(full_seq)
-
-    #get flanking peptides for the epitope chosen
-    def get_sub_seq(self, full_seq, mt_seq):
-        beginning = full_seq.find(mt_seq)
-        if beginning == -1:
-            sys.exit("Error: could not find mutant epitope sequence in mutant full sequence")
-        length = len(mt_seq)
-        end = beginning + length
-        #if eptitope sequence is too close to the beginning or end to get the
-        #right amount of flanking peptides, get appropriate length from solely
-        #ahead or behind
-        len_needed = self.n_mer - length
-        if len_needed % 2 != 0:
-            front = int(beginning - len_needed / 2)
-            back = int(end + len_needed / 2)
-        else:
-            front = int(beginning - len_needed / 2)
-            back = int(end + len_needed / 2)
-        if front < 0:
-            sub_seq = full_seq[beginning:(beginning + self.n_mer)]
-        elif back > len(full_seq):
-            sub_seq = full_seq[(end - self.n_mer):end]
-        else:
-            sub_seq = full_seq[front:back]
-        return(sub_seq)
-
-    def write_output_fasta(self, mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs, transcripts_dict):
+    def write_output_fasta(self, peptides):
         with open(self.output_file, 'w') as out_f:
-            sub_seq = ""
-            full_seq = ""
-            for i in range(len(transcript_IDs)):
-                full_seq = (transcripts_dict[mut_IDs[i]])[0] 
-
-                full_seq = self.edit_full_seq(i, mut_types, mutations, wt_epitope_seqs, mt_epitope_seqs, sub_seq, full_seq, transcripts_dict, transcript_IDs, mut_IDs)
-
-                sub_seq = self.get_sub_seq(full_seq, mt_epitope_seqs[i])
-                out_f.write(">" + mut_IDs[i] + "\n")
-                out_f.write(sub_seq + "\n")
-                print("ID: " + mut_IDs[i] + ", sequence: " + sub_seq)
+            for index, peptide in peptides.items():
+                out_f.write(">%s\n" % index)
+                out_f.write("%s\n" % peptide)
+                print("ID: " + index + ", sequence: " + peptide)
         out_f.close()
         print("FASTA file written")
-        return()
-
 
     def execute(self):
-        mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs = self.parse_choosen_epitopes()
+        epitopes = self.parse_choosen_epitopes()
         transcripts_dict = self.parse_original_vcf()
-        self.write_output_fasta(mut_IDs, mutations, mut_types, mt_epitope_seqs, wt_epitope_seqs, transcript_IDs, transcripts_dict)
+        extracted_peptides = self.extract_peptide_sequences(transcripts_dict, epitopes)
+        self.write_output_fasta(extracted_peptides)
+
+    def extract_peptide_sequences(self, transcript_dict, epitopes):
+        extracted_peptides = {}
+        for index, epitope in sorted(epitopes.items()):
+            p = re.compile('^(.+)_pos([0-9]+)_len([0-9]+)$')
+            identifier = p.search(index).group(1)
+            original_position = p.search(index).group(2)
+            length = p.search(index).group(3)
+            full_sequence = transcript_dict[identifier]
+            #find all occurrences of the epitope in the full sequence
+            occurrences = [n for n in range(len(full_sequence)) if full_sequence.find(epitope, n) == n]
+            #epitope occurs once in the full sequence
+            if len(occurrences) == 1:
+                new_position = occurrences[0]
+            #epitope occurs multiple times
+            else:
+                #find the occurence that is closest to the original positon and use that
+                new_position = min(occurences, key=lambda x:abs(original_position-1-x))
+
+            length = int(length)
+            n_mer = int(self.n_mer)
+            if len(full_sequence) <= n_mer:
+                extracted_sequence = full_sequence
+            else:
+                wingspan = (n_mer - length) / 2
+                start = math.ceil(new_position - wingspan)
+                end = math.ceil(new_position + length + wingspan)
+                if start < 0:
+                    remainder = math.fabs(start)
+                    end += remainder
+                if end > len(full_sequence):
+                    remainder = end - len(full_sequence)
+                    start -= remainder
+                extracted_sequence = full_sequence[start:end]
+            exists = False
+            for other_index, other_extracted_sequence in extracted_peptides.items():
+                if other_extracted_sequence == extracted_sequence:
+                    print("Sequence for item %s is identical to sequence for item %s. Skipping %s" % (index, other_index, index))
+                    exists = True
+            if not exists:
+                extracted_peptides[index] = extracted_sequence
+        return extracted_peptides
+
