@@ -213,6 +213,9 @@ class VcfConverter(InputFileConverter):
             indexes = []
             for alt in alts:
                 alt = str(alt)
+                if genotype.gt_bases and alt not in genotype.gt_bases.split('/'):
+                    continue
+
                 if entry.is_indel:
                     if self.is_deletion(reference, alt):
                         bam_readcount_position = start + 1
