@@ -94,13 +94,6 @@ class PredictionRunArgumentParser(RunArgumentParser):
                  + "Default: median"
         )
         self.parser.add_argument(
-            "-c", "--minimum-fold-change", type=int,
-            default=0,
-            help="Minimum fold change between mutant binding score and wild-type score. "
-                 + "The default is 0, which filters no results, but 1 is often a sensible choice "
-                 + "(requiring that binding is better to the MT than WT). Default: 0",
-        )
-        self.parser.add_argument(
             '--net-chop-threshold', type=float,
             default=0.5,
             help="NetChop prediction threshold. Default: 0.5",
@@ -137,6 +130,13 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
             "-i", "--additional-input-file-list",
             help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
                  + "For an example of this yaml file run `pvacseq config_files additional_input_file_list`."
+        )
+        self.parser.add_argument(
+            "-c", "--minimum-fold-change", type=int,
+            default=0,
+            help="Minimum fold change between mutant binding score and wild-type score. "
+                 + "The default is 0, which filters no results, but 1 is often a sensible choice "
+                 + "(requiring that binding is better to the MT than WT). Default: 0",
         )
         self.parser.add_argument(
             '--normal-cov', type=int,
