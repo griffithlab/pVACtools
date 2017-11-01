@@ -43,6 +43,9 @@ the ratio of the MT score to the WT Score. This option can be activated by setti
 If the ``--top-score-metric`` option is set to ``median``, the ``Median Fold Change`` column
 will be used (``Median WT Score``/``Median MT Score``).
 
+By default, entries with ``NA`` values will be included in the output. This
+behavior can be turned off by using the ``--exclude-NAs`` flag.
+
 Coverage Filter
 ---------------
 
@@ -62,6 +65,9 @@ If no additional coverage input files have been provided to the main pVACseq run
 would need to be manually added to the report in order to run this filter
 using the appropriate headers. Columns available for this filter are ``Tumor DNA Depth``, ``Tumor DNA VAF``,
 ``Tumor RNA Depth``, ``Tumor RNA VAF``, ``Normal Depth``, ``Normal VAF``, ``Gene Expression``, ``Transcript Expression``.
+
+By default, entries with ``NA`` values will be included in the output. This
+behavior can be turned off by using the ``--exclude-NAs`` flag.
 
 Top Score Filter
 ----------------

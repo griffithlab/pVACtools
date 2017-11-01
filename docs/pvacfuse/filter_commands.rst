@@ -34,6 +34,9 @@ The ``median`` binding affinity score is recorded in the ``Median MT Score`` col
 corresponds to the median ic50 score of all prediction algorithms used to create the report.
 Be default, the binding filter runs on the ``median`` binding affinity.
 
+By default, entries with ``NA`` values will be included in the output. This
+behavior can be turned off by using the ``--exclude-NAs`` flag.
+
 .. Coverage Filter
  ---------------
 
