@@ -5,9 +5,13 @@
 Filtering Commands
 =============================
 
-pVACfuse currently offers a binding filter.
+pVACfuse currently offers two filters: a binding filter
+and a top score filter.
 
-The binding filter is always run automatically as part of the pVACfuse pipeline. It can also be run manually to narrow the final results down further.
+The binding filter is always run automatically as part of the pVACfuse pipeline.
+The top score filter is run if the ``--top-result-per-mutation`` flag is set.
+
+All filters can also be run manually to narrow the final results down further.
 
 Binding Filter
 --------------
@@ -21,9 +25,14 @@ Binding Filter
     :func: define_parser
     :prog: pvacfuse binding_filter
 
-The binding filter filters out variants that don't pass the chosen binding threshold. The user can chose whether to apply this filter to the "lowest" or the "median" binding affinity score. The "lowest" binding affinity score is recorded in the "Best MT Score" column and represents the lowest ic50 score of all prediction algorithms that were picked during the previous pVACfuse run. The "median" binding affinity score is recorded in the "Median MT Score" column and corresponds to the median ic50 score of all prediction algorithms used to create the report.
-
-The binding filter also offers the option to filter on Fold Change columns, which contain the ratio of the MT score to the WT Score. If the binding filter is set to "best", the "Corresponding Fold Change" column will be used. ("Corresponding WT Score"/"Best MT Score"). If the binding filter is set to "median", the "Median Fold Change" column will be used ("Median WT Score"/"Median MT Score").
+The binding filter filters out variants that don't pass the chosen binding threshold.
+The user can chose whether to apply this filter to the ``lowest`` or the ``median`` binding
+affinity score by setting the ``--top-score-metric`` flag. The ``lowest`` binding
+affinity score is recorded in the ``Best MT Score`` column and represents the lowest
+ic50 score of all prediction algorithms that were picked during the previous pVACseq run.
+The ``median`` binding affinity score is recorded in the ``Median MT Score`` column and
+corresponds to the median ic50 score of all prediction algorithms used to create the report.
+Be default, the binding filter runs on the ``median`` binding affinity.
 
 .. Coverage Filter
  ---------------
