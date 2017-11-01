@@ -16,5 +16,6 @@ IEDB-supported prediction softwares can be reported.
    pvacfuse/prerequisites
    pvacfuse/getting_started
    pvacfuse/run
+   pvacfuse/output_files
    pvacfuse/filter_commands
    pvacfuse/additional_commands
