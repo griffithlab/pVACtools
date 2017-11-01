@@ -16,7 +16,7 @@ class FastaGenerator(metaclass=ABCMeta):
         self.epitope_length             = kwargs['epitope_length']
         self.output_file                = kwargs['output_file']
         self.output_key_file            = kwargs['output_key_file']
-        self.downstream_sequence_length = kwargs['downstream_sequence_length']
+        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', None)
 
     def position_out_of_bounds(self, position, sequence):
         return position > len(sequence)-1

@@ -106,6 +106,7 @@ def run_pipelines(input_file, base_output_dir, args):
 def find_min_scores(parsed_output_files, args):
     iedb_results = {}
     epitopes = []
+    indexes = []
     for parsed_output_file in parsed_output_files:
         with open(parsed_output_file, 'r') as parsed:
             reader = csv.DictReader(parsed, delimiter="\t")
@@ -246,11 +247,10 @@ def main(args_input=sys.argv[1:]):
             sys.exit("Input VCF is required when using a pVACseq TSV as input file")
         generate_input_fasta = True
     else:
-        sys.exit("Input file type not as expected. Needs to be a .fa or a .vcf file")
+        sys.exit("Input file type not as expected. Needs to be a .fa or a .tsv file")
 
     base_output_dir = os.path.abspath(args.output_dir)
-    tmp_dir = os.path.join(base_output_dir, 'tmp')
-    os.makedirs(tmp_dir, exist_ok=True)
+    os.makedirs(base_output_dir, exist_ok=True)
 
     if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
         random.seed(0.5)
@@ -273,7 +273,6 @@ def main(args_input=sys.argv[1:]):
     VectorVisualization(results_file, base_output_dir).draw()
 
     if not args.keep_tmp_files:
-        shutil.rmtree(tmp_dir)
         shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_I'), ignore_errors=True)
         shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_II'), ignore_errors=True)
 
