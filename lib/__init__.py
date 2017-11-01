@@ -9,7 +9,8 @@ __all__ = [
     "valid_alleles",
     'net_chop',
     "netmhc_stab",
-    "filter"
+    "filter",
+    "top_score_filter",
 ]
 
 import os

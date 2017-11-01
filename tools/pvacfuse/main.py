@@ -23,6 +23,13 @@ def main():
     )
     binding_filter_parser.set_defaults(func=binding_filter)
 
+    top_score_filter_parser = subparsers.add_parser(
+        "top_score_filter",
+        help="Pick the best neoepitope for each variant",
+        add_help=False,
+    )
+    top_score_filter_parser.set_defaults(func=top_score_filter)
+
     valid_alleles_parser = subparsers.add_parser(
         "valid_alleles",
         help="Shows a list of valid allele names",
