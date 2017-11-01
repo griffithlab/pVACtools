@@ -42,15 +42,16 @@ class BindingFilter:
                  + "has ic50 binding scores below this value. Default: 500",
             default=500
         )
-        parser.add_argument(
-            '-c', '--minimum-fold-change', type=int,
-            help="Minimum fold change between mutant binding "
-                 + "score and wild-type score. The default is 0, which "
-                 + "filters no results, but 1 is often a sensible "
-                 + "option (requiring that binding is better to the MT than WT). "
-                 + "Default: 0",
-            default=0
-        )
+        if tool == 'pvacseq':
+            parser.add_argument(
+                '-c', '--minimum-fold-change', type=int,
+                help="Minimum fold change between mutant binding "
+                     + "score and wild-type score. The default is 0, which "
+                     + "filters no results, but 1 is often a sensible "
+                     + "option (requiring that binding is better to the MT than WT). "
+                     + "Default: 0",
+                default=0
+            )
         parser.add_argument(
             '-m', '--top-score-metric',
             choices=['lowest', 'median'],

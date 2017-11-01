@@ -62,7 +62,6 @@ def main(args_input = sys.argv[1:]):
         'top_result_per_mutation'   : args.top_result_per_mutation,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
-        'minimum_fold_change'       : args.minimum_fold_change,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
         'additional_report_columns' : args.additional_report_columns,
