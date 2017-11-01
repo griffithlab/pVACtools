@@ -22,3 +22,4 @@ solution, when one exists.
 
    pvacvector/prerequisites
    pvacvector/run
+   pvacvector/output_files
