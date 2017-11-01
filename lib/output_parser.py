@@ -16,8 +16,6 @@ class OutputParser(metaclass=ABCMeta):
         self.input_tsv_file          = kwargs['input_tsv_file']
         self.key_file                = kwargs['key_file']
         self.output_file             = kwargs['output_file']
-        self.top_result_per_mutation = kwargs['top_result_per_mutation']
-        self.top_score_metric        = kwargs['top_score_metric']
         self.sample_name             = kwargs['sample_name']
 
     def parse_input_tsv_file(self):
@@ -281,28 +279,6 @@ class OutputParser(metaclass=ABCMeta):
 
         return iedb_results_with_metrics
 
-    def pick_top_results(self, iedb_results):
-        score_at_position = {}
-        for key, value in iedb_results.items():
-            (tsv_index, position) = key.split('|', 1)
-            if tsv_index not in score_at_position.keys():
-                score_at_position[tsv_index] = {}
-            if self.top_score_metric == 'median':
-                score_at_position[tsv_index][position] = value['median_mt_score']
-            elif self.top_score_metric == 'lowest':
-                score_at_position[tsv_index][position] = value['best_mt_score']
-
-        filtered_iedb_results = {}
-        for tsv_index, value in score_at_position.items():
-            top_score = sys.maxsize
-            for position, score in sorted(value.items(), key=lambda x: x[1]):
-                top_score_key = "%s|%s" % (tsv_index, position)
-                if iedb_results[top_score_key]['wt_epitope_seq'] != iedb_results[top_score_key]['mt_epitope_seq']:
-                    filtered_iedb_results[top_score_key] = iedb_results[top_score_key]
-                    break
-
-        return filtered_iedb_results
-
     def flatten_iedb_results(self, iedb_results):
         #transform the iedb_results dictionary into a two-dimensional list
         flattened_iedb_results = list((
@@ -329,11 +305,7 @@ class OutputParser(metaclass=ABCMeta):
     def process_input_iedb_file(self, tsv_entries):
         iedb_results              = self.parse_iedb_file(tsv_entries)
         iedb_results_with_metrics = self.add_summary_metrics(iedb_results)
-        if self.top_result_per_mutation == True:
-            filtered_iedb_results  = self.pick_top_results(iedb_results_with_metrics)
-            flattened_iedb_results = self.flatten_iedb_results(filtered_iedb_results)
-        else:
-            flattened_iedb_results = self.flatten_iedb_results(iedb_results_with_metrics)
+        flattened_iedb_results = self.flatten_iedb_results(iedb_results_with_metrics)
 
         return flattened_iedb_results
 

@@ -35,8 +35,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -60,39 +58,12 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'lowest',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
 
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_and_produces_expected_output_with_multiple_iedb_files_and_top_scores(self):
-        parse_output_input_iedb_files = [
-            os.path.join(self.test_data_dir, "input.ann.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.smm.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.smmpmbec.HLA-A*29:02.9.tsv"),
-        ]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
-        parse_output_key_file = os.path.join(self.test_data_dir, "Test_21.key")
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_files,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_file'               : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': True,
-            'top_score_metric'       : 'median',
-            'sample_name'            : None,
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.top.tsv")
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
 
     def test_parse_output_runs_and_produces_expected_output_for_repetitive_deletion_at_beginning_of_sequence(self):
@@ -106,8 +77,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -127,8 +96,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -148,8 +115,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -169,8 +134,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -190,8 +153,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -212,8 +173,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -233,8 +192,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -254,8 +211,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -275,8 +230,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -296,8 +249,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -317,8 +268,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -338,8 +287,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -359,8 +306,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = DefaultOutputParser(**parse_output_params)
@@ -380,8 +325,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = FusionOutputParser(**parse_output_params)
@@ -400,8 +343,6 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : None,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'top_result_per_mutation': False,
-            'top_score_metric'       : 'median',
             'sample_name'            : None,
         }
         parser = VectorOutputParser(**parse_output_params)

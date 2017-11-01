@@ -14,6 +14,7 @@ from lib.input_file_converter import *
 from lib.fasta_generator import *
 from lib.output_parser import *
 from lib.binding_filter import *
+from lib.top_score_filter import *
 from lib.filter import *
 import shutil
 import yaml
@@ -285,6 +286,13 @@ class Pipeline(metaclass=ABCMeta):
             shutil.copy(self.binding_filter_out_path(), self.coverage_filter_out_path())
         status_message("Completed")
 
+    def top_result_filter_out_path(self):
+        return os.path.join(self.output_dir, self.sample_name+".filtered.top.tsv")
+
+    def top_result_filter(self):
+        status_message("Running Top Score Filter")
+        TopScoreFilter(self.coverage_filter_out_path(), self.top_result_filter_out_path(), self.top_score_metric).execute()
+
     def net_chop_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".chop.tsv")
 
@@ -350,10 +358,16 @@ class Pipeline(metaclass=ABCMeta):
             os.symlink(self.binding_filter_out_path(), self.coverage_filter_out_path())
             symlinks_to_delete.append(self.coverage_filter_out_path())
 
+        if self.top_result_per_mutation:
+            self.top_result_filter()
+        else:
+            os.symlink(self.coverage_filter_out_path(), self.top_result_filter_out_path())
+            symlinks_to_delete.append(self.top_result_filter_out_path())
+
         if self.net_chop_method:
             self.net_chop()
         else:
-            os.symlink(self.coverage_filter_out_path(), self.net_chop_out_path())
+            os.symlink(self.top_result_filter_out_path(), self.net_chop_out_path())
             symlinks_to_delete.append(self.net_chop_out_path())
 
         if self.netmhc_stab:
@@ -369,8 +383,7 @@ class Pipeline(metaclass=ABCMeta):
 
         status_message(
             "\n"
-            + "Done: pvacseq has completed. File %s contains list of filtered putative neoantigens. " % self.final_path()
-            + "We recommend appending coverage information and running `pvacseq coverage_filter` to filter based on sequencing coverage information"
+            + "Done: Pipeline finished successfully. File %s contains list of filtered putative neoantigens. " % self.final_path()
         )
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir)
@@ -473,8 +486,6 @@ class MHCIPipeline(Pipeline):
                             'input_tsv_file'         : split_tsv_file_path,
                             'key_file'               : split_fasta_key_file_path,
                             'output_file'            : split_parsed_file_path,
-                            'top_score_metric'       : self.top_score_metric,
-                            'top_result_per_mutation': self.top_result_per_mutation
                         }
                         if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                             params['sample_name'] = self.sample_name
@@ -577,8 +588,6 @@ class MHCIIPipeline(Pipeline):
                         'input_tsv_file'         : split_tsv_file_path,
                         'key_file'               : split_fasta_key_file_path,
                         'output_file'            : split_parsed_file_path,
-                        'top_score_metric'       : self.top_score_metric,
-                        'top_result_per_mutation': self.top_result_per_mutation
                     }
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['sample_name'] = self.sample_name
