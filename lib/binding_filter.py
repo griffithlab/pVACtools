@@ -13,13 +13,18 @@ class BindingFilter:
         self.top_score_metric = top_score_metric
 
     def execute(self):
+        filter_criteria = []
+
         if self.top_score_metric == 'median':
             column = 'Median MT Score'
         elif self.top_score_metric == 'lowest':
             column = 'Best MT Score'
-
-        filter_criteria = []
         filter_criteria.append({'column': column, 'operator': '<=', 'threshold': self.binding_threshold})
+
+        if self.top_score_metric == 'median':
+            column = 'Median Fold Change'
+        elif self.top_score_metric == 'lowest':
+            column = 'Corresponding Fold Change'
         filter_criteria.append({'column': column, 'operator': '>=', 'threshold': self.minimum_fold_change})
 
         Filter(self.input_file, self.output_file, filter_criteria).execute()
