@@ -7,6 +7,7 @@ __all__ = [
     'generate_protein_fasta',
     'install_vep_plugin',
     'config_files',
+    'top_score_filter',
 ]
 
 from . import *
