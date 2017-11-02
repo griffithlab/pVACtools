@@ -14,6 +14,20 @@ def main():
     )
     run_main_program_parser.set_defaults(func=run)
 
+    valid_alleles_parser = subparsers.add_parser(
+        "valid_alleles",
+        help="Shows a list of valid allele names",
+        add_help=False
+    )
+    valid_alleles_parser.set_defaults(func=valid_alleles)
+
+    download_example_data_parser = subparsers.add_parser(
+        "download_example_data",
+        help="Downloads example input and output files",
+        add_help=False
+    )
+    download_example_data_parser.set_defaults(func=download_example_data)
+
     args = parser.parse_known_args()
     try:
         args[0].func.main(args[1])
