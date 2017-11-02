@@ -5,7 +5,7 @@
 Additional Commands
 ===================
 
-To make using pVACvector easier several convenience methods are included in the package.
+To make using pVACvector easier, several convenience methods are included in the package.
 
 .. _pvacvector_example_data:
 
