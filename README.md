@@ -20,3 +20,5 @@ This project is licensed under <a href="http://opensource.org/licenses/NPOSL-3.0
 
 ## Installation
 We're currently in the process of preparing pVACtools for packaging. Once finished, pVACtools will be available on PyPi and available for install using `pip`.
+
+For the time being pVACseq is still available as a standalone package and can be installed using `pip install pvacseq`. The original pVACseq documentation can be found on <a href="http://pvac-seq.readthedocs.io/en/latest/">readthedocs</a>.
