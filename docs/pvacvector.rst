@@ -21,5 +21,7 @@ solution, when one exists.
    :glob:
 
    pvacvector/prerequisites
+   pvacvector/getting_started
    pvacvector/run
+   pvacvector/additional_commands
    pvacvector/output_files
