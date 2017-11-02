@@ -60,6 +60,7 @@ class Pipeline(metaclass=ABCMeta):
         self.iedb_retries                = kwargs.pop('iedb_retries', 5)
         self.downstream_sequence_length  = kwargs.pop('downstream_sequence_length', 1000)
         self.keep_tmp_files              = kwargs.pop('keep_tmp_files', False)
+        self.exclude_NAs                 = kwargs.pop('exclude_NAs', False)
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
@@ -263,6 +264,7 @@ class Pipeline(metaclass=ABCMeta):
             self.binding_threshold,
             self.minimum_fold_change,
             self.top_score_metric,
+            self.exclude_NAs,
         ).execute()
         status_message("Completed")
 
@@ -281,7 +283,7 @@ class Pipeline(metaclass=ABCMeta):
             filter_criteria.append({'column': "Tumor_RNA_VAF", 'operator': '>=', 'threshold': self.trna_vaf})
             filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': self.expn_val})
             filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': self.expn_val})
-            Filter(self.binding_filter_out_path(), self.coverage_filter_out_path(), filter_criteria).execute()
+            Filter(self.binding_filter_out_path(), self.coverage_filter_out_path(), filter_criteria, self.exclude_NAs).execute()
         elif self.input_file_type == 'bedpe':
             shutil.copy(self.binding_filter_out_path(), self.coverage_filter_out_path())
         status_message("Completed")
