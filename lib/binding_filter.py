@@ -5,12 +5,13 @@ import csv
 from lib.filter import *
 
 class BindingFilter:
-    def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric):
+    def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, exclude_nas):
         self.input_file = input_file
         self.output_file = output_file
         self.binding_threshold = binding_threshold
         self.minimum_fold_change = minimum_fold_change
         self.top_score_metric = top_score_metric
+        self.exclude_nas = exclude_nas
 
     def execute(self):
         filter_criteria = []
@@ -27,7 +28,7 @@ class BindingFilter:
             column = 'Corresponding Fold Change'
         filter_criteria.append({'column': column, 'operator': '>=', 'threshold': self.minimum_fold_change})
 
-        Filter(self.input_file, self.output_file, filter_criteria).execute()
+        Filter(self.input_file, self.output_file, filter_criteria, self.exclude_nas).execute()
 
     @classmethod
     def parser(cls, tool):
@@ -65,5 +66,11 @@ class BindingFilter:
                  + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. "
                  + "Default: median",
             default='median',
+        )
+        parser.add_argument(
+            '--exclude-NAs',
+            help="Exclude NA values from the filtered output. Default: False",
+            default=False,
+            action='store_true'
         )
         return parser

@@ -116,6 +116,12 @@ class PredictionRunArgumentParser(RunArgumentParser):
             help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
                 + "Use 'full' to include the full downstream sequence. Default: 1000"
         )
+        self.parser.add_argument(
+            '--exclude-NAs',
+            help="Exclude NA values from the filtered output. Default: False",
+            default=False,
+            action='store_true'
+        )
 
 class PvacseqRunArgumentParser(PredictionRunArgumentParser):
     def __init__(self):

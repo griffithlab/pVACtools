@@ -55,7 +55,13 @@ def define_parser():
         '--expn-val', type=int,
         help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered"
              + "Default: 1",
-         default=1
+        default=1
+    )
+    parser.add_argument(
+        '--exclude-NAs',
+        help="Exclude NA values from the filtered output. Default: False",
+        default=False,
+        action='store_true'
     )
     return parser
 
@@ -82,7 +88,7 @@ def main(args_input = sys.argv[1:]):
     filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': args.expn_val})
     filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': args.expn_val})
 
-    Filter(args.input_file, args.output_file, filter_criteria).execute()
+    Filter(args.input_file, args.output_file, filter_criteria, args.exclude_NAs).execute()
 
 if __name__ == "__main__":
     main()
