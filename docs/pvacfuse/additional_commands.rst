@@ -5,7 +5,7 @@
 Additional Commands
 ===================
 
-To make using pVACfuse easier several convenience methods are included in the package.
+To make using pVACfuse easier, several convenience methods are included in the package.
 
 .. _pvacfuse_example_data:
 
