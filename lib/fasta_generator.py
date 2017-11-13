@@ -177,7 +177,7 @@ class FusionFastaGenerator(FastaGenerator):
         fasta_sequences         = OrderedDict()
         for line in tsvin:
             variant_type = line['variant_type']
-            position     = int(line['fusion_position'])
+            position     = int(line['protein_position'])
             sequence     = line['fusion_amino_acid_sequence']
             one_flanking_sequence_length = self.determine_flanking_sequence_length(len(sequence), peptide_sequence_length, line)
             if position < one_flanking_sequence_length:

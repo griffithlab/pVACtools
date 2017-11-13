@@ -26,7 +26,6 @@ class InputFileConverter(metaclass=ABCMeta):
             'fusion_amino_acid_sequence',
             'variant_type',
             'protein_position',
-            'fusion_position',
             'transcript_expression',
             'gene_expression',
             'normal_depth',
@@ -350,15 +349,14 @@ class IntegrateConverter(InputFileConverter):
         tsv_writer.writeheader()
         for entry in csv_reader:
             output_row = {
-                'chromosome_name'            : entry['chr 5p'],
-                'start'                      : entry['start 5p'],
-                'stop'                       : entry['end 5p'],
+                'chromosome_name'            : "%s / %s" % (entry['chr 5p'], entry['chr 3p']),
+                'start'                      : "%s / %s" % (entry['start 5p'], entry['start 3p']),
+                'stop'                       : "%s / %s" % (entry['end 5p'], entry['end 3p']),
                 'reference'                  : 'fusion',
                 'variant'                    : 'fusion',
                 'gene_name'                  : entry['name of fusion'],
                 'amino_acid_change'          : 'NA',
                 'ensembl_gene_id'            : 'NA',
-                'protein_position'           : 'NA',
                 'amino_acid_change'          : 'NA',
                 'transcript_expression'      : 'NA',
                 'gene_expression'            : 'NA',
@@ -383,14 +381,14 @@ class IntegrateConverter(InputFileConverter):
 
                 if len(inframe_fusions):
                     output_row['variant_type']               = 'inframe_fusion'
-                    output_row['fusion_position']            = fusion_position
+                    output_row['protein_position']           = fusion_position
                     output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
                     output_row['transcript_name']            = ';'.join(inframe_fusions)
                     output_row['index']                      = '%s_%s.%s.%s' % (entry['name of fusion'], count, 'inframe_fusion', fusion_position)
                     tsv_writer.writerow(output_row)
                 if len(frameshift_fusions):
                     output_row['variant_type']               = 'frameshift_fusion'
-                    output_row['fusion_position']            = fusion_position
+                    output_row['protein_position']           = fusion_position
                     output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
                     output_row['transcript_name']            = ';'.join(frameshift_fusions)
                     output_row['index']                      = '%s_%s.%s.%s' % (entry['name of fusion'], count, 'frameshift_fusion', fusion_position)
