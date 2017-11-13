@@ -17,6 +17,10 @@ for dirpath, dirnames, filenames in os.walk("tools/pvacfuse/example_data"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             data_files.append(os.path.join('..', dirpath, filename))
+for dirpath, dirnames, filenames in os.walk("tools/pvacvector/example_data"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            data_files.append(os.path.join('..', dirpath, filename))
 for dirpath, dirnames, filenames in os.walk("tools/pvacseq/VEP_plugins"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
