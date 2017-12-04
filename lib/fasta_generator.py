@@ -190,10 +190,11 @@ class FusionFastaGenerator(FastaGenerator):
                 subsequence   = sequence[start_position:stop_position]
             elif variant_type == 'frameshift_fusion':
                 subsequence = sequence[start_position:]
-                if subsequence.endswith('X'):
-                    subsequence = subsequence[:-1]
             else:
                 continue
+
+            if subsequence.endswith('X'):
+                subsequence = subsequence[:-1]
 
             if '*' in subsequence:
                 continue
