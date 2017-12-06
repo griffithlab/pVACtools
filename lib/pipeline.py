@@ -433,6 +433,9 @@ class MHCIPipeline(Pipeline):
                     split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
                     split_iedb_output_files = []
                     status_message("Processing entries for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk))
+                    if os.path.getsize(split_fasta_file_path) == 0:
+                        status_message("Fasta file is empty. Skipping")
+                        continue
                     for method in self.prediction_algorithms:
                         prediction_class = globals()[method]
                         prediction = prediction_class()
@@ -540,6 +543,9 @@ class MHCIIPipeline(Pipeline):
                 split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
                 split_iedb_output_files = []
                 status_message("Processing entries for Allele %s - Entries %s" % (a, fasta_chunk))
+                if os.path.getsize(split_fasta_file_path) == 0:
+                    status_message("Fasta file is empty. Skipping")
+                    continue
                 for method in self.prediction_algorithms:
                     prediction_class = globals()[method]
                     prediction = prediction_class()
