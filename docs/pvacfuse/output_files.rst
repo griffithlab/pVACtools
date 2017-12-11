@@ -45,7 +45,7 @@ Column Name                                                     Description
 ``Variant``                                                     ``fusion``
 ``Transcript``                                                  The Ensembl IDs of the affected transcripts
 ``Ensembl Gene ID``                                             ``NA``
-``Variant Type``                                                The type fusion. ``inframe_fusion`` for inframe fusions, ``frameshift_fusion`` for frameshift fusions
+``Variant Type``                                                The type of fusion. ``inframe_fusion`` for inframe fusions, ``frameshift_fusion`` for frameshift fusions
 ``Mutation``                                                    ``NA``
 ``Protein Position``                                            The position of the fusion in the fusion protein sequence
 ``Gene Name``                                                   The Ensembl gene names of the affected genes
