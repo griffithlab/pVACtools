@@ -139,7 +139,7 @@ class VectorVisualization:
         self.turtle.pensize(self.pen_thick)
         angle_parsed += self.conversion_factor * pep_length
         #if length within reasonable range, draw and label arc for peptide
-        if pep_length > self.min_pep_length and pep_length < self.max_pep_length:
+        if pep_length >= self.min_pep_length and pep_length <= self.max_pep_length:
             self.draw_arc_peptide(peptide, pep_length, junctions_parsed, angle_parsed)
             if junctions_parsed < len(self.junct_scores):
                 self.draw_junction_w_label(self.junct_scores[junctions_parsed], angle_parsed)
