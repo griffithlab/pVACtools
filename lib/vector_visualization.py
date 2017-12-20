@@ -200,7 +200,7 @@ class VectorVisualization:
 
     def write_junct_score(self, junct_score, size):
         self.turtle.back(size)
-        self.turtle.write(junct_score + 'nM', align="center")
+        self.turtle.write("{}nM".format(round(float(junct_score), 5)) , align="center")
         self.turtle.forward(size)
 
     #draw arc for amino acid inserts to junctions
