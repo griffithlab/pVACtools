@@ -5,7 +5,7 @@
 Additional Commands
 ===================
 
-To make using pVACseq easier several convenience methods are included in the package.
+To make using pVACseq easier, several convenience methods are included in the package.
 
 .. _example_data:
 
