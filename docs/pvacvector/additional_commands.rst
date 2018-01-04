@@ -12,9 +12,7 @@ To make using pVACvector easier, several convenience methods are included in the
 Download Example Data
 ---------------------
 
-.. topic:: For usage instructions run
-
-   ``pvacvector download_example_data --help``
+.. program-output:: pvacfuse download_example_data -h
 
 .. .. argparse::
     :module: lib.download_example_data
@@ -24,9 +22,7 @@ Download Example Data
 List Valid Alleles
 ------------------
 
-.. topic:: For usage instructions run
-
-   ``pvacvector valid_alleles --help``
+.. program-output:: pvacfuse valid_alleles -h
 
 .. .. argparse::
     :module: lib.valid_alleles

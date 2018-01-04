@@ -16,9 +16,7 @@ All filters can also be run manually to narrow the final results down further.
 Binding Filter
 --------------
 
-.. topic:: For usage instructions run
-
-   ``pvacfuse binding_filter --help``
+.. program-output:: pvacfuse binding_filter -h
 
 .. .. argparse::
     :module: lib.binding_filter
@@ -55,9 +53,7 @@ behavior can be turned off by using the ``--exclude-NAs`` flag.
 Top Score Filter
 ----------------
 
-.. topic:: For usage instructions run
-
-   ``pvacfuse top_score_filter --help``
+.. program-output:: pvacfuse top_score_filter -h
 
 This filter picks the top epitope for a variant. By default the
 ``--top-score-metric`` option is set to ``median`` which will apply this
