@@ -12,9 +12,7 @@ To make using pVACseq easier, several convenience methods are included in the pa
 Download Example Data
 ---------------------
 
-.. topic:: For usage instructions run
-
-   ``pvacseq download_example_data --help``
+.. program-output:: pvacseq download_example_data -h
 
 .. .. argparse::
     :module: lib.download_example_data
@@ -26,9 +24,7 @@ Download Example Data
 Install VEP Plugin
 ------------------
 
-.. topic:: For usage instructions run
-
-   ``pvacseq install_vep_plugin --help``
+.. program-output:: pvacseq install_vep_plugin -h
 
 .. .. argparse::
     :module: lib.install_vep_plugin
@@ -40,9 +36,7 @@ Install VEP Plugin
 List Valid Alleles
 ------------------
 
-.. topic:: For usage instructions run
-
-   ``pvacseq valid_alleles --help``
+.. program-output:: pvacseq valid_alleles -h
 
 .. .. argparse::
     :module: lib.valid_alleles
@@ -52,9 +46,7 @@ List Valid Alleles
 Documentation For Configuration Files
 -------------------------------------
 
-.. topic:: For usage instructions run
-
-   ``pvacseq config_files --help``
+.. program-output:: pvacseq config_files -h
 
 .. .. argparse::
     :module: lib.config_files

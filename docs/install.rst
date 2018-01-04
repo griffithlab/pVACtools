@@ -110,3 +110,8 @@ A Docker container for pVACtools is available on DockerHub using the
 `mgibio/pvactools <https://hub.docker.com/r/mgibio/pvactools/>`_ repo. CWL
 tool wrappers for pVACseq, pVACfuse, and pVACvector can be downloaded
 using the ``pvactools download_cwls`` command.
+
+Download CWL tool wrappers
+__________________________
+
+.. program-output:: pvactools download_cwls -h
