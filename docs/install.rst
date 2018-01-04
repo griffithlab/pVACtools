@@ -102,3 +102,11 @@ Then run the configure script.
 .. note::
 
    Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.
+
+Docker and CWL
+--------------
+
+A Docker container for pVACtools is available on DockerHub using the
+`mgibio/pvactools <https://hub.docker.com/r/mgibio/pvactools/>`_ repo. CWL
+tool wrappers for pVACseq, pVACfuse, and pVACvector can be downloaded
+using the ``pvactools download_cwls`` command.
