@@ -11,7 +11,7 @@ class DownloadExampleData:
     def execute(self):
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
         source_directory = os.path.join(base_dir, 'tools', self.tool, 'example_data')
-        copytree(source_directory, os.path.join(self.destination_directory, '%d_example_data' % self.tool))
+        copytree(source_directory, os.path.join(self.destination_directory, '{}_example_data'.format(self.tool)))
 
     @classmethod
     def parser(cls, tool):
