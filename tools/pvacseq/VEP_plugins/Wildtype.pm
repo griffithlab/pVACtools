@@ -42,30 +42,29 @@ sub run {
 
     my $tv = $tva->transcript_variation;
     my $tr = $tv->transcript;
-    my $cds_seq = defined($tr->{_variation_effect_feature_cache}) ? $tr->{_variation_effect_feature_cache}->{translateable_seq} : $tr->translateable_seq;
-    my $codon_seq = Bio::Seq->new(
-        -seq      => $cds_seq,
-        -moltype  => 'dna',
-        -alphabet => 'dna'
-    );
 
-    #get codon table
-    my $codon_table;
-    if(defined($tr->{_variation_effect_feature_cache})) {
-        $codon_table = $tr->{_variation_effect_feature_cache}->{codon_table} || 1;
+    my $pep;
+
+    # this handles the case where VEP hasn't precached the translation data
+    if(!$tr->{_variation_effect_feature_cache}) {
+        
+        # initialize so we don't try again on failure
+        $tr->{_variation_effect_feature_cache} = {};
+
+        if(my $translation = $tr->translate) {
+
+            # cache on transcript object so we're not refetching every call
+            $tr->{_variation_effect_feature_cache}->{peptide} = $translation->seq;
+        }
     }
+
+    if(my $pep = $tr->{_variation_effect_feature_cache}->{peptide}) {
+        return { WildtypeProtein => $pep };
+    }
+    # some transcripts won't (or shouldn't) have translations e.g. non-protein coding transcripts
     else {
-        my ($attrib) = @{$tr->slice->get_all_Attributes('codon_table')};
-        $codon_table = $attrib ? $attrib->value || 1 : 1;
+        return {};
     }
-
-    # translate
-    my $new_pep = $codon_seq->translate(undef, undef, undef, $codon_table)->seq();
-    $new_pep =~ s/\*.*//;
-
-    return {
-        WildtypeProtein => $new_pep,
-    };
 }
 
 1;

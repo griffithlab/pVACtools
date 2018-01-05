@@ -28,6 +28,7 @@ class FilterTests(unittest.TestCase):
                 'operator': "<",
                 'threshold': "500",
             }],
+            False,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -48,6 +49,7 @@ class FilterTests(unittest.TestCase):
                 'operator': "<=",
                 'threshold': "500",
             }],
+            False,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -68,6 +70,7 @@ class FilterTests(unittest.TestCase):
                 'operator': "==",
                 'threshold': "500",
             }],
+            False,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -88,6 +91,7 @@ class FilterTests(unittest.TestCase):
                 'operator': ">=",
                 'threshold': "500",
             }],
+            False,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -108,6 +112,7 @@ class FilterTests(unittest.TestCase):
                 'operator': ">",
                 'threshold': "500",
             }],
+            False,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -128,9 +133,31 @@ class FilterTests(unittest.TestCase):
                 'operator': ">",
                 'threshold': "100",
             }],
+            False
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_path, "Test.filtered.NA.tsv"),
+            False
+        ))
+
+    def test_exclude_NA(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(Filter(
+            os.path.join(
+                self.test_data_path,
+                'Test.combined.parsed.tsv'
+            ),
+            output_file.name,
+            [{
+                'column': "Tumor RNA Depth",
+                'operator': ">",
+                'threshold': "100",
+            }],
+            True,
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_path, "Test.filtered.exclude_NA.tsv"),
             False
         ))

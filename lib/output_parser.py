@@ -321,7 +321,6 @@ class OutputParser(metaclass=ABCMeta):
             'Variant Type',
             'Mutation',
             'Protein Position',
-            'Fusion Position',
             'Gene Name',
             'HLA Allele',
             'Peptide Length',
@@ -454,10 +453,6 @@ class OutputParser(metaclass=ABCMeta):
                     row['Tumor RNA VAF'] = tsv_entry['trna_vaf']
                 if self.sample_name:
                     row['Sample Name'] = self.sample_name
-                if 'fusion_position' in tsv_entry:
-                    row['Fusion Position'] = tsv_entry['fusion_position']
-                else:
-                    row['Fusion Position'] = 'NA'
                 tsv_writer.writerow(row)
 
         tmp_output_filehandle.close()

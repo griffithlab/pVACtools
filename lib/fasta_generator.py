@@ -177,7 +177,7 @@ class FusionFastaGenerator(FastaGenerator):
         fasta_sequences         = OrderedDict()
         for line in tsvin:
             variant_type = line['variant_type']
-            position     = int(line['fusion_position'])
+            position     = int(line['protein_position'])
             sequence     = line['fusion_amino_acid_sequence']
             one_flanking_sequence_length = self.determine_flanking_sequence_length(len(sequence), peptide_sequence_length, line)
             if position < one_flanking_sequence_length:
@@ -190,10 +190,11 @@ class FusionFastaGenerator(FastaGenerator):
                 subsequence   = sequence[start_position:stop_position]
             elif variant_type == 'frameshift_fusion':
                 subsequence = sequence[start_position:]
-                if subsequence.endswith('X'):
-                    subsequence = subsequence[:-1]
             else:
                 continue
+
+            if subsequence.endswith('X'):
+                subsequence = subsequence[:-1]
 
             if '*' in subsequence:
                 continue
