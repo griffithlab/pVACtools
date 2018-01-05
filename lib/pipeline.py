@@ -76,15 +76,15 @@ class Pipeline(metaclass=ABCMeta):
             with open(log_file, 'r') as log_fh:
                 past_inputs = yaml.load(log_fh)
                 current_inputs = self.__dict__
-                current_inputs['pvacseq_version'] = pkg_resources.get_distribution("pvacseq").version
-                if past_inputs['pvacseq_version'] != current_inputs['pvacseq_version']:
+                current_inputs['pvactools_version'] = pkg_resources.get_distribution("pvactools").version
+                if past_inputs['pvactools_version'] != current_inputs['pvactools_version']:
                     status_message(
-                        "Restart to be executed with a different pVAC-Seq version:\n" +
-                        "Past version: %s\n" % past_inputs['pvacseq_version'] +
-                        "Current version: %s" % current_inputs['pvacseq_version']
+                        "Restart to be executed with a different pVACtools version:\n" +
+                        "Past version: %s\n" % past_inputs['pvactools_version'] +
+                        "Current version: %s" % current_inputs['pvactools_version']
                     )
                 for key in current_inputs.keys():
-                    if key == 'pvacseq_version':
+                    if key == 'pvactools_version' or key == 'pvacseq_version':
                         continue
                     if key not in past_inputs.keys() and current_inputs[key] is not None:
                         sys.exit(
@@ -102,7 +102,7 @@ class Pipeline(metaclass=ABCMeta):
         else:
             with open(log_file, 'w') as log_fh:
                 inputs = self.__dict__
-                inputs['pvacseq_version'] = pkg_resources.get_distribution("pvacseq").version
+                inputs['pvactools_version'] = pkg_resources.get_distribution("pvactools").version
                 yaml.dump(inputs, log_fh, default_flow_style=False)
 
     def tsv_file_path(self):
