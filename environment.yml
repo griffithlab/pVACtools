@@ -14,7 +14,8 @@ dependencies:
   - momoko>=2.2.3
   - psycopg2>=2.6.1
   - tornado==4.3
-  - sphinx-argparse
+  - sphinxjp.themes.basicstrap
+  - sphinxcontrib-programoutput
   - PyVCF
   - requests
   - PyYAML
