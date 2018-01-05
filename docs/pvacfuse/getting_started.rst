@@ -12,7 +12,7 @@ The example data output can be reproduced by running the following command:
 .. code-block:: none
 
    pvacfuse run \
-   <example_data_dir>/fusions_annotated.bedpe \
+   <example_data_dir>/fusions.bedpe.annot \
    Test \
    HLA-A*29:02 \
    NetMHC \
