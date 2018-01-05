@@ -1,12 +1,20 @@
 import argparse
 import sys
 import pkg_resources
+from tools import *
 
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
     #add subcommands
+    download_cwls_parser = subparsers.add_parser(
+        "download_cwls",
+        help="Run pVACtools CWLs",
+        add_help=False
+    )
+    download_cwls_parser.set_defaults(func=download_cwls)
+
     parser.add_argument(
         "-v", "--version",
         action="store_true",
