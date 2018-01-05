@@ -20,6 +20,9 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../tools/pvacseq'))
+sys.path.insert(0, os.path.abspath('../tools/pvacfuse'))
+sys.path.insert(0, os.path.abspath('../tools/pvacvector'))
+sys.path.insert(0, os.path.abspath('../tools'))
 
 # -- General configuration ------------------------------------------------
 
