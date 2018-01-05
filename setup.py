@@ -5,7 +5,7 @@ import sys
 if sys.version_info < (3,5):
     print("This python version is not supported:")
     print(sys.version)
-    print("pVAC-Seq requires python 3.5 or greater")
+    print("pVACtools requires python 3.5 or greater")
     sys.exit(1)
 
 data_files = []
@@ -42,16 +42,17 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacapi"):
             ))
 
 setup(
-    name="pvacseq",
-    version="4.1.0b4",
-    packages=["tools.pvacseq", "lib", "utils.pvacapi", "utils.pvacapi.controllers"],
+    name="pvactools",
+    version="1.0.0",
+    #packages=["tools", "tools.pvacfuse", "tools.pvacvector", "tools.pvacseq", "lib", "utils.pvacapi", "utils.pvacapi.controllers"],
+    packages=["tools", "tools.pvacfuse", "tools.pvacvector", "tools.pvacseq", "lib"],
     entry_points={
         "console_scripts":[
             "pvactools = tools.main:main",
             "pvacseq = tools.pvacseq.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
-            "pvacseq-api = utils.pvacapi.app:main [API]"
+            #"pvacseq-api = utils.pvacapi.app:main [API]"
         ]
     },
     install_requires=[
@@ -67,18 +68,18 @@ setup(
     ],
     package_data={
         'tools.pvacseq' : data_files,
-        'utils.pvacapi' : server_data,
+    #    'utils.pvacapi' : server_data,
     },
-    extras_require={
-        'API':[
-            'connexion',
-            'py-postgresql',
-            'watchdog',
-            'flask-cors',
-            'bokeh==0.12.6',
-            'pvacseq-client'
-        ]
-    },
+    #extras_require={
+    #    'API':[
+    #        'connexion',
+    #        'py-postgresql',
+    #        'watchdog',
+    #        'flask-cors',
+    #        'bokeh==0.12.6',
+    #        'pvacseq-client'
+    #    ]
+    #},
     classifiers=[
         'Development Status :: 4 - Beta',
 
@@ -88,11 +89,10 @@ setup(
         "Programming Language :: Python :: 3.5"
     ],
 
-    author = "Jasreet Hundal, Susanna Kiwala, Aaron Graubert, Jason Walker, Chris Miller, Malachi Griffith and Elaine Mardis",
-    author_email = "pvacseq-support@genome.wustl.edu",
-    description = "Personalized Variant Antigens by Cancer Sequencing (pVAC-Seq)",
-    long_description = "A cancer immunotherapy pipeline for the identification of personalized Variant Antigens by Cancer Sequencing (pVAC-Seq)",
+    author = "Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Yang-Yang Feng, Christopher A. Miller, Aaron Graubert, Amber Wollam, Connor Liu, Jonas Neichin, Megan Neveau, Jason Walker, Elaine R. Mardis, Obi L. Griffith, Malachi Griffith",
+    author_email = "help@pvactools.org",
+    description = "A cancer immunotherapy tools suite",
     license = "NPOSL-3.0",
-    keywords = "antigens neoantigens cancer sequencing variant variants",
-    url = "https://github.com/griffithlab/pVAC-Seq",
+    keywords = "antigens neoantigens cancer sequencing variant variants fusion fusions",
+    url = "pvactools.org",
 )
