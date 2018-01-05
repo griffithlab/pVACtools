@@ -14,14 +14,6 @@ tools:
    A tool designed to aid specifically in the construction of DNA-based
    cancer vaccines.
 
-**pVACclient**
-   A browser-based user interface that assists
-   users in launching, managing, reviewing, and visualizing the results of
-   pVACtools processes.
-
-**pVACapi**
-    The pVACapi provides a HTTP REST interface to the pVACtools
-    suite.
 
 .. toctree::
    :maxdepth: 2
@@ -34,13 +26,34 @@ tools:
    :maxdepth: 1
 
    install
+   frequently_asked_questions
    contact
 
-New in version |release|
-------------------------
+.. New in version |release|
+.. ------------------------
+
+
+
+Coming soon
+-----------
+
+**pVACclient**
+   A browser-based user interface that assists
+   users in launching, managing, reviewing, and visualizing the results of
+   pVACtools processes.
+
+**pVACapi**
+    The pVACapi will provide a HTTP REST interface to the pVACtools
+    suite.
 
 Citation
 --------
+
+Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi
+L. Griffith, Elaine R. Mardis, and Malachi Griffith. `pVACseq: A genome-guided
+in silico approach to identifying tumor neoantigens <http://www.genomemedicine.com/content/8/1/11>`_. Genome Medicine. 2016,
+8:11, DOI: 10.1186/s13073-016-0264-5. PMID: `26825632
+<http://www.ncbi.nlm.nih.gov/pubmed/26825632>`_.
 
 License
 -------
