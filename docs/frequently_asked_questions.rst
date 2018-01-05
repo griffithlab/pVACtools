@@ -16,6 +16,7 @@ pVACseq is licensed under `NPOSL-3.0
 <http://opensource.org/licenses/NPOSL-3.0>`_.
 
 :large:`Where can I get help?`
+
 Bug reports or feature requests can be submitted on the `pVACtools Github page <https://github.com/griffithlab/pVACtools/issues>`_. You may also contact us by email at help@pvactools.org.
 
 :large:`How do I cite pVACtools?`
