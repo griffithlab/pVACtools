@@ -44,8 +44,7 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacapi"):
 setup(
     name="pvactools",
     version="1.0.0",
-    #packages=["tools", "tools.pvacfuse", "tools.pvacvector", "tools.pvacseq", "lib", "utils.pvacapi", "utils.pvacapi.controllers"],
-    packages=["tools", "tools.pvacfuse", "tools.pvacvector", "tools.pvacseq", "lib"],
+    packages=["tools", "tools.pvacfuse", "tools.pvacvector", "tools.pvacseq", "lib", "utils.pvacapi", "utils.pvacapi.controllers"],
     entry_points={
         "console_scripts":[
             "pvactools = tools.main:main",
@@ -68,18 +67,18 @@ setup(
     ],
     package_data={
         'tools.pvacseq' : data_files,
-    #    'utils.pvacapi' : server_data,
+        'utils.pvacapi' : server_data,
     },
-    #extras_require={
-    #    'API':[
-    #        'connexion',
-    #        'py-postgresql',
-    #        'watchdog',
-    #        'flask-cors',
-    #        'bokeh==0.12.6',
-    #        'pvacseq-client'
-    #    ]
-    #},
+    extras_require={
+        'API':[
+            'connexion',
+            'py-postgresql',
+            'watchdog',
+            'flask-cors',
+            'bokeh==0.12.6',
+            'pvacseq-client'
+        ]
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
 
