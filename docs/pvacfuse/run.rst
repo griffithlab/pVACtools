@@ -1,4 +1,8 @@
-.. _run:
+.. image:: ../images/pVACfuse_logo_trans-bg_sm_v4b.png
+    :align: right
+    :alt: pVACfuse logo
+
+.. _pvacfuse_run:
 
 Usage
 ====================================
@@ -9,11 +13,9 @@ Usage
    prediction algorithms. More information on how to install IEDB locally can
    be found on the :ref:`Installation <iedb_install>` page.
 
-.. topic:: For usage instructions run
-   
-   ``pvacseq run --help``
+.. program-output:: pvacfuse run -h
 
 .. .. argparse::
-        :module: lib.main
+        :module: tools.pvacfuse.run
         :func: define_parser
-        :prog: pvacseq run
+        :prog: pvacfuse run

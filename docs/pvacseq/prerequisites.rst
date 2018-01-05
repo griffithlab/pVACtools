@@ -1,3 +1,7 @@
+.. image:: ../images/pVACseq_logo_trans-bg_sm_v4b.png
+    :align: right
+    :alt: pVACseq logo
+
 .. _prerequisites_label:
 
 Prerequisites
@@ -6,13 +10,13 @@ Prerequisites
 VEP
 ---
 
-The input to the pVAC-Seq pipeline is a VEP annotated single-sample VCF. In addition to the standard VEP annotations, pVAC-Seq also requires the annotations provided by the Downstream and Wildtype VEP plugins.
+The input to the pVACseq pipeline is a VEP annotated single-sample VCF. In addition to the standard VEP annotations, pVACseq also requires the annotations provided by the Downstream and Wildtype VEP plugins.
 
-To create a VCF for use with pVAC-Seq follow these steps:
+To create a VCF for use with pVACseq follow these steps:
 
 1. Download and install the VEP command line tool following `these instructions <http://useast.ensembl.org/info/docs/tools/vep/script/index.html>`_.
 2. Download the VEP_plugins from their `GitHub repository <https://github.com/Ensembl/VEP_plugins>`_.
-3. :ref:`Copy the Wildtype plugin<install_vep_plugin_label>` provided with the pVAC-Seq package to the folder with the other VEP_plugins:
+3. :ref:`Copy the Wildtype plugin<install_vep_plugin_label>` provided with the pVACseq package to the folder with the other VEP_plugins:
 
 .. code-block:: none
 
@@ -33,9 +37,9 @@ The ``--dir_plugins <VEP_plugins directory>`` option may need to be set dependin
 
 The ``--pick`` option might be useful to limit the annotation to the top
 transcripts. Otherwise, VEP will annotate each variant with all possible
-transcripts. pVAC-Seq will provide predictions for all transcripts in the VEP
+transcripts. pVACseq will provide predictions for all transcripts in the VEP
 CSQ field. Running VEP without the ``--pick`` option can therefor drasticly
-increase the runtime of pVAC-Seq.
+increase the runtime of pVACseq.
 
 Additional VEP options that might be desired can be found `here <http://useast.ensembl.org/info/docs/tools/vep/script/vep_options.html>`_.
 
@@ -54,7 +58,7 @@ Optional Preprocessing
 Coverage and Expression Data
 ############################
 
-Coverage and expression data can be added to the pVAC-Seq processing by providing bam-readcount and/or Cufflinks output files as additional input files. These additional input files must be provided as a yaml file in the following structure:
+Coverage and expression data can be added to the pVACseq processing by providing bam-readcount and/or Cufflinks output files as additional input files. These additional input files must be provided as a yaml file in the following structure:
 
 .. code-block:: none
 
@@ -72,7 +76,7 @@ Each file in this list is optional, and its entry can be omitted. If no addition
 bam-readcount
 ^^^^^^^^^^^^^
 
-pVAC-Seq optionally accepts bam-readcount files as inputs to add coverage information (depth and VAF) for downstream filtering. Depth and VAF are calculated from the read counts of the reference allele and alternate allele.
+pVACseq optionally accepts bam-readcount files as inputs to add coverage information (depth and VAF) for downstream filtering. Depth and VAF are calculated from the read counts of the reference allele and alternate allele.
 
 Follow the installation instructions on the `bam-readcount GitHub page <https://github.com/genome/bam-readcount#build-instructions>`_.
 
@@ -91,7 +95,7 @@ A minimum base quality of 20 is recommended which can be enabled by ``-b 20``.
 Cufflinks
 ^^^^^^^^^
 
-pVAC-Seq optionally accepts Cufflinks files as inputs to extract gene and transcript expression data for downstream filtering.
+pVACseq optionally accepts Cufflinks files as inputs to extract gene and transcript expression data for downstream filtering.
 
 Installation instructions for Cufflinks can be found on their `GitHub page <https://github.com/cole-trapnell-lab/cufflinks#install-quick-start>`_.
 
@@ -111,6 +115,6 @@ FPKM values.
 **For gene FPKM**: a tab-separated file with a ``tracking_id`` column
 containing Ensembl gene IDs, a ``locus`` column describing the
 region within the gene, and a ``FPKM`` column containing FPKM values. In the
-pVAC-Seq pipeline the FPKM values will be summed for all loci of a gene. You
+pVACseq pipeline the FPKM values will be summed for all loci of a gene. You
 may also provide already summed FPKM values. In that case you will still need
 to provide a ``locus`` column but the values in that column can be empty.
