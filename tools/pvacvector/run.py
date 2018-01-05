@@ -270,7 +270,8 @@ def main(args_input=sys.argv[1:]):
     Paths = create_graph(iedb_scores, seq_tuples)
     distance_matrix = create_distance_matrix(Paths)
     results_file = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
-    VectorVisualization(results_file, base_output_dir).draw()
+    if 'DISPLAY' in os.environ.keys():
+        VectorVisualization(results_file, base_output_dir).draw()
 
     if not args.keep_tmp_files:
         shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_I'), ignore_errors=True)
