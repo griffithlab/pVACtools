@@ -94,5 +94,6 @@ setup(
     description = "A cancer immunotherapy tools suite",
     license = "NPOSL-3.0",
     keywords = "antigens neoantigens cancer sequencing variant variants fusion fusions",
-    url = "pvactools.org",
+    #This needs to be the url where the code is being hosted
+    url = "https://github.com/griffithlab/pVACtools",
 )
