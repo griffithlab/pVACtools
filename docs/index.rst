@@ -14,6 +14,10 @@ tools:
    A tool designed to aid specifically in the construction of DNA-based
    cancer vaccines.
 
+.. image:: images/pVACtools_main-figure_v2e.png
+    :align: center
+    :alt: pVACtools immunotherapy workflow
+
 
 .. toctree::
    :maxdepth: 2
