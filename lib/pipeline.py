@@ -525,7 +525,7 @@ class MHCIIPipeline(Pipeline):
             generate_fasta_params = {
                 'input_file'                : split_tsv_file_path,
                 'peptide_sequence_length'   : self.peptide_sequence_length,
-                'epitope_length'            : 9,
+                'epitope_length'            : 15,
                 'output_file'               : split_fasta_file_path,
                 'output_key_file'           : split_fasta_key_file_path,
                 'downstream_sequence_length': self.downstream_sequence_length,
