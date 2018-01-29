@@ -33,10 +33,17 @@ tools:
    frequently_asked_questions
    contact
 
-.. New in version |release|
-.. ------------------------
+New in version |release|
+------------------------
 
+This is a hotfix release. It fixes the following issues:
 
+- Additional data, like example data and VEP plugins were not included in the
+  package correctly so the commands to download these files would fail. This
+  has been corrected.
+- Class II predictions would fail if the protein sequences used for binding
+  predictions in IEDB were shorter than 15 peptide sequences. This has been
+  fixed.
 
 Coming soon
 -----------
