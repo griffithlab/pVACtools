@@ -8,27 +8,29 @@ if sys.version_info < (3,5):
     print("pVACtools requires python 3.5 or greater")
     sys.exit(1)
 
-data_files = []
+pvacseq_data_files = []
 for dirpath, dirnames, filenames in os.walk("tools/pvacseq/example_data"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            data_files.append(os.path.join('..', dirpath, filename))
+            pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
+pvacfuse_data_files = []
 for dirpath, dirnames, filenames in os.walk("tools/pvacfuse/example_data"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            data_files.append(os.path.join('..', dirpath, filename))
+            pvacfuse_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
+pvacvector_data_files = []
 for dirpath, dirnames, filenames in os.walk("tools/pvacvector/example_data"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            data_files.append(os.path.join('..', dirpath, filename))
+            pvacvector_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
 for dirpath, dirnames, filenames in os.walk("tools/pvacseq/VEP_plugins"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            data_files.append(os.path.join('..', dirpath, filename))
+            pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
 for dirpath, dirnames, filenames in os.walk("tools/pvacseq/iedb_alleles"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            data_files.append(os.path.join('..', dirpath, filename))
+            pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
 server_data = []
 for dirpath, dirnames, filenames in os.walk("utils/pvacapi"):
     for filename in filenames:
@@ -66,8 +68,10 @@ setup(
         'wget',
     ],
     package_data={
-        'tools.pvacseq' : data_files,
-        'utils.pvacapi' : server_data,
+        'tools.pvacseq' : pvacseq_data_files,
+        'tools.pvacfuse' : pvacfuse_data_files,
+        'tools.pvacvector' : pvacvector_data_files,
+        'pvactools.server' : server_data,
     },
     extras_require={
         'API':[
