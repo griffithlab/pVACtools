@@ -1,0 +1,3 @@
+chromosome_name	start	stop	reference	variant	amino_acid_change	protein_position	main_somatic_variant
+1	153003465	153003465	C	G	L/V	149	SPRR3_ENST00000295367_1.missense.156T/M
+2	217498312	217498312	A	T	A/L	27	IGFBP2_ENST00000233809_1.inframe_ins.20L/LLP
