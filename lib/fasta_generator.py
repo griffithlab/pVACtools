@@ -1,7 +1,7 @@
 import csv
 import re
 import sys
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import yaml
 from abc import ABCMeta
 from Bio import SeqIO
@@ -10,6 +10,17 @@ import itertools
 csv.field_size_limit(sys.maxsize)
 
 class FastaGenerator(metaclass=ABCMeta):
+    def parse_proximal_variants_file(self):
+        if self.proximal_variants_file is not None:
+            proximal_variants = defaultdict(list)
+            with open(self.proximal_variants_file, 'r') as fh:
+                tsvin = csv.DictReader(fh, delimiter='\t')
+                for line in tsvin:
+                    proximal_variants[line['main_somatic_variant']].append(line)
+            return proximal_variants
+        else:
+            return {}
+
     def __init__(self, **kwargs):
         self.input_file                 = kwargs['input_file']
         self.peptide_sequence_length    = kwargs['peptide_sequence_length']
@@ -17,6 +28,8 @@ class FastaGenerator(metaclass=ABCMeta):
         self.output_file                = kwargs['output_file']
         self.output_key_file            = kwargs['output_key_file']
         self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', None)
+        self.proximal_variants_file     = kwargs.pop('proximal_variants_file', None)
+        self.proximal_variants          = self.parse_proximal_variants_file()
 
     def position_out_of_bounds(self, position, sequence):
         return position > len(sequence)-1
@@ -87,7 +100,29 @@ class FastaGenerator(metaclass=ABCMeta):
         mutation_subsequence_stop_position = position
         wildtype_subsequence = full_wildtype_sequence[start_position:wildtype_subsequence_stop_position]
         mutation_start_subsequence = full_wildtype_sequence[start_position:mutation_subsequence_stop_position]
-        return wildtype_subsequence, mutation_start_subsequence
+        return start_position, wildtype_subsequence, mutation_start_subsequence
+
+    def add_proximal_variants(self, somatic_variant_index, wildtype_subsequence, mutation_position, original_position):
+        mutation_offset = original_position - mutation_position
+        wildtype_subsequence_with_proximal_variants = wildtype_subsequence
+        if somatic_variant_index in self.proximal_variants.keys():
+            for line in self.proximal_variants[somatic_variant_index]:
+                proximal_variant_position = int(line['protein_position']) - 1 - mutation_offset
+                if proximal_variant_position <= 0 or proximal_variant_position >= len(wildtype_subsequence):
+                    continue
+                proximal_variant_wildtype_amino_acid, proximal_variant_mutant_amino_acid = line['amino_acid_change'].split('/')
+                if len(proximal_variant_wildtype_amino_acid) != len(proximal_variant_mutant_amino_acid):
+                    print("Nearby variant is not a missense mutation. Skipping.")
+                    continue
+                if wildtype_subsequence[proximal_variant_position] != proximal_variant_wildtype_amino_acid:
+                    sys.exit(
+                        "Error when processing proximal variant.\n" +
+                        "The wildtype amino acid for variant %s with substring %s is different than expected.\n" % (somatic_variant_index, wildtype_subsequence) +
+                        "Actual wildtype amino acid: %s\n" % wildtype_subsequence[proximal_variant_position] +
+                        "Wildtype amino acid of the proximal_variant: %s" % proximal_variant_wildtype_amino_acid
+                    )
+                wildtype_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:proximal_variant_position] + proximal_variant_mutant_amino_acid + wildtype_subsequence_with_proximal_variants[proximal_variant_position+1:]
+        return wildtype_subsequence_with_proximal_variants
 
     def execute(self):
         peptide_sequence_length = self.peptide_sequence_length
@@ -152,11 +187,13 @@ class FastaGenerator(metaclass=ABCMeta):
                 continue
 
             if variant_type == 'FS':
-                wildtype_subsequence, mutant_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
+                mutation_start_position, wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
                 downstream_sequence = line['downstream_amino_acid_sequence']
                 if self.downstream_sequence_length and len(downstream_sequence) > self.downstream_sequence_length:
                     downstream_sequence = downstream_sequence[0:self.downstream_sequence_length]
-                mutant_subsequence += downstream_sequence
+                mutant_subsequence = left_flanking_subsequence + downstream_sequence
+                left_flanking_subsequence_with_proximal_variants = self.add_proximal_variants(line['index'], left_flanking_subsequence, mutation_start_position, position)
+                mutant_subsequence_with_proximal_variants = left_flanking_subsequence_with_proximal_variants + downstream_sequence
             else:
                 mutation_start_position, wildtype_subsequence = self.get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line)
                 mutation_end_position = mutation_start_position + wildtype_amino_acid_length
@@ -166,10 +203,13 @@ class FastaGenerator(metaclass=ABCMeta):
                         continue
                     else:
                         sys.exit("ERROR: There was a mismatch between the actual wildtype amino acid sequence ({}) and the expected amino acid sequence ({}). Did you use the same reference build version for VEP that you used for creating the VCF?\n{}".format(wildtype_subsequence[mutation_start_position:mutation_end_position], wildtype_amino_acid, line))
+                wildtype_subsequence_with_proximal_variants = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position)
                 if stop_codon_added:
                     mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid
+                    mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid
                 else:
                     mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
+                    mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence_with_proximal_variants[mutation_end_position:]
 
             if '*' in wildtype_subsequence or '*' in mutant_subsequence:
                 continue
@@ -191,10 +231,11 @@ class FastaGenerator(metaclass=ABCMeta):
             variant_id = line['index']
             for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, mutant_subsequence]):
                 key = '%s.%s' % (designation, variant_id)
-                if subsequence in fasta_sequences:
-                    fasta_sequences[subsequence].append(key)
-                else:
-                    fasta_sequences[subsequence] = [key]
+                fasta_sequences.setdefault(subsequence, []).append(key)
+
+            if mutant_subsequence_with_proximal_variants != mutant_subsequence:
+                key = '%s.%s' % ('MTWPV', variant_id)
+                fasta_sequences.setdefault(mutant_subsequence_with_proximal_variants, []).append(key)
 
         writer = open(self.output_file, 'w')
         key_writer = open(self.output_key_file, 'w')
@@ -245,10 +286,7 @@ class FusionFastaGenerator(FastaGenerator):
             if len(subsequence) < self.epitope_length:
                 continue
 
-            if subsequence in fasta_sequences:
-                fasta_sequences[subsequence].append(line['index'])
-            else:
-                fasta_sequences[subsequence] = [line['index']]
+            fasta_sequences.setdefault(subsequence, []).append(line['index'])
 
         writer                  = open(self.output_file, 'w')
         key_writer              = open(self.output_key_file, 'w')
@@ -279,7 +317,7 @@ class VectorFastaGenerator():
         epitopes = dict()
         rev_lookup = dict()
 
-        fasta_sequences = {}
+        fasta_sequences = OrderedDict()
         for comb in seq_tuples:
             seq1 = comb[0]
             seq2 = comb[1]
@@ -298,10 +336,7 @@ class VectorFastaGenerator():
 
         for seq_id in epitopes:
             sequence = epitopes[seq_id]
-            if sequence in fasta_sequences:
-                fasta_sequences[sequence].append(seq_id)
-            else:
-                fasta_sequences[sequence] = [seq_id]
+            fasta_sequences.setdefault(sequence, []).append(seq_id)
 
         writer = open(self.output_file, 'w')
         key_writer = open(self.output_key_file, 'w')
