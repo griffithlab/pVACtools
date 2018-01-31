@@ -350,3 +350,22 @@ class OutputParserTests(unittest.TestCase):
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output_pvacvector.iedb.parsed.tsv")
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+
+    def test_parse_output_runs_and_produces_expected_output_for_inframe_insertion_with_proximal_variants(self):
+        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_proximal_variants_inframe_insertion.ann.HLA-A*01:01.9.tsv")]
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_proximal_variants_inframe_insertion.tsv")
+        parse_output_key_file = os.path.join(self.test_data_dir, "input_proximal_variants_inframe_insertion.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'input_iedb_files'       : parse_output_input_iedb_file,
+            'input_tsv_file'         : parse_output_input_tsv_file,
+            'key_file'               : parse_output_key_file,
+            'output_file'            : parse_output_output_file.name,
+            'sample_name'            : None,
+        }
+        parser = DefaultOutputParser(**parse_output_params)
+
+        self.assertFalse(parser.execute())
+        expected_output_file  = os.path.join(self.test_data_dir, "output_proximal_variants_inframe_insertion.iedb.parsed.tsv")
+        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
