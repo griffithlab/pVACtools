@@ -1,6 +1,6 @@
 # pVACtools
 
-pVACtools is a cancer immunotherapy tools suite consisting of the following tools:
+pVACtools is a cancer immunotherapy suite consisting of the following tools:
 
 **pVACseq**
 
@@ -12,9 +12,9 @@ A tool for detecting neoantigens resulting from gene fusions.
 
 **pVACvector**
 
-A tool designed to aid specifically in the construction of DNA-based cancer vaccines.
+A tool designed to aid specifically in the construction of DNA vector-based cancer vaccines.
 
-## Comming Soon
+## Coming Soon
 
 **pVACclient**
 
@@ -39,7 +39,7 @@ If you don’t have Python 3.5 installed, we recommend using Conda to emulate a 
 
 Once you have set up your Python 3.5 environment correctly you can use pip to install pVACtools. Make sure you have pip installed. pip is generally included in python distributions, but may need to be upgraded before use. See the instructions for installing or upgrading pip.
 
-After you have pip installed, type the following command on your Terminal:
+After you have pip installed/upgraded, type the following command on your Terminal:
 
 `pip install pvactools`
 
@@ -51,7 +51,7 @@ You can also check the installed version:
 
 `pvactools -v`
 
-`pip` will fetch and install pVACtools and its dependencies for you. After installing, each tool of the pVACtools suite is available in its own command line tree directly from the Terminal.
+`pip` will fetch and install pVACtools and its dependencies for you. After installing, each tool of the pVACtools suite is available with its own command line tree directly from the Terminal.
 
 If you have an old version of pVACtools installed you might want to consider upgrading to the latest version:
 
