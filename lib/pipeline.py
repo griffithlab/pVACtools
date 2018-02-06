@@ -43,6 +43,7 @@ class Pipeline(metaclass=ABCMeta):
         self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
         self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
         self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
+        self.proximal_variants_file      = kwargs.pop('proximal_variants_file', None)
         self.net_chop_method             = kwargs.pop('net_chop_method', None)
         self.net_chop_threshold          = kwargs.pop('net_chop_threshold', 0.5)
         self.netmhc_stab                 = kwargs.pop('netmhc_stab', False)
@@ -441,6 +442,7 @@ class MHCIPipeline(Pipeline):
                 'output_file'               : split_fasta_file_path,
                 'output_key_file'           : split_fasta_key_file_path,
                 'downstream_sequence_length': self.downstream_sequence_length,
+                'proximal_variants_file'    : self.proximal_variants_file,
             }
             fasta_generator = self.fasta_generator(generate_fasta_params)
             fasta_generator.execute()
@@ -555,6 +557,7 @@ class MHCIIPipeline(Pipeline):
                 'output_file'               : split_fasta_file_path,
                 'output_key_file'           : split_fasta_key_file_path,
                 'downstream_sequence_length': self.downstream_sequence_length,
+                'proximal_variants_file'    : self.proximal_variants_file,
             }
             fasta_generator = self.fasta_generator(generate_fasta_params)
             fasta_generator.execute()
