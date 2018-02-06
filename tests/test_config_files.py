@@ -29,5 +29,6 @@ class ConfigFilesTests(unittest.TestCase):
             + "tdna_indels_coverage_file: <bam-readcount output file for tumor DNA BAM and indels>\n"
             + "trna_snvs_coverage_file: <bam-readcount output file for tumor RNA BAM and snvs>\n"
             + "trna_indels_coverage_file: <bam-readcount output file for tumor RNA BAM and indels>\n"
+            + "proximal_variants_file: <A TSV file with proximal variant information>\n"
         )
         self.assertEqual(output.decode(), expected_output)
