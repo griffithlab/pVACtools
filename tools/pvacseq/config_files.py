@@ -12,6 +12,7 @@ def additional_input_file_list_options():
         ('tdna_indels_coverage_file', 'bam-readcount output file for tumor DNA BAM and indels'),
         ('trna_snvs_coverage_file', 'bam-readcount output file for tumor RNA BAM and snvs'),
         ('trna_indels_coverage_file', 'bam-readcount output file for tumor RNA BAM and indels'),
+        ('proximal_variants_file', 'A TSV file with proximal variant information'),
     ])
 
 def define_parser():
