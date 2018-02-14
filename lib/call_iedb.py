@@ -60,7 +60,7 @@ def main(args_input = sys.argv[1:]):
         data = {
             'sequence_text': args.input_file.read(),
             'method':        args.method,
-            'allele':        args.allele,
+            'allele':        args.allele.replace('-DPB', '/DPB'),
             'user_tool':     'pVac-seq',
         }
         if args.epitope_length is not None:
