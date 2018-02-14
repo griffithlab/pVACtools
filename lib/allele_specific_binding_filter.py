@@ -1,4 +1,5 @@
 import csv
+import sys
 from lib.prediction_class import *
 
 class AlleleSpecificBindingFilter:
