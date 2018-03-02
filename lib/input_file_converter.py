@@ -347,6 +347,7 @@ class IntegrateConverter(InputFileConverter):
         writer = open(self.output_file, 'w')
         tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
+        count = 1
         for entry in csv_reader:
             output_row = {
                 'chromosome_name'            : "%s / %s" % (entry['chr 5p'], entry['chr 3p']),
@@ -368,7 +369,6 @@ class IntegrateConverter(InputFileConverter):
                 'trna_vaf'                   : 'NA',
             }
 
-            count = 1
             if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':
                 continue
             for (fusion_position, transcript_set, fusion_amino_acid_sequence) in zip(entry['fusion positions'].split(','), entry['transcripts'].split(','), entry['peptides'].split(',')):
@@ -387,7 +387,7 @@ class IntegrateConverter(InputFileConverter):
                 output_row['protein_position']           = fusion_position
                 output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
                 output_row['transcript_name']            = ';'.join(fusions)
-                output_row['index']                      = '%s_%s.%s.%s' % (entry['name of fusion'], count, variant_type, fusion_position)
+                output_row['index']                      = '%s.%s.%s.%s' % (count, entry['name of fusion'], variant_type, fusion_position)
                 tsv_writer.writerow(output_row)
 
                 count += 1
