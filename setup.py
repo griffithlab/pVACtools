@@ -53,7 +53,7 @@ setup(
             "pvacseq = tools.pvacseq.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
-            #"pvacseq-api = utils.pvacapi.app:main [API]"
+            "pvacseq-api = utils.pvacapi.app:main [API]"
         ]
     },
     install_requires=[
