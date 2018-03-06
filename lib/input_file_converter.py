@@ -248,8 +248,11 @@ class VcfConverter(InputFileConverter):
                                 coverage_for_entry[coverage_type + '_depth'] = self.calculate_coverage(int(brct[ref_base]), int(brct[var_base]))
                                 coverage_for_entry[coverage_type + '_vaf']   = self.calculate_vaf(int(brct[ref_base]), int(brct[var_base]))
 
-                csq_allele = alleles_dict[alt]
-                transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
+                transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, alt)
+                if len(transcripts) == 0:
+                    csq_allele = alleles_dict[alt]
+                    transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
+
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
                     consequence = self.resolve_consequence(transcript['Consequence'])
