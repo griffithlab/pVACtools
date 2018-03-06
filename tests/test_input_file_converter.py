@@ -235,6 +235,20 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
+    def test_input_vcf_with_conflicting_alts_generates_expected_tsv(self):
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_conflicting_alts.vcf')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'                 : convert_vcf_input_file,
+            'output_file'                : convert_vcf_output_file.name,
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_conflicting_alts.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
     def test_input_vcf_with_uncalled_genotype_generates_expected_tsv(self):
         convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_uncalled_genotype.vcf')
         convert_vcf_output_file = tempfile.NamedTemporaryFile()
