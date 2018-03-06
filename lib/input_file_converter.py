@@ -268,7 +268,7 @@ class VcfConverter(InputFileConverter):
                     gene_name = transcript['SYMBOL']
                     index = '%s.%s.%s.%s' % (gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
-                        print("Warning: TSV index already exists: {}".format(index))
+                        sys.exit("Warning: TSV index already exists: {}".format(index))
                     else:
                         indexes.append(index)
                     ensembl_gene_id = transcript['Gene']
