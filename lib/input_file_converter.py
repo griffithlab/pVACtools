@@ -92,6 +92,8 @@ class VcfConverter(InputFileConverter):
     def parse_csq_format(self, vcf_reader):
         info_fields = vcf_reader.infos
 
+        if 'CSQ' not in info_fields:
+            sys.exit('Input VCF does not contain a CSQ header. Please annotate the VCF with VEP before running it.')
         if info_fields['CSQ'] is None:
             sys.exit('Failed to extract format string from info description for tag (CSQ)')
         else:
