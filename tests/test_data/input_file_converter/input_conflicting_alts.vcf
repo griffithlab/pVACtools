@@ -1,0 +1,166 @@
+##fileformat=VCFv4.2
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed">
+##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele fractions of alternate alleles in the tumor">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth (reads with MQ=255 or with bad mates are filtered)">
+##FORMAT=<ID=F1R2,Number=R,Type=Integer,Description="Count of reads in F1R2 pair orientation supporting each allele">
+##FORMAT=<ID=F2R1,Number=R,Type=Integer,Description="Count of reads in F2R1 pair orientation supporting each allele">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=MBQ,Number=A,Type=Float,Description="median base quality">
+##FORMAT=<ID=MFRL,Number=R,Type=Float,Description="median fragment length">
+##FORMAT=<ID=MMQ,Number=A,Type=Float,Description="median mapping quality">
+##FORMAT=<ID=MPOS,Number=A,Type=Float,Description="median distance from end of read">
+##FORMAT=<ID=PGT,Number=1,Type=String,Description="Physical phasing haplotype information, describing how the alternate alleles are phased in relation to one another">
+##FORMAT=<ID=PID,Number=1,Type=String,Description="Physical phasing ID information, where each unique ID within a given sample (but not across samples) connects records within a phasing group">
+##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification">
+##FORMAT=<ID=SA_MAP_AF,Number=3,Type=Float,Description="MAP estimates of allele fraction given z">
+##FORMAT=<ID=SA_POST_PROB,Number=3,Type=Float,Description="posterior probabilities of the presence of strand artifact">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth; some reads may have been filtered">
+##INFO=<ID=ECNT,Number=1,Type=Integer,Description="Number of events in this haplotype">
+##INFO=<ID=IN_PON,Number=0,Type=Flag,Description="site found in panel of normals">
+##INFO=<ID=NLOD,Number=A,Type=Float,Description="Normal LOD score">
+##INFO=<ID=N_ART_LOD,Number=A,Type=Float,Description="log odds of artifact in normal with same allele fraction as tumor">
+##INFO=<ID=POP_AF,Number=A,Type=Float,Description="population allele frequencies of alt alleles">
+##INFO=<ID=P_GERMLINE,Number=A,Type=Float,Description="Posterior probability for alt allele to be germline variants">
+##INFO=<ID=RPA,Number=.,Type=Integer,Description="Number of times tandem repeat unit is repeated, for each allele (including reference)">
+##INFO=<ID=RU,Number=1,Type=String,Description="Tandem repeat unit (bases)">
+##INFO=<ID=STR,Number=0,Type=Flag,Description="Variant is a short tandem repeat">
+##INFO=<ID=TLOD,Number=A,Type=Float,Description="Tumor LOD score">
+##Mutect Version=2.1-beta
+##contig=<ID=1,length=249250621>
+##contig=<ID=2,length=243199373>
+##contig=<ID=3,length=198022430>
+##contig=<ID=4,length=191154276>
+##contig=<ID=5,length=180915260>
+##contig=<ID=6,length=171115067>
+##contig=<ID=7,length=159138663>
+##contig=<ID=8,length=146364022>
+##contig=<ID=9,length=141213431>
+##contig=<ID=10,length=135534747>
+##contig=<ID=11,length=135006516>
+##contig=<ID=12,length=133851895>
+##contig=<ID=13,length=115169878>
+##contig=<ID=14,length=107349540>
+##contig=<ID=15,length=102531392>
+##contig=<ID=16,length=90354753>
+##contig=<ID=17,length=81195210>
+##contig=<ID=18,length=78077248>
+##contig=<ID=19,length=59128983>
+##contig=<ID=20,length=63025520>
+##contig=<ID=21,length=48129895>
+##contig=<ID=22,length=51304566>
+##contig=<ID=X,length=155270560>
+##contig=<ID=Y,length=59373566>
+##contig=<ID=MT,length=16569>
+##filtering_status=Warning: unfiltered Mutect 2 calls.  Please run FilterMutectCalls to remove false positives.
+##source=Mutect2
+##tumor_sample=S-01
+##INFO=<ID=ANNOVAR_DATE,Number=1,Type=String,Description="Flag the start of ANNOVAR annotation for one alternative allele">
+##INFO=<ID=Func.refGene,Number=.,Type=String,Description="Func.refGene annotation provided by ANNOVAR">
+##INFO=<ID=Gene.refGene,Number=.,Type=String,Description="Gene.refGene annotation provided by ANNOVAR">
+##INFO=<ID=GeneDetail.refGene,Number=.,Type=String,Description="GeneDetail.refGene annotation provided by ANNOVAR">
+##INFO=<ID=ExonicFunc.refGene,Number=.,Type=String,Description="ExonicFunc.refGene annotation provided by ANNOVAR">
+##INFO=<ID=AAChange.refGene,Number=.,Type=String,Description="AAChange.refGene annotation provided by ANNOVAR">
+##INFO=<ID=cytoBand,Number=.,Type=String,Description="cytoBand annotation provided by ANNOVAR">
+##INFO=<ID=genomicSuperDups,Number=.,Type=String,Description="genomicSuperDups annotation provided by ANNOVAR">
+##INFO=<ID=esp6500siv2_all,Number=1,Type=Float,Description="esp6500siv2_all annotation provided by ANNOVAR">
+##INFO=<ID=1000g2015aug_all,Number=1,Type=Float,Description="1000g2015aug_all annotation provided by ANNOVAR">
+##INFO=<ID=ExAC_ALL,Number=.,Type=String,Description="ExAC_ALL annotation provided by ANNOVAR">
+##INFO=<ID=ExAC_AFR,Number=.,Type=String,Description="ExAC_AFR annotation provided by ANNOVAR">
+##INFO=<ID=ExAC_AMR,Number=.,Type=String,Description="ExAC_AMR annotation provided by ANNOVAR">
+##INFO=<ID=ExAC_EAS,Number=.,Type=String,Description="ExAC_EAS annotation provided by ANNOVAR">
+##INFO=<ID=ExAC_FIN,Number=.,Type=String,Description="ExAC_FIN annotation provided by ANNOVAR">
+##INFO=<ID=ExAC_NFE,Number=.,Type=String,Description="ExAC_NFE annotation provided by ANNOVAR">
+##INFO=<ID=ExAC_OTH,Number=.,Type=String,Description="ExAC_OTH annotation provided by ANNOVAR">
+##INFO=<ID=ExAC_SAS,Number=.,Type=String,Description="ExAC_SAS annotation provided by ANNOVAR">
+##INFO=<ID=gnomAD_exome_ALL,Number=.,Type=String,Description="gnomAD_exome_ALL annotation provided by ANNOVAR">
+##INFO=<ID=gnomAD_exome_AFR,Number=.,Type=String,Description="gnomAD_exome_AFR annotation provided by ANNOVAR">
+##INFO=<ID=gnomAD_exome_AMR,Number=.,Type=String,Description="gnomAD_exome_AMR annotation provided by ANNOVAR">
+##INFO=<ID=gnomAD_exome_ASJ,Number=.,Type=String,Description="gnomAD_exome_ASJ annotation provided by ANNOVAR">
+##INFO=<ID=gnomAD_exome_EAS,Number=.,Type=String,Description="gnomAD_exome_EAS annotation provided by ANNOVAR">
+##INFO=<ID=gnomAD_exome_FIN,Number=.,Type=String,Description="gnomAD_exome_FIN annotation provided by ANNOVAR">
+##INFO=<ID=gnomAD_exome_NFE,Number=.,Type=String,Description="gnomAD_exome_NFE annotation provided by ANNOVAR">
+##INFO=<ID=gnomAD_exome_OTH,Number=.,Type=String,Description="gnomAD_exome_OTH annotation provided by ANNOVAR">
+##INFO=<ID=gnomAD_exome_SAS,Number=.,Type=String,Description="gnomAD_exome_SAS annotation provided by ANNOVAR">
+##INFO=<ID=snp129,Number=.,Type=String,Description="snp129 annotation provided by ANNOVAR">
+##INFO=<ID=avsnp150,Number=.,Type=String,Description="avsnp150 annotation provided by ANNOVAR">
+##INFO=<ID=cosmic70,Number=.,Type=String,Description="cosmic70 annotation provided by ANNOVAR">
+##INFO=<ID=CLINSIG,Number=.,Type=String,Description="CLINSIG annotation provided by ANNOVAR">
+##INFO=<ID=CLNDBN,Number=.,Type=String,Description="CLNDBN annotation provided by ANNOVAR">
+##INFO=<ID=CLNACC,Number=.,Type=String,Description="CLNACC annotation provided by ANNOVAR">
+##INFO=<ID=CLNDSDB,Number=.,Type=String,Description="CLNDSDB annotation provided by ANNOVAR">
+##INFO=<ID=CLNDSDBID,Number=.,Type=String,Description="CLNDSDBID annotation provided by ANNOVAR">
+##INFO=<ID=SIFT_score,Number=.,Type=String,Description="SIFT_score annotation provided by ANNOVAR">
+##INFO=<ID=SIFT_converted_rankscore,Number=.,Type=String,Description="SIFT_converted_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=SIFT_pred,Number=.,Type=String,Description="SIFT_pred annotation provided by ANNOVAR">
+##INFO=<ID=Polyphen2_HDIV_score,Number=.,Type=String,Description="Polyphen2_HDIV_score annotation provided by ANNOVAR">
+##INFO=<ID=Polyphen2_HDIV_rankscore,Number=.,Type=String,Description="Polyphen2_HDIV_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=Polyphen2_HDIV_pred,Number=.,Type=String,Description="Polyphen2_HDIV_pred annotation provided by ANNOVAR">
+##INFO=<ID=Polyphen2_HVAR_score,Number=.,Type=String,Description="Polyphen2_HVAR_score annotation provided by ANNOVAR">
+##INFO=<ID=Polyphen2_HVAR_rankscore,Number=.,Type=String,Description="Polyphen2_HVAR_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=Polyphen2_HVAR_pred,Number=.,Type=String,Description="Polyphen2_HVAR_pred annotation provided by ANNOVAR">
+##INFO=<ID=LRT_score,Number=.,Type=String,Description="LRT_score annotation provided by ANNOVAR">
+##INFO=<ID=LRT_converted_rankscore,Number=.,Type=String,Description="LRT_converted_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=LRT_pred,Number=.,Type=String,Description="LRT_pred annotation provided by ANNOVAR">
+##INFO=<ID=MutationTaster_score,Number=.,Type=String,Description="MutationTaster_score annotation provided by ANNOVAR">
+##INFO=<ID=MutationTaster_converted_rankscore,Number=.,Type=String,Description="MutationTaster_converted_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=MutationTaster_pred,Number=.,Type=String,Description="MutationTaster_pred annotation provided by ANNOVAR">
+##INFO=<ID=MutationAssessor_score,Number=.,Type=String,Description="MutationAssessor_score annotation provided by ANNOVAR">
+##INFO=<ID=MutationAssessor_score_rankscore,Number=.,Type=String,Description="MutationAssessor_score_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=MutationAssessor_pred,Number=.,Type=String,Description="MutationAssessor_pred annotation provided by ANNOVAR">
+##INFO=<ID=FATHMM_score,Number=.,Type=String,Description="FATHMM_score annotation provided by ANNOVAR">
+##INFO=<ID=FATHMM_converted_rankscore,Number=.,Type=String,Description="FATHMM_converted_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=FATHMM_pred,Number=.,Type=String,Description="FATHMM_pred annotation provided by ANNOVAR">
+##INFO=<ID=PROVEAN_score,Number=.,Type=String,Description="PROVEAN_score annotation provided by ANNOVAR">
+##INFO=<ID=PROVEAN_converted_rankscore,Number=.,Type=String,Description="PROVEAN_converted_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=PROVEAN_pred,Number=.,Type=String,Description="PROVEAN_pred annotation provided by ANNOVAR">
+##INFO=<ID=VEST3_score,Number=.,Type=String,Description="VEST3_score annotation provided by ANNOVAR">
+##INFO=<ID=VEST3_rankscore,Number=.,Type=String,Description="VEST3_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=MetaSVM_score,Number=.,Type=String,Description="MetaSVM_score annotation provided by ANNOVAR">
+##INFO=<ID=MetaSVM_rankscore,Number=.,Type=String,Description="MetaSVM_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=MetaSVM_pred,Number=.,Type=String,Description="MetaSVM_pred annotation provided by ANNOVAR">
+##INFO=<ID=MetaLR_score,Number=.,Type=String,Description="MetaLR_score annotation provided by ANNOVAR">
+##INFO=<ID=MetaLR_rankscore,Number=.,Type=String,Description="MetaLR_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=MetaLR_pred,Number=.,Type=String,Description="MetaLR_pred annotation provided by ANNOVAR">
+##INFO=<ID=M-CAP_score,Number=.,Type=String,Description="M-CAP_score annotation provided by ANNOVAR">
+##INFO=<ID=M-CAP_rankscore,Number=.,Type=String,Description="M-CAP_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=M-CAP_pred,Number=.,Type=String,Description="M-CAP_pred annotation provided by ANNOVAR">
+##INFO=<ID=CADD_raw,Number=.,Type=String,Description="CADD_raw annotation provided by ANNOVAR">
+##INFO=<ID=CADD_raw_rankscore,Number=.,Type=String,Description="CADD_raw_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=CADD_phred,Number=.,Type=String,Description="CADD_phred annotation provided by ANNOVAR">
+##INFO=<ID=DANN_score,Number=.,Type=String,Description="DANN_score annotation provided by ANNOVAR">
+##INFO=<ID=DANN_rankscore,Number=.,Type=String,Description="DANN_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=fathmm-MKL_coding_score,Number=.,Type=String,Description="fathmm-MKL_coding_score annotation provided by ANNOVAR">
+##INFO=<ID=fathmm-MKL_coding_rankscore,Number=.,Type=String,Description="fathmm-MKL_coding_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=fathmm-MKL_coding_pred,Number=.,Type=String,Description="fathmm-MKL_coding_pred annotation provided by ANNOVAR">
+##INFO=<ID=Eigen_coding_or_noncoding,Number=.,Type=String,Description="Eigen_coding_or_noncoding annotation provided by ANNOVAR">
+##INFO=<ID=Eigen-raw,Number=.,Type=String,Description="Eigen-raw annotation provided by ANNOVAR">
+##INFO=<ID=Eigen-PC-raw,Number=.,Type=String,Description="Eigen-PC-raw annotation provided by ANNOVAR">
+##INFO=<ID=GenoCanyon_score,Number=.,Type=String,Description="GenoCanyon_score annotation provided by ANNOVAR">
+##INFO=<ID=GenoCanyon_score_rankscore,Number=.,Type=String,Description="GenoCanyon_score_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=integrated_fitCons_score,Number=.,Type=String,Description="integrated_fitCons_score annotation provided by ANNOVAR">
+##INFO=<ID=integrated_fitCons_score_rankscore,Number=.,Type=String,Description="integrated_fitCons_score_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=integrated_confidence_value,Number=.,Type=String,Description="integrated_confidence_value annotation provided by ANNOVAR">
+##INFO=<ID=GERP++_RS,Number=.,Type=String,Description="GERP++_RS annotation provided by ANNOVAR">
+##INFO=<ID=GERP++_RS_rankscore,Number=.,Type=String,Description="GERP++_RS_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=phyloP100way_vertebrate,Number=.,Type=String,Description="phyloP100way_vertebrate annotation provided by ANNOVAR">
+##INFO=<ID=phyloP100way_vertebrate_rankscore,Number=.,Type=String,Description="phyloP100way_vertebrate_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=phyloP20way_mammalian,Number=.,Type=String,Description="phyloP20way_mammalian annotation provided by ANNOVAR">
+##INFO=<ID=phyloP20way_mammalian_rankscore,Number=.,Type=String,Description="phyloP20way_mammalian_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=phastCons100way_vertebrate,Number=.,Type=String,Description="phastCons100way_vertebrate annotation provided by ANNOVAR">
+##INFO=<ID=phastCons100way_vertebrate_rankscore,Number=.,Type=String,Description="phastCons100way_vertebrate_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=phastCons20way_mammalian,Number=.,Type=String,Description="phastCons20way_mammalian annotation provided by ANNOVAR">
+##INFO=<ID=phastCons20way_mammalian_rankscore,Number=.,Type=String,Description="phastCons20way_mammalian_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=SiPhy_29way_logOdds,Number=.,Type=String,Description="SiPhy_29way_logOdds annotation provided by ANNOVAR">
+##INFO=<ID=SiPhy_29way_logOdds_rankscore,Number=.,Type=String,Description="SiPhy_29way_logOdds_rankscore annotation provided by ANNOVAR">
+##INFO=<ID=Interpro_domain,Number=.,Type=String,Description="Interpro_domain annotation provided by ANNOVAR">
+##INFO=<ID=GTEx_V6_gene,Number=.,Type=String,Description="GTEx_V6_gene annotation provided by ANNOVAR">
+##INFO=<ID=GTEx_V6_tissue,Number=.,Type=String,Description="GTEx_V6_tissue annotation provided by ANNOVAR">
+##INFO=<ID=ALLELE_END,Number=0,Type=Flag,Description="Flag the end of ANNOVAR annotation for one alternative allele">
+##VEP="v91" time="2018-03-03 21:41:44" cache="pvactools/vep/homo_sapiens/87_GRCh37" ensembl-funcgen=91.4681d69 ensembl-io=91.923d668 ensembl=91.18ee742 ensembl-variation=91.c78d8b4 1000genomes="phase3" COSMIC="78" ClinVar="201610" ESP="20141103" ExAC="0.3" HGMD-PUBLIC="20162" assembly="GRCh37.p13" dbSNP="147" gencode="GENCODE 19" genebuild="2011-04" polyphen="2.2.2" regbuild="1.0" sift="sift5.2.2"
+##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|DownstreamProtein|ProteinLengthChange|WildtypeProtein">
+##DownstreamProtein=Predicted downstream translation for frameshift mutations
+##ProteinLengthChange=Predicted change in protein product length
+##WildtypeProtein=The normal, non-mutated protein sequence
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S-01
+1	208063100	.	G	A,GA	.	.	DP=153;ECNT=1;IN_PON;POP_AF=2.500e-06,2.500e-06;P_GERMLINE=-7.918e-02,-7.918e-02;TLOD=33.41,87.34;ANNOVAR_DATE=2017-07-17;Func.refGene=intronic;Gene.refGene=CD34;GeneDetail.refGene=.;ExonicFunc.refGene=.;AAChange.refGene=.;cytoBand=1q32.2;genomicSuperDups=.;esp6500siv2_all=.;1000g2015aug_all=.;ExAC_ALL=0.0004;ExAC_AFR=0.0002;ExAC_AMR=0.0007;ExAC_EAS=0.0003;ExAC_FIN=0.0002;ExAC_NFE=0.0004;ExAC_OTH=0.0016;ExAC_SAS=0.0002;gnomAD_exome_ALL=0.0032;gnomAD_exome_AFR=0.0029;gnomAD_exome_AMR=0.0014;gnomAD_exome_ASJ=0.0024;gnomAD_exome_EAS=0.0021;gnomAD_exome_FIN=0.0133;gnomAD_exome_NFE=0.0021;gnomAD_exome_OTH=0.0031;gnomAD_exome_SAS=0.0011;snp129=.;avsnp150=.;cosmic70=.;CLINSIG=.;CLNDBN=.;CLNACC=.;CLNDSDB=.;CLNDSDBID=.;SIFT_score=0.004;SIFT_converted_rankscore=0.654;SIFT_pred=D;Polyphen2_HDIV_score=0.08;Polyphen2_HDIV_rankscore=0.230;Polyphen2_HDIV_pred=B;Polyphen2_HVAR_score=0.022;Polyphen2_HVAR_rankscore=0.184;Polyphen2_HVAR_pred=B;LRT_score=.;LRT_converted_rankscore=.;LRT_pred=.;MutationTaster_score=1;MutationTaster_converted_rankscore=0.090;MutationTaster_pred=N;MutationAssessor_score=.;MutationAssessor_score_rankscore=.;MutationAssessor_pred=.;FATHMM_score=0.71;FATHMM_converted_rankscore=0.512;FATHMM_pred=T;PROVEAN_score=-1.18;PROVEAN_converted_rankscore=0.301;PROVEAN_pred=N;VEST3_score=0.067;VEST3_rankscore=0.054;MetaSVM_score=-0.999;MetaSVM_rankscore=0.301;MetaSVM_pred=T;MetaLR_score=0.069;MetaLR_rankscore=0.284;MetaLR_pred=T;M-CAP_score=0.144;M-CAP_rankscore=0.827;M-CAP_pred=D;CADD_raw=-0.074;CADD_raw_rankscore=0.087;CADD_phred=1.929;DANN_score=0.982;DANN_rankscore=0.382;fathmm-MKL_coding_score=0.041;fathmm-MKL_coding_rankscore=0.094;fathmm-MKL_coding_pred=N;Eigen_coding_or_noncoding=c;Eigen-raw=-1.256;Eigen-PC-raw=-1.367;GenoCanyon_score=1.000;GenoCanyon_score_rankscore=0.443;integrated_fitCons_score=0.503;integrated_fitCons_score_rankscore=0.197;integrated_confidence_value=0;GERP++_RS=-2.87;GERP++_RS_rankscore=0.053;phyloP100way_vertebrate=0.130;phyloP100way_vertebrate_rankscore=0.156;phyloP20way_mammalian=-1.544;phyloP20way_mammalian_rankscore=0.010;phastCons100way_vertebrate=0.000;phastCons100way_vertebrate_rankscore=0.063;phastCons20way_mammalian=0.001;phastCons20way_mammalian_rankscore=0.043;SiPhy_29way_logOdds=0.213;SiPhy_29way_logOdds_rankscore=0.001;Interpro_domain=.;GTEx_V6_gene=.;GTEx_V6_tissue=.;ALLELE_END;ANNOVAR_DATE=2017-07-17;Func.refGene=intronic;Gene.refGene=CD34;GeneDetail.refGene=.;ExonicFunc.refGene=.;AAChange.refGene=.;cytoBand=1q32.2;genomicSuperDups=.;esp6500siv2_all=0.4029;1000g2015aug_all=0.48762;ExAC_ALL=0.5013;ExAC_AFR=0.3572;ExAC_AMR=0.5222;ExAC_EAS=0.4745;ExAC_FIN=0.5789;ExAC_NFE=0.5140;ExAC_OTH=0.5186;ExAC_SAS=0.4923;gnomAD_exome_ALL=0.4928;gnomAD_exome_AFR=0.3690;gnomAD_exome_AMR=0.5038;gnomAD_exome_ASJ=0.5005;gnomAD_exome_EAS=0.4553;gnomAD_exome_FIN=0.5359;gnomAD_exome_NFE=0.5055;gnomAD_exome_OTH=0.4888;gnomAD_exome_SAS=0.4820;snp129=.;avsnp150=rs397751524;cosmic70=.;CLINSIG=.;CLNDBN=.;CLNACC=.;CLNDSDB=.;CLNDSDBID=.;SIFT_score=.;SIFT_converted_rankscore=.;SIFT_pred=.;Polyphen2_HDIV_score=.;Polyphen2_HDIV_rankscore=.;Polyphen2_HDIV_pred=.;Polyphen2_HVAR_score=.;Polyphen2_HVAR_rankscore=.;Polyphen2_HVAR_pred=.;LRT_score=.;LRT_converted_rankscore=.;LRT_pred=.;MutationTaster_score=.;MutationTaster_converted_rankscore=.;MutationTaster_pred=.;MutationAssessor_score=.;MutationAssessor_score_rankscore=.;MutationAssessor_pred=.;FATHMM_score=.;FATHMM_converted_rankscore=.;FATHMM_pred=.;PROVEAN_score=.;PROVEAN_converted_rankscore=.;PROVEAN_pred=.;VEST3_score=.;VEST3_rankscore=.;MetaSVM_score=.;MetaSVM_rankscore=.;MetaSVM_pred=.;MetaLR_score=.;MetaLR_rankscore=.;MetaLR_pred=.;M-CAP_score=.;M-CAP_rankscore=.;M-CAP_pred=.;CADD_raw=.;CADD_raw_rankscore=.;CADD_phred=.;DANN_score=.;DANN_rankscore=.;fathmm-MKL_coding_score=.;fathmm-MKL_coding_rankscore=.;fathmm-MKL_coding_pred=.;Eigen_coding_or_noncoding=.;Eigen-raw=.;Eigen-PC-raw=.;GenoCanyon_score=.;GenoCanyon_score_rankscore=.;integrated_fitCons_score=.;integrated_fitCons_score_rankscore=.;integrated_confidence_value=.;GERP++_RS=.;GERP++_RS_rankscore=.;phyloP100way_vertebrate=.;phyloP100way_vertebrate_rankscore=.;phyloP20way_mammalian=.;phyloP20way_mammalian_rankscore=.;phastCons100way_vertebrate=.;phastCons100way_vertebrate_rankscore=.;phastCons20way_mammalian=.;phastCons20way_mammalian_rankscore=.;SiPhy_29way_logOdds=.;SiPhy_29way_logOdds_rankscore=.;Interpro_domain=.;GTEx_V6_gene=.;GTEx_V6_tissue=.;ALLELE_END;CSQ=A|intron_variant|MODIFIER|CD34|ENSG00000174059|Transcript|ENST00000310833|protein_coding||4/7||||||||||-1||HGNC|1662|||MLVRRGARAGPRMPRGWTALCLLSLLPSGFMSLDNNGTATPELPTQGTFSNVSTNVSYQETTTPSTLGSTSLHPVSQHGNEATTNITETTVKFTSTSVITSVYGNTNSSVQSQTSVISTVFTTPANVSTPETTLKPSLSPGNVSDLSTTSTSLATSPTKPYTSSSPILSDIKAEIKCSGIREVKLTQGICLEQNKTSSCAEFKKDRGEGLARVLCGEEQADADAGAQVCSLLLAQSEVRPQCLLLVLANRTEISSKLQLMKKHQSDLKKLGILDFTEQDVASHQSYSQKTLIALVTSGALLAVLGITGYFLMNRRSWSPTGERLGEDPYYTENGGGQGYSSGPGTSPEAQGKASVNRGAQENGTGQATSRNGHSARQHVVADTEL,GA|intron_variant|MODIFIER|CD34|ENSG00000174059|Transcript|ENST00000310833|protein_coding||4/7||||||||||-1||HGNC|1662|||MLVRRGARAGPRMPRGWTALCLLSLLPSGFMSLDNNGTATPELPTQGTFSNVSTNVSYQETTTPSTLGSTSLHPVSQHGNEATTNITETTVKFTSTSVITSVYGNTNSSVQSQTSVISTVFTTPANVSTPETTLKPSLSPGNVSDLSTTSTSLATSPTKPYTSSSPILSDIKAEIKCSGIREVKLTQGICLEQNKTSSCAEFKKDRGEGLARVLCGEEQADADAGAQVCSLLLAQSEVRPQCLLLVLANRTEISSKLQLMKKHQSDLKKLGILDFTEQDVASHQSYSQKTLIALVTSGALLAVLGITGYFLMNRRSWSPTGERLGEDPYYTENGGGQGYSSGPGTSPEAQGKASVNRGAQENGTGQATSRNGHSARQHVVADTEL,A|intron_variant|MODIFIER|CD34|ENSG00000174059|Transcript|ENST00000356522|protein_coding||4/7||||||||||-1||HGNC|1662|||MLVRRGARAGPRMPRGWTALCLLSLLPSGFMSLDNNGTATPELPTQGTFSNVSTNVSYQETTTPSTLGSTSLHPVSQHGNEATTNITETTVKFTSTSVITSVYGNTNSSVQSQTSVISTVFTTPANVSTPETTLKPSLSPGNVSDLSTTSTSLATSPTKPYTSSSPILSDIKAEIKCSGIREVKLTQGICLEQNKTSSCAEFKKDRGEGLARVLCGEEQADADAGAQVCSLLLAQSEVRPQCLLLVLANRTEISSKLQLMKKHQSDLKKLGILDFTEQDVASHQSYSQKTLIALVTSGALLAVLGITGYFLMNRRSWSPTGERLELEP,GA|intron_variant|MODIFIER|CD34|ENSG00000174059|Transcript|ENST00000356522|protein_coding||4/7||||||||||-1||HGNC|1662|||MLVRRGARAGPRMPRGWTALCLLSLLPSGFMSLDNNGTATPELPTQGTFSNVSTNVSYQETTTPSTLGSTSLHPVSQHGNEATTNITETTVKFTSTSVITSVYGNTNSSVQSQTSVISTVFTTPANVSTPETTLKPSLSPGNVSDLSTTSTSLATSPTKPYTSSSPILSDIKAEIKCSGIREVKLTQGICLEQNKTSSCAEFKKDRGEGLARVLCGEEQADADAGAQVCSLLLAQSEVRPQCLLLVLANRTEISSKLQLMKKHQSDLKKLGILDFTEQDVASHQSYSQKTLIALVTSGALLAVLGITGYFLMNRRSWSPTGERLELEP,A|missense_variant|MODERATE|CD34|ENSG00000174059|Transcript|ENST00000367036|protein_coding|1/5||||738|83|28|S/F|tCt/tTt|||-1||HGNC|1662|||MDFGPGRLFRFFSYCVVAHIQLAVFFFSVGILETRILLADGAEFKKDRGEGLARVLCGEEQADADAGAQVCSLLLAQSEVRPQCLLLVLANRTEISSKLQLMKKHQSDLKKLGILDFTEQDVASHQSYSQKTLIALVTSGALLAVLGITGYFLMNRRSWSPTGERLGEDPYYTENGGGQGYSSGPGTSPEAQGKASVNRGAQENGTGQATSRNGHSARQHVVADTEL,GA|frameshift_variant|HIGH|CD34|ENSG00000174059|Transcript|ENST00000367036|protein_coding|1/5||||738|83|28|S/FX|tCt/tTCt|||-1||HGNC|1662|FCWNFRNKDPSCGRGGV|-182|MDFGPGRLFRFFSYCVVAHIQLAVFFFSVGILETRILLADGAEFKKDRGEGLARVLCGEEQADADAGAQVCSLLLAQSEVRPQCLLLVLANRTEISSKLQLMKKHQSDLKKLGILDFTEQDVASHQSYSQKTLIALVTSGALLAVLGITGYFLMNRRSWSPTGERLGEDPYYTENGGGQGYSSGPGTSPEAQGKASVNRGAQENGTGQATSRNGHSARQHVVADTEL,A|intron_variant&non_coding_transcript_variant|MODIFIER|CD34|ENSG00000174059|Transcript|ENST00000485761|processed_transcript||2/5||||||||||-1||HGNC|1662|||,GA|intron_variant&non_coding_transcript_variant|MODIFIER|CD34|ENSG00000174059|Transcript|ENST00000485761|processed_transcript||2/5||||||||||-1||HGNC|1662|||,A|intron_variant|MODIFIER|CD34|ENSG00000174059|Transcript|ENST00000537704|protein_coding||3/6||||||||||-1||HGNC|1662|||MFLQMYPTKKLQHLVPLEVPACTLCLNMAMRPQQTSQAEIKCSGIREVKLTQGICLEQNKTSSCAEFKKDRGEGLARVLCGEEQADADAGAQVCSLLLAQSEVRPQCLLLVLANRTEISSKLQLMKKHQSDLKKLGILDFTEQDVASHQSYSQKTLIALVTSGALLAVLGITGYFLMNRRSWSPTGERLGEDPYYTENGGGQGYSSGPGTSPEAQGKASVNRGAQENGTGQATSRNGHSARQHVVADTEL,GA|intron_variant|MODIFIER|CD34|ENSG00000174059|Transcript|ENST00000537704|protein_coding||3/6||||||||||-1||HGNC|1662|||MFLQMYPTKKLQHLVPLEVPACTLCLNMAMRPQQTSQAEIKCSGIREVKLTQGICLEQNKTSSCAEFKKDRGEGLARVLCGEEQADADAGAQVCSLLLAQSEVRPQCLLLVLANRTEISSKLQLMKKHQSDLKKLGILDFTEQDVASHQSYSQKTLIALVTSGALLAVLGITGYFLMNRRSWSPTGERLGEDPYYTENGGGQGYSSGPGTSPEAQGKASVNRGAQENGTGQATSRNGHSARQHVVADTEL	GT:AD:AF:F1R2:F2R1:MBQ:MFRL:MMQ:MPOS:SA_MAP_AF:SA_POST_PROB	0/1/2:8,48,41:0.352,0.441:4,20,15,1:4,26,25,1:36,36:197,166,166:60,60:20,33:0.212,0.414,0.417:1.000,6.982e-07,1.725e-04
