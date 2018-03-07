@@ -201,7 +201,7 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
             'python2.7',
             args.iedb_executable_path,
             args.method,
-            args.allele,
+            args.allele.replace('-DPB', '/DPB'),
             args.input_file.name,
         ]
 

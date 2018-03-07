@@ -27,7 +27,7 @@ def define_parser():
     )
     parser.add_argument(
         "-d", "--downstream-sequence-length",
-        default='1000',
+        default="1000",
         help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
             + "Use 'full' to include the full downstream sequence. Default: 1000"
     )
@@ -103,7 +103,7 @@ def main(args_input = sys.argv[1:]):
     if args.downstream_sequence_length == 'full':
         downstream_sequence_length = None
     elif args.downstream_sequence_length.isdigit():
-        downstream_sequence_length = args.downstream_sequence_length
+        downstream_sequence_length = int(args.downstream_sequence_length)
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
