@@ -1,9 +1,9 @@
 import vcf
 import csv
 import sys
-import re
 from abc import ABCMeta
 from collections import OrderedDict
+from lib.csq_parser import CsqParser
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -89,7 +89,7 @@ class VcfConverter(InputFileConverter):
             alt = alt[1:]
         return ref, alt
 
-    def parse_csq_format(self, vcf_reader):
+    def csq_parser(self, vcf_reader):
         info_fields = vcf_reader.infos
 
         if 'CSQ' not in info_fields:
@@ -98,9 +98,7 @@ class VcfConverter(InputFileConverter):
             sys.exit('Failed to extract format string from info description for tag (CSQ)')
         else:
             csq_header = info_fields['CSQ']
-            format_pattern = re.compile('Format: (.*)')
-            match = format_pattern.search(csq_header.desc)
-            return match.group(1)
+            return CsqParser(csq_header.desc)
 
     def resolve_alleles(self, entry):
         alleles = {}
@@ -119,20 +117,6 @@ class VcfConverter(InputFileConverter):
                 alleles[alt] = alt
 
         return alleles
-
-    def parse_csq_entries_for_allele(self, csq_entries, csq_format, csq_allele):
-        csq_format_array = csq_format.split('|')
-
-        transcripts = []
-        for entry in csq_entries:
-            values = entry.split('|')
-            transcript = {}
-            for key, value in zip(csq_format_array, values):
-                transcript[key] = value
-            if transcript['Allele'] == csq_allele:
-                transcripts.append(transcript)
-
-        return transcripts
 
     def resolve_consequence(self, consequence_string):
         consequences = {consequence.lower() for consequence in consequence_string.split('&')}
@@ -191,9 +175,9 @@ class VcfConverter(InputFileConverter):
         tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
 
-        csq_format = self.parse_csq_format(vcf_reader)
         indexes = []
         count = 1
+        csq_parser = self.csq_parser(vcf_reader)
         for entry in vcf_reader:
             chromosome = entry.CHROM
             start      = entry.affected_start
@@ -251,10 +235,10 @@ class VcfConverter(InputFileConverter):
                                 coverage_for_entry[coverage_type + '_depth'] = self.calculate_coverage(int(brct[ref_base]), int(brct[var_base]))
                                 coverage_for_entry[coverage_type + '_vaf']   = self.calculate_vaf(int(brct[ref_base]), int(brct[var_base]))
 
-                transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, alt)
+                transcripts = csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)
                 if len(transcripts) == 0:
                     csq_allele = alleles_dict[alt]
-                    transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
+                    transcripts = csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_allele)
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
