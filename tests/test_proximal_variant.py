@@ -32,3 +32,10 @@ class ProximalVariantTests(unittest.TestCase):
 
         self.assertTrue(phased_somatic_variant)
         self.assertFalse(potential_proximal_variants)
+
+    def test_found_potential_proximal_variants(self):
+        somatic_variant = next(self.somatic_vcf_reader.fetch('chr2', 227893862, 227893863))
+        (phased_somatic_variant, potential_proximal_variants) = self.klass.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, "T", "ENST00000309931")
+
+        self.assertTrue(phased_somatic_variant)
+        self.assertTrue(potential_proximal_variants)
