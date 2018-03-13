@@ -54,6 +54,26 @@ class VcfConverter(InputFileConverter):
         self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
         if self.proximal_variants_vcf and not self.proximal_variants_tsv:
             sys.exit("A proximal variants TSV output path needs to be specified if a proximal variants input VCF is provided")
+        if self.input_file.endswith('.gz'):
+            mode = 'rb'
+        else:
+            mode = 'r'
+        self.reader = open(self.input_file, mode)
+        self.vcf_reader = vcf.Reader(self.reader)
+        if len(self.vcf_reader.samples) > 1:
+            sys.exit('ERROR: VCF file contains more than one sample')
+        self.writer = open(self.output_file, 'w')
+        self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers())
+        self.tsv_writer.writeheader()
+
+        self.csq_parser = self.create_csq_parser()
+        if self.proximal_variants_vcf:
+            self.proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
+            self.proximal_variants_writer = csv.DictWriter(self.proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'protein_position', 'type', 'main_somatic_variant'])
+            self.proximal_variants_writer.writeheader()
+            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf)
+            self.somatic_vcf_fh = open(self.input_file, mode)
+            self.somatic_vcf_reader = vcf.Reader(self.somatic_vcf_fh)
 
     def parse_bam_readcount_file(self, bam_readcount_file):
         with open(bam_readcount_file, 'r') as reader:
@@ -94,8 +114,8 @@ class VcfConverter(InputFileConverter):
             alt = alt[1:]
         return ref, alt
 
-    def csq_parser(self, vcf_reader):
-        info_fields = vcf_reader.infos
+    def create_csq_parser(self):
+        info_fields = self.vcf_reader.infos
 
         if 'CSQ' not in info_fields:
             sys.exit('Input VCF does not contain a CSQ header. Please annotate the VCF with VEP before running it.')
@@ -145,7 +165,7 @@ class VcfConverter(InputFileConverter):
     def calculate_vaf(self, ref, var):
         return (var / (self.calculate_coverage(ref, var)+0.00001)) * 100
 
-    def execute(self):
+    def parse_gene_expns_file(self):
         gene_expns = {}
         if self.gene_expn_file is not None:
             with open(self.gene_expn_file, 'r') as reader:
@@ -154,14 +174,18 @@ class VcfConverter(InputFileConverter):
                     if row['tracking_id'] not in gene_expns.keys():
                         gene_expns[row['tracking_id']] = {}
                     gene_expns[row['tracking_id']][row['locus']] = row
+        return gene_expns
 
+    def parse_transcript_expns_file(self):
         transcript_expns = {}
         if self.transcript_expn_file is not None:
             with open(self.transcript_expn_file, 'r') as reader:
                 isoforms_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 for row in isoforms_tsv_reader:
                     transcript_expns[row['tracking_id']] = row
+        return transcript_expns
 
+    def parse_coverage_files(self):
         coverage = {}
         for variant_type in ['snvs', 'indels']:
             for data_type in ['normal', 'tdna', 'trna']:
@@ -171,43 +195,96 @@ class VcfConverter(InputFileConverter):
                     if variant_type not in coverage:
                         coverage[variant_type] = {}
                     coverage[variant_type][data_type] = self.parse_bam_readcount_file(coverage_file)
+        return coverage
 
-        if self.input_file.endswith('.gz'):
-            mode = 'rb'
+    def determine_bam_readcount_bases(self, entry, reference, alt, start):
+        if len(reference) == len(alt):
+            bam_readcount_position = entry.POS
+            variant_type = 'snvs'
+            ref_base = reference
+            var_base = alt
         else:
-            mode = 'r'
-        reader = open(self.input_file, mode)
-        vcf_reader = vcf.Reader(reader)
-        if len(vcf_reader.samples) > 1:
-            sys.exit('ERROR: VCF file contains more than one sample')
-        writer = open(self.output_file, 'w')
-        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers())
-        tsv_writer.writeheader()
+            if self.is_deletion(reference, alt):
+                bam_readcount_position = start + 1
+                (simplified_reference, simplified_alt) = self.simplify_indel_allele(reference, alt)
+                ref_base = reference[1:2]
+                var_base = '-' + simplified_reference
+            elif self.is_insertion(reference, alt):
+                bam_readcount_position = start
+                (simplified_reference, simplified_alt) = self.simplify_indel_allele(reference, alt)
+                ref_base = reference
+                var_base = '+' + simplified_alt
+            variant_type = 'indels'
+        return (bam_readcount_position, ref_base, var_base, variant_type)
+
+    def calculate_coverage_for_entry(self, coverage, entry, reference, alt, start, chromosome):
+        (bam_readcount_position, ref_base, var_base, variant_type) = self.determine_bam_readcount_bases(entry, reference, alt, start)
+        coverage_for_entry = {}
+        for coverage_type in ['normal', 'tdna', 'trna']:
+            coverage_for_entry[coverage_type + '_depth'] = 'NA'
+            coverage_for_entry[coverage_type + '_vaf'] = 'NA'
+        if variant_type in coverage:
+            for coverage_type in coverage[variant_type]:
+                if (
+                    chromosome in coverage[variant_type][coverage_type]
+                    and str(bam_readcount_position) in coverage[variant_type][coverage_type][chromosome]
+                    and ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]
+                ):
+                    brct = self.parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base])
+                    if ref_base in brct and var_base in brct:
+                        coverage_for_entry[coverage_type + '_depth'] = self.calculate_coverage(int(brct[ref_base]), int(brct[var_base]))
+                        coverage_for_entry[coverage_type + '_vaf']   = self.calculate_vaf(int(brct[ref_base]), int(brct[var_base]))
+        return coverage_for_entry
+
+    def write_proximal_variant_entries(self, entry, alt, transcript_name, index):
+        proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name)
+        for (proximal_variant, csq_entry) in proximal_variants:
+            if len(list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
+                proximal_variant_type = 'somatic'
+            else:
+                proximal_variant_type = 'germline'
+            proximal_variant_entry = {
+                'chromosome_name': proximal_variant.CHROM,
+                'start': proximal_variant.affected_start,
+                'stop': proximal_variant.affected_end,
+                'reference': proximal_variant.REF,
+                'variant': proximal_variant.ALT[0],
+                'amino_acid_change': csq_entry['Amino_acids'],
+                'protein_position': csq_entry['Protein_position'],
+                'type': proximal_variant_type,
+                'main_somatic_variant': index,
+            }
+            self.proximal_variants_writer.writerow(proximal_variant_entry)
+
+    def close_filehandles(self):
+        self.writer.close()
+        self.reader.close()
+        if self.proximal_variants_vcf:
+            self.proximal_variant_parser.fh.close()
+            self.proximal_variants_tsv_fh.close()
+            self.somatic_vcf_fh.close()
+
+    def execute(self):
+        gene_expns = self.parse_gene_expns_file()
+        transcript_expns = self.parse_transcript_expns_file()
+        coverage = self.parse_coverage_files()
 
         indexes = []
         count = 1
-        csq_parser = self.csq_parser(vcf_reader)
-        if self.proximal_variants_vcf:
-            proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
-            proximal_variants_writer = csv.DictWriter(proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'protein_position', 'type', 'main_somatic_variant'])
-            proximal_variants_writer.writeheader()
-            proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf)
-            somatic_vcf_fh = open(self.input_file, mode)
-            somatic_vcf_reader = vcf.Reader(somatic_vcf_fh)
-        for entry in vcf_reader:
+        for entry in self.vcf_reader:
             chromosome = entry.CHROM
             start      = entry.affected_start
             stop       = entry.affected_end
             reference  = entry.REF
             alts       = entry.ALT
 
-            genotype = entry.genotype(vcf_reader.samples[0])
+            genotype = entry.genotype(self.vcf_reader.samples[0])
             if genotype.gt_type is None or genotype.gt_type == 0:
                 #The genotype is uncalled or hom_ref
                 continue
 
-            if len(vcf_reader.samples) == 1:
-                genotype = entry.genotype(vcf_reader.samples[0])
+            if len(self.vcf_reader.samples) == 1:
+                genotype = entry.genotype(self.vcf_reader.samples[0])
                 if genotype.gt_type is None or genotype.gt_type == 0:
                     #The genotype is uncalled or hom_ref
                     continue
@@ -218,43 +295,12 @@ class VcfConverter(InputFileConverter):
                 if genotype.gt_bases and alt not in genotype.gt_bases.split('/'):
                     continue
 
-                if entry.is_indel:
-                    if self.is_deletion(reference, alt):
-                        bam_readcount_position = start + 1
-                        (simplified_reference, simplified_alt) = self.simplify_indel_allele(reference, alt)
-                        ref_base = reference[1:2]
-                        var_base = '-' + simplified_reference
-                    elif self.is_insertion(reference, alt):
-                        bam_readcount_position = start
-                        (simplified_reference, simplified_alt) = self.simplify_indel_allele(reference, alt)
-                        ref_base = reference
-                        var_base = '+' + simplified_alt
-                    variant_type = 'indels'
-                else:
-                    bam_readcount_position = entry.POS
-                    variant_type = 'snvs'
-                    ref_base = reference
-                    var_base = alt
-                coverage_for_entry = {}
-                for coverage_type in ['normal', 'tdna', 'trna']:
-                    coverage_for_entry[coverage_type + '_depth'] = 'NA'
-                    coverage_for_entry[coverage_type + '_vaf'] = 'NA'
-                if variant_type in coverage:
-                    for coverage_type in coverage[variant_type]:
-                        if (
-                            chromosome in coverage[variant_type][coverage_type]
-                            and str(bam_readcount_position) in coverage[variant_type][coverage_type][chromosome]
-                            and ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]
-                        ):
-                            brct = self.parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base])
-                            if ref_base in brct and var_base in brct:
-                                coverage_for_entry[coverage_type + '_depth'] = self.calculate_coverage(int(brct[ref_base]), int(brct[var_base]))
-                                coverage_for_entry[coverage_type + '_vaf']   = self.calculate_vaf(int(brct[ref_base]), int(brct[var_base]))
+                coverage_for_entry = self.calculate_coverage_for_entry(coverage, entry, reference, alt, start, chromosome)
 
-                transcripts = csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)
+                transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)
                 if len(transcripts) == 0:
                     csq_allele = alleles_dict[alt]
-                    transcripts = csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_allele)
+                    transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_allele)
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
@@ -277,24 +323,7 @@ class VcfConverter(InputFileConverter):
                         count += 1
 
                     if self.proximal_variants_vcf:
-                        proximal_variants = proximal_variant_parser.extract(entry, alt, transcript_name)
-                        for (proximal_variant, csq_entry) in proximal_variants:
-                            if len(list(somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
-                                proximal_variant_type = 'somatic'
-                            else:
-                                proximal_variant_type = 'germline'
-                            proximal_variant_entry = {
-                                'chromosome_name': proximal_variant.CHROM,
-                                'start': proximal_variant.affected_start,
-                                'stop': proximal_variant.affected_end,
-                                'reference': proximal_variant.REF,
-                                'variant': proximal_variant.ALT[0],
-                                'amino_acid_change': csq_entry['Amino_acids'],
-                                'protein_position': csq_entry['Protein_position'],
-                                'type': proximal_variant_type,
-                                'main_somatic_variant': index,
-                            }
-                            proximal_variants_writer.writerow(proximal_variant_entry)
+                        self.write_proximal_variant_entries(entry, alt, transcript_name, index)
 
                     ensembl_gene_id = transcript['Gene']
                     output_row = {
@@ -334,14 +363,9 @@ class VcfConverter(InputFileConverter):
 
                     output_row.update(coverage_for_entry)
 
-                    tsv_writer.writerow(output_row)
+                    self.tsv_writer.writerow(output_row)
 
-        writer.close()
-        reader.close()
-        if self.proximal_variants_vcf:
-            proximal_variant_parser.fh.close()
-            proximal_variants_tsv_fh.close()
-            somatic_vcf_fh.close()
+        self.close_filehandles()
 
 class IntegrateConverter(InputFileConverter):
     def input_fieldnames(self):
