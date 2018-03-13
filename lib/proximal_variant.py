@@ -18,12 +18,28 @@ class ProximalVariant:
 
         if phased_somatic_variant is None:
             print("Warning: Main somatic variant not found in phased variants file: {}, {}".format(somatic_variant, alt))
-            return
+            return []
 
         if len(potential_proximal_variants) == 0:
-            return
-        #for entry in potential_proximal_variants:
-            #identify variants that are in phase with the phased_somatic_variant
+            return []
+
+        proximal_variants = []
+        sample = self.proximal_variants_vcf.samples[0]
+        if 'HP' in phased_somatic_variant.FORMAT:
+            somatic_phasing = phased_somatic_variant.genotype(sample)['HP']
+            for (entry, csq_entry) in potential_proximal_variants:
+                #identify variants that are in phase with the phased_somatic_variant
+                if 'HP' in entry.FORMAT:
+                    if entry.genotype(sample)['HP'] == somatic_phasing:
+                        proximal_variants.append([entry, csq_entry])
+                    elif entry.genotype(sample)['GT'] == '1/1':
+                        proximal_variants.append([entry, csq_entry])
+        elif phased_somatic_variant.genotype(sample)['GT'] == '1/1':
+            for (entry, csq_entry) in potential_proximal_variants:
+                if entry.genotype(sample)['GT'] in ['1/1', '0/1']:
+                    proximal_variants.append([entry, csq_entry])
+
+        return proximal_variants
 
     def find_phased_somatic_variant_and_potential_proximal_variants(self, somatic_variant, alt, transcript):
         potential_proximal_variants = []
