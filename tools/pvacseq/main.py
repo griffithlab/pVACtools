@@ -79,7 +79,7 @@ def main():
     except AttributeError as e:
         parser.print_help()
         print("Error: No command specified")
-        sys.exit(-1)
+        raise
 
 
 if __name__ == '__main__':

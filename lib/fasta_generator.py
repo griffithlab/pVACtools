@@ -63,7 +63,9 @@ class FastaGenerator(metaclass=ABCMeta):
 
     def get_wildtype_subsequence(self, position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line):
         one_flanking_sequence_length = self.determine_flanking_sequence_length(len(full_wildtype_sequence), peptide_sequence_length, line)
-        peptide_sequence_length = 2 * one_flanking_sequence_length + wildtype_amino_acid_length
+        ##clip by wt sequence length, otherwise with deletions peptide_sequence_length may exceeds full wt sequence length,
+        ##and the code below tries extracting ranges beyond the wt sequence
+        peptide_sequence_length = min(2 * one_flanking_sequence_length + wildtype_amino_acid_length,len(full_wildtype_sequence))
 
         # We want to extract a subset from full_wildtype_sequence that is
         # peptide_sequence_length long so that the position ends
@@ -165,7 +167,6 @@ class FastaGenerator(metaclass=ABCMeta):
             if variant_type == 'FS':
                 mutation_start_position, wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
                 downstream_sequence = line['downstream_amino_acid_sequence']
-
                 if self.downstream_sequence_length and len(downstream_sequence) > self.downstream_sequence_length:
                     downstream_sequence = downstream_sequence[0:self.downstream_sequence_length]
                 mutant_subsequence = left_flanking_subsequence + downstream_sequence
