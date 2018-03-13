@@ -4,6 +4,7 @@ import sys
 from abc import ABCMeta
 from collections import OrderedDict
 from lib.csq_parser import CsqParser
+from lib.proximal_variant import ProximalVariant
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -49,6 +50,10 @@ class VcfConverter(InputFileConverter):
         self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
         self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
         self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
+        self.proximal_variants_vcf = kwargs.pop('proximal_variants_vcf', None)
+        self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
+        if self.proximal_variants_vcf and not self.proximal_variants_tsv:
+            sys.exit("A proximal variants TSV output path needs to be specified if a proximal variants input VCF is provided")
 
     def parse_bam_readcount_file(self, bam_readcount_file):
         with open(bam_readcount_file, 'r') as reader:
@@ -167,7 +172,11 @@ class VcfConverter(InputFileConverter):
                         coverage[variant_type] = {}
                     coverage[variant_type][data_type] = self.parse_bam_readcount_file(coverage_file)
 
-        reader = open(self.input_file, 'r')
+        if self.input_file.endswith('.gz'):
+            mode = 'rb'
+        else:
+            mode = 'r'
+        reader = open(self.input_file, mode)
         vcf_reader = vcf.Reader(reader)
         if len(vcf_reader.samples) > 1:
             sys.exit('ERROR: VCF file contains more than one sample')
@@ -176,6 +185,13 @@ class VcfConverter(InputFileConverter):
         tsv_writer.writeheader()
 
         csq_parser = self.csq_parser(vcf_reader)
+        if self.proximal_variants_vcf:
+            proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
+            proximal_variants_writer = csv.DictWriter(proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'protein_position', 'type', 'main_somatic_variant'])
+            proximal_variants_writer.writeheader()
+            proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf)
+            somatic_vcf_fh = open(self.input_file, mode)
+            somatic_vcf_reader = vcf.Reader(somatic_vcf_fh)
         for entry in vcf_reader:
             chromosome = entry.CHROM
             start      = entry.affected_start
@@ -257,6 +273,27 @@ class VcfConverter(InputFileConverter):
                         sys.exit("Warning: TSV index already exists: {}".format(index))
                     else:
                         indexes.append(index)
+
+                    if self.proximal_variants_vcf:
+                        proximal_variants = proximal_variant_parser.extract(entry, alt, transcript_name)
+                        for (proximal_variant, csq_entry) in proximal_variants:
+                            if len(list(somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
+                                proximal_variant_type = 'somatic'
+                            else:
+                                proximal_variant_type = 'germline'
+                            proximal_variant_entry = {
+                                'chromosome_name': proximal_variant.CHROM,
+                                'start': proximal_variant.affected_start,
+                                'stop': proximal_variant.affected_end,
+                                'reference': proximal_variant.REF,
+                                'variant': proximal_variant.ALT[0],
+                                'amino_acid_change': csq_entry['Amino_acids'],
+                                'protein_position': csq_entry['Protein_position'],
+                                'type': proximal_variant_type,
+                                'main_somatic_variant': index,
+                            }
+                            proximal_variants_writer.writerow(proximal_variant_entry)
+
                     ensembl_gene_id = transcript['Gene']
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
@@ -299,6 +336,10 @@ class VcfConverter(InputFileConverter):
 
         writer.close()
         reader.close()
+        if self.proximal_variants_vcf:
+            proximal_variant_parser.fh.close()
+            proximal_variants_tsv_fh.close()
+            somatic_vcf_fh.close()
 
 class IntegrateConverter(InputFileConverter):
     def input_fieldnames(self):
