@@ -44,6 +44,7 @@ class Pipeline(metaclass=ABCMeta):
         self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
         self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
         self.proximal_variants_file      = kwargs.pop('proximal_variants_file', None)
+        self.phased_proximal_variants_vcf = kwargs.pop('phased_proximal_variants_vcf', None)
         self.net_chop_method             = kwargs.pop('net_chop_method', None)
         self.net_chop_threshold          = kwargs.pop('net_chop_threshold', 0.5)
         self.netmhc_stab                 = kwargs.pop('netmhc_stab', False)
@@ -171,6 +172,11 @@ class Pipeline(metaclass=ABCMeta):
                 convert_params[attribute] = getattr(self, attribute)
             else:
                 convert_params[attribute] = None
+        if self.phased_proximal_variants_vcf is not None:
+            convert_params['proximal_variants_vcf'] = self.phased_proximal_variants_vcf
+            proximal_variants_tsv = os.path.join(self.output_dir, self.sample_name + '.proximal_variants.tsv')
+            convert_params['proximal_variants_tsv'] = proximal_variants_tsv
+            self.proximal_variants_file = proximal_variants_tsv
 
         converter = self.converter(convert_params)
         converter.execute()
