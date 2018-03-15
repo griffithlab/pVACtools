@@ -13,8 +13,8 @@ class ProximalVariant:
             sys.exit('Failed to extract format string from info description for tag (CSQ)')
         self.csq_parser = CsqParser(info_fields['CSQ'].desc)
 
-    def extract(self, somatic_variant, alt, transcript):
-        (phased_somatic_variant, potential_proximal_variants) = self.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, alt, transcript)
+    def extract(self, somatic_variant, alt, transcript, peptide_size):
+        (phased_somatic_variant, potential_proximal_variants) = self.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, alt, transcript, peptide_size)
 
         if phased_somatic_variant is None:
             return []
@@ -40,9 +40,10 @@ class ProximalVariant:
 
         return proximal_variants
 
-    def find_phased_somatic_variant_and_potential_proximal_variants(self, somatic_variant, alt, transcript):
+    def find_phased_somatic_variant_and_potential_proximal_variants(self, somatic_variant, alt, transcript, peptide_size):
+        flanking_length = peptide_size * 3 / 2
         potential_proximal_variants = []
-        for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.start - 100, somatic_variant.end + 100):
+        for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.start - flanking_length, somatic_variant.end + flanking_length):
             if entry.start == somatic_variant.start and entry.end == somatic_variant.end and entry.ALT[0] == alt:
                 phased_somatic_variant = entry
                 continue

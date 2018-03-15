@@ -172,6 +172,7 @@ class Pipeline(metaclass=ABCMeta):
             proximal_variants_tsv = os.path.join(self.output_dir, self.sample_name + '.proximal_variants.tsv')
             convert_params['proximal_variants_tsv'] = proximal_variants_tsv
             self.proximal_variants_file = proximal_variants_tsv
+            convert_params['peptide_length'] = self.peptide_sequence_length
 
         converter = self.converter(convert_params)
         converter.execute()
