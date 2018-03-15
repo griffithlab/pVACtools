@@ -316,6 +316,7 @@ class InputFileConverterTests(unittest.TestCase):
             'output_file': convert_output_file.name,
             'proximal_variants_vcf': convert_input_proximal_variants_file,
             'proximal_variants_tsv': convert_output_proximal_variants_file.name,
+            'peptide_length': 60,
         }
         converter = VcfConverter(**convert_vcf_params)
 

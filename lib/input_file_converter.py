@@ -52,8 +52,9 @@ class VcfConverter(InputFileConverter):
         self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
         self.proximal_variants_vcf = kwargs.pop('proximal_variants_vcf', None)
         self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
-        if self.proximal_variants_vcf and not self.proximal_variants_tsv:
-            sys.exit("A proximal variants TSV output path needs to be specified if a proximal variants input VCF is provided")
+        self.peptide_length = kwargs.pop('peptide_length', None)
+        if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.peptide_length):
+            sys.exit("A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided")
         if self.input_file.endswith('.gz'):
             mode = 'rb'
         else:
@@ -237,7 +238,7 @@ class VcfConverter(InputFileConverter):
         return coverage_for_entry
 
     def write_proximal_variant_entries(self, entry, alt, transcript_name, index):
-        proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name)
+        proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name, self.peptide_length)
         for (proximal_variant, csq_entry) in proximal_variants:
             if len(list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
                 proximal_variant_type = 'somatic'
