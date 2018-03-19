@@ -2,6 +2,30 @@ from abc import ABCMeta, abstractmethod
 import os
 import csv
 import sys
+import inspect
+
+class IEDB(metaclass=ABCMeta):
+    @classmethod
+    def iedb_prediction_methods(cls):
+        return [prediction_class().iedb_prediction_method for prediction_class in cls.prediction_classes()]
+
+    @abstractmethod
+    def parse_iedb_allele_file(self):
+        pass
+
+    @abstractmethod
+    def iedb_executable_params(self, args):
+        pass
+
+    @property
+    @abstractmethod
+    def iedb_prediction_method(self):
+        pass
+
+    @property
+    @abstractmethod
+    def url(self):
+        pass
 
 class PredictionClass(metaclass=ABCMeta):
     valid_allele_names_dict = {}
@@ -9,6 +33,8 @@ class PredictionClass(metaclass=ABCMeta):
     @classmethod
     def prediction_classes(cls):
         prediction_classes = []
+        if not inspect.isabstract(cls):
+            prediction_classes.append(cls)
         for subclass in cls.__subclasses__():
             prediction_classes.extend(subclass.prediction_classes())
         return prediction_classes
@@ -18,8 +44,17 @@ class PredictionClass(metaclass=ABCMeta):
         return sorted([prediction_class.__name__ for prediction_class in cls.prediction_classes()])
 
     @classmethod
-    def iedb_prediction_methods(cls):
-        return [prediction_class().iedb_prediction_method for prediction_class in cls.prediction_classes()]
+    def prediction_class_for_iedb_prediction_method(cls, method):
+        prediction_classes = cls.prediction_classes()
+        for prediction_class in prediction_classes:
+            prediction_class_object = prediction_class()
+            if ( issubclass(prediction_class_object.__class__, IEDBMHCI) or issubclass(prediction_class_object.__class__, MHCII) ) and prediction_class_object.iedb_prediction_method == method:
+                return prediction_class_object
+        return getattr(sys.modules[__name__], method)
+
+    @classmethod
+    def prediction_class_name_for_iedb_prediction_method(cls, method):
+        return cls.prediction_class_for_iedb_prediction_method(method).__class__.__name__
 
     @classmethod
     def all_valid_allele_names(cls):
@@ -35,43 +70,13 @@ class PredictionClass(metaclass=ABCMeta):
             if allele not in valid_alleles:
                 sys.exit("Allele %s not valid. Run `pvacseq valid_alleles` for a list of valid allele names." % allele)
 
-    @classmethod
-    def prediction_class_for_iedb_prediction_method(cls, method):
-        prediction_classes = cls.prediction_classes()
-        for prediction_class in prediction_classes:
-            prediction_class_object = prediction_class()
-            if prediction_class_object.iedb_prediction_method == method:
-                return prediction_class_object
-
-    @classmethod
-    def prediction_class_name_for_iedb_prediction_method(cls, method):
-        return cls.prediction_class_for_iedb_prediction_method(method).__class__.__name__
-
-    @abstractmethod
-    def parse_iedb_allele_file(self):
-        pass
-
     @abstractmethod
     def valid_allele_names(self):
-        pass
-
-    @abstractmethod
-    def iedb_executable_params(self, args):
         pass
 
     @property
     @abstractmethod
     def needs_epitope_length(self):
-        pass
-
-    @property
-    @abstractmethod
-    def iedb_prediction_method(self):
-        pass
-
-    @property
-    @abstractmethod
-    def url(self):
         pass
 
     def check_allele_valid(self, allele):
@@ -81,16 +86,17 @@ class PredictionClass(metaclass=ABCMeta):
 
 class MHCI(PredictionClass, metaclass=ABCMeta):
     @property
-    def url(self):
-        return 'http://tools-cluster-interface.iedb.org/tools_api/mhci/'
-
-    @property
     def needs_epitope_length(self):
         return True
 
-    @classmethod
-    def prediction_classes(cls):
-        return cls.__subclasses__()
+#class MHCflurry(MHCI):
+#    def valid_allele_names(self):
+#        pass
+
+class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
+    @property
+    def url(self):
+        return 'http://tools-cluster-interface.iedb.org/tools_api/mhci/'
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
@@ -135,37 +141,37 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
             args.input_file.name,
         ]
 
-class NetMHC(MHCI):
+class NetMHC(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'ann'
 
-class NetMHCpan(MHCI):
+class NetMHCpan(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'netmhcpan'
 
-class SMMPMBEC(MHCI):
+class SMMPMBEC(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'smmpmbec'
 
-class SMM(MHCI):
+class SMM(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'smm'
 
-class NetMHCcons(MHCI):
+class NetMHCcons(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'netmhccons'
 
-class PickPocket(MHCI):
+class PickPocket(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'pickpocket'
 
-class MHCII(PredictionClass, metaclass=ABCMeta):
+class MHCII(PredictionClass, IEDB, metaclass=ABCMeta):
     @property
     def url(self):
         return 'http://tools-cluster-interface.iedb.org/tools_api/mhcii/'
@@ -173,10 +179,6 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
     def needs_epitope_length(self):
         return False
-
-    @classmethod
-    def prediction_classes(cls):
-        return cls.__subclasses__()
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
