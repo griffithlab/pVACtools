@@ -466,7 +466,7 @@ class MHCIPipeline(Pipeline):
                         lib.call_iedb.main([
                             split_fasta_file_path,
                             split_iedb_out,
-                            iedb_method,
+                            method,
                             a,
                             '-l', str(epl),
                             '-r', str(self.iedb_retries),
@@ -572,7 +572,7 @@ class MHCIIPipeline(Pipeline):
                     lib.call_iedb.main([
                         split_fasta_file_path,
                         split_iedb_out,
-                        iedb_method,
+                        method,
                         a,
                         '-r', str(self.iedb_retries),
                         '-e', self.iedb_executable,

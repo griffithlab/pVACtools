@@ -23,7 +23,7 @@ def main(args_input = sys.argv[1:]):
     parser.add_argument('output_file',
                         help="Output file from iedb")
     parser.add_argument('method',
-                        choices=PredictionClass.iedb_prediction_methods(),
+                        choices=PredictionClass.prediction_methods(),
                         help="The iedb analysis method to use")
     parser.add_argument('allele',
                         help="Allele for which to make prediction")
@@ -42,7 +42,8 @@ def main(args_input = sys.argv[1:]):
     args = parser.parse_args(args_input)
 
     PredictionClass.check_alleles_valid([args.allele])
-    prediction_class_object = PredictionClass.prediction_class_for_iedb_prediction_method(args.method)
+    prediction_class = getattr(sys.modules[__name__], args.method)
+    prediction_class_object = prediction_class()
     prediction_class_object.check_allele_valid(args.allele)
 
     if isinstance(prediction_class_object, MHCI):
@@ -58,7 +59,7 @@ def main(args_input = sys.argv[1:]):
     else:
         data = {
             'sequence_text': args.input_file.read(),
-            'method':        args.method,
+            'method':        prediction_class_object.iedb_prediction_method,
             'allele':        args.allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
             'user_tool':     'pVac-seq',
         }
