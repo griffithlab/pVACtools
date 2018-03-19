@@ -8,6 +8,7 @@ from subprocess import call
 from filecmp import cmp
 import py_compile
 import lib.call_iedb
+from lib.prediction_class import PredictionClass
 
 def make_response(method, path):
     reader = open(os.path.join(
@@ -67,11 +68,12 @@ class CallIEDBClassITests(CallIEDBTests):
         #netmhcpan, netmhccons, and pickpocket are slow so we won't run them in the tests
         for method in self.methods:
             call_iedb_output_file = tempfile.NamedTemporaryFile()
+            class_name = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
 
             lib.call_iedb.main([
                 self.input_file,
                 call_iedb_output_file.name,
-                method,
+                class_name,
                 self.allele,
                 '-l', str(self.epitope_length)
             ])
@@ -101,11 +103,12 @@ class CallIEDBClassIITests(CallIEDBTests):
     def test_iedb_methods_generate_expected_files(self):
         for method in self.methods:
             call_iedb_output_file = tempfile.NamedTemporaryFile()
+            class_name = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
 
             lib.call_iedb.main([
                 self.input_file,
                 call_iedb_output_file.name,
-                method,
+                class_name,
                 self.allele,
             ])
             reader = open(self.input_file, mode='r')
