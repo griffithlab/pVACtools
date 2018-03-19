@@ -21,6 +21,7 @@ class InputFileConverter(metaclass=ABCMeta):
             'gene_name',
             'transcript_name',
             'amino_acid_change',
+            'codon_change',
             'ensembl_gene_id',
             'wildtype_amino_acid_sequence',
             'downstream_amino_acid_sequence',
@@ -349,6 +350,11 @@ class VcfConverter(InputFileConverter):
                     else:
                         output_row['amino_acid_change'] = 'NA'
 
+                    if transcript['Codons']:
+                        output_row['codon_change'] =  transcript['Codons']
+                    else:
+                        output_row['codon_change'] = 'NA'
+
                     if transcript_name in transcript_expns.keys():
                         transcript_expn_entry = transcript_expns[transcript_name]
                         output_row['transcript_expression'] = transcript_expn_entry['FPKM']
@@ -415,6 +421,7 @@ class IntegrateConverter(InputFileConverter):
                 'variant'                    : 'fusion',
                 'gene_name'                  : entry['name of fusion'],
                 'amino_acid_change'          : 'NA',
+                'codon_change'               : 'NA',
                 'ensembl_gene_id'            : 'NA',
                 'amino_acid_change'          : 'NA',
                 'transcript_expression'      : 'NA',
