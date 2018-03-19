@@ -22,6 +22,7 @@ class InputFileConverter(metaclass=ABCMeta):
             'gene_name',
             'transcript_name',
             'amino_acid_change',
+            'codon_change',
             'ensembl_gene_id',
             'hgvsc',
             'hgvsp',
@@ -423,6 +424,11 @@ class VcfConverter(InputFileConverter):
                     if transcript['Amino_acids']:
                         output_row['amino_acid_change'] = transcript['Amino_acids']
 
+                    if transcript['Codons']:
+                        output_row['codon_change'] =  transcript['Codons']
+                    else:
+                        output_row['codon_change'] = 'NA'
+
                     if transcript_name in transcript_expns.keys():
                         transcript_expn_entry = transcript_expns[transcript_name]
                         output_row['transcript_expression'] = transcript_expn_entry['FPKM']
@@ -510,6 +516,18 @@ class IntegrateConverter(InputFileConverter):
                 'wildtype_amino_acid_sequence'   : '',
                 'downstream_amino_acid_sequence' : '',
                 'protein_length_change'      : '',
+                'amino_acid_change'          : 'NA',
+                'codon_change'               : 'NA',
+                'ensembl_gene_id'            : 'NA',
+                'amino_acid_change'          : 'NA',
+                'transcript_expression'      : 'NA',
+                'gene_expression'            : 'NA',
+                'normal_depth'               : 'NA',
+                'normal_vaf'                 : 'NA',
+                'tdna_depth'                 : 'NA',
+                'tdna_vaf'                   : 'NA',
+                'trna_depth'                 : 'NA',
+                'trna_vaf'                   : 'NA',
             }
 
             if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':
