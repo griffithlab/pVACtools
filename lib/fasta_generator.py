@@ -181,6 +181,13 @@ class FastaGenerator(metaclass=ABCMeta):
             if self.position_out_of_bounds(position, full_wildtype_sequence):
                 continue
 
+            if variant_type == 'missense' and line['index'] in self.proximal_variants and line['protein_position'] in self.proximal_variants[line['index']]:
+                codon_changes = [ item['codon_change'] for item in self.proximal_variants[line['index']][line['protein_position']] ]
+                codon_changes.append(line['codon_change'])
+                mutant_amino_acid_with_proximal_variants = ProximalVariant.combine_conflicting_variants(codon_changes)
+            elif variant_type != 'FS':
+                mutant_amino_acid_with_proximal_variants = mutant_amino_acid
+
             if variant_type == 'FS':
                 mutation_start_position, wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
                 downstream_sequence = line['downstream_amino_acid_sequence']
@@ -200,7 +207,7 @@ class FastaGenerator(metaclass=ABCMeta):
                 mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
                 wildtype_subsequence_with_germline_variants = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, True)
                 wildtype_subsequence_with_proximal_variants = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, False)
-                mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence_with_proximal_variants[mutation_end_position:]
+                mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid_with_proximal_variants + wildtype_subsequence_with_proximal_variants[mutation_end_position:]
 
             if '*' in wildtype_subsequence or '*' in mutant_subsequence or '*' in wildtype_subsequence_with_germline_variants or '*' in mutant_subsequence_with_proximal_variants:
                 continue
