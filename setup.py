@@ -66,6 +66,7 @@ setup(
         'simanneal',
         'pandas',
         'wget',
+        'pysam',
     ],
     package_data={
         'tools.pvacseq' : pvacseq_data_files,
