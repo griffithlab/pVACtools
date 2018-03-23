@@ -380,24 +380,7 @@ class VcfConverter(InputFileConverter):
                         count += 1
 
                     if self.proximal_variants_vcf:
-                        proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name, self.peptide_length)
-                        for (proximal_variant, csq_entry) in proximal_variants:
-                            if len(list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
-                                proximal_variant_type = 'somatic'
-                            else:
-                                proximal_variant_type = 'germline'
-                            proximal_variant_entry = {
-                                'chromosome_name': proximal_variant.CHROM,
-                                'start': proximal_variant.affected_start,
-                                'stop': proximal_variant.affected_end,
-                                'reference': proximal_variant.REF,
-                                'variant': proximal_variant.ALT[0],
-                                'amino_acid_change': csq_entry['Amino_acids'],
-                                'protein_position': csq_entry['Protein_position'],
-                                'type': proximal_variant_type,
-                                'main_somatic_variant': index,
-                            }
-                            self.proximal_variants_writer.writerow(proximal_variant_entry)
+                        self.write_proximal_variant_entries(entry, alt, transcript_name, index)
 
                     ensembl_gene_id = transcript['Gene']
                     hgvsc = transcript['HGVSc'] if 'HGVSc' in transcript else 'NA'
