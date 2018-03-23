@@ -1,6 +1,7 @@
 import vcf
 import sys
 from lib.csq_parser import CsqParser
+from Bio.Seq import translate
 
 class ProximalVariant:
     def __init__(self, proximal_variants_vcf):
@@ -70,4 +71,18 @@ class ProximalVariant:
             potential_proximal_variants.append([entry, csq_entry])
 
         return (phased_somatic_variant, potential_proximal_variants)
+
+    @classmethod
+    def combine_conflicting_variants(cls, codon_changes):
+        codon = list(codon_changes[0].split('/')[0].lower())
+        modified_positions = []
+        for codon_change in codon_changes:
+            (old_codon, new_codon) = codon_change.split('/')
+            change_positions = [i for i in range(len(old_codon)) if old_codon[i] != new_codon[i]]
+            for position in change_positions:
+                if position in modified_positions:
+                    print("Warning: position has already been modified")
+                codon[position] = new_codon[position].lower()
+                modified_positions.append(position)
+        return translate("".join(codon))
 
