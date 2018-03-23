@@ -192,6 +192,8 @@ class VcfConverter(InputFileConverter):
         tsv_writer.writeheader()
 
         csq_format = self.parse_csq_format(vcf_reader)
+        indexes = []
+        count = 1
         for entry in vcf_reader:
             chromosome = entry.CHROM
             start      = entry.affected_start
@@ -211,7 +213,6 @@ class VcfConverter(InputFileConverter):
                     continue
 
             alleles_dict = self.resolve_alleles(entry)
-            indexes = []
             for alt in alts:
                 alt = str(alt)
                 if genotype.gt_bases and alt not in genotype.gt_bases.split('/'):
@@ -268,11 +269,12 @@ class VcfConverter(InputFileConverter):
                     else:
                         amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
-                    index = '%s.%s.%s.%s' % (gene_name, transcript_name, consequence, amino_acid_change_position)
+                    index = '%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
                         sys.exit("Warning: TSV index already exists: {}".format(index))
                     else:
                         indexes.append(index)
+                        count += 1
                     ensembl_gene_id = transcript['Gene']
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
