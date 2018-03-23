@@ -44,3 +44,8 @@ class ProximalVariantTests(unittest.TestCase):
         somatic_variant = next(self.somatic_vcf_reader.fetch('chr2', 227893862, 227893863))
         proximal_variants = self.klass.extract(somatic_variant, "T", "ENST00000309931", 60)
         self.assertTrue(proximal_variants)
+
+    def test_combine_conflicting_variants(self):
+        self.assertEqual(self.klass.combine_conflicting_variants(["ttC/ttA", "tTc/tAc"]), '*')
+        self.assertEqual(self.klass.combine_conflicting_variants(["Cca/Tca", "cCa/cTa"]), 'L')
+
