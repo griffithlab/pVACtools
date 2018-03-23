@@ -6,17 +6,18 @@ import yaml
 from abc import ABCMeta
 from Bio import SeqIO
 import itertools
+from lib.proximal_variant import ProximalVariant
 
 csv.field_size_limit(sys.maxsize)
 
 class FastaGenerator(metaclass=ABCMeta):
     def parse_proximal_variants_file(self):
         if self.proximal_variants_file is not None:
-            proximal_variants = defaultdict(list)
+            proximal_variants = defaultdict(lambda: defaultdict(list))
             with open(self.proximal_variants_file, 'r') as fh:
                 tsvin = csv.DictReader(fh, delimiter='\t')
                 for line in tsvin:
-                    proximal_variants[line['main_somatic_variant']].append(line)
+                    proximal_variants[line['main_somatic_variant']][line['protein_position']].append(line)
             return proximal_variants
         else:
             return {}
@@ -106,13 +107,29 @@ class FastaGenerator(metaclass=ABCMeta):
         mutation_offset = original_position - mutation_position
         wildtype_subsequence_with_proximal_variants = wildtype_subsequence
         if somatic_variant_index in self.proximal_variants.keys():
-            for line in self.proximal_variants[somatic_variant_index]:
-                if germline_variants_only and line['type'] == 'somatic':
+            for (protein_position, lines) in self.proximal_variants[somatic_variant_index].items():
+                if protein_position == original_position:
                     continue
-                proximal_variant_position = int(line['protein_position']) - 1 - mutation_offset
+
+                if germline_variants_only:
+                    filtered_lines = [line for line in lines if line['type'] == 'germline']
+                else:
+                    filtered_lines = lines
+
+                if len(filtered_lines) == 0:
+                    continue
+                elif len(filtered_lines) == 1:
+                    line = filtered_lines[0]
+                    proximal_variant_wildtype_amino_acid, proximal_variant_mutant_amino_acid = line['amino_acid_change'].split('/')
+                else:
+                    line = filtered_lines[0]
+                    proximal_variant_wildtype_amino_acid = line['amino_acid_change'].split('/')[0]
+                    codon_changes = [ item['codon_change'] for item in filtered_lines ]
+                    proximal_variant_mutant_amino_acid = ProximalVariant.combine_conflicting_variants(codon_changes)
+
+                proximal_variant_position = int(protein_position) - 1 - mutation_offset
                 if proximal_variant_position <= 0 or proximal_variant_position >= len(wildtype_subsequence):
                     continue
-                proximal_variant_wildtype_amino_acid, proximal_variant_mutant_amino_acid = line['amino_acid_change'].split('/')
                 if len(proximal_variant_wildtype_amino_acid) != len(proximal_variant_mutant_amino_acid):
                     print("Nearby variant is not a missense mutation. Skipping.")
                     continue
@@ -178,6 +195,13 @@ class FastaGenerator(metaclass=ABCMeta):
             if self.position_out_of_bounds(position, full_wildtype_sequence):
                 continue
 
+            if variant_type == 'missense' and line['index'] in self.proximal_variants and line['protein_position'] in self.proximal_variants[line['index']]:
+                codon_changes = [ item['codon_change'] for item in self.proximal_variants[line['index']][line['protein_position']] ]
+                codon_changes.append(line['codon_change'])
+                mutant_amino_acid_with_proximal_variants = ProximalVariant.combine_conflicting_variants(codon_changes)
+            elif variant_type != 'FS':
+                mutant_amino_acid_with_proximal_variants = mutant_amino_acid
+
             if variant_type == 'FS':
                 mutation_start_position, wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
                 downstream_sequence = line['downstream_amino_acid_sequence']
@@ -198,15 +222,15 @@ class FastaGenerator(metaclass=ABCMeta):
                 wildtype_subsequence_with_proximal_variants = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, False)
                 if stop_codon_added:
                     mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid
-                    mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid
+                    mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid_with_proximal_variants
                 else:
                     mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
-                    mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence_with_proximal_variants[mutation_end_position:]
+                    mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid_with_proximal_variants + wildtype_subsequence_with_proximal_variants[mutation_end_position:]
 
-            if '*' in wildtype_subsequence or '*' in mutant_subsequence:
+            if '*' in wildtype_subsequence or '*' in mutant_subsequence or '*' in wildtype_subsequence_with_germline_variants or '*' in mutant_subsequence_with_proximal_variants:
                 continue
 
-            if 'X' in wildtype_subsequence or 'X' in mutant_subsequence:
+            if 'X' in wildtype_subsequence or 'X' in mutant_subsequence or 'X' in wildtype_subsequence_with_germline_variants or 'X' in mutant_subsequence_with_proximal_variants:
                 continue
 
             if mutant_subsequence in wildtype_subsequence:
