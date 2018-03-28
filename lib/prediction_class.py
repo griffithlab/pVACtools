@@ -126,14 +126,7 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
             sys.exit("Length %s not valid for allele %s and method %s." % (length, allele, self.iedb_prediction_method))
 
     def iedb_executable_params(self, args):
-        return [
-            'python2.7',
-            args.iedb_executable_path,
-            args.method,
-            args.allele,
-            str(args.epitope_length),
-            args.input_file.name,
-        ]
+        return "{} {} {} {} {}".format(args.iedb_executable_path, args.method, args.allele, str(args.epitope_length), args.input_file.name)
 
 class NetMHC(MHCI):
     @property
@@ -197,13 +190,8 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
         return self.valid_allele_names_dict
 
     def iedb_executable_params(self, args):
-        return [
-            'python2.7',
-            args.iedb_executable_path,
-            args.method,
-            args.allele.replace('-DPB', '/DPB'),
-            args.input_file.name,
-        ]
+        allele = args.allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
+        return "{} {} {} {}".format(args.iedb_executable_path, args.method, allele, args.input_file.name)
 
 class NetMHCIIpan(MHCII):
     @property

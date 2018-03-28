@@ -5,6 +5,7 @@ from lib.prediction_class import *
 from lib.pipeline import *
 from tools.pvacseq.config_files import additional_input_file_list_options
 from lib.run_argument_parser import *
+import lib.call_iedb
 
 def define_parser():
     return PvacfuseRunArgumentParser().parser
@@ -28,6 +29,9 @@ def main(args_input = sys.argv[1:]):
         downstream_sequence_length = int(args.downstream_sequence_length)
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
+
+    if args.iedb_install_directory:
+        lib.call_iedb.setup_iedb_conda_env()
 
     input_file_type = 'bedpe'
     base_output_dir = os.path.abspath(args.output_dir)
