@@ -40,11 +40,11 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
 
-        call([
+        self.assertFalse(call([
             self.python,
             self.executable,
             generate_protein_fasta_input_file,
             peptide_sequence_length,
             generate_protein_fasta_output_file.name,
             '-d', 'full',
-        ], shell=False)
+        ], shell=False))
