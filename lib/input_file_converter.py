@@ -92,6 +92,8 @@ class VcfConverter(InputFileConverter):
     def parse_csq_format(self, vcf_reader):
         info_fields = vcf_reader.infos
 
+        if 'CSQ' not in info_fields:
+            sys.exit('Input VCF does not contain a CSQ header. Please annotate the VCF with VEP before running it.')
         if info_fields['CSQ'] is None:
             sys.exit('Failed to extract format string from info description for tag (CSQ)')
         else:
@@ -190,6 +192,8 @@ class VcfConverter(InputFileConverter):
         tsv_writer.writeheader()
 
         csq_format = self.parse_csq_format(vcf_reader)
+        indexes = []
+        count = 1
         for entry in vcf_reader:
             chromosome = entry.CHROM
             start      = entry.affected_start
@@ -209,7 +213,6 @@ class VcfConverter(InputFileConverter):
                     continue
 
             alleles_dict = self.resolve_alleles(entry)
-            indexes = []
             for alt in alts:
                 alt = str(alt)
                 if genotype.gt_bases and alt not in genotype.gt_bases.split('/'):
@@ -248,8 +251,11 @@ class VcfConverter(InputFileConverter):
                                 coverage_for_entry[coverage_type + '_depth'] = self.calculate_coverage(int(brct[ref_base]), int(brct[var_base]))
                                 coverage_for_entry[coverage_type + '_vaf']   = self.calculate_vaf(int(brct[ref_base]), int(brct[var_base]))
 
-                csq_allele = alleles_dict[alt]
-                transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
+                transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, alt)
+                if len(transcripts) == 0:
+                    csq_allele = alleles_dict[alt]
+                    transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
+
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
                     consequence = self.resolve_consequence(transcript['Consequence'])
@@ -263,11 +269,12 @@ class VcfConverter(InputFileConverter):
                     else:
                         amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
-                    index = '%s.%s.%s.%s' % (gene_name, transcript_name, consequence, amino_acid_change_position)
+                    index = '%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
-                        sys.exit("TSV index already exists")
+                        sys.exit("Warning: TSV index already exists: {}".format(index))
                     else:
                         indexes.append(index)
+                        count += 1
                     ensembl_gene_id = transcript['Gene']
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
@@ -347,6 +354,7 @@ class IntegrateConverter(InputFileConverter):
         writer = open(self.output_file, 'w')
         tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
+        count = 1
         for entry in csv_reader:
             output_row = {
                 'chromosome_name'            : "%s / %s" % (entry['chr 5p'], entry['chr 3p']),
@@ -368,7 +376,6 @@ class IntegrateConverter(InputFileConverter):
                 'trna_vaf'                   : 'NA',
             }
 
-            count = 1
             if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':
                 continue
             for (fusion_position, transcript_set, fusion_amino_acid_sequence) in zip(entry['fusion positions'].split(','), entry['transcripts'].split(','), entry['peptides'].split(',')):
@@ -387,7 +394,7 @@ class IntegrateConverter(InputFileConverter):
                 output_row['protein_position']           = fusion_position
                 output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
                 output_row['transcript_name']            = ';'.join(fusions)
-                output_row['index']                      = '%s_%s.%s.%s' % (entry['name of fusion'], count, variant_type, fusion_position)
+                output_row['index']                      = '%s.%s.%s.%s' % (count, entry['name of fusion'], variant_type, fusion_position)
                 tsv_writer.writerow(output_row)
 
                 count += 1

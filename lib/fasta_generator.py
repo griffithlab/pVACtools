@@ -50,7 +50,9 @@ class FastaGenerator(metaclass=ABCMeta):
 
     def get_wildtype_subsequence(self, position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line):
         one_flanking_sequence_length = self.determine_flanking_sequence_length(len(full_wildtype_sequence), peptide_sequence_length, line)
-        peptide_sequence_length = 2 * one_flanking_sequence_length + wildtype_amino_acid_length
+        ##clip by wt sequence length, otherwise with deletions peptide_sequence_length may exceeds full wt sequence length,
+        ##and the code below tries extracting ranges beyond the wt sequence
+        peptide_sequence_length = min(2 * one_flanking_sequence_length + wildtype_amino_acid_length,len(full_wildtype_sequence))
 
         # We want to extract a subset from full_wildtype_sequence that is
         # peptide_sequence_length long so that the position ends
@@ -102,6 +104,13 @@ class FastaGenerator(metaclass=ABCMeta):
                     position = int(line['protein_position'].split('-', 1)[0]) - 1
             elif variant_type == 'missense' or variant_type == 'inframe_ins':
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
+                if wildtype_amino_acid.endswith('*'):
+                    wildtype_amino_acid = wildtype_amino_acid.replace('*', '')
+                if mutant_amino_acid.endswith('*'):
+                    mutant_amino_acid = mutant_amino_acid.replace('*', '')
+                    stop_codon_added = True
+                else:
+                    stop_codon_added = False
                 if wildtype_amino_acid == '-':
                     position = int(line['protein_position'].split('-', 1)[0])
                     wildtype_amino_acid_length = 0
@@ -115,6 +124,13 @@ class FastaGenerator(metaclass=ABCMeta):
             elif variant_type == 'inframe_del':
                 variant_type = 'inframe_del'
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
+                if wildtype_amino_acid.endswith('*'):
+                    wildtype_amino_acid = wildtype_amino_acid.replace('*', '')
+                if mutant_amino_acid.endswith('*'):
+                    mutant_amino_acid = mutant_amino_acid.replace('*', '')
+                    stop_codon_added = True
+                else:
+                    stop_codon_added = False
                 position = int(line['protein_position'].split('-', 1)[0]) - 1
                 wildtype_amino_acid_length = len(wildtype_amino_acid)
                 if mutant_amino_acid == '-':
@@ -128,7 +144,6 @@ class FastaGenerator(metaclass=ABCMeta):
             if variant_type == 'FS':
                 wildtype_subsequence, mutant_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
                 downstream_sequence = line['downstream_amino_acid_sequence']
-
                 if self.downstream_sequence_length and len(downstream_sequence) > self.downstream_sequence_length:
                     downstream_sequence = downstream_sequence[0:self.downstream_sequence_length]
                 mutant_subsequence += downstream_sequence
@@ -137,12 +152,19 @@ class FastaGenerator(metaclass=ABCMeta):
                 mutation_end_position = mutation_start_position + wildtype_amino_acid_length
                 if wildtype_amino_acid != '-' and wildtype_amino_acid != wildtype_subsequence[mutation_start_position:mutation_end_position]:
                     sys.exit("ERROR: There was a mismatch between the actual wildtype amino acid and the expected amino acid. Did you use the same reference build version for VEP that you used for creating the VCF?\n%s" % line)
-                mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
+                if stop_codon_added:
+                    mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid
+                else:
+                    mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
 
             if '*' in wildtype_subsequence or '*' in mutant_subsequence:
                 continue
 
             if 'X' in wildtype_subsequence or 'X' in mutant_subsequence:
+                continue
+
+            if mutant_subsequence in wildtype_subsequence:
+                #This is not a novel peptide
                 continue
 
             if len(wildtype_subsequence) < self.epitope_length or len(mutant_subsequence) < self.epitope_length:
