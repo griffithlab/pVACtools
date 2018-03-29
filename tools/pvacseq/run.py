@@ -125,6 +125,10 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
         pipeline = MHCIPipeline(**class_i_arguments)
         pipeline.execute()
+    elif len(class_i_prediction_algorithms) == 0:
+        print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
+    elif len(class_i_alleles) == 0:
+        print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
 
     if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         if args.iedb_install_directory:
@@ -147,6 +151,10 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments['netmhc_stab']           = False
         pipeline = MHCIIPipeline(**class_ii_arguments)
         pipeline.execute()
+    elif len(class_ii_prediction_algorithms) == 0:
+        print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
+    elif len(class_ii_alleles) == 0:
+        print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
 
 if __name__ == '__main__':
     main()

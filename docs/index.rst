@@ -38,12 +38,17 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- Additional data, like example data and VEP plugins were not included in the
-  package correctly so the commands to download these files would fail. This
-  has been corrected.
-- Class II predictions would fail if the protein sequences used for binding
-  predictions in IEDB were shorter than 15 peptide sequences. This has been
-  fixed.
+- Stop-gain mutation were previously not handled correctly. If a mutation had
+  a \* (stop gain) in the VEP Amino_acids field, pVACseq would throw an error.
+  We now ensure that those cases are handled. pVACseq will also skip stop-gain
+  mutations if the resulting mutant peptide sequence is not novel.
+- pVACseq would previously throw an error if multiple mutations resulted
+  in the same consequence. This is now handled by assigning a unique
+  identifier to each mutation.
+- We added a better warning messages if the chosen prediction algorithms and
+  alleles MHC classes are mutually exclusive, e.g., if only class I prediction
+  algorithms were chosen with only class II alleles. Previously, pVACseq would
+  simply finish without producing any output or errors.
 
 Coming soon
 -----------

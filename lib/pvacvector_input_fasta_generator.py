@@ -61,7 +61,7 @@ class PvacvectorInputFastaGenerator():
                     continue
                 ids      = keys[int(key)]
                 for id in ids:
-                    (type, index) = id.split('.', 1)
+                    (type, count, index) = id.split('.', 2)
                     dataframe[index] = sequence
         return dataframe
 
