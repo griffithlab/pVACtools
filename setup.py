@@ -45,7 +45,7 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacapi"):
 
 setup(
     name="pvactools",
-    version="1.0.2",
+    version="1.0.3",
     packages=["tools", "tools.pvacfuse", "tools.pvacvector", "tools.pvacseq", "lib", "utils.pvacapi", "utils.pvacapi.controllers"],
     entry_points={
         "console_scripts":[

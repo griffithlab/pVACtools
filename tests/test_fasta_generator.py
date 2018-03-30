@@ -288,10 +288,8 @@ class FastaGeneratorTests(unittest.TestCase):
         generator = FastaGenerator(**generate_fasta_params)
 
         self.assertFalse(generator.execute())
-        expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.fasta')
-        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
-        expected_key_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.key')
-        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+        self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
+        self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
 
     def test_input_file_with_inframe_deletion_range(self):
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_inframe_deletion_range.tsv')
@@ -435,10 +433,8 @@ class FastaGeneratorTests(unittest.TestCase):
         generator = FastaGenerator(**generate_fasta_params)
 
         self.assertFalse(generator.execute())
-        expected_output_file = os.path.join(self.test_data_dir, 'output_asterisk_sequence.fasta')
-        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
-        expected_key_output_file = os.path.join(self.test_data_dir, 'output_asterisk_sequence.key')
-        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+        self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
+        self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
 
     def test_input_file_with_sequence_containing_X(self):
         peptide_sequence_length        = 31
@@ -657,6 +653,48 @@ class FastaGeneratorTests(unittest.TestCase):
             'output_file'               : generate_fasta_output_file.name,
             'output_key_file'           : generate_fasta_key_output_file.name,
             'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
+        self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
+
+    def test_protein_change_with_asterisk_in_wildtype(self):
+        peptide_sequence_length        = '21'
+        test_data_dir                  = os.path.join(self.test_data_dir, 'protein_change_with_asterisk_in_wildtype')
+        generate_fasta_input_file      = os.path.join(test_data_dir, 'input.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
+        self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
+
+    def test_protein_change_with_asterisk_in_wildtype_and_mutant(self):
+        peptide_sequence_length        = '21'
+        test_data_dir                  = os.path.join(self.test_data_dir, 'protein_change_with_asterisk_in_wildtype_and_mutant')
+        generate_fasta_input_file      = os.path.join(test_data_dir, 'input.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
         }
         generator = FastaGenerator(**generate_fasta_params)
 
