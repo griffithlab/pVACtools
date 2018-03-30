@@ -443,7 +443,7 @@ class OutputParser(metaclass=ABCMeta):
             tsv_entry = tsv_entries[tsv_index]
             if wt_epitope_seq == mt_epitope_seq and wtwgv_epitope_seq == 'NA' and mtwpv_epitope_seq == 'NA':
                 continue
-            elif mutation_position == 'NA':
+            elif mutation_position == 'NA' and 'fusion' not in tsv_entry['variant_type']:
                 continue
             else:
                 if wt_epitope_seq == 'NA':
