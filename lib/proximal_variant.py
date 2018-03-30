@@ -14,14 +14,18 @@ class ProximalVariant:
             sys.exit('Failed to extract format string from info description for tag (CSQ)')
         self.csq_parser = CsqParser(info_fields['CSQ'].desc)
 
-    def extract(self, somatic_variant, alt, transcript, peptide_size):
-        (phased_somatic_variant, potential_proximal_variants) = self.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, alt, transcript, peptide_size)
+    def extract(self, somatic_variant, alt, transcript, peptide_size, counter):
+        counter['somatic_variants'] += 1
+
+        (phased_somatic_variant, potential_proximal_variants, counter) = self.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, alt, transcript, peptide_size, counter)
 
         if phased_somatic_variant is None:
-            return []
+            return [], counter
 
         if len(potential_proximal_variants) == 0:
-            return []
+            return [], counter
+
+        counter['somatic_variants_with_proximal_variants'] += 1
 
         proximal_variants = []
         sample = self.proximal_variants_vcf.samples[0]
@@ -39,15 +43,24 @@ class ProximalVariant:
                 if entry.genotype(sample)['GT'] in ['1/1', '0/1']:
                     proximal_variants.append([entry, csq_entry])
 
-        return proximal_variants
+        if len(proximal_variants) > 0:
+            counter['somatic_variants_with_phased_proximal_variants'] += 1
 
-    def find_phased_somatic_variant_and_potential_proximal_variants(self, somatic_variant, alt, transcript, peptide_size):
+        return proximal_variants, counter
+
+    def find_phased_somatic_variant_and_potential_proximal_variants(self, somatic_variant, alt, transcript, peptide_size, counter):
         flanking_length = peptide_size * 3 / 2
         potential_proximal_variants = []
+        has_proximal_variants = False
+        has_proximal_variants_with_annotations = False
+        has_proximal_variants_that_are_missense = False
+        has_proximal_variants_on_same_transcript = False
         for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.start - flanking_length, somatic_variant.end + flanking_length):
             if entry.start == somatic_variant.start and entry.end == somatic_variant.end and entry.ALT[0] == alt:
                 phased_somatic_variant = entry
                 continue
+
+            has_proximal_variants = True
 
             #We assume that there is only one CSQ entry because the PICK option was used but we should double check that
             csq_entries = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)
@@ -56,19 +69,33 @@ class ProximalVariant:
                 continue
             else:
                 csq_entry = csq_entries[0]
+                has_proximal_variants_with_annotations = True
 
             consequences = {consequence.lower() for consequence in csq_entry['Consequence'].split('&')}
             if 'missense_variant' not in consequences:
                 print("Warning: Proximal variant is not a missense mutation and will be skipped: {}".format(entry))
                 continue
+            else:
+                has_proximal_variants_that_are_missense = True
 
             if csq_entry['Feature'] != transcript:
                 print("Warning: Proximal variant transcript is not the same as the somatic variant transcript. Proximal variant will be skipped: {}".format(entry))
                 continue
+            else:
+                has_proximal_variants_on_same_transcript = True
 
             potential_proximal_variants.append([entry, csq_entry])
 
-        return (phased_somatic_variant, potential_proximal_variants)
+        if has_proximal_variants:
+            counter['somatic_variants_with_proximal_variants'] += 1
+        if has_proximal_variants_with_annotations:
+            counter['somatic_variants_with_annotated_proximal_variants'] += 1
+        if has_proximal_variants_that_are_missense:
+            counter['somatic_variants_with_missense_annotated_proximal_variants'] += 1
+        if has_proximal_variants_on_same_transcript:
+            counter['somatic_variants_with_missense_annotated_proximal_variants_on_same_transcript'] += 1
+
+        return (phased_somatic_variant, potential_proximal_variants, counter)
 
     @classmethod
     def combine_conflicting_variants(cls, codon_changes):

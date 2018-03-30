@@ -4,6 +4,7 @@ import unittest
 import py_compile
 import vcf
 from lib.proximal_variant import *
+from collections import Counter
 
 class ProximalVariantTests(unittest.TestCase):
     @classmethod
@@ -28,21 +29,45 @@ class ProximalVariantTests(unittest.TestCase):
 
     def test_no_potential_proximal_variants(self):
         somatic_variant = next(self.somatic_vcf_reader.fetch('chr1', 16006133, 16006134))
-        (phased_somatic_variant, potential_proximal_variants) = self.klass.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, "T", "ENST00000329454", 60)
+        counter = Counter({
+            'somatic_variants': 0,
+            'somatic_variants_with_proximal_variants': 0,
+            'somatic_variants_with_annotated_proximal_variants': 0,
+            'somatic_variants_with_missense_annotated_proximal_variants': 0,
+            'somatic_variants_with_missense_annotated_proximal_variants_on_same_transcript': 0,
+            'somatic_variants_with_phased_proximal_variants': 0,
+        })
+        (phased_somatic_variant, potential_proximal_variants, counter) = self.klass.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, "T", "ENST00000329454", 60, counter)
 
         self.assertTrue(phased_somatic_variant)
         self.assertFalse(potential_proximal_variants)
 
     def test_found_potential_proximal_variants(self):
         somatic_variant = next(self.somatic_vcf_reader.fetch('chr2', 227893862, 227893863))
-        (phased_somatic_variant, potential_proximal_variants) = self.klass.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, "T", "ENST00000309931", 60)
+        counter = Counter({
+            'somatic_variants': 0,
+            'somatic_variants_with_proximal_variants': 0,
+            'somatic_variants_with_annotated_proximal_variants': 0,
+            'somatic_variants_with_missense_annotated_proximal_variants': 0,
+            'somatic_variants_with_missense_annotated_proximal_variants_on_same_transcript': 0,
+            'somatic_variants_with_phased_proximal_variants': 0,
+        })
+        (phased_somatic_variant, potential_proximal_variants, counter) = self.klass.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, "T", "ENST00000309931", 60, counter)
 
         self.assertTrue(phased_somatic_variant)
         self.assertTrue(potential_proximal_variants)
 
     def test_found_actual_proximal_variant(self):
         somatic_variant = next(self.somatic_vcf_reader.fetch('chr2', 227893862, 227893863))
-        proximal_variants = self.klass.extract(somatic_variant, "T", "ENST00000309931", 60)
+        counter = Counter({
+            'somatic_variants': 0,
+            'somatic_variants_with_proximal_variants': 0,
+            'somatic_variants_with_annotated_proximal_variants': 0,
+            'somatic_variants_with_missense_annotated_proximal_variants': 0,
+            'somatic_variants_with_missense_annotated_proximal_variants_on_same_transcript': 0,
+            'somatic_variants_with_phased_proximal_variants': 0,
+        })
+        proximal_variants, counts = self.klass.extract(somatic_variant, "T", "ENST00000309931", 60, counter)
         self.assertTrue(proximal_variants)
 
     def test_combine_conflicting_variants(self):

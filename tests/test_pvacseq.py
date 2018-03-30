@@ -355,7 +355,7 @@ class PvacseqTests(unittest.TestCase):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', 'tmp', file_name)
             self.assertTrue(cmp(output_file, expected_file, False))
-        for file_name in ['Test.proximal_variants.tsv', 'Test.combined.parsed.tsv', 'Test.final.tsv']:
+        for file_name in ['Test.proximal_variants.tsv', 'Test.proximal_variants.tsv.stats', 'Test.combined.parsed.tsv', 'Test.final.tsv']:
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
             self.assertTrue(cmp(output_file, expected_file, False))

@@ -5,6 +5,7 @@ from abc import ABCMeta
 from collections import OrderedDict
 from lib.csq_parser import CsqParser
 from lib.proximal_variant import ProximalVariant
+from collections import Counter
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -67,6 +68,14 @@ class VcfConverter(InputFileConverter):
         self.writer = open(self.output_file, 'w')
         self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers())
         self.tsv_writer.writeheader()
+        self.counter = Counter({
+            'somatic_variants': 0,
+            'somatic_variants_with_proximal_variants': 0,
+            'somatic_variants_with_annotated_proximal_variants': 0,
+            'somatic_variants_with_missense_annotated_proximal_variants': 0,
+            'somatic_variants_with_missense_annotated_proximal_variants_on_same_transcript': 0,
+            'somatic_variants_with_phased_proximal_variants': 0,
+        })
 
         self.csq_parser = self.create_csq_parser()
         if self.proximal_variants_vcf:
@@ -239,7 +248,7 @@ class VcfConverter(InputFileConverter):
         return coverage_for_entry
 
     def write_proximal_variant_entries(self, entry, alt, transcript_name, index):
-        proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name, self.peptide_length)
+        proximal_variants, self.counter =  self.proximal_variant_parser.extract(entry, alt, transcript_name, self.peptide_length, self.counter)
         has_proximal_variants = False
         for (proximal_variant, csq_entry) in proximal_variants:
             if len(list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
@@ -377,6 +386,22 @@ class VcfConverter(InputFileConverter):
                     output_row.update(coverage_for_entry)
 
                     self.tsv_writer.writerow(output_row)
+
+        if self.proximal_variants_tsv:
+            stats_filename = '.'.join([self.proximal_variants_tsv, 'stats'])
+            fieldnames = [
+                'somatic_variants',
+                'somatic_variants_with_proximal_variants',
+                'somatic_variants_with_annotated_proximal_variants',
+                'somatic_variants_with_missense_annotated_proximal_variants',
+                'somatic_variants_with_missense_annotated_proximal_variants_on_same_transcript',
+                'somatic_variants_with_phased_proximal_variants',
+            ]
+
+            with open(stats_filename, 'w') as fh:
+                writer = csv.DictWriter(fh, delimiter='\t', fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerow(self.counter)
 
         self.close_filehandles()
 
