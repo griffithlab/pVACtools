@@ -611,8 +611,10 @@ class FastaGeneratorTests(unittest.TestCase):
         generator = FastaGenerator(**generate_fasta_params)
 
         self.assertFalse(generator.execute())
-        self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
-        self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
+        expected_output_file = os.path.join(test_data_dir, 'output.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(test_data_dir, 'output.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
     def test_multiple_proximal_variants_on_same_codon_results_in_novel_peptide(self):
         peptide_sequence_length        = '21'
@@ -657,8 +659,10 @@ class FastaGeneratorTests(unittest.TestCase):
         generator = FastaGenerator(**generate_fasta_params)
 
         self.assertFalse(generator.execute())
-        self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
-        self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
+        expected_output_file = os.path.join(test_data_dir, 'output.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(test_data_dir, 'output.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
     def test_protein_change_with_asterisk_in_wildtype(self):
         peptide_sequence_length        = '21'

@@ -158,10 +158,10 @@ class FastaGenerator(metaclass=ABCMeta):
                     position = int(line['protein_position'].split('-', 1)[0]) - 1
             elif variant_type == 'missense' or variant_type == 'inframe_ins':
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
-                if wildtype_amino_acid.endswith('*'):
-                    wildtype_amino_acid = wildtype_amino_acid.replace('*', '')
-                if mutant_amino_acid.endswith('*'):
-                    mutant_amino_acid = mutant_amino_acid.replace('*', '')
+                if '*' in wildtype_amino_acid:
+                    wildtype_amino_acid = wildtype_amino_acid.split('*')[0]
+                if '*' in mutant_amino_acid:
+                    mutant_amino_acid = mutant_amino_acid.split('*')[0]
                     stop_codon_added = True
                 else:
                     stop_codon_added = False
@@ -178,10 +178,10 @@ class FastaGenerator(metaclass=ABCMeta):
             elif variant_type == 'inframe_del':
                 variant_type = 'inframe_del'
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
-                if wildtype_amino_acid.endswith('*'):
-                    wildtype_amino_acid = wildtype_amino_acid.replace('*', '')
-                if mutant_amino_acid.endswith('*'):
-                    mutant_amino_acid = mutant_amino_acid.replace('*', '')
+                if '*' in wildtype_amino_acid:
+                    wildtype_amino_acid = wildtype_amino_acid.split('*')[0]
+                if '*' in mutant_amino_acid:
+                    mutant_amino_acid = mutant_amino_acid.split('*')[0]
                     stop_codon_added = True
                 else:
                     stop_codon_added = False
@@ -227,13 +227,17 @@ class FastaGenerator(metaclass=ABCMeta):
                     mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
                     mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid_with_proximal_variants + wildtype_subsequence_with_proximal_variants[mutation_end_position:]
 
-            if '*' in wildtype_subsequence or '*' in mutant_subsequence or '*' in wildtype_subsequence_with_germline_variants or '*' in mutant_subsequence_with_proximal_variants:
+            if '*' in wildtype_subsequence_with_germline_variants:
+                wildtype_subsequence_with_germline_variants = wildtype_subsequence_with_germline_variants.split('*')[0]
+            if '*' in mutant_subsequence_with_proximal_variants:
+                mutant_subsequence_with_proximal_variants = mutant_subsequence_with_proximal_variants.split('*')[0]
+            if '*' in wildtype_subsequence or '*' in mutant_subsequence:
                 continue
 
             if 'X' in wildtype_subsequence or 'X' in mutant_subsequence or 'X' in wildtype_subsequence_with_germline_variants or 'X' in mutant_subsequence_with_proximal_variants:
                 continue
 
-            if mutant_subsequence in wildtype_subsequence:
+            if mutant_subsequence in wildtype_subsequence and wildtype_subsequence_with_germline_variants == wildtype_subsequence and mutant_subsequence_with_proximal_variants == mutant_subsequence:
                 #This is not a novel peptide
                 continue
 
@@ -245,7 +249,7 @@ class FastaGenerator(metaclass=ABCMeta):
                 key = '%s.%s' % (designation, variant_id)
                 fasta_sequences.setdefault(subsequence, []).append(key)
 
-            if mutant_subsequence_with_proximal_variants != mutant_subsequence:
+            if self.proximal_variants_file:
                 for designation, subsequence in zip(['MTWPV', 'WTWGV'], [mutant_subsequence_with_proximal_variants, wildtype_subsequence_with_germline_variants]):
                     key = '%s.%s' % (designation, variant_id)
                     fasta_sequences.setdefault(subsequence, []).append(key)
