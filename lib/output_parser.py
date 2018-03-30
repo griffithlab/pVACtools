@@ -441,7 +441,11 @@ class OutputParser(metaclass=ABCMeta):
             median_wt_score
         ) in iedb_results:
             tsv_entry = tsv_entries[tsv_index]
-            if mt_epitope_seq != wt_epitope_seq:
+            if wt_epitope_seq == mt_epitope_seq and wtwgv_epitope_seq == 'NA' and mtwpv_epitope_seq == 'NA':
+                continue
+            elif mutation_position == 'NA':
+                continue
+            else:
                 if wt_epitope_seq == 'NA':
                     corresponding_fold_change = 'NA'
                 else:
@@ -487,23 +491,17 @@ class OutputParser(metaclass=ABCMeta):
                     else:
                         row["%s MT Score" % pretty_method] = 'NA'
                     if contains_proximal_variants:
-                        if mtwpv_scores != 'NA' and method in mtwpv_scores and mtwpv_epitope_seq != mt_epitope_seq:
+                        if mtwpv_scores != 'NA' and method in mtwpv_scores:
                             row["%s MTWPV Score" % pretty_method] = mtwpv_scores[method]
                         else:
                             row["%s MTWPV Score" % pretty_method] = 'NA'
-                        if wtwgv_scores != 'NA' and method in wtwgv_scores and wtwgv_epitope_seq != wt_epitope_seq:
+                        if wtwgv_scores != 'NA' and method in wtwgv_scores:
                             row["%s WTWGV Score" % pretty_method] = wtwgv_scores[method]
                         else:
                             row["%s WTWGV Score" % pretty_method] = 'NA'
                 if contains_proximal_variants:
-                    if mtwpv_epitope_seq == mt_epitope_seq:
-                        row['MTWPV Epitope Seq'] = 'NA'
-                    else:
-                        row['MTWPV Epitope Seq'] = mtwpv_epitope_seq
-                    if wtwgv_epitope_seq == wt_epitope_seq:
-                        row['WTWGV Epitope Seq'] = 'NA'
-                    else:
-                        row['WTWGV Epitope Seq'] = wtwgv_epitope_seq
+                    row['MTWPV Epitope Seq'] = mtwpv_epitope_seq
+                    row['WTWGV Epitope Seq'] = wtwgv_epitope_seq
                 if 'gene_expression' in tsv_entry:
                     row['Gene Expression'] = tsv_entry['gene_expression']
                 if 'transcript_expression' in tsv_entry:
