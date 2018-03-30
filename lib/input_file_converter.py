@@ -240,11 +240,13 @@ class VcfConverter(InputFileConverter):
 
     def write_proximal_variant_entries(self, entry, alt, transcript_name, index):
         proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name, self.peptide_length)
+        has_proximal_variants = False
         for (proximal_variant, csq_entry) in proximal_variants:
             if len(list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
                 proximal_variant_type = 'somatic'
             else:
                 proximal_variant_type = 'germline'
+            has_proximal_variants = True
             proximal_variant_entry = {
                 'chromosome_name': proximal_variant.CHROM,
                 'start': proximal_variant.affected_start,
@@ -258,6 +260,7 @@ class VcfConverter(InputFileConverter):
                 'main_somatic_variant': index,
             }
             self.proximal_variants_writer.writerow(proximal_variant_entry)
+        return has_proximal_variants
 
     def close_filehandles(self):
         self.writer.close()
@@ -326,7 +329,9 @@ class VcfConverter(InputFileConverter):
                         count += 1
 
                     if self.proximal_variants_vcf:
-                        self.write_proximal_variant_entries(entry, alt, transcript_name, index)
+                        has_proximal_variants = self.write_proximal_variant_entries(entry, alt, transcript_name, index)
+                        if not has_proximal_variants:
+                            continue
 
                     ensembl_gene_id = transcript['Gene']
                     output_row = {

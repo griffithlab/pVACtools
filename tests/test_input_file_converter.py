@@ -321,5 +321,7 @@ class InputFileConverterTests(unittest.TestCase):
         converter = VcfConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_somatic_variants_for_proximal_variants.tsv')
+        self.assertTrue(cmp(convert_output_file.name, expected_output_file))
         expected_proximal_variants_tsv = os.path.join(self.test_data_dir, 'output_proximal_variants.tsv')
         self.assertTrue(cmp(convert_output_proximal_variants_file.name, expected_proximal_variants_tsv))
