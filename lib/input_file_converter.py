@@ -57,6 +57,7 @@ class VcfConverter(InputFileConverter):
         self.peptide_length = kwargs.pop('peptide_length', None)
         if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.peptide_length):
             sys.exit("A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided")
+        #TODO: Make this more robust
         if self.input_file.endswith('.gz'):
             mode = 'rb'
         else:

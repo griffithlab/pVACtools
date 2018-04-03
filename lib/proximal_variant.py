@@ -5,7 +5,12 @@ from Bio.Seq import translate
 
 class ProximalVariant:
     def __init__(self, proximal_variants_vcf):
-        self.fh = open(proximal_variants_vcf, 'rb')
+        #TODO: Make this more robust
+        if proximal_variants_vcf.endswith('.gz'):
+            mode = 'rb'
+        else:
+            mode = 'r'
+        self.fh = open(proximal_variants_vcf, mode)
         self.proximal_variants_vcf = vcf.Reader(self.fh)
         info_fields = self.proximal_variants_vcf.infos
         if 'CSQ' not in info_fields:
