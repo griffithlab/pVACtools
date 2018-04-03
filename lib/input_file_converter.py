@@ -112,24 +112,6 @@ class VcfConverter(InputFileConverter):
             csq_header = info_fields['CSQ']
             return CsqParser(csq_header.desc)
 
-    def resolve_alleles(self, entry):
-        alleles = {}
-        if entry.is_indel:
-            for alt in entry.ALT:
-                alt = str(alt)
-                if alt[0:1] != entry.REF[0:1]:
-                    alleles[alt] = alt
-                elif alt[1:] == "":
-                    alleles[alt] = '-'
-                else:
-                    alleles[alt] = alt[1:]
-        else:
-            for alt in entry.ALT:
-                alt = str(alt)
-                alleles[alt] = alt
-
-        return alleles
-
     def resolve_consequence(self, consequence_string):
         consequences = {consequence.lower() for consequence in consequence_string.split('&')}
         if 'start_lost' in consequences:
@@ -252,7 +234,7 @@ class VcfConverter(InputFileConverter):
                     #The genotype is uncalled or hom_ref
                     continue
 
-            alleles_dict = self.resolve_alleles(entry)
+            alleles_dict = self.csq_parser.resolve_alleles(entry)
             for alt in alts:
                 alt = str(alt)
                 if genotype.gt_bases and alt not in genotype.gt_bases.split('/'):
