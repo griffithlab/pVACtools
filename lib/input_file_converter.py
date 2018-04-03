@@ -1,6 +1,7 @@
 import vcf
 import csv
 import sys
+import os
 from abc import ABCMeta
 from collections import OrderedDict
 from lib.csq_parser import CsqParser
@@ -60,6 +61,8 @@ class VcfConverter(InputFileConverter):
             mode = 'rb'
         else:
             mode = 'r'
+        if self.proximal_variants_vcf and not os.path.exists(self.proximal_variants_vcf + '.tbi'):
+            sys.exit('No .tbi file found for input VCF. Input VCF needs to be tabix indexed if processing with proximal variants.')
         self.reader = open(self.input_file, mode)
         self.vcf_reader = vcf.Reader(self.reader)
         if len(self.vcf_reader.samples) > 1:
