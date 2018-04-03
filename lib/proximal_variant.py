@@ -56,35 +56,47 @@ class ProximalVariant:
         has_proximal_variants_that_are_missense = False
         has_proximal_variants_on_same_transcript = False
         for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.start - flanking_length, somatic_variant.end + flanking_length):
-            if entry.start == somatic_variant.start and entry.end == somatic_variant.end and entry.ALT[0] == alt:
-                phased_somatic_variant = entry
-                continue
+            for proximal_alt in entry.ALT:
+                if entry.start == somatic_variant.start and entry.end == somatic_variant.end and proximal_alt == alt:
+                    phased_somatic_variant = entry
+                    continue
 
-            has_proximal_variants = True
+                has_proximal_variants = True
 
-            #We assume that there is only one CSQ entry because the PICK option was used but we should double check that
-            csq_entries = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)
-            if len(csq_entries) == 0:
-                print("Warning: Proximal variant is not VEP annotated and will be skipped: {}".format(entry))
-                continue
-            else:
+                if 'CSQ' not in entry.INFO:
+                    print("Warning: Proximal variant is not VEP annotated and will be skipped: {}".format(entry))
+                    continue
+
+                alleles_dict = self.csq_parser.resolve_alleles(entry)
+                csq_entries = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], proximal_alt)
+                if len(csq_entries) == 0:
+                    csq_allele = alleles_dict[str(proximal_alt)]
+                    csq_entries = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_allele)
+
+                    if len(csq_entries) == 0:
+                        print("Warning: Proximal variant does not contain any VEP annotations for alternate allele and will be skipped: {}".format(entry))
+                        continue
+
+                #We assume that there is only one CSQ entry because the PICK option was used but we should double check that
+                if len(csq_entries) > 1:
+                    print("Warning: There are multiple CSQ entries (consequences) for proximal variant {} and alternate allele {}. Using the first one.".format(entry, proximal_alt))
                 csq_entry = csq_entries[0]
                 has_proximal_variants_with_annotations = True
 
-            consequences = {consequence.lower() for consequence in csq_entry['Consequence'].split('&')}
-            if 'missense_variant' not in consequences:
-                print("Warning: Proximal variant is not a missense mutation and will be skipped: {}".format(entry))
-                continue
-            else:
-                has_proximal_variants_that_are_missense = True
+                consequences = {consequence.lower() for consequence in csq_entry['Consequence'].split('&')}
+                if 'missense_variant' not in consequences:
+                    print("Warning: Proximal variant is not a missense mutation and will be skipped: {}".format(entry))
+                    continue
+                else:
+                    has_proximal_variants_that_are_missense = True
 
-            if csq_entry['Feature'] != transcript:
-                print("Warning: Proximal variant transcript is not the same as the somatic variant transcript. Proximal variant will be skipped: {}".format(entry))
-                continue
-            else:
-                has_proximal_variants_on_same_transcript = True
+                if csq_entry['Feature'] != transcript:
+                    print("Warning: Proximal variant transcript is not the same as the somatic variant transcript. Proximal variant will be skipped: {}".format(entry))
+                    continue
+                else:
+                    has_proximal_variants_on_same_transcript = True
 
-            potential_proximal_variants.append([entry, csq_entry])
+                potential_proximal_variants.append([entry, csq_entry])
 
         if has_proximal_variants:
             counter['somatic_variants_with_proximal_variants'] += 1

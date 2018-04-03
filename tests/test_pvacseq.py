@@ -351,7 +351,7 @@ class PvacseqTests(unittest.TestCase):
         ]
         run.main(params)
 
-        for file_name in ['Test_21.fa.split_1-10', 'Test_21.fa.split_1-10.key']:
+        for file_name in ['Test_21.fa.split_1-16', 'Test_21.fa.split_1-16.key']:
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', 'tmp', file_name)
             self.assertTrue(cmp(output_file, expected_file, False))
