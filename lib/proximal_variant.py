@@ -1,5 +1,6 @@
 import vcf
 import sys
+import os
 from lib.csq_parser import CsqParser
 from Bio.Seq import translate
 
@@ -10,6 +11,8 @@ class ProximalVariant:
             mode = 'rb'
         else:
             mode = 'r'
+        if not os.path.exists(proximal_variants_vcf + '.tbi'):
+            sys.exit('No .tbi file found for proximal variants VCF. Proximal variants VCF needs to be tabix indexed.')
         self.fh = open(proximal_variants_vcf, mode)
         self.proximal_variants_vcf = vcf.Reader(self.fh)
         info_fields = self.proximal_variants_vcf.infos
