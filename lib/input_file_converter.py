@@ -74,11 +74,13 @@ class VcfConverter(InputFileConverter):
         self.tsv_writer.writeheader()
         self.counter = Counter({
             'somatic_variants': 0,
-            'somatic_variants_with_proximal_variants': 0,
-            'somatic_variants_with_annotated_proximal_variants': 0,
-            'somatic_variants_with_missense_annotated_proximal_variants': 0,
-            'somatic_variants_with_missense_annotated_proximal_variants_on_same_transcript': 0,
-            'somatic_variants_with_phased_proximal_variants': 0,
+            'somatic_variants_handled': 0,
+            'somatic_missense_variants': 0,
+            'somatic_missense_variants_with_proximal_variants': 0,
+            'somatic_missense_variants_with_annotated_proximal_variants': 0,
+            'somatic_missense_variants_with_missense_annotated_proximal_variants': 0,
+            'somatic_missense_variants_with_missense_annotated_proximal_variants_on_same_transcript': 0,
+            'somatic_missense_variants_with_phased_proximal_variants': 0,
         })
 
         self.csq_parser = self.create_csq_parser()
@@ -306,9 +308,14 @@ class VcfConverter(InputFileConverter):
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
                     consequence = self.resolve_consequence(transcript['Consequence'])
+                    self.counter['somatic_variants'] += 1
                     if consequence is None:
                         continue
-                    elif consequence == 'FS':
+                    self.counter['somatic_variants_handled'] += 1
+                    if self.proximal_variants_vcf and consequence is not 'missense':
+                        continue
+                    self.counter['somatic_missense_variants'] += 1
+                    if consequence == 'FS':
                         if transcript['DownstreamProtein'] == '':
                             continue
                         else:
@@ -377,13 +384,14 @@ class VcfConverter(InputFileConverter):
             stats_filename = '.'.join([self.proximal_variants_tsv, 'stats'])
             fieldnames = [
                 'somatic_variants',
-                'somatic_variants_with_proximal_variants',
-                'somatic_variants_with_annotated_proximal_variants',
-                'somatic_variants_with_missense_annotated_proximal_variants',
-                'somatic_variants_with_missense_annotated_proximal_variants_on_same_transcript',
-                'somatic_variants_with_phased_proximal_variants',
+                'somatic_variants_handled',
+                'somatic_missense_variants',
+                'somatic_missense_variants_with_proximal_variants',
+                'somatic_missense_variants_with_annotated_proximal_variants',
+                'somatic_missense_variants_with_missense_annotated_proximal_variants',
+                'somatic_missense_variants_with_missense_annotated_proximal_variants_on_same_transcript',
+                'somatic_missense_variants_with_phased_proximal_variants',
             ]
-
             with open(stats_filename, 'w') as fh:
                 writer = csv.DictWriter(fh, delimiter='\t', fieldnames=fieldnames)
                 writer.writeheader()

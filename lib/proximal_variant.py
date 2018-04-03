@@ -23,8 +23,6 @@ class ProximalVariant:
         self.csq_parser = CsqParser(info_fields['CSQ'].desc)
 
     def extract(self, somatic_variant, alt, transcript, peptide_size, counter):
-        counter['somatic_variants'] += 1
-
         (phased_somatic_variant, potential_proximal_variants, counter) = self.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, alt, transcript, peptide_size, counter)
 
         if phased_somatic_variant is None:
@@ -32,8 +30,6 @@ class ProximalVariant:
 
         if len(potential_proximal_variants) == 0:
             return [], counter
-
-        counter['somatic_variants_with_proximal_variants'] += 1
 
         proximal_variants = []
         sample = self.proximal_variants_vcf.samples[0]
@@ -52,7 +48,7 @@ class ProximalVariant:
                     proximal_variants.append([entry, csq_entry])
 
         if len(proximal_variants) > 0:
-            counter['somatic_variants_with_phased_proximal_variants'] += 1
+            counter['somatic_missense_variants_with_phased_proximal_variants'] += 1
 
         return proximal_variants, counter
 
@@ -107,13 +103,13 @@ class ProximalVariant:
                 potential_proximal_variants.append([entry, csq_entry])
 
         if has_proximal_variants:
-            counter['somatic_variants_with_proximal_variants'] += 1
+            counter['somatic_missense_variants_with_proximal_variants'] += 1
         if has_proximal_variants_with_annotations:
-            counter['somatic_variants_with_annotated_proximal_variants'] += 1
+            counter['somatic_missense_variants_with_annotated_proximal_variants'] += 1
         if has_proximal_variants_that_are_missense:
-            counter['somatic_variants_with_missense_annotated_proximal_variants'] += 1
+            counter['somatic_missense_variants_with_missense_annotated_proximal_variants'] += 1
         if has_proximal_variants_on_same_transcript:
-            counter['somatic_variants_with_missense_annotated_proximal_variants_on_same_transcript'] += 1
+            counter['somatic_missense_variants_with_missense_annotated_proximal_variants_on_same_transcript'] += 1
 
         return (phased_somatic_variant, potential_proximal_variants, counter)
 
