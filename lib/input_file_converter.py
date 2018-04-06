@@ -4,6 +4,7 @@ import sys
 from abc import ABCMeta
 from collections import OrderedDict
 from lib.csq_parser import CsqParser
+import lib.utils
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -49,7 +50,7 @@ class VcfConverter(InputFileConverter):
         self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
         self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
         self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
-        if self.input_file.endswith('.gz'):
+        if lib.utils.is_gz_file(self.input_file):
             mode = 'rb'
         else:
             mode = 'r'
