@@ -6,6 +6,7 @@ from abc import ABCMeta
 from collections import OrderedDict
 from lib.csq_parser import CsqParser
 from lib.proximal_variant import ProximalVariant
+import lib.utils
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -57,7 +58,7 @@ class VcfConverter(InputFileConverter):
         self.peptide_length = kwargs.pop('peptide_length', None)
         if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.peptide_length):
             sys.exit("A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided")
-        if self.input_file.endswith('.gz'):
+        if lib.utils.is_gz_file(self.input_file):
             mode = 'rb'
         else:
             mode = 'r'
