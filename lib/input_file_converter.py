@@ -7,6 +7,7 @@ from collections import OrderedDict
 from lib.csq_parser import CsqParser
 import lib.utils
 from lib.proximal_variant import ProximalVariant
+import lib.utils
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -65,6 +66,10 @@ class VcfConverter(InputFileConverter):
             sys.exit("A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided")
         if self.proximal_variants_vcf and not os.path.exists(self.proximal_variants_vcf + '.tbi'):
             sys.exit('No .tbi file found for input VCF. Input VCF needs to be tabix indexed if processing with proximal variants.')
+        if lib.utils.is_gz_file(self.input_file):
+            mode = 'rb'
+        else:
+            mode = 'r'
         if self.proximal_variants_vcf:
             self.proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
             self.proximal_variants_writer = csv.DictWriter(self.proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'codon_change', 'protein_position', 'type', 'main_somatic_variant'])
@@ -72,10 +77,6 @@ class VcfConverter(InputFileConverter):
             self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf)
             self.somatic_vcf_fh = open(self.input_file, mode)
             self.somatic_vcf_reader = vcf.Reader(self.somatic_vcf_fh)
-        if lib.utils.is_gz_file(self.input_file):
-            mode = 'rb'
-        else:
-            mode = 'r'
         self.reader = open(self.input_file, mode)
         self.vcf_reader = vcf.Reader(self.reader)
         if len(self.vcf_reader.samples) > 1:
