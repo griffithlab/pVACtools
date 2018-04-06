@@ -3,13 +3,20 @@ import sys
 import os
 from lib.csq_parser import CsqParser
 from Bio.Seq import translate
+import lib.utils
 
 class ProximalVariant:
     def __init__(self, proximal_variants_vcf):
-        self.fh = open(proximal_variants_vcf, 'rb')
         if not os.path.exists(proximal_variants_vcf + '.tbi'):
             sys.exit('No .tbi file found for proximal variants VCF. Proximal variants VCF needs to be tabix indexed.')
+
+        if lib.utils.is_gz_file(proximal_variants_vcf):
+            mode = 'rb'
+        else:
+            mode = 'r'
+        self.fh = open(proximal_variants_vcf, mode)
         self.proximal_variants_vcf = vcf.Reader(self.fh)
+
         info_fields = self.proximal_variants_vcf.infos
         if 'CSQ' not in info_fields:
             sys.exit('Proximal Variants VCF does not contain a CSQ header. Please annotate the VCF with VEP before running it.')
