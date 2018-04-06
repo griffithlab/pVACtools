@@ -26,6 +26,7 @@ class ProximalVariant:
         (phased_somatic_variant, potential_proximal_variants, counter) = self.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, alt, transcript, peptide_size, counter)
 
         if phased_somatic_variant is None:
+            print("Warning: Main somatic variant not found in phased variants file: {}, {}".format(somatic_variant, alt))
             return [], counter
 
         if len(potential_proximal_variants) == 0:
@@ -59,6 +60,7 @@ class ProximalVariant:
         has_proximal_variants_with_annotations = False
         has_proximal_variants_that_are_missense = False
         has_proximal_variants_on_same_transcript = False
+        phased_somatic_variant = None
         for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.start - flanking_length, somatic_variant.end + flanking_length):
             for proximal_alt in entry.ALT:
                 if entry.start == somatic_variant.start and entry.end == somatic_variant.end and proximal_alt == alt:
@@ -110,9 +112,6 @@ class ProximalVariant:
             counter['somatic_missense_variants_with_missense_annotated_proximal_variants'] += 1
         if has_proximal_variants_on_same_transcript:
             counter['somatic_missense_variants_with_missense_annotated_proximal_variants_on_same_transcript'] += 1
-            
-        if 'phased_somatic_variant' not in locals():
-            sys.exit("Main somatic variant not found in phased variants file: {}, {}".format(somatic_variant, alt))
 
         return (phased_somatic_variant, potential_proximal_variants, counter)
 
