@@ -110,6 +110,9 @@ class ProximalVariant:
             counter['somatic_missense_variants_with_missense_annotated_proximal_variants'] += 1
         if has_proximal_variants_on_same_transcript:
             counter['somatic_missense_variants_with_missense_annotated_proximal_variants_on_same_transcript'] += 1
+            
+        if 'phased_somatic_variant' not in locals():
+            sys.exit("Main somatic variant not found in phased variants file: {}, {}".format(somatic_variant, alt))
 
         return (phased_somatic_variant, potential_proximal_variants, counter)
 
