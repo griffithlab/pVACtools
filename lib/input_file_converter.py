@@ -74,6 +74,7 @@ class VcfConverter(InputFileConverter):
         self.tsv_writer.writeheader()
         self.counter = Counter({
             'somatic_variants': 0,
+            'somatic_pass_variants': 0,
             'somatic_variants_handled': 0,
             'somatic_missense_variants': 0,
             'somatic_missense_variants_with_proximal_variants': 0,
@@ -309,6 +310,14 @@ class VcfConverter(InputFileConverter):
                     transcript_name = transcript['Feature']
                     consequence = self.resolve_consequence(transcript['Consequence'])
                     self.counter['somatic_variants'] += 1
+
+                    filt = entry.FILTER
+                    if self.proximal_variants_vcf:
+                        if not (filt is None or len(filt) == 0):
+                            continue
+
+                    self.counter['somatic_pass_variants'] += 1
+
                     if consequence is None:
                         continue
                     self.counter['somatic_variants_handled'] += 1
@@ -384,6 +393,7 @@ class VcfConverter(InputFileConverter):
             stats_filename = '.'.join([self.proximal_variants_tsv, 'stats'])
             fieldnames = [
                 'somatic_variants',
+                'somatic_pass_variants',
                 'somatic_variants_handled',
                 'somatic_missense_variants',
                 'somatic_missense_variants_with_proximal_variants',
