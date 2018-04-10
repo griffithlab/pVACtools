@@ -236,24 +236,7 @@ class OutputParser(metaclass=ABCMeta):
             result['match_direction']     = match_direction
             result['wt_epitope_position'] = best_match_position
 
-    def add_mtwpv_iedb_results(self, iedb_results, mtwpv_iedb_results):
-        for key, result in iedb_results.items():
-            (wtwpv_iedb_result_key, mt_position) = key.split('|', 1)
-            if wtwpv_iedb_result_key in mtwpv_iedb_results and mt_position in mtwpv_iedb_results[wtwpv_iedb_result_key]:
-                mtwpv_result = mtwpv_iedb_results[wtwpv_iedb_result_key][mt_position]
-                result['mtwpv_epitope_seq'] = mtwpv_result['mtwpv_epitope_seq']
-                result['mtwpv_scores'] = mtwpv_result['mtwpv_scores']
-
-    def add_wtwgv_iedb_results(self, iedb_results, wtwgv_iedb_results):
-        for key, result in iedb_results.items():
-            (wtwgv_iedb_result_key, mt_position) = key.split('|', 1)
-            wt_position = result['wt_epitope_position']
-            if wtwgv_iedb_result_key in wtwgv_iedb_results and wt_position in wtwgv_iedb_results[wtwgv_iedb_result_key]:
-                wtwgv_result = wtwgv_iedb_results[wtwgv_iedb_result_key][wt_position]
-                result['wtwgv_epitope_seq'] = wtwgv_result['wtwgv_epitope_seq']
-                result['wtwgv_scores'] = wtwgv_result['wtwgv_scores']
-
-    def match_wildtype_and_mutant_entries(self, iedb_results, wt_iedb_results, mtwpv_iedb_results, wtwgv_iedb_results):
+    def match_wildtype_and_mutant_entries(self, iedb_results, wt_iedb_results):
         for key in sorted(iedb_results.keys(), key = lambda x: int(x.split('|')[-1])):
             result = iedb_results[key]
             (wt_iedb_result_key, mt_position) = key.split('|', 1)
@@ -271,9 +254,6 @@ class OutputParser(metaclass=ABCMeta):
             elif result['variant_type'] == 'inframe_ins' or result['variant_type'] == 'inframe_del':
                 iedb_results_for_wt_iedb_result_key = dict([(key,value) for key, value in iedb_results.items() if key.startswith(wt_iedb_result_key)])
                 self.match_wildtype_and_mutant_entry_for_inframe_indel(result, mt_position, wt_results, previous_result, iedb_results_for_wt_iedb_result_key)
-
-        self.add_mtwpv_iedb_results(iedb_results, mtwpv_iedb_results)
-        self.add_wtwgv_iedb_results(iedb_results, wtwgv_iedb_results)
 
         return iedb_results
 
@@ -315,12 +295,8 @@ class OutputParser(metaclass=ABCMeta):
                 'mutation_position',
                 'mt_scores',
                 'wt_scores',
-                'mtwpv_scores',
-                'wtwgv_scores',
                 'wt_epitope_seq',
                 'mt_epitope_seq',
-                'mtwpv_epitope_seq',
-                'wtwgv_epitope_seq',
                 'tsv_index',
                 'allele',
                 'peptide_length',
@@ -338,13 +314,13 @@ class OutputParser(metaclass=ABCMeta):
         return flattened_iedb_results
 
     def process_input_iedb_file(self, tsv_entries):
-        (iedb_results, contains_proximal_variants) = self.parse_iedb_file(tsv_entries)
+        iedb_results = self.parse_iedb_file(tsv_entries)
         iedb_results_with_metrics = self.add_summary_metrics(iedb_results)
         flattened_iedb_results = self.flatten_iedb_results(iedb_results_with_metrics)
 
-        return (flattened_iedb_results, contains_proximal_variants)
+        return flattened_iedb_results
 
-    def base_headers(self, contains_proximal_variants):
+    def base_headers(self):
         headers = [
             'Chromosome',
             'Start',
@@ -364,13 +340,7 @@ class OutputParser(metaclass=ABCMeta):
             'Sub-peptide Position',
             'Mutation Position',
             'MT Epitope Seq',
-        ]
-        if contains_proximal_variants:
-            headers.append('MTWPV Epitope Seq')
-        headers.append('WT Epitope Seq'),
-        if contains_proximal_variants:
-            headers.append('WTWGV Epitope Seq')
-        headers.extend([
+            'WT Epitope Seq',
             'Best MT Score Method',
             'Best MT Score',
             'Corresponding WT Score',
@@ -386,18 +356,15 @@ class OutputParser(metaclass=ABCMeta):
             'Median MT Score',
             'Median WT Score',
             'Median Fold Change',
-        ])
+        ]
         return headers
 
-    def output_headers(self, contains_proximal_variants):
-        headers = self.base_headers(contains_proximal_variants)
+    def output_headers(self):
+        headers = self.base_headers()
         for method in self.prediction_methods():
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
             headers.append("%s WT Score" % pretty_method)
             headers.append("%s MT Score" % pretty_method)
-            if contains_proximal_variants:
-                headers.append("%s WTWGV Score" % pretty_method)
-                headers.append("%s MTWPV Score" % pretty_method)
         if self.sample_name:
             headers.append("Sample Name")
 
@@ -413,11 +380,11 @@ class OutputParser(metaclass=ABCMeta):
 
     def execute(self):
         tsv_entries = self.parse_input_tsv_file()
-        (iedb_results, contains_proximal_variants) = self.process_input_iedb_file(tsv_entries)
+        iedb_results = self.process_input_iedb_file(tsv_entries)
 
         tmp_output_file = self.output_file + '.tmp'
         tmp_output_filehandle = open(tmp_output_file, 'w')
-        tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers(contains_proximal_variants))
+        tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
 
         for (
@@ -427,12 +394,8 @@ class OutputParser(metaclass=ABCMeta):
             mutation_position,
             mt_scores,
             wt_scores,
-            mtwpv_scores,
-            wtwgv_scores,
             wt_epitope_seq,
             mt_epitope_seq,
-            mtwpv_epitope_seq,
-            wtwgv_epitope_seq,
             tsv_index,
             allele,
             peptide_length,
@@ -490,24 +453,6 @@ class OutputParser(metaclass=ABCMeta):
                         row["%s MT Score" % pretty_method] = mt_scores[method]
                     else:
                         row["%s MT Score" % pretty_method] = 'NA'
-                    if contains_proximal_variants:
-                        if mtwpv_scores != 'NA' and method in mtwpv_scores and mtwpv_epitope_seq != mt_epitope_seq:
-                            row["%s MTWPV Score" % pretty_method] = mtwpv_scores[method]
-                        else:
-                            row["%s MTWPV Score" % pretty_method] = 'NA'
-                        if wtwgv_scores != 'NA' and method in wtwgv_scores and wtwgv_epitope_seq != wt_epitope_seq:
-                            row["%s WTWGV Score" % pretty_method] = wtwgv_scores[method]
-                        else:
-                            row["%s WTWGV Score" % pretty_method] = 'NA'
-                if contains_proximal_variants:
-                    if mtwpv_epitope_seq == mt_epitope_seq:
-                        row['MTWPV Epitope Seq'] = 'NA'
-                    else:
-                        row['MTWPV Epitope Seq'] = mtwpv_epitope_seq
-                    if wtwgv_epitope_seq == wt_epitope_seq:
-                        row['WTWGV Epitope Seq'] = 'NA'
-                    else:
-                        row['WTWGV Epitope Seq'] = wtwgv_epitope_seq
                 if 'gene_expression' in tsv_entry:
                     row['Gene Expression'] = tsv_entry['gene_expression']
                 if 'transcript_expression' in tsv_entry:
@@ -537,8 +482,6 @@ class DefaultOutputParser(OutputParser):
             protein_identifiers_from_label = yaml.load(key_file_reader)
         iedb_results = {}
         wt_iedb_results = {}
-        mtwpv_iedb_results = {}
-        wtwgv_iedb_results = {}
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
@@ -579,8 +522,6 @@ class DefaultOutputParser(OutputParser):
 
                         results = {
                             'WT': wt_iedb_results,
-                            'MTWPV': mtwpv_iedb_results,
-                            'WTWGV': wtwgv_iedb_results,
                         }
                         if protein_type == 'MT':
                             continue
@@ -593,7 +534,7 @@ class DefaultOutputParser(OutputParser):
                         result_set[tsv_index][position][protein_type.lower() + '_epitope_seq'] = epitope
                         result_set[tsv_index][position][protein_type.lower() + '_scores'][method] = float(score)
 
-        return self.match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results, mtwpv_iedb_results, wtwgv_iedb_results), len(mtwpv_iedb_results.keys())>0
+        return self.match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
 
 class FusionOutputParser(OutputParser):
     def parse_iedb_file(self, tsv_entries):
@@ -638,7 +579,7 @@ class FusionOutputParser(OutputParser):
                         iedb_results[key]['mt_scores'][method] = float(score)
                         iedb_results[key]['wt_scores'][method] = 'NA'
 
-        return iedb_results, False
+        return iedb_results
 
 class VectorOutputParser(OutputParser):
     def parse_iedb_file(self):
@@ -708,7 +649,7 @@ class VectorOutputParser(OutputParser):
         flattened_iedb_results    = self.flatten_iedb_results(iedb_results_with_metrics)
         return flattened_iedb_results
 
-    def base_headers(self, contains_proximal_variants):
+    def base_headers(self):
         return[
             'HLA Allele',
             'Sub-peptide Position',
@@ -721,7 +662,7 @@ class VectorOutputParser(OutputParser):
     def execute(self):
         tmp_output_file = self.output_file + '.tmp'
         tmp_output_filehandle = open(tmp_output_file, 'w')
-        tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers(False))
+        tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
 
         iedb_results = self.process_input_iedb_file()

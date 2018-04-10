@@ -217,12 +217,11 @@ class FastaGenerator(metaclass=ABCMeta):
                 downstream_sequence = line['downstream_amino_acid_sequence']
                 if self.downstream_sequence_length and len(downstream_sequence) > self.downstream_sequence_length:
                     downstream_sequence = downstream_sequence[0:self.downstream_sequence_length]
-                mutant_subsequence = left_flanking_subsequence + downstream_sequence
-                wildtype_subsequence_with_germline_variants = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, True)
+                wildtype_subsequence = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, True)
                 left_flanking_subsequence_with_proximal_variants = self.add_proximal_variants(line['index'], left_flanking_subsequence, mutation_start_position, position, False)
                 #The caveat here is that if a nearby variant is in the downstream sequence, the protein sequence would be further altered, which we aren't taking into account.
                 #we would need to recalculate the downstream protein sequence taking all downstream variants into account.
-                mutant_subsequence_with_proximal_variants = left_flanking_subsequence_with_proximal_variants + downstream_sequence
+                mutant_subsequence = left_flanking_subsequence_with_proximal_variants + downstream_sequence
             else:
                 mutation_start_position, wildtype_subsequence = self.get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line)
                 mutation_end_position = mutation_start_position + wildtype_amino_acid_length
@@ -232,19 +231,17 @@ class FastaGenerator(metaclass=ABCMeta):
                         continue
                     else:
                         sys.exit("ERROR: There was a mismatch between the actual wildtype amino acid sequence ({}) and the expected amino acid sequence ({}). Did you use the same reference build version for VEP that you used for creating the VCF?\n{}".format(wildtype_subsequence[mutation_start_position:mutation_end_position], wildtype_amino_acid, line))
-                wildtype_subsequence_with_germline_variants = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, True)
                 wildtype_subsequence_with_proximal_variants = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, False)
+                wildtype_subsequence = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, True)
                 if stop_codon_added:
-                    mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid
-                    mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid_with_proximal_variants
+                    mutant_subsequence = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid_with_proximal_variants
                 else:
-                    mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
-                    mutant_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid_with_proximal_variants + wildtype_subsequence_with_proximal_variants[mutation_end_position:]
+                    mutant_subsequence = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid_with_proximal_variants + wildtype_subsequence_with_proximal_variants[mutation_end_position:]
 
-            if '*' in wildtype_subsequence or '*' in mutant_subsequence or '*' in wildtype_subsequence_with_germline_variants or '*' in mutant_subsequence_with_proximal_variants:
+            if '*' in wildtype_subsequence or '*' in mutant_subsequence:
                 continue
 
-            if 'X' in wildtype_subsequence or 'X' in mutant_subsequence or 'X' in wildtype_subsequence_with_germline_variants or 'X' in mutant_subsequence_with_proximal_variants:
+            if 'X' in wildtype_subsequence or 'X' in mutant_subsequence:
                 continue
 
             if 'U' in wildtype_subsequence or 'U' in mutant_subsequence:
@@ -262,11 +259,6 @@ class FastaGenerator(metaclass=ABCMeta):
             for designation, subsequence in zip(['WT', 'MT'], [wildtype_subsequence, mutant_subsequence]):
                 key = '%s.%s' % (designation, variant_id)
                 fasta_sequences.setdefault(subsequence, []).append(key)
-
-            if mutant_subsequence_with_proximal_variants != mutant_subsequence:
-                for designation, subsequence in zip(['MTWPV', 'WTWGV'], [mutant_subsequence_with_proximal_variants, wildtype_subsequence_with_germline_variants]):
-                    key = '%s.%s' % (designation, variant_id)
-                    fasta_sequences.setdefault(subsequence, []).append(key)
 
         writer = open(self.output_file, 'w')
         key_writer = open(self.output_key_file, 'w')
