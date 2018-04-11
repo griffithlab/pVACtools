@@ -50,6 +50,7 @@ class VcfConverter(InputFileConverter):
         self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
         self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
         self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
+        self.pass_only                   = kwargs.pop('pass_only', False)
         if lib.utils.is_gz_file(self.input_file):
             mode = 'rb'
         else:
@@ -234,6 +235,10 @@ class VcfConverter(InputFileConverter):
                 if genotype.gt_type is None or genotype.gt_type == 0:
                     #The genotype is uncalled or hom_ref
                     continue
+
+            filt = entry.FILTER
+            if self.pass_only and not (filt is None or len(filt) == 0):
+                continue
 
             alleles_dict = self.csq_parser.resolve_alleles(entry)
             for alt in alts:
