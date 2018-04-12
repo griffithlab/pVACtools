@@ -44,7 +44,6 @@ class Pipeline(metaclass=ABCMeta):
         self.net_chop_method             = kwargs.pop('net_chop_method', None)
         self.net_chop_threshold          = kwargs.pop('net_chop_threshold', 0.5)
         self.netmhc_stab                 = kwargs.pop('netmhc_stab', False)
-        self.top_result_per_mutation     = kwargs.pop('top_result_per_mutation', False)
         self.top_score_metric            = kwargs.pop('top_score_metric', 'median')
         self.binding_threshold           = kwargs.pop('binding_threshold', 500)
         self.minimum_fold_change         = kwargs.pop('minimum_fold_change', 0)
@@ -294,6 +293,7 @@ class Pipeline(metaclass=ABCMeta):
     def top_result_filter(self):
         status_message("Running Top Score Filter")
         TopScoreFilter(self.coverage_filter_out_path(), self.top_result_filter_out_path(), self.top_score_metric).execute()
+        status_message("Completed")
 
     def net_chop_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".chop.tsv")
@@ -301,7 +301,7 @@ class Pipeline(metaclass=ABCMeta):
     def net_chop(self):
         status_message("Submitting remaining epitopes to NetChop")
         lib.net_chop.main([
-            self.coverage_filter_out_path(),
+            self.top_result_filter_out_path(),
             self.net_chop_out_path(),
             '--method',
             self.net_chop_method,
@@ -360,11 +360,7 @@ class Pipeline(metaclass=ABCMeta):
             os.symlink(self.binding_filter_out_path(), self.coverage_filter_out_path())
             symlinks_to_delete.append(self.coverage_filter_out_path())
 
-        if self.top_result_per_mutation:
-            self.top_result_filter()
-        else:
-            os.symlink(self.coverage_filter_out_path(), self.top_result_filter_out_path())
-            symlinks_to_delete.append(self.top_result_filter_out_path())
+        self.top_result_filter()
 
         if self.net_chop_method:
             self.net_chop()
