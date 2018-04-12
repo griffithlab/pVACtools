@@ -201,6 +201,7 @@ class PvacseqTests(unittest.TestCase):
                 'Test.combined.parsed.tsv',
                 'Test.filtered.binding.tsv',
                 'Test.filtered.coverage.tsv',
+                'Test.filtered.top.tsv',
                 'Test.chop.tsv',
                 'Test.stab.tsv',
                 'Test.final.tsv',
@@ -252,11 +253,12 @@ class PvacseqTests(unittest.TestCase):
                 'Test.combined.parsed.tsv',
                 'Test.filtered.binding.tsv',
                 'Test.filtered.coverage.tsv',
+                'Test.filtered.top.tsv',
                 'Test.final.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name)
-                self.assertTrue(cmp(output_file, expected_file, False))
+                self.assertTrue(compare(output_file, expected_file))
 
             for file_name in (
                 'Test_31.fa.split_1-48',
