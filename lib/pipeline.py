@@ -16,6 +16,7 @@ from lib.output_parser import *
 from lib.binding_filter import *
 from lib.top_score_filter import *
 from lib.filter import *
+from lib.condense_final_report import *
 import shutil
 import yaml
 import pkg_resources
@@ -324,6 +325,14 @@ class Pipeline(metaclass=ABCMeta):
     def final_path(self):
         return os.path.join(self.output_dir, self.sample_name+".final.tsv")
 
+    def condensed_final_path(self):
+        return os.path.join(self.output_dir, self.sample_name+".final.condensed.tsv")
+
+    def condensed_report(self):
+        print("Creating condensed final report")
+        CondenseFinalReport(self.final_path(), self.condensed_final_path(), self.top_score_metric).execute()
+        print("Completed")
+
     def execute(self):
         self.print_log()
         self.convert_vcf()
@@ -375,9 +384,11 @@ class Pipeline(metaclass=ABCMeta):
             symlinks_to_delete.append(self.netmhc_stab_out_path())
 
         shutil.copy(self.netmhc_stab_out_path(), self.final_path())
+
+        self.condensed_report()
+
         for symlink in symlinks_to_delete:
             os.unlink(symlink)
-
 
         status_message(
             "\n"
