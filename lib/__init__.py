@@ -2,6 +2,7 @@ __all__ = [
     "binding_filter",
     "call_iedb",
     "combine_parsed_outputs",
+    "condense_final_report",
     "input_file_converter",
     "download_example_data",
     "fasta_generator",
