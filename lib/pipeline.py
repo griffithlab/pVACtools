@@ -17,6 +17,7 @@ from lib.binding_filter import *
 from lib.top_score_filter import *
 from lib.filter import *
 from lib.condense_final_report import *
+from lib.rank_epitopes import *
 import shutil
 import yaml
 import pkg_resources
@@ -333,6 +334,14 @@ class Pipeline(metaclass=ABCMeta):
         CondenseFinalReport(self.final_path(), self.condensed_final_path(), self.top_score_metric).execute()
         print("Completed")
 
+    def ranked_final_path(self):
+        return os.path.join(self.output_dir, self.sample_name+".final.condensed.ranked.tsv")
+
+    def rank_epitopes(self):
+        print("Ranking neoepitopes")
+        RankEpitopes(self.condensed_final_path(), self.ranked_final_path()).execute()
+        print("Completed")
+
     def execute(self):
         self.print_log()
         self.convert_vcf()
@@ -386,14 +395,13 @@ class Pipeline(metaclass=ABCMeta):
         shutil.copy(self.netmhc_stab_out_path(), self.final_path())
 
         self.condensed_report()
+        self.rank_epitopes()
 
         for symlink in symlinks_to_delete:
             os.unlink(symlink)
 
-        status_message(
-            "\n"
-            + "Done: Pipeline finished successfully. File %s contains list of filtered putative neoantigens. " % self.final_path()
-        )
+        status_message("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.ranked_final_path()))
+
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir)
 
