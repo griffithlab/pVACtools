@@ -13,8 +13,8 @@ class CondenseFinalReport:
             'Protein Position',
             'HLA Allele',
             'MT Epitope Seq',
-            'MT Score',
-            'WT Score',
+            'MT IC50',
+            'WT IC50',
             'Fold Change',
             'Tumor DNA Depth',
             'Tumor DNA VAF',
@@ -31,11 +31,11 @@ class CondenseFinalReport:
 
             for line in reader:
                 if self.top_score_metric == 'median':
-                    line['MT Score'] = line['Median MT Score']
-                    line['WT Score'] = line['Median WT Score']
+                    line['MT IC50'] = line['Median MT Score']
+                    line['WT IC50'] = line['Median WT Score']
                     line['Fold Change'] = line['Median Fold Change']
                 elif self.top_score_metric == 'lowest':
-                    line['MT Score'] = line['Best MT Score']
-                    line['WT Score'] = line['Corresponding WT Score']
+                    line['MT IC50'] = line['Best MT Score']
+                    line['WT IC50'] = line['Corresponding WT Score']
                     line['Fold Change'] = line['Corresponding Fold Change']
                 writer.writerow(line)

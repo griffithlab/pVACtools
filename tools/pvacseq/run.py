@@ -6,6 +6,7 @@ from lib.pipeline import *
 from config_files import additional_input_file_list_options
 from lib.run_argument_parser import *
 from lib.condense_final_report import *
+from lib.rank_epitopes import *
 
 import shutil
 import yaml
@@ -84,6 +85,13 @@ def condensed_report(final_output_file, output_dir, args):
     print("Completed")
     return output_file
 
+def rank_epitopes(condensed_report_output_file, output_dir, args):
+    output_file = os.path.join(output_dir, "{}.final.condensed.ranked.tsv".format(args.sample_name))
+    print("Ranking neoepitopes")
+    RankEpitopes(condensed_report_output_file, output_file).execute()
+    print("Completed")
+    return output_file
+
 def create_combined_reports(base_output_dir, args, additional_input_files):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
@@ -102,7 +110,8 @@ def create_combined_reports(base_output_dir, args, additional_input_files):
     final_output_file = os.path.join(output_dir, "{}.final.tsv".format(args.sample_name))
     shutil.copy(top_result_filter_output_file, final_output_file)
     condensed_report_output_file = condensed_report(final_output_file, output_dir, args)
-    print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens for class I and class II predictions.".format(final_output_file))
+    ranked_output_file = rank_epitopes(condensed_report_output_file, output_dir, args)
+    print("\nDone: Pipeline finished successfully. File {} contains ranked list of filtered putative neoantigens for class I and class II predictions.\n".format(ranked_output_file))
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()

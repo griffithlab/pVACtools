@@ -5,9 +5,78 @@ from lib.prediction_class import *
 from lib.pipeline import *
 from tools.pvacseq.config_files import additional_input_file_list_options
 from lib.run_argument_parser import *
+from lib.condense_final_report import *
+from lib.rank_epitopes import *
+from lib.binding_filter import *
+from lib.top_score_filter import *
 
 def define_parser():
     return PvacfuseRunArgumentParser().parser
+
+def combine_reports(input_files, output_file):
+    write_headers = True
+    with open(output_file, 'w') as fout:
+        writer = csv.writer(fout)
+        for filename in input_files:
+            with open(filename) as fin:
+                reader = csv.reader(fin)
+                headers = next(reader)
+                if write_headers:
+                    write_headers = False  # Only write headers once.
+                    writer.writerow(headers)
+                writer.writerows(reader)  # Write all remaining rows.
+
+def binding_filter(input_file, output_dir, args):
+    output_file = os.path.join(output_dir, "{}.filtered.binding.tsv".format(args.sample_name))
+    print("Running Binding Filters")
+    BindingFilter(
+        input_file,
+        output_file,
+        args.binding_threshold,
+        0,
+        args.top_score_metric,
+        args.exclude_NAs,
+    ).execute()
+    print("Completed")
+    return output_file
+
+def top_result_filter(coverage_filter_output_file, output_dir, args):
+    output_file = os.path.join(output_dir, "{}.filtered.top.tsv".format(args.sample_name))
+    print("Running Top Score Filter")
+    TopScoreFilter(coverage_filter_output_file, output_file, args.top_score_metric).execute()
+    print("Completed")
+    return output_file
+
+def condensed_report(final_output_file, output_dir, args):
+    output_file = os.path.join(output_dir, "{}.final.condensed.tsv".format(args.sample_name))
+    print("Creating condensed final report")
+    CondenseFinalReport(final_output_file, output_file, args.top_score_metric).execute()
+    print("Completed")
+    return output_file
+
+def rank_epitopes(condensed_report_output_file, output_dir, args):
+    output_file = os.path.join(output_dir, "{}.final.condensed.ranked.tsv".format(args.sample_name))
+    print("Ranking neoepitopes")
+    RankEpitopes(condensed_report_output_file, output_file).execute()
+    print("Completed")
+    return output_file
+
+def create_combined_reports(base_output_dir, args):
+    output_dir = os.path.join(base_output_dir, 'combined')
+    os.makedirs(output_dir, exist_ok=True)
+
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.combined.parsed.tsv".format(args.sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.combined.parsed.tsv".format(args.sample_name))
+    combined_output_file = os.path.join(output_dir, "{}.combined.parsed.tsv".format(args.sample_name))
+    combine_reports([file1, file2], combined_output_file)
+
+    binding_filter_output_file = binding_filter(combined_output_file, output_dir, args)
+    top_result_filter_output_file = top_result_filter(binding_filter_output_file, output_dir, args)
+    final_output_file = os.path.join(output_dir, "{}.final.tsv".format(args.sample_name))
+    shutil.copy(top_result_filter_output_file, final_output_file)
+    condensed_report_output_file = condensed_report(final_output_file, output_dir, args)
+    ranked_output_file = rank_epitopes(condensed_report_output_file, output_dir, args)
+    print("\nDone: Pipeline finished successfully. File {} contains ranked list of filtered putative neoantigens for class I and class II predictions.\n".format(ranked_output_file))
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
@@ -118,6 +187,10 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments['netmhc_stab']           = False
         pipeline = MHCIIPipeline(**class_ii_arguments)
         pipeline.execute()
+
+    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+        print("Creating combined reports")
+        create_combined_reports(base_output_dir, args)
 
 if __name__ == '__main__':
     main()
