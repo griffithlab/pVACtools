@@ -160,6 +160,8 @@ class PvacfuseTests(unittest.TestCase):
                 'Test.combined.parsed.tsv',
                 'Test.filtered.binding.tsv',
                 'Test.final.tsv',
+                'Test.final.condensed.tsv',
+                'Test.final.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', file_name)
