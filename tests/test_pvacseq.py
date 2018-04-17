@@ -336,6 +336,7 @@ class PvacseqTests(unittest.TestCase):
         files,
         test_data_directory()
     )))
+
     def test_pvacseq_pipeline_sleep(self):
         output_dir_1 = tempfile.TemporaryDirectory()
         params_1 = [
@@ -370,3 +371,48 @@ class PvacseqTests(unittest.TestCase):
         output_dir_2.cleanup()
 
         self.assertTrue(duration_1 > duration_2)
+
+    def test_pvacfuse_combine_and_condense_steps(self):
+        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+        for subdir in ['MHC_Class_I', 'MHC_Class_II']:
+            path = os.path.join(output_dir.name, subdir)
+            os.mkdir(path)
+            test_data_dir = os.path.join(self.test_data_directory, 'combine_and_condense', subdir)
+            for item in os.listdir(test_data_dir):
+                os.symlink(os.path.join(test_data_dir, item), os.path.join(path, item))
+
+        additional_input_files = tempfile.NamedTemporaryFile('w')
+        additional_input_file_list = {
+            'gene_expn_file': os.path.join(self.test_data_directory, 'genes.fpkm_tracking'),
+            'transcript_expn_file': os.path.join(self.test_data_directory, 'isoforms.fpkm_tracking'),
+            'tdna_snvs_coverage_file': os.path.join(self.test_data_directory, 'snvs.bam_readcount'),
+            'tdna_indels_coverage_file': os.path.join(self.test_data_directory, 'indels.bam_readcount'),
+        }
+        yaml.dump(additional_input_file_list, additional_input_files, default_flow_style=False)
+
+        run.main([
+            os.path.join(self.test_data_directory, "input.vcf"),
+            'Test',
+            'HLA-G*01:09,HLA-E*01:01,H2-IAb',
+            'NetMHC',
+            'PickPocket',
+            'NNalign',
+            output_dir.name,
+            '-e', '9,10',
+            '-i', additional_input_files.name,
+            '--top-score-metric=lowest',
+            '--keep-tmp-files',
+            '--tdna-vaf', '20',
+            '-d', 'full',
+        ])
+
+        for file_name in (
+            'Test.combined.parsed.tsv',
+            'Test.filtered.binding.tsv',
+            'Test.final.tsv',
+            'Test.final.condensed.tsv',
+            'Test.final.condensed.ranked.tsv',
+        ):
+            output_file   = os.path.join(output_dir.name, 'combined', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
+            self.assertTrue(compare(output_file, expected_file))
