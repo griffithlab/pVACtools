@@ -205,6 +205,8 @@ class PvacseqTests(unittest.TestCase):
                 'Test.chop.tsv',
                 'Test.stab.tsv',
                 'Test.final.tsv',
+                'Test.final.condensed.tsv',
+                'Test.final.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name)
@@ -255,6 +257,8 @@ class PvacseqTests(unittest.TestCase):
                 'Test.filtered.coverage.tsv',
                 'Test.filtered.top.tsv',
                 'Test.final.tsv',
+                'Test.final.condensed.tsv',
+                'Test.final.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name)
