@@ -55,7 +55,7 @@ def condensed_report(final_output_file, output_dir, args):
     return output_file
 
 def rank_epitopes(condensed_report_output_file, output_dir, args):
-    output_file = os.path.join(output_dir, "{}.final.condensed.ranked.tsv".format(args.sample_name))
+    output_file = os.path.join(output_dir, "{}.filtered.condensed.ranked.tsv".format(args.sample_name))
     print("Ranking neoepitopes")
     RankEpitopes(condensed_report_output_file, output_file).execute()
     print("Completed")
@@ -65,17 +65,23 @@ def create_combined_reports(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
 
-    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.combined.parsed.tsv".format(args.sample_name))
-    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.combined.parsed.tsv".format(args.sample_name))
-    combined_output_file = os.path.join(output_dir, "{}.combined.parsed.tsv".format(args.sample_name))
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
+    combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
     combine_reports([file1, file2], combined_output_file)
 
     binding_filter_output_file = binding_filter(combined_output_file, output_dir, args)
     top_result_filter_output_file = top_result_filter(binding_filter_output_file, output_dir, args)
-    final_output_file = os.path.join(output_dir, "{}.final.tsv".format(args.sample_name))
+    final_output_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
     shutil.copy(top_result_filter_output_file, final_output_file)
     condensed_report_output_file = condensed_report(final_output_file, output_dir, args)
     ranked_output_file = rank_epitopes(condensed_report_output_file, output_dir, args)
+    for file_name in [
+        binding_filter_output_file,
+        top_result_filter_output_file,
+        condensed_report_output_file,
+    ]:
+        os.unlink(file_name)
     print("\nDone: Pipeline finished successfully. File {} contains ranked list of filtered putative neoantigens for class I and class II predictions.\n".format(ranked_output_file))
 
 def main(args_input = sys.argv[1:]):
