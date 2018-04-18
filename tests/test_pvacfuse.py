@@ -157,11 +157,9 @@ class PvacfuseTests(unittest.TestCase):
             for file_name in (
                 'Test.tsv',
                 'Test.tsv_1-4',
-                'Test.combined.parsed.tsv',
-                'Test.filtered.binding.tsv',
-                'Test.final.tsv',
-                'Test.final.condensed.tsv',
-                'Test.final.condensed.ranked.tsv',
+                'Test.all_epitopes.tsv',
+                'Test.filtered.tsv',
+                'Test.filtered.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', file_name)
@@ -204,11 +202,9 @@ class PvacfuseTests(unittest.TestCase):
             ])
 
             for file_name in (
-                'Test.combined.parsed.tsv',
-                'Test.filtered.binding.tsv',
-                'Test.final.tsv',
-                'Test.final.condensed.tsv',
-                'Test.final.condensed.ranked.tsv',
+                'Test.all_epitopes.tsv',
+                'Test.filtered.tsv',
+                'Test.filtered.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)

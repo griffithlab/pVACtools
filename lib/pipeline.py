@@ -242,7 +242,7 @@ class Pipeline(metaclass=ABCMeta):
         pass
 
     def combined_parsed_path(self):
-        combined_parsed = "%s.combined.parsed.tsv" % self.sample_name
+        combined_parsed = "%s.all_epitopes.tsv" % self.sample_name
         return os.path.join(self.output_dir, combined_parsed)
 
     def combined_parsed_outputs(self, split_parsed_output_files):
@@ -324,7 +324,7 @@ class Pipeline(metaclass=ABCMeta):
         status_message("Completed")
 
     def final_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".final.tsv")
+        return os.path.join(self.output_dir, self.sample_name+".filtered.tsv")
 
     def condensed_final_path(self):
         return os.path.join(self.output_dir, self.sample_name+".final.condensed.tsv")
@@ -335,7 +335,7 @@ class Pipeline(metaclass=ABCMeta):
         print("Completed")
 
     def ranked_final_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".final.condensed.ranked.tsv")
+        return os.path.join(self.output_dir, self.sample_name+".filtered.condensed.ranked.tsv")
 
     def rank_epitopes(self):
         print("Ranking neoepitopes")
@@ -364,7 +364,6 @@ class Pipeline(metaclass=ABCMeta):
         self.combined_parsed_outputs(split_parsed_output_files)
         self.binding_filter()
 
-        symlinks_to_delete = []
         if (self.gene_expn_file is not None
             or self.transcript_expn_file is not None
             or self.normal_snvs_coverage_file is not None
@@ -376,7 +375,6 @@ class Pipeline(metaclass=ABCMeta):
             self.coverage_filter()
         else:
             os.symlink(self.binding_filter_out_path(), self.coverage_filter_out_path())
-            symlinks_to_delete.append(self.coverage_filter_out_path())
 
         self.top_result_filter()
 
@@ -384,20 +382,25 @@ class Pipeline(metaclass=ABCMeta):
             self.net_chop()
         else:
             os.symlink(self.top_result_filter_out_path(), self.net_chop_out_path())
-            symlinks_to_delete.append(self.net_chop_out_path())
 
         if self.netmhc_stab:
             self.call_netmhc_stab()
         else:
             os.symlink(self.net_chop_out_path(), self.netmhc_stab_out_path())
-            symlinks_to_delete.append(self.netmhc_stab_out_path())
 
         shutil.copy(self.netmhc_stab_out_path(), self.final_path())
 
         self.condensed_report()
         self.rank_epitopes()
 
-        for symlink in symlinks_to_delete:
+        for symlink in [
+            self.binding_filter_out_path(),
+            self.coverage_filter_out_path(),
+            self.top_result_filter_out_path(),
+            self.net_chop_out_path(),
+            self.netmhc_stab_out_path(),
+            self.condensed_final_path(),
+        ]:
             os.unlink(symlink)
 
         status_message("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.ranked_final_path()))

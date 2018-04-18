@@ -198,15 +198,9 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'Test.tsv',
                 'Test.tsv_1-24',
-                'Test.combined.parsed.tsv',
-                'Test.filtered.binding.tsv',
-                'Test.filtered.coverage.tsv',
-                'Test.filtered.top.tsv',
-                'Test.chop.tsv',
-                'Test.stab.tsv',
-                'Test.final.tsv',
-                'Test.final.condensed.tsv',
-                'Test.final.condensed.ranked.tsv',
+                'Test.all_epitopes.tsv',
+                'Test.filtered.tsv',
+                'Test.filtered.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name)
@@ -252,13 +246,9 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'Test.tsv',
                 'Test.tsv_1-24',
-                'Test.combined.parsed.tsv',
-                'Test.filtered.binding.tsv',
-                'Test.filtered.coverage.tsv',
-                'Test.filtered.top.tsv',
-                'Test.final.tsv',
-                'Test.final.condensed.tsv',
-                'Test.final.condensed.ranked.tsv',
+                'Test.all_epitopes.tsv',
+                'Test.filtered.tsv',
+                'Test.filtered.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name)
@@ -327,7 +317,7 @@ class PvacseqTests(unittest.TestCase):
             '-a', 'sample_name',
         ]
         run.main(params)
-        output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.final.tsv')
+        output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.filtered.tsv')
         expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
         self.assertTrue(cmp(output_file, expected_file, False))
 
@@ -372,7 +362,7 @@ class PvacseqTests(unittest.TestCase):
 
         self.assertTrue(duration_1 > duration_2)
 
-    def test_pvacfuse_combine_and_condense_steps(self):
+    def test_pvacseq_combine_and_condense_steps(self):
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
         for subdir in ['MHC_Class_I', 'MHC_Class_II']:
             path = os.path.join(output_dir.name, subdir)
@@ -407,11 +397,9 @@ class PvacseqTests(unittest.TestCase):
         ])
 
         for file_name in (
-            'Test.combined.parsed.tsv',
-            'Test.filtered.binding.tsv',
-            'Test.final.tsv',
-            'Test.final.condensed.tsv',
-            'Test.final.condensed.ranked.tsv',
+            'Test.all_epitopes.tsv',
+            'Test.filtered.tsv',
+            'Test.filtered.condensed.ranked.tsv',
         ):
             output_file   = os.path.join(output_dir.name, 'combined', file_name)
             expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
