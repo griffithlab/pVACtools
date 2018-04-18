@@ -104,10 +104,10 @@ class FastaGenerator(metaclass=ABCMeta):
                     position = int(line['protein_position'].split('-', 1)[0]) - 1
             elif variant_type == 'missense' or variant_type == 'inframe_ins':
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
-                if wildtype_amino_acid.endswith('*'):
-                    wildtype_amino_acid = wildtype_amino_acid.replace('*', '')
-                if mutant_amino_acid.endswith('*'):
-                    mutant_amino_acid = mutant_amino_acid.replace('*', '')
+                if '*' in wildtype_amino_acid:
+                    wildtype_amino_acid = wildtype_amino_acid.split('*')[0]
+                if '*' in mutant_amino_acid:
+                    mutant_amino_acid = mutant_amino_acid.split('*')[0]
                     stop_codon_added = True
                 else:
                     stop_codon_added = False
@@ -124,10 +124,10 @@ class FastaGenerator(metaclass=ABCMeta):
             elif variant_type == 'inframe_del':
                 variant_type = 'inframe_del'
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
-                if wildtype_amino_acid.endswith('*'):
-                    wildtype_amino_acid = wildtype_amino_acid.replace('*', '')
-                if mutant_amino_acid.endswith('*'):
-                    mutant_amino_acid = mutant_amino_acid.replace('*', '')
+                if '*' in wildtype_amino_acid:
+                    wildtype_amino_acid = wildtype_amino_acid.split('*')[0]
+                if '*' in mutant_amino_acid:
+                    mutant_amino_acid = mutant_amino_acid.split('*')[0]
                     stop_codon_added = True
                 else:
                     stop_codon_added = False
