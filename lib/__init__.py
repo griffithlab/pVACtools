@@ -2,6 +2,7 @@ __all__ = [
     "binding_filter",
     "call_iedb",
     "combine_parsed_outputs",
+    "csq_parser",
     "input_file_converter",
     "download_example_data",
     "fasta_generator",
@@ -11,6 +12,7 @@ __all__ = [
     "netmhc_stab",
     "filter",
     "top_score_filter",
+    "utils",
 ]
 
 import os
