@@ -564,6 +564,27 @@ class FastaGeneratorTests(unittest.TestCase):
         self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
         self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
 
+    def test_protein_change_with_X_in_wildtype_and_mutatnt(self):
+        peptide_sequence_length        = '21'
+        test_data_dir                  = os.path.join(self.test_data_dir, 'protein_change_with_X_in_wildtype_and_mutant')
+        generate_fasta_input_file      = os.path.join(test_data_dir, 'input.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
+        self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
+
     def test_protein_change_with_multiple_asterisks(self):
         peptide_sequence_length        = '21'
         test_data_dir                  = os.path.join(self.test_data_dir, 'protein_change_with_multiple_asterisks')

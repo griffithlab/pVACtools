@@ -106,8 +106,13 @@ class FastaGenerator(metaclass=ABCMeta):
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
                 if '*' in wildtype_amino_acid:
                     wildtype_amino_acid = wildtype_amino_acid.split('*')[0]
+                elif 'X' in wildtype_amino_acid:
+                    wildtype_amino_acid = wildtype_amino_acid.split('X')[0]
                 if '*' in mutant_amino_acid:
                     mutant_amino_acid = mutant_amino_acid.split('*')[0]
+                    stop_codon_added = True
+                elif 'X' in mutant_amino_acid:
+                    mutant_amino_acid = mutant_amino_acid.split('X')[0]
                     stop_codon_added = True
                 else:
                     stop_codon_added = False
@@ -126,8 +131,13 @@ class FastaGenerator(metaclass=ABCMeta):
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
                 if '*' in wildtype_amino_acid:
                     wildtype_amino_acid = wildtype_amino_acid.split('*')[0]
+                elif 'X' in wildtype_amino_acid:
+                    wildtype_amino_acid = wildtype_amino_acid.split('X')[0]
                 if '*' in mutant_amino_acid:
                     mutant_amino_acid = mutant_amino_acid.split('*')[0]
+                    stop_codon_added = True
+                elif 'X' in mutant_amino_acid:
+                    mutant_amino_acid = mutant_amino_acid.split('X')[0]
                     stop_codon_added = True
                 else:
                     stop_codon_added = False
