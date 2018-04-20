@@ -11,6 +11,8 @@ class CondenseFinalReport:
             'Gene Name',
             'Mutation',
             'Protein Position',
+            'HGVSc',
+            'HGVSp',
             'HLA Allele',
             'MT Epitope Seq',
             'MT IC50',
