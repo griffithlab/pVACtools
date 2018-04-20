@@ -71,7 +71,7 @@ setup(
         'tools.pvacseq' : pvacseq_data_files,
         'tools.pvacfuse' : pvacfuse_data_files,
         'tools.pvacvector' : pvacvector_data_files,
-        'pvactools.server' : server_data,
+        'utils.server' : server_data,
     },
     extras_require={
         'API':[
