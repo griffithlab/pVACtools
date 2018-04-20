@@ -1,2 +1,2 @@
-Gene Name	Mutation	Protein Position	HLA Allele	MT Epitope Seq	MT IC50	WT IC50	Fold Change	Tumor DNA Depth	Tumor DNA VAF	Tumor RNA Depth	Tumor RNA VAF	Gene Expression	Score
-MPDU1>>GLP2R	NA	36	H2-IAb	PAVWGLPGPNLHFHS	108.7	NA	NA	NA	NA	NA	NA	NA	1.0
+Gene Name	Mutation	Protein Position	HGVSc	HGVSp	HLA Allele	MT Epitope Seq	MT IC50	WT IC50	Fold Change	Tumor DNA Depth	Tumor DNA VAF	Tumor RNA Depth	Tumor RNA VAF	Gene Expression	Score
+MPDU1>>GLP2R	NA	36	NA	NA	H2-IAb	PAVWGLPGPNLHFHS	108.7	NA	NA	NA	NA	NA	NA	NA	1.0
