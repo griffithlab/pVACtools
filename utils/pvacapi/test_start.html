@@ -106,5 +106,16 @@
         req.send();
       }
     </script>
+    <script src="https://cdn.rawgit.com/roman01la/JSONFormData/2e0fce05/src/json-formdata.js"></script>
+    <script>
+     /* Pass callback function, which is an error handler,
+      * as the second argument, to let JSONFormData handle things.
+      */
+     var form = document.querySelector('form');
+     new JSONFormData(form, function (err, res) {
+         console.log('err: ' + err);
+         console.log('res: ' + res);
+     });
+    </script>
   </body>
 </html>
