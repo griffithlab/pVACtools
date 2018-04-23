@@ -1,0 +1,2 @@
+chromosome_name	start	stop	reference	variant	gene_name	transcript_name	amino_acid_change	ensembl_gene_id	wildtype_amino_acid_sequence	downstream_amino_acid_sequence	fusion_amino_acid_sequence	variant_type	protein_position	transcript_expression	gene_expression	normal_depth	normal_vaf	tdna_depth	tdna_vaf	trna_depth	trna_vaf	index	protein_length_change
+12	96617457	96617460	CAGA	C	ELK3	ENST00000547249	AX/X	ENSG00000111145	MESAITLWQFLLQLLLDQKHEHLICWTSNDGEFKLLKA			inframe_del	38-39	NA	NA	NA	NA	NA	NA	NA	NA	39805.ELK3.ENST00000547249.inframe_del.38-39AX/X	
