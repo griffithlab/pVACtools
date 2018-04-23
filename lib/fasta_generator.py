@@ -104,6 +104,18 @@ class FastaGenerator(metaclass=ABCMeta):
                     position = int(line['protein_position'].split('-', 1)[0]) - 1
             elif variant_type == 'missense' or variant_type == 'inframe_ins':
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
+                if '*' in wildtype_amino_acid:
+                    wildtype_amino_acid = wildtype_amino_acid.split('*')[0]
+                elif 'X' in wildtype_amino_acid:
+                    wildtype_amino_acid = wildtype_amino_acid.split('X')[0]
+                if '*' in mutant_amino_acid:
+                    mutant_amino_acid = mutant_amino_acid.split('*')[0]
+                    stop_codon_added = True
+                elif 'X' in mutant_amino_acid:
+                    mutant_amino_acid = mutant_amino_acid.split('X')[0]
+                    stop_codon_added = True
+                else:
+                    stop_codon_added = False
                 if wildtype_amino_acid == '-':
                     position = int(line['protein_position'].split('-', 1)[0])
                     wildtype_amino_acid_length = 0
@@ -117,6 +129,18 @@ class FastaGenerator(metaclass=ABCMeta):
             elif variant_type == 'inframe_del':
                 variant_type = 'inframe_del'
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
+                if '*' in wildtype_amino_acid:
+                    wildtype_amino_acid = wildtype_amino_acid.split('*')[0]
+                elif 'X' in wildtype_amino_acid:
+                    wildtype_amino_acid = wildtype_amino_acid.split('X')[0]
+                if '*' in mutant_amino_acid:
+                    mutant_amino_acid = mutant_amino_acid.split('*')[0]
+                    stop_codon_added = True
+                elif 'X' in mutant_amino_acid:
+                    mutant_amino_acid = mutant_amino_acid.split('X')[0]
+                    stop_codon_added = True
+                else:
+                    stop_codon_added = False
                 position = int(line['protein_position'].split('-', 1)[0]) - 1
                 wildtype_amino_acid_length = len(wildtype_amino_acid)
                 if mutant_amino_acid == '-':
@@ -137,13 +161,24 @@ class FastaGenerator(metaclass=ABCMeta):
                 mutation_start_position, wildtype_subsequence = self.get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line)
                 mutation_end_position = mutation_start_position + wildtype_amino_acid_length
                 if wildtype_amino_acid != '-' and wildtype_amino_acid != wildtype_subsequence[mutation_start_position:mutation_end_position]:
-                    sys.exit("ERROR: There was a mismatch between the actual wildtype amino acid and the expected amino acid. Did you use the same reference build version for VEP that you used for creating the VCF?\n%s" % line)
-                mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
+                    if line['amino_acid_change'].split('/')[0].count('*') > 1:
+                        print("Warning: Amino acid change is not sane - contains multiple stops. Skipping entry {}".format(line['index']))
+                        continue
+                    else:
+                        sys.exit("ERROR: There was a mismatch between the actual wildtype amino acid sequence ({}) and the expected amino acid sequence ({}). Did you use the same reference build version for VEP that you used for creating the VCF?\n{}".format(wildtype_subsequence[mutation_start_position:mutation_end_position], wildtype_amino_acid, line))
+                if stop_codon_added:
+                    mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid
+                else:
+                    mutant_subsequence = wildtype_subsequence[:mutation_start_position] + mutant_amino_acid + wildtype_subsequence[mutation_end_position:]
 
             if '*' in wildtype_subsequence or '*' in mutant_subsequence:
                 continue
 
             if 'X' in wildtype_subsequence or 'X' in mutant_subsequence:
+                continue
+
+            if mutant_subsequence in wildtype_subsequence:
+                #This is not a novel peptide
                 continue
 
             if len(wildtype_subsequence) < self.epitope_length or len(mutant_subsequence) < self.epitope_length:

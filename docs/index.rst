@@ -38,25 +38,11 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The epitope length used for generating the peptide fasta when running with
-  multiple epitope lengths was incorrect. This would potentially result in including
-  fasta sequences that were shorter than the largest epitope length which
-  would cause an error during calls to IEDB.
-- pVACseq would fail with a nondescript error message if the input VCF was not
-  annotated with VEP before running. A more descriptive error message has been
-  added.
-- IEDB changed the format of class II IEDB alleles which would cause an error
-  when running with those alleles. pVACtools will now handle transposing the
-  affected alleles into the new format.
-- The standalone binding filters had a few bugs that would result in syntax
-  errors during runtime.
-- The indexes created for each fusion entry with pVACfuse had the potential to
-  not be unique which would result in parsing errors downstream.
-- pVACseq had the potential to use the incorrect VEP allele for positions with
-  multiple alternate alleles which would result in the incorrect CSQ entry
-  getting used for some of those alternate alleles.
-- pVACseq would throw an error if the chosen peptide sequence length exceeds
-  the wildtype protein sequence length of a transcript.
+- We discovered a couple more cases of mutations involving stop codons that
+  would result in errors. These are amino acid changes (VEP Amino_acids field)
+  for large indels that would span exon boundaries (multiple \* in the Amino_acids
+  field), or amino acid changes involving the transcript stop codon (ending in X).
+  These cases are now handled.
 
 Coming soon
 -----------
