@@ -62,9 +62,9 @@ def precheck(configObj, data):
             reader.close()
             #input
             if len(set(configObj)^set(current_config)):
-                #if there are keys in one set and not the other
+                # if there are keys in one set and not the other
                 continue
-            #otherwise, check every key except input, output, and additional files
+            # otherwise, check every key except input, output, and additional files
             failed = False
             for param in configObj:
                 if param in {'input', 'output', 'additional_input_file_list'}:
@@ -96,34 +96,26 @@ def precheck(configObj, data):
                     return i
     return None
 
-def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
-          peptide_sequence_length, gene_expn_file, transcript_expn_file,
-          normal_snvs_coverage_file, normal_indels_coverage_file,
-          tdna_snvs_coverage_file, tdna_indels_coverage_file,
-          trna_snvs_coverage_file, trna_indels_coverage_file,
-          net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
-          binding_threshold, minimum_fold_change,
-          normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
-          expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
-          downstream_sequence_length, keep_tmp_files, force):
+def staging(parameters):
     """Stage input for a new pVAC-Seq run.  Generate a unique output directory and \
     save uploaded files to temporary locations (and give pVAC-Seq the filepaths). \
     Then forward the command to start()"""
-    input_file = input
+    input_file = parameters['input']
     data = current_app.config['storage']['loader']()
-    samplename  = re.sub(r'[^\w\s.]', '_', samplename)
-    list_input() #update the manifest stored in current_app
+    samplename = re.sub(r'[^\w\s.]', '_', parameters['samplename'])
+    list_input()  # update the manifest stored in current_app
     # input_manifest = current_app.config['storage']['manifest']
     current_path = os.path.join(
         current_app.config['files']['data-dir'],
         'results',
         samplename
     )
+
     if os.path.exists(current_path):
         i = 1
-        while os.path.exists(current_path+"_"+str(i)):
+        while os.path.exists(current_path + "_" + str(i)):
             i += 1
-        current_path += "_"+str(i)
+        current_path += "_" + str(i)
 
     temp_path = tempfile.TemporaryDirectory()
 
@@ -131,156 +123,156 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
     if not input_path:
         return (
             {
-                'code':400,
-                'message':'Unable to locate the given file: %s'%input_file,
-                'fields':'input'
-            },400
+                'code': 400,
+                'message': 'Unable to locate the given file: %s' % input_file,
+                'fields': 'input'
+            }, 400
         )
 
     additional_input_file_list = open(os.path.join(temp_path.name, "additional_input_file_list.yml"), 'w')
 
-    if gene_expn_file:
-        gene_expn_file_path = resolve_filepath(gene_expn_file)
+    if parameters['gene_expn_file']:
+        gene_expn_file_path = resolve_filepath(parameters['gene_expn_file'])
         if not gene_expn_file_path:
             return (
                 {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%gene_expn_file,
-                    'fields':'gene_expn_file'
-                },400
+                    'code': 400,
+                    'message': 'Unable to locate the given file: %s' % parameters['gene_expn_file'],
+                    'fields': 'gene_expn_file'
+                }, 400
             )
         if os.path.getsize(gene_expn_file_path):
             yaml.dump({"gene_expn_file": gene_expn_file_path}, additional_input_file_list, default_flow_style=False)
 
-    if transcript_expn_file:
-        transcript_expn_file_path = resolve_filepath(transcript_expn_file)
+    if parameters['transcript_expn_file']:
+        transcript_expn_file_path = resolve_filepath(parameters['transcript_expn_file'])
         if not transcript_expn_file_path:
             return (
                 {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%transcript_expn_file,
-                    'fields':'transcript_expn_file'
-                },400
+                    'code': 400,
+                    'message': 'Unable to locate the given file: %s' % parameters['transcript_expn_file'],
+                    'fields': 'transcript_expn_file'
+                }, 400
             )
         if os.path.getsize(transcript_expn_file_path):
-            yaml.dump({"transcript_expn_file" :transcript_expn_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"transcript_expn_file": transcript_expn_file_path}, additional_input_file_list, default_flow_style=False)
 
-    if normal_snvs_coverage_file:
-        normal_snvs_coverage_file_path = resolve_filepath(normal_snvs_coverage_file)
+    if parameters['normal_snvs_coverage_file']:
+        normal_snvs_coverage_file_path = resolve_filepath(parameters['normal_snvs_coverage_file'])
         if not normal_snvs_coverage_file_path:
             return (
                 {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%normal_snvs_coverage_file,
-                    'fields':'normal_snvs_coverage_file'
-                },400
+                    'code': 400,
+                    'message': 'Unable to locate the given file: %s' % parameters['normal_snvs_coverage_file'],
+                    'fields': 'normal_snvs_coverage_file'
+                }, 400
             )
         if os.path.getsize(normal_snvs_coverage_file_path):
-            yaml.dump({"normal_snvs_coverage_file" :normal_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"normal_snvs_coverage_file": normal_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
-    if normal_indels_coverage_file:
-        normal_indels_coverage_file_path = resolve_filepath(normal_indels_coverage_file)
+    if parameters['normal_indels_coverage_file']:
+        normal_indels_coverage_file_path = resolve_filepath(parameters['normal_indels_coverage_file'])
         if not normal_indels_coverage_file_path:
             return (
                 {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%normal_indels_coverage_file,
-                    'fields':'normal_indels_coverage_file'
-                },400
+                    'code': 400,
+                    'message': 'Unable to locate the given file: %s' % parameters['normal_indels_coverage_file'],
+                    'fields': 'normal_indels_coverage_file'
+                }, 400
             )
 
         if os.path.getsize(normal_indels_coverage_file_path):
-            yaml.dump({"normal_indels_coverage_file" :normal_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"normal_indels_coverage_file": normal_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
-    if tdna_snvs_coverage_file:
-        tdna_snvs_coverage_file_path = resolve_filepath(tdna_snvs_coverage_file)
+    if parameters['tdna_snvs_coverage_file']:
+        tdna_snvs_coverage_file_path = resolve_filepath(parameters['tdna_snvs_coverage_file'])
         if not tdna_snvs_coverage_file_path:
             return (
                 {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%tdna_snvs_coverage_file,
-                    'fields':'tdna_snvs_coverage_file'
-                },400
+                    'code': 400,
+                    'message': 'Unable to locate the given file: %s' % parameters['tdna_snvs_coverage_file'],
+                    'fields': 'tdna_snvs_coverage_file'
+                }, 400
             )
         if os.path.getsize(tdna_snvs_coverage_file_path):
-            yaml.dump({"tdna_snvs_coverage_file" :tdna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"tdna_snvs_coverage_file": tdna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
-    if tdna_indels_coverage_file:
-        tdna_indels_coverage_file_path = resolve_filepath(tdna_indels_coverage_file)
+    if parameters['tdna_indels_coverage_file']:
+        tdna_indels_coverage_file_path = resolve_filepath(parameters['tdna_indels_coverage_file'])
         if not tdna_indels_coverage_file_path:
             return (
                 {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%tdna_indels_coverage_file,
-                    'fields':'tdna_indels_coverage_file'
-                },400
+                    'code': 400,
+                    'message': 'Unable to locate the given file: %s' % parameters['tdna_indels_coverage_file'],
+                    'fields': 'tdna_indels_coverage_file'
+                }, 400
             )
 
         if os.path.getsize(tdna_indels_coverage_file_path):
-            yaml.dump({"tdna_indels_coverage_file" :tdna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"tdna_indels_coverage_file": tdna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
-    if trna_snvs_coverage_file:
-        trna_snvs_coverage_file_path = resolve_filepath(trna_snvs_coverage_file)
+    if parameters['trna_snvs_coverage_file']:
+        trna_snvs_coverage_file_path = resolve_filepath(parameters['trna_snvs_coverage_file'])
         if not trna_snvs_coverage_file_path:
             return (
                 {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%trna_snvs_coverage_file,
-                    'fields':'trna_snvs_coverage_file'
-                },400
+                    'code': 400,
+                    'message': 'Unable to locate the given file: %s' % parameters['trna_snvs_coverage_file'],
+                    'fields': 'trna_snvs_coverage_file'
+                }, 400
             )
 
         if os.path.getsize(trna_snvs_coverage_file_path):
-            yaml.dump({"trna_snvs_coverage_file" :trna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"trna_snvs_coverage_file": trna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
-    if trna_indels_coverage_file:
-        trna_indels_coverage_file_path = resolve_filepath(trna_indels_coverage_file)
+    if parameters['trna_indels_coverage_file']:
+        trna_indels_coverage_file_path = resolve_filepath(parameters['trna_indels_coverage_file'])
         if not trna_indels_coverage_file_path:
             return (
                 {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%trna_indels_coverage_file,
-                    'fields':'trna_indels_coverage_file'
-                },400
+                    'code': 400,
+                    'message': 'Unable to locate the given file: %s' % parameters['trna_indels_coverage_file'],
+                    'fields': 'trna_indels_coverage_file'
+                }, 400
             )
 
         if os.path.getsize(trna_indels_coverage_file_path):
-            yaml.dump({"trna_indels_coverage_file" :trna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
+            yaml.dump({"trna_indels_coverage_file": trna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     additional_input_file_list.flush()
-
+    
     configObj = {
-        'input': input_path, #input
-        'samplename':samplename, #samplename
-        'alleles':alleles.split(','),
-        'output':current_path,
-        'epitope_lengths':[int(item) for item in epitope_lengths.split(',')],
-        'prediction_algorithms':prediction_algorithms.split(','),
-        'peptide_sequence_length':peptide_sequence_length,
-        'additional_input_file_list':(
-            additional_input_file_list.name if additional_input_file_list.tell() else '' #check if any data was written to file
+        'input': input_path,  # input
+        'samplename': samplename,  # samplename
+        'alleles': parameters['alleles'].split(','),
+        'output': current_path,
+        'epitope_lengths': [int(item) for item in parameters['epitope_lengths'].split(',')],
+        'prediction_algorithms': parameters['prediction_algorithms'].split(','),
+        'peptide_sequence_length': parameters['peptide_sequence_length'],
+        'additional_input_file_list': (
+            additional_input_file_list.name if additional_input_file_list.tell() else ''  # check if any data was written to file
         ),
-        'net_chop_method':net_chop_method,
-        'netmhc_stab':bool(netmhc_stab),
-        'top_result_per_mutation':bool(top_result_per_mutation),
-        'top_score_metric':top_score_metric,
-        'binding_threshold':binding_threshold,
-        'minimum_fold_change':minimum_fold_change,
-        'normal_cov':normal_cov, #normal_cov
-        'tdna_cov':tdna_cov, #tdna_cov
-        'trna_cov':trna_cov, #trna_cov
-        'normal_vaf':normal_vaf, #normal_vaf
-        'tdna_vaf':tdna_vaf, #tdna_vaf
-        'trna_vaf':trna_vaf, #trna_vaf
-        'expn_val':expn_val, #expn_val
-        'net_chop_threshold':net_chop_threshold,
-        'fasta_size':fasta_size,
-        'iedb_retries':iedb_retries,
-        'iedb_install_dir':iedb_install_dir,
-        'keep_tmp_files':bool(keep_tmp_files),
-        'downstream_sequence_length':downstream_sequence_length
+        'net_chop_method': parameters['net_chop_method'],
+        'netmhc_stab': bool(parameters['netmhc_stab']),
+        'top_result_per_mutation': bool(parameters['top_result_per_mutation']),
+        'top_score_metric': parameters['top_score_metric'],
+        'binding_threshold': parameters['binding_threshold'],
+        'minimum_fold_change': parameters['minimum_fold_change'],
+        'normal_cov': parameters['normal_cov'],  # normal_cov
+        'tdna_cov': parameters['tdna_cov'],  # tdna_cov
+        'trna_cov': parameters['trna_cov'],  # trna_cov
+        'normal_vaf': parameters['normal_vaf'],  # normal_vaf
+        'tdna_vaf': parameters['tdna_vaf'],  # tdna_vaf
+        'trna_vaf': parameters['trna_vaf'],  # trna_vaf
+        'expn_val': parameters['expn_val'],  # expn_val
+        'net_chop_threshold': parameters['net_chop_threshold'],
+        'fasta_size': parameters['fasta_size'],
+        'iedb_retries': parameters['iedb_retries'],
+        'iedb_install_dir': parameters['iedb_install_dir'],
+        'keep_tmp_files': bool(parameters['keep_tmp_files']),
+        'downstream_sequence_length': parameters['downstream_sequence_length']
     }
-    checkOK = precheck(configObj, data) if not force else None
+    checkOK = precheck(configObj, data) if not parameters['force'] else None
     if checkOK is None:
         copytree(temp_path.name, current_path)
         print(additional_input_file_list.tell())
@@ -292,27 +284,24 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
         writer = open(os.path.join(
             os.path.abspath(current_path),
             'config.json'
-        ),'w')
+        ), 'w')
         json.dump(configObj, writer, indent='\t')
         writer.close()
         temp_path.cleanup()
         new_id = start(**configObj)
 
         return ({
-            'code':201,
+            'code': 201,
             'message': "Process started.",
             'processid': new_id
-        },
-        201)
+        }, 201)
     
     return (
         {
-            'code':400,
-            'message':"The given parameters match process %d"%checkOK,
-            'fields':"N/A"
-        },
-        400
-    )
+            'code': 400,
+            'message': "The given parameters match process %d" % checkOK,
+            'fields': "N/A"
+        }, 400)
 
 
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
