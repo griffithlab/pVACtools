@@ -209,6 +209,8 @@ paths:
       - tag: "cols"
   /api/v1/start:
     post:
+      consumes:
+      - "application/json"
       tags:
       - "start"
       summary: "Start a new pVAC-Seq run"
@@ -217,146 +219,147 @@ paths:
       operationId: "utils.pvacapi.controllers.staging.start"
       parameters:
       - name: "input"
-        in: "formData"
+        in: "body"
         description: "Input VCF File: Filepath to the input VCF file"
         required: true
-        type: "string"
-      - name: "samplename"
-        in: "formData"
-        description: "Sample Name: Name for your sample"
-        required: true
-        type: "string"
-      - name: "alleles"
-        in: "formData"
-        description: "Alleles: A comma-separated list of alleles to run the sequences against"
-        required: true
-        type: "string"
-      - name: "epitope_lengths"
-        in: "formData"
-        description: "Epitope Lengths: A comma-separated list of epitope lengths to produce"
-        required: false
-        type: "string"
-        default: "10"
-      - name: "prediction_algorithms"
-        in: "formData"
-        description: "Prediction Algorithms: A comma-separated list of prediction algorithms to use"
-        required: true
-        type: "string"
-      - name: "output"
-        in: "formData"
-        description: "Output Directory: The directory to which output will be written"
-        required: true
-        type: "string"
-      - name: "peptide_sequence_length"
-        in: "formData"
-        description: "Peptide Sequence Length: Length of the peptide sequences to produce in the FASTA"
-        required: false
-        type: "integer"
-        default: 21
-      - name: "additional_input_file_list"
-        in: "formData"
-        description: "Additional Input File List: yaml file of additional files to be used as inputs, e.g. cufflinks output files"
-        required: false
-        type: "string"
-        default: ""
-      - name: "net_chop_method"
-        in: "formData"
-        description: "Net Chop Method: Run NetChop using the specified method"
-        type: "string"
-        enum: ["cterm", "20s"]
-        required: false
-        default: ''
-      - name: "netmhc_stab"
-        in: "formData"
-        description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
-        type: "boolean"
-        default: false
-      - name: "top_result_per_mutation"
-        in: "formData"
-        description: "Top Result Per Mutation: Output top scoring candidate per allele-length per mutation"
-        type: "boolean"
-        default: false
-      - name: "top_score_metric"
-        in: "formData"
-        description: "Top Score Metric: ic50 metric for choosing best epitopes during binding filtering"
-        type: "string"
-        enum: ["lowest", "median"]
-        default: "median"
-      - name: "binding_threshold"
-        in: "formData"
-        description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
-        type: "integer"
-        default: 500
-      - name: "minimum_fold_change"
-        in: "formData"
-        description: "Minimum Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
-        type: "number"
-        default: 0
-      - name: "normal_cov"
-        in: "formData"
-        description: "Normal Coverage Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 5
-      - name: "tdna_cov"
-        in: "formData"
-        description: "Tumor DNA Coverage Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 10
-      - name: "trna_cov"
-        in: "formData"
-        description: "Tumor RNA Coverage Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 10
-      - name: "normal_vaf"
-        in: "formData"
-        description: "Normal VAF Cutoff: Sites below this cutoff will be considered"
-        type: "integer"
-        default: 2
-      - name: "tdna_vaf"
-        in: "formData"
-        description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 40
-      - name: "trna_vaf"
-        in: "formData"
-        description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 40
-      - name: "expn_val"
-        in: "formData"
-        description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 1
-      - name: "net_chop_threshold"
-        in: "formData"
-        description: "NetChop Threshold: NetChop prediction threshold"
-        type: "number"
-        default: 0.5
-      - name: "fasta_size"
-        in: "formData"
-        description: "FASTA Size: Number of entries submitted to IEDB in each request.  Must be an even number"
-        type: "integer"
-        default: 200
-      - name: "iedb_retries"
-        in: "formData"
-        description: "IEDB Retries: Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100"
-        type: "integer"
-        default: 5
-      - name: "iedb_install_dir"
-        in: "formData"
-        description: "Path to a local install of IEDB (if available)"
-        type: "string"
-        default: ""
-      - name: "downstream_sequence_length"
-        in : "formData"
-        description: "Downstream Sequence Length: Cap to limit the downstream sequence length for frameshifts when creating the fasta file. Use 'full' to include the full downstream sequence"
-        type: "integer"
-        default: 1000
-      - name: "keep_tmp_files"
-        in: "formData"
-        description: "Keep Temp Files? Keep temporary files in the output directory after completion"
-        type: "boolean"
-        default: false
+        schema:
+          type: "string"
+      # - name: "samplename"
+      #   in: "body"
+      #   description: "Sample Name: Name for your sample"
+      #   required: true
+      #   type: "string"
+      # - name: "alleles"
+      #   in: "body"
+      #   description: "Alleles: A comma-separated list of alleles to run the sequences against"
+      #   required: true
+      #   type: "string"
+      # - name: "epitope_lengths"
+      #   in: "body"
+      #   description: "Epitope Lengths: A comma-separated list of epitope lengths to produce"
+      #   required: false
+      #   type: "string"
+      #   default: "10"
+      # - name: "prediction_algorithms"
+      #   in: "body"
+      #   description: "Prediction Algorithms: A comma-separated list of prediction algorithms to use"
+      #   required: true
+      #   type: "string"
+      # - name: "output"
+      #   in: "body"
+      #   description: "Output Directory: The directory to which output will be written"
+      #   required: true
+      #   type: "string"
+      # - name: "peptide_sequence_length"
+      #   in: "body"
+      #   description: "Peptide Sequence Length: Length of the peptide sequences to produce in the FASTA"
+      #   required: false
+      #   type: "integer"
+      #   default: 21
+      # - name: "additional_input_file_list"
+      #   in: "body"
+      #   description: "Additional Input File List: yaml file of additional files to be used as inputs, e.g. cufflinks output files"
+      #   required: false
+      #   type: "string"
+      #   default: ""
+      # - name: "net_chop_method"
+      #   in: "body"
+      #   description: "Net Chop Method: Run NetChop using the specified method"
+      #   type: "string"
+      #   enum: ["cterm", "20s"]
+      #   required: false
+      #   default: ''
+      # - name: "netmhc_stab"
+      #   in: "body"
+      #   description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
+      #   type: "boolean"
+      #   default: false
+      # - name: "top_result_per_mutation"
+      #   in: "body"
+      #   description: "Top Result Per Mutation: Output top scoring candidate per allele-length per mutation"
+      #   type: "boolean"
+      #   default: false
+      # - name: "top_score_metric"
+      #   in: "body"
+      #   description: "Top Score Metric: ic50 metric for choosing best epitopes during binding filtering"
+      #   type: "string"
+      #   enum: ["lowest", "median"]
+      #   default: "median"
+      # - name: "binding_threshold"
+      #   in: "body"
+      #   description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
+      #   type: "integer"
+      #   default: 500
+      # - name: "minimum_fold_change"
+      #   in: "body"
+      #   description: "Minimum Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
+      #   type: "number"
+      #   default: 0
+      # - name: "normal_cov"
+      #   in: "body"
+      #   description: "Normal Coverage Cutoff: Sites above this cutoff will be considered"
+      #   type: "integer"
+      #   default: 5
+      # - name: "tdna_cov"
+      #   in: "body"
+      #   description: "Tumor DNA Coverage Cutoff: Sites above this cutoff will be considered"
+      #   type: "integer"
+      #   default: 10
+      # - name: "trna_cov"
+      #   in: "body"
+      #   description: "Tumor RNA Coverage Cutoff: Sites above this cutoff will be considered"
+      #   type: "integer"
+      #   default: 10
+      # - name: "normal_vaf"
+      #   in: "body"
+      #   description: "Normal VAF Cutoff: Sites below this cutoff will be considered"
+      #   type: "integer"
+      #   default: 2
+      # - name: "tdna_vaf"
+      #   in: "body"
+      #   description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
+      #   type: "integer"
+      #   default: 40
+      # - name: "trna_vaf"
+      #   in: "body"
+      #   description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
+      #   type: "integer"
+      #   default: 40
+      # - name: "expn_val"
+      #   in: "body"
+      #   description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
+      #   type: "integer"
+      #   default: 1
+      # - name: "net_chop_threshold"
+      #   in: "body"
+      #   description: "NetChop Threshold: NetChop prediction threshold"
+      #   type: "number"
+      #   default: 0.5
+      # - name: "fasta_size"
+      #   in: "body"
+      #   description: "FASTA Size: Number of entries submitted to IEDB in each request.  Must be an even number"
+      #   type: "integer"
+      #   default: 200
+      # - name: "iedb_retries"
+      #   in: "body"
+      #   description: "IEDB Retries: Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100"
+      #   type: "integer"
+      #   default: 5
+      # - name: "iedb_install_dir"
+      #   in: "body"
+      #   description: "Path to a local install of IEDB (if available)"
+      #   type: "string"
+      #   default: ""
+      # - name: "downstream_sequence_length"
+      #   in : "body"
+      #   description: "Downstream Sequence Length: Cap to limit the downstream sequence length for frameshifts when creating the fasta file. Use 'full' to include the full downstream sequence"
+      #   type: "integer"
+      #   default: 1000
+      # - name: "keep_tmp_files"
+      #   in: "body"
+      #   description: "Keep Temp Files? Keep temporary files in the output directory after completion"
+      #   type: "boolean"
+      #   default: false
       responses:
         200:
           description: "Returns the process ID of the newly started pVAC-Seq run"
