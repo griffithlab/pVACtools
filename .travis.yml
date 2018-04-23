@@ -10,7 +10,9 @@ before_install:
   - sudo apt-get install -y ghostscript
 install:
   #Remove the following line when pvacseq-client is first pushed to the live pypi site
-  - pip install -i https://testpypi.python.org/pypi pvacseq-client
+  #This has been updated to pull from the live pypi site, instead of test pypi.
+  #Not sure if it can or needs to be deleted altogether.
+  - pip install pvacseq-client
   - pip install -e .[API]
 before_script:
   - "export DISPLAY=:99.0"
