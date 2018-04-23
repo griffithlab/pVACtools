@@ -1,4 +1,3 @@
-from trepan.api import debug
 import os
 import csv
 import re
@@ -60,7 +59,6 @@ def list_input(path = None):
         path = os.path.join(current_app.config['files']['data-dir'], 'input')
         current_app.config['storage']['manifest'] = []
     output = []
-    debug()
     for entity in sorted(os.listdir(path)):
         fullname = os.path.join(path, entity)
         if (fullname[fullname.rfind('/')+1] == '.'):
