@@ -240,7 +240,17 @@ def staging(parameters):
             yaml.dump({"trna_indels_coverage_file": trna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
 
     additional_input_file_list.flush()
-    
+
+    #  simple json POST (e.g. from test_start.html form) may not include unchecked checkboxes, need to catch those:
+    if not hasattr(parameters, 'netmhc_stab'):
+        parameters['netmhc_stab'] = False
+
+    if not hasattr(parameters, 'top_result_per_mutation'):
+        parameters['top_result_per_mutation'] = False
+
+    if not hasattr(parameters, 'keep_tmp_files'):
+        parameters['keep_tmp_files'] = False
+
     configObj = {
         'input': input_path,  # input
         'samplename': samplename,  # samplename
@@ -272,7 +282,7 @@ def staging(parameters):
         'keep_tmp_files': bool(parameters['keep_tmp_files']),
         'downstream_sequence_length': parameters['downstream_sequence_length']
     }
-    checkOK = precheck(configObj, data) if not parameters['force'] else None
+    checkOK = precheck(configObj, data) if not hasattr(parameters, 'force') else None
     if checkOK is None:
         copytree(temp_path.name, current_path)
         print(additional_input_file_list.tell())
