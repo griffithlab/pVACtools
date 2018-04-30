@@ -38,11 +38,10 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- We discovered a couple more cases of mutations involving stop codons that
-  would result in errors. These are amino acid changes (VEP Amino_acids field)
-  for large indels that would span exon boundaries (multiple \* in the Amino_acids
-  field), or amino acid changes involving the transcript stop codon (ending in X).
-  These cases are now handled.
+- IEDB changed the format of combinatorial class II alleles to use ``/`` as a
+  delimiter instead of ``-``. DP alleles were previously fixed in pull request
+  `#85 <https://github.com/griffithlab/pVACtools/pull/85>`_ but this failed to
+  address DQ alleles. This version fixes this oversight.
 
 Coming soon
 -----------
