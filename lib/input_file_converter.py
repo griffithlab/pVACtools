@@ -77,7 +77,8 @@ class VcfConverter(InputFileConverter):
                     coverage[chromosome] = {}
                 if position not in coverage[chromosome]:
                     coverage[chromosome][position] = {}
-                coverage[chromosome][position][reference_base] = brct
+                coverage[chromosome][position][reference_base] = self.parse_brct_field(brct)
+                coverage[chromosome][position][reference_base]['depth'] = depth
         return coverage
 
     def parse_brct_field(self, brct_entry):
@@ -129,11 +130,8 @@ class VcfConverter(InputFileConverter):
             consequence = None
         return consequence
 
-    def calculate_coverage(self, ref, var):
-        return ref + var
-
-    def calculate_vaf(self, ref, var):
-        return (var / (self.calculate_coverage(ref, var)+0.00001)) * 100
+    def calculate_vaf(self, var_count, depth):
+        return (var_count / depth) * 100
 
     def parse_gene_expns_file(self):
         gene_expns = {}
@@ -200,10 +198,10 @@ class VcfConverter(InputFileConverter):
                     and str(bam_readcount_position) in coverage[variant_type][coverage_type][chromosome]
                     and ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]
                 ):
-                    brct = self.parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base])
-                    if ref_base in brct and var_base in brct:
-                        coverage_for_entry[coverage_type + '_depth'] = self.calculate_coverage(int(brct[ref_base]), int(brct[var_base]))
-                        coverage_for_entry[coverage_type + '_vaf']   = self.calculate_vaf(int(brct[ref_base]), int(brct[var_base]))
+                    brct = coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base]
+                    if 'depth' in brct and var_base in brct:
+                        coverage_for_entry[coverage_type + '_depth'] = int(brct['depth'])
+                        coverage_for_entry[coverage_type + '_vaf']   = self.calculate_vaf(int(brct[var_base]), int(brct['depth']))
         return coverage_for_entry
 
     def close_filehandles(self):
