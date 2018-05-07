@@ -54,9 +54,12 @@ def main(args_input = sys.argv[1:]):
     (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries)
 
     tmp_output_file = args.output_file + '.tmp'
-    tmp_output_filehandle = open(tmp_output_file, output_mode)
-    tmp_output_filehandle.write(response_text)
-    tmp_output_filehandle.close()
+    if output_mode == 'pandas':
+        response_text.to_csv(tmp_output_file, index=False, sep="\t")
+    else:
+        tmp_output_filehandle = open(tmp_output_file, output_mode)
+        tmp_output_filehandle.write(response_text)
+        tmp_output_filehandle.close()
     os.replace(tmp_output_file, args.output_file)
 
     args.input_file.close()

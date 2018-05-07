@@ -3,6 +3,7 @@ import os
 import csv
 import sys
 import inspect
+from mhcflurry import Class1AffinityPredictor
 import requests
 import re
 import pandas as pd
@@ -121,9 +122,35 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
     def needs_epitope_length(self):
         return True
 
-#class MHCflurry(MHCI):
-#    def valid_allele_names(self):
-#        pass
+class MHCflurry(MHCI):
+    def valid_allele_names(self):
+        predictor = Class1AffinityPredictor.load()
+        return predictor.supported_alleles
+
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
+    def determine_neoepitopes(self, sequence, length):
+        epitopes = []
+        for i in range(0, len(sequence)-length+1):
+            epitopes.append(sequence[i:i+9])
+        return epitopes
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
+        predictor = Class1AffinityPredictor.load()
+        results = pd.DataFrame()
+        for line in input_file:
+            match = re.search('^>([0-9]+)$', line)
+            if match:
+                seq_num = match.group(1)
+            else:
+                epitopes = self.determine_neoepitopes(line.rstrip(), epitope_length)
+                df = predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
+                df['seq_num'] = seq_num
+                df['start'] = df.index+1
+                df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
+                results = results.append(df)
+        return (results, 'pandas')
 
 class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
     @property
