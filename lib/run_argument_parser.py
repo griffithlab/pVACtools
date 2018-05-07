@@ -11,9 +11,13 @@ class RunArgumentParser(metaclass=ABCMeta):
             "input_file",
             help=input_file_help
         )
+        if run_name == 'pvacseq':
+            sample_name_help = "The name of the tumor sample being processed. Must be a sample in the input VCF."
+        else:
+            sample_name_help = "The name of the sample being processed. This will be used as a prefix for output files."
         parser.add_argument(
             "sample_name",
-            help="The name of the sample being processed. This will be used as a prefix for output files"
+            help=sample_name_help
         )
         parser.add_argument(
             "allele", type=lambda s:[a for a in s.split(',')],
@@ -67,6 +71,10 @@ class PredictionRunArgumentParser(RunArgumentParser):
             "-l", "--peptide-sequence-length", type=int,
             default=21,
             help="Length of the peptide sequence to use when creating the FASTA. Default: 21",
+        )
+        self.parser.add_argument(
+            '--normal-sample-name',
+            help="In a multi-sample VCF, the name of the matched normal sample."
         )
         self.parser.add_argument(
             '--net-chop-method',

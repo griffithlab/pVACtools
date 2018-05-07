@@ -94,6 +94,7 @@ def main(args_input = sys.argv[1:]):
         'iedb_retries'              : args.iedb_retries,
         'downstream_sequence_length': downstream_sequence_length,
         'keep_tmp_files'            : args.keep_tmp_files,
+        'normal_sample_name'        : args.normal_sample_name,
     }
     additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
     shared_arguments.update(additional_input_files)
