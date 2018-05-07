@@ -1,7 +1,6 @@
 import sys
 import os
 import argparse
-import requests
 import re
 from lib.prediction_class import *
 import time
@@ -52,34 +51,7 @@ def main(args_input = sys.argv[1:]):
     if args.epitope_length is None and prediction_class_object.needs_epitope_length:
         sys.exit("Epitope length is required for class I binding predictions")
 
-    if args.iedb_executable_path is not None:
-        response = run(prediction_class_object.iedb_executable_params(args), stdout=PIPE, check=True)
-        response_text = filter_response(response.stdout)
-        output_mode = 'wb'
-    else:
-        data = {
-            'sequence_text': args.input_file.read(),
-            'method':        prediction_class_object.iedb_prediction_method,
-            'allele':        args.allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
-            'user_tool':     'pVac-seq',
-        }
-        if args.epitope_length is not None:
-            data['length'] = args.epitope_length
-
-        url = prediction_class_object.url
-
-        response = requests.post(url, data=data)
-        retries = 0
-        while response.status_code == 500 and retries < args.iedb_retries:
-            time.sleep(60 * retries)
-            response = requests.post(url, data=data)
-            print("IEDB: Retry %s of %s" % (retries, args.iedb_retries))
-            retries += 1
-
-        if response.status_code != 200:
-            sys.exit("Error posting request to IEDB.\n%s" % response.text)
-        response_text = response.text
-        output_mode = 'w'
+    (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries)
 
     tmp_output_file = args.output_file + '.tmp'
     tmp_output_filehandle = open(tmp_output_file, output_mode)
