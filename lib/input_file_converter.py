@@ -68,7 +68,7 @@ class VcfConverter(InputFileConverter):
         else:
             self.sample_name = self.vcf_reader.samples[0]
         self.writer = open(self.output_file, 'w')
-        self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers())
+        self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         self.tsv_writer.writeheader()
         self.csq_parser = self.create_csq_parser()
 
@@ -227,9 +227,6 @@ class VcfConverter(InputFileConverter):
     def calculate_coverage_for_entry(self, coverage, entry, reference, alt, start, chromosome, genotype):
         (bam_readcount_position, ref_base, var_base, variant_type) = self.determine_bam_readcount_bases(entry, reference, alt, start)
         coverage_for_entry = {}
-        for coverage_type in ['normal', 'tdna', 'trna']:
-            coverage_for_entry[coverage_type + '_depth'] = 'NA'
-            coverage_for_entry[coverage_type + '_vaf'] = 'NA'
         if variant_type in coverage:
             for coverage_type in coverage[variant_type]:
                 if (
@@ -320,6 +317,7 @@ class VcfConverter(InputFileConverter):
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
                         'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
+                        'fusion_amino_acid_sequence'     : '',
                         'variant_type'                   : consequence,
                         'protein_position'               : transcript['Protein_position'],
                         'index'                          : index,
@@ -327,22 +325,15 @@ class VcfConverter(InputFileConverter):
                     }
                     if transcript['Amino_acids']:
                         output_row['amino_acid_change'] = transcript['Amino_acids']
-                    else:
-                        output_row['amino_acid_change'] = 'NA'
-
                     if transcript_name in transcript_expns.keys():
                         transcript_expn_entry = transcript_expns[transcript_name]
                         output_row['transcript_expression'] = transcript_expn_entry['FPKM']
-                    else:
-                        output_row['transcript_expression'] = 'NA'
                     if ensembl_gene_id in gene_expns.keys():
                         gene_expn_entries = gene_expns[ensembl_gene_id]
                         gene_fpkm = 0
                         for locus, gene_expn_entry in gene_expn_entries.items():
                             gene_fpkm += float(gene_expn_entry['FPKM'])
                         output_row['gene_expression'] = gene_fpkm
-                    else:
-                        output_row['gene_expression'] = 'NA'
 
                     output_row.update(coverage_for_entry)
 
@@ -384,7 +375,7 @@ class IntegrateConverter(InputFileConverter):
         reader = open(self.input_file, 'r')
         csv_reader = csv.DictReader(reader, delimiter='\t', fieldnames=self.input_fieldnames())
         writer = open(self.output_file, 'w')
-        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers())
+        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         tsv_writer.writeheader()
         count = 1
         for entry in csv_reader:
@@ -395,17 +386,9 @@ class IntegrateConverter(InputFileConverter):
                 'reference'                  : 'fusion',
                 'variant'                    : 'fusion',
                 'gene_name'                  : entry['name of fusion'],
-                'amino_acid_change'          : 'NA',
-                'ensembl_gene_id'            : 'NA',
-                'amino_acid_change'          : 'NA',
-                'transcript_expression'      : 'NA',
-                'gene_expression'            : 'NA',
-                'normal_depth'               : 'NA',
-                'normal_vaf'                 : 'NA',
-                'tdna_depth'                 : 'NA',
-                'tdna_vaf'                   : 'NA',
-                'trna_depth'                 : 'NA',
-                'trna_vaf'                   : 'NA',
+                'wildtype_amino_acid_sequence'   : '',
+                'downstream_amino_acid_sequence' : '',
+                'protein_length_change'      : '',
             }
 
             if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':
