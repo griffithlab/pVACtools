@@ -3,6 +3,9 @@ import os
 import csv
 import sys
 import inspect
+import requests
+import re
+import pandas as pd
 
 class IEDB(metaclass=ABCMeta):
     @classmethod
@@ -26,6 +29,35 @@ class IEDB(metaclass=ABCMeta):
     @abstractmethod
     def url(self):
         pass
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
+        if iedb_executable_path is not None:
+            response = run(self.iedb_executable_params(iedb_exectuable_path, self.iedb_prediction_method(), allele, input_file, epitope_length), stdout=PIPE, check=True)
+            response_text = filter_response(response.stdout)
+            return (response_text, 'wb')
+        else:
+            data = {
+                'sequence_text': input_file.read(),
+                'method':        self.iedb_prediction_method,
+                'allele':        allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
+                'user_tool':     'pVac-seq',
+            }
+            if epitope_length is not None:
+                data['length'] = epitope_length
+
+            response = requests.post(self.url, data=data)
+            retries = 0
+            while response.status_code == 500 and retries < iedb_retries:
+                time.sleep(60 * retries)
+                response = requests.post(url, data=data)
+                print("IEDB: Retry %s of %s" % (retries, iedb_retries))
+                retries += 1
+
+            if response.status_code != 200:
+                sys.exit("Error posting request to IEDB.\n%s" % response.text)
+            response_text = response.text
+            output_mode = 'w'
+            return (response_text, 'w')
 
 class PredictionClass(metaclass=ABCMeta):
     valid_allele_names_dict = {}
@@ -131,14 +163,14 @@ class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
         if length not in valid_lengths:
             sys.exit("Length %s not valid for allele %s and method %s." % (length, allele, self.iedb_prediction_method))
 
-    def iedb_executable_params(self, args):
+    def iedb_executable_params(self, iedb_exectuable_path, method, allele, input_file, epitope_length):
         return [
             'python2.7',
-            args.iedb_executable_path,
-            args.method,
-            args.allele,
-            str(args.epitope_length),
-            args.input_file.name,
+            iedb_executable_path,
+            method,
+            allele,
+            str(epitope_length),
+            input_file.name,
         ]
 
 class NetMHC(IEDBMHCI):
@@ -198,13 +230,13 @@ class MHCII(PredictionClass, IEDB, metaclass=ABCMeta):
             self.valid_allele_names_dict = self.parse_iedb_allele_file()
         return self.valid_allele_names_dict
 
-    def iedb_executable_params(self, args):
+    def iedb_executable_params(self, iedb_exectuable_path, method, allele, input_file, epitope_length):
         return [
             'python2.7',
-            args.iedb_executable_path,
-            args.method,
-            args.allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
-            args.input_file.name,
+            iedb_executable_path,
+            method,
+            allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
+            input_file.name,
         ]
 
 class NetMHCIIpan(MHCII):
