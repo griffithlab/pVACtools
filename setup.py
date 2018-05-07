@@ -66,6 +66,7 @@ setup(
         'simanneal',
         'pandas',
         'wget',
+        'mhcflurry',
     ],
     package_data={
         'tools.pvacseq' : pvacseq_data_files,
