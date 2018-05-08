@@ -83,7 +83,8 @@ class PredictionClass(metaclass=ABCMeta):
             prediction_class_object = prediction_class()
             if ( issubclass(prediction_class_object.__class__, IEDBMHCI) or issubclass(prediction_class_object.__class__, MHCII) ) and prediction_class_object.iedb_prediction_method == method:
                 return prediction_class_object
-        return getattr(sys.modules[__name__], method)
+        module = getattr(sys.modules[__name__], method)
+        return module()
 
     @classmethod
     def prediction_class_name_for_iedb_prediction_method(cls, method):
@@ -129,6 +130,9 @@ class MHCflurry(MHCI):
 
     def check_length_valid_for_allele(self, length, allele):
         return True
+
+    def valid_lengths_for_allele(self, allele):
+        return [8,9,10,11,12,13,14]
 
     def determine_neoepitopes(self, sequence, length):
         epitopes = []
