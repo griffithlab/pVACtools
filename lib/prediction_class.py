@@ -5,6 +5,7 @@ import sys
 
 class PredictionClass(metaclass=ABCMeta):
     valid_allele_names_dict = {}
+    allele_cutoff_dict = {}
 
     @classmethod
     def prediction_classes(cls):
@@ -46,6 +47,31 @@ class PredictionClass(metaclass=ABCMeta):
     @classmethod
     def prediction_class_name_for_iedb_prediction_method(cls, method):
         return cls.prediction_class_for_iedb_prediction_method(method).__class__.__name__
+
+    @classmethod
+    def parse_allele_cutoff_file(cls):
+        base_dir                = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        iedb_alleles_dir        = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles')
+        allele_cutoff_file_name = os.path.join(iedb_alleles_dir, "cutoffs.csv")
+        cutoffs = {}
+        with open(allele_cutoff_file_name) as allele_cutoff_file:
+            csv_reader = csv.DictReader(allele_cutoff_file)
+            for row in csv_reader:
+                cutoffs[row['allele']] = row['allele_specific_cutoff']
+        return cutoffs
+
+    @classmethod
+    def print_all_allele_cutoffs(cls):
+        if not cls.allele_cutoff_dict:
+            cls.allele_cutoff_dict = cls.parse_allele_cutoff_file()
+        for allele, cutoff in sorted(cls.allele_cutoff_dict.items()):
+            print("%s\t%s" % (allele, cutoff))
+
+    @classmethod
+    def cutoff_for_allele(cls, allele):
+        if not cls.allele_cutoff_dict:
+            cls.allele_cutoff_dict = cls.parse_allele_cutoff_file()
+        return cls.allele_cutoff_dict.get(allele, None)
 
     @abstractmethod
     def parse_iedb_allele_file(self):
@@ -126,14 +152,7 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
             sys.exit("Length %s not valid for allele %s and method %s." % (length, allele, self.iedb_prediction_method))
 
     def iedb_executable_params(self, args):
-        return [
-            'python2.7',
-            args.iedb_executable_path,
-            args.method,
-            args.allele,
-            str(args.epitope_length),
-            args.input_file.name,
-        ]
+        return "{} {} {} {} {}".format(args.iedb_executable_path, args.method, args.allele, str(args.epitope_length), args.input_file.name)
 
 class NetMHC(MHCI):
     @property
@@ -197,13 +216,8 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
         return self.valid_allele_names_dict
 
     def iedb_executable_params(self, args):
-        return [
-            'python2.7',
-            args.iedb_executable_path,
-            args.method,
-            args.allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
-            args.input_file.name,
-        ]
+        allele = args.allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
+        return "{} {} {} {}".format(args.iedb_executable_path, args.method, allele, args.input_file.name)
 
 class NetMHCIIpan(MHCII):
     @property
