@@ -22,6 +22,8 @@ class InputFileConverter(metaclass=ABCMeta):
             'transcript_name',
             'amino_acid_change',
             'ensembl_gene_id',
+            'hgvsc',
+            'hgvsp',
             'wildtype_amino_acid_sequence',
             'downstream_amino_acid_sequence',
             'fusion_amino_acid_sequence',
@@ -50,6 +52,7 @@ class VcfConverter(InputFileConverter):
         self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
         self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
         self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
+        self.pass_only                   = kwargs.pop('pass_only', False)
         self.sample_name        = kwargs.pop('sample_name', None)
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
         if lib.utils.is_gz_file(self.input_file):
@@ -272,6 +275,10 @@ class VcfConverter(InputFileConverter):
                 #The genotype is uncalled or hom_ref
                 continue
 
+            filt = entry.FILTER
+            if self.pass_only and not (filt is None or len(filt) == 0):
+                continue
+
             alleles_dict = self.csq_parser.resolve_alleles(entry)
             for alt in alts:
                 alt = str(alt)
@@ -306,6 +313,8 @@ class VcfConverter(InputFileConverter):
                         count += 1
 
                     ensembl_gene_id = transcript['Gene']
+                    hgvsc = transcript['HGVSc'] if 'HGVSc' in transcript else 'NA'
+                    hgvsp = transcript['HGVSp'] if 'HGVSp' in transcript else 'NA'
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
                         'start'                          : entry.affected_start,
@@ -315,6 +324,8 @@ class VcfConverter(InputFileConverter):
                         'gene_name'                      : gene_name,
                         'transcript_name'                : transcript_name,
                         'ensembl_gene_id'                : ensembl_gene_id,
+                        'hgvsc'                          : hgvsc,
+                        'hgvsp'                          : hgvsp,
                         'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
                         'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
                         'fusion_amino_acid_sequence'     : '',
@@ -325,15 +336,39 @@ class VcfConverter(InputFileConverter):
                     }
                     if transcript['Amino_acids']:
                         output_row['amino_acid_change'] = transcript['Amino_acids']
+
                     if transcript_name in transcript_expns.keys():
                         transcript_expn_entry = transcript_expns[transcript_name]
                         output_row['transcript_expression'] = transcript_expn_entry['FPKM']
+                    elif 'TX' in self.vcf_reader.formats:
+                        transcript_expressions = genotype['TX']
+                        if isinstance(transcript_expressions, list):
+                            for transcript_expression in transcript_expressions:
+                                (transcript, value) = transcript_expression.split('|')
+                                if transcript == transcript_name:
+                                    output_row['transcript_expression'] = value
+                        else:
+                            (transcript, value) = transcript_expressions.split('|')
+                            if transcript == transcript_name:
+                                output_row['transcript_expression'] = value
+
                     if ensembl_gene_id in gene_expns.keys():
                         gene_expn_entries = gene_expns[ensembl_gene_id]
                         gene_fpkm = 0
                         for locus, gene_expn_entry in gene_expn_entries.items():
                             gene_fpkm += float(gene_expn_entry['FPKM'])
                         output_row['gene_expression'] = gene_fpkm
+                    elif 'GX' in self.vcf_reader.formats:
+                        gene_expressions = genotype['GX']
+                        if isinstance(gene_expressions, list):
+                            for gene_expression in gene_expressions:
+                                (gene, value) = gene_expression.split('|')
+                                if ensembl_gene_id == gene or gene_name == gene:
+                                    output_row['gene_expression'] = value
+                        else:
+                            (gene, value) = gene_expressions.split('|')
+                            if ensembl_gene_id == gene or gene_name == gene:
+                                output_row['gene_expression'] = value
 
                     output_row.update(coverage_for_entry)
 
