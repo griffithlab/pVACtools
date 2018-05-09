@@ -7,6 +7,7 @@ from config_files import additional_input_file_list_options
 from lib.run_argument_parser import *
 from lib.condense_final_report import *
 from lib.rank_epitopes import *
+import lib.call_iedb
 
 import shutil
 import yaml
@@ -51,6 +52,7 @@ def binding_filter(input_file, output_dir, args):
         args.minimum_fold_change,
         args.top_score_metric,
         args.exclude_NAs,
+        args.allele_specific_binding_thresholds,
     ).execute()
     print("Completed")
     return output_file
@@ -140,6 +142,9 @@ def main(args_input = sys.argv[1:]):
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
+    if args.iedb_install_directory:
+        lib.call_iedb.setup_iedb_conda_env()
+
     input_file_type = 'vcf'
     base_output_dir = os.path.abspath(args.output_dir)
 
@@ -172,6 +177,7 @@ def main(args_input = sys.argv[1:]):
         'sample_name'               : args.sample_name,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
+        'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
         'minimum_fold_change'       : args.minimum_fold_change,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
@@ -187,6 +193,7 @@ def main(args_input = sys.argv[1:]):
         'iedb_retries'              : args.iedb_retries,
         'downstream_sequence_length': downstream_sequence_length,
         'keep_tmp_files'            : args.keep_tmp_files,
+        'pass_only'                 : args.pass_only,
     }
     additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
     shared_arguments.update(additional_input_files)

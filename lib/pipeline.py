@@ -48,6 +48,7 @@ class Pipeline(metaclass=ABCMeta):
         self.netmhc_stab                 = kwargs.pop('netmhc_stab', False)
         self.top_score_metric            = kwargs.pop('top_score_metric', 'median')
         self.binding_threshold           = kwargs.pop('binding_threshold', 500)
+        self.allele_specific_cutoffs     = kwargs.pop('allele_specific_cutoffs', False)
         self.minimum_fold_change         = kwargs.pop('minimum_fold_change', 0)
         self.normal_cov                  = kwargs.pop('normal_cov', None)
         self.normal_vaf                  = kwargs.pop('normal_vaf', None)
@@ -266,6 +267,7 @@ class Pipeline(metaclass=ABCMeta):
             self.minimum_fold_change,
             self.top_score_metric,
             self.exclude_NAs,
+            self.allele_specific_cutoffs,
         ).execute()
         status_message("Completed")
 
