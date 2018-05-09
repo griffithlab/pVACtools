@@ -181,6 +181,7 @@ class PvacseqTests(unittest.TestCase):
                 '--netmhc-stab',
                 '--tdna-vaf', '20',
                 '-d', 'full',
+                '--pass-only',
             ])
 
             run.main([
