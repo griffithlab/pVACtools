@@ -9,6 +9,7 @@ from lib.condense_final_report import *
 from lib.rank_epitopes import *
 from lib.binding_filter import *
 from lib.top_score_filter import *
+import lib.call_iedb
 
 def define_parser():
     return PvacfuseRunArgumentParser().parser
@@ -36,6 +37,7 @@ def binding_filter(input_file, output_dir, args):
         0,
         args.top_score_metric,
         args.exclude_NAs,
+        args.allele_specific_binding_thresholds,
     ).execute()
     print("Completed")
     return output_file
@@ -104,6 +106,9 @@ def main(args_input = sys.argv[1:]):
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
+    if args.iedb_install_directory:
+        lib.call_iedb.setup_iedb_conda_env()
+
     input_file_type = 'bedpe'
     base_output_dir = os.path.abspath(args.output_dir)
 
@@ -136,6 +141,7 @@ def main(args_input = sys.argv[1:]):
         'sample_name'               : args.sample_name,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
+        'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
         'additional_report_columns' : args.additional_report_columns,
