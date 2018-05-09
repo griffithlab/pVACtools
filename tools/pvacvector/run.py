@@ -114,9 +114,16 @@ def find_min_scores(parsed_output_files, args):
             for row in reader:
                 index = row['Index']
                 allele = row['HLA Allele']
+
                 score = float(row['Best MT Score'])
-                if score < float(args.binding_threshold):
+                if args.allele_specific_binding_thresholds:
+                    threshold = PredictionClass.cutoff_for_allele(entry[allele])
+                    threshold = float(args.binding_threshold) if threshold is None else float(threshold)
+                else:
+                    threshold = float(args.binding_threshold)
+                if score < threshold:
                     continue
+
                 if index not in iedb_results:
                     iedb_results[index] = {}
                 if allele not in iedb_results[index]:
