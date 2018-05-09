@@ -22,6 +22,8 @@ class InputFileConverter(metaclass=ABCMeta):
             'transcript_name',
             'amino_acid_change',
             'ensembl_gene_id',
+            'hgvsc',
+            'hgvsp',
             'wildtype_amino_acid_sequence',
             'downstream_amino_acid_sequence',
             'fusion_amino_acid_sequence',
@@ -274,6 +276,8 @@ class VcfConverter(InputFileConverter):
                         count += 1
 
                     ensembl_gene_id = transcript['Gene']
+                    hgvsc = transcript['HGVSc'] if 'HGVSc' in transcript else 'NA'
+                    hgvsp = transcript['HGVSp'] if 'HGVSp' in transcript else 'NA'
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
                         'start'                          : entry.affected_start,
@@ -283,6 +287,8 @@ class VcfConverter(InputFileConverter):
                         'gene_name'                      : gene_name,
                         'transcript_name'                : transcript_name,
                         'ensembl_gene_id'                : ensembl_gene_id,
+                        'hgvsc'                          : hgvsc,
+                        'hgvsp'                          : hgvsp,
                         'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
                         'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
                         'variant_type'                   : consequence,
@@ -384,6 +390,8 @@ class IntegrateConverter(InputFileConverter):
                 'gene_name'                  : entry['name of fusion'],
                 'amino_acid_change'          : 'NA',
                 'ensembl_gene_id'            : 'NA',
+                'hgvsc'                      : 'NA',
+                'hgvsp'                      : 'NA',
                 'amino_acid_change'          : 'NA',
                 'transcript_expression'      : 'NA',
                 'gene_expression'            : 'NA',
