@@ -47,7 +47,16 @@ Installing IEDB binding prediction tools (strongly recommended)
    The IEDB binding prediction tools are only compatible with Linux.
 
 You may create a local install of the IEDB binding prediction tools by first downloading the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ from the IEDB website. If using both the Class I and the Class II tools, they both need to be installed into the same parent directory.
-   
+
+.. warning::
+
+   Using a local IEDB install with pVACtools requires conda.
+
+   pVACtools is written in python 3.5 and IEDB is only compatible with python
+   2.7. Because of this version mismatch, the pVACtools modules will create a
+   custom python 2.7 environment and execute IEDB inside of it. This requires
+   conda.
+
 .. note::
 
    IEDB requires tcsh. You can install it by running ``sudo apt-get install tcsh``.
@@ -67,15 +76,6 @@ Download the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and 
 
    Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.
 
-Open ``method/netmhc-4.0-executable/netmhc_4_0_executable/__init__.py`` and delete/comment out the first line (``import pkg_resources``). Also delete/comment out the same line of code from ``method/netmhcpan-3.0-executable/netmhcpan_3_0_executable/__init__.py`` on line 7.
-
-If you want to use the NetMHCcons prediction algorithm you will need to change the shebang line of certain files to explicitly use python2.7. The files in question are:
-
-* ``method/netmhccons-1.1-executable/netmhccons_1_1_executable/bin/pseudofind``
-* ``method/netmhc-3.4-executable/netmhc_3_4_executable/netMHC``
-
-In these files change the shebang line to ``#! /usr/bin/env python2.7``.
-
 MHC Class II
 ____________
 
@@ -83,7 +83,7 @@ Download the archives for `class II <http://tools.iedb.org/mhcii/download/>`_ an
 
 .. code-block:: none
 
-   tar -zxvf IEDB_MHC_II-2.17.3.tar.gz
+   tar -zxvf IEDB_MHC_II-2.17.4.tar.gz
    cd mhc_ii
 
 On older versions of the IEDB software, you might need to update some paths in the configure scripts to use relative paths. Open the ``configure.py`` file and update the lines that set the ``smm`` and ``nn`` variables to use relative paths like so:
