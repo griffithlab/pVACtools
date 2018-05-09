@@ -192,6 +192,12 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
             default=1,
             help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered. Default: 1",
         )
+        self.parser.add_argument(
+            '--pass-only',
+            help="Only process VCF entries that are PASS. Default: False",
+            default=False,
+            action='store_true'
+        )
 
 class PvacfuseRunArgumentParser(PredictionRunArgumentParser):
     def __init__(self):
