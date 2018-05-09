@@ -87,11 +87,6 @@ class PredictionRunArgumentParser(RunArgumentParser):
             help="Run NetMHCStabPan after all filtering and add stability predictions to predicted epitopes"
         )
         self.parser.add_argument(
-            '-t', '--top-result-per-mutation',
-            action='store_true',
-            help='Output only the top scoring result for each allele-peptide length combination for each variant. Default: False'
-        )
-        self.parser.add_argument(
             '-m', '--top-score-metric',
             choices=['lowest', 'median'],
             default='median',
