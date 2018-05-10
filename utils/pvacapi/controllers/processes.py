@@ -118,7 +118,7 @@ def process_info(id):
     if not process[0]:
         return (
             {
-                "code":400,
+                "status":400,
                 "message":"The requested process (%d) does not exist"%id,
                 "fields":"id"
             },400
@@ -238,7 +238,7 @@ def archive(processID):
         if 'process-%d'%processID not in data:
             return (
                 {
-                    'code':400,
+                    'status':400,
                     'message': "The requested process (%d) does not exist"%processID,
                     'fields':"processID"
                 },
@@ -285,7 +285,7 @@ def restart(processID):
     if key not in data:
         return (
             {
-                'code':400,
+                'status':400,
                 'message':"Invalid ProcessID: %d"%processID,
                 'fields':"processID"
             },
@@ -295,7 +295,7 @@ def restart(processID):
     if is_running(proc):
         return (
             {
-                'code':400,
+                'status':400,
                 'message':"The requested process (%d) is still running"%processID,
                 'fields':"processID"
             },
