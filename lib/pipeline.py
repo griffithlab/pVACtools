@@ -462,7 +462,10 @@ class MHCIPipeline(Pipeline):
                     for method in self.prediction_algorithms:
                         prediction_class = globals()[method]
                         prediction = prediction_class()
-                        iedb_method = prediction.iedb_prediction_method
+                        if hasattr(prediction, 'iedb_prediction_method'):
+                            iedb_method = prediction.iedb_prediction_method
+                        else:
+                            iedb_method = method
                         valid_alleles = prediction.valid_allele_names()
                         if a not in valid_alleles:
                             status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
@@ -489,7 +492,7 @@ class MHCIPipeline(Pipeline):
                         lib.call_iedb.main([
                             split_fasta_file_path,
                             split_iedb_out,
-                            iedb_method,
+                            method,
                             a,
                             '-l', str(epl),
                             '-r', str(self.iedb_retries),
@@ -595,7 +598,7 @@ class MHCIIPipeline(Pipeline):
                     lib.call_iedb.main([
                         split_fasta_file_path,
                         split_iedb_out,
-                        iedb_method,
+                        method,
                         a,
                         '-r', str(self.iedb_retries),
                         '-e', self.iedb_executable,
