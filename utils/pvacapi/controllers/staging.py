@@ -123,7 +123,7 @@ def staging(parameters):
     if not input_path:
         return (
             {
-                'code': 400,
+                'status': 400,
                 'message': 'Unable to locate the given file: %s' % input_file,
                 'fields': 'input'
             }, 400
@@ -136,7 +136,7 @@ def staging(parameters):
         if not gene_expn_file_path:
             return (
                 {
-                    'code': 400,
+                    'status': 400,
                     'message': 'Unable to locate the given file: %s' % parameters['gene_expn_file'],
                     'fields': 'gene_expn_file'
                 }, 400
@@ -149,7 +149,7 @@ def staging(parameters):
         if not transcript_expn_file_path:
             return (
                 {
-                    'code': 400,
+                    'status': 400,
                     'message': 'Unable to locate the given file: %s' % parameters['transcript_expn_file'],
                     'fields': 'transcript_expn_file'
                 }, 400
@@ -162,7 +162,7 @@ def staging(parameters):
         if not normal_snvs_coverage_file_path:
             return (
                 {
-                    'code': 400,
+                    'status': 400,
                     'message': 'Unable to locate the given file: %s' % parameters['normal_snvs_coverage_file'],
                     'fields': 'normal_snvs_coverage_file'
                 }, 400
@@ -175,7 +175,7 @@ def staging(parameters):
         if not normal_indels_coverage_file_path:
             return (
                 {
-                    'code': 400,
+                    'status': 400,
                     'message': 'Unable to locate the given file: %s' % parameters['normal_indels_coverage_file'],
                     'fields': 'normal_indels_coverage_file'
                 }, 400
@@ -189,7 +189,7 @@ def staging(parameters):
         if not tdna_snvs_coverage_file_path:
             return (
                 {
-                    'code': 400,
+                    'status': 400,
                     'message': 'Unable to locate the given file: %s' % parameters['tdna_snvs_coverage_file'],
                     'fields': 'tdna_snvs_coverage_file'
                 }, 400
@@ -202,7 +202,7 @@ def staging(parameters):
         if not tdna_indels_coverage_file_path:
             return (
                 {
-                    'code': 400,
+                    'status': 400,
                     'message': 'Unable to locate the given file: %s' % parameters['tdna_indels_coverage_file'],
                     'fields': 'tdna_indels_coverage_file'
                 }, 400
@@ -216,7 +216,7 @@ def staging(parameters):
         if not trna_snvs_coverage_file_path:
             return (
                 {
-                    'code': 400,
+                    'status': 400,
                     'message': 'Unable to locate the given file: %s' % parameters['trna_snvs_coverage_file'],
                     'fields': 'trna_snvs_coverage_file'
                 }, 400
@@ -230,7 +230,7 @@ def staging(parameters):
         if not trna_indels_coverage_file_path:
             return (
                 {
-                    'code': 400,
+                    'status': 400,
                     'message': 'Unable to locate the given file: %s' % parameters['trna_indels_coverage_file'],
                     'fields': 'trna_indels_coverage_file'
                 }, 400
@@ -301,14 +301,14 @@ def staging(parameters):
         new_id = start(**configObj)
 
         return ({
-            'code': 201,
+            'status': 201,
             'message': "Process started.",
             'processid': new_id
         }, 201)
     
     return (
         {
-            'code': 400,
+            'status': 400,
             'message': "The given parameters match process %d" % checkOK,
             'fields': "N/A"
         }, 400)
