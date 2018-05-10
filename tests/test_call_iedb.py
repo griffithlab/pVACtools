@@ -8,7 +8,7 @@ from subprocess import call
 from filecmp import cmp
 import py_compile
 import lib.call_iedb
-from lib.prediction_class import PredictionClass
+from lib.prediction_class import PredictionClass, IEDB
 
 def make_response(method, path):
     reader = open(os.path.join(
@@ -47,9 +47,9 @@ class FilterResponseTests(CallIEDBTests):
             unfiltered_file_contents = f.read().rstrip()
         with open(filtered_file, 'rb') as f:
             filtered_file_contents = f.read().rstrip()
-        filtered_response = lib.call_iedb.filter_response(unfiltered_file_contents)
+        filtered_response = IEDB.filter_response(unfiltered_file_contents)
         self.assertEqual(filtered_response, filtered_file_contents)
-        filtered_response_on_filtered_file = lib.call_iedb.filter_response(filtered_file_contents)
+        filtered_response_on_filtered_file = IEDB.filter_response(filtered_file_contents)
         self.assertEqual(filtered_response_on_filtered_file, filtered_file_contents)
 
 class CallIEDBClassITests(CallIEDBTests):
