@@ -71,7 +71,7 @@ NNalign                           2.2
 
 Automatic filtering on the binding affinity ic50 value narrows down the results to only include "good" candidate peptides. The binding filter threshold can be adjusted by the user for each pVACseq run, and additional filtering can be manually done by the user on the final result file to narrow down the candidate epitopes even further.
 
-bam-readcount and cufflinks files can be provided by the user as additional input files and are used to extract coverage and expression data. When any bam-readcount or cufflinks files are provided, automatic filtering with adjustable thresholds on depth, VAF, and/or expression value will narrow down the results. The user can also manually run the coverage filter to further narrow down their results from the final output file.
+Readcount and expression data can be extracted from a annotated VCF to automatically filter with adjustable thresholds on depth, VAF, and/or expression value will narrow down the results. The user can also manually run the coverage filter to further narrow down their results from the final output file.
 
 The user can also specify an option to only keep the top scoring result for each allele-peptide length combination for each variant.
 
