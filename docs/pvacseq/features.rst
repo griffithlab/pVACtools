@@ -75,6 +75,12 @@ Readcount and expression data can be extracted from a annotated VCF to automatic
 
 The user can also specify an option to only keep the top scoring result for each allele-peptide length combination for each variant.
 
+**Scoring of candidate neoepitopes**
+
+Filtered neoepitopes are scored and ranked based on the binding affinity,
+fold change between mutant and wildtype binding affinity, gene expression, RNA
+and DNA VAF.
+
 **NetChop and NetMHCstab integration**
 
 Cleavage position predictions are added with optional processing through NetChop.

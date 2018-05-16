@@ -97,7 +97,7 @@ predictions for alleles:
 
 - The alleles you picked might've not been compatible with the prediction algorithm and/or epitope lengths chosen. In that case no calls for that allele would've been made and a status message would've printed to the screen.
 
-- It could be that all epitope predictions for some alleles got filtered out. You can check the ``<sample_name>.combined.parsed.tsv`` file to see all called epitopes before filtering.
+- It could be that all epitope predictions for some alleles got filtered out. You can check the ``<sample_name>.all_epitopes.tsv`` file to see all called epitopes before filtering.
 
 :large:`Why are some values in the` :large-code:`WT Epitope Seq` :large:`column` :large-code:`NA` :large:`?`
 
@@ -119,7 +119,7 @@ same as the wildtype epitope sequence will also be filtered out.
 :large:`How can I see all of the candidate epitopes without any filters
 applied?`
 
-The ``<sample_name>.combined.parsed.tsv`` will contain all of the epitopes predicted
+The ``<sample_name>.all_epitopes.tsv`` will contain all of the epitopes predicted
 before filters are applied.
 
 :large:`Why have some of my epitopes been filtered out even though the` :large-code:`Best MT Score` :large:`is below 500?`
