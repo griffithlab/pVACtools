@@ -56,14 +56,14 @@ Column Name                                                     Description
 ``Best MT Score``                                               Lowest ic50 binding affinity of all prediction algorithms used
 ``Corresponding WT Score``                                      ic50 binding affinity of the wildtype epitope. ``NA`` if there is no ``WT Epitope Seq``.
 ``Corresponding Fold Change``                                   ``Corresponding WT Score`` / ``Best MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
-``Tumor DNA Depth``                                             Tumor DNA depth at this position. ``NA`` if no bam-readcount file provided.
-``Tumor DNA VAF``                                               Tumor DNA variant allele frequency at this position. ``NA`` if no bam-readcount file provided.
-``Tumor DNA Depth``                                             Tumor RNA depth at this position. ``NA`` if no bam-readcount file provided.
-``Tumor DNA VAF``                                               Tumor RNA variant allele frequency at this position. ``NA`` if no bam-readcount file provided.
-``Tumor DNA Depth``                                             Normal DNA depth at this position. ``NA`` if no bam-readcount file provided.
-``Tumor DNA VAF``                                               Normal DNA variant allele frequency at this position. ``NA`` if no bam-readcount file provided.
-``Gene Expression``                                             Gene expression value at this position. ``NA`` if no cufflinks file provided.
-``Transcript Expression``                                       Transcript expression value at this position. ``NA`` if no cufflinks file provided.
+``Tumor DNA Depth``                                             Tumor DNA depth at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
+``Tumor DNA VAF``                                               Tumor DNA variant allele frequency at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
+``Tumor RNA Depth``                                             Tumor RNA depth at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
+``Tumor RNA VAF``                                               Tumor RNA variant allele frequency at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
+``Normal DNA Depth``                                            Normal DNA depth at this position. ``NA`` if VCF entry does not contain normal DNA readcount annotation.
+``Normal DNA VAF``                                              Normal DNA variant allele frequency at this position. ``NA`` if VCF entry does not contain normal DNA readcount annotation.
+``Gene Expression``                                             Gene expression value at this position. ``NA`` if VCF entry does not contain gene expression annotation.
+``Transcript Expression``                                       Transcript expression value at this position. ``NA`` if VCF entry does not contain transcript expression annotation.
 ``Median MT Score``                                             Median ic50 binding affinity of the mutant epitope of all prediction algorithms used
 ``Median WT Score``                                             Median ic50 binding affinity of the wildtype epitope of all prediction algorithms used. ``NA`` if there is no ``WT Epitope Seq``.
 ``Median Fold Change``                                          ``Median WT Score`` / ``Median MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
