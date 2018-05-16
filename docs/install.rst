@@ -103,6 +103,45 @@ Then run the configure script.
 
    Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.
 
+
+Installing MHCflurry
+--------------------
+
+If you wish to run the MHCflurry prediction algorithm, you will need to
+install the ``mhcflurry`` python package on your system. This package is set
+as a dependency for the ``pvactools`` package so it should be installed
+automatically when you download or upgrade the ``pvactools`` package. You can
+install it manually by running:
+
+.. code-block:: none
+
+   pip install mhcflurry
+
+.. note::
+
+   The ``mhcflurry`` package needs to be installed in the same python 3.5 conda
+   environment as the ``pvactools`` package.
+
+Next, you will need to download the download the MHCflurry datasets and trained models:
+
+.. code-block:: none
+
+   mhcflurry-downloads fetch
+
+.. note::
+
+   The ``mhcflurry-downloads fetch`` command will need to be run manually, even
+   if the mhcflurry package was already installed automatically as a
+   dependency with the ``pvactools`` package.
+
+You can check that the ``mhcflurry`` package  was installed successfully by running:
+
+.. code-block:: none
+
+  mhcflurry-predict -h
+
+This should pull up the help page for the MHCflurry predictor.
+
 Docker and CWL
 --------------
 
