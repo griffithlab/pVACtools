@@ -134,7 +134,13 @@ class VcfConverter(InputFileConverter):
         return transcripts
 
     def resolve_consequence(self, consequence_string):
-        consequences = {consequence.lower() for consequence in consequence_string.split('&')}
+        if '&' in consequence_string:
+            consequences = {consequence.lower() for consequence in consequence_string.split('&')}
+        elif '.' in consequence_string:
+            consequences = {consequence.lower() for consequence in consequence_string.split('.')}
+        else:
+            consequences = [consequence_string.lower()]
+
         if 'start_lost' in consequences:
             consequence = None
         elif 'frameshift_variant' in consequences:
