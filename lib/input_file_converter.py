@@ -225,7 +225,7 @@ class VcfConverter(InputFileConverter):
                         var_count = allele_depths[alts.index(alt) + 1]
                 else:
                     var_count = allele_depths
-                vaf = var_count / genotype[dp_tag]
+                vaf = int(var_count) / int(genotype[dp_tag])
             except AttributeError:
                 vaf = 'NA'
         return vaf
