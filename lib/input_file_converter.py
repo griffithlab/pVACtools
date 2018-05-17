@@ -270,11 +270,16 @@ class VcfConverter(InputFileConverter):
                         continue
                     elif consequence == 'FS':
                         if transcript['DownstreamProtein'] == '':
+                            print("frameshift_variant transcript does not contain a DownstreamProtein sequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                             continue
                         else:
                             amino_acid_change_position = "%s%s/%s" % (transcript['Protein_position'], entry.REF, alt)
                     else:
-                        amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
+                        if transcript['Amino_acids'] == '':
+                            print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                            continue
+                        else:
+                            amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
                     index = '%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
