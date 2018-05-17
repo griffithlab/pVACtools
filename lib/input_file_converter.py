@@ -294,6 +294,8 @@ class VcfConverter(InputFileConverter):
                 if len(transcripts) == 0:
                     csq_allele = alleles_dict[alt]
                     transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_allele)
+                if len(transcripts) == 0 and self.is_deletion(reference, alt):
+                    transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], 'deletion')
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
