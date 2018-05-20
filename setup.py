@@ -79,7 +79,7 @@ setup(
             'py-postgresql',
             'watchdog',
             'flask-cors',
-            'bokeh==0.12.6',
+            'bokeh==0.12.4',
             'pvacseq-client'
         ]
     },
