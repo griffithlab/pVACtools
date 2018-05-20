@@ -80,6 +80,7 @@ setup(
             'watchdog',
             'flask-cors',
             'bokeh==0.12.4',
+            'tornado===4.4.3',
             'pvacseq-client'
         ]
     },
