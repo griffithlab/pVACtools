@@ -76,7 +76,6 @@ def main(args_input = sys.argv[1:]):
         'input_file'                : args.input_file,
         'input_file_type'           : input_file_type,
         'sample_name'               : args.sample_name,
-        'top_result_per_mutation'   : args.top_result_per_mutation,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'minimum_fold_change'       : args.minimum_fold_change,
