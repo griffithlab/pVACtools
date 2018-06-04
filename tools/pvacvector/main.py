@@ -21,13 +21,6 @@ def main():
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
 
-    allele_specific_cutoffs_parser = subparsers.add_parser(
-        "allele_specific_cutoffs",
-        help="Show the allele specific cutoffs",
-        add_help=False,
-    )
-    allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
-
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
         help="Downloads example input and output files",
