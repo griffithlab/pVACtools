@@ -2,7 +2,6 @@ __all__ = [
     'run',
     'binding_filter',
     'valid_alleles',
-    'allele_specific_cutoffs',
     'download_example_data',
     'coverage_filter',
     'generate_protein_fasta',
