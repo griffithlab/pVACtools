@@ -290,6 +290,11 @@ class Pipeline(metaclass=ABCMeta):
     def top_result_filter_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".filtered.top.tsv")
 
+    def top_result_filter(self):
+        status_message("Running Top Score Filter")
+        TopScoreFilter(self.coverage_filter_out_path(), self.top_result_filter_out_path(), self.top_score_metric).execute()
+        status_message("Completed")
+
     def net_chop_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".chop.tsv")
 
@@ -355,7 +360,7 @@ class Pipeline(metaclass=ABCMeta):
             os.symlink(self.binding_filter_out_path(), self.coverage_filter_out_path())
             symlinks_to_delete.append(self.coverage_filter_out_path())
 
-        TopScoreFilter(self.coverage_filter_out_path(), self.top_result_filter_out_path(), self.top_score_metric).execute()
+        self.top_result_filter
 
         if self.net_chop_method:
             self.net_chop()
