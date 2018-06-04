@@ -1,9 +1,10 @@
 import vcf
 import csv
 import sys
-import re
 from abc import ABCMeta
 from collections import OrderedDict
+from lib.csq_parser import CsqParser
+import lib.utils
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -21,6 +22,8 @@ class InputFileConverter(metaclass=ABCMeta):
             'transcript_name',
             'amino_acid_change',
             'ensembl_gene_id',
+            'hgvsc',
+            'hgvsp',
             'wildtype_amino_acid_sequence',
             'downstream_amino_acid_sequence',
             'fusion_amino_acid_sequence',
@@ -49,6 +52,28 @@ class VcfConverter(InputFileConverter):
         self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
         self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
         self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
+        self.pass_only                   = kwargs.pop('pass_only', False)
+        self.sample_name        = kwargs.pop('sample_name', None)
+        self.normal_sample_name = kwargs.pop('normal_sample_name', None)
+        if lib.utils.is_gz_file(self.input_file):
+            mode = 'rb'
+        else:
+            mode = 'r'
+        self.reader = open(self.input_file, mode)
+        self.vcf_reader = vcf.Reader(self.reader)
+        if len(self.vcf_reader.samples) > 1:
+            if not self.sample_name:
+                sys.exit("VCF contains more than one sample but sample_name is not set.")
+            elif self.sample_name not in self.vcf_reader.samples:
+                sys.exit("sample_name {} not in VCF {}".format(self.sample_name, self_input_file))
+            if self.normal_sample_name is not None and self.normal_sample_name not in self.vcf_reader.samples:
+                sys.exit("normal_sample_name {} not in VCF {}".format(self.normal_sample_name, self.input_file))
+        else:
+            self.sample_name = self.vcf_reader.samples[0]
+        self.writer = open(self.output_file, 'w')
+        self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
+        self.tsv_writer.writeheader()
+        self.csq_parser = self.create_csq_parser()
 
     def parse_bam_readcount_file(self, bam_readcount_file):
         with open(bam_readcount_file, 'r') as reader:
@@ -64,7 +89,8 @@ class VcfConverter(InputFileConverter):
                     coverage[chromosome] = {}
                 if position not in coverage[chromosome]:
                     coverage[chromosome][position] = {}
-                coverage[chromosome][position][reference_base] = brct
+                coverage[chromosome][position][reference_base] = self.parse_brct_field(brct)
+                coverage[chromosome][position][reference_base]['depth'] = depth
         return coverage
 
     def parse_brct_field(self, brct_entry):
@@ -89,8 +115,8 @@ class VcfConverter(InputFileConverter):
             alt = alt[1:]
         return ref, alt
 
-    def parse_csq_format(self, vcf_reader):
-        info_fields = vcf_reader.infos
+    def create_csq_parser(self):
+        info_fields = self.vcf_reader.infos
 
         if 'CSQ' not in info_fields:
             sys.exit('Input VCF does not contain a CSQ header. Please annotate the VCF with VEP before running it.')
@@ -98,41 +124,7 @@ class VcfConverter(InputFileConverter):
             sys.exit('Failed to extract format string from info description for tag (CSQ)')
         else:
             csq_header = info_fields['CSQ']
-            format_pattern = re.compile('Format: (.*)')
-            match = format_pattern.search(csq_header.desc)
-            return match.group(1)
-
-    def resolve_alleles(self, entry):
-        alleles = {}
-        if entry.is_indel:
-            for alt in entry.ALT:
-                alt = str(alt)
-                if alt[0:1] != entry.REF[0:1]:
-                    alleles[alt] = alt
-                elif alt[1:] == "":
-                    alleles[alt] = '-'
-                else:
-                    alleles[alt] = alt[1:]
-        else:
-            for alt in entry.ALT:
-                alt = str(alt)
-                alleles[alt] = alt
-
-        return alleles
-
-    def parse_csq_entries_for_allele(self, csq_entries, csq_format, csq_allele):
-        csq_format_array = csq_format.split('|')
-
-        transcripts = []
-        for entry in csq_entries:
-            values = entry.split('|')
-            transcript = {}
-            for key, value in zip(csq_format_array, values):
-                transcript[key] = value
-            if transcript['Allele'] == csq_allele:
-                transcripts.append(transcript)
-
-        return transcripts
+            return CsqParser(csq_header.desc)
 
     def resolve_consequence(self, consequence_string):
         consequences = {consequence.lower() for consequence in consequence_string.split('&')}
@@ -150,13 +142,10 @@ class VcfConverter(InputFileConverter):
             consequence = None
         return consequence
 
-    def calculate_coverage(self, ref, var):
-        return ref + var
+    def calculate_vaf(self, var_count, depth):
+        return (var_count / depth) * 100
 
-    def calculate_vaf(self, ref, var):
-        return (var / (self.calculate_coverage(ref, var)+0.00001)) * 100
-
-    def execute(self):
+    def parse_gene_expns_file(self):
         gene_expns = {}
         if self.gene_expn_file is not None:
             with open(self.gene_expn_file, 'r') as reader:
@@ -165,14 +154,18 @@ class VcfConverter(InputFileConverter):
                     if row['tracking_id'] not in gene_expns.keys():
                         gene_expns[row['tracking_id']] = {}
                     gene_expns[row['tracking_id']][row['locus']] = row
+        return gene_expns
 
+    def parse_transcript_expns_file(self):
         transcript_expns = {}
         if self.transcript_expn_file is not None:
             with open(self.transcript_expn_file, 'r') as reader:
                 isoforms_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 for row in isoforms_tsv_reader:
                     transcript_expns[row['tracking_id']] = row
+        return transcript_expns
 
+    def parse_coverage_files(self):
         coverage = {}
         for variant_type in ['snvs', 'indels']:
             for data_type in ['normal', 'tdna', 'trna']:
@@ -182,79 +175,122 @@ class VcfConverter(InputFileConverter):
                     if variant_type not in coverage:
                         coverage[variant_type] = {}
                     coverage[variant_type][data_type] = self.parse_bam_readcount_file(coverage_file)
+        return coverage
 
-        reader = open(self.input_file, 'r')
-        vcf_reader = vcf.Reader(reader)
-        if len(vcf_reader.samples) > 1:
-            sys.exit('ERROR: VCF file contains more than one sample')
-        writer = open(self.output_file, 'w')
-        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers())
-        tsv_writer.writeheader()
+    def determine_bam_readcount_bases(self, entry, reference, alt, start):
+        if len(reference) == len(alt):
+            bam_readcount_position = entry.POS
+            variant_type = 'snvs'
+            ref_base = reference
+            var_base = alt
+        else:
+            if self.is_deletion(reference, alt):
+                bam_readcount_position = start + 1
+                (simplified_reference, simplified_alt) = self.simplify_indel_allele(reference, alt)
+                ref_base = reference[1:2]
+                var_base = '-' + simplified_reference
+            elif self.is_insertion(reference, alt):
+                bam_readcount_position = start
+                (simplified_reference, simplified_alt) = self.simplify_indel_allele(reference, alt)
+                ref_base = reference
+                var_base = '+' + simplified_alt
+            variant_type = 'indels'
+        return (bam_readcount_position, ref_base, var_base, variant_type)
 
-        csq_format = self.parse_csq_format(vcf_reader)
+    def get_depth_from_vcf_genotype(self, genotype, tag):
+        try:
+            depth = genotype[tag]
+        except AttributeError:
+            depth = 'NA'
+        return depth
+
+    def get_vaf_from_vcf_genotype(self, genotype, alts, alt, af_tag, ad_tag, dp_tag):
+        try:
+            allele_frequencies = genotype[af_tag]
+            if isinstance(allele_frequencies, list):
+                vaf = allele_frequencies[alts.index(alt)]
+            else:
+                vaf = allele_frequencies
+        except AttributeError:
+            try:
+                allele_depths = genotype[ad_tag]
+                if isinstance(allele_depths, list):
+                    #sometimes AF is type R, sometimes it's A
+                    if len(allele_depths) == len(alts):
+                        var_count = allele_depths[alts.index(alt)]
+                    elif len(allele_depths) == len(alts) + 1:
+                        var_count = allele_depths[alts.index(alt) + 1]
+                else:
+                    var_count = allele_depths
+                vaf = var_count / genotype[dp_tag]
+            except AttributeError:
+                vaf = 'NA'
+        return vaf
+
+    def calculate_coverage_for_entry(self, coverage, entry, reference, alt, start, chromosome, genotype):
+        (bam_readcount_position, ref_base, var_base, variant_type) = self.determine_bam_readcount_bases(entry, reference, alt, start)
+        coverage_for_entry = {}
+        if variant_type in coverage:
+            for coverage_type in coverage[variant_type]:
+                if (
+                    chromosome in coverage[variant_type][coverage_type]
+                    and str(bam_readcount_position) in coverage[variant_type][coverage_type][chromosome]
+                    and ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]
+                ):
+                    brct = coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base]
+                    if 'depth' in brct and var_base in brct:
+                        coverage_for_entry[coverage_type + '_depth'] = int(brct['depth'])
+                        coverage_for_entry[coverage_type + '_vaf']   = self.calculate_vaf(int(brct[var_base]), int(brct['depth']))
+        else:
+            coverage_for_entry['tdna_depth'] = self.get_depth_from_vcf_genotype(genotype, 'DP')
+            coverage_for_entry['trna_depth'] = self.get_depth_from_vcf_genotype(genotype, 'RDP')
+            coverage_for_entry['tdna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, entry.ALT, alt, 'AF', 'AD', 'DP')
+            coverage_for_entry['trna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, entry.ALT, alt, 'RAF', 'RAD', 'RDP')
+            if self.normal_sample_name is not None:
+                normal_genotype = entry.genotype(self.normal_sample_name)
+                coverage_for_entry['normal_depth'] = self.get_depth_from_vcf_genotype(normal_genotype, 'DP')
+                coverage_for_entry['normal_vaf'] = self.get_vaf_from_vcf_genotype(normal_genotype, entry.ALT, alt, 'AF', 'AD', 'DP')
+        return coverage_for_entry
+
+    def close_filehandles(self):
+        self.writer.close()
+        self.reader.close()
+
+    def execute(self):
+        gene_expns = self.parse_gene_expns_file()
+        transcript_expns = self.parse_transcript_expns_file()
+        coverage = self.parse_coverage_files()
+
         indexes = []
         count = 1
-        for entry in vcf_reader:
+        for entry in self.vcf_reader:
             chromosome = entry.CHROM
             start      = entry.affected_start
             stop       = entry.affected_end
             reference  = entry.REF
             alts       = entry.ALT
 
-            genotype = entry.genotype(vcf_reader.samples[0])
+            genotype = entry.genotype(self.sample_name)
             if genotype.gt_type is None or genotype.gt_type == 0:
                 #The genotype is uncalled or hom_ref
                 continue
 
-            if len(vcf_reader.samples) == 1:
-                genotype = entry.genotype(vcf_reader.samples[0])
-                if genotype.gt_type is None or genotype.gt_type == 0:
-                    #The genotype is uncalled or hom_ref
-                    continue
+            filt = entry.FILTER
+            if self.pass_only and not (filt is None or len(filt) == 0):
+                continue
 
-            alleles_dict = self.resolve_alleles(entry)
+            alleles_dict = self.csq_parser.resolve_alleles(entry)
             for alt in alts:
                 alt = str(alt)
                 if genotype.gt_bases and alt not in genotype.gt_bases.split('/'):
                     continue
 
-                if entry.is_indel:
-                    if self.is_deletion(reference, alt):
-                        bam_readcount_position = start + 1
-                        (simplified_reference, simplified_alt) = self.simplify_indel_allele(reference, alt)
-                        ref_base = reference[1:2]
-                        var_base = '-' + simplified_reference
-                    elif self.is_insertion(reference, alt):
-                        bam_readcount_position = start
-                        (simplified_reference, simplified_alt) = self.simplify_indel_allele(reference, alt)
-                        ref_base = reference
-                        var_base = '+' + simplified_alt
-                    variant_type = 'indels'
-                else:
-                    bam_readcount_position = entry.POS
-                    variant_type = 'snvs'
-                    ref_base = reference
-                    var_base = alt
-                coverage_for_entry = {}
-                for coverage_type in ['normal', 'tdna', 'trna']:
-                    coverage_for_entry[coverage_type + '_depth'] = 'NA'
-                    coverage_for_entry[coverage_type + '_vaf'] = 'NA'
-                if variant_type in coverage:
-                    for coverage_type in coverage[variant_type]:
-                        if (
-                            chromosome in coverage[variant_type][coverage_type]
-                            and str(bam_readcount_position) in coverage[variant_type][coverage_type][chromosome]
-                            and ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]
-                        ):
-                            brct = self.parse_brct_field(coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base])
-                            if ref_base in brct and var_base in brct:
-                                coverage_for_entry[coverage_type + '_depth'] = self.calculate_coverage(int(brct[ref_base]), int(brct[var_base]))
-                                coverage_for_entry[coverage_type + '_vaf']   = self.calculate_vaf(int(brct[ref_base]), int(brct[var_base]))
+                coverage_for_entry = self.calculate_coverage_for_entry(coverage, entry, reference, alt, start, chromosome, genotype)
 
-                transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, alt)
+                transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)
                 if len(transcripts) == 0:
                     csq_allele = alleles_dict[alt]
-                    transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
+                    transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_allele)
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
@@ -275,7 +311,10 @@ class VcfConverter(InputFileConverter):
                     else:
                         indexes.append(index)
                         count += 1
+
                     ensembl_gene_id = transcript['Gene']
+                    hgvsc = transcript['HGVSc'] if 'HGVSc' in transcript else 'NA'
+                    hgvsp = transcript['HGVSp'] if 'HGVSp' in transcript else 'NA'
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
                         'start'                          : entry.affected_start,
@@ -285,8 +324,11 @@ class VcfConverter(InputFileConverter):
                         'gene_name'                      : gene_name,
                         'transcript_name'                : transcript_name,
                         'ensembl_gene_id'                : ensembl_gene_id,
+                        'hgvsc'                          : hgvsc,
+                        'hgvsp'                          : hgvsp,
                         'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
                         'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
+                        'fusion_amino_acid_sequence'     : '',
                         'variant_type'                   : consequence,
                         'protein_position'               : transcript['Protein_position'],
                         'index'                          : index,
@@ -294,29 +336,45 @@ class VcfConverter(InputFileConverter):
                     }
                     if transcript['Amino_acids']:
                         output_row['amino_acid_change'] = transcript['Amino_acids']
-                    else:
-                        output_row['amino_acid_change'] = 'NA'
 
                     if transcript_name in transcript_expns.keys():
                         transcript_expn_entry = transcript_expns[transcript_name]
                         output_row['transcript_expression'] = transcript_expn_entry['FPKM']
-                    else:
-                        output_row['transcript_expression'] = 'NA'
+                    elif 'TX' in self.vcf_reader.formats:
+                        transcript_expressions = genotype['TX']
+                        if isinstance(transcript_expressions, list):
+                            for transcript_expression in transcript_expressions:
+                                (transcript, value) = transcript_expression.split('|')
+                                if transcript == transcript_name:
+                                    output_row['transcript_expression'] = value
+                        else:
+                            (transcript, value) = transcript_expressions.split('|')
+                            if transcript == transcript_name:
+                                output_row['transcript_expression'] = value
+
                     if ensembl_gene_id in gene_expns.keys():
                         gene_expn_entries = gene_expns[ensembl_gene_id]
                         gene_fpkm = 0
                         for locus, gene_expn_entry in gene_expn_entries.items():
                             gene_fpkm += float(gene_expn_entry['FPKM'])
                         output_row['gene_expression'] = gene_fpkm
-                    else:
-                        output_row['gene_expression'] = 'NA'
+                    elif 'GX' in self.vcf_reader.formats:
+                        gene_expressions = genotype['GX']
+                        if isinstance(gene_expressions, list):
+                            for gene_expression in gene_expressions:
+                                (gene, value) = gene_expression.split('|')
+                                if ensembl_gene_id == gene or gene_name == gene:
+                                    output_row['gene_expression'] = value
+                        else:
+                            (gene, value) = gene_expressions.split('|')
+                            if ensembl_gene_id == gene or gene_name == gene:
+                                output_row['gene_expression'] = value
 
                     output_row.update(coverage_for_entry)
 
-                    tsv_writer.writerow(output_row)
+                    self.tsv_writer.writerow(output_row)
 
-        writer.close()
-        reader.close()
+        self.close_filehandles()
 
 class IntegrateConverter(InputFileConverter):
     def input_fieldnames(self):
@@ -352,7 +410,7 @@ class IntegrateConverter(InputFileConverter):
         reader = open(self.input_file, 'r')
         csv_reader = csv.DictReader(reader, delimiter='\t', fieldnames=self.input_fieldnames())
         writer = open(self.output_file, 'w')
-        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers())
+        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         tsv_writer.writeheader()
         count = 1
         for entry in csv_reader:
@@ -363,17 +421,9 @@ class IntegrateConverter(InputFileConverter):
                 'reference'                  : 'fusion',
                 'variant'                    : 'fusion',
                 'gene_name'                  : entry['name of fusion'],
-                'amino_acid_change'          : 'NA',
-                'ensembl_gene_id'            : 'NA',
-                'amino_acid_change'          : 'NA',
-                'transcript_expression'      : 'NA',
-                'gene_expression'            : 'NA',
-                'normal_depth'               : 'NA',
-                'normal_vaf'                 : 'NA',
-                'tdna_depth'                 : 'NA',
-                'tdna_vaf'                   : 'NA',
-                'trna_depth'                 : 'NA',
-                'trna_vaf'                   : 'NA',
+                'wildtype_amino_acid_sequence'   : '',
+                'downstream_amino_acid_sequence' : '',
+                'protein_length_change'      : '',
             }
 
             if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':

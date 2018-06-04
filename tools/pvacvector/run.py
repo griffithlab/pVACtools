@@ -16,6 +16,7 @@ from lib.vector_visualization import *
 from lib.run_argument_parser import *
 from lib.pvacvector_input_fasta_generator import *
 from lib.pipeline import *
+import lib.call_iedb
 
 def define_parser():
     return PvacvectorRunArgumentParser().parser
@@ -113,9 +114,16 @@ def find_min_scores(parsed_output_files, args):
             for row in reader:
                 index = row['Index']
                 allele = row['HLA Allele']
+
                 score = float(row['Best MT Score'])
-                if score < float(args.binding_threshold):
+                if args.allele_specific_binding_thresholds:
+                    threshold = PredictionClass.cutoff_for_allele(entry[allele])
+                    threshold = float(args.binding_threshold) if threshold is None else float(threshold)
+                else:
+                    threshold = float(args.binding_threshold)
+                if score < threshold:
                     continue
+
                 if index not in iedb_results:
                     iedb_results[index] = {}
                 if allele not in iedb_results[index]:
@@ -236,6 +244,9 @@ def main(args_input=sys.argv[1:]):
 
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
+
+    if args.iedb_install_directory:
+        lib.call_iedb.setup_iedb_conda_env()
 
     if (os.path.splitext(args.input_file))[1] == '.fa':
         input_file = args.input_file
