@@ -11,7 +11,7 @@ and a top score filter.
 The binding filter is always run automatically as part of the pVACseq pipeline.
 The coverage filter is run automatically if bam-readcount or cufflinks file are
 proAvided as additional input files to a pVACseq run. The top score filter is
-run if the ``--top-result-per-mutation`` flag is set.
+also run automatically as part of the pVACseq pipeline.
 
 All filters can also be run manually to narrow the final results down further.
 
