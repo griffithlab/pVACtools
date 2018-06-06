@@ -175,7 +175,7 @@ class MHCflurry(MHCI):
     def determine_neoepitopes(self, sequence, length):
         epitopes = []
         for i in range(0, len(sequence)-length+1):
-            epitopes.append(sequence[i:i+9])
+            epitopes.append(sequence[i:i+length])
         return epitopes
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
