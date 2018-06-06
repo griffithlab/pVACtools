@@ -105,6 +105,19 @@ class CallIEDBClassITests(CallIEDBTests):
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcflurry_osx.tsv')
             self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
 
+    def test_mhcnuggets_method_generates_expected_files(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+
+        lib.call_iedb.main([
+            self.input_file,
+            call_iedb_output_file.name,
+            'MHCnuggetsI',
+            'HLA-A0201',
+            '-l', str(self.epitope_length)
+        ])
+        expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
+        self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+
 class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):
