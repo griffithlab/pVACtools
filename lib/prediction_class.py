@@ -4,10 +4,12 @@ import csv
 import sys
 import inspect
 from mhcflurry import Class1AffinityPredictor
+from mhcnuggets.src.predict import predict
 import requests
 import re
 import pandas as pd
 from subprocess import run, PIPE
+import tempfile
 
 class IEDB(metaclass=ABCMeta):
     @classmethod
@@ -192,6 +194,46 @@ class MHCflurry(MHCI):
                 df['start'] = df.index+1
                 df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
                 results = results.append(df)
+        return (results, 'pandas')
+
+class MHCnuggetsI(MHCI):
+    def valid_allele_names(self):
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
+        with open(alleles_file_name, 'r') as fh:
+            return fh.read().split('\n')
+
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
+    def valid_lengths_for_allele(self, allele):
+        return [8,9,10,11,12,13,14]
+
+    def write_neoepitopes_to_file(self, sequence, length):
+        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
+        for i in range(0, len(sequence)-length+1):
+            tmp_file.write(sequence[i:i+length] + '\n')
+        tmp_file.flush()
+        return tmp_file
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
+        results = pd.DataFrame()
+        for line in input_file:
+            match = re.search('^>([0-9]+)$', line)
+            if match:
+                seq_num = match.group(1)
+            else:
+                peptide_file = self.write_neoepitopes_to_file(line.rstrip(), epitope_length)
+                tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+                predict('I', peptide_file.name, allele, output=tmp_output_file.name)
+                peptide_file.close()
+                df = pd.read_csv(tmp_output_file.name)
+                df['seq_num'] = seq_num
+                df['start'] = df.index+1
+                df['allele'] = allele
+                results = results.append(df)
+                tmp_output_file.close()
         return (results, 'pandas')
 
 class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
