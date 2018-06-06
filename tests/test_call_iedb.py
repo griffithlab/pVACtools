@@ -151,5 +151,17 @@ class CallIEDBClassIITests(CallIEDBTests):
             expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
             self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
 
+    def test_mhcnuggets_method_generates_expected_files(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+
+        lib.call_iedb.main([
+            self.input_file,
+            call_iedb_output_file.name,
+            'MHCnuggetsII',
+            'H-2-IAb',
+        ])
+        expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
+        self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+
 if __name__ == '__main__':
     unittest.main()

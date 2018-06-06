@@ -96,7 +96,7 @@ class PredictionClass(metaclass=ABCMeta):
         prediction_classes = cls.prediction_classes()
         for prediction_class in prediction_classes:
             prediction_class_object = prediction_class()
-            if ( issubclass(prediction_class_object.__class__, IEDBMHCI) or issubclass(prediction_class_object.__class__, MHCII) ) and prediction_class_object.iedb_prediction_method == method:
+            if ( issubclass(prediction_class_object.__class__, IEDBMHCI) or issubclass(prediction_class_object.__class__, IEDBMHCII) ) and prediction_class_object.iedb_prediction_method == method:
                 return prediction_class_object
         module = getattr(sys.modules[__name__], method)
         return module()
@@ -307,14 +307,56 @@ class PickPocket(IEDBMHCI):
     def iedb_prediction_method(self):
         return 'pickpocket'
 
-class MHCII(PredictionClass, IEDB, metaclass=ABCMeta):
-    @property
-    def url(self):
-        return 'http://tools-cluster-interface.iedb.org/tools_api/mhcii/'
-
+class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
     def needs_epitope_length(self):
         return False
+
+class MHCnuggetsII(MHCII):
+    def valid_allele_names(self):
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_ii')
+        alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
+        with open(alleles_file_name, 'r') as fh:
+            return fh.read().split('\n')
+
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
+    def valid_lengths_for_allele(self, allele):
+        return [15]
+
+    def write_neoepitopes_to_file(self, sequence):
+        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
+        for i in range(0, len(sequence)-16):
+            tmp_file.write(sequence[i:i+15] + '\n')
+        tmp_file.flush()
+        return tmp_file
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
+        results = pd.DataFrame()
+        for line in input_file:
+            match = re.search('^>([0-9]+)$', line)
+            if match:
+                seq_num = match.group(1)
+            else:
+                peptide_file = self.write_neoepitopes_to_file(line.rstrip())
+                tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+                predict('II', peptide_file.name, allele, output=tmp_output_file.name)
+                peptide_file.close()
+                df = pd.read_csv(tmp_output_file.name)
+                df['seq_num'] = seq_num
+                df['start'] = df.index+1
+                df['allele'] = allele
+                results = results.append(df)
+                tmp_output_file.close()
+        return (results, 'pandas')
+
+
+class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
+    @property
+    def url(self):
+        return 'http://tools-cluster-interface.iedb.org/tools_api/mhcii/'
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
@@ -338,17 +380,17 @@ class MHCII(PredictionClass, IEDB, metaclass=ABCMeta):
         allele = allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
         return "{} {} {} {}".format(iedb_executable_path, method, allele, input_file.name)
 
-class NetMHCIIpan(MHCII):
+class NetMHCIIpan(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
         return 'NetMHCIIpan'
 
-class NNalign(MHCII):
+class NNalign(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
         return 'nn_align'
 
-class SMMalign(MHCII):
+class SMMalign(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
         return 'smm_align'
