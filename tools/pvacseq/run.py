@@ -104,7 +104,8 @@ def create_combined_reports(base_output_dir, args, additional_input_files):
     combine_reports([file1, file2], combined_output_file)
 
     binding_filter_output_file = binding_filter(combined_output_file, output_dir, args)
-    if len(additional_input_files) > 0:
+    defined_additional_input_files = {k: v for (k,v) in additional_input_files.items() if v is not None}
+    if len(defined_additional_input_files) > 0:
         coverage_filter_output_file = coverage_filter(binding_filter_output_file, output_dir, args)
         top_result_filter_output_file = top_result_filter(coverage_filter_output_file, output_dir, args)
         os.unlink(coverage_filter_output_file)
