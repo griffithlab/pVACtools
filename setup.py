@@ -67,6 +67,7 @@ setup(
         'pandas',
         'wget',
         'mhcflurry',
+        'mhcnuggets',
     ],
     package_data={
         'tools.pvacseq' : pvacseq_data_files,
