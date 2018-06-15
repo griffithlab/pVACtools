@@ -56,6 +56,7 @@ class CallIEDBClassITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):
         cls.input_file     = os.path.join(cls.test_data_dir, 'input.fasta')
+        cls.short_input_file = os.path.join(cls.test_data_dir, 'input.short.fasta')
         cls.allele         = 'HLA-A*02:01'
         cls.epitope_length = 9
         cls.methods = ['ann', 'smmpmbec', 'smm']
@@ -109,7 +110,7 @@ class CallIEDBClassITests(CallIEDBTests):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
         lib.call_iedb.main([
-            self.input_file,
+            self.short_input_file,
             call_iedb_output_file.name,
             'MHCnuggetsI',
             'HLA-A0201',
@@ -122,6 +123,7 @@ class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):
         cls.input_file     = os.path.join(cls.test_data_dir, 'input_31.fasta')
+        cls.short_input_file = os.path.join(cls.test_data_dir, 'input_31.short.fasta')
         cls.allele         = 'H2-IAb'
         cls.methods = ['nn_align']
         cls.request_mock = unittest.mock.Mock(side_effect = (
@@ -155,7 +157,7 @@ class CallIEDBClassIITests(CallIEDBTests):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
         lib.call_iedb.main([
-            self.input_file,
+            self.short_input_file,
             call_iedb_output_file.name,
             'MHCnuggetsII',
             'H-2-IAb',
