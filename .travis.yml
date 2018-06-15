@@ -18,6 +18,9 @@ install:
   - pip install pvacseq-client
   - pip install -e .[API]
   - mhcflurry-downloads fetch
+  #Remove this once there is a version of MHCnuggets that is python3
+  #compatible
+  - pip install -e. git+git://github.com/KarchinLab/mhcnuggets-2.0@master#egg=mhcnuggets -I
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
