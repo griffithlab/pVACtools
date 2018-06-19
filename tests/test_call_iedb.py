@@ -91,7 +91,7 @@ class CallIEDBClassITests(CallIEDBTests):
             self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
 
     #the output from MHCflurry varies between operating systems and the version of tensorflow installed
-    #these outputs where created on tensorflow 1.1.0
+    #these outputs where created on tensorflow 1.8.0
     def test_mhcflurry_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
