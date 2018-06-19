@@ -80,7 +80,8 @@ setup(
             'watchdog',
             'flask-cors',
             'bokeh==0.12.6',
-            'pvacseq-client'
+            'pvacseq-client',
+            'swagger-spec-validator==2.1.0',
         ]
     },
     classifiers=[
