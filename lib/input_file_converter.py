@@ -143,7 +143,10 @@ class VcfConverter(InputFileConverter):
         return consequence
 
     def calculate_vaf(self, var_count, depth):
-        return (var_count / depth) * 100
+        if depth == 0:
+            return 'NA'
+        else:
+            return (var_count / depth) * 100
 
     def parse_gene_expns_file(self):
         gene_expns = {}
