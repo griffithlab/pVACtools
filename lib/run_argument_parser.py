@@ -108,7 +108,7 @@ class PredictionRunArgumentParser(RunArgumentParser):
             default=200,
             help="Number of fasta entries per IEDB request. "
                  + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
-                 + "Needs to be an even number.",
+                 + "Needs to be an even number. Default: 200",
         )
         self.parser.add_argument(
             "-d", "--downstream-sequence-length",
