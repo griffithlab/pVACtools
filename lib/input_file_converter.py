@@ -104,17 +104,16 @@ class VcfConverter(InputFileConverter):
 
     def resolve_alleles(self, entry):
         alleles = {}
-        if entry.is_indel:
-            for alt in entry.ALT:
-                alt = str(alt)
+        for alt in entry.ALT:
+            alt = str(alt)
+            if self.is_insertion(entry.REF, alt) or self.is_deletion(entry.REF, alt):
                 if alt[0:1] != entry.REF[0:1]:
                     alleles[alt] = alt
                 elif alt[1:] == "":
                     alleles[alt] = '-'
                 else:
                     alleles[alt] = alt[1:]
-        else:
-            for alt in entry.ALT:
+            else:
                 alt = str(alt)
                 alleles[alt] = alt
 
@@ -135,7 +134,13 @@ class VcfConverter(InputFileConverter):
         return transcripts
 
     def resolve_consequence(self, consequence_string):
-        consequences = {consequence.lower() for consequence in consequence_string.split('&')}
+        if '&' in consequence_string:
+            consequences = {consequence.lower() for consequence in consequence_string.split('&')}
+        elif '.' in consequence_string:
+            consequences = {consequence.lower() for consequence in consequence_string.split('.')}
+        else:
+            consequences = [consequence_string.lower()]
+
         if 'start_lost' in consequences:
             consequence = None
         elif 'frameshift_variant' in consequences:
@@ -255,6 +260,8 @@ class VcfConverter(InputFileConverter):
                 if len(transcripts) == 0:
                     csq_allele = alleles_dict[alt]
                     transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, csq_allele)
+                if len(transcripts) == 0 and self.is_deletion(reference, alt):
+                    transcripts = self.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_format, 'deletion')
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
@@ -263,11 +270,16 @@ class VcfConverter(InputFileConverter):
                         continue
                     elif consequence == 'FS':
                         if transcript['DownstreamProtein'] == '':
+                            print("frameshift_variant transcript does not contain a DownstreamProtein sequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                             continue
                         else:
                             amino_acid_change_position = "%s%s/%s" % (transcript['Protein_position'], entry.REF, alt)
                     else:
-                        amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
+                        if transcript['Amino_acids'] == '':
+                            print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                            continue
+                        else:
+                            amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
                     index = '%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
