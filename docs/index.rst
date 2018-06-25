@@ -38,10 +38,9 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- IEDB changed the format of combinatorial class II alleles to use ``/`` as a
-  delimiter instead of ``-``. DP alleles were previously fixed in pull request
-  `#85 <https://github.com/griffithlab/pVACtools/pull/85>`_ but this failed to
-  address DQ alleles. This version fixes this oversight.
+- There was a bug in how alternate alleles were resolved when matching VEP
+  consequence fields to an entry which resulted in certain indels to be
+  skipped. This has now been fixed.
 
 Coming soon
 -----------
