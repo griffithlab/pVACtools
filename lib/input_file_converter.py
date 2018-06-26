@@ -68,6 +68,8 @@ class VcfConverter(InputFileConverter):
                 sys.exit("sample_name {} not in VCF {}".format(self.sample_name, self_input_file))
             if self.normal_sample_name is not None and self.normal_sample_name not in self.vcf_reader.samples:
                 sys.exit("normal_sample_name {} not in VCF {}".format(self.normal_sample_name, self.input_file))
+        elif len(self.vcf_reader.samples) ==  0:
+            sys.exit("VCF doesn't contain any sample genotype information.")
         else:
             self.sample_name = self.vcf_reader.samples[0]
         self.writer = open(self.output_file, 'w')
