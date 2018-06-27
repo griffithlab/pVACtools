@@ -177,6 +177,10 @@ class FastaGenerator(metaclass=ABCMeta):
             if 'X' in wildtype_subsequence or 'X' in mutant_subsequence:
                 continue
 
+            if 'U' in wildtype_subsequence or 'U' in mutant_subsequence:
+                print("Warning. Sequence contains unsupported amino acid U. Skipping entry {}".format(line['index']))
+                continue
+
             if mutant_subsequence in wildtype_subsequence:
                 #This is not a novel peptide
                 continue

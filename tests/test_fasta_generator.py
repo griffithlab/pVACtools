@@ -458,6 +458,26 @@ class FastaGeneratorTests(unittest.TestCase):
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_X_sequence.key')
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
+    def test_input_file_with_sequence_containing_U(self):
+        peptide_sequence_length        = 31
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_U_sequence.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        self.assertEqual(os.stat(generate_fasta_output_file.name).st_size, 0)
+        self.assertEqual(os.stat(generate_fasta_key_output_file.name).st_size, 0)
+
     def test_input_file_with_resulting_short_fasta_sequence(self):
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_short_fasta_sequence.tsv')
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()

@@ -22,18 +22,23 @@ class CsqParser:
 
     def resolve_alleles(self, entry):
         alleles = {}
-        if entry.is_indel:
-            for alt in entry.ALT:
-                alt = str(alt)
+        for alt in entry.ALT:
+            alt = str(alt)
+            if self.is_insertion(entry.REF, alt) or self.is_deletion(entry.REF, alt):
                 if alt[0:1] != entry.REF[0:1]:
                     alleles[alt] = alt
                 elif alt[1:] == "":
                     alleles[alt] = '-'
                 else:
                     alleles[alt] = alt[1:]
-        else:
-            for alt in entry.ALT:
+            else:
                 alt = str(alt)
                 alleles[alt] = alt
 
         return alleles
+
+    def is_insertion(self, ref, alt):
+        return len(alt) > len(ref)
+
+    def is_deletion(self, ref, alt):
+        return len(alt) < len(ref)
