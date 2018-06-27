@@ -38,9 +38,9 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- There was a bug in how alternate alleles were resolved when matching VEP
-  consequence fields to an entry which resulted in certain indels to be
-  skipped. This has now been fixed.
+- VEP82 and higher supports selenocysteine modicfications (amino acid "U"), which is
+  not supported by downstream IEDB prediction algorithms. pVACtools now skips
+  sequences containing this amino acid with a warning.
 
 Coming soon
 -----------
