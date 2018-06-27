@@ -68,6 +68,8 @@ class VcfConverter(InputFileConverter):
                 sys.exit("sample_name {} not in VCF {}".format(self.sample_name, self_input_file))
             if self.normal_sample_name is not None and self.normal_sample_name not in self.vcf_reader.samples:
                 sys.exit("normal_sample_name {} not in VCF {}".format(self.normal_sample_name, self.input_file))
+        elif len(self.vcf_reader.samples) ==  0:
+            sys.exit("VCF doesn't contain any sample genotype information.")
         else:
             self.sample_name = self.vcf_reader.samples[0]
         self.writer = open(self.output_file, 'w')
@@ -127,7 +129,13 @@ class VcfConverter(InputFileConverter):
             return CsqParser(csq_header.desc)
 
     def resolve_consequence(self, consequence_string):
-        consequences = {consequence.lower() for consequence in consequence_string.split('&')}
+        if '&' in consequence_string:
+            consequences = {consequence.lower() for consequence in consequence_string.split('&')}
+        elif '.' in consequence_string:
+            consequences = {consequence.lower() for consequence in consequence_string.split('.')}
+        else:
+            consequences = [consequence_string.lower()]
+
         if 'start_lost' in consequences:
             consequence = None
         elif 'frameshift_variant' in consequences:
@@ -143,7 +151,10 @@ class VcfConverter(InputFileConverter):
         return consequence
 
     def calculate_vaf(self, var_count, depth):
-        return (var_count / depth) * 100
+        if depth == 0:
+            return 'NA'
+        else:
+            return (var_count / depth) * 100
 
     def parse_gene_expns_file(self):
         gene_expns = {}
@@ -222,7 +233,7 @@ class VcfConverter(InputFileConverter):
                         var_count = allele_depths[alts.index(alt) + 1]
                 else:
                     var_count = allele_depths
-                vaf = var_count / genotype[dp_tag]
+                vaf = int(var_count) / int(genotype[dp_tag])
             except AttributeError:
                 vaf = 'NA'
         return vaf
@@ -291,6 +302,8 @@ class VcfConverter(InputFileConverter):
                 if len(transcripts) == 0:
                     csq_allele = alleles_dict[alt]
                     transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_allele)
+                if len(transcripts) == 0 and self.is_deletion(reference, alt):
+                    transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], 'deletion')
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
@@ -299,11 +312,16 @@ class VcfConverter(InputFileConverter):
                         continue
                     elif consequence == 'FS':
                         if transcript['DownstreamProtein'] == '':
+                            print("frameshift_variant transcript does not contain a DownstreamProtein sequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                             continue
                         else:
                             amino_acid_change_position = "%s%s/%s" % (transcript['Protein_position'], entry.REF, alt)
                     else:
-                        amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
+                        if transcript['Amino_acids'] == '':
+                            print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                            continue
+                        else:
+                            amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
                     index = '%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
