@@ -16,12 +16,12 @@
 	"peptide_sequence_length": 21,
 	"expn_val": 1,
 	"binding_threshold": 500,
+	"allele_specific_cutoffs": false,
 	"epitope_lengths": [
 		10
 	],
 	"samplename": "endpoint_input",
 	"trna_cov": 10,
-	"top_result_per_mutation": false,
 	"keep_tmp_files": false,
 	"normal_vaf": 2,
 	"trna_vaf": 40,
