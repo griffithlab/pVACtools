@@ -253,12 +253,6 @@ paths:
         required: false
         type: "integer"
         default: 21
-      - name: "additional_input_file_list"
-        in: "formData"
-        description: "Additional Input File List: yaml file of additional files to be used as inputs, e.g. cufflinks output files"
-        required: false
-        type: "string"
-        default: ""
       - name: "net_chop_method"
         in: "formData"
         description: "Net Chop Method: Run NetChop using the specified method"
@@ -269,11 +263,6 @@ paths:
       - name: "netmhc_stab"
         in: "formData"
         description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
-        type: "boolean"
-        default: false
-      - name: "top_result_per_mutation"
-        in: "formData"
-        description: "Top Result Per Mutation: Output top scoring candidate per allele-length per mutation"
         type: "boolean"
         default: false
       - name: "top_score_metric"
@@ -287,6 +276,11 @@ paths:
         description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
         type: "integer"
         default: 500
+      - name: "allele_specific_cutoffs"
+        in: "formData"
+        description: "Allele Specific Binding Thresholds: Use allele-specific cutoffs instead of the value provided with the Binding Threshold"
+        type: "boolean"
+        default: false
       - name: "minimum_fold_change"
         in: "formData"
         description: "Minimum Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
@@ -514,6 +508,10 @@ paths:
                 default: false
               force:
                 description: "Bypass the check for duplicate processes"
+                type: boolean
+                default: false
+              allele_specific_cutoffs:
+                description: "Allele Specific Binding Thresholds: Use allele-specific cutoffs instead of the value provided with the Binding Threshold"
                 type: boolean
                 default: false
       responses:

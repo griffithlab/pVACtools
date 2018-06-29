@@ -45,7 +45,7 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacapi"):
 
 setup(
     name="pvactools",
-    version="1.0.1",
+    version="1.0.5",
     packages=["tools", "tools.pvacfuse", "tools.pvacvector", "tools.pvacseq", "lib", "utils.pvacapi", "utils.pvacapi.controllers"],
     entry_points={
         "console_scripts":[
@@ -66,6 +66,7 @@ setup(
         'simanneal',
         'pandas',
         'wget',
+        'mhcflurry',
     ],
     package_data={
         'tools.pvacseq' : pvacseq_data_files,
@@ -81,7 +82,8 @@ setup(
             'flask-cors',
             'bokeh==0.12.4',
             'tornado===4.4.3',
-            'pvacseq-client'
+            'pvacseq-client',
+            'swagger-spec-validator==2.1.0',
         ]
     },
     classifiers=[

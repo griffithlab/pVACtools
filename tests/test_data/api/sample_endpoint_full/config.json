@@ -15,16 +15,15 @@
 	"fasta_size": 200,
 	"netmhc_stab": false,
 	"peptide_sequence_length": 21,
-	"additional_input_file_list": "/Users/agrauber/pVAC-Seq/results/sample_endpoint_full/additional_input_file_list.yml",
 	"expn_val": 1,
 	"binding_threshold": 3000,
+	"allele_specific_cutoffs": false,
 	"epitope_lengths": [
 		9,
 		10
 	],
 	"samplename": "endpoint_full",
 	"trna_cov": 10,
-	"top_result_per_mutation": false,
 	"keep_tmp_files": false,
 	"normal_vaf": 2,
 	"trna_vaf": 40,

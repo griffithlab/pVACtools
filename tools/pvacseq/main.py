@@ -66,6 +66,13 @@ def main():
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
 
+    allele_specific_cutoffs_parser = subparsers.add_parser(
+        "allele_specific_cutoffs",
+        help="Show the allele specific cutoffs",
+        add_help=False,
+    )
+    allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
+
     config_files_parser = subparsers.add_parser(
         "config_files",
         help="Documentation for the configuration files",
@@ -79,7 +86,7 @@ def main():
     except AttributeError as e:
         parser.print_help()
         print("Error: No command specified")
-        sys.exit(-1)
+        raise
 
 
 if __name__ == '__main__':
