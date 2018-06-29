@@ -23,7 +23,6 @@
 	],
 	"samplename": "basic_run",
 	"trna_cov": 10,
-	"top_result_per_mutation": false,
 	"keep_tmp_files": false,
 	"normal_vaf": 2,
 	"trna_vaf": 40,
