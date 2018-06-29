@@ -271,11 +271,6 @@ paths:
         description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
         type: "boolean"
         default: false
-      - name: "top_result_per_mutation"
-        in: "formData"
-        description: "Top Result Per Mutation: Output top scoring candidate per allele-length per mutation"
-        type: "boolean"
-        default: false
       - name: "top_score_metric"
         in: "formData"
         description: "Top Score Metric: ic50 metric for choosing best epitopes during binding filtering"
@@ -474,12 +469,6 @@ paths:
       - name: "netmhc_stab"
         in: "formData"
         description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
-        required: false
-        type: "string"
-        default: ""
-      - name: "top_result_per_mutation"
-        in: "formData"
-        description: "Top Results per Mutation: Output top scoring candidate per allele-length per mutation"
         required: false
         type: "string"
         default: ""

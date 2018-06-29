@@ -101,7 +101,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
           normal_snvs_coverage_file, normal_indels_coverage_file,
           tdna_snvs_coverage_file, tdna_indels_coverage_file,
           trna_snvs_coverage_file, trna_indels_coverage_file,
-          net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
+          net_chop_method, netmhc_stab, top_score_metric,
           binding_threshold, allele_specific_cutoffs, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
@@ -262,7 +262,6 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
         ),
         'net_chop_method':net_chop_method,
         'netmhc_stab':bool(netmhc_stab),
-        'top_result_per_mutation':bool(top_result_per_mutation),
         'top_score_metric':top_score_metric,
         'binding_threshold':binding_threshold,
         'allele_specific_cutoffs':bool(allele_specific_cutoffs),
@@ -318,7 +317,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
 
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
           peptide_sequence_length, additional_input_file_list,
-          net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
+          net_chop_method, netmhc_stab, top_score_metric,
           binding_threshold, allele_specific_cutoffs, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
@@ -366,8 +365,6 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         ]
     if netmhc_stab:
         command.append('--netmhc-stab')
-    if top_result_per_mutation:
-        command.append('--top-result-per-mutation')
     if allele_specific_cutoffs:
         command.append('--allele-specific-binding-thresholds')
     if keep_tmp_files:
