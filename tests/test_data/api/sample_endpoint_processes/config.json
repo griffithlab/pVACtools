@@ -14,15 +14,14 @@
 	"fasta_size": 200,
 	"netmhc_stab": false,
 	"peptide_sequence_length": 21,
-	"additional_input_file_list": "",
 	"expn_val": 1,
 	"binding_threshold": 500,
+	"allele_specific_cutoffs": false,
 	"epitope_lengths": [
 		10
 	],
 	"samplename": "endpoint_processes",
 	"trna_cov": 10,
-	"top_result_per_mutation": false,
 	"keep_tmp_files": false,
 	"normal_vaf": 2,
 	"trna_vaf": 40,

@@ -38,12 +38,10 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- Additional data, like example data and VEP plugins were not included in the
-  package correctly so the commands to download these files would fail. This
-  has been corrected.
-- Class II predictions would fail if the protein sequences used for binding
-  predictions in IEDB were shorter than 15 peptide sequences. This has been
-  fixed.
+- IEDB changed the format of combinatorial class II alleles to use ``/`` as a
+  delimiter instead of ``-``. DP alleles were previously fixed in pull request
+  `#85 <https://github.com/griffithlab/pVACtools/pull/85>`_ but this failed to
+  address DQ alleles. This version fixes this oversight.
 
 Coming soon
 -----------
