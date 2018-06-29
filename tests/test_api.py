@@ -561,22 +561,6 @@ class APITests(unittest.TestCase):
                 'alleles':'HLA-G*01:09,HLA-E*01:01',
                 'prediction_algorithms':'NetMHC,PickPocket',
                 'epitope_lengths':'9,10',
-                'gene_expn_file':os.path.join(
-                    self.test_data_directory,
-                    'genes.fpkm_tracking'
-                ),
-                'transcript_expn_file':os.path.join(
-                    self.test_data_directory,
-                    'isoforms.fpkm_tracking'
-                ),
-                'tdna_snvs_coverage_file':os.path.join(
-                    self.test_data_directory,
-                    'snvs.bam_readcount'
-                ),
-                'tdna_indels_coverage_file':os.path.join(
-                    self.test_data_directory,
-                    'indels.bam_readcount'
-                ),
                 'top_score_metric':'lowest',
                 'keep_tmp_files':'on',
                 'netmhc_stab':'on',
@@ -994,7 +978,8 @@ class APITests(unittest.TestCase):
             self.assertEqual(response.status_code,200)
             paged_result = response.json()
 
-            self.assertEqual(len(paged_result['result']), 3 if len(full_result_list['result']) >= 6 else len(full_result_list['result']) - 3)
+            self.assertEqual(len(paged_result['result']), 3 if len(full_result_list['result']) >= 6 else \
+                len(full_result_list['result']) - 3 if len(full_result_list['result']) >= 3 else 0)
             self.assertEqual(paged_result['result'][0] if len(paged_result['result']) else [], full_result_list['result'][3] if len(full_result_list['result']) > 3 else [])
             self.assertEqual(paged_result['_meta']['per_page'], 3)
             self.assertEqual(paged_result['_meta']['current_page'], 2)

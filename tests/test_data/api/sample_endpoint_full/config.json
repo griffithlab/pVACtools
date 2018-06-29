@@ -15,7 +15,6 @@
 	"fasta_size": 200,
 	"netmhc_stab": false,
 	"peptide_sequence_length": 21,
-	"additional_input_file_list": "/Users/agrauber/pVAC-Seq/results/sample_endpoint_full/additional_input_file_list.yml",
 	"expn_val": 1,
 	"binding_threshold": 3000,
 	"allele_specific_cutoffs": false,

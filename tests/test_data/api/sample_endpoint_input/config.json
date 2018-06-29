@@ -14,7 +14,6 @@
 	"fasta_size": 200,
 	"netmhc_stab": false,
 	"peptide_sequence_length": 21,
-	"additional_input_file_list": "",
 	"expn_val": 1,
 	"binding_threshold": 500,
 	"allele_specific_cutoffs": false,

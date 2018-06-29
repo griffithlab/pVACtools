@@ -253,12 +253,6 @@ paths:
         required: false
         type: "integer"
         default: 21
-      - name: "additional_input_file_list"
-        in: "formData"
-        description: "Additional Input File List: yaml file of additional files to be used as inputs, e.g. cufflinks output files"
-        required: false
-        type: "string"
-        default: ""
       - name: "net_chop_method"
         in: "formData"
         description: "Net Chop Method: Run NetChop using the specified method"
@@ -411,54 +405,6 @@ paths:
         required: false
         type: "integer"
         default: 21
-      - name: "gene_expn_file"
-        in: "formData"
-        description: "Gene Expression File: Filepath to the genes.fpkm_tracking file from Cufflinks"
-        required: false
-        type: "string"
-        default: ""
-      - name: "transcript_expn_file"
-        in: "formData"
-        description: "Transcript Expression File: Filepath to the isoforms.fpkm_tracking file from Cufflinks"
-        required: false
-        type: "string"
-        default: ""
-      - name: "normal_snvs_coverage_file"
-        in: "formData"
-        description: "Normal SNVs Coverage File: Filepath to bam-readcount output file for normal BAM and snvs"
-        required: false
-        type: "string"
-        default: ""
-      - name: "normal_indels_coverage_file"
-        in: "formData"
-        description: "Normal Indels Coverage File: Filepath to bam-readcount output file for normal BAM and indels"
-        required: false
-        type: "string"
-        default: ""
-      - name: "tdna_snvs_coverage_file"
-        in: "formData"
-        description: "Tumor DNA Coverage File: Filepath to bam-readcount output file for tumor DNA BAM and snvs"
-        required: false
-        type: "string"
-        default: ""
-      - name: "tdna_indels_coverage_file"
-        in: "formData"
-        description: "Tumor DNA Coverage File: Filepath to bam-readcount output file for tumor DNA BAM and indels"
-        required: false
-        type: "string"
-        default: ""
-      - name: "trna_snvs_coverage_file"
-        in: "formData"
-        description: "Tumor RNA Coverage File: Filepath to bam-readcount output file for tumor RNA BAM and snvs"
-        required: false
-        type: "string"
-        default: ""
-      - name: "trna_indels_coverage_file"
-        in: "formData"
-        description: "Tumor RNA Coverage File: Filepath to bam-readcount output file for tumor RNA BAM and indels"
-        required: false
-        type: "string"
-        default: ""
       - name: "net_chop_method"
         in: "formData"
         description: "Net Chop Method: Run NetChop using the specified method"
