@@ -18,6 +18,7 @@
 	"additional_input_file_list": "/Users/agrauber/pVAC-Seq/results/sample_endpoint_full/additional_input_file_list.yml",
 	"expn_val": 1,
 	"binding_threshold": 3000,
+	"allele_specific_cutoffs": false,
 	"epitope_lengths": [
 		9,
 		10
