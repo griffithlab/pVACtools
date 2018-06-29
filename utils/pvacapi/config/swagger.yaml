@@ -282,6 +282,11 @@ paths:
         description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
         type: "integer"
         default: 500
+      - name: "allele_specific_cutoffs"
+        in: "formData"
+        description: "Allele Specific Binding Thresholds: Use allele-specific cutoffs instead of the value provided with the Binding Threshold"
+        type: "boolean"
+        default: false
       - name: "minimum_fold_change"
         in: "formData"
         description: "Minimum Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
@@ -480,6 +485,12 @@ paths:
         required: false
         type: "integer"
         default: 500
+      - name: "allele_specific_cutoffs"
+        in: "formData"
+        description: "Allele Specific Binding Thresholds: USE allele-specific cutoffs instead of the value provided with the Binding Threshold"
+        required: false
+        type: "string"
+        default: ""
       - name: "minimum_fold_change"
         in: "formData"
         description: "Medium Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"

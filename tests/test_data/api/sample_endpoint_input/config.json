@@ -17,6 +17,7 @@
 	"additional_input_file_list": "",
 	"expn_val": 1,
 	"binding_threshold": 500,
+	"allele_specific_cutoffs": false,
 	"epitope_lengths": [
 		10
 	],

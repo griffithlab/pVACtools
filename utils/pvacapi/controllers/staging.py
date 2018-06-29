@@ -102,7 +102,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
           tdna_snvs_coverage_file, tdna_indels_coverage_file,
           trna_snvs_coverage_file, trna_indels_coverage_file,
           net_chop_method, netmhc_stab, top_score_metric,
-          binding_threshold, minimum_fold_change,
+          binding_threshold, allele_specific_cutoffs, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
           downstream_sequence_length, keep_tmp_files, force):
@@ -264,6 +264,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
         'netmhc_stab':bool(netmhc_stab),
         'top_score_metric':top_score_metric,
         'binding_threshold':binding_threshold,
+        'allele_specific_cutoffs':bool(allele_specific_cutoffs),
         'minimum_fold_change':minimum_fold_change,
         'normal_cov':normal_cov, #normal_cov
         'tdna_cov':tdna_cov, #tdna_cov
@@ -317,7 +318,7 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
           peptide_sequence_length, additional_input_file_list,
           net_chop_method, netmhc_stab, top_score_metric,
-          binding_threshold, minimum_fold_change,
+          binding_threshold, allele_specific_cutoffs, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
           downstream_sequence_length, keep_tmp_files):
@@ -364,6 +365,8 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         ]
     if netmhc_stab:
         command.append('--netmhc-stab')
+    if allele_specific_cutoffs:
+        command.append('--allele-specific-binding-thresholds')
     if keep_tmp_files:
         command.append('-k')
     if len(iedb_install_dir):
