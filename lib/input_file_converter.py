@@ -211,6 +211,8 @@ class VcfConverter(InputFileConverter):
     def get_depth_from_vcf_genotype(self, genotype, tag):
         try:
             depth = genotype[tag]
+            if depth is None or depth == "":
+                depth = 'NA'
         except AttributeError:
             depth = 'NA'
         return depth
@@ -231,9 +233,17 @@ class VcfConverter(InputFileConverter):
                         var_count = allele_depths[alts.index(alt)]
                     elif len(allele_depths) == len(alts) + 1:
                         var_count = allele_depths[alts.index(alt) + 1]
+                    else:
+                        print("Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype {}".format(genotype))
+                        return 'NA'
                 else:
                     var_count = allele_depths
-                vaf = int(var_count) / int(genotype[dp_tag])
+                if var_count is None or var_count == "":
+                    return 'NA'
+                depth = genotype[dp_tag]
+                if depth is None or depth == "":
+                    return 'NA'
+                vaf = int(var_count) / int(depth)
             except AttributeError:
                 vaf = 'NA'
         return vaf
