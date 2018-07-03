@@ -15,9 +15,6 @@ install:
   - pip install pvacseq-client
   - pip install -e .[API]
   - mhcflurry-downloads fetch
-  #Remove this once there is a version of MHCnuggets that is python3
-  #compatible
-  - pip install -e. git+git://github.com/KarchinLab/mhcnuggets-2.0@master#egg=mhcnuggets -I
   #with the newest version of the spec validator our swagger yml doesn't
   #validate anymore. Use a version that works.
   - pip install swagger-spec-validator==2.1.0
