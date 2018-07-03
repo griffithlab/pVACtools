@@ -158,6 +158,8 @@ class APITests(unittest.TestCase):
                 'samplename':'basic_run',
                 'alleles':'HLA-E*01:01',
                 'prediction_algorithms':'NetMHC',
+                'epitope_lengths': "10",
+                'downstream_sequence_length': '1000',
                 'force':True
             }
         )
@@ -567,10 +569,10 @@ class APITests(unittest.TestCase):
                 'prediction_algorithms':'NetMHC,PickPocket',
                 'epitope_lengths':'9,10',
                 'top_score_metric':'lowest',
-                'keep_tmp_files':'on',
-                'netmhc_stab':'on',
+                'keep_tmp_files':True,
+                'netmhc_stab':True,
                 'net_chop_method':'cterm',
-                'tdna_vaf':'40',
+                'tdna_vaf':40,
                 'binding_threshold':3000,
                 'force':True
 
@@ -707,6 +709,8 @@ class APITests(unittest.TestCase):
                 'samplename':'basic_run',
                 'alleles':'HLA-E*01:01',
                 'prediction_algorithms':'NetMHC',
+                'epitope_lengths': "10",
+                'downstream_sequence_length': '1000',
             }
         )
         self.assertEqual(response.status_code, 400)
