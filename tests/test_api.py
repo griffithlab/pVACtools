@@ -139,7 +139,7 @@ class APITests(unittest.TestCase):
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,
-            data={
+            json={
                 'input':os.path.join(
                     self.test_data_directory,
                     'input.vcf'
@@ -223,7 +223,7 @@ class APITests(unittest.TestCase):
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,
-            data={
+            json={
                 'input':vcf_id['fileID'],
                 'samplename':'endpoint_input',
                 'alleles':'HLA-G*01:09',
@@ -241,7 +241,7 @@ class APITests(unittest.TestCase):
         response = requests.post(
             self.urlBase + '/staging',
             timeout = 5,
-            data={
+            json={
                 'input':os.path.join(
                     self.test_data_directory,
                     'input.vcf'
@@ -552,7 +552,7 @@ class APITests(unittest.TestCase):
         response = requests.post(
             self.urlBase + '/staging',
             timeout = 5,
-            data={
+            json={
                 'input':os.path.join(
                     self.test_data_directory,
                     'input.vcf'
@@ -697,7 +697,7 @@ class APITests(unittest.TestCase):
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,
-            data={
+            json={
                 'input':os.path.join(
                     self.test_data_directory,
                     'input.vcf'
