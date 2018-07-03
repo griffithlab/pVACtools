@@ -226,7 +226,7 @@ class MHCnuggetsI(MHCI):
             else:
                 peptide_file = self.write_neoepitopes_to_file(line.rstrip(), epitope_length)
                 tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-                predict('I', peptide_file.name, allele, output=tmp_output_file.name)
+                predict('I', peptide_file.name, allele.replace('*', ''), output=tmp_output_file.name)
                 peptide_file.close()
                 df = pd.read_csv(tmp_output_file.name)
                 df['seq_num'] = seq_num
@@ -342,7 +342,7 @@ class MHCnuggetsII(MHCII):
             else:
                 peptide_file = self.write_neoepitopes_to_file(line.rstrip())
                 tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-                predict('II', peptide_file.name, allele, output=tmp_output_file.name)
+                predict('II', peptide_file.name, allele.replace('*', '').replace('H2', 'H-2'), output=tmp_output_file.name)
                 peptide_file.close()
                 df = pd.read_csv(tmp_output_file.name)
                 df['seq_num'] = seq_num
