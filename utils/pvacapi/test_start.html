@@ -5,7 +5,7 @@
     <title>Test pVAC-Seq web form</title>
   </head>
   <body>
-    <form action="/api/v1/staging" method="post" enctype="multipart/form-data">
+    <form action="/api/v1/staging" method="post" enctype="application/json">
       Input VCF file: <select required name="input" class="selector">
       </select><br>
       Sample Name: <input type="text" name="samplename" required><br>
@@ -38,6 +38,8 @@
       FASTA Size: <input type="number" name="fasta_size" value="200" step="2"><br>
       IEDB Retries: <input type="number" name="iedb_retries" value="5"><br>
       Downstream Sequence Length: <input type="text" name="downstream_sequence_length" value="1000"><br>
+      IEDB Install Directory: <input type="text" name="iedb_install_dir"><br>
+      Bypass duplicate process check: <input type="checkbox" name="force"><br>
       Keep Tmp Files: <input type="checkbox" name="keep_tmp_files"><br>
 
       <input type="submit">
@@ -81,6 +83,17 @@
         req.open('GET', '/api/v1/input');
         req.send();
       }
+    </script>
+    <script src="https://cdn.rawgit.com/roman01la/JSONFormData/2e0fce05/src/json-formdata.js"></script>
+    <script>
+     /* Pass callback function, which is an error handler,
+      * as the second argument, to let JSONFormData handle things.
+      */
+     var form = document.querySelector('form');
+     new JSONFormData(form, function (err, res) {
+         console.log('err: ' + err);
+         console.log('res: ' + res);
+     });
     </script>
   </body>
 </html>

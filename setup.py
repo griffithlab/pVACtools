@@ -53,7 +53,7 @@ setup(
             "pvacseq = tools.pvacseq.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
-            #"pvacseq-api = utils.pvacapi.app:main [API]"
+            "pvacseq-api = utils.pvacapi.app:main [API]"
         ]
     },
     install_requires=[
@@ -72,7 +72,7 @@ setup(
         'tools.pvacseq' : pvacseq_data_files,
         'tools.pvacfuse' : pvacfuse_data_files,
         'tools.pvacvector' : pvacvector_data_files,
-        'pvactools.server' : server_data,
+        'utils.server' : server_data,
     },
     extras_require={
         'API':[
@@ -80,7 +80,8 @@ setup(
             'py-postgresql',
             'watchdog',
             'flask-cors',
-            'bokeh==0.12.6',
+            'bokeh==0.12.4',
+            'tornado===4.4.3',
             'pvacseq-client',
             'swagger-spec-validator==2.1.0',
         ]
