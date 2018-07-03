@@ -107,42 +107,42 @@ def staging(parameters):
         )
 
     #  simple json POST (e.g. from test_start.html form) may not include unchecked checkboxes, need to catch those:
-    if not hasattr(parameters, 'netmhc_stab'):
-        parameters['netmhc_stab'] = False
+    parameters['netmhc_stab'] = parameters.pop('netmhc_stab', False)
+    parameters['allele_specific_cutoffs'] = parameters.pop('allele_specific_cutoffs', False)
+    parameters['keep_tmp_files'] = parameters.pop('keep_tmp_files', False)
 
-    if not hasattr(parameters, 'allele_specific_cutoffs'):
-        parameters['allele_specific_cutoffs'] = False
-
-    if not hasattr(parameters, 'keep_tmp_files'):
-        parameters['keep_tmp_files'] = False
+    if 'epitope_lengths' in parameters:
+        epitope_lengths = [int(item) for item in parameters['epitope_lengths'].split(',')]
+    else:
+        epitope_lengths = ""
 
     configObj = {
         'input': input_path,  # input
         'samplename': samplename,  # samplename
         'alleles': parameters['alleles'].split(','),
         'output': current_path,
-        'epitope_lengths': [int(item) for item in parameters['epitope_lengths'].split(',')],
+        'epitope_lengths': epitope_lengths,
         'prediction_algorithms': parameters['prediction_algorithms'].split(','),
-        'peptide_sequence_length': parameters['peptide_sequence_length'],
-        'net_chop_method': parameters['net_chop_method'],
+        'peptide_sequence_length': parameters.pop('peptide_sequence_length', 21),
+        'net_chop_method': parameters.pop('net_chop_method', ""),
         'netmhc_stab': bool(parameters['netmhc_stab']),
         'allele_specific_cutoffs': bool(parameters['allele_specific_cutoffs']),
-        'top_score_metric': parameters['top_score_metric'],
-        'binding_threshold': parameters['binding_threshold'],
-        'minimum_fold_change': parameters['minimum_fold_change'],
-        'normal_cov': parameters['normal_cov'],  # normal_cov
-        'tdna_cov': parameters['tdna_cov'],  # tdna_cov
-        'trna_cov': parameters['trna_cov'],  # trna_cov
-        'normal_vaf': parameters['normal_vaf'],  # normal_vaf
-        'tdna_vaf': parameters['tdna_vaf'],  # tdna_vaf
-        'trna_vaf': parameters['trna_vaf'],  # trna_vaf
-        'expn_val': parameters['expn_val'],  # expn_val
-        'net_chop_threshold': parameters['net_chop_threshold'],
-        'fasta_size': parameters['fasta_size'],
-        'iedb_retries': parameters['iedb_retries'],
-        'iedb_install_dir': parameters['iedb_install_dir'],
+        'top_score_metric': parameters.pop('top_score_metric', 'median'),
+        'binding_threshold': parameters.pop('binding_threshold', 500),
+        'minimum_fold_change': parameters.pop('minimum_fold_change', 0),
+        'normal_cov': parameters.pop('normal_cov', 5),  # normal_cov
+        'tdna_cov': parameters.pop('tdna_cov', 10),  # tdna_cov
+        'trna_cov': parameters.pop('trna_cov', 10),  # trna_cov
+        'normal_vaf': parameters.pop('normal_vaf', 2),  # normal_vaf
+        'tdna_vaf': parameters.pop('tdna_vaf', 40),  # tdna_vaf
+        'trna_vaf': parameters.pop('trna_vaf', 40),  # trna_vaf
+        'expn_val': parameters.pop('expn_val', 1),  # expn_val
+        'net_chop_threshold': parameters.pop('net_chop_threshold', 0.5),
+        'fasta_size': parameters.pop('fasta_size', 200),
+        'iedb_retries': parameters.pop('iedb_retries', 5),
+        'iedb_install_dir': parameters.pop('iedb_install_dir', ""),
         'keep_tmp_files': bool(parameters['keep_tmp_files']),
-        'downstream_sequence_length': parameters['downstream_sequence_length']
+        'downstream_sequence_length': parameters.pop('downstream_sequence_length', 'full')
     }
     checkOK = precheck(configObj, data) if not hasattr(parameters, 'force') else None
     if checkOK is None:
