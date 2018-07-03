@@ -16,6 +16,7 @@ from socket import *
 from . import mock_api
 from subprocess import run, PIPE, Popen, DEVNULL, TimeoutExpired
 from filecmp import cmp
+import uuid
 pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
 
@@ -136,17 +137,29 @@ class APITests(unittest.TestCase):
         time.sleep(.5)
 
     def start_basic_run(self):
+        destination = os.path.expanduser(os.path.join(
+            '~',
+            'pVAC-Seq',
+            'input',
+            str(uuid.uuid4()) + '.vcf'
+        ))
+        os.symlink(
+            os.path.join(
+                self.test_data_directory,
+                'input.vcf'
+            ),
+            destination
+        )
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,
-            data={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+            json={
+                'input':'0',
                 'samplename':'basic_run',
                 'alleles':'HLA-E*01:01',
                 'prediction_algorithms':'NetMHC',
+                'epitope_lengths': "10",
+                'downstream_sequence_length': '1000',
                 'force':True
             }
         )
@@ -223,8 +236,8 @@ class APITests(unittest.TestCase):
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,
-            data={
-                'input':vcf_id['fileID'],
+            json={
+                'input':str(vcf_id['fileID']),
                 'samplename':'endpoint_input',
                 'alleles':'HLA-G*01:09',
                 'prediction_algorithms':'NetMHC',
@@ -234,18 +247,15 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 201, response.url+' : '+response.content.decode())
         result = response.json()
         self.assertTrue(re.match(r'\d+', str(result['processid'])))
-        self.assertTrue(re.match(r'\d+', str(result['code'])))
+        self.assertTrue(re.match(r'\d+', str(result['status'])))
         self.assertTrue(re.match(r'\S+', result['message']))
     
     def test_endpoint_processes(self):
         response = requests.post(
             self.urlBase + '/staging',
             timeout = 5,
-            data={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+            json={
+                'input':'0',
                 'samplename':'endpoint_processes',
                 'alleles':'HLA-G*01:09',
                 'prediction_algorithms':'NetMHC',
@@ -255,7 +265,7 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 201, response.url+' : '+response.content.decode())
         result = response.json()
         self.assertTrue(re.match(r'\d+', str(result['processid'])))
-        self.assertTrue(re.match(r'\d+', str(result['code'])))
+        self.assertTrue(re.match(r'\d+', str(result['status'])))
         self.assertTrue(re.match(r'\S+', result['message']))     
         processID = result['processid']
         response = requests.get(
@@ -552,20 +562,17 @@ class APITests(unittest.TestCase):
         response = requests.post(
             self.urlBase + '/staging',
             timeout = 5,
-            data={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+            json={
+                'input':'0',
                 'samplename':'endpoint_full',
                 'alleles':'HLA-G*01:09,HLA-E*01:01',
                 'prediction_algorithms':'NetMHC,PickPocket',
                 'epitope_lengths':'9,10',
                 'top_score_metric':'lowest',
-                'keep_tmp_files':'on',
-                'netmhc_stab':'on',
+                'keep_tmp_files':True,
+                'netmhc_stab':True,
                 'net_chop_method':'cterm',
-                'tdna_vaf':'40',
+                'tdna_vaf':40,
                 'binding_threshold':3000,
                 'force':True
 
@@ -697,14 +704,13 @@ class APITests(unittest.TestCase):
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,
-            data={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+            json={
+                'input':'0',
                 'samplename':'basic_run',
                 'alleles':'HLA-E*01:01',
                 'prediction_algorithms':'NetMHC',
+                'epitope_lengths': "10",
+                'downstream_sequence_length': '1000',
             }
         )
         self.assertEqual(response.status_code, 400)
