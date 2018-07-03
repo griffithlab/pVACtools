@@ -247,7 +247,7 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 201, response.url+' : '+response.content.decode())
         result = response.json()
         self.assertTrue(re.match(r'\d+', str(result['processid'])))
-        self.assertTrue(re.match(r'\d+', str(result['code'])))
+        self.assertTrue(re.match(r'\d+', str(result['status'])))
         self.assertTrue(re.match(r'\S+', result['message']))
     
     def test_endpoint_processes(self):
@@ -265,7 +265,7 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 201, response.url+' : '+response.content.decode())
         result = response.json()
         self.assertTrue(re.match(r'\d+', str(result['processid'])))
-        self.assertTrue(re.match(r'\d+', str(result['code'])))
+        self.assertTrue(re.match(r'\d+', str(result['status'])))
         self.assertTrue(re.match(r'\S+', result['message']))     
         processID = result['processid']
         response = requests.get(
