@@ -609,11 +609,15 @@ def cmp(arg1, op, arg2):
 def fullresponse(data, page, count):
     if count == -1:
         count = len(data)
+    if count == 0:
+        total_pages = 0
+    else:
+        total_pages = ceil(len(data)/count)
     return ({
         "_meta": {
             "current_page":page,
             "per_page":count,
-            "total_pages":ceil(len(data)/count),
+            "total_pages":total_pages,
             "total_count":len(data)
         },
         "result": data[(count*(page-1)):((count*page)) if (count*page)<len(data) else len(data)]
