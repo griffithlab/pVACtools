@@ -144,7 +144,8 @@ def staging(parameters):
         'keep_tmp_files': bool(parameters['keep_tmp_files']),
         'downstream_sequence_length': parameters.pop('downstream_sequence_length', 'full')
     }
-    checkOK = precheck(configObj, data) if not hasattr(parameters, 'force') else None
+    force = bool(parameters.pop('force', False))
+    checkOK = precheck(configObj, data) if not force else None
     if checkOK is None:
         copytree(temp_path.name, current_path)
         writer = open(os.path.join(
