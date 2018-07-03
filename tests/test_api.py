@@ -16,6 +16,7 @@ from socket import *
 from . import mock_api
 from subprocess import run, PIPE, Popen, DEVNULL, TimeoutExpired
 from filecmp import cmp
+import uuid
 pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
 
@@ -136,14 +137,24 @@ class APITests(unittest.TestCase):
         time.sleep(.5)
 
     def start_basic_run(self):
+        destination = os.path.expanduser(os.path.join(
+            '~',
+            'pVAC-Seq',
+            'input',
+            str(uuid.uuid4()) + '.vcf'
+        ))
+        os.symlink(
+            os.path.join(
+                self.test_data_directory,
+                'input.vcf'
+            ),
+            destination
+        )
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,
             json={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+                'input':'0',
                 'samplename':'basic_run',
                 'alleles':'HLA-E*01:01',
                 'prediction_algorithms':'NetMHC',
@@ -224,7 +235,7 @@ class APITests(unittest.TestCase):
             self.urlBase+'/staging',
             timeout = 5,
             json={
-                'input':vcf_id['fileID'],
+                'input':str(vcf_id['fileID']),
                 'samplename':'endpoint_input',
                 'alleles':'HLA-G*01:09',
                 'prediction_algorithms':'NetMHC',
@@ -242,10 +253,7 @@ class APITests(unittest.TestCase):
             self.urlBase + '/staging',
             timeout = 5,
             json={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+                'input':'0',
                 'samplename':'endpoint_processes',
                 'alleles':'HLA-G*01:09',
                 'prediction_algorithms':'NetMHC',
@@ -553,10 +561,7 @@ class APITests(unittest.TestCase):
             self.urlBase + '/staging',
             timeout = 5,
             json={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+                'input':'0',
                 'samplename':'endpoint_full',
                 'alleles':'HLA-G*01:09,HLA-E*01:01',
                 'prediction_algorithms':'NetMHC,PickPocket',
@@ -698,10 +703,7 @@ class APITests(unittest.TestCase):
             self.urlBase+'/staging',
             timeout = 5,
             json={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+                'input':'0',
                 'samplename':'basic_run',
                 'alleles':'HLA-E*01:01',
                 'prediction_algorithms':'NetMHC',
