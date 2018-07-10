@@ -325,7 +325,7 @@ def initialize(current_app, args):
             dbr
         )
         for key in list(data['dropbox']):
-            if data['dropbox'][key] == filename:
+            if data['dropbox'][key]['display_name'] == filename:
                 del data['dropbox'][key]
                 print("Deleting file:",key,'-->', filename)
                 with db.synchronizer:
@@ -350,7 +350,7 @@ def initialize(current_app, args):
             dbr
         )
         for key in data['dropbox']:
-            if data['dropbox'][key] == filesrc:
+            if data['dropbox'][key]['display_name'] == filesrc:
                 data['dropbox'][key] = {
                     'fullname':os.path.abspath(os.path.join(
                         dbr,
