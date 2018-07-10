@@ -36,20 +36,20 @@ def define_parser():
     parser.add_argument(
         '--normal-vaf', type=int,
         help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered. "
-             + "Default: 2",
-        default=2
+             + "Default: 0.02",
+        default=0.02
     )
     parser.add_argument(
         '--tdna-vaf', type=int,
         help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered. "
-             + "Default: 40",
-        default=40
+             + "Default: 0.4",
+        default=0.4
     )
     parser.add_argument(
         '--trna-vaf', type=int,
         help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered. "
-             + "Default: 40",
-        default=40
+             + "Default: 0.4",
+        default=0.4
     )
     parser.add_argument(
         '--expn-val', type=int,
