@@ -7,7 +7,7 @@ import json
 import sys
 import subprocess
 from shlex import split
-from .utils import filterdata
+from .utils import filterprocess
 from shutil import move as movetree
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
@@ -112,7 +112,7 @@ def processes(filters, sorting, page, count):
                 range(data['processid']+1)
             ) if 'process-%d'%(proc[0]) in data
     ]
-    return filterdata(data2, filters, sorting, page, count)
+    return filterprocess(data2, filters, sorting, page, count)
 
 
 def process_info(id):
