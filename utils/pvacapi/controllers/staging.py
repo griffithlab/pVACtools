@@ -14,8 +14,9 @@ from .files import list_input
 from lib.prediction_class import *
 
 def resolve_filepath(filepath):
-    if int_pattern.match(filepath) and int(filepath) <= len(current_app.config['storage']['manifest']):
-        filepath = current_app.config['storage']['manifest'][int(filepath)]
+    data = current_app.config['storage']['loader']()
+    if int_pattern.match(filepath) and int(filepath) <= len(data['input']):
+        filepath = data['input'][int(filepath)]['fullname']
     if not os.path.isfile(filepath):
         filepath = os.path.join(
             current_app.config['files']['data-dir'],
