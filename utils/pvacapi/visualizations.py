@@ -1,3 +1,4 @@
+from os.path import dirname, join
 import postgresql as psql
 from bokeh.io import curdoc
 import re
@@ -126,10 +127,10 @@ del raw_data
 ### From here to the bottom, the code can be changed to modify the plotted data
 from bokeh.layouts import row, widgetbox, column
 from bokeh.charts import Scatter
-from bokeh.models import ColumnDataSource, PanTool, HoverTool, Slider, RangeSlider
+from bokeh.models import ColumnDataSource, CustomJS, PanTool, HoverTool, Slider, RangeSlider
 from bokeh.models import TableColumn, TapTool, BoxSelectTool, ResizeTool
 from bokeh.models.ranges import Range1d as Range
-from bokeh.models.widgets import Select, DataTable, Toggle
+from bokeh.models.widgets import Button, Select, DataTable, Toggle
 from bokeh.plotting import figure
 #Set up the x/y axis selectors and the toggle to hide null entries
 widgets = []
@@ -314,6 +315,11 @@ getters.append((
 x_field.on_change('value', lambda a,r,g: update())
 y_field.on_change('value', lambda a,r,g: update())
 hide_null.on_click(lambda arg: update())
+
+button = Button(label="Download", button_type="success")
+button.callback = CustomJS(args=dict(source=source),
+                           code=open(join(dirname(__file__), "js/csv_download.js")).read())
+widgets.append(button)
 
 #Add all models and widgets to the document
 box = widgetbox(*widgets, sizing_mode='stretch_both')
