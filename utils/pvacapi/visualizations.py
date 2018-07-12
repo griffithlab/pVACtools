@@ -1,7 +1,7 @@
 from os.path import dirname, join
 import postgresql as psql
 from bokeh.io import curdoc
-import re
+import sys
 import json
 import decimal
 import functools
@@ -94,23 +94,25 @@ def range_column_filter(colname, stepsize, title=None):
             widgets.append(col_filter)
             return getter
 
-#Parse session arguments
+
+# Parse session arguments
 args = curdoc().session_context.request.arguments
+
 try:
     parentID = int(args.get('target-process')[0])
     fileID = int(args.get('target-file')[0])
     cols = json.loads(args.get('cols')[0].decode())
-    cols['rowid']='Row'
-    sample = str(args.get('samplename')[0])
+    cols['rowid'] = 'Row'
+    sample = args.get('samplename')[0].decode('utf-8')
 except BaseException as e:
     raise ValueError("Unable to parse the requried arguments") from e
 tablekey = "data_%s_%s" % (
     (parentID if parentID >= 0 else 'dropbox'),
     fileID
 )
-#Fetch table data from postgres
+# Fetch table data from postgres
 db = psql.open('localhost/pvacseq')
-raw_data = db.prepare("SELECT %s FROM %s"%(','.join(cols), tablekey))()
+raw_data = db.prepare("SELECT %s FROM %s" % (','.join(cols), tablekey))()
 entries = [
     {
         col:float(val) if isinstance(val, decimal.Decimal) else val
@@ -118,8 +120,11 @@ entries = [
     }
     for entry in raw_data
 ]
+
 entries.sort(key=lambda x:x['rowid'])
 del raw_data
+
+
 ### The data is stored in entries.
 # Entries is a list of dicts, where each dict maps a cloumn name to a value
 # cols is a dict mapping the column names to a display name
@@ -156,7 +161,8 @@ hide_null = Toggle(
     label="Hide 0 results with null X or Y axis values"
 )
 widgets.append(hide_null)
-#Set up the data dictionary (a transposed version of entries)
+
+# Set up the data dictionary (a transposed version of entries)
 data_dict = {
     key:[] for key in cols
 }
@@ -164,15 +170,19 @@ data_dict.update({
     '_x':[],
     '_y':[],
 })
+
 source = ColumnDataSource(data=data_dict) #wrap a datasource around the dictionary
+source.tags = [sample] # save sample name to tags to access for naming downloaded CSV files 
+
 p = figure(
     title = sample,
     # sizing_mode='stretch_both',
     plot_height=800, plot_width=900,
 )
-#every keyword argument can accept a constant value, or a column name
-#if given a column name, it will use the values of that column in the data source
-#for each point
+
+# every keyword argument can accept a constant value, or a column name
+# if given a column name, it will use the values of that column in the data source
+# for each point
 p.circle(x="_x", y="_y", source=source, size=7, color="blue", line_color=None, fill_alpha=1)
 p.add_tools(TapTool())
 p.add_tools(BoxSelectTool())
@@ -184,7 +194,8 @@ hover.tooltips = [
     ('Y', '@_y')
 ]
 p.add_tools(hover)
-#add the data table
+
+# add the data table
 table = DataTable(
     columns = [
         TableColumn(
@@ -205,7 +216,8 @@ table = DataTable(
     # sizing_mode = 'scale_width',
     width = 1200
 )
-#Update function
+
+# Update function
 def update():
     """Updates the data in the datasource for the graph and table based on\
     the currently applied filters"""
@@ -310,6 +322,7 @@ getters.append((
     'transcript_expression',
     range_column_filter('transcript_expression', 1)
 ))
+
 
 # Add callbacks to the 3 widgets manually created back at the start
 x_field.on_change('value', lambda a,r,g: update())
