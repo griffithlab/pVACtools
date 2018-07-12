@@ -311,23 +311,28 @@ getters.append((
     range_column_filter('transcript_expression', 1)
 ))
 
-#Add callbacks to the 3 widgets manually created back at the start
+# Add callbacks to the 3 widgets manually created back at the start
 x_field.on_change('value', lambda a,r,g: update())
 y_field.on_change('value', lambda a,r,g: update())
 hide_null.on_click(lambda arg: update())
 
-button = Button(label="Download", button_type="success")
-button.callback = CustomJS(args=dict(source=source),
-                           code=open(join(dirname(__file__), "js/csv_download.js")).read())
-widgets.append(button)
+download_button = Button(label="Download", button_type="success")
+download_button.callback = CustomJS(args=dict(source=source),
+                                    code=open(join(dirname(__file__), "js/csv_download_all.js")).read())
 
-#Add all models and widgets to the document
+download_selected_button = Button(label="Download Selected", button_type="success")
+download_selected_button.callback = CustomJS(args=dict(source=source),
+                                             code=open(join(dirname(__file__), "js/csv_download_selected.js")).read())
+
+widgets.extend((download_button, download_selected_button))
+
+# Add all models and widgets to the document
 box = widgetbox(*widgets, sizing_mode='stretch_both')
 fig = column(
     row(box, p),
     table,
     sizing_mode='scale_width'
 )
-update() #initial update
+update() # initial update
 curdoc().add_root(fig)
 curdoc().title = sample
