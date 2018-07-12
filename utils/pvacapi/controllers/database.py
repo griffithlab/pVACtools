@@ -379,13 +379,16 @@ def visualize_script(parentID, fileID):
             },
             400
         )
+
     proc_data = process_info(parentID)
+
     if type(proc_data)==dict and 'parameters' in proc_data and 'sample_name' in proc_data['parameters']:
         sample = proc_data['parameters']['sample_name']
     elif parentID == -1:
         sample = data['dropbox'][str(fileID)]['display_name'].rsplit(".", 1)[0]
     else:
         sample = 'Unknown Sample'
+
     return re.sub(
         r'src="(.+)"',
         r'src="\1&%s"'%(
