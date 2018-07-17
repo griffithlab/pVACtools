@@ -5,7 +5,7 @@ from flask import current_app
 import subprocess
 from .processes import fetch_process, is_running
 from .database import filterfile
-from .utils import descriptions, is_visualizable, column_filter, filterdata, sort, fullresponse
+from .utils import descriptions, is_visualizable, visualization_type, column_filter, filterdata, sort, fullresponse
 
 # details for each file to be appended to the output of results_get
 def resultfile(id, process, fileID):
@@ -15,6 +15,7 @@ def resultfile(id, process, fileID):
         'description': file_info['description'],
         'display_name': file_info['display_name'],
         'is_visualizable': file_info['is_visualizable'],
+        'visualization_type': file_info['visualization_type'],
         'url':'/api/v1/processes/%d/results/%s'%(id, fileID),
         'size':os.path.getsize(process[0]['files'][fileID]['fullname']),
         'rows':int(subprocess.check_output([
@@ -73,6 +74,7 @@ def list_input(path = None):
                 'fileID':len(current_app.config['storage']['manifest']),
                 'description':descriptions(ext),
                 'is_visualizable': is_visualizable(ext),
+                'visualization_type': visualization_type(ext),
             })
             current_app.config['storage']['manifest'].append(fullname)
         elif os.path.isdir(fullname):
