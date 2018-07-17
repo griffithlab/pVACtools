@@ -1046,6 +1046,9 @@ definitions:
       display_name:
         type: "string"
         description: "Display name of result file (try to keep under 32 chars or so)"
+      is_visualizable:
+        type: "boolean"
+        description: "Indicates whether or not a result file can be visualized"
       url:
         type: "string"
         description: "URL of results file"
@@ -1107,6 +1110,9 @@ definitions:
       description:
         type: "string"
         description: "A description of the file's contents in the context of pVAC-Seq"
+      is_visualizable:
+        type: "boolean"
+        description: "Indicates whether or not a result file can be visualized"
   MetaData:
     type: "object"
     properties:
