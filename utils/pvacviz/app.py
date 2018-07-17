@@ -14,8 +14,6 @@ class MyHandler(SimpleHTTPRequestHandler):
         # Parse query data to find out what was requested
         parsedParams = urlparse(self.path)
 
-        # import rpdb; rpdb.set_trace()
-
         # See if the file requested exists
         if os.access(CLIENTDIR + os.sep + parsedParams.path, os.R_OK):
             # File exists, serve it up
@@ -25,7 +23,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
-            with open(INDEXFILE, 'r') as fin:
+            with open(INDEXFILE, 'rb') as fin:
                 self.copyfile(fin, self.wfile)
 
 
