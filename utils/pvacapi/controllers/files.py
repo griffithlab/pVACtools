@@ -5,14 +5,17 @@ from flask import current_app
 import subprocess
 from .processes import fetch_process, is_running
 from .database import filterfile
-from .utils import descriptions, column_filter, filterdata, sort, fullresponse
+from .utils import descriptions, is_visualizable, visualization_type, column_filter, filterdata, sort, fullresponse
 
 # details for each file to be appended to the output of results_get
 def resultfile(id, process, fileID):
+    file_info = process[0]['files'][fileID]
     return({
         'fileID':int(fileID),
-        'description':process[0]['files'][fileID]['description'],
-        'display_name':process[0]['files'][fileID]['display_name'],
+        'description': file_info['description'],
+        'display_name': file_info['display_name'],
+        'is_visualizable': file_info['is_visualizable'],
+        'visualization_type': file_info['visualization_type'],
         'url':'/api/v1/processes/%d/results/%s'%(id, fileID),
         'size':os.path.getsize(process[0]['files'][fileID]['fullname']),
         'rows':int(subprocess.check_output([
@@ -63,14 +66,15 @@ def list_input(path = None):
         fullname = os.path.join(path, entity)
         if (fullname[fullname.rfind('/')+1] == '.'):
             continue
+        ext = '.'.join(os.path.basename(entity).split('.')[1:])
         if os.path.isfile(fullname):
             output.append({
                 'display_name':entity,
                 'type':'file',
                 'fileID':len(current_app.config['storage']['manifest']),
-                'description':descriptions(
-                    '.'.join(os.path.basename(entity).split('.')[1:])
-                ),
+                'description':descriptions(ext),
+                'is_visualizable': is_visualizable(ext),
+                'visualization_type': visualization_type(ext),
             })
             current_app.config['storage']['manifest'].append(fullname)
         elif os.path.isdir(fullname):
