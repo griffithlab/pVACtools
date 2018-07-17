@@ -59,36 +59,47 @@ class dataObj(dict):
 _file_info = {
     'json': {
         'description': "Metadata regarding a specific run of pVAC-Seq",
+        'visualizable': False,
     },
     'yml': {
         'description': "Manifest of auxiliary files supplied to pVAC-Seq",
+        'visualizable': False,
     },
     'yaml': {
         'description': "Manifest of auxiliary files supplied to pVAC-Seq",
+        'visualizable': False,
     },
     'log': {
         'description': "Transcript of messages produced by pVAC-Seq",
+        'visualizable': False,
     },
     'chop.tsv': {
         'description': "Processed and filtered data, with peptide cleavage data added",
+        'visualizable': True,
     },
     'all_epitopes.tsv': {
         'description': "Processed data from IEDB, but with no filtering or extra data",
+        'visualizable': True,
     },
     'filtered.tsv': {
         'description': "Processed data with all filters applied",
+        'visualizable': True,
     },
     'stab.tsv': {
         'description': "Processed and filtered data, with peptide stability data added",
+        'visualizable': True,
     },
     'filtered.condensed.ranked.tsv': {
         'description': "A condensed report of the processed and filtered data, with ranking score added",
+        'visualizable': True,
     },
     'tsv': {
         'description': "Raw input data parsed out of the input vcf",
+        'visualizable': False,
     },
     'vcf': {
         'description': "Unprocessed input VCF",
+        'visualizable': False,
     },
 }
 
@@ -100,6 +111,12 @@ def descriptions(ext):
     elif re.search(r'key$', ext):
         return "Data used by pVAC-Seq to parse results from IEDB"
     return "Unknown File"
+
+def is_visualizable(ext):
+    if ext in _file_info:
+        return _file_info[ext]['visualizable']
+    else:
+        return False
 
 def column_filter(column):
     """standardize column names"""
@@ -273,6 +290,7 @@ def initialize(current_app, args):
     }
     for (key, filename) in data['dropbox'].items():
         if type(data['dropbox'][key])==str:
+            ext = '.'.join(os.path.basename(filename).split('.')[1:])
             print("Updating dropbox entry",key,"to new format")
             data['dropbox'][key] = {
                 'fullname':os.path.join(
@@ -283,9 +301,8 @@ def initialize(current_app, args):
                     filename,
                     dbr
                 ),
-                'description':descriptions(
-                    '.'.join(os.path.basename(filename).split('.')[1:])
-                )
+                'description':descriptions(ext),
+                'is_visualizable': is_visualizable(ext),
             }
     recorded = {item['fullname'] for item in data['dropbox'].values()}
     targets = {data['dropbox'][k]['fullname'] for k in data['dropbox'] if data['dropbox'][k]['fullname'] in recorded-current}
@@ -295,6 +312,7 @@ def initialize(current_app, args):
     for filename in current-recorded:
         while str(fileID) in data['dropbox']:
             fileID += 1
+        ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         print("Assigning file:", fileID,"-->",filename)
         data['dropbox'][str(fileID)] = {
             'fullname':os.path.abspath(os.path.join(
@@ -305,9 +323,8 @@ def initialize(current_app, args):
                 filename,
                 dbr
             ),
-            'description':descriptions(
-                '.'.join(os.path.basename(filename).split('.')[0b1:])
-            )
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
         }
 
     data_path = current_app.config['files']
@@ -320,6 +337,7 @@ def initialize(current_app, args):
         fileID = 0
         while str(fileID) in data['dropbox']:
             fileID += 1
+        ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         print("Creating file:", fileID, "-->",filename)
         data['dropbox'][str(fileID)] = {
             'fullname':os.path.abspath(os.path.join(
@@ -327,9 +345,8 @@ def initialize(current_app, args):
                 filename
             )),
             'display_name':filename,
-            'description':descriptions(
-                '.'.join(os.path.basename(filename).split('.')[0b1:])
-            )
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
         }
         data.save()
     dropbox_watcher.subscribe(
@@ -368,6 +385,7 @@ def initialize(current_app, args):
             event.dest_path,
             dbr
         )
+        ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
         for key in data['dropbox']:
             if data['dropbox'][key]['display_name'] == filesrc:
                 data['dropbox'][key] = {
@@ -379,9 +397,8 @@ def initialize(current_app, args):
                         filedest,
                         dbr
                     ),
-                    'description':descriptions(
-                        '.'.join(os.path.basename(filedest).split('.')[0b1:])
-                    )
+                    'description':descriptions(ext),
+                    'is_visualizable': is_visualizable(ext),
                 }
                 print("Moving file:", key,'(',filesrc,'-->',filedest,')')
                 data.save()
@@ -411,7 +428,10 @@ def initialize(current_app, args):
                             ),
                             'description':descriptions(
                                 '.'.join(os.path.basename(filename).split('.')[1:])
-                            )
+                            ),
+                            'is_visualizable': is_visualizable(
+                                '.'.join(os.path.basename(filename).split('.')[1:])
+                            ),
                         }
                         for (filename, fileID) in zip(
                             data[processkey]['files'],
@@ -435,6 +455,7 @@ def initialize(current_app, args):
                 while str(fileID) in data[processkey]['files']:
                     fileID += 1
                 fileID = str(fileID)
+                ext = '.'.join(os.path.basename(filename).split('.')[1:])
                 print("Assigning file:",fileID,"-->",filename)
                 data[processkey]['files'][fileID] = {
                     'fullname':filename,
@@ -442,9 +463,8 @@ def initialize(current_app, args):
                         filename,
                         data[processkey]['output']
                     ),
-                    'description':descriptions(
-                        '.'.join(os.path.basename(filename).split('.')[1:])
-                    )
+                    'description':descriptions(ext),
+                    'is_visualizable': is_visualizable(ext),
                 }
 
     def _create(event):
@@ -467,13 +487,13 @@ def initialize(current_app, args):
                     filepath,
                     data[processkey]['output']
                 )
+                ext = '.'.join(os.path.basename(filepath).split('.')[1:])
                 print("Assigning id",fileID,'-->',display_name)
                 data[processkey]['files'][fileID] = {
                     'fullname':filepath,
                     'display_name':display_name,
-                    'description':descriptions(
-                        '.'.join(os.path.basename(filepath).split('.')[1:])
-                    )
+                    'description':descriptions(ext),
+                    'is_visualizable': is_visualizable(ext),
                 }
                 data.save()
                 return
@@ -526,6 +546,7 @@ def initialize(current_app, args):
             elif os.path.commonpath([filedest, parentpath]) == parentpath:
                 destkey = 'process-%d'%parentID
 
+        ext = '.'.join(os.path.basename(filedest).split('.')[1:])
         if srckey == destkey:
             for (fileID, filedata) in data[srckey]['files'].items():
                 if filedata['fullname'] == filesrc:
@@ -535,9 +556,8 @@ def initialize(current_app, args):
                             filedest,
                             data[srckey]['output']
                         ),
-                        'description':descriptions(
-                            '.'.join(os.path.basename(filedest).split('.')[1:])
-                        )
+                        'description':descriptions(ext),
+                        'is_visualizable': is_visualizable(ext),
                     }
         else:
             _delete(event)
