@@ -43,6 +43,16 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacapi"):
                 filename
             ))
 
+for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            server_data.append(os.path.join(
+                os.path.relpath(
+                    dirpath,
+                    'utils/pvacapi'
+                ),
+                filename
+            ))
 setup(
     name="pvactools",
     version="1.0.5",
