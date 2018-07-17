@@ -7,7 +7,7 @@ import json
 import sys
 import subprocess
 from shlex import split
-from .utils import descriptions, filterdata
+from .utils import filterdata
 from shutil import move as movetree
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
@@ -86,7 +86,9 @@ def processes(filters, sorting, page, count):
                          fileID
                      ),
                      'display_name':filedata['display_name'],
-                     'description':filedata['description']
+                     'description':filedata['description'],
+                     'is_visualizable': filedata['is_visualizable'],
+                     'visualization_type': filedata['visualization_type'],
                  }
                  for (fileID, filedata) in data['process-%d'%proc[0]]['files'].items()
              ],
@@ -191,7 +193,9 @@ def process_info(id):
                     fileID
                 ),
                 'display_name':filedata['display_name'],
-                'description':filedata['description']
+                'description':filedata['description'],
+                'is_visualizable': filedata['is_visualizable'],
+                'visualization_type': filedata['visualization_type'],
             }
             for (fileID, filedata) in data['process-%d'%id]['files'].items()
         ],
