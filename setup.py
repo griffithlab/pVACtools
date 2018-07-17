@@ -82,7 +82,6 @@ setup(
             'flask-cors',
             'bokeh==0.12.4',
             'tornado==4.4.3',
-            'pvacseq-client',
             'swagger-spec-validator==2.1.0',
         ]
     },
