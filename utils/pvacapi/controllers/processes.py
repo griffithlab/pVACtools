@@ -88,6 +88,7 @@ def processes(filters, sorting, page, count):
                      'display_name':filedata['display_name'],
                      'description':filedata['description'],
                      'is_visualizable': filedata['is_visualizable'],
+                     'visualization_type': filedata['visualization_type'],
                  }
                  for (fileID, filedata) in data['process-%d'%proc[0]]['files'].items()
              ],
@@ -194,6 +195,7 @@ def process_info(id):
                 'display_name':filedata['display_name'],
                 'description':filedata['description'],
                 'is_visualizable': filedata['is_visualizable'],
+                'visualization_type': filedata['visualization_type'],
             }
             for (fileID, filedata) in data['process-%d'%id]['files'].items()
         ],

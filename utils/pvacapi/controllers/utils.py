@@ -76,22 +76,27 @@ _file_info = {
     'chop.tsv': {
         'description': "Processed and filtered data, with peptide cleavage data added",
         'visualizable': True,
+        'visualization_type': 'full',
     },
     'all_epitopes.tsv': {
         'description': "Processed data from IEDB, but with no filtering or extra data",
         'visualizable': True,
+        'visualization_type': 'full',
     },
     'filtered.tsv': {
         'description': "Processed data with all filters applied",
         'visualizable': True,
+        'visualization_type': 'full',
     },
     'stab.tsv': {
         'description': "Processed and filtered data, with peptide stability data added",
         'visualizable': True,
+        'visualization_type': 'full',
     },
     'filtered.condensed.ranked.tsv': {
         'description': "A condensed report of the processed and filtered data, with ranking score added",
         'visualizable': True,
+        'visualization_type': 'condensed',
     },
     'tsv': {
         'description': "Raw input data parsed out of the input vcf",
@@ -117,6 +122,12 @@ def is_visualizable(ext):
         return _file_info[ext]['visualizable']
     else:
         return False
+
+def visualization_type(ext):
+    if ext in _file_info and 'visualization_type' in _file_info[ext]:
+        return _file_info[ext]['visualization_type']
+    else:
+        return None
 
 def column_filter(column):
     """standardize column names"""
@@ -303,6 +314,7 @@ def initialize(current_app, args):
                 ),
                 'description':descriptions(ext),
                 'is_visualizable': is_visualizable(ext),
+                'visualization_type': visualization_type(ext),
             }
     recorded = {item['fullname'] for item in data['dropbox'].values()}
     targets = {data['dropbox'][k]['fullname'] for k in data['dropbox'] if data['dropbox'][k]['fullname'] in recorded-current}
@@ -325,6 +337,7 @@ def initialize(current_app, args):
             ),
             'description':descriptions(ext),
             'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
         }
 
     data_path = current_app.config['files']
@@ -347,6 +360,7 @@ def initialize(current_app, args):
             'display_name':filename,
             'description':descriptions(ext),
             'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
         }
         data.save()
     dropbox_watcher.subscribe(
@@ -399,6 +413,7 @@ def initialize(current_app, args):
                     ),
                     'description':descriptions(ext),
                     'is_visualizable': is_visualizable(ext),
+                    'visualization_type': visualization_type(ext),
                 }
                 print("Moving file:", key,'(',filesrc,'-->',filedest,')')
                 data.save()
@@ -430,6 +445,9 @@ def initialize(current_app, args):
                                 '.'.join(os.path.basename(filename).split('.')[1:])
                             ),
                             'is_visualizable': is_visualizable(
+                                '.'.join(os.path.basename(filename).split('.')[1:])
+                            ),
+                            'visualization_type': visualization_type(
                                 '.'.join(os.path.basename(filename).split('.')[1:])
                             ),
                         }
@@ -465,6 +483,7 @@ def initialize(current_app, args):
                     ),
                     'description':descriptions(ext),
                     'is_visualizable': is_visualizable(ext),
+                    'visualization_type': visualization_type(ext),
                 }
 
     def _create(event):
@@ -494,6 +513,7 @@ def initialize(current_app, args):
                     'display_name':display_name,
                     'description':descriptions(ext),
                     'is_visualizable': is_visualizable(ext),
+                    'visualization_type': visualization_type(ext),
                 }
                 data.save()
                 return
@@ -558,6 +578,7 @@ def initialize(current_app, args):
                         ),
                         'description':descriptions(ext),
                         'is_visualizable': is_visualizable(ext),
+                        'visualization_type': visualization_type(ext),
                     }
         else:
             _delete(event)

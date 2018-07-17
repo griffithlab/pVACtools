@@ -1049,6 +1049,9 @@ definitions:
       is_visualizable:
         type: "boolean"
         description: "Indicates whether or not a result file can be visualized"
+      visualization_type:
+        type: "string"
+        description: "Type of visualization that this file can be used with"
       url:
         type: "string"
         description: "URL of results file"
@@ -1113,6 +1116,9 @@ definitions:
       is_visualizable:
         type: "boolean"
         description: "Indicates whether or not a result file can be visualized"
+      visualization_type:
+        type: "string"
+        description: "Type of visualization that this file can be used with"
   MetaData:
     type: "object"
     properties:
