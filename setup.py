@@ -42,17 +42,18 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacapi"):
                 ),
                 filename
             ))
-
+client_data = []
 for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            server_data.append(os.path.join(
+            client_data.append(os.path.join(
                 os.path.relpath(
                     dirpath,
-                    'utils/pvacapi'
+                    'utils/pvacapi/client'
                 ),
                 filename
             ))
+
 setup(
     name="pvactools",
     version="1.0.5",
@@ -89,10 +90,11 @@ setup(
         'mhcflurry',
     ],
     package_data={
-        'tools.pvacseq' : pvacseq_data_files,
-        'tools.pvacfuse' : pvacfuse_data_files,
-        'tools.pvacvector' : pvacvector_data_files,
-        'utils.pvacapi' : server_data,
+        'tools.pvacseq': pvacseq_data_files,
+        'tools.pvacfuse': pvacfuse_data_files,
+        'tools.pvacvector': pvacvector_data_files,
+        'utils.pvacapi': server_data,
+        'utils.pvacviz': client_data,
     },
     extras_require={
         'API':[
