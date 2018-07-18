@@ -19,7 +19,10 @@ class MyHandler(SimpleHTTPRequestHandler):
         # See if the file requested exists
         if os.access(CLIENTDIR + os.sep + parsedParams.path, os.R_OK):
             # File exists, serve it up
-            SimpleHTTPRequestHandler.do_GET(self)
+            try:
+                SimpleHTTPRequestHandler.do_GET(self)
+            except ConnectionError as err:
+                print("%s occured attempting to open the path %s" % (err, parsedParams.path))
         else:
             # send index.html, but don't redirect
             self.send_response(200)
@@ -37,11 +40,11 @@ def main():
     thread = threading.Thread(target=httpd.serve_forever)
 
     try:
-        print(time.asctime(), "%s:%s - Starting pVACviz client webserver" % (HOSTNAME, PORT))
+        print(time.asctime(), "Starting pVACviz client webserver")
         thread.start()
 
     except (KeyboardInterrupt, SystemExit):
-        print(time.asctime(), "%s:%s - Stopping pVACviz client webserver" % (HOSTNAME, PORT))
+        print(time.asctime(), "Stopping pVACviz client webserver")
         httpd.shutdown()
         pass
 
@@ -51,11 +54,10 @@ def main():
         pass
 
     finally:
-        print(time.asctime(), "%s:%s - pVACviz server started." % (HOSTNAME, PORT))
+        print(time.asctime(), "pVACviz server started at http://%s:%s" % (HOSTNAME, PORT))
 
-    # import rpdb; rpdb.set_trace()
-    print("Opening pVACviz client in default browser.")
-    webbrowser.open("%s:%s" % (HOSTNAME, PORT), new=1, autoraise=True)
+    print(time.asctime(), "Opening pVACviz client at http://%s:%s in default browser." % (HOSTNAME, PORT))
+    webbrowser.get().open("http://%s:%s" % (HOSTNAME, PORT), new=1, autoraise=True)
 
 
 if __name__ == "__main__":
