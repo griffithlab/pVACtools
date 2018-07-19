@@ -41,8 +41,16 @@ class ProximalVariant:
                 if 'HP' in entry.FORMAT:
                     if entry.genotype(sample)['HP'] == somatic_phasing:
                         proximal_variants.append([entry, csq_entry])
-                    elif entry.genotype(sample)['GT'] == '1/1':
+                elif phased_somatic_variant.genotype(sample)['GT'] == '0/1':
+                    if entry.genotype(sample)['GT'] == '1/1':
                         proximal_variants.append([entry, csq_entry])
+                elif phased_somatic_variant.genotype(sample)['GT'] == '1/1':
+                    if entry.genotype(sample)['GT'] in ['1/1', '0/1']:
+                        proximal_variants.append([entry, csq_entry])
+        elif phased_somatic_variant.genotype(sample)['GT'] == '0/1':
+            for (entry, csq_entry) in potential_proximal_variants:
+                if entry.genotype(sample)['GT'] == '1/1':
+                    proximal_variants.append([entry, csq_entry])
         elif phased_somatic_variant.genotype(sample)['GT'] == '1/1':
             for (entry, csq_entry) in potential_proximal_variants:
                 if entry.genotype(sample)['GT'] in ['1/1', '0/1']:
