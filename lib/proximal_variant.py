@@ -41,13 +41,24 @@ class ProximalVariant:
                 if 'HP' in entry.FORMAT:
                     if entry.genotype(sample)['HP'] == somatic_phasing:
                         proximal_variants.append([entry, csq_entry])
-                elif phased_somatic_variant.genotype(sample).is_het:
-                    if entry.genotype(sample).is_variant and not entry.genotype(sample).is_het:
+                #proximal variant is hom var
+                elif entry.genotype(sample).is_variant and not entry.genotype(sample).is_het:
+                    #main somatic variant is het
+                    if phased_somatic_variant.genotype(sample).is_het:
                         proximal_variants.append([entry, csq_entry])
-        elif phased_somatic_variant.genotype(sample).is_het:
+                    #main somatic variant is hom var
+                    if phased_somatic_variant.genotype(sample).is_variant and not phased_somatic_variant.genotype(sample).is_het:
+                        proximal_variants.append([entry, csq_entry])
+        else:
             for (entry, csq_entry) in potential_proximal_variants:
+                #proximal variant is hom var
                 if entry.genotype(sample).is_variant and not entry.genotype(sample).is_het:
-                    proximal_variants.append([entry, csq_entry])
+                    #main somatic variant is het
+                    if phased_somatic_variant.genotype(sample).is_het:
+                        proximal_variants.append([entry, csq_entry])
+                    #main somatic variant is hom var
+                    if phased_somatic_variant.genotype(sample).is_variant and not phased_somatic_variant.genotype(sample).is_het:
+                        proximal_variants.append([entry, csq_entry])
 
         if len(proximal_variants) > 0:
             counter['somatic_missense_variants_with_phased_proximal_variants'] += 1
