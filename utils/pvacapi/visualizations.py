@@ -145,7 +145,7 @@ x_field = Select(
     options=sorted([
         (key, val) for (key, val) in cols.items()
     ], key = lambda x:x[1]),
-    value = 'corresponding_wt_score'
+    value = 'corresponding_wt_score' if 'corresponding_wt_score' in cols.keys() else 'wt_ic50'
 )
 widgets.append(x_field)
 y_field = Select(
@@ -153,7 +153,7 @@ y_field = Select(
     options=sorted([
         (key, val) for (key, val) in cols.items()
     ], key = lambda x:x[1]),
-    value = 'best_mt_score'
+    value = 'best_mt_score' if 'best_mt_score' in cols.keys() else 'mt_ic50'
 )
 widgets.append(y_field)
 hide_null = Toggle(
