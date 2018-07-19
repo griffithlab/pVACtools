@@ -38,18 +38,15 @@ class ProximalVariant:
             somatic_phasing = phased_somatic_variant.genotype(sample)['HP']
             for (entry, csq_entry) in potential_proximal_variants:
                 #identify variants that are in phase with the phased_somatic_variant
-                if entry.genotype(sample)['GT'] == '1/1':
-                    import pdb
-                    pdb.set_trace()
                 if 'HP' in entry.FORMAT:
                     if entry.genotype(sample)['HP'] == somatic_phasing:
                         proximal_variants.append([entry, csq_entry])
-                elif phased_somatic_variant.genotype(sample)['GT'] == '0/1':
-                    if entry.genotype(sample)['GT'] == '1/1':
+                elif phased_somatic_variant.genotype(sample).is_het:
+                    if entry.genotype(sample).is_variant and not entry.genotype(sample).is_het:
                         proximal_variants.append([entry, csq_entry])
-        elif phased_somatic_variant.genotype(sample)['GT'] == '0/1':
+        elif phased_somatic_variant.genotype(sample).is_het:
             for (entry, csq_entry) in potential_proximal_variants:
-                if entry.genotype(sample)['GT'] == '1/1':
+                if entry.genotype(sample).is_variant and not entry.genotype(sample).is_het:
                     proximal_variants.append([entry, csq_entry])
 
         if len(proximal_variants) > 0:
