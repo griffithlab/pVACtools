@@ -959,7 +959,8 @@ def fullresponse(data, page, count):
     })
 
 def sort_tree(data,col):
-    data.sort(key=operator.itemgetter(col[1:]), reverse=True if col.startswith('-') else False)
+    #doesn't sort numbers properly i.e. '12' < '2' while 2 < 12
+    data.sort(key=lambda x: str(x[col[1:]]) if col[1:] in x else '~', reverse=True if col.startswith('-') else False)
     for file in data:
         if file['type'] == 'directory':
             sort_tree(file['contents'], col)
