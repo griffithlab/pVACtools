@@ -230,7 +230,8 @@ class APITests(unittest.TestCase):
             timeout=5,
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-        self.assertTrue(re.search(r'input\.vcf', response.content.decode()))
+        result = response.json()
+        self.assertTrue(any([re.search(r'input\.vcf', entity['display_name']) for entity in result]))
         input_manifest = response.json()
         vcf_id = list(filter(lambda x:x['display_name']=='input.vcf', input_manifest))[0]
         response = requests.post(
