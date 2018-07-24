@@ -968,6 +968,8 @@ def sort_tree(data,col):
 def sort_data(data, sorting, page, count, columns):
     if not len(sorting) or sorting[0]=="none":
         sorting = ['+display_name']
+    if '-type' not in sorting and '+type' not in sorting:
+        sorting.insert(0,'-type')
     i = len(sorting)-1
     while i > -1:
         col = sorting[i]
