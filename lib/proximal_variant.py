@@ -74,6 +74,10 @@ class ProximalVariant:
         has_proximal_variants_on_same_transcript = False
         phased_somatic_variant = None
         for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.start - flanking_length, somatic_variant.end + flanking_length):
+            filt = entry.FILTER
+            if not (filt is None or len(filt) == 0):
+                continue
+
             for proximal_alt in entry.ALT:
                 if entry.start == somatic_variant.start and entry.end == somatic_variant.end and proximal_alt == alt:
                     phased_somatic_variant = entry

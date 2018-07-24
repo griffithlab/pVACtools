@@ -240,8 +240,15 @@ class VcfConverter(InputFileConverter):
         proximal_variants, self.counter =  self.proximal_variant_parser.extract(entry, alt, transcript_name, self.peptide_length, self.counter)
         has_proximal_variants = False
         for (proximal_variant, csq_entry) in proximal_variants:
-            if len(list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
-                proximal_variant_type = 'somatic'
+            proximal_entry_in_somatic_vcf = list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))
+            if len(proximal_entry_in_somatic_vcf) == 1:
+                filt = proximal_entry_in_somatic_vcf[0].FILTER
+                if not (filt is None or len(filt) == 0):
+                    continue
+                else:
+                    proximal_variant_type = "somatic"
+            elif len(proximal_entry_in_somatic_vcf) > 1:
+                sys.exit("Found multiple matches for the proximal variant in the somatic VCF {}".format(proximal_entry_in_somatic_vcf))
             else:
                 proximal_variant_type = 'germline'
             has_proximal_variants = True
