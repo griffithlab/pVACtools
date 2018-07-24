@@ -60,9 +60,6 @@ class ProximalVariant:
                     if phased_somatic_variant.genotype(sample).is_variant and not phased_somatic_variant.genotype(sample).is_het:
                         proximal_variants.append([entry, csq_entry])
 
-        if len(proximal_variants) > 0:
-            counter['somatic_missense_variants_with_phased_proximal_variants'] += 1
-
         return proximal_variants, counter
 
     def find_phased_somatic_variant_and_potential_proximal_variants(self, somatic_variant, alt, transcript, peptide_size, counter):
@@ -74,6 +71,10 @@ class ProximalVariant:
         has_proximal_variants_on_same_transcript = False
         phased_somatic_variant = None
         for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.start - flanking_length, somatic_variant.end + flanking_length):
+            filt = entry.FILTER
+            if not (filt is None or len(filt) == 0):
+                continue
+
             for proximal_alt in entry.ALT:
                 if entry.start == somatic_variant.start and entry.end == somatic_variant.end and proximal_alt == alt:
                     phased_somatic_variant = entry
