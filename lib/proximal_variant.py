@@ -6,7 +6,7 @@ from Bio.Seq import translate
 import lib.utils
 
 class ProximalVariant:
-    def __init__(self, proximal_variants_vcf):
+    def __init__(self, proximal_variants_vcf, pass_only):
         if not os.path.exists(proximal_variants_vcf + '.tbi'):
             sys.exit('No .tbi file found for proximal variants VCF. Proximal variants VCF needs to be tabix indexed.')
 
@@ -23,6 +23,8 @@ class ProximalVariant:
         if info_fields['CSQ'] is None:
             sys.exit('Failed to extract format string from info description for tag (CSQ)')
         self.csq_parser = CsqParser(info_fields['CSQ'].desc)
+
+        self.pass_only = pass_only
 
     def extract(self, somatic_variant, alt, transcript, peptide_size):
         (phased_somatic_variant, potential_proximal_variants) = self.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, alt, transcript, peptide_size)
@@ -73,6 +75,11 @@ class ProximalVariant:
         potential_proximal_variants = []
         phased_somatic_variant = None
         for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.start - flanking_length, somatic_variant.end + flanking_length):
+            if self.pass_only:
+                filt = entry.FILTER
+                if not (filt is None or len(filt) == 0):
+                    continue
+
             for proximal_alt in entry.ALT:
                 if entry.start == somatic_variant.start and entry.end == somatic_variant.end and proximal_alt == alt:
                     phased_somatic_variant = entry
