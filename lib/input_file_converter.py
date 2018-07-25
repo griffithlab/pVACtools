@@ -339,7 +339,7 @@ class VcfConverter(InputFileConverter):
                     else:
                         amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
-                    index = '%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position)
+                    index = '%s.%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position, entry.affected_start)
                     if index in indexes:
                         sys.exit("Warning: TSV index already exists: {}".format(index))
                     else:
