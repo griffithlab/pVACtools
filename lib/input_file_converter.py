@@ -351,6 +351,8 @@ class VcfConverter(InputFileConverter):
                         if not has_proximal_variants:
                             continue
 
+                    self.counter['somatic_missense_variants_with_phased_proximal_variants'] += 1
+
                     ensembl_gene_id = transcript['Gene']
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
