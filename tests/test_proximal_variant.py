@@ -13,7 +13,7 @@ class ProximalVariantTests(unittest.TestCase):
         cls.executable     = os.path.join(cls.executable_dir, 'proximal_variant.py')
         cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'proximal_variant')
         proximal_variant_vcf_path = os.path.join(cls.test_data_dir, 'input.vcf.gz')
-        cls.klass = ProximalVariant(proximal_variant_vcf_path)
+        cls.klass = ProximalVariant(proximal_variant_vcf_path, False)
         somatic_vcf_path = os.path.join(cls.test_data_dir, 'somatic.vcf.gz')
         cls.somatic_vcf_fh = open(somatic_vcf_path, 'rb')
         cls.somatic_vcf_reader = vcf.Reader(cls.somatic_vcf_fh)

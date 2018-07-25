@@ -74,7 +74,7 @@ class VcfConverter(InputFileConverter):
             self.proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
             self.proximal_variants_writer = csv.DictWriter(self.proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'codon_change', 'protein_position', 'type', 'main_somatic_variant'])
             self.proximal_variants_writer.writeheader()
-            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf)
+            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf, self.pass_only)
             self.somatic_vcf_fh = open(self.input_file, mode)
             self.somatic_vcf_reader = vcf.Reader(self.somatic_vcf_fh)
         self.reader = open(self.input_file, mode)
