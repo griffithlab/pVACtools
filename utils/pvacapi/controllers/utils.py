@@ -296,6 +296,9 @@ def initialize(current_app, args):
     input_watcher = Observe(inputdir)
     input_watcher.subscribe(lambda x:print("Input Event:", x))
 
+    input_data['errors'] = []
+    input_data['var'] = []
+
     input_data['input'] = []
     hier_inp = input_data['input']
 
@@ -347,14 +350,18 @@ def initialize(current_app, args):
     for filename in current:
         file_path = os.path.abspath(os.path.join(inputdir, filename))
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
-        nav_to_dir(file_path, inputdir, hier_inp).append({
-            'display_name':filename[filename.rfind('/')+1:],
-            'type':'file',
-            'fileID':str([k for k,v in data['input'].items() if v['fullname'] == file_path][0]),
-            'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
-    })
+        try:
+            input_data['var'].append('inp: ' + file_path)
+            nav_to_dir(file_path, inputdir, hier_inp).append({
+                'display_name':filename[filename.rfind('/')+1:],
+                'type':'file',
+                'fileID':str([k for k,v in data['input'].items() if v['fullname'] == file_path][0]),
+                'description':descriptions(ext),
+                'is_visualizable': is_visualizable(ext),
+                'visualization_type': visualization_type(ext),
+            })
+        except:
+            input_data['errors'].append('inp: ' + file_path)
 
     def _create(event):
         data = loader()
@@ -377,14 +384,18 @@ def initialize(current_app, args):
             'is_visualizable': is_visualizable(ext),
             'visualization_type': visualization_type(ext),
         }
-        nav_to_dir(event.src_path, inputdir, hier_inp).append({
-            'display_name':filename[filename.rfind('/')+1:],
-            'type':'file',
-            'fileID':str(file_id),
-            'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
-        })
+        try:
+            input_data['var'].append('inpC: ' + filename)
+            nav_to_dir(event.src_path, inputdir, hier_inp).append({
+                'display_name':filename[filename.rfind('/')+1:],
+                'type':'file',
+                'fileID':str(file_id),
+                'description':descriptions(ext),
+                'is_visualizable': is_visualizable(ext),
+                'visualization_type': visualization_type(ext),
+            })
+        except:
+            input_data['errors'].append('inpC: ' + filename)
         data.save()
     input_watcher.subscribe(
         _create,
@@ -397,11 +408,15 @@ def initialize(current_app, args):
             event.src_path,
             inputdir
         )
-        current = nav_to_dir(event.src_path, inputdir, hier_inp)
-        for entity in current:
-            if entity['display_name'] == filename[filename.rfind('/')+1:]:
-                current.remove(entity)
-        clean_tree(hier_inp)
+        try:
+            input_data['var'].append('inpD: ' + filename)
+            current = nav_to_dir(event.src_path, inputdir, hier_inp)
+            for entity in current:
+                if entity['display_name'] == filename[filename.rfind('/')+1:]:
+                    current.remove(entity)
+            clean_tree(hier_inp)
+        except:
+            input_data['errors'].append('inpD: ' + filename)
         for key in list(data['input']):
             if data['input'][key]['display_name'] == filename:
                 del data['input'][key]
@@ -423,21 +438,25 @@ def initialize(current_app, args):
             event.dest_path,
             inputdir
         )
-        current_src = nav_to_dir(event.src_path, inputdir, hier_inp)
         file_id = [k for k in data['input'] if data['input'][k]['display_name'] == filesrc][0]
         ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
-        nav_to_dir(event.dest_path, inputdir, hier_inp).append({
-            'display_name':filedest[filedest.rfind('/')+1:],
-            'type':'file',
-            'fileID':str(file_id),
-            'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
-        })
-        current_src.remove([
-            entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
-        ][0])
-        clean_tree(hier_inp)
+        try:
+            input_data['var'].append('inpM: ' + filesrc + '-->' + filedest)
+            current_src = nav_to_dir(event.src_path, inputdir, hier_inp)
+            nav_to_dir(event.dest_path, inputdir, hier_inp).append({
+                'display_name':filedest[filedest.rfind('/')+1:],
+                'type':'file',
+                'fileID':str(file_id),
+                'description':descriptions(ext),
+                'is_visualizable': is_visualizable(ext),
+                'visualization_type': visualization_type(ext),
+            })
+            current_src.remove([
+                entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
+            ][0])
+            clean_tree(hier_inp)
+        except:
+            input_data['errors'].append('inpM: ' + filesrc + '-->' + filedest)
         for key in data['input']:
             if key == file_id:
                 data['input'][key] = {
@@ -515,14 +534,18 @@ def initialize(current_app, args):
     for filename in current:
         file_path = os.path.abspath(os.path.join(dbr, filename))
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
-        nav_to_dir(file_path, dbr, hier_db).append({
-            'display_name':filename[filename.rfind('/')+1:],
-            'type':'file',
-            'fileID':str([k for k,v in data['dropbox'].items() if v['fullname'] == file_path][0]),
-            'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
-    })
+        try:
+            input_data['var'].append('dbx: ' + file_path)
+            nav_to_dir(file_path, dbr, hier_db).append({
+                'display_name':filename[filename.rfind('/')+1:],
+                'type':'file',
+                'fileID':str([k for k,v in data['dropbox'].items() if v['fullname'] == file_path][0]),
+                'description':descriptions(ext),
+                'is_visualizable': is_visualizable(ext),
+                'visualization_type': visualization_type(ext),
+            })
+        except:
+            input_data['errors'].append('dbx: ' + file_path)
 
     data_path = current_app.config['files']
     def _create(event):
@@ -546,14 +569,18 @@ def initialize(current_app, args):
             'is_visualizable': is_visualizable(ext),
             'visualization_type': visualization_type(ext),
         }
-        nav_to_dir(event.src_path, dbr, hier_db).append({
-            'display_name':filename[filename.rfind('/')+1:],
-            'type':'file',
-            'fileID':str(file_id),
-            'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
-        })
+        try:
+            input_data['var'].append('dbxC: ' + filename)
+            nav_to_dir(event.src_path, dbr, hier_db).append({
+                'display_name':filename[filename.rfind('/')+1:],
+                'type':'file',
+                'fileID':str(file_id),
+                'description':descriptions(ext),
+                'is_visualizable': is_visualizable(ext),
+                'visualization_type': visualization_type(ext),
+            })
+        except:
+            input_data['errors'].append('dbxC: ' + filename)
         data.save()
     dropbox_watcher.subscribe(
         _create,
@@ -566,11 +593,15 @@ def initialize(current_app, args):
             event.src_path,
             dbr
         )
-        current = nav_to_dir(event.src_path, dbr, hier_db)
-        for entity in current:
-            if entity['display_name'] == filename[filename.rfind('/')+1:]:
-                current.remove(entity)
-        clean_tree(hier_db)
+        try:
+            input_data['var'].append('dbxD: ' + filename)
+            current = nav_to_dir(event.src_path, dbr, hier_db)
+            for entity in current:
+                if entity['display_name'] == filename[filename.rfind('/')+1:]:
+                    current.remove(entity)
+            clean_tree(hier_db)
+        except:
+            input_data['errors'].append('dbxD: ' + filename)
         for key in list(data['dropbox']):
             if data['dropbox'][key]['display_name'] == filename:
                 del data['dropbox'][key]
@@ -596,21 +627,25 @@ def initialize(current_app, args):
             event.dest_path,
             dbr
         )
-        current_src = nav_to_dir(event.src_path, dbr, hier_db)
         file_id = [k for k in data['dropbox'] if data['dropbox'][k]['display_name'] == filesrc][0]
         ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
-        nav_to_dir(event.dest_path, dbr, hier_db).append({
-            'display_name':filedest[filedest.rfind('/')+1:],
-            'type':'file',
-            'fileID':str(file_id),
-            'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
-        })
-        current_src.remove([
-            entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
-        ][0])
-        clean_tree(hier_db)
+        try:
+            input_data['var'].append('dbxM: ' + filesrc + '-->' + filedest)
+            current_src = nav_to_dir(event.src_path, dbr, hier_db)
+            nav_to_dir(event.dest_path, dbr, hier_db).append({
+                'display_name':filedest[filedest.rfind('/')+1:],
+                'type':'file',
+                'fileID':str(file_id),
+                'description':descriptions(ext),
+                'is_visualizable': is_visualizable(ext),
+                'visualization_type': visualization_type(ext),
+            })
+            current_src.remove([
+                entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
+            ][0])
+            clean_tree(hier_db)
+        except:
+            input_data['errors'].append('dbxM: ' + filesrc + '-->' + filedest)
         for key in data['dropbox']:
             if key == file_id:
                 data['dropbox'][key] = {
@@ -699,14 +734,18 @@ def initialize(current_app, args):
             for filename in current:
                 file_path = os.path.abspath(os.path.join(data[processkey]['output'], filename))
                 ext = '.'.join(os.path.basename(filename).split('.')[1:])
-                nav_to_dir(file_path, resultdir, hier_res).append({
-                    'display_name':filename[filename.rfind('/')+1:],
-                    'type':'file',
-                    'fileID':str([k for k,v in data[processkey]['files'].items() if v['fullname'] == file_path][0]),
-                    'description':descriptions(ext),
-                    'is_visualizable': is_visualizable(ext),
-                    'visualization_type': visualization_type(ext),
-            })
+                input_data['var'].append('res: ' + filename)
+                try:
+                    nav_to_dir(file_path, resultdir, hier_res).append({
+                        'display_name':filename[filename.rfind('/')+1:],
+                        'type':'file',
+                        'fileID':str([k for k,v in data[processkey]['files'].items() if v['fullname'] == file_path][0]),
+                        'description':descriptions(ext),
+                        'is_visualizable': is_visualizable(ext),
+                        'visualization_type': visualization_type(ext),
+                    })
+                except:
+                    input_data['errors'].append('res: ' + file_path)
 
     def _create(event):
         data = loader()
@@ -737,14 +776,18 @@ def initialize(current_app, args):
                     'is_visualizable': is_visualizable(ext),
                     'visualization_type': visualization_type(ext),
                 }
-                nav_to_dir(filepath, resultdir, hier_res).append({
-                    'display_name':filename[filename.rfind('/')+1:],
-                    'type':'file',
-                    'fileID':file_id,
-                    'description':descriptions(ext),
-                    'is_visualizable': is_visualizable(ext),
-                    'visualization_type': visualization_type(ext),
-                })
+                input_data['var'].append('resC: ' + filepath)
+                try:
+                    nav_to_dir(filepath, resultdir, hier_res).append({
+                        'display_name':filepath[filepath.rfind('/')+1:],
+                        'type':'file',
+                        'fileID':file_id,
+                        'description':descriptions(ext),
+                        'is_visualizable': is_visualizable(ext),
+                        'visualization_type': visualization_type(ext),
+                    })
+                except:
+                    input_data['errors'].append('resC: ' + filepath)
                 data.save()
                 return
     results_watcher.subscribe(
@@ -760,11 +803,15 @@ def initialize(current_app, args):
             if 'process-%d'%i in data
         }
         filepath = event.src_path
-        current = nav_to_dir(filepath, resultdir, hier_res)
-        for entity in current:
-            if entity['display_name'] == filename[filename.rfind('/')+1:]:
-                current.remove(entity)
-        clean_tree(hier_res)
+        try:
+            input_data['var'].append('resD: ' + filepath)
+            current = nav_to_dir(filepath, resultdir, hier_res)
+            for entity in current:
+                if entity['display_name'] == filepath[filepath.rfind('/')+1:]:
+                    current.remove(entity)
+            clean_tree(hier_res)
+        except:
+            input_data['errors'].append('resD: ' + filepath)
         for (parentpath, parentID) in parentpaths:
             if os.path.commonpath([filepath, parentpath])==parentpath:
                 print("Deleted output from process",parentID)
@@ -805,18 +852,22 @@ def initialize(current_app, args):
         if srckey == destkey:
             for (file_id, filedata) in data[srckey]['files'].items():
                 if filedata['fullname'] == filesrc:
-                    nav_to_dir(filedest, resultdir, hier_res).append({
-                        'display_name':filedest[filedest.rfind('/')+1:],
-                        'type':'file',
-                        'fileID':file_id,
-                        'description':descriptions(ext),
-                        'is_visualizable': is_visualizable(ext),
-                        'visualization_type': visualization_type(ext),
-                    })
-                    current_src = nav_to_dir(filesrc, resultdir, hier_res)
-                    current_src.remove([
-                        entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
-                    ][0])
+                    try:
+                        input_data['var'].append('resM: ' + filesrc + '-->' +filedest)
+                        nav_to_dir(filedest, resultdir, hier_res).append({
+                            'display_name':filedest[filedest.rfind('/')+1:],
+                            'type':'file',
+                            'fileID':file_id,
+                            'description':descriptions(ext),
+                            'is_visualizable': is_visualizable(ext),
+                            'visualization_type': visualization_type(ext),
+                        })
+                        current_src = nav_to_dir(filesrc, resultdir, hier_res)
+                        current_src.remove([
+                            entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
+                        ][0])
+                    except:
+                        input_data['errors'].append('resM: ' + filesrc + '-->' + filedest)
                     data[srckey]['files'][file_id] = {
                         'fullname':filedest,
                         'display_name':os.path.relpath(
@@ -958,9 +1009,16 @@ def fullresponse(data, page, count):
         "result": data[(count*(page-1)):((count*page)) if (count*page)<len(data) else len(data)]
     })
 
+def value_type(data,col):
+    for entity in data:
+        if entity['type'] == 'file':
+            return type(entity[col])()
+        elif entity['type'] == 'directory' and tree_size(entity['contents']):
+            return value_type(entity['contents'],col)
+
 def sort_tree(data,col):
-    #doesn't sort numbers properly i.e. '12' < '2' while 2 < 12
-    data.sort(key=lambda x: str(x[col[1:]]) if col[1:] in x else '~', reverse=True if col.startswith('-') else False)
+    col_type = value_type(data,col[1:])
+    data.sort(key=lambda x: x[col[1:]] if col[1:] in x else col_type, reverse=True if col.startswith('-') else False)
     for file in data:
         if file['type'] == 'directory':
             sort_tree(file['contents'], col)
