@@ -199,7 +199,8 @@ def process_info(id):
             }
             for (fileID, filedata) in data['process-%d'%id]['files'].items()
         ],
-        'parameters':params
+        'parameters':params,
+        'data':current_app.config['storage']['manifest']
     }
 
 
