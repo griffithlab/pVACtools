@@ -978,7 +978,8 @@ class APITests(unittest.TestCase):
 
             def sort_tree(data,col):
                 col_type = value_type(data,col[1:])
-                data.sort(key=lambda x: x[col[1:]] if col[1:] in x else col_type, reverse=True if col.startswith('-') else False)
+                col_type = str() if col_type == None else col_type
+                data.sort(key=lambda x: x[col[1:]] if col[1:] in x and x[col[1:]] != None else col_type, reverse=True if col.startswith('-') else False)
                 for file in data:
                     if file['type'] == 'directory':
                         sort_tree(file['contents'], col)
