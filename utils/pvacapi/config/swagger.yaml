@@ -151,7 +151,7 @@ paths:
       parameters:
       - name: "id"
         in: "path"
-        description: "ProcessID or -1 for dropbox"
+        description: "ProcessID or -1 for visualize"
         required: true
         type: "integer"
       - name: "fileID"
@@ -780,15 +780,15 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/dropbox:
+  /api/v1/visualize:
     get:
       tags:
-        - "dropbox"
-      summary: "Get files currently in the dropbox"
-      description: "The dropbox endpoint returns a list of the files currently in\
-      the dropbox folder.  The user may drop result files into this folder to be\
+        - "visualize"
+      summary: "Get files currently in the visualize folder"
+      description: "The visualize endpoint returns a list of the files currently in\
+      the visualize folder.  The user may drop result files into this folder to be\
       displayed in the frontend UI"
-      operationId: "utils.pvacapi.controllers.files.list_dropbox"
+      operationId: "utils.pvacapi.controllers.files.list_visualize"
       parameters:
       - name: "type"
         in: "query"
@@ -831,7 +831,7 @@ paths:
         default: 10
       responses:
         200:
-          description: "An object containing metadata and a list of files in the dropbox"
+          description: "An object containing metadata and a list of files in the visualize folder"
           schema:
             type: "array"
             items:
@@ -850,7 +850,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -894,7 +894,7 @@ paths:
           default: 'ASC'
       responses:
         200:
-          description: "Returns a list of files in the dropbox"
+          description: "Returns a list of files in the visualize folder"
           schema:
             type: "array"
             items: {
@@ -916,7 +916,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -966,7 +966,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -996,7 +996,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
