@@ -272,7 +272,7 @@ def initialize(current_app, args):
         exist_ok=True
     )
     os.makedirs(
-        os.path.join(current_app.config['files']['data-dir'],'results'),
+        os.path.join(current_app.config['files']['data-dir'],'.processes'),
         exist_ok=True
     )
     os.makedirs(
@@ -280,7 +280,11 @@ def initialize(current_app, args):
         exist_ok=True
     )
     os.makedirs(
-        os.path.join(current_app.config['files']['data-dir'],'dropbox'),
+        os.path.join(current_app.config['files']['data-dir'],'visualize'),
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(current_app.config['files']['data-dir'],'export'),
         exist_ok=True
     )
     os.makedirs(
@@ -512,7 +516,7 @@ def initialize(current_app, args):
     )
     current_app.config['storage']['watchers'].append(input_watcher)
 
-    dbr = os.path.join(current_app.config['files']['data-dir'],'dropbox')
+    dbr = os.path.join(current_app.config['files']['data-dir'],'visualize')
     dropbox_watcher = Observe(dbr)
     dropbox_watcher.subscribe(lambda x:print("Dropbox Event:", x))
 
@@ -689,7 +693,7 @@ def initialize(current_app, args):
     manifest_data['results'] = []
     hier_res = manifest_data['results']
 
-    resultdir = os.path.join(current_app.config['files']['data-dir'], 'results')
+    resultdir = os.path.join(current_app.config['files']['data-dir'], '.processes')
     results_watcher = Observe(resultdir)
     results_watcher.subscribe(lambda x:print("Results Event:", x))
     for processID in range(data['processid']+1):

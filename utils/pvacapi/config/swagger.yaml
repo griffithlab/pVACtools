@@ -1035,6 +1035,50 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
+  /api/v1/export/{processID}:
+    get:
+      tags:
+        - "export"
+      summary: "export a process"
+      description: "Copies the results of a process to the export folder"
+      operationId: "utils.pvacapi.controllers.processes.export"
+      parameters:
+        - name: "processID"
+          in: "path"
+          description: "Id of the process to export"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "No meaningful data to return"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/delete/{processID}:
+    get:
+      tags:
+        - "delete"
+      summary: "delete a process"
+      description: "Deletes the a process and all of its results"
+      operationId: "utils.pvacapi.controllers.processes.delete"
+      parameters:
+        - name: "processID"
+          in: "path"
+          description: "Id of the process to delete"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "No meaningful data to return"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
   /api/v1/restart/{processID}:
     get:
       tags:
