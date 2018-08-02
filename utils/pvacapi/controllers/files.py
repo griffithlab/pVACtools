@@ -122,7 +122,7 @@ def results_getcols(id, fileID):
         raw_reader = open(
             os.path.join(
                 os.path.abspath(current_app.config['files']['data-dir']),
-                'dropbox',
+                'visualize',
                 data['dropbox'][str(fileID)]['display_name']
             )
         )
