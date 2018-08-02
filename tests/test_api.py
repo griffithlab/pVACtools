@@ -105,7 +105,7 @@ class APITests(unittest.TestCase):
         db = psql.open("localhost/pvacseq")
         for row in db.prepare("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'data\__%\__%'")():
             name = row[0]
-            if re.match(r'data_(dropbox|\d+)_\d+', name):
+            if re.match(r'data_(visualize|\d+)_\d+', name):
                 print("DROP TABLE", name)
                 db.execute("DROP TABLE %s"%name)
 
@@ -887,7 +887,7 @@ class APITests(unittest.TestCase):
         self.assertIn('results_url', process_data)
         self.assertEqual(process_data['results_url'], old_data['results_url'])
 
-    def test_endpoint_dropbox(self):
+    def test_endpoint_visualize(self):
         shutil.copyfile(
             os.path.join(
                 self.test_data_directory,
@@ -902,7 +902,7 @@ class APITests(unittest.TestCase):
         )
         time.sleep(1)
         response = requests.get(
-            self.urlBase+'/dropbox',
+            self.urlBase+'/visualize',
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())

@@ -87,12 +87,12 @@ def column_mapping(row, mapping, schema):
 def filterfile(parentID, fileID, count, page, filters, sort, direction):
     """Gets the file ID belonging to the parent.\
     For result files, the parentID is the process ID that spawned them.\
-    For dropbox files, the parentID is -1"""
+    For visualize files, the parentID is -1"""
     data = current_app.config['storage']['loader']()
 
     # first, generate the key
     tablekey = "data_%s_%s" % (
-        (parentID if parentID >= 0 else 'dropbox'),
+        (parentID if parentID >= 0 else 'visualize'),
         fileID
     )
 
@@ -126,15 +126,15 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                 )
             raw_reader = open(process[0]['files'][fileID]['fullname'])
         else:
-            if str(fileID) not in data['dropbox']:
+            if str(fileID) not in data['visualize']:
                 return (
                     {
                         "code": 400,
-                        "message": "The requested fileID (%s) does not exist in the dropbox" % fileID,
+                        "message": "The requested fileID (%s) does not exist in the visualize" % fileID,
                         "fields": "fileID"
                     }, 400
                 )
-            raw_reader = open(data['dropbox'][str(fileID)]['fullname'])
+            raw_reader = open(data['visualize'][str(fileID)]['fullname'])
         if not raw_reader.name.endswith('.tsv'):
             ext = os.path.splitext(raw_reader.name)[1].lower()
             if len(ext) and ext[0] == '.':
@@ -311,7 +311,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
 def fileschema(parentID, fileID):
     data = current_app.config['storage']['loader']()
     tablekey = "data_%s_%s" % (
-        (parentID if parentID >= 0 else 'dropbox'),
+        (parentID if parentID >= 0 else 'visualize'),
         fileID
     )
 
@@ -385,7 +385,7 @@ def visualize_script(parentID, fileID):
     if type(proc_data)==dict and 'parameters' in proc_data and 'sample_name' in proc_data['parameters']:
         sample = proc_data['parameters']['sample_name']
     elif parentID == -1:
-        sample = data['dropbox'][str(fileID)]['display_name'].rsplit(".", 1)[0]
+        sample = data['visualize'][str(fileID)]['display_name'].rsplit(".", 1)[0]
     else:
         sample = 'Unknown Sample'
 
