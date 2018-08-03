@@ -8,7 +8,7 @@ class Filter:
         self.exclude_nas = exclude_nas
 
     def execute(self):
-        data = pandas.read_csv(self.input_file, delimiter='\t', float_precision='high')
+        data = pandas.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False)
         header = data.columns
         clean_header = header.map(lambda x: x.replace(' ', '_') if isinstance(x, str) else x)
         data.columns = clean_header

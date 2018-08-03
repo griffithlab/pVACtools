@@ -193,6 +193,8 @@ def initialize(current_app, args):
         data.addKey('processid', 0, current_app.config['files']['processes'])
     if 'dropbox' not in data:
         data.addKey('dropbox', {}, current_app.config['files']['dropbox'])
+    if 'input' not in data:
+        data.addKey('input', {}, current_app.config['files']['input'])
     #Check the last reboot (because pid's won't remain valid after a reboot)
     current_app.config['storage']['data'] = data
     import weakref
@@ -286,12 +288,236 @@ def initialize(current_app, args):
         exist_ok=True
     )
 
+    def make_config():
+        import yaml
+        base = os.path.join(current_app.config['files']['data-dir'],'dropbox')
+        runs = [d for d in os.listdir(base) if os.path.isdir(os.path.join(base, d))]
+        for run in runs:
+            config_path = os.path.join(base, run, 'config.json')
+            MHCI = os.path.join(base, run, 'MHC_Class_I', 'log', 'inputs.yml')
+            MHCII = os.path.join(base, run, 'MHC_Class_II', 'log', 'inputs.yml')
+            if os.path.exists(MHCI):
+                with open(MHCI, 'r') as MHCI_input:
+                    MHC_dict = yaml.load(MHCI_input)
+                    if MHC_dict:
+                        if os.path.exists(MHCII):
+                            with open(MHCII, 'r') as MHCII_input:
+                                temp_dict = yaml.load(MHCII_input)
+                                if temp_dict:
+                                    MHC_dict.update({k:v for k,v in temp_dict.items() if k not in MHC_dict})
+                                    MHC_dict['alleles'].extend(temp_dict['alleles'])
+                                    MHC_dict['prediction_algorithms'].extend(temp_dict['prediction_algorithms'])
+                        del MHC_dict['tmp_dir']
+                        MHC_dict['output'] = MHC_dict['output_dir']
+                        del MHC_dict['output_dir']
+                        if 'MHC_Class' in os.path.basename(MHC_dict['output']):
+                            MHC_dict['output'] = MHC_dict['output'][:MHC_dict['output'].rfind('/')]
+                        if os.path.exists(config_path):
+                            old_dict = json.load(open(config_path))
+                            if old_dict and MHC_dict != old_dict:
+                                with open(config_path, 'w') as config_file:
+                                    json.dump(MHC_dict, config_file, indent='\t')
+                        else:
+                            with open(config_path, 'w') as config_file:
+                                json.dump(MHC_dict, config_file, indent='\t')
+            elif os.path.exists(MHCII):
+                with open(MHCII, 'r') as MHCII_input:
+                    MHC_dict = yaml.load(MHCII_input)
+                    if MHC_dict:
+                        del MHC_dict['tmp_dir']
+                        MHC_dict['output'] = MHC_dict['output_dir']
+                        del MHC_dict['output_dir']
+                        if 'MHC_Class' in os.path.basename(MHC_dict['output']):
+                            MHC_dict['output'] = MHC_dict['output'][:MHC_dict['output'].rfind('/')]
+                        if os.path.exists(config_path):
+                            old_dict = json.load(open(config_path))
+                            if old_dict and MHC_dict != old_dict:
+                                with open(config_path, 'w') as config_file:
+                                    json.dump(MHC_dict, config_file, indent='\t')
+                        else:
+                            with open(config_path, 'w') as config_file:
+                                json.dump(MHC_dict, config_file, indent='\t')
+
+    #checks if any previous runs results are already provided and creates subsequent config files if so
+    if os.listdir(os.path.join(current_app.config['files']['data-dir'],'dropbox')): make_config()
+
     #Setup the watchers to observe the files
     current_app.config['storage']['watchers'] = []
+
+    inputdir = os.path.join(current_app.config['files']['data-dir'],'input')
+    manifest_data = current_app.config['storage']['manifest']
+    input_watcher = Observe(inputdir)
+    input_watcher.subscribe(lambda x:print("Input Event:", x))
+
+    manifest_data['input'] = []
+    hier_inp = manifest_data['input']
+
+    current = {
+        os.path.join(path, filename)
+        for (path, _, files) in os.walk(inputdir)
+        for filename in files
+    }
+    for (key, filename) in data['input'].items():
+        if type(data['input'][key])==str:
+            ext = '.'.join(os.path.basename(filename).split('.')[1:])
+            print("Updating input entry",key,"to new format")
+            data['input'][key] = {
+                'fullname':os.path.join(
+                    inputdir,
+                    filename
+                ),
+                'display_name':os.path.relpath(
+                    filename,
+                    inputdir
+                ),
+                'description':descriptions(ext),
+                'is_visualizable': is_visualizable(ext),
+                'visualization_type': visualization_type(ext),
+            }
+    recorded = {item['fullname'] for item in data['input'].values()}
+    targets = {k for k in data['input'] if data['input'][k]['fullname'] in recorded-current}
+    for file_id in targets:
+        del data['input'][file_id]
+    file_id = 0
+    for filename in current-recorded:
+        while str(file_id) in data['input']:
+            file_id += 1
+        ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
+        print("Assigning file:", file_id,"-->",filename)
+        data['input'][str(file_id)] = {
+            'fullname':os.path.abspath(os.path.join(
+                inputdir,
+                filename
+            )),
+            'display_name':os.path.relpath(
+                filename,
+                inputdir
+            ),
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
+        }
+    for filename in current:
+        file_path = os.path.abspath(os.path.join(inputdir, filename))
+        ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
+        nav_to_dir(file_path, inputdir, hier_inp).append({
+            'display_name':filename[filename.rfind('/')+1:],
+            'type':'file',
+            'fileID':str([k for k,v in data['input'].items() if v['fullname'] == file_path][0]),
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
+        })
+
+    def _create(event):
+        data = loader()
+        filename = os.path.relpath(
+            event.src_path,
+            inputdir
+        )
+        file_id = 0
+        while str(file_id) in data['input']:
+            file_id += 1
+        ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
+        print("Creating file:", file_id, "-->",filename)
+        data['input'][str(file_id)] = {
+            'fullname':os.path.abspath(os.path.join(
+                inputdir,
+                filename
+            )),
+            'display_name':filename,
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
+        }
+        nav_to_dir(event.src_path, inputdir, hier_inp).append({
+            'display_name':filename[filename.rfind('/')+1:],
+            'type':'file',
+            'fileID':str(file_id),
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
+        })
+        data.save()
+    input_watcher.subscribe(
+        _create,
+        watchdog.events.FileCreatedEvent
+    )
+
+    def _delete(event):
+        data = loader()
+        filename = os.path.relpath(
+            event.src_path,
+            inputdir
+        )
+        current = nav_to_dir(event.src_path, inputdir, hier_inp)
+        for entity in current:
+            if entity['display_name'] == filename[filename.rfind('/')+1:]:
+                current.remove(entity)
+        clean_tree(hier_inp)
+        for key in list(data['input']):
+            if data['input'][key]['display_name'] == filename:
+                del data['input'][key]
+                print("Deleting file:",key,'-->', filename)
+                data.save()
+                return
+    input_watcher.subscribe(
+        _delete,
+        watchdog.events.FileDeletedEvent
+    )
+
+    def _move(event):
+        data = loader()
+        filesrc = os.path.relpath(
+            event.src_path,
+            inputdir
+        )
+        filedest = os.path.relpath(
+            event.dest_path,
+            inputdir
+        )
+        file_id = [k for k in data['input'] if data['input'][k]['display_name'] == filesrc][0]
+        ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
+        current_src = nav_to_dir(event.src_path, inputdir, hier_inp)
+        nav_to_dir(event.dest_path, inputdir, hier_inp).append({
+            'display_name':filedest[filedest.rfind('/')+1:],
+            'type':'file',
+            'fileID':str(file_id),
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
+        })
+        current_src.remove([
+            entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
+        ][0])
+        clean_tree(hier_inp)
+        for key in data['input']:
+            if key == file_id:
+                data['input'][key] = {
+                    'fullname':os.path.abspath(os.path.join(
+                        inputdir,
+                        filedest
+                    )),
+                    'display_name':filedest,
+                    'description':descriptions(ext),
+                    'is_visualizable': is_visualizable(ext),
+                    'visualization_type': visualization_type(ext),
+                }
+                print("Moving file:", key,'(',filesrc,'-->',filedest,')')
+                data.save()
+                return
+    input_watcher.subscribe(
+        _move,
+        watchdog.events.FileMovedEvent
+    )
+    current_app.config['storage']['watchers'].append(input_watcher)
 
     dbr = os.path.join(current_app.config['files']['data-dir'],'dropbox')
     dropbox_watcher = Observe(dbr)
     dropbox_watcher.subscribe(lambda x:print("Dropbox Event:", x))
+
+    manifest_data['dropbox'] = []
+    hier_db = manifest_data['dropbox']
     #Now we set up event handlers for the dropbox
     #This ensures that file ids are held consistent
     current = {
@@ -317,16 +543,16 @@ def initialize(current_app, args):
                 'visualization_type': visualization_type(ext),
             }
     recorded = {item['fullname'] for item in data['dropbox'].values()}
-    targets = {data['dropbox'][k]['fullname'] for k in data['dropbox'] if data['dropbox'][k]['fullname'] in recorded-current}
-    for fileID in targets:
-        del data['dropbox'][fileID]
-    fileID = 0
+    targets = {k for k in data['dropbox'] if data['dropbox'][k]['fullname'] in recorded-current}
+    for file_id in targets:
+        del data['dropbox'][file_id]
+    file_id = 0
     for filename in current-recorded:
-        while str(fileID) in data['dropbox']:
-            fileID += 1
+        while str(file_id) in data['dropbox']:
+            file_id += 1
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
-        print("Assigning file:", fileID,"-->",filename)
-        data['dropbox'][str(fileID)] = {
+        print("Assigning file:", file_id,"-->",filename)
+        data['dropbox'][str(file_id)] = {
             'fullname':os.path.abspath(os.path.join(
                 dbr,
                 filename
@@ -339,20 +565,32 @@ def initialize(current_app, args):
             'is_visualizable': is_visualizable(ext),
             'visualization_type': visualization_type(ext),
         }
+    for filename in current:
+        file_path = os.path.abspath(os.path.join(dbr, filename))
+        ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
+        nav_to_dir(file_path, dbr, hier_db).append({
+            'display_name':filename[filename.rfind('/')+1:],
+            'type':'file',
+            'fileID':str([k for k,v in data['dropbox'].items() if v['fullname'] == file_path][0]),
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
+        })
 
     data_path = current_app.config['files']
     def _create(event):
         data = loader()
+        make_config()
         filename = os.path.relpath(
             event.src_path,
             dbr
         )
-        fileID = 0
-        while str(fileID) in data['dropbox']:
-            fileID += 1
+        file_id = 0
+        while str(file_id) in data['dropbox']:
+            file_id += 1
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
-        print("Creating file:", fileID, "-->",filename)
-        data['dropbox'][str(fileID)] = {
+        print("Creating file:", file_id, "-->",filename)
+        data['dropbox'][str(file_id)] = {
             'fullname':os.path.abspath(os.path.join(
                 dbr,
                 filename
@@ -362,6 +600,14 @@ def initialize(current_app, args):
             'is_visualizable': is_visualizable(ext),
             'visualization_type': visualization_type(ext),
         }
+        nav_to_dir(event.src_path, dbr, hier_db).append({
+            'display_name':filename[filename.rfind('/')+1:],
+            'type':'file',
+            'fileID':str(file_id),
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
+        })
         data.save()
     dropbox_watcher.subscribe(
         _create,
@@ -374,6 +620,11 @@ def initialize(current_app, args):
             event.src_path,
             dbr
         )
+        current = nav_to_dir(event.src_path, dbr, hier_db)
+        for entity in current:
+            if entity['display_name'] == filename[filename.rfind('/')+1:]:
+                current.remove(entity)
+        clean_tree(hier_db)
         for key in list(data['dropbox']):
             if data['dropbox'][key]['display_name'] == filename:
                 del data['dropbox'][key]
@@ -399,18 +650,29 @@ def initialize(current_app, args):
             event.dest_path,
             dbr
         )
+        file_id = [k for k in data['dropbox'] if data['dropbox'][k]['display_name'] == filesrc][0]
         ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
+        current_src = nav_to_dir(event.src_path, dbr, hier_db)
+        nav_to_dir(event.dest_path, dbr, hier_db).append({
+            'display_name':filedest[filedest.rfind('/')+1:],
+            'type':'file',
+            'fileID':str(file_id),
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
+        })
+        current_src.remove([
+            entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
+        ][0])
+        clean_tree(hier_db)
         for key in data['dropbox']:
-            if data['dropbox'][key]['display_name'] == filesrc:
+            if key == file_id:
                 data['dropbox'][key] = {
                     'fullname':os.path.abspath(os.path.join(
                         dbr,
                         filedest
                     )),
-                    'display_name':os.path.relpath(
-                        filedest,
-                        dbr
-                    ),
+                    'display_name':filedest,
                     'description':descriptions(ext),
                     'is_visualizable': is_visualizable(ext),
                     'visualization_type': visualization_type(ext),
@@ -424,6 +686,9 @@ def initialize(current_app, args):
     )
     current_app.config['storage']['watchers'].append(dropbox_watcher)
 
+    manifest_data['results'] = []
+    hier_res = manifest_data['results']
+
     resultdir = os.path.join(current_app.config['files']['data-dir'], 'results')
     results_watcher = Observe(resultdir)
     results_watcher.subscribe(lambda x:print("Results Event:", x))
@@ -435,7 +700,7 @@ def initialize(current_app, args):
                 if type(data[processkey]['files']) == list:
                     print("Updating file manifest of process",processID,"to new format")
                     data[processkey]['files']={
-                        fileID:{
+                        file_id:{
                             'fullname':filename,
                             'display_name':os.path.relpath(
                                 filename,
@@ -451,7 +716,7 @@ def initialize(current_app, args):
                                 '.'.join(os.path.basename(filename).split('.')[1:])
                             ),
                         }
-                        for (filename, fileID) in zip(
+                        for (filename, file_id) in zip(
                             data[processkey]['files'],
                             range(sys.maxsize)
                         )
@@ -464,18 +729,18 @@ def initialize(current_app, args):
                 for filename in files
             }
             recorded = {entry['fullname']:k for k,entry in data[processkey]['files'].items()}
-            for fileID in recorded.keys()-current:
-                print("Deleting file",fileID,"from manifest")
-                fileID = recorded[fileID]
-                del data[processkey]['files'][fileID]
+            for file_id in recorded.keys()-current:
+                print("Deleting file",file_id,"from manifest")
+                file_id = recorded[file_id]
+                del data[processkey]['files'][file_id]
             for filename in current-recorded.keys():
-                fileID = len(data[processkey]['files'])
-                while str(fileID) in data[processkey]['files']:
-                    fileID += 1
-                fileID = str(fileID)
+                file_id = len(data[processkey]['files'])
+                while str(file_id) in data[processkey]['files']:
+                    file_id += 1
+                file_id = str(file_id)
                 ext = '.'.join(os.path.basename(filename).split('.')[1:])
-                print("Assigning file:",fileID,"-->",filename)
-                data[processkey]['files'][fileID] = {
+                print("Assigning file:",file_id,"-->",filename)
+                data[processkey]['files'][file_id] = {
                     'fullname':filename,
                     'display_name':os.path.relpath(
                         filename,
@@ -485,6 +750,17 @@ def initialize(current_app, args):
                     'is_visualizable': is_visualizable(ext),
                     'visualization_type': visualization_type(ext),
                 }
+            for filename in current:
+                file_path = os.path.abspath(os.path.join(data[processkey]['output'], filename))
+                ext = '.'.join(os.path.basename(filename).split('.')[1:])
+                nav_to_dir(file_path, resultdir, hier_res).append({
+                    'display_name':filename[filename.rfind('/')+1:],
+                    'type':'file',
+                    'fileID':str([k for k,v in data[processkey]['files'].items() if v['fullname'] == file_path][0]),
+                    'description':descriptions(ext),
+                    'is_visualizable': is_visualizable(ext),
+                    'visualization_type': visualization_type(ext),
+                })
 
     def _create(event):
         data = loader()
@@ -498,23 +774,31 @@ def initialize(current_app, args):
             if os.path.commonpath([filepath, parentpath])==parentpath:
                 print("New output from process",parentID)
                 processkey = 'process-%d'%parentID
-                fileID = len(data[processkey]['files'])
-                while str(fileID) in data[processkey]['files']:
-                    fileID+=1
-                fileID = str(fileID)
+                file_id = len(data[processkey]['files'])
+                while str(file_id) in data[processkey]['files']:
+                    file_id+=1
+                file_id = str(file_id)
                 display_name = os.path.relpath(
                     filepath,
                     data[processkey]['output']
                 )
                 ext = '.'.join(os.path.basename(filepath).split('.')[1:])
-                print("Assigning id",fileID,'-->',display_name)
-                data[processkey]['files'][fileID] = {
+                print("Assigning id",file_id,'-->',display_name)
+                data[processkey]['files'][file_id] = {
                     'fullname':filepath,
                     'display_name':display_name,
                     'description':descriptions(ext),
                     'is_visualizable': is_visualizable(ext),
                     'visualization_type': visualization_type(ext),
                 }
+                nav_to_dir(filepath, resultdir, hier_res).append({
+                    'display_name':filepath[filepath.rfind('/')+1:],
+                    'type':'file',
+                    'fileID':file_id,
+                    'description':descriptions(ext),
+                    'is_visualizable': is_visualizable(ext),
+                    'visualization_type': visualization_type(ext),
+                })
                 data.save()
                 return
     results_watcher.subscribe(
@@ -530,18 +814,23 @@ def initialize(current_app, args):
             if 'process-%d'%i in data
         }
         filepath = event.src_path
+        current = nav_to_dir(filepath, resultdir, hier_res)
+        for entity in current:
+            if entity['display_name'] == filepath[filepath.rfind('/')+1:]:
+                current.remove(entity)
+            clean_tree(hier_res)
         for (parentpath, parentID) in parentpaths:
             if os.path.commonpath([filepath, parentpath])==parentpath:
                 print("Deleted output from process",parentID)
                 processkey = 'process-%d'%parentID
-                for (fileID, filedata) in list(data[processkey]['files'].items()):
+                for (file_id, filedata) in list(data[processkey]['files'].items()):
                     if filedata['fullname'] == filepath:
-                        del data[processkey]['files'][fileID]
-                        print("Deleted file:", fileID,'-->',filepath)
+                        del data[processkey]['files'][file_id]
+                        print("Deleted file:", file_id,'-->',filepath)
                         with db.synchronizer:
                             query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
-                            if len(query('data_%d_%s'%(parentID, fileID))):
-                                db.execute("DROP TABLE data_%d_%s"%(parentID, fileID))
+                            if len(query('data_%d_%s'%(parentID, file_id))):
+                                db.execute("DROP TABLE data_%d_%s"%(parentID, file_id))
                 data.save()
                 return
     results_watcher.subscribe(
@@ -568,9 +857,21 @@ def initialize(current_app, args):
 
         ext = '.'.join(os.path.basename(filedest).split('.')[1:])
         if srckey == destkey:
-            for (fileID, filedata) in data[srckey]['files'].items():
+            for (file_id, filedata) in data[srckey]['files'].items():
                 if filedata['fullname'] == filesrc:
-                    data[srckey]['files'][fileID] = {
+                    nav_to_dir(filedest, resultdir, hier_res).append({
+                        'display_name':filedest[filedest.rfind('/')+1:],
+                        'type':'file',
+                        'fileID':file_id,
+                        'description':descriptions(ext),
+                        'is_visualizable': is_visualizable(ext),
+                        'visualization_type': visualization_type(ext),
+                    })
+                    current_src = nav_to_dir(filesrc, resultdir, hier_res)
+                    current_src.remove([
+                        entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
+                    ][0])
+                    data[srckey]['files'][file_id] = {
                         'fullname':filedest,
                         'display_name':os.path.relpath(
                             filedest,
@@ -585,6 +886,7 @@ def initialize(current_app, args):
             evt = lambda:None
             evt.src_path = event.dest_path
             _create(evt)
+        clean_tree(hier_res)
     results_watcher.subscribe(
         _move,
         watchdog.events.FileMovedEvent
@@ -654,6 +956,33 @@ ops = {
     '>': operator.gt
 }
 
+#return the associated list within data that represents the directory of file_dir, 
+#creating dictionaries for each directory in the path that doesn't already exist.
+#Note: assumes file_dir is a path to a file and navigates to it's directory.
+def nav_to_dir(file_dir, home_dir, data):
+    current = data
+    for d in os.path.relpath(file_dir, home_dir).split('/'):
+        if not d == '.' and not d == file_dir[file_dir.rfind('/')+1:]:
+            if d not in [f['display_name'] for f in current if f['type'] == 'directory']:
+                current.append({
+                    'display_name':d,
+                    'type':'directory',
+                    'contents': []
+                })
+            for item in current:
+                if item['display_name'] == d and item['type'] == 'directory':
+                    current = item['contents']
+                    break
+    return current
+
+#recursively remove all directory dictionaries in data that are empty from bottom up
+def clean_tree(data):
+    for entity in data:
+        if entity['type'] == 'directory':
+            if not clean_tree(entity['contents']):
+                data.remove(entity)
+    return data
+
 # see if string is a number
 def is_number(string):
     try:
@@ -683,6 +1012,48 @@ def fullresponse(data, page, count):
         "result": data[(count*(page-1)):((count*page)) if (count*page)<len(data) else len(data)]
     })
 
+def value_type(data,col):
+    for entity in data:
+        if entity['type'] == 'file':
+            return type(entity[col])()
+        elif entity['type'] == 'directory' and tree_size(entity['contents']):
+            return value_type(entity['contents'], col)
+
+def sort_tree(data,col):
+    col_type = value_type(data,col[1:])
+    #accounts for visualization_type which has NoneType and String objects
+    col_type = str() if col_type == None else col_type
+    data.sort(key=lambda x: x[col[1:]] if col[1:] in x and x[col[1:]] != None else col_type, reverse=True if col.startswith('-') else False)
+    for file in data:
+        if file['type'] == 'directory':
+            sort_tree(file['contents'], col)
+
+#sort filterdata
+def sort_data(data, sorting, page, count, columns):
+    if not len(sorting) or sorting[0]=="none":
+        sorting = ['+display_name']
+    if not [item for item in sorting if re.search(r'[-\s\+]type$', item) != None]:
+        sorting.insert(0,'-type')
+    i = len(sorting)-1
+    while i > -1:
+        col = sorting[i] if not sorting[i].startswith(' ') else '+' + sorting[i][1:]
+        if not col.startswith('-') and not col.startswith('+'):
+            return ({
+                "code": 400,
+                "message": "Please indicate which direction you'd like to sort by by putting a + or - in front of the column name",
+                "fields": "sorting"
+            }, 400)
+        if col[1:] not in columns:
+            return ({
+                "code": 400,
+                "message": "Unknown column name %s" % col[1:],
+                "fields": "sorting"
+            }, 400)
+        sort_tree(data,col)
+        i-=1
+    return data#fullresponse(data, page, count)
+
+#sort filterprocess
 def sort(data, sorting, page, count, columns):
     if not len(sorting) or sorting[0]=="none":
         return fullresponse(data, page, count)
@@ -705,7 +1076,80 @@ def sort(data, sorting, page, count, columns):
         i-=1
     return fullresponse(data, page, count)
 
+def rem_inv(data):
+    for file in [f for f in data]:
+        if file['type'] == 'file' and file['display_name'].startswith('.'):
+            data.remove(file)
+        elif file['type'] == 'directory':
+            rem_inv(file['contents'])
+
+def tree_size(data):
+    count = 0
+    for file in data:
+        if file['type'] == 'file':
+            count += 1
+        elif file['type'] == 'directory':
+            count += tree_size(file['contents'])
+    return count
+
+def col_names(data):
+    col = []
+    for file in data:
+        if file['type'] == 'file':
+            col = [name for name in file]
+            break;
+        elif file['type'] == 'directory':
+            col = col_names(file['contents'])
+    return col
+
+def filter_tree(data, filters, columns):
+    for file in [f for f in data]: #remove from data without the issues of removing while iterating over it
+        if file['type'] == 'file':
+            keep = True
+            for j in range(len(filters)):
+                f = filters[j].strip()
+                if not len(f):
+                    continue
+                result = queryfilters.match(f)
+                if not result:
+                    return ({
+                        "code":400,
+                        "message": "Encountered an invalid filter (%s)" % f,
+                        "fields": "filtering"
+                    }, 400)
+                colname = result.group(1)
+                if colname not in columns:
+                    return ({
+                        "code": 400,
+                        "message": "Unknown column name %s" % result.group(1),
+                        "fields": "filtering"
+                    }, 400)
+                op = result.group(2)
+                val = result.group(3)
+                comp = file[colname]
+                if type(comp) == int:
+                    val = int(val)
+                elif is_number(comp):
+                    val = float(val)
+                if not cmp(comp, op, val):
+                    keep = False
+            if not keep:
+                data.remove(file)
+        elif file['type'] == 'directory':
+            filter_tree(file['contents'],filters,columns)
+
+#a version of filterprocess for tree structured data
 def filterdata(data, filters, sorting, page, count):
+    rem_inv(data) #remove invisible files (if this becomes a filter option, remove)
+    if not tree_size(data):
+        return data
+    columns = col_names(data)
+    if not len(filters) or filters[0]=="none":
+        return sort_data(data, sorting, page, count, columns)
+    filter_tree(data, filters, columns)
+    return sort_data(data, sorting, page, count, columns)
+
+def filterprocess(data, filters, sorting, page, count):
     if not len(data):
         return fullresponse(data, page, count)
     columns = [name for name in data[0]]

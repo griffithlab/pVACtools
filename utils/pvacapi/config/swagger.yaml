@@ -96,6 +96,38 @@ paths:
       description: "Queries the input folder for a list of files ready to be used\
       in a new run of pVAC-Seq"
       operationId: "utils.pvacapi.controllers.files.list_input"
+      parameters:
+      - name: "filters"
+        in: "query"
+        description: "Array of filters to be applied. ex: size>200"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "sorting"
+        in: "query"
+        description: "Ordered array of ways to sort data, + before property name\
+        indicating ascending, - indicating descending. ex: +size,-fileID"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "page"
+        in: "query"
+        description: "Page of results to return"
+        required: false
+        type: "integer"
+        default: 1
+      - name: "count"
+        in: "query"
+        description: "Number of results to return per page"
+        required: false
+        type: "integer"
+        default: 10
       responses:
         200:
           description: "An object containing metadata and an array of input files"
@@ -304,18 +336,18 @@ paths:
       - name: "normal_vaf"
         in: "formData"
         description: "Normal VAF Cutoff: Sites below this cutoff will be considered"
-        type: "integer"
-        default: 2
+        type: "number"
+        default: 0.02
       - name: "tdna_vaf"
         in: "formData"
         description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 40
+        type: "number"
+        default: 0.4
       - name: "trna_vaf"
         in: "formData"
         description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 40
+        type: "number"
+        default: 0.4
       - name: "expn_val"
         in: "formData"
         description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
@@ -757,6 +789,46 @@ paths:
       the dropbox folder.  The user may drop result files into this folder to be\
       displayed in the frontend UI"
       operationId: "utils.pvacapi.controllers.files.list_dropbox"
+      parameters:
+      - name: "type"
+        in: "query"
+        description: "Type of file to display"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        default: "default"
+      - name: "filters"
+        in: "query"
+        description: "Array of filters to be applied. ex: size>200"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "sorting"
+        in: "query"
+        description: "Ordered array of ways to sort data, + before property name\
+        indicating ascending, - indicating descending. ex: +size,-fileID"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "page"
+        in: "query"
+        description: "Page of results to return"
+        required: false
+        type: "integer"
+        default: 1
+      - name: "count"
+        in: "query"
+        description: "Number of results to return per page"
+        required: false
+        type: "integer"
+        default: 10
       responses:
         200:
           description: "An object containing metadata and a list of files in the dropbox"
