@@ -23,12 +23,12 @@
 	"samplename": "basic_run",
 	"trna_cov": 10,
 	"keep_tmp_files": false,
-	"normal_vaf": 2,
-	"trna_vaf": 40,
+	"normal_vaf": 0.02,
+	"trna_vaf": 0.40,
 	"prediction_algorithms": [
 		"NetMHC"
 	],
 	"iedb_install_dir": "",
-	"tdna_vaf": 40,
+	"tdna_vaf": 0.40,
 	"tdna_cov": 10
 }

@@ -154,7 +154,7 @@ class VcfConverter(InputFileConverter):
         if depth == 0:
             return 'NA'
         else:
-            return (var_count / depth) * 100
+            return (var_count / depth)
 
     def parse_gene_expns_file(self):
         gene_expns = {}
@@ -224,6 +224,8 @@ class VcfConverter(InputFileConverter):
                 vaf = allele_frequencies[alts.index(alt)]
             else:
                 vaf = allele_frequencies
+            if vaf > 1:
+                print("Warning: VAF is expected to be a fraction, but is larger than 1. If VAFs are encoded as percentages, please adjust the coverage cutoffs accordingly.")
         except AttributeError:
             try:
                 allele_depths = genotype[ad_tag]
@@ -243,7 +245,7 @@ class VcfConverter(InputFileConverter):
                 depth = genotype[dp_tag]
                 if depth is None or depth == "":
                     return 'NA'
-                vaf = int(var_count) / int(depth)
+                vaf = self.calculate_vaf(int(var_count), int(depth))
             except AttributeError:
                 vaf = 'NA'
         return vaf
