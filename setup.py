@@ -80,7 +80,6 @@ setup(
             'watchdog',
             'flask-cors',
             'bokeh==0.12.6',
-            'pvacseq-client',
             'swagger-spec-validator==2.1.0',
         ]
     },
