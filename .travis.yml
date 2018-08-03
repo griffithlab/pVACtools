@@ -17,6 +17,7 @@ install:
   #with the newest version of the spec validator our swagger yml doesn't
   #validate anymore. Use a version that works.
   - pip install swagger-spec-validator==2.1.0
+  - pip install connexion==1.4.2
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"

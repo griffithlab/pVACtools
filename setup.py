@@ -60,7 +60,7 @@ setup(
         'PyVCF',
         'requests',
         'PyYAML',
-        'connexion',
+        'connexion==1.4.2',
         'biopython',
         'networkx',
         'simanneal',
@@ -75,7 +75,7 @@ setup(
     },
     extras_require={
         'API':[
-            'connexion',
+            'connexion==1.4.2',
             'py-postgresql',
             'watchdog',
             'flask-cors',
