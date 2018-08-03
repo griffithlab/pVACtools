@@ -288,6 +288,59 @@ def initialize(current_app, args):
         exist_ok=True
     )
 
+    def make_config():
+        import yaml
+        base = os.path.join(current_app.config['files']['data-dir'],'dropbox')
+        runs = [d for d in os.listdir(base) if os.path.isdir(os.path.join(base, d))]
+        for run in runs:
+            config_path = os.path.join(base, run, 'config.json')
+            MHCI = os.path.join(base, run, 'MHC_Class_I', 'log', 'inputs.yml')
+            MHCII = os.path.join(base, run, 'MHC_Class_II', 'log', 'inputs.yml')
+            if os.path.exists(MHCI):
+                with open(MHCI, 'r') as MHCI_input:
+                    MHC_dict = yaml.load(MHCI_input)
+                    if MHC_dict:
+                        if os.path.exists(MHCII):
+                            with open(MHCII, 'r') as MHCII_input:
+                                temp_dict = yaml.load(MHCII_input)
+                                if temp_dict:
+                                    MHC_dict.update({k:v for k,v in temp_dict.items() if k not in MHC_dict})
+                                    MHC_dict['alleles'].extend(temp_dict['alleles'])
+                                    MHC_dict['prediction_algorithms'].extend(temp_dict['prediction_algorithms'])
+                        del MHC_dict['tmp_dir']
+                        MHC_dict['output'] = MHC_dict['output_dir']
+                        del MHC_dict['output_dir']
+                        if 'MHC_Class' in os.path.basename(MHC_dict['output']):
+                            MHC_dict['output'] = MHC_dict['output'][:MHC_dict['output'].rfind('/')]
+                        if os.path.exists(config_path):
+                            old_dict = json.load(open(config_path))
+                            if old_dict and MHC_dict != old_dict:
+                                with open(config_path, 'w') as config_file:
+                                    json.dump(MHC_dict, config_file, indent='\t')
+                        else:
+                            with open(config_path, 'w') as config_file:
+                                json.dump(MHC_dict, config_file, indent='\t')
+            elif os.path.exists(MHCII):
+                with open(MHCII, 'r') as MHCII_input:
+                    MHC_dict = yaml.load(MHCII_input)
+                    if MHC_dict:
+                        del MHC_dict['tmp_dir']
+                        MHC_dict['output'] = MHC_dict['output_dir']
+                        del MHC_dict['output_dir']
+                        if 'MHC_Class' in os.path.basename(MHC_dict['output']):
+                            MHC_dict['output'] = MHC_dict['output'][:MHC_dict['output'].rfind('/')]
+                        if os.path.exists(config_path):
+                            old_dict = json.load(open(config_path))
+                            if old_dict and MHC_dict != old_dict:
+                                with open(config_path, 'w') as config_file:
+                                    json.dump(MHC_dict, config_file, indent='\t')
+                        else:
+                            with open(config_path, 'w') as config_file:
+                                json.dump(MHC_dict, config_file, indent='\t')
+
+    #checks if any previous runs results are already provided and creates subsequent config files if so
+    if os.listdir(os.path.join(current_app.config['files']['data-dir'],'dropbox')): make_config()
+
     #Setup the watchers to observe the files
     current_app.config['storage']['watchers'] = []
 
@@ -527,6 +580,7 @@ def initialize(current_app, args):
     data_path = current_app.config['files']
     def _create(event):
         data = loader()
+        make_config()
         filename = os.path.relpath(
             event.src_path,
             dbr
