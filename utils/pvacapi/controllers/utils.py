@@ -307,6 +307,11 @@ def initialize(current_app, args):
                                     MHC_dict.update({k:v for k,v in temp_dict.items() if k not in MHC_dict})
                                     MHC_dict['alleles'].extend(temp_dict['alleles'])
                                     MHC_dict['prediction_algorithms'].extend(temp_dict['prediction_algorithms'])
+                        del MHC_dict['tmp_dir']
+                        MHC_dict['output'] = MHC_dict['output_dir']
+                        del MHC_dict['output_dir']
+                        if 'MHC_Class' in os.path.basename(MHC_dict['output']):
+                            MHC_dict['output'] = MHC_dict['output'][:MHC_dict['output'].rfind('/')]
                         if os.path.exists(config_path):
                             old_dict = json.load(open(config_path))
                             if old_dict and MHC_dict != old_dict:
@@ -319,6 +324,11 @@ def initialize(current_app, args):
                 with open(MHCII, 'r') as MHCII_input:
                     MHC_dict = yaml.load(MHCII_input)
                     if MHC_dict:
+                        del MHC_dict['tmp_dir']
+                        MHC_dict['output'] = MHC_dict['output_dir']
+                        del MHC_dict['output_dir']
+                        if 'MHC_Class' in os.path.basename(MHC_dict['output']):
+                            MHC_dict['output'] = MHC_dict['output'][:MHC_dict['output'].rfind('/')]
                         if os.path.exists(config_path):
                             old_dict = json.load(open(config_path))
                             if old_dict and MHC_dict != old_dict:
