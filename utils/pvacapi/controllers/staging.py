@@ -14,8 +14,9 @@ from .files import list_input
 from lib.prediction_class import *
 
 def resolve_filepath(filepath):
-    if int_pattern.match(filepath) and int(filepath) <= len(current_app.config['storage']['manifest']):
-        filepath = current_app.config['storage']['manifest'][int(filepath)]
+    data = current_app.config['storage']['loader']()
+    if int_pattern.match(filepath) and str(filepath) in data['input']:
+        filepath = data['input'][str(filepath)]['fullname']
     if not os.path.isfile(filepath):
         filepath = os.path.join(
             current_app.config['files']['data-dir'],
@@ -133,9 +134,9 @@ def staging(parameters):
         'normal_cov': parameters.pop('normal_cov', 5),  # normal_cov
         'tdna_cov': parameters.pop('tdna_cov', 10),  # tdna_cov
         'trna_cov': parameters.pop('trna_cov', 10),  # trna_cov
-        'normal_vaf': parameters.pop('normal_vaf', 2),  # normal_vaf
-        'tdna_vaf': parameters.pop('tdna_vaf', 40),  # tdna_vaf
-        'trna_vaf': parameters.pop('trna_vaf', 40),  # trna_vaf
+        'normal_vaf': parameters.pop('normal_vaf', 0.02),  # normal_vaf
+        'tdna_vaf': parameters.pop('tdna_vaf', 0.4),  # tdna_vaf
+        'trna_vaf': parameters.pop('trna_vaf', 0.4),  # trna_vaf
         'expn_val': parameters.pop('expn_val', 1),  # expn_val
         'net_chop_threshold': parameters.pop('net_chop_threshold', 0.5),
         'fasta_size': parameters.pop('fasta_size', 200),

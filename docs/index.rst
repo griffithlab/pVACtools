@@ -38,10 +38,10 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- IEDB changed the format of combinatorial class II alleles to use ``/`` as a
-  delimiter instead of ``-``. DP alleles were previously fixed in pull request
-  `#85 <https://github.com/griffithlab/pVACtools/pull/85>`_ but this failed to
-  address DQ alleles. This version fixes this oversight.
+- The log directories were accidentially included with the pVACseq example data.
+  They are now removed.
+- Some users were reporting mixed type warnings for pandas when running
+  pVACseq. We added some options to avoid this warning.
 
 Coming soon
 -----------
