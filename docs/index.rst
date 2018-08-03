@@ -38,9 +38,10 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- VEP82 and higher supports selenocysteine modicfications (amino acid "U"), which is
-  not supported by downstream IEDB prediction algorithms. pVACtools now skips
-  sequences containing this amino acid with a warning.
+- The log directories were accidentially included with the pVACseq example data.
+  They are now removed.
+- Some users were reporting mixed type warnings for pandas when running
+  pVACseq. We added some options to avoid this warning.
 
 Coming soon
 -----------
