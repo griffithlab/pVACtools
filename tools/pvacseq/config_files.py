@@ -12,7 +12,6 @@ def additional_input_file_list_options():
         ('tdna_indels_coverage_file', 'bam-readcount output file for tumor DNA BAM and indels'),
         ('trna_snvs_coverage_file', 'bam-readcount output file for tumor RNA BAM and snvs'),
         ('trna_indels_coverage_file', 'bam-readcount output file for tumor RNA BAM and indels'),
-        ('phased_proximal_variants_vcf', 'A VCF with phased proximal variant information'),
     ])
 
 def define_parser():

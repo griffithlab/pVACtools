@@ -329,11 +329,6 @@ class PvacseqTests(unittest.TestCase):
     )))
     def test_pvacseq_pipeline_proximal_variants_vcf(self):
         output_dir = tempfile.TemporaryDirectory()
-        additional_input_files = tempfile.NamedTemporaryFile('w')
-        additional_input_file_list = {
-            'phased_proximal_variants_vcf': os.path.join(self.test_data_directory, 'phased.vcf.gz'),
-        }
-        yaml.dump(additional_input_file_list, additional_input_files, default_flow_style=False)
 
         params = [
             os.path.join(self.test_data_directory, "input_somatic.vcf.gz"),
@@ -342,9 +337,9 @@ class PvacseqTests(unittest.TestCase):
             'NetMHC',
             output_dir.name,
             '-e', '8',
-            '-i', additional_input_files.name,
             '-s', '1000',
             '-k',
+            '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz')
         ]
         run.main(params)
 
