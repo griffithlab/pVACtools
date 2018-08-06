@@ -199,11 +199,7 @@ class MHCflurry(MHCI):
 
 class MHCnuggetsI(MHCI):
     def valid_allele_names(self):
-        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
-        alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
-        with open(alleles_file_name, 'r') as fh:
-            return fh.read().split('\n')
+        return []
 
     def check_length_valid_for_allele(self, length, allele):
         return True
@@ -227,7 +223,10 @@ class MHCnuggetsI(MHCI):
             else:
                 peptide_file = self.write_neoepitopes_to_file(line.rstrip(), epitope_length)
                 tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-                predict('I', peptide_file.name, allele.replace('*', ''), output=tmp_output_file.name)
+                try:
+                    predict('I', peptide_file.name, allele.replace('*', ''), output=tmp_output_file.name)
+                except TypeError:
+                    raise Exception("Allele {} not supported for MHCnuggetsI.".format(allele))
                 peptide_file.close()
                 df = pd.read_csv(tmp_output_file.name)
                 df['seq_num'] = seq_num
@@ -315,11 +314,7 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
 
 class MHCnuggetsII(MHCII):
     def valid_allele_names(self):
-        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_ii')
-        alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
-        with open(alleles_file_name, 'r') as fh:
-            return fh.read().split('\n')
+        return []
 
     def check_length_valid_for_allele(self, length, allele):
         return True
@@ -343,7 +338,13 @@ class MHCnuggetsII(MHCII):
             else:
                 peptide_file = self.write_neoepitopes_to_file(line.rstrip())
                 tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-                predict('II', peptide_file.name, allele.replace('*', '').replace('H2', 'H-2'), output=tmp_output_file.name)
+                try:
+                    allele = allele.replace('*', '').replace('H2', 'H-2')
+                    if allele.startswith(('DP', 'DR', 'DQ', 'DM', 'DO')):
+                        allele = "HLA-{}".format(allele)
+                    predict('II', peptide_file.name, allele, output=tmp_output_file.name)
+                except TypeError:
+                    raise Exception("Allele {} not supported for MHCnuggetsII.".format(allele))
                 peptide_file.close()
                 df = pd.read_csv(tmp_output_file.name)
                 df['seq_num'] = seq_num
