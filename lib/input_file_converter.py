@@ -1,9 +1,12 @@
 import vcf
 import csv
 import sys
+import os
 from abc import ABCMeta
 from collections import OrderedDict
 from lib.csq_parser import CsqParser
+import lib.utils
+from lib.proximal_variant import ProximalVariant
 import lib.utils
 
 class InputFileConverter(metaclass=ABCMeta):
@@ -21,6 +24,7 @@ class InputFileConverter(metaclass=ABCMeta):
             'gene_name',
             'transcript_name',
             'amino_acid_change',
+            'codon_change',
             'ensembl_gene_id',
             'hgvsc',
             'hgvsp',
@@ -55,10 +59,24 @@ class VcfConverter(InputFileConverter):
         self.pass_only                   = kwargs.pop('pass_only', False)
         self.sample_name        = kwargs.pop('sample_name', None)
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
+        self.proximal_variants_vcf = kwargs.pop('proximal_variants_vcf', None)
+        self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
+        self.peptide_length = kwargs.pop('peptide_length', None)
+        if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.peptide_length):
+            sys.exit("A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided")
+        if self.proximal_variants_vcf and not os.path.exists(self.proximal_variants_vcf + '.tbi'):
+            sys.exit('No .tbi file found for input VCF. Input VCF needs to be tabix indexed if processing with proximal variants.')
         if lib.utils.is_gz_file(self.input_file):
             mode = 'rb'
         else:
             mode = 'r'
+        if self.proximal_variants_vcf:
+            self.proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
+            self.proximal_variants_writer = csv.DictWriter(self.proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'codon_change', 'protein_position', 'type', 'main_somatic_variant'])
+            self.proximal_variants_writer.writeheader()
+            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf, self.pass_only)
+            self.somatic_vcf_fh = open(self.input_file, mode)
+            self.somatic_vcf_reader = vcf.Reader(self.somatic_vcf_fh)
         self.reader = open(self.input_file, mode)
         self.vcf_reader = vcf.Reader(self.reader)
         if len(self.vcf_reader.samples) > 1:
@@ -68,6 +86,8 @@ class VcfConverter(InputFileConverter):
                 sys.exit("sample_name {} not in VCF {}".format(self.sample_name, self_input_file))
             if self.normal_sample_name is not None and self.normal_sample_name not in self.vcf_reader.samples:
                 sys.exit("normal_sample_name {} not in VCF {}".format(self.normal_sample_name, self.input_file))
+        elif len(self.vcf_reader.samples) ==  0:
+            sys.exit("VCF doesn't contain any sample genotype information.")
         else:
             self.sample_name = self.vcf_reader.samples[0]
         self.writer = open(self.output_file, 'w')
@@ -127,7 +147,13 @@ class VcfConverter(InputFileConverter):
             return CsqParser(csq_header.desc)
 
     def resolve_consequence(self, consequence_string):
-        consequences = {consequence.lower() for consequence in consequence_string.split('&')}
+        if '&' in consequence_string:
+            consequences = {consequence.lower() for consequence in consequence_string.split('&')}
+        elif '.' in consequence_string:
+            consequences = {consequence.lower() for consequence in consequence_string.split('.')}
+        else:
+            consequences = [consequence_string.lower()]
+
         if 'start_lost' in consequences:
             consequence = None
         elif 'frameshift_variant' in consequences:
@@ -143,7 +169,10 @@ class VcfConverter(InputFileConverter):
         return consequence
 
     def calculate_vaf(self, var_count, depth):
-        return (var_count / depth) * 100
+        if depth == 0:
+            return 'NA'
+        else:
+            return (var_count / depth)
 
     def parse_gene_expns_file(self):
         gene_expns = {}
@@ -200,6 +229,8 @@ class VcfConverter(InputFileConverter):
     def get_depth_from_vcf_genotype(self, genotype, tag):
         try:
             depth = genotype[tag]
+            if depth is None or depth == "":
+                depth = 'NA'
         except AttributeError:
             depth = 'NA'
         return depth
@@ -211,6 +242,8 @@ class VcfConverter(InputFileConverter):
                 vaf = allele_frequencies[alts.index(alt)]
             else:
                 vaf = allele_frequencies
+            if vaf > 1:
+                print("Warning: VAF is expected to be a fraction, but is larger than 1. If VAFs are encoded as percentages, please adjust the coverage cutoffs accordingly.")
         except AttributeError:
             try:
                 allele_depths = genotype[ad_tag]
@@ -220,9 +253,17 @@ class VcfConverter(InputFileConverter):
                         var_count = allele_depths[alts.index(alt)]
                     elif len(allele_depths) == len(alts) + 1:
                         var_count = allele_depths[alts.index(alt) + 1]
+                    else:
+                        print("Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype {}".format(genotype))
+                        return 'NA'
                 else:
                     var_count = allele_depths
-                vaf = var_count / genotype[dp_tag]
+                if var_count is None or var_count == "":
+                    return 'NA'
+                depth = genotype[dp_tag]
+                if depth is None or depth == "":
+                    return 'NA'
+                vaf = self.calculate_vaf(int(var_count), int(depth))
             except AttributeError:
                 vaf = 'NA'
         return vaf
@@ -252,9 +293,34 @@ class VcfConverter(InputFileConverter):
                 coverage_for_entry['normal_vaf'] = self.get_vaf_from_vcf_genotype(normal_genotype, entry.ALT, alt, 'AF', 'AD', 'DP')
         return coverage_for_entry
 
+    def write_proximal_variant_entries(self, entry, alt, transcript_name, index):
+        proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name, self.peptide_length)
+        for (proximal_variant, csq_entry) in proximal_variants:
+            if len(list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
+                proximal_variant_type = 'somatic'
+            else:
+                proximal_variant_type = 'germline'
+            proximal_variant_entry = {
+                'chromosome_name': proximal_variant.CHROM,
+                'start': proximal_variant.affected_start,
+                'stop': proximal_variant.affected_end,
+                'reference': proximal_variant.REF,
+                'variant': proximal_variant.ALT[0],
+                'amino_acid_change': csq_entry['Amino_acids'],
+                'codon_change': csq_entry['Codons'],
+                'protein_position': csq_entry['Protein_position'],
+                'type': proximal_variant_type,
+                'main_somatic_variant': index,
+            }
+            self.proximal_variants_writer.writerow(proximal_variant_entry)
+
     def close_filehandles(self):
         self.writer.close()
         self.reader.close()
+        if self.proximal_variants_vcf:
+            self.proximal_variant_parser.fh.close()
+            self.proximal_variants_tsv_fh.close()
+            self.somatic_vcf_fh.close()
 
     def execute(self):
         gene_expns = self.parse_gene_expns_file()
@@ -291,6 +357,8 @@ class VcfConverter(InputFileConverter):
                 if len(transcripts) == 0:
                     csq_allele = alleles_dict[alt]
                     transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_allele)
+                if len(transcripts) == 0 and self.is_deletion(reference, alt):
+                    transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], 'deletion')
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
@@ -299,11 +367,16 @@ class VcfConverter(InputFileConverter):
                         continue
                     elif consequence == 'FS':
                         if transcript['DownstreamProtein'] == '':
+                            print("frameshift_variant transcript does not contain a DownstreamProtein sequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                             continue
                         else:
                             amino_acid_change_position = "%s%s/%s" % (transcript['Protein_position'], entry.REF, alt)
                     else:
-                        amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
+                        if transcript['Amino_acids'] == '':
+                            print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                            continue
+                        else:
+                            amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
                     index = '%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
@@ -311,6 +384,9 @@ class VcfConverter(InputFileConverter):
                     else:
                         indexes.append(index)
                         count += 1
+
+                    if self.proximal_variants_vcf:
+                        self.write_proximal_variant_entries(entry, alt, transcript_name, index)
 
                     ensembl_gene_id = transcript['Gene']
                     hgvsc = transcript['HGVSc'] if 'HGVSc' in transcript else 'NA'
@@ -336,6 +412,11 @@ class VcfConverter(InputFileConverter):
                     }
                     if transcript['Amino_acids']:
                         output_row['amino_acid_change'] = transcript['Amino_acids']
+
+                    if transcript['Codons']:
+                        output_row['codon_change'] =  transcript['Codons']
+                    else:
+                        output_row['codon_change'] = 'NA'
 
                     if transcript_name in transcript_expns.keys():
                         transcript_expn_entry = transcript_expns[transcript_name]
@@ -424,6 +505,18 @@ class IntegrateConverter(InputFileConverter):
                 'wildtype_amino_acid_sequence'   : '',
                 'downstream_amino_acid_sequence' : '',
                 'protein_length_change'      : '',
+                'amino_acid_change'          : 'NA',
+                'codon_change'               : 'NA',
+                'ensembl_gene_id'            : 'NA',
+                'amino_acid_change'          : 'NA',
+                'transcript_expression'      : 'NA',
+                'gene_expression'            : 'NA',
+                'normal_depth'               : 'NA',
+                'normal_vaf'                 : 'NA',
+                'tdna_depth'                 : 'NA',
+                'tdna_vaf'                   : 'NA',
+                'trna_depth'                 : 'NA',
+                'trna_vaf'                   : 'NA',
             }
 
             if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':

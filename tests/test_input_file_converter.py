@@ -277,6 +277,20 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_conflicting_alts.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
+    def test_input_vcf_with_deletion_and_dash_csq_allele(self):
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_dash_csq_allele.vcf')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'                 : convert_vcf_input_file,
+            'output_file'                : convert_vcf_output_file.name,
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_dash_csq_allele.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
     def test_input_vcf_with_uncalled_genotype_generates_expected_tsv(self):
         convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_uncalled_genotype.vcf')
         convert_vcf_output_file = tempfile.NamedTemporaryFile()
@@ -348,3 +362,22 @@ class InputFileConverterTests(unittest.TestCase):
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_integrate.tsv')
         self.assertTrue(cmp(convert_output_file.name, expected_output_file))
+
+    def test_proximal_variants_input(self):
+        convert_input_file = os.path.join(self.test_data_dir, 'somatic.vcf.gz')
+        convert_input_proximal_variants_file = os.path.join(self.test_data_dir, 'phased.vcf.gz')
+        convert_output_file = tempfile.NamedTemporaryFile()
+        convert_output_proximal_variants_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file': convert_input_file,
+            'output_file': convert_output_file.name,
+            'proximal_variants_vcf': convert_input_proximal_variants_file,
+            'proximal_variants_tsv': convert_output_proximal_variants_file.name,
+            'peptide_length': 60,
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_proximal_variants_tsv = os.path.join(self.test_data_dir, 'output_proximal_variants.tsv')
+        self.assertTrue(cmp(convert_output_proximal_variants_file.name, expected_proximal_variants_tsv))

@@ -3,7 +3,6 @@ import os
 import argparse
 import re
 from lib.prediction_class import *
-import time
 from subprocess import run, PIPE
 
 def setup_iedb_conda_env():
