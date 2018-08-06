@@ -88,6 +88,7 @@ setup(
         'pandas',
         'wget',
         'mhcflurry',
+        'mhcnuggets',
         'pysam',
     ],
     package_data={
