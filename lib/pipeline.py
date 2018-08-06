@@ -475,14 +475,15 @@ class MHCIPipeline(Pipeline):
                             iedb_method = prediction.iedb_prediction_method
                         else:
                             iedb_method = method
-                        valid_alleles = prediction.valid_allele_names()
-                        if a not in valid_alleles:
-                            status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
-                            continue
-                        valid_lengths = prediction.valid_lengths_for_allele(a)
-                        if epl not in valid_lengths:
-                            status_message("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
-                            continue
+                        if isinstance(prediction, IEDB) or isinstance(prediction, MHCflurry):
+                            valid_alleles = prediction.valid_allele_names()
+                            if a not in valid_alleles:
+                                status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
+                                continue
+                            valid_lengths = prediction.valid_lengths_for_allele(a)
+                            if epl not in valid_lengths:
+                                status_message("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
+                                continue
 
                         split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, str(epl), "tsv_%s" % fasta_chunk]))
                         if os.path.exists(split_iedb_out):
@@ -589,10 +590,11 @@ class MHCIIPipeline(Pipeline):
                         iedb_method = prediction.iedb_prediction_method
                     else:
                         iedb_method = method
-                    valid_alleles = prediction.valid_allele_names()
-                    if a not in valid_alleles:
-                        status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
-                        continue
+                    if isinstance(prediction, IEDB):
+                        valid_alleles = prediction.valid_allele_names()
+                        if a not in valid_alleles:
+                            status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
+                            continue
 
                     split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, "tsv_%s" % fasta_chunk]))
                     if os.path.exists(split_iedb_out):
