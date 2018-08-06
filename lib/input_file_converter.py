@@ -1,9 +1,12 @@
 import vcf
 import csv
 import sys
+import os
 from abc import ABCMeta
 from collections import OrderedDict
 from lib.csq_parser import CsqParser
+import lib.utils
+from lib.proximal_variant import ProximalVariant
 import lib.utils
 
 class InputFileConverter(metaclass=ABCMeta):
@@ -21,6 +24,7 @@ class InputFileConverter(metaclass=ABCMeta):
             'gene_name',
             'transcript_name',
             'amino_acid_change',
+            'codon_change',
             'ensembl_gene_id',
             'hgvsc',
             'hgvsp',
@@ -55,10 +59,24 @@ class VcfConverter(InputFileConverter):
         self.pass_only                   = kwargs.pop('pass_only', False)
         self.sample_name        = kwargs.pop('sample_name', None)
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
+        self.proximal_variants_vcf = kwargs.pop('proximal_variants_vcf', None)
+        self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
+        self.peptide_length = kwargs.pop('peptide_length', None)
+        if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.peptide_length):
+            sys.exit("A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided")
+        if self.proximal_variants_vcf and not os.path.exists(self.proximal_variants_vcf + '.tbi'):
+            sys.exit('No .tbi file found for input VCF. Input VCF needs to be tabix indexed if processing with proximal variants.')
         if lib.utils.is_gz_file(self.input_file):
             mode = 'rb'
         else:
             mode = 'r'
+        if self.proximal_variants_vcf:
+            self.proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
+            self.proximal_variants_writer = csv.DictWriter(self.proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'codon_change', 'protein_position', 'type', 'main_somatic_variant'])
+            self.proximal_variants_writer.writeheader()
+            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf, self.pass_only)
+            self.somatic_vcf_fh = open(self.input_file, mode)
+            self.somatic_vcf_reader = vcf.Reader(self.somatic_vcf_fh)
         self.reader = open(self.input_file, mode)
         self.vcf_reader = vcf.Reader(self.reader)
         if len(self.vcf_reader.samples) > 1:
@@ -275,9 +293,34 @@ class VcfConverter(InputFileConverter):
                 coverage_for_entry['normal_vaf'] = self.get_vaf_from_vcf_genotype(normal_genotype, entry.ALT, alt, 'AF', 'AD', 'DP')
         return coverage_for_entry
 
+    def write_proximal_variant_entries(self, entry, alt, transcript_name, index):
+        proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name, self.peptide_length)
+        for (proximal_variant, csq_entry) in proximal_variants:
+            if len(list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
+                proximal_variant_type = 'somatic'
+            else:
+                proximal_variant_type = 'germline'
+            proximal_variant_entry = {
+                'chromosome_name': proximal_variant.CHROM,
+                'start': proximal_variant.affected_start,
+                'stop': proximal_variant.affected_end,
+                'reference': proximal_variant.REF,
+                'variant': proximal_variant.ALT[0],
+                'amino_acid_change': csq_entry['Amino_acids'],
+                'codon_change': csq_entry['Codons'],
+                'protein_position': csq_entry['Protein_position'],
+                'type': proximal_variant_type,
+                'main_somatic_variant': index,
+            }
+            self.proximal_variants_writer.writerow(proximal_variant_entry)
+
     def close_filehandles(self):
         self.writer.close()
         self.reader.close()
+        if self.proximal_variants_vcf:
+            self.proximal_variant_parser.fh.close()
+            self.proximal_variants_tsv_fh.close()
+            self.somatic_vcf_fh.close()
 
     def execute(self):
         gene_expns = self.parse_gene_expns_file()
@@ -342,6 +385,9 @@ class VcfConverter(InputFileConverter):
                         indexes.append(index)
                         count += 1
 
+                    if self.proximal_variants_vcf:
+                        self.write_proximal_variant_entries(entry, alt, transcript_name, index)
+
                     ensembl_gene_id = transcript['Gene']
                     hgvsc = transcript['HGVSc'] if 'HGVSc' in transcript else 'NA'
                     hgvsp = transcript['HGVSp'] if 'HGVSp' in transcript else 'NA'
@@ -366,6 +412,11 @@ class VcfConverter(InputFileConverter):
                     }
                     if transcript['Amino_acids']:
                         output_row['amino_acid_change'] = transcript['Amino_acids']
+
+                    if transcript['Codons']:
+                        output_row['codon_change'] =  transcript['Codons']
+                    else:
+                        output_row['codon_change'] = 'NA'
 
                     if transcript_name in transcript_expns.keys():
                         transcript_expn_entry = transcript_expns[transcript_name]
@@ -454,6 +505,18 @@ class IntegrateConverter(InputFileConverter):
                 'wildtype_amino_acid_sequence'   : '',
                 'downstream_amino_acid_sequence' : '',
                 'protein_length_change'      : '',
+                'amino_acid_change'          : 'NA',
+                'codon_change'               : 'NA',
+                'ensembl_gene_id'            : 'NA',
+                'amino_acid_change'          : 'NA',
+                'transcript_expression'      : 'NA',
+                'gene_expression'            : 'NA',
+                'normal_depth'               : 'NA',
+                'normal_vaf'                 : 'NA',
+                'tdna_depth'                 : 'NA',
+                'tdna_vaf'                   : 'NA',
+                'trna_depth'                 : 'NA',
+                'trna_vaf'                   : 'NA',
             }
 
             if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':
