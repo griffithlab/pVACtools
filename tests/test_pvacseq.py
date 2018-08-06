@@ -327,7 +327,36 @@ class PvacseqTests(unittest.TestCase):
         files,
         test_data_directory()
     )))
+    def test_pvacseq_pipeline_proximal_variants_vcf(self):
+        output_dir = tempfile.TemporaryDirectory()
 
+        params = [
+            os.path.join(self.test_data_directory, "input_somatic.vcf.gz"),
+            'Test',
+            'HLA-E*01:01',
+            'NetMHC',
+            output_dir.name,
+            '-e', '8',
+            '-s', '1000',
+            '-k',
+            '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz')
+        ]
+        run.main(params)
+
+        for file_name in ['Test_21.fa.split_1-818', 'Test_21.fa.split_1-818.key']:
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', 'tmp', file_name)
+            self.assertTrue(cmp(output_file, expected_file, False))
+        for file_name in ['Test.proximal_variants.tsv', 'Test.all_epitopes.tsv', 'Test.filtered.tsv']:
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
+            self.assertTrue(cmp(output_file, expected_file, False))
+
+    @patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        data,
+        files,
+        test_data_directory()
+    )))
     def test_pvacseq_pipeline_sleep(self):
         output_dir_1 = tempfile.TemporaryDirectory()
         params_1 = [

@@ -88,6 +88,7 @@ setup(
         'pandas',
         'wget',
         'mhcflurry',
+        'pysam',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,
