@@ -479,10 +479,26 @@ def initialize(current_app, args):
         filedest = os.path.relpath(
             event.dest_path,
             inputdir
-        )
-        file_id = [k for k in data['input'] if data['input'][k]['display_name'] == filesrc][0]
+        ) 
         ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
-        current_src = nav_to_dir(event.src_path, inputdir, hier_inp)
+        #This accounts for how Watchdog records duplicate symlinks (i.e. symlinks of the same file) 
+        #as File Moved Events from the previously added duplicate symlink, resulting in said symlinks not being 
+        #properly recorded and causing situations where the source file of such events may not also be recorded.
+        current = {
+            filename
+            for (_, _, files) in os.walk(inputdir)
+            for filename in files
+        }
+        if filesrc in [data['input'][k]['display_name'] for k in data['input']] and os.path.basename(filesrc) not in current:
+            file_id = [k for k in data['input'] if data['input'][k]['display_name'] == filesrc][0]
+            current_src = nav_to_dir(event.src_path, inputdir, hier_inp)
+            current_src.remove([
+                entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
+            ][0])
+        else:
+            file_id = 0
+            while str(file_id) in data['input']:
+                file_id += 1
         nav_to_dir(event.dest_path, inputdir, hier_inp).append({
             'display_name':filedest[filedest.rfind('/')+1:],
             'type':'file',
@@ -491,25 +507,19 @@ def initialize(current_app, args):
             'is_visualizable': is_visualizable(ext),
             'visualization_type': visualization_type(ext),
         })
-        current_src.remove([
-            entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
-        ][0])
         clean_tree(hier_inp)
-        for key in data['input']:
-            if key == file_id:
-                data['input'][key] = {
-                    'fullname':os.path.abspath(os.path.join(
-                        inputdir,
-                        filedest
-                    )),
-                    'display_name':filedest,
-                    'description':descriptions(ext),
-                    'is_visualizable': is_visualizable(ext),
-                    'visualization_type': visualization_type(ext),
-                }
-                print("Moving file:", key,'(',filesrc,'-->',filedest,')')
-                data.save()
-                return
+        data['input'][str(file_id)] = {
+            'fullname':os.path.abspath(os.path.join(
+                inputdir,
+                filedest
+            )),
+            'display_name':filedest,
+            'description':descriptions(ext),
+            'is_visualizable': is_visualizable(ext),
+            'visualization_type': visualization_type(ext),
+        }
+        print("Moving file:", key,'(',filesrc,'-->',filedest,')')
+        data.save()
     input_watcher.subscribe(
         _move,
         watchdog.events.FileMovedEvent
