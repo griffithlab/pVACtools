@@ -1,3 +1,4 @@
+import pdb
 import os
 import re
 import shutil
@@ -6,7 +7,7 @@ import json
 import sys
 import subprocess
 from shlex import split
-from .utils import descriptions, filterdata
+from .utils import filterprocess
 from shutil import move as movetree
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
@@ -55,7 +56,7 @@ def processes(filters, sorting, page, count):
     #Python comprehensions are great!
     # data['process-%d'%id]['returncode'] = process[1].returncode
     # data['process-%d'%id]['status'] = 1 if process[1].returncode == 0 else -1
-    return filterdata([
+    data2 = [
          {
              'id':proc[0],
              'running':is_running(proc[1]),
@@ -85,7 +86,9 @@ def processes(filters, sorting, page, count):
                          fileID
                      ),
                      'display_name':filedata['display_name'],
-                     'description':filedata['description']
+                     'description':filedata['description'],
+                     'is_visualizable': filedata['is_visualizable'],
+                     'visualization_type': filedata['visualization_type'],
                  }
                  for (fileID, filedata) in data['process-%d'%proc[0]]['files'].items()
              ],
@@ -108,7 +111,8 @@ def processes(filters, sorting, page, count):
                 )),
                 range(data['processid']+1)
             ) if 'process-%d'%(proc[0]) in data
-    ], filters, sorting, page, count)
+    ]
+    return filterprocess(data2, filters, sorting, page, count)
 
 
 def process_info(id):
@@ -118,7 +122,7 @@ def process_info(id):
     if not process[0]:
         return (
             {
-                "code":400,
+                "status":400,
                 "message":"The requested process (%d) does not exist"%id,
                 "fields":"id"
             },400
@@ -152,8 +156,23 @@ def process_info(id):
         'results_url':'/api/v1/processes/%d/results'%id,#
         'attached': bool(process[1]),#
         'command':process[0]['command'],#
-        'returncode':process[0]['returncode'] if 'returncode' in process[0] else 0,
-        'status':0 if is_running(process) else (process[0]['status'] if 'status' in process[0] else 0),
+        'returncode':process[1].returncode if (not is_running(process)) and process[1] else (
+            process[0]['returncode'] if 'returncode' in process[0] else 0
+        ),
+        'status':0 if is_running(process) else (
+            -1 if (
+                (process[1] and process[1].returncode != 0) or
+                ('returncode' in process[0] and process[0]['returncode'] != 0)
+            ) else 1
+        ),
+        # 'returncode':process[0]['returncode'] if 'returncode' in process[0] else 0,
+        # 'status':0 if is_running(process) else (process[0]['status'] if 'status' in process[0] else 0),
+        # 'status':0 if is_running(process) else (
+        #     -1 if (
+        #         (process[0] and process[0].returncode != 0) or
+        #         ('returncode' in process[0] and process[0]['returncode'] != 0)
+        #     ) else 1
+        # ),
         'last_message':process[0]['last_message'],
         'log':log,
         'log_updated_at':(
@@ -174,7 +193,9 @@ def process_info(id):
                     fileID
                 ),
                 'display_name':filedata['display_name'],
-                'description':filedata['description']
+                'description':filedata['description'],
+                'is_visualizable': filedata['is_visualizable'],
+                'visualization_type': filedata['visualization_type'],
             }
             for (fileID, filedata) in data['process-%d'%id]['files'].items()
         ],
@@ -238,7 +259,7 @@ def archive(processID):
         if 'process-%d'%processID not in data:
             return (
                 {
-                    'code':400,
+                    'status':400,
                     'message': "The requested process (%d) does not exist"%processID,
                     'fields':"processID"
                 },
@@ -285,7 +306,7 @@ def restart(processID):
     if key not in data:
         return (
             {
-                'code':400,
+                'status':400,
                 'message':"Invalid ProcessID: %d"%processID,
                 'fields':"processID"
             },
@@ -295,7 +316,7 @@ def restart(processID):
     if is_running(proc):
         return (
             {
-                'code':400,
+                'status':400,
                 'message':"The requested process (%d) is still running"%processID,
                 'fields':"processID"
             },

@@ -8,6 +8,7 @@ from mhcnuggets.src.predict import predict
 import requests
 import re
 import pandas as pd
+import time
 from subprocess import run, PIPE
 import tempfile
 
@@ -64,7 +65,7 @@ class IEDB(metaclass=ABCMeta):
             retries = 0
             while response.status_code == 500 and retries < iedb_retries:
                 time.sleep(60 * retries)
-                response = requests.post(url, data=data)
+                response = requests.post(self.url, data=data)
                 print("IEDB: Retry %s of %s" % (retries, iedb_retries))
                 retries += 1
 
