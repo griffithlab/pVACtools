@@ -100,12 +100,24 @@ args = curdoc().session_context.request.arguments
 
 try:
     parentID = int(args.get('target-process')[0])
+except BaseException as e:
+    raise ValueError("Unable to parse the requried arguments: parentID") from e
+try:
     fileID = int(args.get('target-file')[0])
+except BaseException as e:
+    raise ValueError("Unable to parse the requried arguments: fileID") from e
+try:
     cols = json.loads(args.get('cols')[0].decode())
+except BaseException as e:
+    raise ValueError("Unable to parse the requried arguments: cols") from e
+try:
     cols['rowid'] = 'Row'
+except BaseException as e:
+    raise ValueError("Unable to parse the requried arguments: rowid") from e
+try:
     sample = args.get('samplename')[0].decode('utf-8')
 except BaseException as e:
-    raise ValueError("Unable to parse the requried arguments") from e
+    raise ValueError("Unable to parse the requried arguments: sample") from e
 tablekey = "data_%s_%s" % (
     (parentID if parentID >= 0 else 'dropbox'),
     fileID
@@ -131,7 +143,6 @@ del raw_data
 # sample is the sample name of the requested file
 ### From here to the bottom, the code can be changed to modify the plotted data
 from bokeh.layouts import row, widgetbox, column
-from bokeh.charts import Scatter
 from bokeh.models import ColumnDataSource, CustomJS, PanTool, HoverTool, Slider, RangeSlider
 from bokeh.models import TableColumn, TapTool, BoxSelectTool, ResizeTool
 from bokeh.models.ranges import Range1d as Range
