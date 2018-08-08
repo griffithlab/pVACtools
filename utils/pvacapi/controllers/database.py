@@ -8,7 +8,7 @@ import time
 from flask import current_app
 from urllib.parse import urlencode
 from hashlib import md5
-from bokeh.embed import autoload_server
+from bokeh.embed import server_document
 from .processes import fetch_process, is_running, process_info
 from .utils import column_filter
 
@@ -389,7 +389,8 @@ def visualize_script(parentID, fileID):
     else:
         sample = 'Unknown Sample'
 
-    return re.sub(
+    """
+    re.sub(
         r'src="(.+)"',
         r'src="\1&%s"'%(
             urlencode([
@@ -399,10 +400,15 @@ def visualize_script(parentID, fileID):
                 ('samplename', sample)
             ])
         ),
-        autoload_server(
-            model=None,
-            app_path="/visualizations",
-            session_id=md5(str(time.time()).encode()).hexdigest(),
-            url="http://localhost:5006"
-        )
+    """
+
+    return server_document(
+        url="http://localhost:5006/visualizations",
+        arguments={
+            'target-process': parentID,
+            'target-file': fileID,
+            'cols': json.dumps(cols),
+            'samplename': sample
+        }
     )
+    #)
