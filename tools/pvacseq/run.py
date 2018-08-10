@@ -5,6 +5,9 @@ from lib.prediction_class import *
 from lib.pipeline import *
 from config_files import additional_input_file_list_options
 from lib.run_argument_parser import *
+from lib.condense_final_report import *
+from lib.rank_epitopes import *
+import lib.call_iedb
 
 import shutil
 import yaml
@@ -26,6 +29,100 @@ def parse_additional_input_file_list(additional_input_file_list):
 def define_parser():
     return PvacseqRunArgumentParser().parser
 
+def combine_reports(input_files, output_file):
+    write_headers = True
+    with open(output_file, 'w') as fout:
+        writer = csv.writer(fout)
+        for filename in input_files:
+            with open(filename) as fin:
+                reader = csv.reader(fin)
+                headers = next(reader)
+                if write_headers:
+                    write_headers = False  # Only write headers once.
+                    writer.writerow(headers)
+                writer.writerows(reader)  # Write all remaining rows.
+
+def binding_filter(input_file, output_dir, args):
+    output_file = os.path.join(output_dir, "{}.filtered.binding.tsv".format(args.sample_name))
+    print("Running Binding Filters")
+    BindingFilter(
+        input_file,
+        output_file,
+        args.binding_threshold,
+        args.minimum_fold_change,
+        args.top_score_metric,
+        args.exclude_NAs,
+        args.allele_specific_binding_thresholds,
+    ).execute()
+    print("Completed")
+    return output_file
+
+def coverage_filter(binding_filter_output_file, output_dir, args):
+    output_file = os.path.join(output_dir, "{}.filtered.coverage.tsv".format(args.sample_name))
+    print("Running Coverage Filters")
+    filter_criteria = []
+    filter_criteria.append({'column': "Normal_Depth", 'operator': '>=', 'threshold': args.normal_cov})
+    filter_criteria.append({'column': "Normal_VAF", 'operator': '<=', 'threshold': args.normal_vaf})
+    filter_criteria.append({'column': "Tumor_DNA_Depth", 'operator': '>=', 'threshold': args.tdna_cov})
+    filter_criteria.append({'column': "Tumor_DNA_VAF", 'operator': '>=', 'threshold': args.tdna_vaf})
+    filter_criteria.append({'column': "Tumor_RNA_Depth", 'operator': '>=', 'threshold': args.trna_cov})
+    filter_criteria.append({'column': "Tumor_RNA_VAF", 'operator': '>=', 'threshold': args.trna_vaf})
+    filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': args.expn_val})
+    filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': args.expn_val})
+    Filter(binding_filter_output_file, output_file, filter_criteria, args.exclude_NAs).execute()
+    print("Completed")
+    return output_file
+
+def top_result_filter(coverage_filter_output_file, output_dir, args):
+    output_file = os.path.join(output_dir, "{}.filtered.top.tsv".format(args.sample_name))
+    print("Running Top Score Filter")
+    TopScoreFilter(coverage_filter_output_file, output_file, args.top_score_metric).execute()
+    print("Completed")
+    return output_file
+
+def condensed_report(final_output_file, output_dir, args):
+    output_file = os.path.join(output_dir, "{}.final.condensed.tsv".format(args.sample_name))
+    print("Creating condensed final report")
+    CondenseFinalReport(final_output_file, output_file, args.top_score_metric).execute()
+    print("Completed")
+    return output_file
+
+def rank_epitopes(condensed_report_output_file, output_dir, args):
+    output_file = os.path.join(output_dir, "{}.filtered.condensed.ranked.tsv".format(args.sample_name))
+    print("Ranking neoepitopes")
+    RankEpitopes(condensed_report_output_file, output_file).execute()
+    print("Completed")
+    return output_file
+
+def create_combined_reports(base_output_dir, args, additional_input_files):
+    output_dir = os.path.join(base_output_dir, 'combined')
+    os.makedirs(output_dir, exist_ok=True)
+
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
+    combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+    combine_reports([file1, file2], combined_output_file)
+
+    binding_filter_output_file = binding_filter(combined_output_file, output_dir, args)
+    defined_additional_input_files = {k: v for (k,v) in additional_input_files.items() if v is not None}
+    if len(defined_additional_input_files) > 0:
+        coverage_filter_output_file = coverage_filter(binding_filter_output_file, output_dir, args)
+        top_result_filter_output_file = top_result_filter(coverage_filter_output_file, output_dir, args)
+        os.unlink(coverage_filter_output_file)
+    else:
+        top_result_filter_output_file = top_result_filter(binding_filter_output_file, output_dir, args)
+    final_output_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+    shutil.copy(top_result_filter_output_file, final_output_file)
+    condensed_report_output_file = condensed_report(final_output_file, output_dir, args)
+    ranked_output_file = rank_epitopes(condensed_report_output_file, output_dir, args)
+    for file_name in [
+        binding_filter_output_file,
+        top_result_filter_output_file,
+        condensed_report_output_file,
+    ]:
+        os.unlink(file_name)
+    print("\nDone: Pipeline finished successfully. File {} contains ranked list of filtered putative neoantigens for class I and class II predictions.\n".format(ranked_output_file))
+
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
@@ -45,6 +142,9 @@ def main(args_input = sys.argv[1:]):
         downstream_sequence_length = int(args.downstream_sequence_length)
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
+
+    if args.iedb_install_directory:
+        lib.call_iedb.setup_iedb_conda_env()
 
     input_file_type = 'vcf'
     base_output_dir = os.path.abspath(args.output_dir)
@@ -66,9 +166,17 @@ def main(args_input = sys.argv[1:]):
         if allele in MHCI.all_valid_allele_names():
             class_i_alleles.append(allele)
             valid = 1
+        elif 'MHCnuggetsI' in args.prediction_algorithms:
+            if allele.startswith(("HLA-A", "HLA-B", "HLA-C")):
+                class_i_alleles.append(allele)
+                valid = 1
         if allele in MHCII.all_valid_allele_names():
             class_ii_alleles.append(allele)
             valid = 1
+        elif 'MHCnuggetsII' in args.prediction_algorithms:
+            if allele.startswith(("DP", "DQ", "DO", "DM", "DR", "H2")):
+                class_ii_alleles.append(allele)
+                valid = 1
         if not valid:
             print("Allele %s not valid. Skipping." % allele)
 
@@ -76,9 +184,9 @@ def main(args_input = sys.argv[1:]):
         'input_file'                : args.input_file,
         'input_file_type'           : input_file_type,
         'sample_name'               : args.sample_name,
-        'top_result_per_mutation'   : args.top_result_per_mutation,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
+        'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
         'minimum_fold_change'       : args.minimum_fold_change,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
@@ -94,6 +202,9 @@ def main(args_input = sys.argv[1:]):
         'iedb_retries'              : args.iedb_retries,
         'downstream_sequence_length': downstream_sequence_length,
         'keep_tmp_files'            : args.keep_tmp_files,
+        'pass_only'                 : args.pass_only,
+        'normal_sample_name'        : args.normal_sample_name,
+        'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
     }
     additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
     shared_arguments.update(additional_input_files)
@@ -154,6 +265,10 @@ def main(args_input = sys.argv[1:]):
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
     elif len(class_ii_alleles) == 0:
         print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
+
+    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+        print("Creating combined reports")
+        create_combined_reports(base_output_dir, args, additional_input_files)
 
 if __name__ == '__main__':
     main()

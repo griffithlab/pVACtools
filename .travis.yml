@@ -14,9 +14,13 @@ install:
   #Not sure if it can or needs to be deleted altogether.
   - pip install pvacseq-client
   - pip install -e .[API]
+  - mhcflurry-downloads fetch
   #with the newest version of the spec validator our swagger yml doesn't
   #validate anymore. Use a version that works.
   - pip install swagger-spec-validator==2.1.0
+  #The MHCflurry output will differ depending on the version of tensorflow
+  #The test data was created on tensorflow 1.8.0
+  - pip install tensorflow==1.8.0
   - pip install connexion==1.4.2
 before_script:
   - "export DISPLAY=:99.0"

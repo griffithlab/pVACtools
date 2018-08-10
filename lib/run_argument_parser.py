@@ -4,16 +4,20 @@ from .prediction_class import *
 import lib
 
 class RunArgumentParser(metaclass=ABCMeta):
-    def __init__(self, run_name, input_file_help):
-        parser = argparse.ArgumentParser(run_name)
+    def __init__(self, tool_name, input_file_help):
+        parser = argparse.ArgumentParser("%s run" % tool_name)
 
         parser.add_argument(
             "input_file",
             help=input_file_help
         )
+        if tool_name == 'pvacseq':
+            sample_name_help = "The name of the tumor sample being processed. Must be a sample in the input VCF."
+        else:
+            sample_name_help = "The name of the sample being processed. This will be used as a prefix for output files."
         parser.add_argument(
             "sample_name",
-            help="The name of the sample being processed. This will be used as a prefix for output files"
+            help=sample_name_help
         )
         parser.add_argument(
             "allele", type=lambda s:[a for a in s.split(',')],
@@ -48,6 +52,13 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Report only epitopes where the mutant allele has ic50 binding scores below this value. Default: 500",
         )
         parser.add_argument(
+            '--allele-specific-binding-thresholds',
+            help="Use allele-specific binding thresholds. To print the allele-specific binding thresholds run `%s allele_specific_cutoffs`. " % tool_name
+                 + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used. Default: False",
+            default=False,
+            action='store_true',
+        )
+        parser.add_argument(
             "-r", "--iedb-retries",type=int,
             default=5,
             help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100."
@@ -61,12 +72,16 @@ class RunArgumentParser(metaclass=ABCMeta):
         self.parser = parser
 
 class PredictionRunArgumentParser(RunArgumentParser):
-    def __init__(self, run_name, input_file_help):
-        RunArgumentParser.__init__(self, run_name, input_file_help)
+    def __init__(self, tool_name, input_file_help):
+        RunArgumentParser.__init__(self, tool_name, input_file_help)
         self.parser.add_argument(
             "-l", "--peptide-sequence-length", type=int,
             default=21,
             help="Length of the peptide sequence to use when creating the FASTA. Default: 21",
+        )
+        self.parser.add_argument(
+            '--normal-sample-name',
+            help="In a multi-sample VCF, the name of the matched normal sample."
         )
         self.parser.add_argument(
             '--net-chop-method',
@@ -78,11 +93,6 @@ class PredictionRunArgumentParser(RunArgumentParser):
             '--netmhc-stab',
             action='store_true',
             help="Run NetMHCStabPan after all filtering and add stability predictions to predicted epitopes"
-        )
-        self.parser.add_argument(
-            '-t', '--top-result-per-mutation',
-            action='store_true',
-            help='Output only the top scoring result for each allele-peptide length combination for each variant. Default: False'
         )
         self.parser.add_argument(
             '-m', '--top-score-metric',
@@ -125,17 +135,21 @@ class PredictionRunArgumentParser(RunArgumentParser):
 
 class PvacseqRunArgumentParser(PredictionRunArgumentParser):
     def __init__(self):
-        run_name = "pvacseq run"
+        tool_name = "pvacseq"
         input_file_help = (
             "A VEP-annotated single-sample VCF containing transcript, "
             "Wildtype protein sequence, and Downstream protein sequence information."
         )
-        PredictionRunArgumentParser.__init__(self, run_name, input_file_help)
+        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
         self.parser.add_argument(
             "-i", "--additional-input-file-list",
             help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
                  + "For an example of this yaml file run `pvacseq config_files additional_input_file_list`."
+        )
+        self.parser.add_argument(
+            "-p", "--phased-proximal-variants-vcf",
+            help="A VCF with phased proximal variant information"
         )
         self.parser.add_argument(
             "-c", "--minimum-fold-change", type=int,
@@ -165,38 +179,44 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         self.parser.add_argument(
             '--normal-vaf', type=int,
             help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered. " +
-            "Default: 2",
-            default=2
+            "Default: 0.02",
+            default=0.2
         )
         self.parser.add_argument(
             '--tdna-vaf', type=int,
             help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 40",
-            default=40
+            "Default: 0.4",
+            default=0.4
         )
         self.parser.add_argument(
             '--trna-vaf', type=int,
             help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 40",
-            default=40
+            "Default: 0.4",
+            default=0.4
         )
         self.parser.add_argument(
             '--expn-val', type=int,
             default=1,
             help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered. Default: 1",
         )
+        self.parser.add_argument(
+            '--pass-only',
+            help="Only process VCF entries that are PASS. Default: False",
+            default=False,
+            action='store_true'
+        )
 
 class PvacfuseRunArgumentParser(PredictionRunArgumentParser):
     def __init__(self):
-        run_name = "pvacfuse run"
+        tool_name = "pvacfuse"
         input_file_help = "A INTEGRATE-Neo bedpe file with fusions."
-        PredictionRunArgumentParser.__init__(self, run_name, input_file_help)
+        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
 class PvacvectorRunArgumentParser(RunArgumentParser):
     def __init__(self):
-        run_name = 'pvacvector run'
+        tool_name = 'pvacvector'
         input_file_help = "A .fa file with peptides or a pVACseq .tsv file with eptiopes to use for vector design."
-        RunArgumentParser.__init__(self, run_name, input_file_help)
+        RunArgumentParser.__init__(self, tool_name, input_file_help)
         self.parser.add_argument(
             '-v', "--input_vcf",
             help="Path to original pVACseq input VCF file. Required if input file is a pVACseq TSV."

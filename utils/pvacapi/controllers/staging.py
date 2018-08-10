@@ -14,8 +14,9 @@ from .files import list_input
 from lib.prediction_class import *
 
 def resolve_filepath(filepath):
-    if int_pattern.match(filepath) and int(filepath) <= len(current_app.config['storage']['manifest']):
-        filepath = current_app.config['storage']['manifest'][int(filepath)]
+    data = current_app.config['storage']['loader']()
+    if int_pattern.match(filepath) and str(filepath) in data['input']:
+        filepath = data['input'][str(filepath)]['fullname']
     if not os.path.isfile(filepath):
         filepath = os.path.join(
             current_app.config['files']['data-dir'],
@@ -43,14 +44,6 @@ def precheck(configObj, data):
     """Check if a process with these same parameters has already been run successfully"""
     #This is a temprary stand-in until https://github.com/griffithlab/pVAC-Seq/pull/292 is merged
     input_hash = hashfile(configObj['input'])
-    additional_hashes = {}
-    if configObj['additional_input_file_list'] != "":
-        additional_hashes = {
-            key:hashfile(path)
-            for (key, path) in yaml.load(
-                open(configObj['additional_input_file_list'])
-            ).items()
-        }
     for i in range(data['processid']+1):
         key = 'process-%d'%i
         if key in data:
@@ -62,68 +55,45 @@ def precheck(configObj, data):
             reader.close()
             #input
             if len(set(configObj)^set(current_config)):
-                #if there are keys in one set and not the other
+                # if there are keys in one set and not the other
                 continue
-            #otherwise, check every key except input, output, and additional files
+            #otherwise, check every key except input and output
             failed = False
             for param in configObj:
-                if param in {'input', 'output', 'additional_input_file_list'}:
+                if param in {'input', 'output'}:
                     #Skip for now, because these will need a longer check
                     continue
                 if configObj[param] != current_config[param]:
                     failed = True
                     break
             if not failed:
-                #do longer checks on input and additional files
+                #do longer checks on input
                 current_hash = hashfile(current_config['input'])
                 if current_hash != input_hash:
                     continue
-                current_input_hashes = {}
-                if current_config['additional_input_file_list'] != "":
-                    current_input_hashes = {
-                        key:hashfile(path)
-                        for (key, path) in yaml.load(
-                            open(current_config['additional_input_file_list'])
-                        ).items()
-                    }
-                if len(set(additional_hashes)^set(current_input_hashes)):
-                    continue
-                if reduce(
-                    lambda x,y: x and additional_hashes[y]==current_input_hashes[y],
-                    current_input_hashes,
-                    True
-                ):
-                    return i
+                return i
     return None
 
-def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
-          peptide_sequence_length, gene_expn_file, transcript_expn_file,
-          normal_snvs_coverage_file, normal_indels_coverage_file,
-          tdna_snvs_coverage_file, tdna_indels_coverage_file,
-          trna_snvs_coverage_file, trna_indels_coverage_file,
-          net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
-          binding_threshold, minimum_fold_change,
-          normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
-          expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
-          downstream_sequence_length, keep_tmp_files, force):
+def staging(parameters):
     """Stage input for a new pVAC-Seq run.  Generate a unique output directory and \
     save uploaded files to temporary locations (and give pVAC-Seq the filepaths). \
     Then forward the command to start()"""
-    input_file = input
+    input_file = parameters['input']
     data = current_app.config['storage']['loader']()
-    samplename  = re.sub(r'[^\w\s.]', '_', samplename)
-    list_input() #update the manifest stored in current_app
+    samplename = re.sub(r'[^\w\s.]', '_', parameters['samplename'])
+    list_input()  # update the manifest stored in current_app
     # input_manifest = current_app.config['storage']['manifest']
     current_path = os.path.join(
         current_app.config['files']['data-dir'],
         'results',
         samplename
     )
+
     if os.path.exists(current_path):
         i = 1
-        while os.path.exists(current_path+"_"+str(i)):
+        while os.path.exists(current_path + "_" + str(i)):
             i += 1
-        current_path += "_"+str(i)
+        current_path += "_" + str(i)
 
     temp_path = tempfile.TemporaryDirectory()
 
@@ -131,194 +101,80 @@ def staging(input, samplename, alleles, epitope_lengths, prediction_algorithms,
     if not input_path:
         return (
             {
-                'code':400,
-                'message':'Unable to locate the given file: %s'%input_file,
-                'fields':'input'
-            },400
+                'status': 400,
+                'message': 'Unable to locate the given file: %s' % input_file,
+                'fields': 'input'
+            }, 400
         )
 
-    additional_input_file_list = open(os.path.join(temp_path.name, "additional_input_file_list.yml"), 'w')
+    #  simple json POST (e.g. from test_start.html form) may not include unchecked checkboxes, need to catch those:
+    parameters['netmhc_stab'] = parameters.pop('netmhc_stab', False)
+    parameters['allele_specific_cutoffs'] = parameters.pop('allele_specific_cutoffs', False)
+    parameters['keep_tmp_files'] = parameters.pop('keep_tmp_files', False)
 
-    if gene_expn_file:
-        gene_expn_file_path = resolve_filepath(gene_expn_file)
-        if not gene_expn_file_path:
-            return (
-                {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%gene_expn_file,
-                    'fields':'gene_expn_file'
-                },400
-            )
-        if os.path.getsize(gene_expn_file_path):
-            yaml.dump({"gene_expn_file": gene_expn_file_path}, additional_input_file_list, default_flow_style=False)
-
-    if transcript_expn_file:
-        transcript_expn_file_path = resolve_filepath(transcript_expn_file)
-        if not transcript_expn_file_path:
-            return (
-                {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%transcript_expn_file,
-                    'fields':'transcript_expn_file'
-                },400
-            )
-        if os.path.getsize(transcript_expn_file_path):
-            yaml.dump({"transcript_expn_file" :transcript_expn_file_path}, additional_input_file_list, default_flow_style=False)
-
-    if normal_snvs_coverage_file:
-        normal_snvs_coverage_file_path = resolve_filepath(normal_snvs_coverage_file)
-        if not normal_snvs_coverage_file_path:
-            return (
-                {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%normal_snvs_coverage_file,
-                    'fields':'normal_snvs_coverage_file'
-                },400
-            )
-        if os.path.getsize(normal_snvs_coverage_file_path):
-            yaml.dump({"normal_snvs_coverage_file" :normal_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
-
-    if normal_indels_coverage_file:
-        normal_indels_coverage_file_path = resolve_filepath(normal_indels_coverage_file)
-        if not normal_indels_coverage_file_path:
-            return (
-                {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%normal_indels_coverage_file,
-                    'fields':'normal_indels_coverage_file'
-                },400
-            )
-
-        if os.path.getsize(normal_indels_coverage_file_path):
-            yaml.dump({"normal_indels_coverage_file" :normal_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
-
-    if tdna_snvs_coverage_file:
-        tdna_snvs_coverage_file_path = resolve_filepath(tdna_snvs_coverage_file)
-        if not tdna_snvs_coverage_file_path:
-            return (
-                {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%tdna_snvs_coverage_file,
-                    'fields':'tdna_snvs_coverage_file'
-                },400
-            )
-        if os.path.getsize(tdna_snvs_coverage_file_path):
-            yaml.dump({"tdna_snvs_coverage_file" :tdna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
-
-    if tdna_indels_coverage_file:
-        tdna_indels_coverage_file_path = resolve_filepath(tdna_indels_coverage_file)
-        if not tdna_indels_coverage_file_path:
-            return (
-                {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%tdna_indels_coverage_file,
-                    'fields':'tdna_indels_coverage_file'
-                },400
-            )
-
-        if os.path.getsize(tdna_indels_coverage_file_path):
-            yaml.dump({"tdna_indels_coverage_file" :tdna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
-
-    if trna_snvs_coverage_file:
-        trna_snvs_coverage_file_path = resolve_filepath(trna_snvs_coverage_file)
-        if not trna_snvs_coverage_file_path:
-            return (
-                {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%trna_snvs_coverage_file,
-                    'fields':'trna_snvs_coverage_file'
-                },400
-            )
-
-        if os.path.getsize(trna_snvs_coverage_file_path):
-            yaml.dump({"trna_snvs_coverage_file" :trna_snvs_coverage_file_path}, additional_input_file_list, default_flow_style=False)
-
-    if trna_indels_coverage_file:
-        trna_indels_coverage_file_path = resolve_filepath(trna_indels_coverage_file)
-        if not trna_indels_coverage_file_path:
-            return (
-                {
-                    'code':400,
-                    'message':'Unable to locate the given file: %s'%trna_indels_coverage_file,
-                    'fields':'trna_indels_coverage_file'
-                },400
-            )
-
-        if os.path.getsize(trna_indels_coverage_file_path):
-            yaml.dump({"trna_indels_coverage_file" :trna_indels_coverage_file_path}, additional_input_file_list, default_flow_style=False)
-
-    additional_input_file_list.flush()
+    if 'epitope_lengths' in parameters:
+        epitope_lengths = [int(item) for item in parameters['epitope_lengths'].split(',')]
+    else:
+        epitope_lengths = ""
 
     configObj = {
-        'input': input_path, #input
-        'samplename':samplename, #samplename
-        'alleles':alleles.split(','),
-        'output':current_path,
-        'epitope_lengths':[int(item) for item in epitope_lengths.split(',')],
-        'prediction_algorithms':prediction_algorithms.split(','),
-        'peptide_sequence_length':peptide_sequence_length,
-        'additional_input_file_list':(
-            additional_input_file_list.name if additional_input_file_list.tell() else '' #check if any data was written to file
-        ),
-        'net_chop_method':net_chop_method,
-        'netmhc_stab':bool(netmhc_stab),
-        'top_result_per_mutation':bool(top_result_per_mutation),
-        'top_score_metric':top_score_metric,
-        'binding_threshold':binding_threshold,
-        'minimum_fold_change':minimum_fold_change,
-        'normal_cov':normal_cov, #normal_cov
-        'tdna_cov':tdna_cov, #tdna_cov
-        'trna_cov':trna_cov, #trna_cov
-        'normal_vaf':normal_vaf, #normal_vaf
-        'tdna_vaf':tdna_vaf, #tdna_vaf
-        'trna_vaf':trna_vaf, #trna_vaf
-        'expn_val':expn_val, #expn_val
-        'net_chop_threshold':net_chop_threshold,
-        'fasta_size':fasta_size,
-        'iedb_retries':iedb_retries,
-        'iedb_install_dir':iedb_install_dir,
-        'keep_tmp_files':bool(keep_tmp_files),
-        'downstream_sequence_length':downstream_sequence_length
+        'input': input_path,  # input
+        'samplename': samplename,  # samplename
+        'alleles': parameters['alleles'].split(','),
+        'output': current_path,
+        'epitope_lengths': epitope_lengths,
+        'prediction_algorithms': parameters['prediction_algorithms'].split(','),
+        'peptide_sequence_length': parameters.pop('peptide_sequence_length', 21),
+        'net_chop_method': parameters.pop('net_chop_method', ""),
+        'netmhc_stab': bool(parameters['netmhc_stab']),
+        'allele_specific_cutoffs': bool(parameters['allele_specific_cutoffs']),
+        'top_score_metric': parameters.pop('top_score_metric', 'median'),
+        'binding_threshold': parameters.pop('binding_threshold', 500),
+        'minimum_fold_change': parameters.pop('minimum_fold_change', 0),
+        'normal_cov': parameters.pop('normal_cov', 5),  # normal_cov
+        'tdna_cov': parameters.pop('tdna_cov', 10),  # tdna_cov
+        'trna_cov': parameters.pop('trna_cov', 10),  # trna_cov
+        'normal_vaf': parameters.pop('normal_vaf', 0.02),  # normal_vaf
+        'tdna_vaf': parameters.pop('tdna_vaf', 0.4),  # tdna_vaf
+        'trna_vaf': parameters.pop('trna_vaf', 0.4),  # trna_vaf
+        'expn_val': parameters.pop('expn_val', 1),  # expn_val
+        'net_chop_threshold': parameters.pop('net_chop_threshold', 0.5),
+        'fasta_size': parameters.pop('fasta_size', 200),
+        'iedb_retries': parameters.pop('iedb_retries', 5),
+        'iedb_install_dir': parameters.pop('iedb_install_dir', ""),
+        'keep_tmp_files': bool(parameters['keep_tmp_files']),
+        'downstream_sequence_length': parameters.pop('downstream_sequence_length', 'full')
     }
+    force = bool(parameters.pop('force', False))
     checkOK = precheck(configObj, data) if not force else None
     if checkOK is None:
         copytree(temp_path.name, current_path)
-        print(additional_input_file_list.tell())
-        if configObj['additional_input_file_list']:
-            configObj['additional_input_file_list'] = os.path.join(
-                current_path,
-                os.path.basename(additional_input_file_list.name)
-            )
         writer = open(os.path.join(
             os.path.abspath(current_path),
             'config.json'
-        ),'w')
+        ), 'w')
         json.dump(configObj, writer, indent='\t')
         writer.close()
         temp_path.cleanup()
         new_id = start(**configObj)
 
         return ({
-            'code':201,
+            'status': 201,
             'message': "Process started.",
             'processid': new_id
-        },
-        201)
+        }, 201)
     
     return (
         {
-            'code':400,
-            'message':"The given parameters match process %d"%checkOK,
-            'fields':"N/A"
-        },
-        400
-    )
+            'status': 400,
+            'message': "The given parameters match process %d" % checkOK,
+            'fields': "N/A"
+        }, 400)
 
 
 def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
-          peptide_sequence_length, additional_input_file_list,
-          net_chop_method, netmhc_stab, top_result_per_mutation, top_score_metric,
-          binding_threshold, minimum_fold_change,
+          peptide_sequence_length, net_chop_method, netmhc_stab, top_score_metric,
+          binding_threshold, allele_specific_cutoffs, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
           downstream_sequence_length, keep_tmp_files):
@@ -356,8 +212,6 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         '-r', str(iedb_retries),
         '-d', str(downstream_sequence_length)
     ]
-    if len(additional_input_file_list):
-        command += ['-i', additional_input_file_list]
     if len(net_chop_method):
         command += [
             '--net-chop-method', net_chop_method,
@@ -365,8 +219,8 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         ]
     if netmhc_stab:
         command.append('--netmhc-stab')
-    if top_result_per_mutation:
-        command.append('--top-result-per-mutation')
+    if allele_specific_cutoffs:
+        command.append('--allele-specific-binding-thresholds')
     if keep_tmp_files:
         command.append('-k')
     if len(iedb_install_dir):

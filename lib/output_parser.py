@@ -68,6 +68,7 @@ class OutputParser(metaclass=ABCMeta):
         mt_epitope_seq = result['mt_epitope_seq']
         wt_result      = wt_results[match_position]
         wt_epitope_seq = wt_result['wt_epitope_seq']
+        result['wt_epitope_position'] = match_position
         total_matches  = self.determine_total_matches(mt_epitope_seq, wt_epitope_seq)
         if total_matches >= self.min_match_count(int(result['peptide_length'])):
             result['wt_epitope_seq'] = wt_epitope_seq
@@ -97,6 +98,7 @@ class OutputParser(metaclass=ABCMeta):
         if match_position not in wt_results:
             result['wt_epitope_seq'] = 'NA'
             result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+            result['wt_epitope_position'] = 'NA'
             if previous_result['mutation_position'] == 'NA':
                 result['mutation_position'] = 'NA'
             elif previous_result['mutation_position'] > 0:
@@ -113,6 +115,7 @@ class OutputParser(metaclass=ABCMeta):
             result['wt_epitope_seq']    = wt_result['wt_epitope_seq']
             result['wt_scores']         = wt_result['wt_scores']
             result['mutation_position'] = 'NA'
+            result['wt_epitope_position'] = 'NA'
         else:
             #Determine how many amino acids are the same between the MT epitope and its matching WT epitope
             total_matches = self.determine_total_matches(mt_epitope_seq, wt_epitope_seq)
@@ -131,6 +134,7 @@ class OutputParser(metaclass=ABCMeta):
                 #The true mutation position is to the left of the current MT eptiope
                 mutation_position = 0
             result['mutation_position'] = mutation_position
+            result['wt_epitope_position'] = match_position
 
     def match_wildtype_and_mutant_entry_for_inframe_indel(self, result, mt_position, wt_results, previous_result, iedb_results_for_wt_iedb_result_key):
         #If the previous WT epitope was matched "from the right" we can just use that position to infer the mutation position and match direction
@@ -281,36 +285,43 @@ class OutputParser(metaclass=ABCMeta):
 
     def flatten_iedb_results(self, iedb_results):
         #transform the iedb_results dictionary into a two-dimensional list
-        flattened_iedb_results = list((
-            value['gene_name'],
-            value['amino_acid_change'],
-            value['position'],
-            value['mutation_position'],
-            value['mt_scores'],
-            value['wt_scores'],
-            value['wt_epitope_seq'],
-            value['mt_epitope_seq'],
-            value['tsv_index'],
-            value['allele'],
-            value['peptide_length'],
-            value['best_mt_score'],
-            value['corresponding_wt_score'],
-            value['best_mt_score_method'],
-            value['median_mt_score'],
-            value['median_wt_score'],
-        ) for value in iedb_results.values())
-
+        flattened_iedb_results = []
+        for value in iedb_results.values():
+            row = []
+            for key in (
+                'gene_name',
+                'amino_acid_change',
+                'position',
+                'mutation_position',
+                'mt_scores',
+                'wt_scores',
+                'wt_epitope_seq',
+                'mt_epitope_seq',
+                'tsv_index',
+                'allele',
+                'peptide_length',
+                'best_mt_score',
+                'corresponding_wt_score',
+                'best_mt_score_method',
+                'median_mt_score',
+                'median_wt_score',
+            ):
+                if key in value.keys():
+                    row.append(value[key])
+                else:
+                    row.append('NA')
+            flattened_iedb_results.append(row)
         return flattened_iedb_results
 
     def process_input_iedb_file(self, tsv_entries):
-        iedb_results              = self.parse_iedb_file(tsv_entries)
+        iedb_results = self.parse_iedb_file(tsv_entries)
         iedb_results_with_metrics = self.add_summary_metrics(iedb_results)
         flattened_iedb_results = self.flatten_iedb_results(iedb_results_with_metrics)
 
         return flattened_iedb_results
 
     def base_headers(self):
-        return[
+        headers = [
             'Chromosome',
             'Start',
             'Stop',
@@ -322,6 +333,8 @@ class OutputParser(metaclass=ABCMeta):
             'Mutation',
             'Protein Position',
             'Gene Name',
+            'HGVSc',
+            'HGVSp',
             'HLA Allele',
             'Peptide Length',
             'Sub-peptide Position',
@@ -344,6 +357,7 @@ class OutputParser(metaclass=ABCMeta):
             'Median WT Score',
             'Median Fold Change',
         ]
+        return headers
 
     def output_headers(self):
         headers = self.base_headers()
@@ -365,13 +379,14 @@ class OutputParser(metaclass=ABCMeta):
         return sorted(list(methods))
 
     def execute(self):
+        tsv_entries = self.parse_input_tsv_file()
+        iedb_results = self.process_input_iedb_file(tsv_entries)
+
         tmp_output_file = self.output_file + '.tmp'
         tmp_output_filehandle = open(tmp_output_file, 'w')
         tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
 
-        tsv_entries  = self.parse_input_tsv_file()
-        iedb_results = self.process_input_iedb_file(tsv_entries)
         for (
             gene_name,
             variant_aa,
@@ -381,7 +396,8 @@ class OutputParser(metaclass=ABCMeta):
             wt_scores,
             wt_epitope_seq,
             mt_epitope_seq,
-            tsv_index, allele,
+            tsv_index,
+            allele,
             peptide_length,
             best_mt_score,
             corresponding_wt_score,
@@ -407,6 +423,8 @@ class OutputParser(metaclass=ABCMeta):
                     'Variant'             : tsv_entry['variant'],
                     'Transcript'          : tsv_entry['transcript_name'],
                     'Ensembl Gene ID'     : tsv_entry['ensembl_gene_id'],
+                    'HGVSc'               : tsv_entry['hgvsc'],
+                    'HGVSp'               : tsv_entry['hgvsp'],
                     'Variant Type'        : tsv_entry['variant_type'],
                     'Mutation'            : variant_aa,
                     'Protein Position'    : tsv_entry['protein_position'],
@@ -502,14 +520,19 @@ class DefaultOutputParser(OutputParser):
                                 iedb_results[key]['peptide_length']    = peptide_length
                             iedb_results[key]['mt_scores'][method] = float(score)
 
-                        if protein_type == 'WT':
-                            if tsv_index not in wt_iedb_results:
-                                wt_iedb_results[tsv_index] = {}
-                            if position not in wt_iedb_results[tsv_index]:
-                                wt_iedb_results[tsv_index][position] = {}
-                                wt_iedb_results[tsv_index][position]['wt_scores']     = {}
-                            wt_iedb_results[tsv_index][position]['wt_epitope_seq']    = epitope
-                            wt_iedb_results[tsv_index][position]['wt_scores'][method] = float(score)
+                        results = {
+                            'WT': wt_iedb_results,
+                        }
+                        if protein_type == 'MT':
+                            continue
+                        result_set = results[protein_type]
+                        if tsv_index not in result_set:
+                            result_set[tsv_index] = {}
+                        if position not in result_set[tsv_index]:
+                            result_set[tsv_index][position] = {}
+                            result_set[tsv_index][position][protein_type.lower() + '_scores'] = {}
+                        result_set[tsv_index][position][protein_type.lower() + '_epitope_seq'] = epitope
+                        result_set[tsv_index][position][protein_type.lower() + '_scores'][method] = float(score)
 
         return self.match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
 

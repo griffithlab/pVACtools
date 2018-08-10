@@ -181,6 +181,7 @@ class PvacseqTests(unittest.TestCase):
                 '--netmhc-stab',
                 '--tdna-vaf', '20',
                 '-d', 'full',
+                '--pass-only',
             ])
 
             run.main([
@@ -198,12 +199,9 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'Test.tsv',
                 'Test.tsv_1-24',
-                'Test.combined.parsed.tsv',
-                'Test.filtered.binding.tsv',
-                'Test.filtered.coverage.tsv',
-                'Test.chop.tsv',
-                'Test.stab.tsv',
-                'Test.final.tsv',
+                'Test.all_epitopes.tsv',
+                'Test.filtered.tsv',
+                'Test.filtered.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name)
@@ -249,14 +247,13 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'Test.tsv',
                 'Test.tsv_1-24',
-                'Test.combined.parsed.tsv',
-                'Test.filtered.binding.tsv',
-                'Test.filtered.coverage.tsv',
-                'Test.final.tsv',
+                'Test.all_epitopes.tsv',
+                'Test.filtered.tsv',
+                'Test.filtered.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name)
-                self.assertTrue(cmp(output_file, expected_file, False))
+                self.assertTrue(compare(output_file, expected_file))
 
             for file_name in (
                 'Test_31.fa.split_1-48',
@@ -321,9 +318,39 @@ class PvacseqTests(unittest.TestCase):
             '-a', 'sample_name',
         ]
         run.main(params)
-        output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.final.tsv')
+        output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.filtered.tsv')
         expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
         self.assertTrue(cmp(output_file, expected_file, False))
+
+    @patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        data,
+        files,
+        test_data_directory()
+    )))
+    def test_pvacseq_pipeline_proximal_variants_vcf(self):
+        output_dir = tempfile.TemporaryDirectory()
+
+        params = [
+            os.path.join(self.test_data_directory, "input_somatic.vcf.gz"),
+            'Test',
+            'HLA-E*01:01',
+            'NetMHC',
+            output_dir.name,
+            '-e', '8',
+            '-s', '1000',
+            '-k',
+            '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz')
+        ]
+        run.main(params)
+
+        for file_name in ['Test_21.fa.split_1-818', 'Test_21.fa.split_1-818.key']:
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', 'tmp', file_name)
+            self.assertTrue(cmp(output_file, expected_file, False))
+        for file_name in ['Test.proximal_variants.tsv', 'Test.all_epitopes.tsv', 'Test.filtered.tsv']:
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
+            self.assertTrue(cmp(output_file, expected_file, False))
 
     @patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
         data,
@@ -364,3 +391,46 @@ class PvacseqTests(unittest.TestCase):
         output_dir_2.cleanup()
 
         self.assertTrue(duration_1 > duration_2)
+
+    def test_pvacseq_combine_and_condense_steps(self):
+        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+        for subdir in ['MHC_Class_I', 'MHC_Class_II']:
+            path = os.path.join(output_dir.name, subdir)
+            os.mkdir(path)
+            test_data_dir = os.path.join(self.test_data_directory, 'combine_and_condense', subdir)
+            for item in os.listdir(test_data_dir):
+                os.symlink(os.path.join(test_data_dir, item), os.path.join(path, item))
+
+        additional_input_files = tempfile.NamedTemporaryFile('w')
+        additional_input_file_list = {
+            'gene_expn_file': os.path.join(self.test_data_directory, 'genes.fpkm_tracking'),
+            'transcript_expn_file': os.path.join(self.test_data_directory, 'isoforms.fpkm_tracking'),
+            'tdna_snvs_coverage_file': os.path.join(self.test_data_directory, 'snvs.bam_readcount'),
+            'tdna_indels_coverage_file': os.path.join(self.test_data_directory, 'indels.bam_readcount'),
+        }
+        yaml.dump(additional_input_file_list, additional_input_files, default_flow_style=False)
+
+        run.main([
+            os.path.join(self.test_data_directory, "input.vcf"),
+            'Test',
+            'HLA-G*01:09,HLA-E*01:01,H2-IAb',
+            'NetMHC',
+            'PickPocket',
+            'NNalign',
+            output_dir.name,
+            '-e', '9,10',
+            '-i', additional_input_files.name,
+            '--top-score-metric=lowest',
+            '--keep-tmp-files',
+            '--tdna-vaf', '20',
+            '-d', 'full',
+        ])
+
+        for file_name in (
+            'Test.all_epitopes.tsv',
+            'Test.filtered.tsv',
+            'Test.filtered.condensed.ranked.tsv',
+        ):
+            output_file   = os.path.join(output_dir.name, 'combined', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
+            self.assertTrue(compare(output_file, expected_file))

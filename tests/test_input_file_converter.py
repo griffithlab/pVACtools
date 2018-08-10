@@ -49,6 +49,34 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_cufflinks.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
+    def test_input_vcf_with_tx_annotation_generates_expected_tsv(self):
+        convert_vcf_input_file              = os.path.join(self.test_data_dir, 'input.tx.vcf')
+        convert_vcf_output_file             = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'                 : convert_vcf_input_file,
+            'output_file'                : convert_vcf_output_file.name,
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_tx.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
+    def test_input_vcf_with_tx_annotation_generates_expected_tsv(self):
+        convert_vcf_input_file              = os.path.join(self.test_data_dir, 'input.gx.vcf')
+        convert_vcf_output_file             = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'                 : convert_vcf_input_file,
+            'output_file'                : convert_vcf_output_file.name,
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_gx.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
     def test_input_vcf_with_bam_readcount_files_generates_expected_tsv(self):
         convert_vcf_input_file       = os.path.join(self.test_data_dir, 'full_input.vcf')
         convert_vcf_output_file      = tempfile.NamedTemporaryFile()
@@ -305,6 +333,22 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_duplicate_index.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
+    def test_readcount_tags(self):
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input.readcount.vcf')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'        : convert_vcf_input_file,
+            'output_file'       : convert_vcf_output_file.name,
+            'sample_name'       : 'H_NJ-HCC1395-HCC1395',
+            'normal_sample_name': 'H_NJ-HCC1395-HCC1396',
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_readcounts.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
     def test_integrate_input_generates_expected_tsv(self):
         convert_input_file  = os.path.join(self.test_data_dir, 'fusions_annotated.bedpe')
         convert_output_file = tempfile.NamedTemporaryFile()
@@ -318,3 +362,22 @@ class InputFileConverterTests(unittest.TestCase):
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_integrate.tsv')
         self.assertTrue(cmp(convert_output_file.name, expected_output_file))
+
+    def test_proximal_variants_input(self):
+        convert_input_file = os.path.join(self.test_data_dir, 'somatic.vcf.gz')
+        convert_input_proximal_variants_file = os.path.join(self.test_data_dir, 'phased.vcf.gz')
+        convert_output_file = tempfile.NamedTemporaryFile()
+        convert_output_proximal_variants_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file': convert_input_file,
+            'output_file': convert_output_file.name,
+            'proximal_variants_vcf': convert_input_proximal_variants_file,
+            'proximal_variants_tsv': convert_output_proximal_variants_file.name,
+            'peptide_length': 60,
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_proximal_variants_tsv = os.path.join(self.test_data_dir, 'output_proximal_variants.tsv')
+        self.assertTrue(cmp(convert_output_proximal_variants_file.name, expected_proximal_variants_tsv))

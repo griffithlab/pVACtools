@@ -8,6 +8,7 @@ from subprocess import call
 from filecmp import cmp
 import py_compile
 import lib.call_iedb
+from lib.prediction_class import PredictionClass, IEDB
 
 def make_response(method, path):
     reader = open(os.path.join(
@@ -46,15 +47,16 @@ class FilterResponseTests(CallIEDBTests):
             unfiltered_file_contents = f.read().rstrip()
         with open(filtered_file, 'rb') as f:
             filtered_file_contents = f.read().rstrip()
-        filtered_response = lib.call_iedb.filter_response(unfiltered_file_contents)
+        filtered_response = IEDB.filter_response(unfiltered_file_contents)
         self.assertEqual(filtered_response, filtered_file_contents)
-        filtered_response_on_filtered_file = lib.call_iedb.filter_response(filtered_file_contents)
+        filtered_response_on_filtered_file = IEDB.filter_response(filtered_file_contents)
         self.assertEqual(filtered_response_on_filtered_file, filtered_file_contents)
 
 class CallIEDBClassITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):
         cls.input_file     = os.path.join(cls.test_data_dir, 'input.fasta')
+        cls.short_input_file = os.path.join(cls.test_data_dir, 'input.short.fasta')
         cls.allele         = 'HLA-A*02:01'
         cls.epitope_length = 9
         cls.methods = ['ann', 'smmpmbec', 'smm']
@@ -67,11 +69,12 @@ class CallIEDBClassITests(CallIEDBTests):
         #netmhcpan, netmhccons, and pickpocket are slow so we won't run them in the tests
         for method in self.methods:
             call_iedb_output_file = tempfile.NamedTemporaryFile()
+            class_name = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
 
             lib.call_iedb.main([
                 self.input_file,
                 call_iedb_output_file.name,
-                method,
+                class_name,
                 self.allele,
                 '-l', str(self.epitope_length)
             ])
@@ -87,10 +90,52 @@ class CallIEDBClassITests(CallIEDBTests):
             expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
             self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
 
+    #the output from MHCflurry varies between operating systems and the version of tensorflow installed
+    #these outputs where created on tensorflow 1.8.0
+    def test_mhcflurry_method_generates_expected_files(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+
+        lib.call_iedb.main([
+            self.input_file,
+            call_iedb_output_file.name,
+            'MHCflurry',
+            self.allele,
+            '-l', str(self.epitope_length)
+        ])
+        if sys.platform == 'darwin':
+            expected_output_file = os.path.join(self.test_data_dir, 'output_mhcflurry_osx.tsv')
+            self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+
+    def test_mhcnuggets_method_generates_expected_files(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+
+        lib.call_iedb.main([
+            self.short_input_file,
+            call_iedb_output_file.name,
+            'MHCnuggetsI',
+            self.allele,
+            '-l', str(self.epitope_length)
+        ])
+        expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
+        self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+
+    def test_mhcnuggets_method_fails_for_nonsense_allele(self):
+        with self.assertRaises(Exception) as context:
+            call_iedb_output_file = tempfile.NamedTemporaryFile()
+            lib.call_iedb.main([
+                self.short_input_file,
+                call_iedb_output_file.name,
+                'MHCnuggetsI',
+                'nonsense',
+                '-l', str(self.epitope_length)
+            ])
+        self.assertTrue('Allele nonsense not supported for MHCnuggetsI.' in str(context.exception))
+
 class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):
         cls.input_file     = os.path.join(cls.test_data_dir, 'input_31.fasta')
+        cls.short_input_file = os.path.join(cls.test_data_dir, 'input_31.short.fasta')
         cls.allele         = 'H2-IAb'
         cls.methods = ['nn_align']
         cls.request_mock = unittest.mock.Mock(side_effect = (
@@ -101,11 +146,12 @@ class CallIEDBClassIITests(CallIEDBTests):
     def test_iedb_methods_generate_expected_files(self):
         for method in self.methods:
             call_iedb_output_file = tempfile.NamedTemporaryFile()
+            class_name = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
 
             lib.call_iedb.main([
                 self.input_file,
                 call_iedb_output_file.name,
-                method,
+                class_name,
                 self.allele,
             ])
             reader = open(self.input_file, mode='r')
@@ -118,6 +164,29 @@ class CallIEDBClassIITests(CallIEDBTests):
             reader.close()
             expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
             self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+
+    def test_mhcnuggets_method_generates_expected_files(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+
+        lib.call_iedb.main([
+            self.short_input_file,
+            call_iedb_output_file.name,
+            'MHCnuggetsII',
+            self.allele,
+        ])
+        expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
+        self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+
+    def test_mhcnuggets_method_fails_for_nonsense_allele(self):
+        with self.assertRaises(Exception) as context:
+            call_iedb_output_file = tempfile.NamedTemporaryFile()
+            lib.call_iedb.main([
+                self.short_input_file,
+                call_iedb_output_file.name,
+                'MHCnuggetsII',
+                'nonsense',
+            ])
+        self.assertTrue('Allele nonsense not supported for MHCnuggetsII.' in str(context.exception))
 
 if __name__ == '__main__':
     unittest.main()

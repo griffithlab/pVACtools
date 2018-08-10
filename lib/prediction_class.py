@@ -2,13 +2,88 @@ from abc import ABCMeta, abstractmethod
 import os
 import csv
 import sys
+import inspect
+from mhcflurry import Class1AffinityPredictor
+from mhcnuggets.src.predict import predict
+import requests
+import re
+import pandas as pd
+import time
+from subprocess import run, PIPE
+import tempfile
+
+class IEDB(metaclass=ABCMeta):
+    @classmethod
+    def iedb_prediction_methods(cls):
+        return [prediction_class().iedb_prediction_method for prediction_class in cls.prediction_classes()]
+
+    @abstractmethod
+    def parse_iedb_allele_file(self):
+        pass
+
+    @abstractmethod
+    def iedb_executable_params(self, args):
+        pass
+
+    @property
+    @abstractmethod
+    def iedb_prediction_method(self):
+        pass
+
+    @property
+    @abstractmethod
+    def url(self):
+        pass
+
+    @classmethod
+    def filter_response(cls, response_text):
+        lines = response_text.splitlines()
+        remaining_lines = lines.copy()
+        for line in lines:
+            if line.startswith(b"allele"):
+                return b"\n".join(remaining_lines)
+            else:
+                remaining_lines.pop(0)
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
+        if iedb_executable_path is not None:
+            arguments = self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length)
+            response = run("/bin/bash -c \"source activate pvactools_py27; python {}\"".format(arguments), stdout=PIPE, check=True, shell=True)
+            response_text = self.filter_response(response.stdout)
+            return (response_text, 'wb')
+        else:
+            data = {
+                'sequence_text': input_file.read(),
+                'method':        self.iedb_prediction_method,
+                'allele':        allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
+                'user_tool':     'pVac-seq',
+            }
+            if epitope_length is not None:
+                data['length'] = epitope_length
+
+            response = requests.post(self.url, data=data)
+            retries = 0
+            while response.status_code == 500 and retries < iedb_retries:
+                time.sleep(60 * retries)
+                response = requests.post(self.url, data=data)
+                print("IEDB: Retry %s of %s" % (retries, iedb_retries))
+                retries += 1
+
+            if response.status_code != 200:
+                sys.exit("Error posting request to IEDB.\n%s" % response.text)
+            response_text = response.text
+            output_mode = 'w'
+            return (response_text, 'w')
 
 class PredictionClass(metaclass=ABCMeta):
     valid_allele_names_dict = {}
+    allele_cutoff_dict = {}
 
     @classmethod
     def prediction_classes(cls):
         prediction_classes = []
+        if not inspect.isabstract(cls):
+            prediction_classes.append(cls)
         for subclass in cls.__subclasses__():
             prediction_classes.extend(subclass.prediction_classes())
         return prediction_classes
@@ -18,8 +93,18 @@ class PredictionClass(metaclass=ABCMeta):
         return sorted([prediction_class.__name__ for prediction_class in cls.prediction_classes()])
 
     @classmethod
-    def iedb_prediction_methods(cls):
-        return [prediction_class().iedb_prediction_method for prediction_class in cls.prediction_classes()]
+    def prediction_class_for_iedb_prediction_method(cls, method):
+        prediction_classes = cls.prediction_classes()
+        for prediction_class in prediction_classes:
+            prediction_class_object = prediction_class()
+            if ( issubclass(prediction_class_object.__class__, IEDBMHCI) or issubclass(prediction_class_object.__class__, IEDBMHCII) ) and prediction_class_object.iedb_prediction_method == method:
+                return prediction_class_object
+        module = getattr(sys.modules[__name__], method)
+        return module()
+
+    @classmethod
+    def prediction_class_name_for_iedb_prediction_method(cls, method):
+        return cls.prediction_class_for_iedb_prediction_method(method).__class__.__name__
 
     @classmethod
     def all_valid_allele_names(cls):
@@ -36,61 +121,125 @@ class PredictionClass(metaclass=ABCMeta):
                 sys.exit("Allele %s not valid. Run `pvacseq valid_alleles` for a list of valid allele names." % allele)
 
     @classmethod
-    def prediction_class_for_iedb_prediction_method(cls, method):
-        prediction_classes = cls.prediction_classes()
-        for prediction_class in prediction_classes:
-            prediction_class_object = prediction_class()
-            if prediction_class_object.iedb_prediction_method == method:
-                return prediction_class_object
+    def parse_allele_cutoff_file(cls):
+        base_dir                = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        iedb_alleles_dir        = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles')
+        allele_cutoff_file_name = os.path.join(iedb_alleles_dir, "cutoffs.csv")
+        cutoffs = {}
+        with open(allele_cutoff_file_name) as allele_cutoff_file:
+            csv_reader = csv.DictReader(allele_cutoff_file)
+            for row in csv_reader:
+                cutoffs[row['allele']] = row['allele_specific_cutoff']
+        return cutoffs
 
     @classmethod
-    def prediction_class_name_for_iedb_prediction_method(cls, method):
-        return cls.prediction_class_for_iedb_prediction_method(method).__class__.__name__
+    def print_all_allele_cutoffs(cls):
+        if not cls.allele_cutoff_dict:
+            cls.allele_cutoff_dict = cls.parse_allele_cutoff_file()
+        for allele, cutoff in sorted(cls.allele_cutoff_dict.items()):
+            print("%s\t%s" % (allele, cutoff))
 
-    @abstractmethod
-    def parse_iedb_allele_file(self):
-        pass
+    @classmethod
+    def cutoff_for_allele(cls, allele):
+        if not cls.allele_cutoff_dict:
+            cls.allele_cutoff_dict = cls.parse_allele_cutoff_file()
+        return cls.allele_cutoff_dict.get(allele, None)
 
     @abstractmethod
     def valid_allele_names(self):
         pass
 
-    @abstractmethod
-    def iedb_executable_params(self, args):
-        pass
-
     @property
     @abstractmethod
     def needs_epitope_length(self):
-        pass
-
-    @property
-    @abstractmethod
-    def iedb_prediction_method(self):
-        pass
-
-    @property
-    @abstractmethod
-    def url(self):
         pass
 
     def check_allele_valid(self, allele):
         valid_alleles = self.valid_allele_names()
         if allele not in valid_alleles:
-            sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, self.iedb_prediction_method, self.__class__.__name__))
+            sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, self.__class__.__name__, self.__class__.__name__))
 
 class MHCI(PredictionClass, metaclass=ABCMeta):
-    @property
-    def url(self):
-        return 'http://tools-cluster-interface.iedb.org/tools_api/mhci/'
-
     @property
     def needs_epitope_length(self):
         return True
 
-    @classmethod
-    def prediction_classes(cls):
-        return cls.__subclasses__()
+class MHCflurry(MHCI):
+    def valid_allele_names(self):
+        predictor = Class1AffinityPredictor.load()
+        return predictor.supported_alleles
+
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
+    def valid_lengths_for_allele(self, allele):
+        return [8,9,10,11,12,13,14]
+
+    def determine_neoepitopes(self, sequence, length):
+        epitopes = []
+        for i in range(0, len(sequence)-length+1):
+            epitopes.append(sequence[i:i+length])
+        return epitopes
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
+        predictor = Class1AffinityPredictor.load()
+        results = pd.DataFrame()
+        for line in input_file:
+            match = re.search('^>([0-9]+)$', line)
+            if match:
+                seq_num = match.group(1)
+            else:
+                epitopes = self.determine_neoepitopes(line.rstrip(), epitope_length)
+                df = predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
+                df['seq_num'] = seq_num
+                df['start'] = df.index+1
+                df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
+                results = results.append(df)
+        return (results, 'pandas')
+
+class MHCnuggetsI(MHCI):
+    def valid_allele_names(self):
+        return []
+
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
+    def valid_lengths_for_allele(self, allele):
+        return [8,9,10,11,12,13,14]
+
+    def write_neoepitopes_to_file(self, sequence, length):
+        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
+        for i in range(0, len(sequence)-length+1):
+            tmp_file.write(sequence[i:i+length] + '\n')
+        tmp_file.flush()
+        return tmp_file
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
+        results = pd.DataFrame()
+        for line in input_file:
+            match = re.search('^>([0-9]+)$', line)
+            if match:
+                seq_num = match.group(1)
+            else:
+                peptide_file = self.write_neoepitopes_to_file(line.rstrip(), epitope_length)
+                tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+                try:
+                    predict('I', peptide_file.name, allele.replace('*', ''), output=tmp_output_file.name)
+                except TypeError:
+                    raise Exception("Allele {} not supported for MHCnuggetsI.".format(allele))
+                peptide_file.close()
+                df = pd.read_csv(tmp_output_file.name)
+                df['seq_num'] = seq_num
+                df['start'] = df.index+1
+                df['allele'] = allele
+                results = results.append(df)
+                tmp_output_file.close()
+        return (results, 'pandas')
+
+class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
+    @property
+    def url(self):
+        return 'http://tools-cluster-interface.iedb.org/tools_api/mhci/'
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
@@ -125,58 +274,91 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
         if length not in valid_lengths:
             sys.exit("Length %s not valid for allele %s and method %s." % (length, allele, self.iedb_prediction_method))
 
-    def iedb_executable_params(self, args):
-        return [
-            'python2.7',
-            args.iedb_executable_path,
-            args.method,
-            args.allele,
-            str(args.epitope_length),
-            args.input_file.name,
-        ]
+    def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
+        return "{} {} {} {} {}".format(iedb_executable_path, method, allele, str(epitope_length), input_file.name)
 
-class NetMHC(MHCI):
+class NetMHC(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'ann'
 
-class NetMHCpan(MHCI):
+class NetMHCpan(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'netmhcpan'
 
-class SMMPMBEC(MHCI):
+class SMMPMBEC(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'smmpmbec'
 
-class SMM(MHCI):
+class SMM(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'smm'
 
-class NetMHCcons(MHCI):
+class NetMHCcons(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'netmhccons'
 
-class PickPocket(MHCI):
+class PickPocket(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'pickpocket'
 
 class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
-    def url(self):
-        return 'http://tools-cluster-interface.iedb.org/tools_api/mhcii/'
-
-    @property
     def needs_epitope_length(self):
         return False
 
-    @classmethod
-    def prediction_classes(cls):
-        return cls.__subclasses__()
+class MHCnuggetsII(MHCII):
+    def valid_allele_names(self):
+        return []
+
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
+    def valid_lengths_for_allele(self, allele):
+        return [15]
+
+    def write_neoepitopes_to_file(self, sequence):
+        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
+        for i in range(0, len(sequence)-16):
+            tmp_file.write(sequence[i:i+15] + '\n')
+        tmp_file.flush()
+        return tmp_file
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
+        results = pd.DataFrame()
+        for line in input_file:
+            match = re.search('^>([0-9]+)$', line)
+            if match:
+                seq_num = match.group(1)
+            else:
+                peptide_file = self.write_neoepitopes_to_file(line.rstrip())
+                tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+                try:
+                    allele = allele.replace('*', '').replace('H2', 'H-2')
+                    if allele.startswith(('DP', 'DR', 'DQ', 'DM', 'DO')):
+                        allele = "HLA-{}".format(allele)
+                    predict('II', peptide_file.name, allele, output=tmp_output_file.name)
+                except TypeError:
+                    raise Exception("Allele {} not supported for MHCnuggetsII.".format(allele))
+                peptide_file.close()
+                df = pd.read_csv(tmp_output_file.name)
+                df['seq_num'] = seq_num
+                df['start'] = df.index+1
+                df['allele'] = allele
+                results = results.append(df)
+                tmp_output_file.close()
+        return (results, 'pandas')
+
+
+class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
+    @property
+    def url(self):
+        return 'http://tools-cluster-interface.iedb.org/tools_api/mhcii/'
 
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
@@ -196,26 +378,21 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
             self.valid_allele_names_dict = self.parse_iedb_allele_file()
         return self.valid_allele_names_dict
 
-    def iedb_executable_params(self, args):
-        return [
-            'python2.7',
-            args.iedb_executable_path,
-            args.method,
-            args.allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
-            args.input_file.name,
-        ]
+    def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
+        allele = allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
+        return "{} {} {} {}".format(iedb_executable_path, method, allele, input_file.name)
 
-class NetMHCIIpan(MHCII):
+class NetMHCIIpan(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
         return 'NetMHCIIpan'
 
-class NNalign(MHCII):
+class NNalign(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
         return 'nn_align'
 
-class SMMalign(MHCII):
+class SMMalign(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
         return 'smm_align'
