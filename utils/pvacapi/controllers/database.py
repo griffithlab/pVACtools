@@ -57,7 +57,7 @@ def column_mapping(row, mapping, schema):
     changes = {}
     for (col, val) in row.items():
         col = column_filter(col)
-        if NA_pattern.match(val):
+        if val == None or NA_pattern.match(val):
             output[col] = None
             continue
         if col not in schema and mapping[col] == str:
@@ -212,10 +212,14 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                 # insert the row
                 insert(*[formatted[column] for column in column_names])
             raw_reader.close()
-    typequery = db.prepare(
-        "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1"
-    )
-    column_defs = typequery(tablekey)
+    #with db.synchronizer:
+    #    test_query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+    #    test_response = query(tablekey)
+    with db.synchronizer:
+        typequery = db.prepare(
+            "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1"
+        )
+        column_defs = typequery(tablekey)
     column_maps = {}
     for (col, typ) in column_defs:
         if 'int' in typ:
@@ -369,6 +373,10 @@ def visualize_script(parentID, fileID):
             },
             400
         )
+    if len(result) == 0 or type(result) == dict:
+        return (
+            'Results file contains no data - cannot visualize'
+        )
     cols = results_getcols(parentID, fileID)
     if type(cols) != dict:
         return (
@@ -389,26 +397,14 @@ def visualize_script(parentID, fileID):
     else:
         sample = 'Unknown Sample'
 
-    """
-    re.sub(
-        r'src="(.+)"',
-        r'src="\1&%s"'%(
-            urlencode([
-                ('target-process', str(parentID)),
-                ('target-file', str(fileID)),
-                ('cols', json.dumps(cols)),
-                ('samplename', sample)
-            ])
-        ),
-    """
-
-    return server_document(
-        url="http://localhost:5006/visualizations",
-        arguments={
-            'target-process': parentID,
-            'target-file': fileID,
-            'cols': json.dumps(cols),
-            'samplename': sample
-        }
+    return (
+        server_document(
+            url="http://localhost:5006/visualizations",
+            arguments={
+                'target-process': parentID,
+                'target-file': fileID,
+                'cols': json.dumps(cols),
+                'samplename': sample
+            }
+        )
     )
-    #)
