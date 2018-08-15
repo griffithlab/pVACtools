@@ -345,6 +345,9 @@ class VcfConverter(InputFileConverter):
             if self.pass_only and not (filt is None or len(filt) == 0):
                 continue
 
+            if 'CSQ' not in entry.INFO:
+                continue
+
             alleles_dict = self.csq_parser.resolve_alleles(entry)
             for alt in alts:
                 alt = str(alt)
