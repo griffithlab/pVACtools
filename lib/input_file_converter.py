@@ -65,7 +65,9 @@ class VcfConverter(InputFileConverter):
         if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.peptide_length):
             sys.exit("A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided")
         if self.proximal_variants_vcf and not os.path.exists(self.proximal_variants_vcf + '.tbi'):
-            sys.exit('No .tbi file found for input VCF. Input VCF needs to be tabix indexed if processing with proximal variants.')
+            sys.exit('No .tbi file found for proximal variants VCF {}. Proximal variants VCF needs to be tabix indexed'.format(self.proximal_variants_vcf))
+        if self.proximal_variants_vcf and not os.path.exists(self.input_file + '.tbi'):
+            sys.exit('No .tbi file found for input VCF {}. Input VCF needs to be tabix indexed if processing with proximal variants.'.format(self.input_file))
         if lib.utils.is_gz_file(self.input_file):
             mode = 'rb'
         else:
