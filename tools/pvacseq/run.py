@@ -166,17 +166,9 @@ def main(args_input = sys.argv[1:]):
         if allele in MHCI.all_valid_allele_names():
             class_i_alleles.append(allele)
             valid = 1
-        elif 'MHCnuggetsI' in args.prediction_algorithms:
-            if allele.startswith(("HLA-A", "HLA-B", "HLA-C")):
-                class_i_alleles.append(allele)
-                valid = 1
         if allele in MHCII.all_valid_allele_names():
             class_ii_alleles.append(allele)
             valid = 1
-        elif 'MHCnuggetsII' in args.prediction_algorithms:
-            if allele.startswith(("DP", "DQ", "DO", "DM", "DR", "H2")):
-                class_ii_alleles.append(allele)
-                valid = 1
         if not valid:
             print("Allele %s not valid. Skipping." % allele)
 
