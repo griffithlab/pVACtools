@@ -203,7 +203,7 @@ class MHCnuggetsI(MHCI):
         alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
         alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
         with open(alleles_file_name, 'r') as fh:
-            return fh.read().split('\n')
+            return list(filter(None, fh.read().split('\n')))
 
     def check_length_valid_for_allele(self, length, allele):
         return True
@@ -319,7 +319,7 @@ class MHCnuggetsII(MHCII):
         alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_ii')
         alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
         with open(alleles_file_name, 'r') as fh:
-            return fh.read().split('\n')
+            return list(filter(None, fh.read().split('\n')))
 
     def check_length_valid_for_allele(self, length, allele):
         return True
