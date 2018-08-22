@@ -286,8 +286,8 @@ class Pipeline(metaclass=ABCMeta):
         return os.path.join(self.output_dir, self.sample_name+".filtered.coverage.tsv")
 
     def coverage_filter(self):
-        status_message("Running Coverage Filters")
         if self.input_file_type == 'vcf':
+            status_message("Running Coverage Filters")
             filter_criteria = []
             filter_criteria.append({'column': "Normal_Depth", 'operator': '>=', 'threshold': self.normal_cov})
             filter_criteria.append({'column': "Normal_VAF", 'operator': '<=', 'threshold': self.normal_vaf})
@@ -298,9 +298,9 @@ class Pipeline(metaclass=ABCMeta):
             filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': self.expn_val})
             filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': self.expn_val})
             Filter(self.binding_filter_out_path(), self.coverage_filter_out_path(), filter_criteria, self.exclude_NAs).execute()
+            status_message("Completed")
         elif self.input_file_type == 'bedpe':
             shutil.copy(self.binding_filter_out_path(), self.coverage_filter_out_path())
-        status_message("Completed")
 
     def top_result_filter_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".filtered.top.tsv")
@@ -376,19 +376,7 @@ class Pipeline(metaclass=ABCMeta):
 
         self.combined_parsed_outputs(split_parsed_output_files)
         self.binding_filter()
-
-        if (self.gene_expn_file is not None
-            or self.transcript_expn_file is not None
-            or self.normal_snvs_coverage_file is not None
-            or self.normal_indels_coverage_file is not None
-            or self.tdna_snvs_coverage_file is not None
-            or self.tdna_indels_coverage_file is not None
-            or self.trna_snvs_coverage_file is not None
-            or self.trna_indels_coverage_file is not None):
-            self.coverage_filter()
-        else:
-            os.symlink(self.binding_filter_out_path(), self.coverage_filter_out_path())
-
+        self.coverage_filter()
         self.top_result_filter()
 
         if self.net_chop_method:

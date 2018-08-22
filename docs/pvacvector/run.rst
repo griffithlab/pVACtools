@@ -13,7 +13,7 @@ Usage
    prediction algorithms. More information on how to install IEDB locally can
    be found on the :ref:`Installation <iedb_install>` page.
 
-.. program-output:: pvacfuse run -h
+.. program-output:: pvacvector run -h
 
 .. .. argparse::
         :module: tools.pvacvector.run
