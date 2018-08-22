@@ -285,7 +285,7 @@ def check_allele(allele):
 
 # takes in comma delimited string of prediction algorithms,
 # returns map of algorithms to valid alleles for that algorithm
-def valid_alleles(prediction_algorithms):
+def valid_alleles_per_algorithm(prediction_algorithms):
     valid_allele_list = {}
     for algorithm in prediction_algorithms.split(","):
         prediction_class = globals()[algorithm]
