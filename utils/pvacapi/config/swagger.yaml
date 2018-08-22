@@ -711,6 +711,40 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
+  /api/v1/validalleles:
+    get:
+      tags:
+        - "allele"
+      summary: "Lists valid alleles for specified prediction algorithms"
+      description: "Takes a string of prediction algorithms and returns an object mapping each allele to the prediction algorithms it can be used with"
+      operationId: "utils.pvacapi.controllers.staging.valid_alleles"
+      parameters:
+        - name: "page"
+          in: "query"
+          description: "Page of results to return"
+          required: false
+          type: "integer"
+          default: 1
+        - name: "count"
+          in: "query"
+          description: "Number of results to return per page"
+          required: false
+          type: "integer"
+          default: 10
+        - name: "prediction_algorithms"
+          in: "query"
+          description: "Prediction algorithms to find valid alleles for"
+          in: "query"
+          type: "string"
+      responses:
+        200:
+          description: "Returns object mapping each allele to an array of predcition algorithms it can be used with"
+          schema:
+            type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
   /api/v1/validallelesperalgorithm:
     get:
       tags:
