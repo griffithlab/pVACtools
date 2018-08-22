@@ -343,7 +343,8 @@ class MHCnuggetsII(MHCII):
             else:
                 peptide_file = self.write_neoepitopes_to_file(line.rstrip())
                 tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-                predict('II', peptide_file.name, allele.replace('*', '').replace('H2', 'H-2'), output=tmp_output_file.name)
+                mhcnuggets_allele = "HLA-{}".format(allele).replace('*', '')
+                predict('II', peptide_file.name, mhcnuggets_allele, output=tmp_output_file.name)
                 peptide_file.close()
                 df = pd.read_csv(tmp_output_file.name)
                 df['seq_num'] = seq_num

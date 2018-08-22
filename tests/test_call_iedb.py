@@ -160,7 +160,7 @@ class CallIEDBClassIITests(CallIEDBTests):
             self.short_input_file,
             call_iedb_output_file.name,
             'MHCnuggetsII',
-            self.allele,
+            'DPA1*01:03',
         ])
         expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
         self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
