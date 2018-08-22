@@ -711,14 +711,14 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/validalleles:
+  /api/v1/validallelesperalgorithm:
     get:
-      tags: 
+      tags:
         - "allele"
-      summary: "Lists valid alleles for specified prediction algorithms"
+      summary: "Lists valid alleles for specified prediction algorithms grouped by the algorithm"
       description: "Takes a string of prediction algorithms and returns an object mapping each algorithm to valid alleles for that algorithm"
-      operationId: "utils.pvacapi.controllers.staging.valid_alleles"
-      parameters: 
+      operationId: "utils.pvacapi.controllers.staging.valid_alleles_per_algorithm"
+      parameters:
         - name: "prediction_algorithms"
           in: "query"
           description: "Prediction algorithms to find valid alleles for"
