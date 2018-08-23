@@ -99,7 +99,7 @@ Column Name          Description
 ==================== ===========
 
 The pVACseq Neoeptiope Priority Score
-=====================================
+_____________________________________
 
 Each of the following 4 criteria are assigned a rank-ordered value (worst = 1):
 
