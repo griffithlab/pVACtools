@@ -118,7 +118,7 @@ class PredictionRunArgumentParser(RunArgumentParser):
             default=200,
             help="Number of fasta entries per IEDB request. "
                  + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
-                 + "Needs to be an even number.",
+                 + "Needs to be an even number. Default: 200",
         )
         self.parser.add_argument(
             "-d", "--downstream-sequence-length",
@@ -148,6 +148,10 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
                  + "For an example of this yaml file run `pvacseq config_files additional_input_file_list`."
         )
         self.parser.add_argument(
+            "-p", "--phased-proximal-variants-vcf",
+            help="A VCF with phased proximal variant information"
+        )
+        self.parser.add_argument(
             "-c", "--minimum-fold-change", type=int,
             default=0,
             help="Minimum fold change between mutant binding score and wild-type score. "
@@ -175,20 +179,20 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         self.parser.add_argument(
             '--normal-vaf', type=int,
             help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered. " +
-            "Default: 2",
-            default=2
+            "Default: 0.02",
+            default=0.2
         )
         self.parser.add_argument(
             '--tdna-vaf', type=int,
             help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 40",
-            default=40
+            "Default: 0.4",
+            default=0.4
         )
         self.parser.add_argument(
             '--trna-vaf', type=int,
             help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 40",
-            default=40
+            "Default: 0.4",
+            default=0.4
         )
         self.parser.add_argument(
             '--expn-val', type=int,

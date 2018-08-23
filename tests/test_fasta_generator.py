@@ -458,6 +458,26 @@ class FastaGeneratorTests(unittest.TestCase):
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_X_sequence.key')
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
+    def test_input_file_with_sequence_containing_U(self):
+        peptide_sequence_length        = 31
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_U_sequence.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        self.assertEqual(os.stat(generate_fasta_output_file.name).st_size, 0)
+        self.assertEqual(os.stat(generate_fasta_key_output_file.name).st_size, 0)
+
     def test_input_file_with_resulting_short_fasta_sequence(self):
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_short_fasta_sequence.tsv')
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
@@ -543,6 +563,29 @@ class FastaGeneratorTests(unittest.TestCase):
         self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
         self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
 
+    def test_proximal_variants_generate_expected_file(self):
+        peptide_sequence_length        = '21'
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_somatic_variant_with_proximal_variants.tsv')
+        generate_fasta_proximal_variants_file = os.path.join(self.test_data_dir, 'input_proximal_variants.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_proximal_variants.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(self.test_data_dir, 'output_proximal_variants.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+
     def test_protein_change_with_asterisk_in_wildtype_and_mutant(self):
         peptide_sequence_length        = '21'
         test_data_dir                  = os.path.join(self.test_data_dir, 'protein_change_with_asterisk_in_wildtype_and_mutant')
@@ -585,6 +628,29 @@ class FastaGeneratorTests(unittest.TestCase):
         self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
         self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
 
+    def test_proximal_variants_for_inframe_insertion_generate_expected_file(self):
+        peptide_sequence_length        = '21'
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_inframe_insertion_aa_replacement.tsv')
+        generate_fasta_proximal_variants_file = os.path.join(self.test_data_dir, 'input_proximal_variants.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_proximal_variants_inframe_insertion.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(self.test_data_dir, 'output_proximal_variants_inframe_insertion.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+
     def test_protein_change_with_multiple_asterisks(self):
         peptide_sequence_length        = '21'
         test_data_dir                  = os.path.join(self.test_data_dir, 'protein_change_with_multiple_asterisks')
@@ -599,6 +665,98 @@ class FastaGeneratorTests(unittest.TestCase):
             'output_file'               : generate_fasta_output_file.name,
             'output_key_file'           : generate_fasta_key_output_file.name,
             'downstream_sequence_length': None,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
+        self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
+
+    def test_proximal_variant_on_same_codon_as_somatic_variant_results_in_novel_peptide(self):
+        peptide_sequence_length        = '21'
+        test_data_dir                  = os.path.join(self.test_data_dir, 'proximal_variant_on_same_codon_as_somatic_variant_results_in_novel_peptide')
+        generate_fasta_input_file      = os.path.join(test_data_dir, 'input.tsv')
+        generate_fasta_proximal_variants_file = os.path.join(test_data_dir, 'proximal_variants.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(test_data_dir, 'output.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(test_data_dir, 'output.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+
+    def test_proximal_variant_on_same_codon_as_somatic_variant_results_in_stop_codon(self):
+        peptide_sequence_length        = '21'
+        test_data_dir                  = os.path.join(self.test_data_dir, 'proximal_variant_on_same_codon_as_somatic_variant_results_in_stop_codon')
+        generate_fasta_input_file      = os.path.join(test_data_dir, 'input.tsv')
+        generate_fasta_proximal_variants_file = os.path.join(test_data_dir, 'proximal_variants.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
+        self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
+
+    def test_multiple_proximal_variants_on_same_codon_results_in_novel_peptide(self):
+        peptide_sequence_length        = '21'
+        test_data_dir                  = os.path.join(self.test_data_dir, 'multiple_proximal_variants_on_same_codon_results_in_novel_peptide')
+        generate_fasta_input_file      = os.path.join(test_data_dir, 'input.tsv')
+        generate_fasta_proximal_variants_file = os.path.join(test_data_dir, 'proximal_variants.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(test_data_dir, 'output.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(test_data_dir, 'output.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+
+    def test_multiple_proximal_variants_on_same_codon_results_in_stop_codon(self):
+        peptide_sequence_length        = '21'
+        test_data_dir                  = os.path.join(self.test_data_dir, 'multiple_proximal_variants_on_same_codon_results_in_stop_codon')
+        generate_fasta_input_file      = os.path.join(test_data_dir, 'input.tsv')
+        generate_fasta_proximal_variants_file = os.path.join(test_data_dir, 'proximal_variants.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'proximal_variants_file'    : generate_fasta_proximal_variants_file,
         }
         generator = FastaGenerator(**generate_fasta_params)
 

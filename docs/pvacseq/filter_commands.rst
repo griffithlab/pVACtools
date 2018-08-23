@@ -8,9 +8,9 @@ Filtering Commands
 pVACseq currently offers three filters: a binding filter, a coverage filter,
 and a top score filter.
 
-The binding filter and top score filters are always run automatically as part
-of the pVACseq pipeline. The coverage filter is run automatically if the VCF
-contained readcount and/or expression annotations.
+The binding filter and top score filter are always run automatically as part
+of the pVACseq pipeline. The coverage filter is run automatically if the input
+VCF contains readcount and/or expression annotations.
 
 All filters can also be run manually to narrow the final results down further.
 

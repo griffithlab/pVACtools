@@ -104,7 +104,8 @@ def create_combined_reports(base_output_dir, args, additional_input_files):
     combine_reports([file1, file2], combined_output_file)
 
     binding_filter_output_file = binding_filter(combined_output_file, output_dir, args)
-    if len(additional_input_files) > 0:
+    defined_additional_input_files = {k: v for (k,v) in additional_input_files.items() if v is not None}
+    if len(defined_additional_input_files) > 0:
         coverage_filter_output_file = coverage_filter(binding_filter_output_file, output_dir, args)
         top_result_filter_output_file = top_result_filter(coverage_filter_output_file, output_dir, args)
         os.unlink(coverage_filter_output_file)
@@ -165,9 +166,17 @@ def main(args_input = sys.argv[1:]):
         if allele in MHCI.all_valid_allele_names():
             class_i_alleles.append(allele)
             valid = 1
+        elif 'MHCnuggetsI' in args.prediction_algorithms:
+            if allele.startswith(("HLA-A", "HLA-B", "HLA-C")):
+                class_i_alleles.append(allele)
+                valid = 1
         if allele in MHCII.all_valid_allele_names():
             class_ii_alleles.append(allele)
             valid = 1
+        elif 'MHCnuggetsII' in args.prediction_algorithms:
+            if allele.startswith(("DP", "DQ", "DO", "DM", "DR", "H2")):
+                class_ii_alleles.append(allele)
+                valid = 1
         if not valid:
             print("Allele %s not valid. Skipping." % allele)
 
@@ -195,6 +204,7 @@ def main(args_input = sys.argv[1:]):
         'keep_tmp_files'            : args.keep_tmp_files,
         'pass_only'                 : args.pass_only,
         'normal_sample_name'        : args.normal_sample_name,
+        'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
     }
     additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
     shared_arguments.update(additional_input_files)
