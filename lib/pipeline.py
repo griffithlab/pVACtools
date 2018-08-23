@@ -43,6 +43,7 @@ class Pipeline(metaclass=ABCMeta):
         self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
         self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
         self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
+        self.phased_proximal_variants_vcf = kwargs.pop('phased_proximal_variants_vcf', None)
         self.net_chop_method             = kwargs.pop('net_chop_method', None)
         self.net_chop_threshold          = kwargs.pop('net_chop_threshold', 0.5)
         self.netmhc_stab                 = kwargs.pop('netmhc_stab', False)
@@ -64,6 +65,7 @@ class Pipeline(metaclass=ABCMeta):
         self.keep_tmp_files              = kwargs.pop('keep_tmp_files', False)
         self.exclude_NAs                 = kwargs.pop('exclude_NAs', False)
         self.normal_sample_name          = kwargs.pop('normal_sample_name', False)
+        self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
@@ -170,6 +172,12 @@ class Pipeline(metaclass=ABCMeta):
                 convert_params[attribute] = getattr(self, attribute)
             else:
                 convert_params[attribute] = None
+        if self.phased_proximal_variants_vcf is not None:
+            convert_params['proximal_variants_vcf'] = self.phased_proximal_variants_vcf
+            proximal_variants_tsv = os.path.join(self.output_dir, self.sample_name + '.proximal_variants.tsv')
+            convert_params['proximal_variants_tsv'] = proximal_variants_tsv
+            self.proximal_variants_file = proximal_variants_tsv
+            convert_params['peptide_length'] = self.peptide_sequence_length
 
         converter = self.converter(convert_params)
         converter.execute()
@@ -278,8 +286,8 @@ class Pipeline(metaclass=ABCMeta):
         return os.path.join(self.output_dir, self.sample_name+".filtered.coverage.tsv")
 
     def coverage_filter(self):
-        status_message("Running Coverage Filters")
         if self.input_file_type == 'vcf':
+            status_message("Running Coverage Filters")
             filter_criteria = []
             filter_criteria.append({'column': "Normal_Depth", 'operator': '>=', 'threshold': self.normal_cov})
             filter_criteria.append({'column': "Normal_VAF", 'operator': '<=', 'threshold': self.normal_vaf})
@@ -290,9 +298,9 @@ class Pipeline(metaclass=ABCMeta):
             filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': self.expn_val})
             filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': self.expn_val})
             Filter(self.binding_filter_out_path(), self.coverage_filter_out_path(), filter_criteria, self.exclude_NAs).execute()
+            status_message("Completed")
         elif self.input_file_type == 'bedpe':
             shutil.copy(self.binding_filter_out_path(), self.coverage_filter_out_path())
-        status_message("Completed")
 
     def top_result_filter_out_path(self):
         return os.path.join(self.output_dir, self.sample_name+".filtered.top.tsv")
@@ -368,19 +376,7 @@ class Pipeline(metaclass=ABCMeta):
 
         self.combined_parsed_outputs(split_parsed_output_files)
         self.binding_filter()
-
-        if (self.gene_expn_file is not None
-            or self.transcript_expn_file is not None
-            or self.normal_snvs_coverage_file is not None
-            or self.normal_indels_coverage_file is not None
-            or self.tdna_snvs_coverage_file is not None
-            or self.tdna_indels_coverage_file is not None
-            or self.trna_snvs_coverage_file is not None
-            or self.trna_indels_coverage_file is not None):
-            self.coverage_filter()
-        else:
-            os.symlink(self.binding_filter_out_path(), self.coverage_filter_out_path())
-
+        self.coverage_filter()
         self.top_result_filter()
 
         if self.net_chop_method:
@@ -441,6 +437,7 @@ class MHCIPipeline(Pipeline):
                 'output_file'               : split_fasta_file_path,
                 'output_key_file'           : split_fasta_key_file_path,
                 'downstream_sequence_length': self.downstream_sequence_length,
+                'proximal_variants_file'    : self.proximal_variants_file,
             }
             fasta_generator = self.fasta_generator(generate_fasta_params)
             fasta_generator.execute()
@@ -466,14 +463,15 @@ class MHCIPipeline(Pipeline):
                             iedb_method = prediction.iedb_prediction_method
                         else:
                             iedb_method = method
-                        valid_alleles = prediction.valid_allele_names()
-                        if a not in valid_alleles:
-                            status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
-                            continue
-                        valid_lengths = prediction.valid_lengths_for_allele(a)
-                        if epl not in valid_lengths:
-                            status_message("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
-                            continue
+                        if isinstance(prediction, IEDB) or isinstance(prediction, MHCflurry):
+                            valid_alleles = prediction.valid_allele_names()
+                            if a not in valid_alleles:
+                                status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
+                                continue
+                            valid_lengths = prediction.valid_lengths_for_allele(a)
+                            if epl not in valid_lengths:
+                                status_message("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
+                                continue
 
                         split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, str(epl), "tsv_%s" % fasta_chunk]))
                         if os.path.exists(split_iedb_out):
@@ -555,6 +553,7 @@ class MHCIIPipeline(Pipeline):
                 'output_file'               : split_fasta_file_path,
                 'output_key_file'           : split_fasta_key_file_path,
                 'downstream_sequence_length': self.downstream_sequence_length,
+                'proximal_variants_file'    : self.proximal_variants_file,
             }
             fasta_generator = self.fasta_generator(generate_fasta_params)
             fasta_generator.execute()
@@ -575,11 +574,15 @@ class MHCIIPipeline(Pipeline):
                 for method in self.prediction_algorithms:
                     prediction_class = globals()[method]
                     prediction = prediction_class()
-                    iedb_method = prediction.iedb_prediction_method
-                    valid_alleles = prediction.valid_allele_names()
-                    if a not in valid_alleles:
-                        status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
-                        continue
+                    if hasattr(prediction, 'iedb_prediction_method'):
+                        iedb_method = prediction.iedb_prediction_method
+                    else:
+                        iedb_method = method
+                    if isinstance(prediction, IEDB):
+                        valid_alleles = prediction.valid_allele_names()
+                        if a not in valid_alleles:
+                            status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
+                            continue
 
                     split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, "tsv_%s" % fasta_chunk]))
                     if os.path.exists(split_iedb_out):
