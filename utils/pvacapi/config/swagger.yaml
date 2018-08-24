@@ -1013,8 +1013,8 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/archive/{processID}:
-    get:
+  /api/v1/processes/{processID}/archive:
+    post:
       tags:
         - "archive"
       summary: "Archive a process"
