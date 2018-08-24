@@ -1,7 +1,9 @@
 #common utils for all controllers
 import os
 from glob import iglob
+import time
 import json
+import csv
 import re
 import sys
 import subprocess
@@ -128,6 +130,24 @@ def visualization_type(ext):
         return _file_info[ext]['visualization_type']
     else:
         return None
+
+def check_size(file, max_tries = 5):
+    tries = 1
+    while tries <= max_tries:
+        try:
+            with open(file) as f:
+                read = csv.DictReader(f, delimiter='\t')
+                try:
+                    next(read)
+                except StopIteration:
+                    if tries >= max_tries:
+                        return False
+        except IOError as e:
+            if tries >= max_tries:
+                print('Could not check size of file',file)
+        time.sleep(1)
+        tries += 1
+    return True
 
 def column_filter(column):
     """standardize column names"""
@@ -365,18 +385,18 @@ def initialize(current_app, args):
         if type(data['input'][key])==str:
             ext = '.'.join(os.path.basename(filename).split('.')[1:])
             print("Updating input entry",key,"to new format")
+            fullname = os.path.join(inputdir, filename)
+            viz = is_visualizable(ext)
+            size = check_size(fullname, 1) if viz else None
             data['input'][key] = {
-                'fullname':os.path.join(
-                    inputdir,
-                    filename
-                ),
+                'fullname':fullname,
                 'display_name':os.path.relpath(
                     filename,
                     inputdir
                 ),
                 'description':descriptions(ext),
-                'is_visualizable': is_visualizable(ext),
-                'visualization_type': visualization_type(ext),
+                'is_visualizable': viz and size,
+                'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
             }
     recorded = {item['fullname'] for item in data['input'].values()}
     targets = {k for k in data['input'] if data['input'][k]['fullname'] in recorded-current}
@@ -388,29 +408,32 @@ def initialize(current_app, args):
             file_id += 1
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         print("Assigning file:", file_id,"-->",filename)
+        fullname = os.path.abspath(os.path.join(inputdir, filename))
+        viz = is_visualizable(ext)
+        size = check_size(fullname, 1) if viz else None
         data['input'][str(file_id)] = {
-            'fullname':os.path.abspath(os.path.join(
-                inputdir,
-                filename
-            )),
+            'fullname':fullname,
             'display_name':os.path.relpath(
                 filename,
                 inputdir
             ),
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         }
     for filename in current:
         file_path = os.path.abspath(os.path.join(inputdir, filename))
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
+        file_id = str([k for k,v in data['input'].items() if v['fullname'] == file_path][0])
+        viz = is_visualizable(ext)
+        size = check_size(data['input'][file_id]['fullname'], 1) if viz else None
         nav_to_dir(file_path, inputdir, hier_inp).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
-            'fileID':str([k for k,v in data['input'].items() if v['fullname'] == file_path][0]),
+            'fileID':file_id,
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         })
 
     def _create(event):
@@ -424,6 +447,8 @@ def initialize(current_app, args):
             file_id += 1
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         print("Creating file:", file_id, "-->",filename)
+        viz = is_visualizable(ext)
+        size = check_size(event.src_path) if viz else None
         data['input'][str(file_id)] = {
             'fullname':os.path.abspath(os.path.join(
                 inputdir,
@@ -431,16 +456,16 @@ def initialize(current_app, args):
             )),
             'display_name':filename,
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         }
         nav_to_dir(event.src_path, inputdir, hier_inp).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
             'fileID':str(file_id),
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         })
         data.save()
     input_watcher.subscribe(
@@ -481,6 +506,8 @@ def initialize(current_app, args):
             inputdir
         ) 
         ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
+        viz = is_visualizable(ext)
+        size = check_size(event.dest_path) if viz else None
         #This accounts for how Watchdog records duplicate symlinks (i.e. symlinks of the same file) 
         #as File Moved Events from the previously added duplicate symlink, resulting in said symlinks not being 
         #properly recorded and causing situations where the source file of such events may not also be recorded.
@@ -499,15 +526,17 @@ def initialize(current_app, args):
             file_id = 0
             while str(file_id) in data['input']:
                 file_id += 1
+                
         nav_to_dir(event.dest_path, inputdir, hier_inp).append({
             'display_name':filedest[filedest.rfind('/')+1:],
             'type':'file',
             'fileID':str(file_id),
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         })
         clean_tree(hier_inp)
+
         data['input'][str(file_id)] = {
             'fullname':os.path.abspath(os.path.join(
                 inputdir,
@@ -515,11 +544,12 @@ def initialize(current_app, args):
             )),
             'display_name':filedest,
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         }
         print("Moving file:", key,'(',filesrc,'-->',filedest,')')
         data.save()
+
     input_watcher.subscribe(
         _move,
         watchdog.events.FileMovedEvent
@@ -543,18 +573,18 @@ def initialize(current_app, args):
         if type(data['visualize'][key])==str:
             ext = '.'.join(os.path.basename(filename).split('.')[1:])
             print("Updating visualize entry",key,"to new format")
+            fullname = os.path.join(vsz, filename)
+            viz = is_visualizable(ext)
+            size = check_size(fullname, 1) if viz else None
             data['visualize'][key] = {
-                'fullname':os.path.join(
-                    vsz,
-                    filename
-                ),
+                'fullname':fullname,
                 'display_name':os.path.relpath(
                     filename,
                     vsz
                 ),
                 'description':descriptions(ext),
-                'is_visualizable': is_visualizable(ext),
-                'visualization_type': visualization_type(ext),
+                'is_visualizable': viz and size,
+                'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
             }
     recorded = {item['fullname'] for item in data['visualize'].values()}
     targets = {k for k in data['visualize'] if data['visualize'][k]['fullname'] in recorded-current}
@@ -566,29 +596,32 @@ def initialize(current_app, args):
             file_id += 1
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         print("Assigning file:", file_id,"-->",filename)
+        fullname = os.path.abspath(os.path.join(vsz, filename))
+        viz = is_visualizable(ext)
+        size = check_size(fullname, 1) if viz else None
         data['visualize'][str(file_id)] = {
-            'fullname':os.path.abspath(os.path.join(
-                vsz,
-                filename
-            )),
+            'fullname':fullname,
             'display_name':os.path.relpath(
                 filename,
                 vsz
             ),
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         }
     for filename in current:
         file_path = os.path.abspath(os.path.join(vsz, filename))
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
-        nav_to_dir(file_path, vsz, hier_vz).append({
+        file_id = str([k for k,v in data['visualize'].items() if v['fullname'] == file_path][0])
+        viz = is_visualizable(ext)
+        size = check_size(data['dropbox'][file_id]['fullname'], 1) if viz else None
+        nav_to_dir(file_path, vsz, hier_vsz).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
-            'fileID':str([k for k,v in data['visualize'].items() if v['fullname'] == file_path][0]),
+            'fileID':file_id,
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         })
 
     data_path = current_app.config['files']
@@ -604,6 +637,8 @@ def initialize(current_app, args):
             file_id += 1
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         print("Creating file:", file_id, "-->",filename)
+        viz = is_visualizable(ext)
+        size = check_size(event.src_path) if viz else None
         data['visualize'][str(file_id)] = {
             'fullname':os.path.abspath(os.path.join(
                 vsz,
@@ -611,16 +646,16 @@ def initialize(current_app, args):
             )),
             'display_name':filename,
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         }
         nav_to_dir(event.src_path, vsz, hier_vz).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
             'fileID':str(file_id),
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         })
         data.save()
     visualize_watcher.subscribe(
@@ -666,14 +701,16 @@ def initialize(current_app, args):
         )
         file_id = [k for k in data['visualize'] if data['visualize'][k]['display_name'] == filesrc][0]
         ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
+        viz = is_visualizable(ext)
+        size = check_size(event.dest_path) if viz else None
         current_src = nav_to_dir(event.src_path, vsz, hier_vz)
         nav_to_dir(event.dest_path, vsz, hier_vz).append({
             'display_name':filedest[filedest.rfind('/')+1:],
             'type':'file',
             'fileID':str(file_id),
             'description':descriptions(ext),
-            'is_visualizable': is_visualizable(ext),
-            'visualization_type': visualization_type(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         })
         current_src.remove([
             entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
@@ -688,8 +725,8 @@ def initialize(current_app, args):
                     )),
                     'display_name':filedest,
                     'description':descriptions(ext),
-                    'is_visualizable': is_visualizable(ext),
-                    'visualization_type': visualization_type(ext),
+                    'is_visualizable': viz and size,
+                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
                 }
                 print("Moving file:", key,'(',filesrc,'-->',filedest,')')
                 data.save()
@@ -713,28 +750,24 @@ def initialize(current_app, args):
             if 'files' in data[processkey]:
                 if type(data[processkey]['files']) == list:
                     print("Updating file manifest of process",processID,"to new format")
-                    data[processkey]['files']={
-                        file_id:{
-                            'fullname':filename,
-                            'display_name':os.path.relpath(
-                                filename,
-                                data[processkey]['output']
-                            ),
-                            'description':descriptions(
-                                '.'.join(os.path.basename(filename).split('.')[1:])
-                            ),
-                            'is_visualizable': is_visualizable(
-                                '.'.join(os.path.basename(filename).split('.')[1:])
-                            ),
-                            'visualization_type': visualization_type(
-                                '.'.join(os.path.basename(filename).split('.')[1:])
-                            ),
+                    for (filename, file_id) in zip(data[processkey]['files'], range(sys.maxsize)):
+                        ext = '.'.join(os.path.basename(filename).split('.')[1:])
+                        viz = is_visualizable(ext)
+                        size = check_size(filename, 1) if viz else None
+                        data[processkey]['files']={
+                            file_id:{
+                                'fullname':filename,
+                                'display_name':os.path.relpath(
+                                    filename,
+                                    data[processkey]['output']
+                                ),
+                                'description':descriptions(
+                                    '.'.join(os.path.basename(filename).split('.')[1:])
+                                ),
+                                'is_visualizable': viz and size,
+                                'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                            }
                         }
-                        for (filename, file_id) in zip(
-                            data[processkey]['files'],
-                            range(sys.maxsize)
-                        )
-                    }
             else:
                 data[processkey]['files'] = {}
             current = {
@@ -754,6 +787,8 @@ def initialize(current_app, args):
                 file_id = str(file_id)
                 ext = '.'.join(os.path.basename(filename).split('.')[1:])
                 print("Assigning file:",file_id,"-->",filename)
+                viz = is_visualizable(ext)
+                size = check_size(filename, 1) if viz else None
                 data[processkey]['files'][file_id] = {
                     'fullname':filename,
                     'display_name':os.path.relpath(
@@ -761,19 +796,22 @@ def initialize(current_app, args):
                         data[processkey]['output']
                     ),
                     'description':descriptions(ext),
-                    'is_visualizable': is_visualizable(ext),
-                    'visualization_type': visualization_type(ext),
+                    'is_visualizable': viz and size,
+                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
                 }
             for filename in current:
                 file_path = os.path.abspath(os.path.join(data[processkey]['output'], filename))
                 ext = '.'.join(os.path.basename(filename).split('.')[1:])
+                file_id = str([k for k,v in data[processkey]['files'].items() if v['fullname'] == file_path][0])
+                viz = is_visualizable(ext)
+                size = check_size(data[processkey]['files'][file_id]['fullname'], 1) if viz else None
                 nav_to_dir(file_path, resultdir, hier_res).append({
                     'display_name':filename[filename.rfind('/')+1:],
                     'type':'file',
-                    'fileID':str([k for k,v in data[processkey]['files'].items() if v['fullname'] == file_path][0]),
+                    'fileID':file_id,
                     'description':descriptions(ext),
-                    'is_visualizable': is_visualizable(ext),
-                    'visualization_type': visualization_type(ext),
+                    'is_visualizable': viz and size,
+                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
                 })
 
     def _create(event):
@@ -798,20 +836,22 @@ def initialize(current_app, args):
                 )
                 ext = '.'.join(os.path.basename(filepath).split('.')[1:])
                 print("Assigning id",file_id,'-->',display_name)
+                viz = is_visualizable(ext)
+                size = check_size(filepath) if viz else None
                 data[processkey]['files'][file_id] = {
                     'fullname':filepath,
                     'display_name':display_name,
                     'description':descriptions(ext),
-                    'is_visualizable': is_visualizable(ext),
-                    'visualization_type': visualization_type(ext),
+                    'is_visualizable': viz and size,
+                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
                 }
                 nav_to_dir(filepath, resultdir, hier_res).append({
                     'display_name':filepath[filepath.rfind('/')+1:],
                     'type':'file',
                     'fileID':file_id,
                     'description':descriptions(ext),
-                    'is_visualizable': is_visualizable(ext),
-                    'visualization_type': visualization_type(ext),
+                    'is_visualizable': viz and size,
+                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
                 })
                 data.save()
                 return
@@ -870,6 +910,8 @@ def initialize(current_app, args):
                 destkey = 'process-%d'%parentID
 
         ext = '.'.join(os.path.basename(filedest).split('.')[1:])
+        viz = is_visualizable(ext)
+        size = check_size(filedest) if viz else None
         if srckey == destkey:
             for (file_id, filedata) in data[srckey]['files'].items():
                 if filedata['fullname'] == filesrc:
@@ -878,8 +920,8 @@ def initialize(current_app, args):
                         'type':'file',
                         'fileID':file_id,
                         'description':descriptions(ext),
-                        'is_visualizable': is_visualizable(ext),
-                        'visualization_type': visualization_type(ext),
+                        'is_visualizable': viz and size,
+                        'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
                     })
                     current_src = nav_to_dir(filesrc, resultdir, hier_res)
                     current_src.remove([
@@ -892,8 +934,8 @@ def initialize(current_app, args):
                             data[srckey]['output']
                         ),
                         'description':descriptions(ext),
-                        'is_visualizable': is_visualizable(ext),
-                        'visualization_type': visualization_type(ext),
+                        'is_visualizable': viz and size,
+                        'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
                     }
         else:
             _delete(event)

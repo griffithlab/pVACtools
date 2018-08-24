@@ -716,17 +716,18 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
             process_data = response.json()
-        # time.sleep(1)
-        # response = requests.get(
-        #     self.urlBase+'/processes/%d'%processID,
-        #     timeout = 5
-        # )
-        # self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-        # process_data = response.json()
+        time.sleep(5)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        process_data = response.json()
         self.assertIn('files', process_data)
         self.assertIsInstance(process_data['files'], list)
 
         finaltsv = [item for item in process_data['files'] if item['display_name'].endswith('.final.tsv')]
+        #import pdb; pdb.set_trace()
         self.assertTrue(finaltsv)
         finaltsv = finaltsv[0]
         raw_reader = open(os.path.join(
