@@ -44,11 +44,10 @@ def main(args_input = sys.argv[1:]):
     )
     args = parser.parse_args(args_input)
 
+    PredictionClass.check_alleles_valid([args.allele])
     prediction_class = getattr(sys.modules[__name__], args.method)
     prediction_class_object = prediction_class()
-
-    if isinstance(prediction_class_object, IEDB) or isinstance(prediction_class_object, MHCflurry):
-        prediction_class_object.check_allele_valid(args.allele)
+    prediction_class_object.check_allele_valid(args.allele)
 
     if isinstance(prediction_class_object, MHCI):
         prediction_class_object.check_length_valid_for_allele(args.epitope_length, args.allele)
