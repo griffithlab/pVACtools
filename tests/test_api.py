@@ -715,9 +715,23 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertFalse(response.json())
 
-    def test_endpoint_validallele(self):
+    def test_endpoint_validalleles(self):
         response = requests.get(
             self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'prediction_algorithms':'NetMHC'
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('NetMHC' in results['result'][0]['prediction_algorithms'])
+        self.assertTrue(len(results['result']))
+
+    def test_endpoint_validallelesperalgorithm(self):
+        response = requests.get(
+            self.urlBase+'/validallelesperalgorithm',
             timeout=5,
             params={
                 'prediction_algorithms':'NetMHC'

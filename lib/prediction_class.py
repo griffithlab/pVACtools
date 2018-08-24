@@ -11,6 +11,7 @@ import pandas as pd
 import time
 from subprocess import run, PIPE
 import tempfile
+from collections import defaultdict
 
 class IEDB(metaclass=ABCMeta):
     @classmethod
@@ -105,6 +106,24 @@ class PredictionClass(metaclass=ABCMeta):
     @classmethod
     def prediction_class_name_for_iedb_prediction_method(cls, method):
         return cls.prediction_class_for_iedb_prediction_method(method).__class__.__name__
+
+    @classmethod
+    def allele_info(cls, prediction_algorithms):
+        alleles = defaultdict(list)
+        if prediction_algorithms is None:
+            prediction_classes = cls.prediction_classes()
+        else:
+            prediction_classes = map(lambda a: globals()[a], prediction_algorithms.split(','))
+        for prediction_class in prediction_classes:
+            for allele in prediction_class().valid_allele_names():
+                alleles[allele].append(prediction_class.__name__)
+        info = []
+        for allele, prediction_algorithms in alleles.items():
+            info.append({
+                'name': allele,
+                'prediction_algorithms': prediction_algorithms,
+            })
+        return info
 
     @classmethod
     def all_valid_allele_names(cls):
@@ -203,7 +222,7 @@ class MHCnuggetsI(MHCI):
         alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
         alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
         with open(alleles_file_name, 'r') as fh:
-            return fh.read().split('\n')
+            return list(filter(None, fh.read().split('\n')))
 
     def check_length_valid_for_allele(self, length, allele):
         return True
@@ -319,7 +338,7 @@ class MHCnuggetsII(MHCII):
         alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_ii')
         alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
         with open(alleles_file_name, 'r') as fh:
-            return fh.read().split('\n')
+            return list(filter(None, fh.read().split('\n')))
 
     def check_length_valid_for_allele(self, length, allele):
         return True
