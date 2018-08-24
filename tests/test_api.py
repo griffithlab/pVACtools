@@ -665,8 +665,8 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
             self.assertIsInstance(response.json(), dict)
-        response = requests.get(
-            self.urlBase+'/delete/%d'%processID,
+        response = requests.delete(
+            self.urlBase+'/processes/%d/delete'%processID,
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())

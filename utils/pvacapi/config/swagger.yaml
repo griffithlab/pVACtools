@@ -1057,8 +1057,8 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/delete/{processID}:
-    get:
+  /api/v1/processes/{processID}/delete:
+    delete:
       tags:
         - "delete"
       summary: "delete a process"
