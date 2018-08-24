@@ -119,18 +119,6 @@ class CallIEDBClassITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
         self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
 
-    def test_mhcnuggets_method_fails_for_nonsense_allele(self):
-        with self.assertRaises(Exception) as context:
-            call_iedb_output_file = tempfile.NamedTemporaryFile()
-            lib.call_iedb.main([
-                self.short_input_file,
-                call_iedb_output_file.name,
-                'MHCnuggetsI',
-                'nonsense',
-                '-l', str(self.epitope_length)
-            ])
-        self.assertTrue('Allele nonsense not supported for MHCnuggetsI.' in str(context.exception))
-
 class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):
@@ -172,21 +160,10 @@ class CallIEDBClassIITests(CallIEDBTests):
             self.short_input_file,
             call_iedb_output_file.name,
             'MHCnuggetsII',
-            self.allele,
+            'DPA1*01:03',
         ])
         expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
         self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
-
-    def test_mhcnuggets_method_fails_for_nonsense_allele(self):
-        with self.assertRaises(Exception) as context:
-            call_iedb_output_file = tempfile.NamedTemporaryFile()
-            lib.call_iedb.main([
-                self.short_input_file,
-                call_iedb_output_file.name,
-                'MHCnuggetsII',
-                'nonsense',
-            ])
-        self.assertTrue('Allele nonsense not supported for MHCnuggetsII.' in str(context.exception))
 
 if __name__ == '__main__':
     unittest.main()

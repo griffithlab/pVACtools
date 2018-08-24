@@ -211,8 +211,8 @@ def initialize(current_app, args):
     data = loaddata(current_app.config['files'], synchronizer)
     if 'processid' not in data:
         data.addKey('processid', 0, current_app.config['files']['processes'])
-    if 'dropbox' not in data:
-        data.addKey('dropbox', {}, current_app.config['files']['dropbox'])
+    if 'visualize' not in data:
+        data.addKey('visualize', {}, current_app.config['files']['visualize'])
     if 'input' not in data:
         data.addKey('input', {}, current_app.config['files']['input'])
     #Check the last reboot (because pid's won't remain valid after a reboot)
@@ -292,7 +292,7 @@ def initialize(current_app, args):
         exist_ok=True
     )
     os.makedirs(
-        os.path.join(current_app.config['files']['data-dir'],'results'),
+        os.path.join(current_app.config['files']['data-dir'],'.processes'),
         exist_ok=True
     )
     os.makedirs(
@@ -300,7 +300,11 @@ def initialize(current_app, args):
         exist_ok=True
     )
     os.makedirs(
-        os.path.join(current_app.config['files']['data-dir'],'dropbox'),
+        os.path.join(current_app.config['files']['data-dir'],'visualize'),
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(current_app.config['files']['data-dir'],'export'),
         exist_ok=True
     )
     os.makedirs(
@@ -310,7 +314,7 @@ def initialize(current_app, args):
 
     def make_config():
         import yaml
-        base = os.path.join(current_app.config['files']['data-dir'],'dropbox')
+        base = os.path.join(current_app.config['files']['data-dir'],'visualize')
         runs = [d for d in os.listdir(base) if os.path.isdir(os.path.join(base, d))]
         for run in runs:
             config_path = os.path.join(base, run, 'config.json')
@@ -359,7 +363,7 @@ def initialize(current_app, args):
                                 json.dump(MHC_dict, config_file, indent='\t')
 
     #checks if any previous runs results are already provided and creates subsequent config files if so
-    if os.listdir(os.path.join(current_app.config['files']['data-dir'],'dropbox')): make_config()
+    if os.listdir(os.path.join(current_app.config['files']['data-dir'],'visualize')): make_config()
 
     #Setup the watchers to observe the files
     current_app.config['storage']['watchers'] = []
@@ -500,12 +504,29 @@ def initialize(current_app, args):
         filedest = os.path.relpath(
             event.dest_path,
             inputdir
-        )
-        file_id = [k for k in data['input'] if data['input'][k]['display_name'] == filesrc][0]
+        ) 
         ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
         viz = is_visualizable(ext)
         size = check_size(event.dest_path) if viz else None
-        current_src = nav_to_dir(event.src_path, inputdir, hier_inp)
+        #This accounts for how Watchdog records duplicate symlinks (i.e. symlinks of the same file) 
+        #as File Moved Events from the previously added duplicate symlink, resulting in said symlinks not being 
+        #properly recorded and causing situations where the source file of such events may not also be recorded.
+        current = {
+            filename
+            for (_, _, files) in os.walk(inputdir)
+            for filename in files
+        }
+        if filesrc in [data['input'][k]['display_name'] for k in data['input']] and os.path.basename(filesrc) not in current:
+            file_id = [k for k in data['input'] if data['input'][k]['display_name'] == filesrc][0]
+            current_src = nav_to_dir(event.src_path, inputdir, hier_inp)
+            current_src.remove([
+                entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
+            ][0])
+        else:
+            file_id = 0
+            while str(file_id) in data['input']:
+                file_id += 1
+                
         nav_to_dir(event.dest_path, inputdir, hier_inp).append({
             'display_name':filedest[filedest.rfind('/')+1:],
             'type':'file',
@@ -514,91 +535,87 @@ def initialize(current_app, args):
             'is_visualizable': viz and size,
             'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         })
-        current_src.remove([
-            entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
-        ][0])
         clean_tree(hier_inp)
-        for key in data['input']:
-            if key == file_id:
-                data['input'][key] = {
-                    'fullname':os.path.abspath(os.path.join(
-                        inputdir,
-                        filedest
-                    )),
-                    'display_name':filedest,
-                    'description':descriptions(ext),
-                    'is_visualizable': viz and size,
-                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
-                }
-                print("Moving file:", key,'(',filesrc,'-->',filedest,')')
-                data.save()
-                return
+
+        data['input'][str(file_id)] = {
+            'fullname':os.path.abspath(os.path.join(
+                inputdir,
+                filedest
+            )),
+            'display_name':filedest,
+            'description':descriptions(ext),
+            'is_visualizable': viz and size,
+            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+        }
+        print("Moving file:", key,'(',filesrc,'-->',filedest,')')
+        data.save()
+
     input_watcher.subscribe(
         _move,
         watchdog.events.FileMovedEvent
     )
     current_app.config['storage']['watchers'].append(input_watcher)
 
-    dbr = os.path.join(current_app.config['files']['data-dir'],'dropbox')
-    dropbox_watcher = Observe(dbr)
-    dropbox_watcher.subscribe(lambda x:print("Dropbox Event:", x))
+    vsz = os.path.join(current_app.config['files']['data-dir'],'visualize')
+    visualize_watcher = Observe(vsz)
+    visualize_watcher.subscribe(lambda x:print("visualize Event:", x))
 
-    manifest_data['dropbox'] = []
-    hier_db = manifest_data['dropbox']
-    #Now we set up event handlers for the dropbox
+    manifest_data['visualize'] = []
+    hier_vz = manifest_data['visualize']
+    #Now we set up event handlers for the visualize
     #This ensures that file ids are held consistent
     current = {
         os.path.join(path, filename)
-        for (path, _, files) in os.walk(dbr)
+        for (path, _, files) in os.walk(vsz)
         for filename in files
     }
-    for (key, filename) in data['dropbox'].items():
-        if type(data['dropbox'][key])==str:
+    for (key, filename) in data['visualize'].items():
+        if type(data['visualize'][key])==str:
             ext = '.'.join(os.path.basename(filename).split('.')[1:])
-            print("Updating dropbox entry",key,"to new format")
-            fullname = os.path.join(dbr, filename)
+            print("Updating visualize entry",key,"to new format")
+            fullname = os.path.join(vsz, filename)
             viz = is_visualizable(ext)
             size = check_size(fullname, 1) if viz else None
-            data['dropbox'][key] = {
+            data['visualize'][key] = {
                 'fullname':fullname,
                 'display_name':os.path.relpath(
                     filename,
-                    dbr
+                    vsz
                 ),
                 'description':descriptions(ext),
                 'is_visualizable': viz and size,
                 'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
             }
-    recorded = {item['fullname'] for item in data['dropbox'].values()}
-    targets = {k for k in data['dropbox'] if data['dropbox'][k]['fullname'] in recorded-current}
+    recorded = {item['fullname'] for item in data['visualize'].values()}
+    targets = {k for k in data['visualize'] if data['visualize'][k]['fullname'] in recorded-current}
     for file_id in targets:
-        del data['dropbox'][file_id]
+        del data['visualize'][file_id]
     file_id = 0
     for filename in current-recorded:
-        while str(file_id) in data['dropbox']:
+        while str(file_id) in data['visualize']:
             file_id += 1
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         print("Assigning file:", file_id,"-->",filename)
-        fullname = os.path.abspath(os.path.join(dbr, filename))
+        fullname = os.path.abspath(os.path.join(vsz, filename))
         viz = is_visualizable(ext)
         size = check_size(fullname, 1) if viz else None
-        data['dropbox'][str(file_id)] = {
+        data['visualize'][str(file_id)] = {
             'fullname':fullname,
             'display_name':os.path.relpath(
                 filename,
-                dbr
+                vsz
             ),
             'description':descriptions(ext),
             'is_visualizable': viz and size,
             'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         }
     for filename in current:
-        file_path = os.path.abspath(os.path.join(dbr, filename))
+        file_path = os.path.abspath(os.path.join(vsz, filename))
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
-        file_id = str([k for k,v in data['dropbox'].items() if v['fullname'] == file_path][0])
+        file_id = str([k for k,v in data['visualize'].items() if v['fullname'] == file_path][0])
         viz = is_visualizable(ext)
         size = check_size(data['dropbox'][file_id]['fullname'], 1) if viz else None
-        nav_to_dir(file_path, dbr, hier_db).append({
+        nav_to_dir(file_path, vsz, hier_vsz).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
             'fileID':file_id,
@@ -613,18 +630,18 @@ def initialize(current_app, args):
         make_config()
         filename = os.path.relpath(
             event.src_path,
-            dbr
+            vsz
         )
         file_id = 0
-        while str(file_id) in data['dropbox']:
+        while str(file_id) in data['visualize']:
             file_id += 1
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         print("Creating file:", file_id, "-->",filename)
         viz = is_visualizable(ext)
         size = check_size(event.src_path) if viz else None
-        data['dropbox'][str(file_id)] = {
+        data['visualize'][str(file_id)] = {
             'fullname':os.path.abspath(os.path.join(
-                dbr,
+                vsz,
                 filename
             )),
             'display_name':filename,
@@ -632,7 +649,7 @@ def initialize(current_app, args):
             'is_visualizable': viz and size,
             'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         }
-        nav_to_dir(event.src_path, dbr, hier_db).append({
+        nav_to_dir(event.src_path, vsz, hier_vz).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
             'fileID':str(file_id),
@@ -641,7 +658,7 @@ def initialize(current_app, args):
             'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
         })
         data.save()
-    dropbox_watcher.subscribe(
+    visualize_watcher.subscribe(
         _create,
         watchdog.events.FileCreatedEvent
     )
@@ -650,24 +667,24 @@ def initialize(current_app, args):
         data = loader()
         filename = os.path.relpath(
             event.src_path,
-            dbr
+            vsz
         )
-        current = nav_to_dir(event.src_path, dbr, hier_db)
+        current = nav_to_dir(event.src_path, vsz, hier_vz)
         for entity in current:
             if entity['display_name'] == filename[filename.rfind('/')+1:]:
                 current.remove(entity)
-        clean_tree(hier_db)
-        for key in list(data['dropbox']):
-            if data['dropbox'][key]['display_name'] == filename:
-                del data['dropbox'][key]
+        clean_tree(hier_vz)
+        for key in list(data['visualize']):
+            if data['visualize'][key]['display_name'] == filename:
+                del data['visualize'][key]
                 print("Deleting file:",key,'-->', filename)
                 with db.synchronizer:
                     query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
-                    if len(query('data_dropbox_'+str(key))):
-                        db.execute("DROP TABLE data_dropbox_"+str(key))
+                    if len(query('data_visualize_'+str(key))):
+                        db.execute("DROP TABLE data_visualize_"+str(key))
                 data.save()
                 return
-    dropbox_watcher.subscribe(
+    visualize_watcher.subscribe(
         _delete,
         watchdog.events.FileDeletedEvent
     )
@@ -676,18 +693,18 @@ def initialize(current_app, args):
         data = loader()
         filesrc = os.path.relpath(
             event.src_path,
-            dbr
+            vsz
         )
         filedest = os.path.relpath(
             event.dest_path,
-            dbr
+            vsz
         )
-        file_id = [k for k in data['dropbox'] if data['dropbox'][k]['display_name'] == filesrc][0]
+        file_id = [k for k in data['visualize'] if data['visualize'][k]['display_name'] == filesrc][0]
         ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
         viz = is_visualizable(ext)
         size = check_size(event.dest_path) if viz else None
-        current_src = nav_to_dir(event.src_path, dbr, hier_db)
-        nav_to_dir(event.dest_path, dbr, hier_db).append({
+        current_src = nav_to_dir(event.src_path, vsz, hier_vz)
+        nav_to_dir(event.dest_path, vsz, hier_vz).append({
             'display_name':filedest[filedest.rfind('/')+1:],
             'type':'file',
             'fileID':str(file_id),
@@ -698,12 +715,12 @@ def initialize(current_app, args):
         current_src.remove([
             entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
         ][0])
-        clean_tree(hier_db)
-        for key in data['dropbox']:
+        clean_tree(hier_vz)
+        for key in data['visualize']:
             if key == file_id:
-                data['dropbox'][key] = {
+                data['visualize'][key] = {
                     'fullname':os.path.abspath(os.path.join(
-                        dbr,
+                        vsz,
                         filedest
                     )),
                     'display_name':filedest,
@@ -714,16 +731,16 @@ def initialize(current_app, args):
                 print("Moving file:", key,'(',filesrc,'-->',filedest,')')
                 data.save()
                 return
-    dropbox_watcher.subscribe(
+    visualize_watcher.subscribe(
         _move,
         watchdog.events.FileMovedEvent
     )
-    current_app.config['storage']['watchers'].append(dropbox_watcher)
+    current_app.config['storage']['watchers'].append(visualize_watcher)
 
     manifest_data['results'] = []
     hier_res = manifest_data['results']
 
-    resultdir = os.path.join(current_app.config['files']['data-dir'], 'results')
+    resultdir = os.path.join(current_app.config['files']['data-dir'], '.processes')
     results_watcher = Observe(resultdir)
     results_watcher.subscribe(lambda x:print("Results Event:", x))
     for processID in range(data['processid']+1):
@@ -942,43 +959,6 @@ def initialize(current_app, args):
 
     current_app.config['storage']['synchronizer'] = synchronizer
     data.save()
-
-    if '--nogui' not in args:
-        #Attempt to boot the frontend api
-        site_dirs = site.getsitepackages()
-        for path in site_dirs:
-            tmp_path = os.path.join(
-                path,
-                'pvacseq-client'
-            )
-            if os.path.isdir(tmp_path):
-                current_app.config['storage']['client-dir'] = tmp_path
-                break
-        if 'client-dir' not in current_app.config['storage']:
-            sys.exit("Unable to locate the frontend!")
-        print("Launching Frontend Server")
-        current_app.config['storage']['frontend']=subprocess.Popen(
-            [
-                sys.executable,
-                '-m',
-                'http.server',
-                '8000'
-            ],
-            cwd=current_app.config['storage']['client-dir']
-        )
-
-        @atexit.register
-        def cleanup_frontend():
-            print("Cleaning up frontend server")
-            import signal
-            current_app.config['storage']['frontend'].send_signal(signal.SIGINT)
-            try:
-                current_app.config['storage']['frontend'].wait(1)
-            except subprocess.TimeoutExpired:
-                current_app.config['storage']['frontend'].terminate()
-
-        #Uncomment if we want to open a browser in the frontend
-        # threading.Timer(2.5, lambda :webbrowser.open('http://localhost:8000')).start()
 
     print("Initialization complete.  Booting API")
 

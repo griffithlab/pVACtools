@@ -85,7 +85,7 @@ def staging(parameters):
     # input_manifest = current_app.config['storage']['manifest']
     current_path = os.path.join(
         current_app.config['files']['data-dir'],
-        'results',
+        '.processes',
         samplename
     )
 
