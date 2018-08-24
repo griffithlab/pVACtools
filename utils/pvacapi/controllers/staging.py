@@ -11,6 +11,7 @@ from shlex import quote
 from shutil import copyfile, copytree
 from .database import int_pattern
 from .files import list_input
+from .utils import fullresponse
 from lib.prediction_class import *
 
 def resolve_filepath(filepath):
@@ -283,9 +284,14 @@ def check_allele(allele):
             return True
     return False
 
+# returns map of alleles to prediction algorithms it can be used with
+def valid_alleles(page, count, prediction_algorithms=None):
+    data = PredictionClass.allele_info(prediction_algorithms)
+    return fullresponse(data, page, count)
+
 # takes in comma delimited string of prediction algorithms,
 # returns map of algorithms to valid alleles for that algorithm
-def valid_alleles(prediction_algorithms):
+def valid_alleles_per_algorithm(prediction_algorithms):
     valid_allele_list = {}
     for algorithm in prediction_algorithms.split(","):
         prediction_class = globals()[algorithm]
