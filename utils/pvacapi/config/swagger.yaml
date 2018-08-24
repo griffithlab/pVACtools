@@ -1035,8 +1035,8 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/export/{processID}:
-    get:
+  /api/v1/processes/{processID}/export:
+    post:
       tags:
         - "export"
       summary: "export a process"
