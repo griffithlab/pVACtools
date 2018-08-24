@@ -10,7 +10,7 @@ which prediction algorithms were chosen:
 
 - ``MHC_Class_I``: for MHC class I prediction algorithms
 - ``MHC_Class_II``: for MHC class II prediction algorithms
-- ``combined``: If both MHC class I and MHC class II prediction algorithm were run, this folder combines the neoeptiope predictions from both
+- ``combined``: If both MHC class I and MHC class II prediction algorithms were run, this folder combines the neoeptiope predictions from both
 
 Each folder will contain the same list of output files (listed in the order
 created):
