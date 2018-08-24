@@ -106,8 +106,15 @@ You can install this package by running:
 Running the vcf-readcount-annotator
 ***********************************
 
-You can now use the bam-readcount output file to add readcount information to
-your VCF:
+If you have multiple files for SNVs and InDels you will first need
+to concatenate the two files together:
+
+.. code-block:: none
+
+   cat snvs_bam_readcount_file indels_bam_readcount_file > bam_readcount_file
+
+You can now use the combined bam-readcount output file to add readcount information to
+your VCF.
 
 .. code-block:: none
 
