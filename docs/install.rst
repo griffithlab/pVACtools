@@ -142,6 +142,32 @@ You can check that the ``mhcflurry`` package  was installed successfully by runn
 
 This should pull up the help page for the MHCflurry predictor.
 
+Installing MHCnuggets
+---------------------
+
+If you wish to run the MHCnuggets prediction algorithm, you will need to
+install the ``mhcnuggets`` python package on your system. This package is set
+as a dependency for the ``pvactools`` package so it should be installed
+automatically when you download or upgrade the ``pvactools`` package. You can
+install it manually by running:
+
+.. code-block:: none
+
+   pip install mhcnuggets
+
+.. note::
+
+   The ``mhcnuggets`` package needs to be installed in the same python 3.5 conda
+   environment as the ``pvactools`` package.
+
+You can check that the ``mhcnuggets`` package  was installed successfully by running:
+
+.. code-block:: none
+
+   pip show mhcnuggets
+
+This should show information about the mhcnuggets package.
+
 Docker and CWL
 --------------
 

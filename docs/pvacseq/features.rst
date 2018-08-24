@@ -45,7 +45,8 @@ Both MHC Class I and Class II predictions are supported. Simply choose the desir
 By using the IEDB RESTful web interface, pVACseq leverages their extensive support of different prediction algorithms.
 
 In addition to IEDB-supported prediction algorithms, we've also added support
-for `MHCflurry <http://www.biorxiv.org/content/early/2017/08/09/174243>`_.
+for `MHCflurry <http://www.biorxiv.org/content/early/2017/08/09/174243>`_ and
+`MHCnuggets <http://karchinlab.org/apps/appMHCnuggets.html>`_.
 
 ================================= =======
 MHC Class I Prediction Algorithm  Version
@@ -57,6 +58,7 @@ PickPocket                        1.1
 SMM
 SMMPMBEC
 MHCflurry
+MHCnuggets
 ================================= =======
 
 ================================= =======
@@ -65,6 +67,7 @@ MHC Class II Prediction Algorithm Version
 NetMHCIIpan                       3.0
 SMMalign                          1.1
 NNalign                           2.2
+MHCnuggets
 ================================= =======
 
 **Comprehensive filtering**
