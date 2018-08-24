@@ -8,7 +8,7 @@ import sys
 import subprocess
 from shlex import split
 from .utils import filterprocess
-from shutil import move as movetree
+from shutil import move as movetree, copytree, rmtree
 
 spinner = re.compile(r'[\\\b\-/|]{2,}')
 
@@ -282,7 +282,7 @@ def archive(processID):
             'archive'
         )
         destpath = os.path.join(archive, dirname)
-        if os.path.exists:
+        if os.path.exists(destpath):
             i = 1
             while os.path.exists(destpath+'_%d'%i):
                 i+=1
@@ -291,11 +291,93 @@ def archive(processID):
             proc[0]['output'],
             destpath
         )
+        delete(processID)
+        data.save()
+    return "OK"
+
+def export(processID):
+    """Copies the results of the given process to /export"""
+    with current_app.config['storage']['synchronizer']:
+        data = current_app.config['storage']['loader']()
+        if 'process-%d'%processID not in data:
+            return (
+                {
+                    'status':400,
+                    'message': "The requested process (%d) does not exist"%processID,
+                    'fields':"processID"
+                },
+                400
+            )
+        proc = fetch_process(processID, data, current_app.config['storage']['children'])
+        if is_running(proc):
+            return (
+                {
+                    'code':400,
+                    'message': "The requested process (%d) is still running.\
+                    Stop the process or wait for it to finish before exporting"%processID,
+                    'fields':"processID"
+                },
+                400
+            )
+        dirname = os.path.basename(proc[0]['output'])
+        export = os.path.join(
+            current_app.config['files']['data-dir'],
+            'export'
+        )
+        destpath = os.path.join(export, dirname)
+        if os.path.exists(destpath):
+            i = 1
+            while os.path.exists(destpath+'_%d'%i):
+                i+=1
+            destpath += '_%d'%i
+        copytree(
+            proc[0]['output'],
+            destpath
+        )
+        data.save()
+        return "OK"
+
+def delete(processID):
+    """deletes the given process and its results"""
+    with current_app.config['storage']['synchronizer']:
+        data = current_app.config['storage']['loader']()
+        if 'process-%d'%processID not in data:
+            return (
+                {
+                    'status':400,
+                    'message': "The requested process (%d) does not exist"%processID,
+                    'fields':"processID"
+                },
+                400
+            )
+        proc = fetch_process(processID, data, current_app.config['storage']['children'])
+        if is_running(proc):
+            return (
+                {
+                    'code':400,
+                    'message': "The requested process (%d) is still running.\
+                    Stop the process or wait for it to finish before deleting"%processID,
+                    'fields':"processID"
+                },
+                400
+            )
         del data['process-%d'%processID]
         if processID in current_app.config['storage']['children']:
             del current_app.config['storage']['children'][processID]
+        rmtree(proc[0]['output']) if os.path.exists(proc[0]['output']) else None
+        #code in advance for the endpoint restructure
+        """
+        result_manifest = current_app.config['storage']['manifest']['results']
+        result = [
+            res for res in result_manifest if 
+                res['type'] == 'directory' and 
+                res['display_name'] == os.path.basename(proc[0]['output'])
+        ][0]
+        result_manifest.remove(result)
+        """
         # Set the processid to the highest child process from this session
         data['processid'] = max([0]+[i for i in range(data['processid']+1) if 'process-%d'%i in data])
+
         data.save()
         return "OK"
 
