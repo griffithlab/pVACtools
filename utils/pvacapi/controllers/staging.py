@@ -285,8 +285,8 @@ def check_allele(allele):
     return False
 
 # returns map of alleles to prediction algorithms it can be used with
-def valid_alleles(page, count, prediction_algorithms=None):
-    data = PredictionClass.allele_info(prediction_algorithms)
+def valid_alleles(page, count, prediction_algorithms=None, name_filter=None):
+    data = PredictionClass.allele_info(prediction_algorithms, name_filter)
     return fullresponse(data, page, count)
 
 # takes in comma delimited string of prediction algorithms,
