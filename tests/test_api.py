@@ -716,7 +716,7 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
             process_data = response.json()
-        time.sleep(5)
+        time.sleep(10)
         response = requests.get(
             self.urlBase+'/processes/%d'%processID,
             timeout = 5
