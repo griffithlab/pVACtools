@@ -1023,8 +1023,8 @@ def fullresponse(data, page, count):
         total_pages = ceil(len(data)/count)
     return ({
         "_meta": {
-            "current_page":page,
-            "per_page":count,
+            "page":page,
+            "count":count,
             "total_pages":total_pages,
             "total_count":len(data)
         },
