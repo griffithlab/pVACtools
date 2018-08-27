@@ -825,6 +825,19 @@ class APITests(unittest.TestCase):
         self.assertTrue('LA-A*01' in results['result'][0]['name'])
         self.assertTrue(len(results['result']))
 
+        response = requests.get(
+            self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'name_filter':'la-a*01',
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('LA-A*01' in results['result'][0]['name'])
+        self.assertTrue(len(results['result']))
+
     def test_endpoint_validallelesperalgorithm(self):
         response = requests.get(
             self.urlBase+'/validallelesperalgorithm',

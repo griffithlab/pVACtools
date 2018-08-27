@@ -117,7 +117,7 @@ class PredictionClass(metaclass=ABCMeta):
         for prediction_class in prediction_classes:
             for allele in prediction_class().valid_allele_names():
                 if name_filter is not None:
-                    if  name_filter in allele:
+                    if name_filter.lower() in allele.lower():
                         alleles[allele].append(prediction_class.__name__)
                 else:
                     alleles[allele].append(prediction_class.__name__)
