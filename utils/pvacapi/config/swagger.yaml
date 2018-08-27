@@ -736,6 +736,11 @@ paths:
           description: "Prediction algorithms to find valid alleles for"
           in: "query"
           type: "string"
+        - name: "name_filter"
+          in: "query"
+          description: "String to use for fuzzy matching to the allele names for typeahead search"
+          in: "query"
+          type: "string"
       responses:
         200:
           description: "Returns object mapping each allele to an array of predcition algorithms it can be used with"
