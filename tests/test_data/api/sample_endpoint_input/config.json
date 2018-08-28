@@ -3,6 +3,7 @@
 	"net_chop_method": "",
 	"normal_cov": 5,
 	"input": "/Users/agrauber/pVAC-Seq/input/input.vcf",
+	"phased_proximal_variants_vcf": "",
 	"downstream_sequence_length": 1000,
 	"minimum_fold_change": 0,
 	"top_score_metric": "median",

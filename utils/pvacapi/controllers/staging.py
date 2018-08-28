@@ -120,6 +120,7 @@ def staging(parameters):
 
     configObj = {
         'input': input_path,  # input
+        'phased_proximal_variants_vcf': parameters.pop('phased_proximal_variants_vcf', ""),
         'samplename': samplename,  # samplename
         'alleles': parameters['alleles'].split(','),
         'output': current_path,
@@ -173,7 +174,7 @@ def staging(parameters):
         }, 400)
 
 
-def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
+def start(input, phased_proximal_variants_vcf, samplename, alleles, epitope_lengths, prediction_algorithms, output,
           peptide_sequence_length, net_chop_method, netmhc_stab, top_score_metric,
           binding_threshold, allele_specific_cutoffs, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
@@ -228,6 +229,11 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         command += [
             '--iedb-install-directory',
             iedb_install_dir
+        ]
+    if len(phased_proximal_variants_vcf):
+        command +=[
+            '--phased-proximal-variants-vcf',
+            phased_proximal_variants_vcf,
         ]
 
     # stdout and stderr from the child process will be directed to this file

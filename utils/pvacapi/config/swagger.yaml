@@ -253,6 +253,11 @@ paths:
         description: "Input VCF File: Filepath to the input VCF file"
         required: true
         type: "string"
+      - name: "phased_proximal_variants_vcf"
+        in: "formData"
+        description: "A VCF with phased proximal variant information"
+        required: false
+        type: "string"
       - name: "samplename"
         in: "formData"
         description: "Sample Name: Name for your sample"
@@ -420,6 +425,9 @@ paths:
             properties:
               input:
                 description: "Input VCF file: File ID of the input VCF file"
+                type: string
+              phased_proximal_variants_vcf:
+                description: "A VCF with phased proximal variant information"
                 type: string
               samplename:
                 description: "Sample name: a name for the sample and process"
