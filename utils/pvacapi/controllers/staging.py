@@ -108,11 +108,6 @@ def staging(parameters):
             }, 400
         )
 
-    #  simple json POST (e.g. from test_start.html form) may not include unchecked checkboxes, need to catch those:
-    parameters['netmhc_stab'] = parameters.pop('netmhc_stab', False)
-    parameters['allele_specific_cutoffs'] = parameters.pop('allele_specific_cutoffs', False)
-    parameters['keep_tmp_files'] = parameters.pop('keep_tmp_files', False)
-
     if 'epitope_lengths' in parameters:
         epitope_lengths = [int(item) for item in parameters['epitope_lengths'].split(',')]
     else:
@@ -128,8 +123,9 @@ def staging(parameters):
         'prediction_algorithms': parameters['prediction_algorithms'].split(','),
         'peptide_sequence_length': parameters.pop('peptide_sequence_length', 21),
         'net_chop_method': parameters.pop('net_chop_method', ""),
-        'netmhc_stab': bool(parameters['netmhc_stab']),
-        'allele_specific_cutoffs': bool(parameters['allele_specific_cutoffs']),
+        'netmhc_stab': bool(parameters.pop('netmhc_stab', False)),
+        'pass_only': bool(parameters.pop('pass_only', False)),
+        'allele_specific_cutoffs': bool(parameters.pop('allele_specific_cutoffs', False)),
         'top_score_metric': parameters.pop('top_score_metric', 'median'),
         'binding_threshold': parameters.pop('binding_threshold', 500),
         'minimum_fold_change': parameters.pop('minimum_fold_change', 0),
@@ -144,7 +140,7 @@ def staging(parameters):
         'fasta_size': parameters.pop('fasta_size', 200),
         'iedb_retries': parameters.pop('iedb_retries', 5),
         'iedb_install_dir': parameters.pop('iedb_install_dir', ""),
-        'keep_tmp_files': bool(parameters['keep_tmp_files']),
+        'keep_tmp_files': bool(parameters.pop('keep_tmp_files', False)),
         'downstream_sequence_length': parameters.pop('downstream_sequence_length', 'full')
     }
     force = bool(parameters.pop('force', False))
@@ -175,7 +171,7 @@ def staging(parameters):
 
 
 def start(input, phased_proximal_variants_vcf, samplename, alleles, epitope_lengths, prediction_algorithms, output,
-          peptide_sequence_length, net_chop_method, netmhc_stab, top_score_metric,
+          peptide_sequence_length, net_chop_method, netmhc_stab, pass_only, top_score_metric,
           binding_threshold, allele_specific_cutoffs, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
@@ -225,6 +221,8 @@ def start(input, phased_proximal_variants_vcf, samplename, alleles, epitope_leng
         command.append('--allele-specific-binding-thresholds')
     if keep_tmp_files:
         command.append('-k')
+    if pass_only:
+        command.append('--pass-only')
     if len(iedb_install_dir):
         command += [
             '--iedb-install-directory',

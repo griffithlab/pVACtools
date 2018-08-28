@@ -15,6 +15,7 @@
 	],
 	"fasta_size": 200,
 	"netmhc_stab": false,
+	"pass_only": false,
 	"peptide_sequence_length": 21,
 	"expn_val": 1,
 	"binding_threshold": 3000,

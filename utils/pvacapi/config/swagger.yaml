@@ -302,6 +302,11 @@ paths:
         description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
         type: "boolean"
         default: false
+      - name: "pass_only"
+        in: "formData"
+        description: "Process only variants that are PASS"
+        type: "boolean"
+        default: false
       - name: "top_score_metric"
         in: "formData"
         description: "Top Score Metric: ic50 metric for choosing best epitopes during binding filtering"
@@ -475,6 +480,10 @@ paths:
                 default: ""
               netmhc_stab:
                 description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
+                type: boolean
+                default: false
+              pass_only:
+                description: "Process only variants that are PASS"
                 type: boolean
                 default: false
               top_result_per_mutation:
