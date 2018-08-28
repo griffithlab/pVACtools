@@ -56,7 +56,7 @@ ____________________
    --vcf
    --symbol
    --terms SO
-   --hgsv
+   --hgvs
    --fasta <reference build fasta location>
    --offline
    --cache
