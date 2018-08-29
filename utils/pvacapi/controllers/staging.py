@@ -107,6 +107,19 @@ def staging(parameters):
                 'fields': 'input'
             }, 400
         )
+    phased_proximal_variants_vcf = parameters.pop('phased_proximal_variants_vcf', "")
+    if len(phased_proximal_variants_vcf):
+        phased_proximal_variants_vcf_path = resolve_filepath(phased_proximal_variants_vcf)
+        if not phased_proximal_variants_vcf_path:
+            return (
+                {
+                    'status': 400,
+                    'message': 'Unable to locate the given file: %s' % phased_proximal_variants_vcf,
+                    'fields': 'phased_proximal_variants_vcf'
+                }, 400
+            )
+    else:
+        phased_proximal_variants_vcf_path = ""
 
     if 'epitope_lengths' in parameters:
         epitope_lengths = [int(item) for item in parameters['epitope_lengths'].split(',')]
@@ -115,7 +128,7 @@ def staging(parameters):
 
     configObj = {
         'input': input_path,  # input
-        'phased_proximal_variants_vcf': parameters.pop('phased_proximal_variants_vcf', ""),
+        'phased_proximal_variants_vcf': phased_proximal_variants_vcf_path,
         'samplename': samplename,  # samplename
         'alleles': parameters['alleles'].split(','),
         'output': current_path,
