@@ -14,6 +14,11 @@ tools:
    A tool designed to aid specifically in the construction of DNA-based
    cancer vaccines.
 
+**pVACviz**
+   A browser-based user interface that assists
+   users in launching, managing, reviewing, and visualizing the results of
+   pVACtools processes.
+
 .. image:: images/pVACtools_main-figure_v2e.png
     :align: center
     :alt: pVACtools immunotherapy workflow
@@ -25,6 +30,7 @@ tools:
    pvacseq
    pvacfuse
    pvacvector
+   pvacviz
 
 .. toctree::
    :maxdepth: 1
@@ -42,18 +48,6 @@ This is a hotfix release. It fixes the following issues:
   They are now removed.
 - Some users were reporting mixed type warnings for pandas when running
   pVACseq. We added some options to avoid this warning.
-
-Coming soon
------------
-
-**pVACclient**
-   A browser-based user interface that assists
-   users in launching, managing, reviewing, and visualizing the results of
-   pVACtools processes.
-
-**pVACapi**
-    The pVACapi will provide a HTTP REST interface to the pVACtools
-    suite.
 
 Citation
 --------
