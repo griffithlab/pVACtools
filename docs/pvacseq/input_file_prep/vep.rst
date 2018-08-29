@@ -11,9 +11,9 @@ consequence, transcript, and gene information to your VCF.
 Installing VEP
 --------------
 
-1. To download and install the VEP command line tool follow `these instructions <http://useast.ensembl.org/info/docs/tools/vep/script/index.html>`_.
+1. To download and install the VEP command line tool follow `the VEP installation instructions <http://useast.ensembl.org/info/docs/tools/vep/script/index.html>`_.
 2. We recommend the use of the VEP cache for your annotation. The VEP cache
-   can be downloaded following `these instructions
+   can be downloaded following `these VEP cache installation instructions
    <http://useast.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache>`_.
    Please ensure that the Ensembl cache version matches the reference build
    and Ensembl version used in other parts of your analysis (e.g. for RNA-seq
