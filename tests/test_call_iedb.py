@@ -9,6 +9,7 @@ from filecmp import cmp
 import py_compile
 import lib.call_iedb
 from lib.prediction_class import PredictionClass, IEDB
+import pandas as pd
 
 def make_response(method, path):
     reader = open(os.path.join(
@@ -103,7 +104,9 @@ class CallIEDBClassITests(CallIEDBTests):
         ])
         if sys.platform == 'darwin':
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcflurry_osx.tsv')
-            self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+            expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
+            actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
+            pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_less_precise=0)
 
     def test_mhcnuggets_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
@@ -116,7 +119,9 @@ class CallIEDBClassITests(CallIEDBTests):
             '-l', str(self.epitope_length)
         ])
         expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
-        self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_less_precise=0)
 
 class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
@@ -161,7 +166,9 @@ class CallIEDBClassIITests(CallIEDBTests):
             'DPA1*01:03',
         ])
         expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
-        self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_less_precise=0)
 
 if __name__ == '__main__':
     unittest.main()
