@@ -8,6 +8,8 @@ from lib.csq_parser import CsqParser
 import lib.utils
 from lib.proximal_variant import ProximalVariant
 import lib.utils
+import binascii
+import re
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -324,6 +326,10 @@ class VcfConverter(InputFileConverter):
             self.proximal_variants_tsv_fh.close()
             self.somatic_vcf_fh.close()
 
+    def decode_hex(self, string):
+        hex_string = string.group(0).replace('%', '')
+        return binascii.unhexlify(hex_string).decode('utf-8')
+
     def execute(self):
         gene_expns = self.parse_gene_expns_file()
         transcript_expns = self.parse_transcript_expns_file()
@@ -394,8 +400,8 @@ class VcfConverter(InputFileConverter):
                         self.write_proximal_variant_entries(entry, alt, transcript_name, index)
 
                     ensembl_gene_id = transcript['Gene']
-                    hgvsc = transcript['HGVSc'] if 'HGVSc' in transcript else 'NA'
-                    hgvsp = transcript['HGVSp'] if 'HGVSp' in transcript else 'NA'
+                    hgvsc = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSc']) if 'HGVSc' in transcript else 'NA'
+                    hgvsp = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSp']) if 'HGVSp' in transcript else 'NA'
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
                         'start'                          : entry.affected_start,
