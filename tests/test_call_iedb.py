@@ -9,6 +9,7 @@ from filecmp import cmp
 import py_compile
 import lib.call_iedb
 from lib.prediction_class import PredictionClass, IEDB
+import pandas as pd
 
 def make_response(method, path):
     reader = open(os.path.join(
@@ -56,7 +57,6 @@ class CallIEDBClassITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):
         cls.input_file     = os.path.join(cls.test_data_dir, 'input.fasta')
-        cls.short_input_file = os.path.join(cls.test_data_dir, 'input.short.fasta')
         cls.allele         = 'HLA-A*02:01'
         cls.epitope_length = 9
         cls.methods = ['ann', 'smmpmbec', 'smm']
@@ -104,26 +104,29 @@ class CallIEDBClassITests(CallIEDBTests):
         ])
         if sys.platform == 'darwin':
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcflurry_osx.tsv')
-            self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+            expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
+            actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
+            pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_less_precise=0)
 
     def test_mhcnuggets_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
         lib.call_iedb.main([
-            self.short_input_file,
+            self.input_file,
             call_iedb_output_file.name,
             'MHCnuggetsI',
             self.allele,
             '-l', str(self.epitope_length)
         ])
         expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
-        self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_less_precise=0)
 
 class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):
         cls.input_file     = os.path.join(cls.test_data_dir, 'input_31.fasta')
-        cls.short_input_file = os.path.join(cls.test_data_dir, 'input_31.short.fasta')
         cls.allele         = 'H2-IAb'
         cls.methods = ['nn_align']
         cls.request_mock = unittest.mock.Mock(side_effect = (
@@ -157,13 +160,15 @@ class CallIEDBClassIITests(CallIEDBTests):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
         lib.call_iedb.main([
-            self.short_input_file,
+            self.input_file,
             call_iedb_output_file.name,
             'MHCnuggetsII',
             'DPA1*01:03',
         ])
         expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
-        self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_less_precise=0)
 
 if __name__ == '__main__':
     unittest.main()
