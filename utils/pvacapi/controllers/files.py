@@ -74,6 +74,7 @@ def inputfile(file):
         'fileID':int(file['fileID']),
         'description':file['description'],
         'display_name':file['display_name'],
+        'is_input': file['display_name'].endswith('.vcf') or file['display_name'].endswith('.vcf.gz'),
         'is_visualizable': file['is_visualizable'],
         'visualization_type': file['visualization_type'],
         'type':'file',
