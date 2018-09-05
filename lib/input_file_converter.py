@@ -433,16 +433,17 @@ class VcfConverter(InputFileConverter):
                         transcript_expn_entry = transcript_expns[transcript_name]
                         output_row['transcript_expression'] = transcript_expn_entry['FPKM']
                     elif 'TX' in self.vcf_reader.formats:
-                        transcript_expressions = genotype['TX']
-                        if isinstance(transcript_expressions, list):
-                            for transcript_expression in transcript_expressions:
-                                (transcript, value) = transcript_expression.split('|')
+                        if 'TX' in genotype.data._asdict():
+                            transcript_expressions = genotype['TX']
+                            if isinstance(transcript_expressions, list):
+                                for transcript_expression in transcript_expressions:
+                                    (transcript, value) = transcript_expression.split('|')
+                                    if transcript == transcript_name:
+                                        output_row['transcript_expression'] = value
+                            else:
+                                (transcript, value) = transcript_expressions.split('|')
                                 if transcript == transcript_name:
                                     output_row['transcript_expression'] = value
-                        else:
-                            (transcript, value) = transcript_expressions.split('|')
-                            if transcript == transcript_name:
-                                output_row['transcript_expression'] = value
 
                     if ensembl_gene_id in gene_expns.keys():
                         gene_expn_entries = gene_expns[ensembl_gene_id]
@@ -451,16 +452,17 @@ class VcfConverter(InputFileConverter):
                             gene_fpkm += float(gene_expn_entry['FPKM'])
                         output_row['gene_expression'] = gene_fpkm
                     elif 'GX' in self.vcf_reader.formats:
-                        gene_expressions = genotype['GX']
-                        if isinstance(gene_expressions, list):
-                            for gene_expression in gene_expressions:
-                                (gene, value) = gene_expression.split('|')
+                        if 'GX' in genotype.data._asdict():
+                            gene_expressions = genotype['GX']
+                            if isinstance(gene_expressions, list):
+                                for gene_expression in gene_expressions:
+                                    (gene, value) = gene_expression.split('|')
+                                    if ensembl_gene_id == gene or gene_name == gene:
+                                        output_row['gene_expression'] = value
+                            else:
+                                (gene, value) = gene_expressions.split('|')
                                 if ensembl_gene_id == gene or gene_name == gene:
                                     output_row['gene_expression'] = value
-                        else:
-                            (gene, value) = gene_expressions.split('|')
-                            if ensembl_gene_id == gene or gene_name == gene:
-                                output_row['gene_expression'] = value
 
                     output_row.update(coverage_for_entry)
 
