@@ -75,3 +75,7 @@ Column Name                                                     Description
 ``Stability Rank`` (optional)                                   The % rank stability of the ``MT Epitope Seq``
 ``NetMHCstab allele`` (optional)                                Nearest neighbor to the ``HLA Allele``. Used for NetMHCstab prediction
 =============================================================== ===========
+
+
+.. image:: ../images/output_file_columns.png
+    :alt: pVACseq ouput file columns illustration
