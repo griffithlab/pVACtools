@@ -75,6 +75,9 @@ Column Name                                                     Description
 ``NetMHCstab allele`` (optional)                                Nearest neighbor to the ``HLA Allele``. Used for NetMHCstab prediction
 =============================================================== ===========
 
+.. image:: ../images/output_file_columns.png
+    :alt: pVACseq ouput file columns illustration
+
 filtered.condensed.ranked.tsv Report Columns
 --------------------------------------------
 
