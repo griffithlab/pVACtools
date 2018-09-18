@@ -41,6 +41,8 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['condensed_report_file'] = condensed_report_file
     post_processing_params['minimum_fold_change'] = 0
     post_processing_params['run_coverage_filter'] = False
+    post_processing_params['run_net_chop'] = False
+    post_processing_params['run_netmhc_stab'] = False
 
     PostProcessor(**post_processing_params).execute()
     print("\nDone: Pipeline finished successfully. File {} contains ranked list of filtered putative neoantigens for class I and class II predictions.\n".format(condensed_report_file))

@@ -6,6 +6,8 @@ from lib.top_score_filter import *
 from lib.condense_final_report import *
 from lib.rank_epitopes import *
 from lib.post_processor import *
+import lib.net_chop
+import lib.netmhc_stab
 
 class PostProcessor:
     def __init__(self, **kwargs):
@@ -14,6 +16,8 @@ class PostProcessor:
         self.binding_filter_fh = tempfile.NamedTemporaryFile()
         self.coverage_filter_fh = tempfile.NamedTemporaryFile()
         self.top_score_filter_fh = tempfile.NamedTemporaryFile()
+        self.net_chop_fh = tempfile.NamedTemporaryFile()
+        self.netmhc_stab_fh = tempfile.NamedTemporaryFile()
         self.condensed_report_fh = tempfile.NamedTemporaryFile()
         self.ranked_epitopes_fh = tempfile.NamedTemporaryFile()
 
@@ -21,9 +25,11 @@ class PostProcessor:
         self.execute_binding_filter()
         self.execute_coverage_filter()
         self.execute_top_score_filter()
+        self.call_net_chop()
+        self.call_netmhc_stab()
         self.condense_report()
         self.rank_epitopes()
-        shutil.copy(self.top_score_filter_fh.name, self.filtered_report_file)
+        shutil.copy(self.netmhc_stab_fh.name, self.filtered_report_file)
         shutil.copy(self.ranked_epitopes_fh.name, self.condensed_report_file)
         self.close_filehandles()
 
@@ -62,9 +68,35 @@ class PostProcessor:
         TopScoreFilter(self.coverage_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric).execute()
         print("Completed")
 
+    def call_net_chop(self):
+        if self.run_net_chop:
+            print("Submitting remaining epitopes to NetChop")
+            lib.net_chop.main([
+                self.top_score_filter_fh.name,
+                self.net_chop_fh.name,
+                '--method',
+                self.net_chop_method,
+                '--threshold',
+                str(self.net_chop_threshold)
+            ])
+            print("Completed")
+        else:
+            shutil.copy(self.top_score_filter_fh.name, self.net_chop_fh.name)
+
+    def call_netmhc_stab(self):
+        if self.run_netmhc_stab:
+            print("Running NetMHCStabPan")
+            lib.netmhc_stab.main([
+                self.net_chop_fh.name,
+                self.netmhc_stab_fh.name,
+            ])
+            print("Completed")
+        else:
+            shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
+
     def condense_report(self):
         print("Creating Condensed Report")
-        CondenseFinalReport(self.top_score_filter_fh.name, self.condensed_report_fh.name, self.top_score_metric).execute()
+        CondenseFinalReport(self.netmhc_stab_fh.name, self.condensed_report_fh.name, self.top_score_metric).execute()
         print("Completed")
 
     def rank_epitopes(self):
@@ -76,5 +108,7 @@ class PostProcessor:
         self.binding_filter_fh.close()
         self.coverage_filter_fh.close()
         self.top_score_filter_fh.close()
+        self.net_chop_fh.close()
+        self.netmhc_stab_fh.close()
         self.condensed_report_fh.close()
         self.ranked_epitopes_fh.close()
