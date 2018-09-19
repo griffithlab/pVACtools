@@ -108,6 +108,10 @@ _file_info = {
         'description': "Unprocessed input VCF",
         'visualizable': False,
     },
+    'vcf.gz': {
+        'description': "Unprocessed input VCF",
+        'visualizable': False,
+    },
 }
 
 def descriptions(ext):
