@@ -1118,8 +1118,8 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/restart/{processID}:
-    get:
+  /api/v1/processes/{processID}/restart:
+    post:
       tags:
         - "restart"
       summary: "Restart an old process"

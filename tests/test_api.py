@@ -914,8 +914,8 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
             old_data = response.json()
-        response = requests.get(
-            self.urlBase+'/restart/%d'%processID,
+        response = requests.post(
+            self.urlBase+'/processes/%d/restart'%processID,
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
