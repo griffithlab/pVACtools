@@ -614,8 +614,8 @@ def initialize(current_app, args):
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         file_id = str([k for k,v in data['visualize'].items() if v['fullname'] == file_path][0])
         viz = is_visualizable(ext)
-        size = check_size(data['dropbox'][file_id]['fullname'], 1) if viz else None
-        nav_to_dir(file_path, vsz, hier_vsz).append({
+        size = check_size(data['visualize'][file_id]['fullname'], 1) if viz else None
+        nav_to_dir(file_path, vsz, hier_vz).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
             'fileID':file_id,
