@@ -253,6 +253,11 @@ paths:
         description: "Input VCF File: Filepath to the input VCF file"
         required: true
         type: "string"
+      - name: "phased_proximal_variants_vcf"
+        in: "formData"
+        description: "A VCF with phased proximal variant information"
+        required: false
+        type: "string"
       - name: "samplename"
         in: "formData"
         description: "Sample Name: Name for your sample"
@@ -295,6 +300,11 @@ paths:
       - name: "netmhc_stab"
         in: "formData"
         description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
+        type: "boolean"
+        default: false
+      - name: "pass_only"
+        in: "formData"
+        description: "Process only variants that are PASS"
         type: "boolean"
         default: false
       - name: "top_score_metric"
@@ -421,6 +431,9 @@ paths:
               input:
                 description: "Input VCF file: File ID of the input VCF file"
                 type: string
+              phased_proximal_variants_vcf:
+                description: "A VCF with phased proximal variant information"
+                type: string
               samplename:
                 description: "Sample name: a name for the sample and process"
                 type: string
@@ -467,6 +480,10 @@ paths:
                 default: ""
               netmhc_stab:
                 description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
+                type: boolean
+                default: false
+              pass_only:
+                description: "Process only variants that are PASS"
                 type: boolean
                 default: false
               top_result_per_mutation:
