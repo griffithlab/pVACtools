@@ -10,6 +10,7 @@ __all__ = [
     'install_vep_plugin',
     'config_files',
     'top_score_filter',
+    'transcript_support_level_filter',
 ]
 
 from . import *

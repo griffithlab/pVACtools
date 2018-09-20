@@ -31,6 +31,13 @@ def main():
     )
     coverage_filter_parser.set_defaults(func=coverage_filter)
 
+    transcript_support_level_filter_parser = subparsers.add_parser(
+        "transcript_support_level_filter",
+        help="Filters variants processed by IEDB by transcript support level",
+        add_help=False
+    )
+    transcript_support_level_filter_parser.set_defaults(func=transcript_support_level_filter)
+
     top_score_filter_parser = subparsers.add_parser(
         "top_score_filter",
         help="Pick the best neoepitope for each variant",
