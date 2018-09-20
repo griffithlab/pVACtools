@@ -57,6 +57,7 @@ def create_combined_reports(base_output_dir, args, additional_input_files):
     post_processing_params['filtered_report_file'] = filtered_report_file
     post_processing_params['condensed_report_file'] = condensed_report_file
     post_processing_params['run_coverage_filter'] = True
+    post_processing_params['run_transcript_support_level_filter'] = True
     post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = False
 
