@@ -212,6 +212,7 @@ table = DataTable(
     selectable = True,
     source = source,
     index_position = None,
+    scroll_to_selection = True,
     # sizing_mode = 'scale_width',
     width = 1200
 )
