@@ -15,6 +15,7 @@ class PostProcessor:
            setattr(self, k, v)
         self.binding_filter_fh = tempfile.NamedTemporaryFile()
         self.coverage_filter_fh = tempfile.NamedTemporaryFile()
+        self.transcript_support_level_filter_fh = tempfile.NamedTemporaryFile()
         self.top_score_filter_fh = tempfile.NamedTemporaryFile()
         self.net_chop_fh = tempfile.NamedTemporaryFile()
         self.netmhc_stab_fh = tempfile.NamedTemporaryFile()
@@ -24,6 +25,7 @@ class PostProcessor:
     def execute(self):
         self.execute_binding_filter()
         self.execute_coverage_filter()
+        self.execute_transcript_support_level_filter()
         self.execute_top_score_filter()
         self.call_net_chop()
         self.call_netmhc_stab()
@@ -63,9 +65,24 @@ class PostProcessor:
         else:
             shutil.copy(self.binding_filter_fh.name, self.coverage_filter_fh.name)
 
+    def execute_transcript_support_level_filter(self):
+        if self.run_transcript_support_level_filter:
+            print("Running Transcript Support Level Filter")
+            filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': self.maximum_transcript_support_level}]
+            Filter(
+                self.coverage_filter_fh.name,
+                self.transcript_support_level_filter_fh.name,
+                filter_criteria,
+                self.exclude_NAs,
+                ['Transcript Support Level'],
+            ).execute()
+            print("Complete")
+        else:
+            shutil.copy(self.coverage_filter_fh.name, self.transcript_support_level_filter_fh.name)
+
     def execute_top_score_filter(self):
         print("Running Top Score Filter")
-        TopScoreFilter(self.coverage_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric).execute()
+        TopScoreFilter(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric).execute()
         print("Completed")
 
     def call_net_chop(self):
@@ -107,6 +124,7 @@ class PostProcessor:
     def close_filehandles(self):
         self.binding_filter_fh.close()
         self.coverage_filter_fh.close()
+        self.transcript_support_level_filter_fh.close()
         self.top_score_filter_fh.close()
         self.net_chop_fh.close()
         self.netmhc_stab_fh.close()
