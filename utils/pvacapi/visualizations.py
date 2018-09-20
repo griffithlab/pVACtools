@@ -107,7 +107,7 @@ try:
 except BaseException as e:
     raise ValueError("Unable to parse the requried arguments") from e
 tablekey = "data_%s_%s" % (
-    (parentID if parentID >= 0 else 'visualize'),
+    (parentID if parentID >= 0 else 'dropbox'),
     fileID
 )
 # Fetch table data from postgres
@@ -212,6 +212,7 @@ table = DataTable(
     selectable = True,
     source = source,
     index_position = None,
+    scroll_to_selection = True,
     # sizing_mode = 'scale_width',
     width = 1200
 )
