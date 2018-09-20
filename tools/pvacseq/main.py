@@ -45,6 +45,13 @@ def main():
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
 
+    generate_protein_fasta_parser = subparsers.add_parser(
+        "generate_condensed_ranked_report",
+        help="Generate a condensed, ranked report from a pVACseq .all_epitopes.tsv or .filtered.tsv report file.",
+        add_help=False
+    )
+    generate_protein_fasta_parser.set_defaults(func=generate_condensed_ranked_report)
+
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
         help="Downloads example input and output files",
