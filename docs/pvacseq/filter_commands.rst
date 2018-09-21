@@ -5,8 +5,8 @@
 Filtering Commands
 =============================
 
-pVACseq currently offers three filters: a binding filter, a coverage filter,
-and a top score filter.
+pVACseq currently offers four filters: a binding filter, a coverage filter,
+a transcript support level filter, and a top score filter.
 
 These filters are always run automatically as part
 of the pVACseq pipeline using default cutoffs.
@@ -62,6 +62,16 @@ apply different cutoffs.
 
 By default, entries with ``NA`` values will be included in the output. This
 behavior can be turned off by using the ``--exclude-NAs`` flag.
+
+Transcript Support Level Filter
+-------------------------------
+
+.. program-output:: pvacseq transcript_support_level_filter -h
+
+This filter is used to eliminate poorly-supported transcripts. By default,
+only transcripts with a `transcript support level (TSL) <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html#tsl>`_
+of <=1 are kept. This threshold can be adjusted using the ``--maximum-transcript-support-level``
+parameter.
 
 By default, entries with ``NA`` values will be included in the output. This
 behavior can be turned off by using the ``--exclude-NAs`` flag.

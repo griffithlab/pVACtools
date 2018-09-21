@@ -41,6 +41,7 @@ Column Name                                                     Description
 ``Reference``                                                   ``fusion``
 ``Variant``                                                     ``fusion``
 ``Transcript``                                                  The Ensembl IDs of the affected transcripts
+``Transcript Support Level``                                    ``NA``
 ``Ensembl Gene ID``                                             ``NA``
 ``Variant Type``                                                The type of fusion. ``inframe_fusion`` for inframe fusions, ``frameshift_fusion`` for frameshift fusions
 ``Mutation``                                                    ``NA``

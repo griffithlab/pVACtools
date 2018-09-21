@@ -37,6 +37,7 @@ Column Name                                                     Description
 ``Reference``                                                   The reference allele
 ``Variant``                                                     The alt allele
 ``Transcript``                                                  The Ensembl ID of the affected transcript
+``Transcript Support Level``                                    The `transcript support level (TSL) <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html#tsl>`_ of the affected transcript. ``NA`` if the VCF entry doesn't contain TSL information.
 ``Ensembl Gene ID``                                             The Ensembl ID of the affected gene
 ``Variant Type``                                                The type of variant. ``missense`` for missense mutations, ``inframe_ins`` for inframe insertions, ``inframe_del`` for inframe deletions, and ``FS`` for frameshift variants
 ``Mutation``                                                    The amnio acid change of this mutation
