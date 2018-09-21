@@ -41,7 +41,7 @@ Running VEP
 
    ./vep \
    --input_file <input VCF> --output_file <output VCF> \
-   --format vcf --vcf --symbol --terms SO \
+   --format vcf --vcf --symbol --terms SO --tsl\
    --hgvs --fasta <reference build fasta file location> \
    --offline --cache [--dir_cache <VEP cache directory>] \
    --plugin Downstream --plugin Wildtype \
@@ -56,6 +56,7 @@ ____________________
    --vcf
    --symbol
    --terms SO
+   --tsl
    --hgvs
    --fasta <reference build fasta location>
    --offline
@@ -68,6 +69,8 @@ ____________________
 - The ``--symbol`` option will include gene symbol in the annotation.
 - The ``--terms SO`` option will result in Sequence Ontology terms being used
   for the consequences.
+- The ``--tsl`` option adds transcript support level information to the
+  annotation.
 - The ``--hgvs`` option will result in HGVS identifiers being added to the
   annotation.
 - Using the ``--hgvs`` option requires the usage of the ``--fasta`` argument to
