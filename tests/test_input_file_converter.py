@@ -63,7 +63,7 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_tx.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
-    def test_input_vcf_with_tx_annotation_generates_expected_tsv(self):
+    def test_input_vcf_with_gx_annotation_generates_expected_tsv(self):
         convert_vcf_input_file              = os.path.join(self.test_data_dir, 'input.gx.vcf')
         convert_vcf_output_file             = tempfile.NamedTemporaryFile()
 

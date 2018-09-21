@@ -51,7 +51,7 @@ def results_get(id, type, filters, sorting, page, count):
     """Get the list of result files from a specific pVAC-Seq run"""
     data = current_app.config['storage']['loader']()
     if id == -1:
-        return list_dropbox(type, filters, sorting, page, count)
+        return list_visualize(type, filters, sorting, page, count)
     process = fetch_process(id, data, current_app.config['storage']['children'])
     if not process[0]:
         return (
@@ -74,6 +74,7 @@ def inputfile(file):
         'fileID':int(file['fileID']),
         'description':file['description'],
         'display_name':file['display_name'],
+        'is_input': file['display_name'].endswith('.vcf') or file['display_name'].endswith('.vcf.gz'),
         'is_visualizable': file['is_visualizable'],
         'visualization_type': file['visualization_type'],
         'type':'file',
@@ -113,7 +114,7 @@ def results_getcols(id, fileID):
     """Get a mapping of standardized column names -> original column names"""
     data = current_app.config['storage']['loader']()
     if id==-1:
-        if str(fileID) not in data['dropbox']:
+        if str(fileID) not in data['visualize']:
             return ({
                 'code':400,
                 'message':'The requested file (%d) does not exist'%fileID,
@@ -122,8 +123,8 @@ def results_getcols(id, fileID):
         raw_reader = open(
             os.path.join(
                 os.path.abspath(current_app.config['files']['data-dir']),
-                'dropbox',
-                data['dropbox'][str(fileID)]['display_name']
+                'visualize',
+                data['visualize'][str(fileID)]['display_name']
             )
         )
         reader = csv.DictReader(raw_reader, delimiter='\t')
@@ -158,7 +159,7 @@ def results_getcols(id, fileID):
     raw_reader.close()
     return output
 
-def dropboxfile(file):
+def visualizefile(file):
     data = current_app.config['storage']['loader']()
     return {
             'fileID':file['fileID'],
@@ -170,11 +171,11 @@ def dropboxfile(file):
             'url':'/api/v1/processes/-1/results/%s'%(file['fileID']),
             'size':(
                 os.path.getsize(
-                    data['dropbox'][file['fileID']]['fullname']
+                    data['visualize'][file['fileID']]['fullname']
                 )
             ),
             'rows':int(subprocess.check_output([
-                'wc', '-l', data['dropbox'][file['fileID']]['fullname']
+                'wc', '-l', data['visualize'][file['fileID']]['fullname']
             ]).decode().split()[0])-1,
     }
 
@@ -184,13 +185,13 @@ def prelim_db(type, data):
         if file['type'] == 'file':
             if "default" in type:
                 if not (re.search("/tmp/", file['display_name'])):
-                    output.append(dropboxfile(file))
+                    output.append(visualizefile(file))
             elif "all" in type:
-                output.append(dropboxfile(file))
+                output.append(visualizefile(file))
             else:
                 for filter in type:
                     if (re.search('%s.tsv'%filter, file['display_name'])):
-                        output.append(dropboxfile(file))
+                        output.append(visualizefile(file))
         elif file['type'] == 'directory':
             output.append({
                 'display_name':file['display_name'],
@@ -199,9 +200,9 @@ def prelim_db(type, data):
             })
     return output
 
-def list_dropbox(type = 'all', filters = [], sorting = [], page = 1, count = -1):
+def list_visualize(type = 'all', filters = [], sorting = [], page = 1, count = -1):
     data = current_app.config['storage']['loader']()
-    db_dir = os.path.join(current_app.config['files']['data-dir'], 'dropbox')
-    tree = current_app.config['storage']['manifest']['dropbox']
+    db_dir = os.path.join(current_app.config['files']['data-dir'], 'visualize')
+    tree = current_app.config['storage']['manifest']['visualize']
     output = prelim_db(type, tree)
     return filterdata(output, filters, sorting, page, count)

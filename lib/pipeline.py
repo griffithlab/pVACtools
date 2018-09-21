@@ -13,11 +13,7 @@ from lib.prediction_class import *
 from lib.input_file_converter import *
 from lib.fasta_generator import *
 from lib.output_parser import *
-from lib.binding_filter import *
-from lib.top_score_filter import *
-from lib.filter import *
-from lib.condense_final_report import *
-from lib.rank_epitopes import *
+from lib.post_processor import *
 import shutil
 import yaml
 import pkg_resources
@@ -49,7 +45,7 @@ class Pipeline(metaclass=ABCMeta):
         self.netmhc_stab                 = kwargs.pop('netmhc_stab', False)
         self.top_score_metric            = kwargs.pop('top_score_metric', 'median')
         self.binding_threshold           = kwargs.pop('binding_threshold', 500)
-        self.allele_specific_cutoffs     = kwargs.pop('allele_specific_cutoffs', False)
+        self.allele_specific_binding_thresholds = kwargs.pop('allele_specific_cutoffs', False)
         self.minimum_fold_change         = kwargs.pop('minimum_fold_change', 0)
         self.normal_cov                  = kwargs.pop('normal_cov', None)
         self.normal_vaf                  = kwargs.pop('normal_vaf', None)
@@ -266,94 +262,11 @@ class Pipeline(metaclass=ABCMeta):
         ])
         status_message("Completed")
 
-    def binding_filter_out_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".filtered.binding.tsv")
-
-    def binding_filter(self):
-        status_message("Running Binding Filters")
-        BindingFilter(
-            self.combined_parsed_path(),
-            self.binding_filter_out_path(),
-            self.binding_threshold,
-            self.minimum_fold_change,
-            self.top_score_metric,
-            self.exclude_NAs,
-            self.allele_specific_cutoffs,
-        ).execute()
-        status_message("Completed")
-
-    def coverage_filter_out_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".filtered.coverage.tsv")
-
-    def coverage_filter(self):
-        if self.input_file_type == 'vcf':
-            status_message("Running Coverage Filters")
-            filter_criteria = []
-            filter_criteria.append({'column': "Normal_Depth", 'operator': '>=', 'threshold': self.normal_cov})
-            filter_criteria.append({'column': "Normal_VAF", 'operator': '<=', 'threshold': self.normal_vaf})
-            filter_criteria.append({'column': "Tumor_DNA_Depth", 'operator': '>=', 'threshold': self.tdna_cov})
-            filter_criteria.append({'column': "Tumor_DNA_VAF", 'operator': '>=', 'threshold': self.tdna_vaf})
-            filter_criteria.append({'column': "Tumor_RNA_Depth", 'operator': '>=', 'threshold': self.trna_cov})
-            filter_criteria.append({'column': "Tumor_RNA_VAF", 'operator': '>=', 'threshold': self.trna_vaf})
-            filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': self.expn_val})
-            filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': self.expn_val})
-            Filter(self.binding_filter_out_path(), self.coverage_filter_out_path(), filter_criteria, self.exclude_NAs).execute()
-            status_message("Completed")
-        elif self.input_file_type == 'bedpe':
-            shutil.copy(self.binding_filter_out_path(), self.coverage_filter_out_path())
-
-    def top_result_filter_out_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".filtered.top.tsv")
-
-    def top_result_filter(self):
-        status_message("Running Top Score Filter")
-        TopScoreFilter(self.coverage_filter_out_path(), self.top_result_filter_out_path(), self.top_score_metric).execute()
-        status_message("Completed")
-
-    def net_chop_out_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".chop.tsv")
-
-    def net_chop(self):
-        status_message("Submitting remaining epitopes to NetChop")
-        lib.net_chop.main([
-            self.top_result_filter_out_path(),
-            self.net_chop_out_path(),
-            '--method',
-            self.net_chop_method,
-            '--threshold',
-            str(self.net_chop_threshold)
-        ])
-        status_message("Completed")
-
-    def netmhc_stab_out_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".stab.tsv")
-
-    def call_netmhc_stab(self):
-        status_message("Running NetMHCStabPan")
-        lib.netmhc_stab.main([
-            self.net_chop_out_path(),
-            self.netmhc_stab_out_path(),
-        ])
-        status_message("Completed")
-
     def final_path(self):
         return os.path.join(self.output_dir, self.sample_name+".filtered.tsv")
 
-    def condensed_final_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".final.condensed.tsv")
-
-    def condensed_report(self):
-        print("Creating condensed final report")
-        CondenseFinalReport(self.final_path(), self.condensed_final_path(), self.top_score_metric).execute()
-        print("Completed")
-
     def ranked_final_path(self):
         return os.path.join(self.output_dir, self.sample_name+".filtered.condensed.ranked.tsv")
-
-    def rank_epitopes(self):
-        print("Ranking neoepitopes")
-        RankEpitopes(self.condensed_final_path(), self.ranked_final_path()).execute()
-        print("Completed")
 
     def execute(self):
         self.print_log()
@@ -375,34 +288,24 @@ class Pipeline(metaclass=ABCMeta):
             return
 
         self.combined_parsed_outputs(split_parsed_output_files)
-        self.binding_filter()
-        self.coverage_filter()
-        self.top_result_filter()
 
+        post_processing_params = vars(self)
+        post_processing_params['input_file'] = self.combined_parsed_path()
+        post_processing_params['filtered_report_file'] = self.final_path()
+        post_processing_params['condensed_report_file'] = self.ranked_final_path()
+        if self.input_file_type == 'pvacvector_input_fasta':
+            post_processing_params['run_coverage_filter'] = False
+        else:
+            post_processing_params['run_coverage_filter'] = True
         if self.net_chop_method:
-            self.net_chop()
+            post_processing_params['run_net_chop'] = True
         else:
-            os.symlink(self.top_result_filter_out_path(), self.net_chop_out_path())
-
+            post_processing_params['run_net_chop'] = False
         if self.netmhc_stab:
-            self.call_netmhc_stab()
+            post_processing_params['run_netmhc_stab'] = True
         else:
-            os.symlink(self.net_chop_out_path(), self.netmhc_stab_out_path())
-
-        shutil.copy(self.netmhc_stab_out_path(), self.final_path())
-
-        self.condensed_report()
-        self.rank_epitopes()
-
-        for symlink in [
-            self.binding_filter_out_path(),
-            self.coverage_filter_out_path(),
-            self.top_result_filter_out_path(),
-            self.net_chop_out_path(),
-            self.netmhc_stab_out_path(),
-            self.condensed_final_path(),
-        ]:
-            os.unlink(symlink)
+            post_processing_params['run_netmhc_stab'] = False
+        PostProcessor(**post_processing_params).execute()
 
         status_message("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.ranked_final_path()))
 
@@ -463,15 +366,14 @@ class MHCIPipeline(Pipeline):
                             iedb_method = prediction.iedb_prediction_method
                         else:
                             iedb_method = method
-                        if isinstance(prediction, IEDB) or isinstance(prediction, MHCflurry):
-                            valid_alleles = prediction.valid_allele_names()
-                            if a not in valid_alleles:
-                                status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
-                                continue
-                            valid_lengths = prediction.valid_lengths_for_allele(a)
-                            if epl not in valid_lengths:
-                                status_message("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
-                                continue
+                        valid_alleles = prediction.valid_allele_names()
+                        if a not in valid_alleles:
+                            status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
+                            continue
+                        valid_lengths = prediction.valid_lengths_for_allele(a)
+                        if epl not in valid_lengths:
+                            status_message("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
+                            continue
 
                         split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, str(epl), "tsv_%s" % fasta_chunk]))
                         if os.path.exists(split_iedb_out):
@@ -578,11 +480,10 @@ class MHCIIPipeline(Pipeline):
                         iedb_method = prediction.iedb_prediction_method
                     else:
                         iedb_method = method
-                    if isinstance(prediction, IEDB):
-                        valid_alleles = prediction.valid_allele_names()
-                        if a not in valid_alleles:
-                            status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
-                            continue
+                    valid_alleles = prediction.valid_allele_names()
+                    if a not in valid_alleles:
+                        status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
+                        continue
 
                     split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, "tsv_%s" % fasta_chunk]))
                     if os.path.exists(split_iedb_out):

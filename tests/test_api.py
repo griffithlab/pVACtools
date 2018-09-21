@@ -105,7 +105,7 @@ class APITests(unittest.TestCase):
         db = psql.open("localhost/pvacseq")
         for row in db.prepare("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'data\__%\__%'")():
             name = row[0]
-            if re.match(r'data_(dropbox|\d+)_\d+', name):
+            if re.match(r'data_(visualize|\d+)_\d+', name):
                 print("DROP TABLE", name)
                 db.execute("DROP TABLE %s"%name)
 
@@ -200,7 +200,12 @@ class APITests(unittest.TestCase):
         self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
             '~',
             'pVAC-Seq',
-            'dropbox'
+            'visualize'
+        ))))
+        self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
+            '~',
+            'pVAC-Seq',
+            'export'
         ))))
         self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
             '~',
@@ -210,7 +215,7 @@ class APITests(unittest.TestCase):
         self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
             '~',
             'pVAC-Seq',
-            'results'
+            '.processes'
         ))))
 
     def test_endpoint_input(self):
@@ -602,13 +607,75 @@ class APITests(unittest.TestCase):
                 timeout = 5
             )
             self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-            process_data = response.json()
-        response = requests.get(
-            self.urlBase+'/archive/%d'%processID,
+            self.assertIsInstance(response.json(), dict)
+        response = requests.post(
+            self.urlBase+'/processes/%d/archive'%processID,
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertIsInstance(response.json(), str)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 400, response.url+' : '+response.content.decode())
+
+    def test_endpoint_export(self):
+        processID = self.start_basic_run()['processid']
+        time.sleep(1)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        process_data = response.json()
+        self.assertIsInstance(process_data, dict)
+        self.assertIn('running', process_data)
+        while process_data['running']:
+            time.sleep(5)
+            response = requests.get(
+                self.urlBase+'/processes/%d'%processID,
+                timeout = 5
+            )
+            self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+            self.assertIsInstance(response.json(), dict)
+        response = requests.post(
+            self.urlBase+'/processes/%d/export'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        self.assertIsInstance(response.json(), str)
+
+    def test_endpoint_delete(self):
+        processID = self.start_basic_run()['processid']
+        time.sleep(1)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        process_data = response.json()
+        self.assertIsInstance(process_data, dict)
+        self.assertIn('running', process_data)
+        while process_data['running']:
+            time.sleep(5)
+            response = requests.get(
+                self.urlBase+'/processes/%d'%processID,
+                timeout = 5
+            )
+            self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+            self.assertIsInstance(response.json(), dict)
+        response = requests.delete(
+            self.urlBase+'/processes/%d/delete'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        self.assertIsInstance(response.json(), str)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 400, response.url+' : '+response.content.decode())
 
     def test_full_api_pipeline(self):
         response = requests.post(
@@ -649,17 +716,18 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
             process_data = response.json()
-        # time.sleep(1)
-        # response = requests.get(
-        #     self.urlBase+'/processes/%d'%processID,
-        #     timeout = 5
-        # )
-        # self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-        # process_data = response.json()
+        time.sleep(10)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        process_data = response.json()
         self.assertIn('files', process_data)
         self.assertIsInstance(process_data['files'], list)
 
         finaltsv = [item for item in process_data['files'] if item['display_name'].endswith('.final.tsv')]
+        #import pdb; pdb.set_trace()
         self.assertTrue(finaltsv)
         finaltsv = finaltsv[0]
         raw_reader = open(os.path.join(
@@ -715,9 +783,64 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertFalse(response.json())
 
-    def test_endpoint_validallele(self):
+    def test_endpoint_validalleles(self):
         response = requests.get(
             self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'prediction_algorithms':'NetMHC'
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('NetMHC' in results['result'][0]['prediction_algorithms'])
+        self.assertTrue(len(results['result']))
+
+        response = requests.get(
+            self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'prediction_algorithms':'NetMHC',
+                'name_filter':'LA-A*01',
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('NetMHC' in results['result'][0]['prediction_algorithms'])
+        self.assertTrue('HLA-A*01:01' in results['result'][0]['name'])
+        self.assertTrue(len(results['result']))
+
+        response = requests.get(
+            self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'name_filter':'LA-A*01',
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('LA-A*01' in results['result'][0]['name'])
+        self.assertTrue(len(results['result']))
+
+        response = requests.get(
+            self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'name_filter':'la-a*01',
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('LA-A*01' in results['result'][0]['name'])
+        self.assertTrue(len(results['result']))
+
+    def test_endpoint_validallelesperalgorithm(self):
+        response = requests.get(
+            self.urlBase+'/validallelesperalgorithm',
             timeout=5,
             params={
                 'prediction_algorithms':'NetMHC'
@@ -791,8 +914,8 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
             old_data = response.json()
-        response = requests.get(
-            self.urlBase+'/restart/%d'%processID,
+        response = requests.post(
+            self.urlBase+'/processes/%d/restart'%processID,
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
@@ -820,7 +943,7 @@ class APITests(unittest.TestCase):
         self.assertIn('results_url', process_data)
         self.assertEqual(process_data['results_url'], old_data['results_url'])
 
-    def test_endpoint_dropbox(self):
+    def test_endpoint_visualize(self):
         shutil.copyfile(
             os.path.join(
                 self.test_data_directory,
@@ -829,13 +952,13 @@ class APITests(unittest.TestCase):
             os.path.expanduser(os.path.join(
                 '~',
                 'pVAC-Seq',
-                'dropbox',
+                'visualize',
                 'Test.final.tsv'
             ))
         )
         time.sleep(1)
         response = requests.get(
-            self.urlBase+'/dropbox',
+            self.urlBase+'/visualize',
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())

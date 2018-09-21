@@ -8,6 +8,8 @@ from lib.csq_parser import CsqParser
 import lib.utils
 from lib.proximal_variant import ProximalVariant
 import lib.utils
+import binascii
+import re
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -324,6 +326,10 @@ class VcfConverter(InputFileConverter):
             self.proximal_variants_tsv_fh.close()
             self.somatic_vcf_fh.close()
 
+    def decode_hex(self, string):
+        hex_string = string.group(0).replace('%', '')
+        return binascii.unhexlify(hex_string).decode('utf-8')
+
     def execute(self):
         gene_expns = self.parse_gene_expns_file()
         transcript_expns = self.parse_transcript_expns_file()
@@ -394,8 +400,8 @@ class VcfConverter(InputFileConverter):
                         self.write_proximal_variant_entries(entry, alt, transcript_name, index)
 
                     ensembl_gene_id = transcript['Gene']
-                    hgvsc = transcript['HGVSc'] if 'HGVSc' in transcript else 'NA'
-                    hgvsp = transcript['HGVSp'] if 'HGVSp' in transcript else 'NA'
+                    hgvsc = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSc']) if 'HGVSc' in transcript else 'NA'
+                    hgvsp = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSp']) if 'HGVSp' in transcript else 'NA'
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
                         'start'                          : entry.affected_start,
@@ -427,16 +433,17 @@ class VcfConverter(InputFileConverter):
                         transcript_expn_entry = transcript_expns[transcript_name]
                         output_row['transcript_expression'] = transcript_expn_entry['FPKM']
                     elif 'TX' in self.vcf_reader.formats:
-                        transcript_expressions = genotype['TX']
-                        if isinstance(transcript_expressions, list):
-                            for transcript_expression in transcript_expressions:
-                                (transcript, value) = transcript_expression.split('|')
+                        if 'TX' in genotype.data._asdict():
+                            transcript_expressions = genotype['TX']
+                            if isinstance(transcript_expressions, list):
+                                for transcript_expression in transcript_expressions:
+                                    (transcript, value) = transcript_expression.split('|')
+                                    if transcript == transcript_name:
+                                        output_row['transcript_expression'] = value
+                            else:
+                                (transcript, value) = transcript_expressions.split('|')
                                 if transcript == transcript_name:
                                     output_row['transcript_expression'] = value
-                        else:
-                            (transcript, value) = transcript_expressions.split('|')
-                            if transcript == transcript_name:
-                                output_row['transcript_expression'] = value
 
                     if ensembl_gene_id in gene_expns.keys():
                         gene_expn_entries = gene_expns[ensembl_gene_id]
@@ -445,16 +452,17 @@ class VcfConverter(InputFileConverter):
                             gene_fpkm += float(gene_expn_entry['FPKM'])
                         output_row['gene_expression'] = gene_fpkm
                     elif 'GX' in self.vcf_reader.formats:
-                        gene_expressions = genotype['GX']
-                        if isinstance(gene_expressions, list):
-                            for gene_expression in gene_expressions:
-                                (gene, value) = gene_expression.split('|')
+                        if 'GX' in genotype.data._asdict():
+                            gene_expressions = genotype['GX']
+                            if isinstance(gene_expressions, list):
+                                for gene_expression in gene_expressions:
+                                    (gene, value) = gene_expression.split('|')
+                                    if ensembl_gene_id == gene or gene_name == gene:
+                                        output_row['gene_expression'] = value
+                            else:
+                                (gene, value) = gene_expressions.split('|')
                                 if ensembl_gene_id == gene or gene_name == gene:
                                     output_row['gene_expression'] = value
-                        else:
-                            (gene, value) = gene_expressions.split('|')
-                            if ensembl_gene_id == gene or gene_name == gene:
-                                output_row['gene_expression'] = value
 
                     output_row.update(coverage_for_entry)
 

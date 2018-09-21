@@ -151,7 +151,7 @@ paths:
       parameters:
       - name: "id"
         in: "path"
-        description: "ProcessID or -1 for dropbox"
+        description: "ProcessID or -1 for visualize"
         required: true
         type: "integer"
       - name: "fileID"
@@ -253,6 +253,11 @@ paths:
         description: "Input VCF File: Filepath to the input VCF file"
         required: true
         type: "string"
+      - name: "phased_proximal_variants_vcf"
+        in: "formData"
+        description: "A VCF with phased proximal variant information"
+        required: false
+        type: "string"
       - name: "samplename"
         in: "formData"
         description: "Sample Name: Name for your sample"
@@ -295,6 +300,11 @@ paths:
       - name: "netmhc_stab"
         in: "formData"
         description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
+        type: "boolean"
+        default: false
+      - name: "pass_only"
+        in: "formData"
+        description: "Process only variants that are PASS"
         type: "boolean"
         default: false
       - name: "top_score_metric"
@@ -421,6 +431,9 @@ paths:
               input:
                 description: "Input VCF file: File ID of the input VCF file"
                 type: string
+              phased_proximal_variants_vcf:
+                description: "A VCF with phased proximal variant information"
+                type: string
               samplename:
                 description: "Sample name: a name for the sample and process"
                 type: string
@@ -467,6 +480,10 @@ paths:
                 default: ""
               netmhc_stab:
                 description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
+                type: boolean
+                default: false
+              pass_only:
+                description: "Process only variants that are PASS"
                 type: boolean
                 default: false
               top_result_per_mutation:
@@ -713,12 +730,51 @@ paths:
             $ref: "#/definitions/Error"
   /api/v1/validalleles:
     get:
-      tags: 
+      tags:
         - "allele"
       summary: "Lists valid alleles for specified prediction algorithms"
-      description: "Takes a string of prediction algorithms and returns an object mapping each algorithm to valid alleles for that algorithm"
+      description: "Takes a string of prediction algorithms and returns an object mapping each allele to the prediction algorithms it can be used with"
       operationId: "utils.pvacapi.controllers.staging.valid_alleles"
-      parameters: 
+      parameters:
+        - name: "page"
+          in: "query"
+          description: "Page of results to return"
+          required: false
+          type: "integer"
+          default: 1
+        - name: "count"
+          in: "query"
+          description: "Number of results to return per page"
+          required: false
+          type: "integer"
+          default: 10
+        - name: "prediction_algorithms"
+          in: "query"
+          description: "Prediction algorithms to find valid alleles for"
+          in: "query"
+          type: "string"
+        - name: "name_filter"
+          in: "query"
+          description: "String to use for fuzzy matching to the allele names for typeahead search"
+          in: "query"
+          type: "string"
+      responses:
+        200:
+          description: "Returns object mapping each allele to an array of predcition algorithms it can be used with"
+          schema:
+            type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/validallelesperalgorithm:
+    get:
+      tags:
+        - "allele"
+      summary: "Lists valid alleles for specified prediction algorithms grouped by the algorithm"
+      description: "Takes a string of prediction algorithms and returns an object mapping each algorithm to valid alleles for that algorithm"
+      operationId: "utils.pvacapi.controllers.staging.valid_alleles_per_algorithm"
+      parameters:
         - name: "prediction_algorithms"
           in: "query"
           description: "Prediction algorithms to find valid alleles for"
@@ -780,15 +836,15 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/dropbox:
+  /api/v1/visualize:
     get:
       tags:
-        - "dropbox"
-      summary: "Get files currently in the dropbox"
-      description: "The dropbox endpoint returns a list of the files currently in\
-      the dropbox folder.  The user may drop result files into this folder to be\
+        - "visualize"
+      summary: "Get files currently in the visualize folder"
+      description: "The visualize endpoint returns a list of the files currently in\
+      the visualize folder.  The user may drop result files into this folder to be\
       displayed in the frontend UI"
-      operationId: "utils.pvacapi.controllers.files.list_dropbox"
+      operationId: "utils.pvacapi.controllers.files.list_visualize"
       parameters:
       - name: "type"
         in: "query"
@@ -831,7 +887,7 @@ paths:
         default: 10
       responses:
         200:
-          description: "An object containing metadata and a list of files in the dropbox"
+          description: "An object containing metadata and a list of files in the visualize folder"
           schema:
             type: "array"
             items:
@@ -850,7 +906,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -894,7 +950,7 @@ paths:
           default: 'ASC'
       responses:
         200:
-          description: "Returns a list of files in the dropbox"
+          description: "Returns a list of files in the visualize folder"
           schema:
             type: "array"
             items: {
@@ -916,7 +972,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -966,7 +1022,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -996,7 +1052,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -1013,8 +1069,8 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/archive/{processID}:
-    get:
+  /api/v1/processes/{processID}/archive:
+    post:
       tags:
         - "archive"
       summary: "Archive a process"
@@ -1035,8 +1091,52 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/restart/{processID}:
-    get:
+  /api/v1/processes/{processID}/export:
+    post:
+      tags:
+        - "export"
+      summary: "export a process"
+      description: "Copies the results of a process to the export folder"
+      operationId: "utils.pvacapi.controllers.processes.export"
+      parameters:
+        - name: "processID"
+          in: "path"
+          description: "Id of the process to export"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "No meaningful data to return"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{processID}/delete:
+    delete:
+      tags:
+        - "delete"
+      summary: "delete a process"
+      description: "Deletes the a process and all of its results"
+      operationId: "utils.pvacapi.controllers.processes.delete"
+      parameters:
+        - name: "processID"
+          in: "path"
+          description: "Id of the process to delete"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "No meaningful data to return"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{processID}/restart:
+    post:
       tags:
         - "restart"
       summary: "Restart an old process"

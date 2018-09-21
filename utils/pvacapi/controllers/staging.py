@@ -11,6 +11,7 @@ from shlex import quote
 from shutil import copyfile, copytree
 from .database import int_pattern
 from .files import list_input
+from .utils import fullresponse
 from lib.prediction_class import *
 
 def resolve_filepath(filepath):
@@ -85,7 +86,7 @@ def staging(parameters):
     # input_manifest = current_app.config['storage']['manifest']
     current_path = os.path.join(
         current_app.config['files']['data-dir'],
-        'results',
+        '.processes',
         samplename
     )
 
@@ -106,11 +107,19 @@ def staging(parameters):
                 'fields': 'input'
             }, 400
         )
-
-    #  simple json POST (e.g. from test_start.html form) may not include unchecked checkboxes, need to catch those:
-    parameters['netmhc_stab'] = parameters.pop('netmhc_stab', False)
-    parameters['allele_specific_cutoffs'] = parameters.pop('allele_specific_cutoffs', False)
-    parameters['keep_tmp_files'] = parameters.pop('keep_tmp_files', False)
+    phased_proximal_variants_vcf = parameters.pop('phased_proximal_variants_vcf', "")
+    if len(phased_proximal_variants_vcf):
+        phased_proximal_variants_vcf_path = resolve_filepath(phased_proximal_variants_vcf)
+        if not phased_proximal_variants_vcf_path:
+            return (
+                {
+                    'status': 400,
+                    'message': 'Unable to locate the given file: %s' % phased_proximal_variants_vcf,
+                    'fields': 'phased_proximal_variants_vcf'
+                }, 400
+            )
+    else:
+        phased_proximal_variants_vcf_path = ""
 
     if 'epitope_lengths' in parameters:
         epitope_lengths = [int(item) for item in parameters['epitope_lengths'].split(',')]
@@ -119,6 +128,7 @@ def staging(parameters):
 
     configObj = {
         'input': input_path,  # input
+        'phased_proximal_variants_vcf': phased_proximal_variants_vcf_path,
         'samplename': samplename,  # samplename
         'alleles': parameters['alleles'].split(','),
         'output': current_path,
@@ -126,8 +136,9 @@ def staging(parameters):
         'prediction_algorithms': parameters['prediction_algorithms'].split(','),
         'peptide_sequence_length': parameters.pop('peptide_sequence_length', 21),
         'net_chop_method': parameters.pop('net_chop_method', ""),
-        'netmhc_stab': bool(parameters['netmhc_stab']),
-        'allele_specific_cutoffs': bool(parameters['allele_specific_cutoffs']),
+        'netmhc_stab': bool(parameters.pop('netmhc_stab', False)),
+        'pass_only': bool(parameters.pop('pass_only', False)),
+        'allele_specific_cutoffs': bool(parameters.pop('allele_specific_cutoffs', False)),
         'top_score_metric': parameters.pop('top_score_metric', 'median'),
         'binding_threshold': parameters.pop('binding_threshold', 500),
         'minimum_fold_change': parameters.pop('minimum_fold_change', 0),
@@ -142,7 +153,7 @@ def staging(parameters):
         'fasta_size': parameters.pop('fasta_size', 200),
         'iedb_retries': parameters.pop('iedb_retries', 5),
         'iedb_install_dir': parameters.pop('iedb_install_dir', ""),
-        'keep_tmp_files': bool(parameters['keep_tmp_files']),
+        'keep_tmp_files': bool(parameters.pop('keep_tmp_files', False)),
         'downstream_sequence_length': parameters.pop('downstream_sequence_length', 'full')
     }
     force = bool(parameters.pop('force', False))
@@ -172,8 +183,8 @@ def staging(parameters):
         }, 400)
 
 
-def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, output,
-          peptide_sequence_length, net_chop_method, netmhc_stab, top_score_metric,
+def start(input, phased_proximal_variants_vcf, samplename, alleles, epitope_lengths, prediction_algorithms, output,
+          peptide_sequence_length, net_chop_method, netmhc_stab, pass_only, top_score_metric,
           binding_threshold, allele_specific_cutoffs, minimum_fold_change,
           normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
@@ -223,10 +234,17 @@ def start(input, samplename, alleles, epitope_lengths, prediction_algorithms, ou
         command.append('--allele-specific-binding-thresholds')
     if keep_tmp_files:
         command.append('-k')
+    if pass_only:
+        command.append('--pass-only')
     if len(iedb_install_dir):
         command += [
             '--iedb-install-directory',
             iedb_install_dir
+        ]
+    if len(phased_proximal_variants_vcf):
+        command +=[
+            '--phased-proximal-variants-vcf',
+            phased_proximal_variants_vcf,
         ]
 
     # stdout and stderr from the child process will be directed to this file
@@ -283,9 +301,14 @@ def check_allele(allele):
             return True
     return False
 
+# returns map of alleles to prediction algorithms it can be used with
+def valid_alleles(page, count, prediction_algorithms=None, name_filter=None):
+    data = PredictionClass.allele_info(prediction_algorithms, name_filter)
+    return fullresponse(data, page, count)
+
 # takes in comma delimited string of prediction algorithms,
 # returns map of algorithms to valid alleles for that algorithm
-def valid_alleles(prediction_algorithms):
+def valid_alleles_per_algorithm(prediction_algorithms):
     valid_allele_list = {}
     for algorithm in prediction_algorithms.split(","):
         prediction_class = globals()[algorithm]

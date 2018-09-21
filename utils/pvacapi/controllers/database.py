@@ -8,7 +8,7 @@ import time
 from flask import current_app
 from urllib.parse import urlencode
 from hashlib import md5
-from bokeh.embed import autoload_server
+from bokeh.embed import server_document
 from .processes import fetch_process, is_running, process_info
 from .utils import column_filter
 
@@ -57,7 +57,7 @@ def column_mapping(row, mapping, schema):
     changes = {}
     for (col, val) in row.items():
         col = column_filter(col)
-        if NA_pattern.match(val):
+        if val == None or NA_pattern.match(val):
             output[col] = None
             continue
         if col not in schema and mapping[col] == str:
@@ -87,12 +87,12 @@ def column_mapping(row, mapping, schema):
 def filterfile(parentID, fileID, count, page, filters, sort, direction):
     """Gets the file ID belonging to the parent.\
     For result files, the parentID is the process ID that spawned them.\
-    For dropbox files, the parentID is -1"""
+    For visualize files, the parentID is -1"""
     data = current_app.config['storage']['loader']()
 
     # first, generate the key
     tablekey = "data_%s_%s" % (
-        (parentID if parentID >= 0 else 'dropbox'),
+        (parentID if parentID >= 0 else 'visualize'),
         fileID
     )
 
@@ -126,15 +126,15 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                 )
             raw_reader = open(process[0]['files'][fileID]['fullname'])
         else:
-            if str(fileID) not in data['dropbox']:
+            if str(fileID) not in data['visualize']:
                 return (
                     {
                         "code": 400,
-                        "message": "The requested fileID (%s) does not exist in the dropbox" % fileID,
+                        "message": "The requested fileID (%s) does not exist in the visualize" % fileID,
                         "fields": "fileID"
                     }, 400
                 )
-            raw_reader = open(data['dropbox'][str(fileID)]['fullname'])
+            raw_reader = open(data['visualize'][str(fileID)]['fullname'])
         if not raw_reader.name.endswith('.tsv'):
             ext = os.path.splitext(raw_reader.name)[1].lower()
             if len(ext) and ext[0] == '.':
@@ -212,10 +212,14 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                 # insert the row
                 insert(*[formatted[column] for column in column_names])
             raw_reader.close()
-    typequery = db.prepare(
-        "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1"
-    )
-    column_defs = typequery(tablekey)
+    #with db.synchronizer:
+    #    test_query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+    #    test_response = query(tablekey)
+    with db.synchronizer:
+        typequery = db.prepare(
+            "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1"
+        )
+        column_defs = typequery(tablekey)
     column_maps = {}
     for (col, typ) in column_defs:
         if 'int' in typ:
@@ -311,7 +315,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
 def fileschema(parentID, fileID):
     data = current_app.config['storage']['loader']()
     tablekey = "data_%s_%s" % (
-        (parentID if parentID >= 0 else 'dropbox'),
+        (parentID if parentID >= 0 else 'visualize'),
         fileID
     )
 
@@ -369,6 +373,10 @@ def visualize_script(parentID, fileID):
             },
             400
         )
+    if len(result) == 0 or type(result) == dict:
+        return (
+            'Results file contains no data - cannot visualize'
+        )
     cols = results_getcols(parentID, fileID)
     if type(cols) != dict:
         return (
@@ -385,24 +393,18 @@ def visualize_script(parentID, fileID):
     if type(proc_data)==dict and 'parameters' in proc_data and 'sample_name' in proc_data['parameters']:
         sample = proc_data['parameters']['sample_name']
     elif parentID == -1:
-        sample = data['dropbox'][str(fileID)]['display_name'].rsplit(".", 1)[0]
+        sample = data['visualize'][str(fileID)]['display_name'].rsplit(".", 1)[0]
     else:
         sample = 'Unknown Sample'
 
-    return re.sub(
-        r'src="(.+)"',
-        r'src="\1&%s"'%(
-            urlencode([
-                ('target-process', str(parentID)),
-                ('target-file', str(fileID)),
-                ('cols', json.dumps(cols)),
-                ('samplename', sample)
-            ])
-        ),
-        autoload_server(
-            model=None,
-            app_path="/visualizations",
-            session_id=md5(str(time.time()).encode()).hexdigest(),
-            url="http://localhost:5006"
+    return (
+        server_document(
+            url="http://localhost:5006/visualizations",
+            arguments={
+                'target-process': parentID,
+                'target-file': fileID,
+                'cols': json.dumps(cols),
+                'samplename': sample
+            }
         )
     )
