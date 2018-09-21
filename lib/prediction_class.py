@@ -11,6 +11,7 @@ import pandas as pd
 import time
 from subprocess import run, PIPE
 import tempfile
+from collections import defaultdict
 
 class IEDB(metaclass=ABCMeta):
     @classmethod
@@ -107,6 +108,28 @@ class PredictionClass(metaclass=ABCMeta):
         return cls.prediction_class_for_iedb_prediction_method(method).__class__.__name__
 
     @classmethod
+    def allele_info(cls, prediction_algorithms, name_filter):
+        alleles = defaultdict(list)
+        if prediction_algorithms is None:
+            prediction_classes = cls.prediction_classes()
+        else:
+            prediction_classes = map(lambda a: globals()[a], prediction_algorithms.split(','))
+        for prediction_class in prediction_classes:
+            for allele in prediction_class().valid_allele_names():
+                if name_filter is not None:
+                    if name_filter.lower() in allele.lower():
+                        alleles[allele].append(prediction_class.__name__)
+                else:
+                    alleles[allele].append(prediction_class.__name__)
+        info = []
+        for allele, prediction_algorithms in alleles.items():
+            info.append({
+                'name': allele,
+                'prediction_algorithms': prediction_algorithms,
+            })
+        return info
+
+    @classmethod
     def all_valid_allele_names(cls):
         valid_alleles = set()
         for prediction_class in cls.prediction_classes():
@@ -199,7 +222,11 @@ class MHCflurry(MHCI):
 
 class MHCnuggetsI(MHCI):
     def valid_allele_names(self):
-        return []
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
+        with open(alleles_file_name, 'r') as fh:
+            return list(filter(None, fh.read().split('\n')))
 
     def check_length_valid_for_allele(self, length, allele):
         return True
@@ -207,34 +234,44 @@ class MHCnuggetsI(MHCI):
     def valid_lengths_for_allele(self, allele):
         return [8,9,10,11,12,13,14]
 
-    def write_neoepitopes_to_file(self, sequence, length):
-        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
+    def find_neoepitopes(self, sequence, length):
+        epitopes = defaultdict(list)
         for i in range(0, len(sequence)-length+1):
-            tmp_file.write(sequence[i:i+length] + '\n')
-        tmp_file.flush()
-        return tmp_file
+            epitope = sequence[i:i+length]
+            epitopes[epitope].append(i+1)
+        return epitopes
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
-        results = pd.DataFrame()
+        epitope_seq_nums = defaultdict(list)
         for line in input_file:
             match = re.search('^>([0-9]+)$', line)
             if match:
                 seq_num = match.group(1)
             else:
-                peptide_file = self.write_neoepitopes_to_file(line.rstrip(), epitope_length)
-                tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-                try:
-                    predict('I', peptide_file.name, allele.replace('*', ''), output=tmp_output_file.name)
-                except TypeError:
-                    raise Exception("Allele {} not supported for MHCnuggetsI.".format(allele))
-                peptide_file.close()
-                df = pd.read_csv(tmp_output_file.name)
-                df['seq_num'] = seq_num
-                df['start'] = df.index+1
-                df['allele'] = allele
-                results = results.append(df)
-                tmp_output_file.close()
-        return (results, 'pandas')
+                epitopes = self.find_neoepitopes(line.rstrip(), epitope_length)
+                for epitope, starts in epitopes.items():
+                    for start in starts:
+                        epitope_seq_nums[epitope].append((seq_num, start))
+        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
+        for epitope in epitope_seq_nums.keys():
+            tmp_file.write("{}\n".format(epitope))
+        tmp_file.close()
+        tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+        predict('I', tmp_file.name, allele.replace('*', ''), output=tmp_output_file.name)
+        tmp_output_file.close()
+        df = pd.read_csv(tmp_output_file.name)
+        processed_df = pd.DataFrame()
+        for index, row in df.iterrows():
+            seq_nums = epitope_seq_nums[row['peptide']]
+            for seq_num, start in seq_nums:
+                new_row = row.copy()
+                new_row['seq_num'] = seq_num
+                new_row['start'] = start
+                new_row['allele'] = allele
+                processed_df = processed_df.append(new_row)
+        processed_df['start'] = pd.to_numeric(processed_df['start'], downcast='integer')
+        processed_df = processed_df[['peptide', 'ic50', 'seq_num', 'start', 'allele']]
+        return (processed_df, 'pandas')
 
 class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
     @property
@@ -314,7 +351,11 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
 
 class MHCnuggetsII(MHCII):
     def valid_allele_names(self):
-        return []
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_ii')
+        alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
+        with open(alleles_file_name, 'r') as fh:
+            return list(filter(None, fh.read().split('\n')))
 
     def check_length_valid_for_allele(self, length, allele):
         return True
@@ -322,38 +363,45 @@ class MHCnuggetsII(MHCII):
     def valid_lengths_for_allele(self, allele):
         return [15]
 
-    def write_neoepitopes_to_file(self, sequence):
-        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
+    def find_neoepitopes(self, sequence):
+        epitopes = defaultdict(list)
         for i in range(0, len(sequence)-16):
-            tmp_file.write(sequence[i:i+15] + '\n')
-        tmp_file.flush()
-        return tmp_file
+            epitope = sequence[i:i+15]
+            epitopes[epitope].append(i+1)
+        return epitopes
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
-        results = pd.DataFrame()
+        epitope_seq_nums = defaultdict(list)
         for line in input_file:
             match = re.search('^>([0-9]+)$', line)
             if match:
                 seq_num = match.group(1)
             else:
-                peptide_file = self.write_neoepitopes_to_file(line.rstrip())
-                tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-                try:
-                    allele = allele.replace('*', '').replace('H2', 'H-2')
-                    if allele.startswith(('DP', 'DR', 'DQ', 'DM', 'DO')):
-                        allele = "HLA-{}".format(allele)
-                    predict('II', peptide_file.name, allele, output=tmp_output_file.name)
-                except TypeError:
-                    raise Exception("Allele {} not supported for MHCnuggetsII.".format(allele))
-                peptide_file.close()
-                df = pd.read_csv(tmp_output_file.name)
-                df['seq_num'] = seq_num
-                df['start'] = df.index+1
-                df['allele'] = allele
-                results = results.append(df)
-                tmp_output_file.close()
-        return (results, 'pandas')
-
+                epitopes = self.find_neoepitopes(line.rstrip())
+                for epitope, starts in epitopes.items():
+                    for start in starts:
+                        epitope_seq_nums[epitope].append((seq_num, start))
+        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
+        for epitope in epitope_seq_nums.keys():
+            tmp_file.write("{}\n".format(epitope))
+        tmp_file.close()
+        tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+        mhcnuggets_allele = "HLA-{}".format(allele).replace('*', '')
+        predict('II', tmp_file.name, mhcnuggets_allele, output=tmp_output_file.name)
+        tmp_output_file.close()
+        df = pd.read_csv(tmp_output_file.name)
+        processed_df = pd.DataFrame()
+        for index, row in df.iterrows():
+            seq_nums = epitope_seq_nums[row['peptide']]
+            for seq_num, start in seq_nums:
+                new_row = row.copy()
+                new_row['seq_num'] = seq_num
+                new_row['start'] = start
+                new_row['allele'] = allele
+                processed_df = processed_df.append(new_row)
+        processed_df['start'] = pd.to_numeric(processed_df['start'], downcast='integer')
+        processed_df = processed_df[['peptide', 'ic50', 'seq_num', 'start', 'allele']]
+        return (processed_df, 'pandas')
 
 class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
     @property

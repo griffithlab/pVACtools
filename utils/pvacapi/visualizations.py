@@ -76,14 +76,14 @@ def range_column_filter(colname, stepsize, title=None):
             top = stepUp(max((val for val in column_data if val is not None)), stepsize)
             col_filter = RangeSlider(
                 title = cols[colname] if title is None else title,
-                range=(0, top),
+                value=(0, top),
                 start = 0,
                 end = top,
                 step=stepsize
             )
-            getter = lambda :col_filter.range
+            getter = lambda :col_filter.value
             col_filter.on_change(
-                'range',
+                'value',
                 lambda a,r,g: debounce(
                     update,
                     getter,
@@ -131,9 +131,8 @@ del raw_data
 # sample is the sample name of the requested file
 ### From here to the bottom, the code can be changed to modify the plotted data
 from bokeh.layouts import row, widgetbox, column
-from bokeh.charts import Scatter
 from bokeh.models import ColumnDataSource, CustomJS, PanTool, HoverTool, Slider, RangeSlider
-from bokeh.models import TableColumn, TapTool, BoxSelectTool, ResizeTool
+from bokeh.models import TableColumn, TapTool, BoxSelectTool#, ResizeTool
 from bokeh.models.ranges import Range1d as Range
 from bokeh.models.widgets import Button, Select, DataTable, Toggle
 from bokeh.plotting import figure
@@ -186,7 +185,7 @@ p = figure(
 p.circle(x="_x", y="_y", source=source, size=7, color="blue", line_color=None, fill_alpha=1)
 p.add_tools(TapTool())
 p.add_tools(BoxSelectTool())
-p.add_tools(ResizeTool())
+#p.add_tools(ResizeTool())
 hover = HoverTool()
 hover.tooltips = [
     ('Row', '@rowid'),
@@ -212,7 +211,8 @@ table = DataTable(
     fit_columns = False,
     selectable = True,
     source = source,
-    row_headers = False,
+    index_position = None,
+    scroll_to_selection = True,
     # sizing_mode = 'scale_width',
     width = 1200
 )

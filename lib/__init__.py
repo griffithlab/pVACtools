@@ -15,6 +15,7 @@ __all__ = [
     "top_score_filter",
     "rank_epitopes",
     "utils",
+    "post_processor",
 ]
 
 import os
