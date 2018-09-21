@@ -8,11 +8,12 @@ Filtering Commands
 pVACseq currently offers three filters: a binding filter, a coverage filter,
 and a top score filter.
 
-The binding filter and top score filter are always run automatically as part
-of the pVACseq pipeline. The coverage filter is run automatically if the input
-VCF contains readcount and/or expression annotations.
+These filters are always run automatically as part
+of the pVACseq pipeline using default cutoffs.
 
-All filters can also be run manually to narrow the final results down further.
+All filters can also be run manually on the filtered.tsv file to narrow the results down further
+or they can be run on the all_epitopes.tsv file to apply different filtering
+thresholds.
 
 Binding Filter
 --------------
@@ -53,13 +54,14 @@ Coverage Filter
     :func: define_parser
     :prog: pvacseq coverage_filter
 
-If a pVACseq process has been run with bam-readcount or Cufflinks input files then the coverage filter
-can be run again on the final report file to narrow down the results even further.
+If the input VCF contains readcount and/or expression annotations,
+then the coverage filter
+can be run again on the filtered.tsv report file to narrow down the results even further.
+You can also run this filter again on the all_eptiopes.tsv report file to
+apply different cutoffs.
 
-If no additional coverage input files have been provided to the main pVACseq run then this information
-would need to be manually added to the report in order to run this filter
-using the appropriate headers. Columns available for this filter are ``Tumor DNA Depth``, ``Tumor DNA VAF``,
-``Tumor RNA Depth``, ``Tumor RNA VAF``, ``Normal Depth``, ``Normal VAF``, ``Gene Expression``, ``Transcript Expression``.
+By default, entries with ``NA`` values will be included in the output. This
+behavior can be turned off by using the ``--exclude-NAs`` flag.
 
 By default, entries with ``NA`` values will be included in the output. This
 behavior can be turned off by using the ``--exclude-NAs`` flag.
