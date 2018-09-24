@@ -403,7 +403,7 @@ class VcfConverter(InputFileConverter):
                     ensembl_gene_id = transcript['Gene']
                     hgvsc = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSc']) if 'HGVSc' in transcript else 'NA'
                     hgvsp = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSp']) if 'HGVSp' in transcript else 'NA'
-                    if 'TSL' in transcript and transcript['TSL'] is not None:
+                    if 'TSL' in transcript and transcript['TSL'] is not None and transcript['TSL'] != '':
                         tsl = transcript['TSL']
                     else:
                         tsl = 'NA'
