@@ -105,9 +105,9 @@ try:
     cols['rowid'] = 'Row'
     sample = args.get('samplename')[0].decode('utf-8')
 except BaseException as e:
-    raise ValueError("Unable to parse the requried arguments") from e
+    raise ValueError("Unable to parse the required arguments") from e
 tablekey = "data_%s_%s" % (
-    (parentID if parentID >= 0 else 'dropbox'),
+    (parentID if parentID >= 0 else 'visualize'),
     fileID
 )
 # Fetch table data from postgres
