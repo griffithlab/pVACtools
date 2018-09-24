@@ -25,6 +25,7 @@ class InputFileConverter(metaclass=ABCMeta):
             'variant',
             'gene_name',
             'transcript_name',
+            'transcript_support_level',
             'amino_acid_change',
             'codon_change',
             'ensembl_gene_id',
@@ -402,6 +403,10 @@ class VcfConverter(InputFileConverter):
                     ensembl_gene_id = transcript['Gene']
                     hgvsc = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSc']) if 'HGVSc' in transcript else 'NA'
                     hgvsp = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSp']) if 'HGVSp' in transcript else 'NA'
+                    if 'TSL' in transcript and transcript['TSL'] is not None:
+                        tsl = transcript['TSL']
+                    else:
+                        tsl = 'NA'
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
                         'start'                          : entry.affected_start,
@@ -410,6 +415,7 @@ class VcfConverter(InputFileConverter):
                         'variant'                        : alt,
                         'gene_name'                      : gene_name,
                         'transcript_name'                : transcript_name,
+                        'transcript_support_level'       : tsl,
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,

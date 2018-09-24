@@ -54,6 +54,7 @@ class Pipeline(metaclass=ABCMeta):
         self.trna_cov                    = kwargs.pop('trna_cov', None)
         self.trna_vaf                    = kwargs.pop('trna_vaf', None)
         self.expn_val                    = kwargs.pop('expn_val', None)
+        self.maximum_transcript_support_level = kwargs.pop('maximum_transcript_support_level', None)
         self.additional_report_columns   = kwargs.pop('additional_report_columns', None)
         self.fasta_size                  = kwargs.pop('fasta_size', 200)
         self.iedb_retries                = kwargs.pop('iedb_retries', 5)
@@ -293,10 +294,12 @@ class Pipeline(metaclass=ABCMeta):
         post_processing_params['input_file'] = self.combined_parsed_path()
         post_processing_params['filtered_report_file'] = self.final_path()
         post_processing_params['condensed_report_file'] = self.ranked_final_path()
-        if self.input_file_type == 'pvacvector_input_fasta':
-            post_processing_params['run_coverage_filter'] = False
-        else:
+        if self.input_file_type == 'vcf':
             post_processing_params['run_coverage_filter'] = True
+            post_processing_params['run_transcript_support_level_filter'] = True
+        else:
+            post_processing_params['run_coverage_filter'] = False
+            post_processing_params['run_transcript_support_level_filter'] = False
         if self.net_chop_method:
             post_processing_params['run_net_chop'] = True
         else:

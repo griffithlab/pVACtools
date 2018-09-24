@@ -200,6 +200,13 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
             help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered. Default: 1",
         )
         self.parser.add_argument(
+            "--maximum-transcript-support-level", type=int,
+            help="The threshold to use for filtering epitopes on the transcript support level. "
+            +"Keep all epitopes with a transcript support level <= to this cutoff. Default: 1",
+            default=1,
+            choices=[1,2,3,4,5]
+        )
+        self.parser.add_argument(
             '--pass-only',
             help="Only process VCF entries that are PASS. Default: False",
             default=False,
