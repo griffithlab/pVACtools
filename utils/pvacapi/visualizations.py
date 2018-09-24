@@ -107,7 +107,7 @@ try:
 except BaseException as e:
     raise ValueError("Unable to parse the requried arguments") from e
 tablekey = "data_%s_%s" % (
-    (parentID if parentID >= 0 else 'dropbox'),
+    (parentID if parentID >= 0 else 'visualize'),
     fileID
 )
 # Fetch table data from postgres
