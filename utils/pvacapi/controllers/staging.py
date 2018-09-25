@@ -151,6 +151,7 @@ def staging(parameters):
         'expn_val': parameters.pop('expn_val', 1),  # expn_val
         'net_chop_threshold': parameters.pop('net_chop_threshold', 0.5),
         'fasta_size': parameters.pop('fasta_size', 200),
+        'maximum_transcript_support_level': parameters.pip('maximum_transcript_support_level', 1),
         'iedb_retries': parameters.pop('iedb_retries', 5),
         'iedb_install_dir': parameters.pop('iedb_install_dir', ""),
         'keep_tmp_files': bool(parameters.pop('keep_tmp_files', False)),
@@ -186,7 +187,7 @@ def staging(parameters):
 def start(input, phased_proximal_variants_vcf, samplename, alleles, epitope_lengths, prediction_algorithms, output,
           peptide_sequence_length, net_chop_method, netmhc_stab, pass_only, top_score_metric,
           binding_threshold, allele_specific_cutoffs, minimum_fold_change,
-          normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf,
+          normal_cov, tdna_cov, trna_cov, normal_vaf, tdna_vaf, trna_vaf, maximum_transcript_support_level,
           expn_val, net_chop_threshold, fasta_size, iedb_retries, iedb_install_dir,
           downstream_sequence_length, keep_tmp_files):
     """Build the command for pVAC-Seq, then spawn a new process to run it"""
@@ -219,6 +220,7 @@ def start(input, phased_proximal_variants_vcf, samplename, alleles, epitope_leng
         '--tdna-vaf', str(tdna_vaf),
         '--trna-vaf', str(trna_vaf),
         '--expn-val', str(expn_val),
+        '--maximum-transcript-support-level', str(maximum_transcript_support_level),
         '-s', str(fasta_size),
         '-r', str(iedb_retries),
         '-d', str(downstream_sequence_length)
