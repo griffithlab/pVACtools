@@ -151,7 +151,7 @@ def staging(parameters):
         'expn_val': parameters.pop('expn_val', 1),  # expn_val
         'net_chop_threshold': parameters.pop('net_chop_threshold', 0.5),
         'fasta_size': parameters.pop('fasta_size', 200),
-        'maximum_transcript_support_level': parameters.pip('maximum_transcript_support_level', 1),
+        'maximum_transcript_support_level': parameters.pop('maximum_transcript_support_level', 1),
         'iedb_retries': parameters.pop('iedb_retries', 5),
         'iedb_install_dir': parameters.pop('iedb_install_dir', ""),
         'keep_tmp_files': bool(parameters.pop('keep_tmp_files', False)),
