@@ -271,10 +271,6 @@ getters.append((
     range_column_filter('median_mt_score', 50, 'Binding Threshold (median)')
 ))
 getters.append((
-    'corresponding_wt_score',
-    range_column_filter('corresponding_wt_score', 50, 'Binding Threshold (WT)')
-))
-getters.append((
     'corresponding_fold_change',
     range_column_filter('corresponding_fold_change', .1, 'Fold Change')
 ))
