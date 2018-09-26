@@ -539,6 +539,11 @@ paths:
                 description: "FASTA Size: Number of entries submitted to IEDB in each request.  Must be an even number"
                 type: integer
                 default: 200
+              maximum_transcript_support_level:
+                description: "The threshold to use for filtering epitopes on the transcript support level. Keep all epitopes with a transcript support level <= to this cutoff."
+                type: integer
+                enum: [1,2,3,4,5]
+                default: 1
               iedb_retries:
                 description: "IEDB Retries: Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100"
                 type: integer
