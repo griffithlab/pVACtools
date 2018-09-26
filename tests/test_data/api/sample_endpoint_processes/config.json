@@ -13,6 +13,7 @@
 		"HLA-G*01:09"
 	],
 	"fasta_size": 200,
+  "maximum_transcript_support_level": 1,
 	"netmhc_stab": false,
 	"pass_only": false,
 	"peptide_sequence_length": 21,
