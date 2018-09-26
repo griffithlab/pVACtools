@@ -540,7 +540,7 @@ paths:
                 type: integer
                 default: 200
               maximum_transcript_support_level:
-                description: "Maximum transcript support level"
+                description: "The threshold to use for filtering epitopes on the transcript support level. Keep all epitopes with a transcript support level <= to this cutoff."
                 type: integer
                 enum: [1,2,3,4,5]
                 default: 1
