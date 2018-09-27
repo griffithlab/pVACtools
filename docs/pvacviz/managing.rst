@@ -5,3 +5,11 @@
 Managing Processes
 ==================
 With the pVACviz management interface, users may manage processes launched with pVACviz. 
+
+
+Showing Running, Completed, Stopped Processes
+---------------------------------------------
+
+Displaying Process Details
+--------------------------
+
