@@ -39,15 +39,36 @@ tools:
    frequently_asked_questions
    contact
 
-New in version |release|
+New in version |version|
 ------------------------
 
-This is a hotfix release. It fixes the following issues:
+This version adds a host of new features to pVACtools:
 
-- The log directories were accidentially included with the pVACseq example data.
-  They are now removed.
-- Some users were reporting mixed type warnings for pandas when running
-  pVACseq. We added some options to avoid this warning.
+- pVACseq is now able to parse VAF, depth, and expression information directly
+  from the VCF. This makes the ``--additional-input-file-list`` option
+  obsolete. The ``--additional-input-file-list`` option is now deprecated and will be removed in an
+  upcoming release. For more information on how to annotated your VCF with
+  readcount and expression information, see the :ref:`prerequisites_label` page.
+- pVACseq is now able to handle proximal germline and somatic variants. In
+  order to incorporate those into the epitope predictions, you will need to
+  provide a phased variants VCF to your pVACseq run using the
+  ``--phased-proximal-variants-vcf`` option
+- We added support to pVACseq for filering on transcript support levels. This requires
+  the input VCF to be annotated with the TSL field by VEP.
+- The binding filter of pVACseq and pVACfuse can now be run with flexible, allele-specific
+  binding-thresholds. This feature can be enabled using the
+  ``--allele-specific-binding-thresholds`` option.
+- pVACseq now supports a ``--pass-only`` flag that will result in any VCF
+  entries with a ``FILTER`` to be skipped. Usin this flag, only VCF entries
+  with a ``FILTER`` of ``PASS`` or ``.`` will be processed.
+- We added support for MHCflurry and MHCnuggets prediction algorithms. These
+  can be run listing ``MHCflurry``, ``MHCnuggetsI`` (for MHC Class I alleles),
+  and/or ``MHCnuggetsII`` (for MHC Class II alleles) as the prediction
+  algorithms.
+- We now offer a graphical user interface, :ref:`pvacviz`, to run pVACseq instead of using the
+  command line. pVACviz, can also be used to plot and filter your pVACseq
+  results.
+
 
 Citation
 --------
