@@ -22,11 +22,18 @@ by executing the following command on the command line:
 
    pvacapi
 
-While pVACapi is running, you then need to start pVACviz in a separate terminal
-window by executing the following command on the command line:
+Depending on the number of completed and running processes it must check, the API may take several seconds to start up. After pVACapi has started, launch pVACviz in a separate terminal window by executing the following command on the command line:
 
 .. code::
 
    pvacviz
 
-This will open a new browser tab with the pVACviz user interface.
+The command will start a HTTP server that provides the web client files and assets, and opens up the client in the default web browser specified by your operating system. In some cases, pvacviz will not be able to automatically open the web browser. If no browser launches after starting pvacviz, you will need to manually load the URL, `http://localhost:4200/`, in a Firefox, Chrome, or Safari browser.
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   pvacviz/starting
+   pvacviz/managing
+   pvacviz/visualizing
