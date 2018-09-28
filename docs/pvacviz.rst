@@ -34,6 +34,7 @@ The command will start a HTTP server that provides the web client files and asse
    :maxdepth: 2
    :glob:
 
+   pvacviz/directories
    pvacviz/starting
    pvacviz/managing
    pvacviz/visualizing

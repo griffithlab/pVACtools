@@ -1,4 +1,4 @@
-.. image:: images/pVACviz_logo_trans-bg_sm_v4b.png
+.. image:: ../images/pVACviz_logo_trans-bg_sm_v4b.png
     :align: right
     :alt: pVACviz logo
 
