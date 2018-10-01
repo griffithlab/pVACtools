@@ -52,14 +52,15 @@ This version adds a host of new features to pVACtools:
 - pVACseq is now able to handle proximal germline and somatic variants. In
   order to incorporate those into the epitope predictions, you will need to
   provide a phased variants VCF to your pVACseq run using the
-  ``--phased-proximal-variants-vcf`` option
+  ``--phased-proximal-variants-vcf`` option. For more information on how to
+  create the file, see the :ref:`prerequisites_label` page.
 - We added support to pVACseq for filering on transcript support levels. This requires
   the input VCF to be annotated with the TSL field by VEP.
 - The binding filter of pVACseq and pVACfuse can now be run with flexible, allele-specific
   binding-thresholds. This feature can be enabled using the
   ``--allele-specific-binding-thresholds`` option.
 - pVACseq now supports a ``--pass-only`` flag that will result in any VCF
-  entries with a ``FILTER`` to be skipped. Usin this flag, only VCF entries
+  entries with a ``FILTER`` to be skipped. Using this flag, only VCF entries
   with a ``FILTER`` of ``PASS`` or ``.`` will be processed.
 - We added support for MHCflurry and MHCnuggets prediction algorithms. These
   can be run listing ``MHCflurry``, ``MHCnuggetsI`` (for MHC Class I alleles),
