@@ -38,10 +38,8 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The log directories were accidentially included with the pVACseq example data.
-  They are now removed.
-- Some users were reporting mixed type warnings for pandas when running
-  pVACseq. We added some options to avoid this warning.
+- Running the ``pvacfuse run`` with the ``--top-result-per-mutation`` flag would result in an error.
+  This has now been fixed.
 
 Coming soon
 -----------
