@@ -16,9 +16,9 @@ def main(args_input = sys.argv[1:]):
     if not os.path.exists(final_dir):
         os.makedirs(final_dir)
 
-    wget.download('https://raw.githubusercontent.com/genome/cancer-genomics-workflow/master/pvactools/pvacseq.cwl', final_dir)
-    wget.download('https://raw.githubusercontent.com/genome/cancer-genomics-workflow/master/pvactools/pvacfuse.cwl', final_dir)
-    wget.download('https://raw.githubusercontent.com/genome/cancer-genomics-workflow/master/pvactools/pvacvector.cwl', final_dir)
+    wget.download('https://raw.githubusercontent.com/genome/analysis-workflows/master/definitions/tools/pvacseq.cwl', final_dir)
+    wget.download('https://raw.githubusercontent.com/genome/analysis-workflows/master/definitions/tools/pvacfuse.cwl', final_dir)
+    wget.download('https://raw.githubusercontent.com/genome/analysis-workflows/master/definitions/tools/pvacvector.cwl', final_dir)
     print("")
 
 if __name__ == '__main__':

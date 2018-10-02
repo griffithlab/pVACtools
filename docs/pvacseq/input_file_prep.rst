@@ -20,3 +20,4 @@ needs to be annotated with this data.
    input_file_prep/vep
    input_file_prep/readcounts
    input_file_prep/expression
+   input_file_prep/proximal_vcf
