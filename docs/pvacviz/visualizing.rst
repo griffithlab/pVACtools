@@ -24,7 +24,7 @@ Scatterplot Visualization
 -------------------------
 On the visualization's scatterplot are placed all of the data points contained in the tsv results file, one dot per row. A set of tools along the right side of the visualization allow you to select and manipulate the plot in various ways.
 
-These icons perform the following functions:
+These icons toggle the following functions:
 
 =================  ================  ========
 Icon               Name              Function
@@ -73,12 +73,18 @@ Icon               Name              Function
    :width: 16
    :height: 16
 
+Axis Columns
+------------
+To the left of the scatterplot display are a set of controls that allow you to set the X and Y axis for the scatterplot, and filter the plot's source data. The top two selectors allow you to choose any column of the result set to serve as the X/Y axis.
+
 Filters
 -------
+You may filter the source data using filters positioned beneath the axis column selectors. By default, points with null X or Y values are filtered out; you may toggle this filter by clicking the Show button. Beneath the show button are displayed a set of sliders that allow you to set min/max values for columns in the result set. Note that the visualization will not show sliders for columns that contain no data.
 
 Data Table
 ----------
+Beneath the plot and filters you will find a datatable, linked to both the filters and scatterplot points. Selecting any points in the plot will highlight the corresponsing rows in the data tables. The filters also affect the data table rows - any rows excluded by the filters will also be excluded from the datatable.
 
 Exporting Visualization Data
 ----------------------------
-
+Two buttons are provided for CSV export of the plot data. The 'Download' button will provide you with a CSV file that contains all of the data provdided to the plot - including filtered rows and rows with null X/Y coordinates. The Download Selected button provides you with a CSV containing only the filtered/selected rows from the plot and datatable.
