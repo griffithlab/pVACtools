@@ -9,8 +9,8 @@ pVACapi Directories
 
 .. figure:: ../images/screenshots/pvacapi-directories.png
     :width: 239px
-    :align: right
     :height: 142px
+    :align: right
     :alt: alternate text
     :figclass: align-left
 
