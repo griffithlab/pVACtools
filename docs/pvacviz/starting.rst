@@ -2,12 +2,13 @@
     :align: right
     :alt: pVACviz logo
 
+.. _pvacviz_starting:
+
 Starting Processes
 ==================
 
 pVACviz provides a helpful form for specifying all of the parameters for a pVACseq process, as an alternative to constructing these commands and executing them via the command line.
 
-.. _pvacviz_starting_proesses:
 
 Populating and Submitting the Start Form
 ----------------------------------------

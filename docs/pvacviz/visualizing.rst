@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACviz logo
 
+.. _pvacviz_visualizing:
+
 Visualizing Processes
 =====================
 
