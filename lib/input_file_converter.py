@@ -249,7 +249,7 @@ class VcfConverter(InputFileConverter):
                 vaf = allele_frequencies
             if vaf > 1:
                 print("Warning: VAF is expected to be a fraction, but is larger than 1. If VAFs are encoded as percentages, please adjust the coverage cutoffs accordingly.")
-        except AttributeError:
+        except (AttributeError, TypeError):
             try:
                 allele_depths = genotype[ad_tag]
                 if isinstance(allele_depths, list):
