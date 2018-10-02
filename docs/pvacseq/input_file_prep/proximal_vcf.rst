@@ -15,7 +15,7 @@ To solve this problem, we added a new option to pVACseq in the ``pvactools``
 release 1.1 and above. This option, ``--phased-proximal-variants-vcf``, can be
 used to provide the path to a phased VCF of proximal variants in addition to
 the normal input VCF. This VCF is then used to incorporate amino acid changes of nearby
-variants that are in-phase to a somatic variant of interest. The result are
+variants that are in-phase to a somatic variant of interest. This results in
 corrected mutant and wildtype protein sequences that account for proximal
 variants.
 
@@ -53,7 +53,7 @@ _______________________________
 Update sample names
 ___________________
 
-The sample names between the ``tumor.bam``, the ``somatic.vcf``, and the
+The sample names in the ``tumor.bam``, the ``somatic.vcf``, and the
 ``germline.vcf`` need to match. If they don't you need to edit the sample names
 in the VCF files to match the tumor BAM file.
 

@@ -152,7 +152,7 @@ Next, you will need to download the download the MHCflurry datasets and trained 
    if the mhcflurry package was already installed automatically as a
    dependency with the ``pvactools`` package.
 
-You can check that the ``mhcflurry`` package  was installed successfully by running:
+You can check that the ``mhcflurry`` package was installed successfully by running:
 
 .. code-block:: none
 
@@ -178,7 +178,7 @@ install it manually by running:
    The ``mhcnuggets`` package needs to be installed in the same python 3.5 conda
    environment as the ``pvactools`` package.
 
-You can check that the ``mhcnuggets`` package  was installed successfully by running:
+You can check that the ``mhcnuggets`` package was installed successfully by running:
 
 .. code-block:: none
 
