@@ -32,6 +32,10 @@ Icon               Name              Function
 |pan|              **Pan**           The pan tool allows the user to pan the plot by left-dragging a mouse or dragging a finger across the plot region.
 |box_zoom|         **Box Zoom**      The box zoom tool allows the user to define a rectangular region to zoom the plot bounds too, by left-dragging a mouse, or dragging a finger across the plot area.
 |wheel_zoom|       **Wheel Zoom**    The wheel zoom tool will zoom the plot in and out, centered on the current mouse location. It will respect any min and max values and ranges preventing zooming in and out beyond these.
+|tap|              **Tap**           The tap selection tool allows the user to select at single points by clicking a left mouse button, or tapping with a finger.
+|save|             **Save**          The save tool pops up a modal dialog that allows the user to save a PNG image of the plot.
+|reset|            **Reset**         The reset tool will restore the plot ranges to their original values.
+|hover|            **Hover**         The hover tool is a passive inspector tool. It is generally on at all times, but can be configured in the inspector’s menu associated with the toolbar.
 =================  ================  ========
 
 .. |pan| image:: https://bokeh.pydata.org/en/latest/_images/Pan.png
@@ -45,6 +49,26 @@ Icon               Name              Function
    :height: 16
 
 .. |wheel_zoom| image:: https://bokeh.pydata.org/en/latest/_images/WheelZoom.png
+   :align: middle
+   :width: 16
+   :height: 16
+
+.. |tap| image:: https://bokeh.pydata.org/en/latest/_images/Tap.png
+   :align: middle
+   :width: 16
+   :height: 16
+
+.. |save| image:: https://bokeh.pydata.org/en/latest/_images/Tap.png
+   :align: middle
+   :width: 16
+   :height: 16
+
+.. |reset| image:: https://bokeh.pydata.org/en/latest/_images/Reset.png
+   :align: middle
+   :width: 16
+   :height: 16
+
+.. |hover| image:: https://bokeh.pydata.org/en/latest/_images/Hover.png
    :align: middle
    :width: 16
    :height: 16
