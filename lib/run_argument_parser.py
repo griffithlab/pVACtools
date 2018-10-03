@@ -185,14 +185,14 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         self.parser.add_argument(
             '--tdna-vaf', type=int,
             help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 0.4",
-            default=0.4
+            "Default: 0.25",
+            default=0.25
         )
         self.parser.add_argument(
             '--trna-vaf', type=int,
             help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 0.4",
-            default=0.4
+            "Default: 0.25",
+            default=0.25
         )
         self.parser.add_argument(
             '--expn-val', type=int,
