@@ -7,12 +7,12 @@
 Visualizing Processes
 =====================
 
-pVACviz provides a results visualization for exploring the results of pVACseq processes. It is able to visualize both the results from processes launched from pVACviz, and results from any pVACseq process.
+pVACviz provides a results visualization for exploring the results of pVACseq processes. It is able to visualize both the results from processes launched from pVACviz and results from any pVACseq process.
 
 Visualizing Completed Processes
 -------------------------------
 You may view visualizations of completed pVACseq processes launched from the pVACviz Start form from two locations within the application. 
-The :ref:`Manage section <pvacviz_managing>` includes a process detail page, reachable by clicking on the Details link on the right side of rows in the process table.On the process detail page, the bottom right card contains a list of all files produced by the pVACseq process. Visualizable files will display a Visualize button that when clicked will load the visualization for that file.
+The :ref:`Manage section <pvacviz_managing>` includes a process detail page, reachable by clicking on the Details link on the right side of rows in the process table. On the process detail page, the bottom right card contains a list of all files produced by the pVACseq process. Visualizable files will display a Visualize button that when clicked will load the visualization for that file.
 
 Additionally, on the Visualize main page in the right hand column, all processes currently managed by pVACapi will be listed with their visualizable files. Clicking on a file will load the visualization for that file.
 
@@ -27,7 +27,7 @@ Additionally, on the Visualize main page in the right hand column, all processes
 
 Visualizing pVACseq Results Files
 ---------------------------------
-Any final results TSV file produced by pVACseq processes - whether launched via pVACviz or the command line - may be visualized with pVACviz. You may drop any file or folder in pVACapi's /visualize directory, and it will scan it for visualizable files. These files will then be listed on in the right column of the main Vizualize page. Click on any of the listed pages to launch the visualization
+Any final results TSV file produced by pVACseq processes - whether launched via pVACviz or the command line - may be visualized with pVACviz. You may drop any file or folder in pVACapi's /visualize directory, and it will scan it for visualizable files. These files will then be listed on in the right column of the main Vizualize page. Click on any of the listed pages to launch the visualization.
 
 Scatterplot Visualization
 -------------------------
@@ -93,7 +93,7 @@ Icon               Name              Function
 
 Axis Columns
 ------------
-To the left of the scatterplot display are a set of controls that allow you to set the X and Y axis for the scatterplot, and filter the plot's source data. The top two selectors allow you to choose any column of the result set to serve as the X/Y axis.
+To the left of the scatterplot display are a set of controls that allow you to set the X and Y axis for the scatterplot and filter the plot's source data. The top two selectors allow you to choose any column of the result set to serve as the X/Y axis.
 
 Filters
 -------
@@ -101,9 +101,9 @@ You may filter the source data using filters positioned beneath the axis column 
 
 Data Table
 ----------
-Beneath the plot and filters you will find a datatable, linked to both the filters and scatterplot points. Selecting any points in the plot will highlight the corresponsing rows in the data tables. The filters also affect the data table rows - any rows excluded by the filters will also be excluded from the datatable.
+Beneath the plot and filters you will find a datatable linked to both the filters and scatterplot points. Selecting any points in the plot will highlight the corresponsing rows in the data tables. The filters also affect the data table rows - any rows excluded by the filters will also be excluded from the datatable.
 
 Exporting Visualization Data
 ----------------------------
-Two buttons are provided for CSV export of the plot data. The 'Download' button will provide you with a CSV file that contains all of the data provdided to the plot - including filtered rows and rows with null X/Y coordinates. The Download Selected button provides you with a CSV containing only the filtered/selected rows from the plot and datatable.
+Two buttons are provided for CSV export of the plot data. The 'Download' button will provide you with a CSV file that contains all of the data provdided to the plot - including filtered rows and rows with null X/Y coordinates. The 'Download Selected' button provides you with a CSV containing only the filtered/selected rows from the plot and datatable.
 
