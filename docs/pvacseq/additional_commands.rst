@@ -43,6 +43,11 @@ List Valid Alleles
     :func: define_parser
     :prog: pvacseq valid_alleles
 
+List Allele-Specific Cutoffs
+----------------------------
+
+.. program-output:: pvacseq allele_specific_cutoffs -h
+
 Documentation For Configuration Files
 -------------------------------------
 

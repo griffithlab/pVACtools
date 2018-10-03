@@ -44,6 +44,10 @@ Both MHC Class I and Class II predictions are supported. Simply choose the desir
 
 By using the IEDB RESTful web interface, pVACseq leverages their extensive support of different prediction algorithms.
 
+In addition to IEDB-supported prediction algorithms, we've also added support
+for `MHCflurry <http://www.biorxiv.org/content/early/2017/08/09/174243>`_ and
+`MHCnuggets <http://karchinlab.org/apps/appMHCnuggets.html>`_.
+
 ================================= =======
 MHC Class I Prediction Algorithm  Version
 ================================= =======
@@ -53,6 +57,8 @@ NetMHCcons                        1.1
 PickPocket                        1.1
 SMM
 SMMPMBEC
+MHCflurry
+MHCnuggets
 ================================= =======
 
 ================================= =======
@@ -61,15 +67,22 @@ MHC Class II Prediction Algorithm Version
 NetMHCIIpan                       3.0
 SMMalign                          1.1
 NNalign                           2.2
+MHCnuggets
 ================================= =======
 
 **Comprehensive filtering**
 
 Automatic filtering on the binding affinity ic50 value narrows down the results to only include "good" candidate peptides. The binding filter threshold can be adjusted by the user for each pVACseq run, and additional filtering can be manually done by the user on the final result file to narrow down the candidate epitopes even further.
 
-bam-readcount and cufflinks files can be provided by the user as additional input files and are used to extract coverage and expression data. When any bam-readcount or cufflinks files are provided, automatic filtering with adjustable thresholds on depth, VAF, and/or expression value will narrow down the results. The user can also manually run the coverage filter to further narrow down their results from the final output file.
+Readcount and expression data can be extracted from a annotated VCF to automatically filter with adjustable thresholds on depth, VAF, and/or expression value will narrow down the results. The user can also manually run the coverage filter to further narrow down their results from the final output file.
 
 The user can also specify an option to only keep the top scoring result for each allele-peptide length combination for each variant.
+
+**Scoring of candidate neoepitopes**
+
+Filtered neoepitopes are scored and ranked based on the binding affinity,
+fold change between mutant and wildtype binding affinity, gene expression, RNA
+and DNA VAF.
 
 **NetChop and NetMHCstab integration**
 

@@ -12,7 +12,7 @@ Frequently Asked Questions
 
 :large:`How is pVACtools licensed?`
 
-pVACseq is licensed under `NPOSL-3.0
+pVACtools is licensed under `NPOSL-3.0
 <http://opensource.org/licenses/NPOSL-3.0>`_.
 
 :large:`Where can I get help?`

@@ -97,7 +97,7 @@ predictions for alleles:
 
 - The alleles you picked might've not been compatible with the prediction algorithm and/or epitope lengths chosen. In that case no calls for that allele would've been made and a status message would've printed to the screen.
 
-- It could be that all epitope predictions for some alleles got filtered out. You can check the ``<sample_name>.combined.parsed.tsv`` file to see all called epitopes before filtering.
+- It could be that all epitope predictions for some alleles got filtered out. You can check the ``<sample_name>.all_epitopes.tsv`` file to see all called epitopes before filtering.
 
 :large:`Why are some values in the` :large-code:`WT Epitope Seq` :large:`column` :large-code:`NA` :large:`?`
 
@@ -111,15 +111,15 @@ meaningful:
 
 :large:`What filters are applied during a pVACseq run?`
 
-By default we filter the neoepitopes on their binding score. If bam-readcount
-files and/or cufflinks files are provided we also filter on the depth, VAF,
+By default we filter the neoepitopes on their binding score. If readcount
+and/or expression annotations are available in the VCF we also filter on the depth, VAF,
 and FPKM. In addition, candidates where the mutant epitope sequence is the
 same as the wildtype epitope sequence will also be filtered out.
 
 :large:`How can I see all of the candidate epitopes without any filters
 applied?`
 
-The ``<sample_name>.combined.parsed.tsv`` will contain all of the epitopes predicted
+The ``<sample_name>.all_epitopes.tsv`` will contain all of the epitopes predicted
 before filters are applied.
 
 :large:`Why have some of my epitopes been filtered out even though the` :large-code:`Best MT Score` :large:`is below 500?`
@@ -145,25 +145,6 @@ a list of supported alleles for a prediction method you may use the
 ``pvacseq valid_alleles`` :ref:`command <valid_alleles>`. For more details on
 each algorithm refer to the IEDB MHC `Class I <http://tools.iedb.org/mhci/help/#Method>`_
 and `Class II <http://tools.iedb.org/mhcii/help/#Method>`_ documentation.
-
-
-:large:`How do I use StringTie instead of Cufflinks for transcript/gene abundance
-estimates?`
-
-You may also provide FPKM values from other sources, including StringTie, by creating
-`cufflinks-formatted input files
-<http://cole-trapnell-lab.github.io/cufflinks/file_formats/#fpkm-tracking-format>`_.
-
-**For transcript FPKM**: a tab-separated file with a ``tracking_id`` column
-containing Ensembl transcript IDs and a ``FPKM`` column containing
-FPKM values.
-
-**For gene FPKM**: a tab-separated file with a ``tracking_id`` column
-containing Ensembl gene IDs, a ``locus`` column describing the
-region within the gene, and a ``FPKM`` column containing FPKM values. In the
-pVACseq pipeline the FPKM values will be summed for all loci of a gene. You
-may also provide already summed FPKM values. In that case you will still need
-to provide a ``locus`` column but the values in that column can be empty.
 
 :large:`How is pVACseq licensed?`
 
