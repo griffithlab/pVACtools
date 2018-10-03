@@ -11,7 +11,7 @@ a transcript support level filter, and a top score filter.
 These filters are always run automatically as part
 of the pVACseq pipeline using default cutoffs.
 
-All filters can also be run manually on the filtered.tsv file to narrow the results down further
+All filters can also be run manually on the filtered.tsv file to narrow the results down further,
 or they can be run on the all_epitopes.tsv file to apply different filtering
 thresholds.
 

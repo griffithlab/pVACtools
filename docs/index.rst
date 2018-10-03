@@ -47,14 +47,14 @@ This version adds a host of new features to pVACtools:
 - pVACseq is now able to parse VAF, depth, and expression information directly
   from the VCF. This makes the ``--additional-input-file-list`` option
   obsolete. The ``--additional-input-file-list`` option is now deprecated and will be removed in an
-  upcoming release. For more information on how to annotated your VCF with
+  upcoming release. For more information on how to annotate your VCF with
   readcount and expression information, see the :ref:`prerequisites_label` page.
 - pVACseq is now able to handle proximal germline and somatic variants. In
   order to incorporate those into the epitope predictions, you will need to
   provide a phased variants VCF to your pVACseq run using the
   ``--phased-proximal-variants-vcf`` option. For more information on how to
   create the file, see the :ref:`prerequisites_label` page.
-- We added support to pVACseq for filering on transcript support levels. This requires
+- We added support to pVACseq for filtering on transcript support levels. This requires
   the input VCF to be annotated with the TSL field by VEP.
 - The binding filter of pVACseq and pVACfuse can now be run with flexible, allele-specific
   binding-thresholds. This feature can be enabled using the
