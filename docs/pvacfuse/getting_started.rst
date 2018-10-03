@@ -14,10 +14,9 @@ The example data output can be reproduced by running the following command:
    pvacfuse run \
    <example_data_dir>/fusions.bedpe.annot \
    Test \
-   HLA-A*29:02 \
-   NetMHC \
+   HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
+   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
    <output_dir> \
-   -e 9 \
-   --top-score-metric=lowest --keep-tmp-files
+   -e 8,9,10
 
 A detailed description of all command options can be found on the :ref:`Usage <pvacfuse_run>` page.

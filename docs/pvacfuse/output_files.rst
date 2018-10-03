@@ -10,6 +10,7 @@ which prediction algorithms were chosen:
 
 - ``MHC_Class_I``: for MHC class I prediction algorithms
 - ``MHC_Class_II``: for MHC class II prediction algorithms
+- ``combined``: If both MHC class I and MHC class II prediction algorithms were run, this folder combines the neoeptiope predictions from both
 
 Each folder will contain the same list of output files (listed in the order
 created):
@@ -17,15 +18,11 @@ created):
 =================================================== ===========
 File Name                                           Description
 =================================================== ===========
-``log``                                             A log file of the parameters used for this run
-``<sample_name>.tsv``                               An intermediate file with variant, transcript, coverage, vaf, and expression information parsed from the input files.
+``<sample_name>.tsv``                               An intermediate file with variant and transcript information parsed from the input file.
 ``<sample_name>.tsv_<chunks>`` (multiple)           The above file but split into smaller chunks for easier processing with IEDB.
-``<sample_name>.combined.parsed.tsv``               A modified version of the ``<sample_name>.tsv`` file with binding scores from IEDB added.
-``<sample_name>.filtered.binding.tsv``              The above file after filtering by binding threshold.
-``<sample_name>.filtered.top.tsv`` (optional)       The above file after picking the top epitope for each variant (optional).
-``<sample_name>.chop.tsv`` (optional)               The above file with cleavage site predictions added (optional).
-``<sample_name>.stab.tsv`` (optional)               The above file with stability predictions added (optional).
-``<sample_name>.final.tsv`` (optional)              The final output file after all filtering and optional steps.
+``<sample_name>.all_epitopes.tsv``                  A list of all predicted epitopes and their binding affinity scores, with additional variant information the ``<sample_name>.tsv``.
+``<sample_name>.filtered.tsv``                      The above file after applying all filters.
+``<sample_name>.filtered.condensed.ranked.tsv``     A condensed version of the filtered TSV with only the most important columns remaining, with a score for each neoepitope candidate added.
 =================================================== ===========
 
 Final Report Columns
@@ -44,6 +41,7 @@ Column Name                                                     Description
 ``Reference``                                                   ``fusion``
 ``Variant``                                                     ``fusion``
 ``Transcript``                                                  The Ensembl IDs of the affected transcripts
+``Transcript Support Level``                                    ``NA``
 ``Ensembl Gene ID``                                             ``NA``
 ``Variant Type``                                                The type of fusion. ``inframe_fusion`` for inframe fusions, ``frameshift_fusion`` for frameshift fusions
 ``Mutation``                                                    ``NA``

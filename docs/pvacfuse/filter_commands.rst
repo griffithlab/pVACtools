@@ -8,8 +8,8 @@ Filtering Commands
 pVACfuse currently offers two filters: a binding filter
 and a top score filter.
 
-The binding filter is always run automatically as part of the pVACfuse pipeline.
-The top score filter is also run automatically as part of the pipeline.
+The binding filter and top score filter are always run automatically as part
+of the pVACfuse pipeline.
 
 All filters can also be run manually to narrow the final results down further.
 

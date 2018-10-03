@@ -28,3 +28,8 @@ List Valid Alleles
     :module: lib.valid_alleles
     :func: define_parser
     :prog: pvacfuse valid_alleles
+
+List Allele-Specific Cutoffs
+----------------------------
+
+.. program-output:: pvacfuse allele_specific_cutoffs -h
