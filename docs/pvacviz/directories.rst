@@ -2,8 +2,6 @@
     :align: right
     :alt: pVACviz logo
 
-.. _pvacviz_directories:
-
 pVACapi Directories
 ===================
 
@@ -11,14 +9,14 @@ pVACapi Directories
     :width: 239px
     :height: 142px
     :align: right
-    :alt: alternate text
+    :alt: pVACapi directories
     :figclass: align-left
 
     pVACapi directories
 
 pVACviz, in order to provide all its features, communicates with a pVACtools component called pVACapi. pVACapi serves as an interface between pVACviz and the pVACseq pipeline proceses, launching pVACseq processes, managing them as they execute, and generating the visualizations the pVACviz displays.
 
-Upon installation, pVACapi creates several directories in the user's home directory in ~/pVACseq/. These directories are used to hold input files to pVACseq processes, results files for visualization, archives, and exported projects. Additionally two hidden directories controlled by pVACapi are used to store files related to managing and running processes.
+Upon installation, pVACapi creates several directories in the user's home directory in ~/pVAC-Seq/. These directories are used to hold input files to pVACseq processes, results files for visualization, archives, and exported projects. Additionally two hidden directories controlled by pVACapi are used to store files related to managing and running processes.
 
 \/archive
 ---------

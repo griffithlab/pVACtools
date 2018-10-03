@@ -14,9 +14,9 @@ When you click on the Manage link in the sidebar you will be presented with a ta
 
 .. figure:: ../images/screenshots/pvacviz-manage-list.png
     :width: 847px
-    :height: 515px
+    :height: 490px
     :align: center
-    :alt: alternate text
+    :alt: pVACviz Process List on Manage page
     :figclass: align-left
 
     pVACviz Process List on Manage page
@@ -35,7 +35,7 @@ All commands available in the process table are also available here in the heade
     :width: 847px
     :height: 1200px
     :align: center
-    :alt: alternate text
+    :alt: pVACviz process detail display
     :figclass: align-left
 
     pVACviz process detail display
