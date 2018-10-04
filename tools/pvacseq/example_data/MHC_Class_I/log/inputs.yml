@@ -28,7 +28,7 @@ normal_indels_coverage_file: null
 normal_sample_name: null
 normal_snvs_coverage_file: null
 normal_vaf: 0.2
-output_dir: /Users/ssiebert/test_example_output2/MHC_Class_I
+output_dir: /Users/ssiebert/Documents/Work/pVAC-Tools/tools/pvacseq/example_data/MHC_Class_I
 peptide_sequence_length: 21
 phased_proximal_variants_vcf: null
 prediction_algorithms:
@@ -39,16 +39,16 @@ prediction_algorithms:
 - SMM
 - SMMPMBEC
 proximal_variants_file: null
-pvactools_version: 1.0.8
+pvactools_version: 1.1.0
 sample_name: Test
 tdna_cov: 10
 tdna_indels_coverage_file: null
 tdna_snvs_coverage_file: null
-tdna_vaf: 0.4
-tmp_dir: /Users/ssiebert/test_example_output2/MHC_Class_I/tmp
+tdna_vaf: 0.25
+tmp_dir: /Users/ssiebert/Documents/Work/pVAC-Tools/tools/pvacseq/example_data/MHC_Class_I/tmp
 top_score_metric: median
 transcript_expn_file: null
 trna_cov: 10
 trna_indels_coverage_file: null
 trna_snvs_coverage_file: null
-trna_vaf: 0.4
+trna_vaf: 0.25
