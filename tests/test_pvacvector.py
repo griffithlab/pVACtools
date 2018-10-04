@@ -11,14 +11,7 @@ from subprocess import run as subprocess_run
 from tools.pvacvector import *
 import unittest.mock
 from mock import patch
-
-def compare(path1, path2):
-    r1 = open(path1)
-    r2 = open(path2)
-    result = not len(set(r1.readlines())^set(r2.readlines()))
-    r1.close()
-    r2.close()
-    return result
+from .test_utils import *
 
 def make_response(data, path, test_name):
     filename = 'response_%s_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'], test_name)

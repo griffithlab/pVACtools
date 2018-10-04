@@ -14,11 +14,9 @@ The example data output can be reproduced by running the following command:
    pvacseq run \
    <example_data_dir>/input.vcf \
    Test \
-   HLA-G*01:09,HLA-E*01:01,H2-IAb \
-   NetMHC PickPocket NNalign <output_dir> \
-   -e 9,10 \
-   -i <example_data_dir>/additional_input_file_list.yaml --tdna-vaf 20 \
-   --net-chop-method cterm --netmhc-stab \
-   --top-score-metric=lowest -d full --keep-tmp-files
+   HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
+   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign
+   <output_dir> \
+   -e 8,9,10
 
 A detailed description of all command options can be found on the :ref:`Usage <pvacseq_run>` page.

@@ -5,14 +5,18 @@ from flask import current_app
 import subprocess
 from .processes import fetch_process, is_running
 from .database import filterfile
-from .utils import descriptions, column_filter, filterdata, sort, fullresponse
+from .utils import descriptions, is_visualizable, visualization_type, column_filter, filterdata, sort, fullresponse, nav_to_dir
 
 # details for each file to be appended to the output of results_get
-def resultfile(id, process, fileID):
+def resultfile(id, process, file):
+    fileID = file['fileID']
     return({
         'fileID':int(fileID),
-        'description':process[0]['files'][fileID]['description'],
-        'display_name':process[0]['files'][fileID]['display_name'],
+        'description':file['description'],
+        'display_name':file['display_name'],
+        'is_visualizable': file['is_visualizable'],
+        'visualization_type': file['visualization_type'],
+        'type':'file',
         'url':'/api/v1/processes/%d/results/%s'%(id, fileID),
         'size':os.path.getsize(process[0]['files'][fileID]['fullname']),
         'rows':int(subprocess.check_output([
@@ -22,11 +26,32 @@ def resultfile(id, process, fileID):
         ]).decode().split()[0])-1,
     })
 
+def prelim_res(id, type, process, data):
+    output = []
+    for file in data:
+        if file['type'] == 'file':
+            if "default" in type:
+                if not (re.search("/tmp/", file['display_name'])):
+                    output.append(resultfile(id, process, file))
+            elif "all" in type:
+                output.append(resultfile(id, process, file))
+            else:
+                for filter in type:
+                    if (re.search('%s.tsv'%filter, file['display_name'])):
+                        output.append(resultfile(id, process, file))
+        elif file['type'] == 'directory':
+            output.append({
+                'display_name':file['display_name'],
+                'type':'directory',
+                'contents':prelim_res(id, type, process, file['contents'])
+            })
+    return output
+
 def results_get(id, type, filters, sorting, page, count):
     """Get the list of result files from a specific pVAC-Seq run"""
     data = current_app.config['storage']['loader']()
     if id == -1:
-        return list_dropbox()
+        return list_visualize(type, filters, sorting, page, count)
     process = fetch_process(id, data, current_app.config['storage']['children'])
     if not process[0]:
         return (
@@ -36,50 +61,42 @@ def results_get(id, type, filters, sorting, page, count):
                 "fields":"id"
             },400
         )
-    output = []
-    if "default" in type:
-         for fileID in process[0]['files']:
-            if not (re.search("/tmp/", process[0]['files'][fileID]['display_name'])):
-                output.append(resultfile(id,process,fileID))
-    elif "all" in type:
-        for fileID in process[0]['files']:
-            output.append(resultfile(id,process,fileID))
-    else:
-        for filter in type:
-            for fileID in process[0]['files']:
-                if (re.search('%s.tsv'%filter, process[0]['files'][fileID]['display_name'])):
-                    output.append(resultfile(id,process,fileID))
+    res_dir = os.path.join(current_app.config['files']['data-dir'], 'results')
+    #nav_to_dir expects a file for arg1, so add a fake file to end of path
+    tree = nav_to_dir(
+        os.path.join(process[0]['output'],'fake_file'), res_dir, current_app.config['storage']['manifest']['results']
+    )
+    output = prelim_res(id, type, process, tree)
     return filterdata(output, filters, sorting, page, count)
 
+def inputfile(file):
+    return({
+        'fileID':int(file['fileID']),
+        'description':file['description'],
+        'display_name':file['display_name'],
+        'is_input': file['display_name'].endswith('.vcf') or file['display_name'].endswith('.vcf.gz'),
+        'is_visualizable': file['is_visualizable'],
+        'visualization_type': file['visualization_type'],
+        'type':'file',
+    })
 
-def list_input(path = None):
-    """Fetches a list of input files from the input directory"""
-    data = current_app.config['storage']['loader']()
-    if not path:
-        path = os.path.join(current_app.config['files']['data-dir'], 'input')
-        current_app.config['storage']['manifest'] = []
+def prelim_inp(data):
     output = []
-    for entity in sorted(os.listdir(path)):
-        fullname = os.path.join(path, entity)
-        if (fullname[fullname.rfind('/')+1] == '.'):
-            continue
-        if os.path.isfile(fullname):
+    for file in data:
+        if file['type'] == 'file':
+            output.append(inputfile(file))
+        elif file['type'] == 'directory':
             output.append({
-                'display_name':entity,
-                'type':'file',
-                'fileID':len(current_app.config['storage']['manifest']),
-                'description':descriptions(
-                    '.'.join(os.path.basename(entity).split('.')[1:])
-                ),
-            })
-            current_app.config['storage']['manifest'].append(fullname)
-        elif os.path.isdir(fullname):
-            output.append({
-                'display_name':entity,
+                'display_name':file['display_name'],
                 'type':'directory',
-                'contents': list_input(fullname)
+                'contents':prelim_inp(file['contents'])
             })
     return output
+
+def list_input(filters = [], sorting = [], page = 1, count = -1):
+    """Fetches a list of input files from the input directory"""
+    output = prelim_inp(current_app.config['storage']['manifest']['input'])
+    return filterdata(output, filters, sorting, page, count)
 
 def results_getfile(id, fileID, count, page, filters, sort, direction):
     """(DEPRECATED) Read data directly from a specific output file"""
@@ -93,13 +110,11 @@ def results_getfile(id, fileID, count, page, filters, sort, direction):
         direction = direction
     )
 
-
-
 def results_getcols(id, fileID):
     """Get a mapping of standardized column names -> original column names"""
     data = current_app.config['storage']['loader']()
     if id==-1:
-        if str(fileID) not in data['dropbox']:
+        if str(fileID) not in data['visualize']:
             return ({
                 'code':400,
                 'message':'The requested file (%d) does not exist'%fileID,
@@ -108,8 +123,8 @@ def results_getcols(id, fileID):
         raw_reader = open(
             os.path.join(
                 os.path.abspath(current_app.config['files']['data-dir']),
-                'dropbox',
-                data['dropbox'][str(fileID)]['display_name']
+                'visualize',
+                data['visualize'][str(fileID)]['display_name']
             )
         )
         reader = csv.DictReader(raw_reader, delimiter='\t')
@@ -144,25 +159,50 @@ def results_getcols(id, fileID):
     raw_reader.close()
     return output
 
-def list_dropbox():
+def visualizefile(file):
     data = current_app.config['storage']['loader']()
-    return [
-        {
-            'fileID':key,
-            'description':entry['description'],
-            'display_name':entry['display_name'],
-            'url':'/api/v1/processes/-1/results/%s'%(key),
+    return {
+            'fileID':file['fileID'],
+            'description':file['description'],
+            'display_name':file['display_name'],
+            'is_visualizable': file['is_visualizable'],
+            'visualization_type': file['visualization_type'],
+            'type':'file',
+            'url':'/api/v1/processes/-1/results/%s'%(file['fileID']),
             'size':(
-                os.path.getsize(os.path.join(
-                    current_app.config['files']['data-dir'],
-                    'dropbox',
-                    entry['display_name']
-                ))
+                os.path.getsize(
+                    data['visualize'][file['fileID']]['fullname']
+                )
             ),
-            'rows':int(subprocess.check_output(['wc', '-l', os.path.join(
-                current_app.config['files']['data-dir'],
-                'dropbox',
-                entry['display_name']
-            )]).decode().split()[0])-1,
-        } for (key, entry) in data['dropbox'].items()
-    ]
+            'rows':int(subprocess.check_output([
+                'wc', '-l', data['visualize'][file['fileID']]['fullname']
+            ]).decode().split()[0])-1,
+    }
+
+def prelim_db(type, data):
+    output = []
+    for file in data:
+        if file['type'] == 'file':
+            if "default" in type:
+                if not (re.search("/tmp/", file['display_name'])):
+                    output.append(visualizefile(file))
+            elif "all" in type:
+                output.append(visualizefile(file))
+            else:
+                for filter in type:
+                    if (re.search('%s.tsv'%filter, file['display_name'])):
+                        output.append(visualizefile(file))
+        elif file['type'] == 'directory':
+            output.append({
+                'display_name':file['display_name'],
+                'type':'directory',
+                'contents':prelim_db(type, file['contents'])
+            })
+    return output
+
+def list_visualize(type = 'all', filters = [], sorting = [], page = 1, count = -1):
+    data = current_app.config['storage']['loader']()
+    db_dir = os.path.join(current_app.config['files']['data-dir'], 'visualize')
+    tree = current_app.config['storage']['manifest']['visualize']
+    output = prelim_db(type, tree)
+    return filterdata(output, filters, sorting, page, count)

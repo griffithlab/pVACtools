@@ -16,3 +16,8 @@ Generate Protein Fasta
     :module: lib.generate_protein_fasta
     :func: define_parser
     :prog: pvacseq generate_protein_fasta
+
+Generate Condensed, Ranked Report
+---------------------------------
+
+.. program-output:: pvacseq generate_condensed_ranked_report -h

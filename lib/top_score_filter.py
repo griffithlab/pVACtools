@@ -14,16 +14,12 @@ class TopScoreFilter:
             writer.writeheader()
             filtered_results = {}
             for line in reader:
-                gene_name = line['Gene Name']
-                transcript_name = line['Transcript']
-                consequence = line['Variant Type']
-                if consequence == 'FS':
-                    amino_acid_change_position = "%s%s/%s" % (line['Protein Position'], line['Reference'], line ['Variant'])
-                elif 'fusion' in consequence:
-                    amino_acid_change_position = line['Protein Position']
-                else:
-                    amino_acid_change_position = line['Protein Position'] + line['Mutation']
-                index = '%s.%s.%s.%s' % (gene_name, transcript_name, consequence, amino_acid_change_position)
+                chromosome = line['Chromosome']
+                start = line['Start']
+                stop = line['Stop']
+                ref = line['Reference']
+                var = line['Variant']
+                index = '%s.%s.%s.%s.%s' % (chromosome, start, stop, ref, var)
                 if index not in filtered_results:
                     filtered_results[index] = line
                 else:

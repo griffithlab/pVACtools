@@ -31,6 +31,13 @@ def main():
     )
     coverage_filter_parser.set_defaults(func=coverage_filter)
 
+    transcript_support_level_filter_parser = subparsers.add_parser(
+        "transcript_support_level_filter",
+        help="Filters variants processed by IEDB by transcript support level",
+        add_help=False
+    )
+    transcript_support_level_filter_parser.set_defaults(func=transcript_support_level_filter)
+
     top_score_filter_parser = subparsers.add_parser(
         "top_score_filter",
         help="Pick the best neoepitope for each variant",
@@ -44,6 +51,13 @@ def main():
         add_help=False
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
+
+    generate_protein_fasta_parser = subparsers.add_parser(
+        "generate_condensed_ranked_report",
+        help="Generate a condensed, ranked report from a pVACseq .all_epitopes.tsv or .filtered.tsv report file.",
+        add_help=False
+    )
+    generate_protein_fasta_parser.set_defaults(func=generate_condensed_ranked_report)
 
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
@@ -65,6 +79,13 @@ def main():
         add_help=False
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
+
+    allele_specific_cutoffs_parser = subparsers.add_parser(
+        "allele_specific_cutoffs",
+        help="Show the allele specific cutoffs",
+        add_help=False,
+    )
+    allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
 
     config_files_parser = subparsers.add_parser(
         "config_files",

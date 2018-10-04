@@ -96,6 +96,38 @@ paths:
       description: "Queries the input folder for a list of files ready to be used\
       in a new run of pVAC-Seq"
       operationId: "utils.pvacapi.controllers.files.list_input"
+      parameters:
+      - name: "filters"
+        in: "query"
+        description: "Array of filters to be applied. ex: size>200"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "sorting"
+        in: "query"
+        description: "Ordered array of ways to sort data, + before property name\
+        indicating ascending, - indicating descending. ex: +size,-fileID"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "page"
+        in: "query"
+        description: "Page of results to return"
+        required: false
+        type: "integer"
+        default: 1
+      - name: "count"
+        in: "query"
+        description: "Number of results to return per page"
+        required: false
+        type: "integer"
+        default: 10
       responses:
         200:
           description: "An object containing metadata and an array of input files"
@@ -119,7 +151,7 @@ paths:
       parameters:
       - name: "id"
         in: "path"
-        description: "ProcessID or -1 for dropbox"
+        description: "ProcessID or -1 for visualize"
         required: true
         type: "integer"
       - name: "fileID"
@@ -221,6 +253,11 @@ paths:
         description: "Input VCF File: Filepath to the input VCF file"
         required: true
         type: "string"
+      - name: "phased_proximal_variants_vcf"
+        in: "formData"
+        description: "A VCF with phased proximal variant information"
+        required: false
+        type: "string"
       - name: "samplename"
         in: "formData"
         description: "Sample Name: Name for your sample"
@@ -253,12 +290,6 @@ paths:
         required: false
         type: "integer"
         default: 21
-      - name: "additional_input_file_list"
-        in: "formData"
-        description: "Additional Input File List: yaml file of additional files to be used as inputs, e.g. cufflinks output files"
-        required: false
-        type: "string"
-        default: ""
       - name: "net_chop_method"
         in: "formData"
         description: "Net Chop Method: Run NetChop using the specified method"
@@ -271,9 +302,9 @@ paths:
         description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
         type: "boolean"
         default: false
-      - name: "top_result_per_mutation"
+      - name: "pass_only"
         in: "formData"
-        description: "Top Result Per Mutation: Output top scoring candidate per allele-length per mutation"
+        description: "Process only variants that are PASS"
         type: "boolean"
         default: false
       - name: "top_score_metric"
@@ -287,6 +318,11 @@ paths:
         description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
         type: "integer"
         default: 500
+      - name: "allele_specific_cutoffs"
+        in: "formData"
+        description: "Allele Specific Binding Thresholds: Use allele-specific cutoffs instead of the value provided with the Binding Threshold"
+        type: "boolean"
+        default: false
       - name: "minimum_fold_change"
         in: "formData"
         description: "Minimum Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
@@ -310,18 +346,18 @@ paths:
       - name: "normal_vaf"
         in: "formData"
         description: "Normal VAF Cutoff: Sites below this cutoff will be considered"
-        type: "integer"
-        default: 2
+        type: "number"
+        default: 0.02
       - name: "tdna_vaf"
         in: "formData"
         description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 40
+        type: "number"
+        default: 0.25
       - name: "trna_vaf"
         in: "formData"
         description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 40
+        type: "number"
+        default: 0.25
       - name: "expn_val"
         in: "formData"
         description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
@@ -370,6 +406,8 @@ paths:
       - tag: "test"
   /api/v1/staging:
     post:
+      consumes:
+        - application/json
       tags:
       - "staging"
       summary: "Start a new pVAC-Seq run from a web form"
@@ -379,199 +417,157 @@ paths:
         directory is automatically generated\n"
       operationId: "utils.pvacapi.controllers.staging.staging"
       parameters:
-      - name: "input"
-        in: "formData"
-        description: "Input VCF File: Local VCF file"
-        required: true
-        type: "string"
-      - name: "samplename"
-        in: "formData"
-        description: "Sample Name: Your name for the sample"
-        required: true
-        type: "string"
-      - name: "alleles"
-        in: "formData"
-        description: "Alleles: A comma-separated list of alleles to run the sequences against"
-        required: true
-        type: "string"
-      - name: "epitope_lengths"
-        in: "formData"
-        description: "Epitope Lengths: A comma-separated list of epitope lengths to produce"
-        required: false
-        type: "string"
-        default: "10"
-      - name: "prediction_algorithms"
-        in: "formData"
-        description: "Prediction Algorithm: A comma-separated list of prediction algorithms to use"
-        required: true
-        type: "string"
-      - name: "peptide_sequence_length"
-        in: "formData"
-        description: "Peptide Sequence Length: Length of the peptide sequences to produce in the FASTA"
-        required: false
-        type: "integer"
-        default: 21
-      - name: "gene_expn_file"
-        in: "formData"
-        description: "Gene Expression File: Filepath to the genes.fpkm_tracking file from Cufflinks"
-        required: false
-        type: "string"
-        default: ""
-      - name: "transcript_expn_file"
-        in: "formData"
-        description: "Transcript Expression File: Filepath to the isoforms.fpkm_tracking file from Cufflinks"
-        required: false
-        type: "string"
-        default: ""
-      - name: "normal_snvs_coverage_file"
-        in: "formData"
-        description: "Normal SNVs Coverage File: Filepath to bam-readcount output file for normal BAM and snvs"
-        required: false
-        type: "string"
-        default: ""
-      - name: "normal_indels_coverage_file"
-        in: "formData"
-        description: "Normal Indels Coverage File: Filepath to bam-readcount output file for normal BAM and indels"
-        required: false
-        type: "string"
-        default: ""
-      - name: "tdna_snvs_coverage_file"
-        in: "formData"
-        description: "Tumor DNA Coverage File: Filepath to bam-readcount output file for tumor DNA BAM and snvs"
-        required: false
-        type: "string"
-        default: ""
-      - name: "tdna_indels_coverage_file"
-        in: "formData"
-        description: "Tumor DNA Coverage File: Filepath to bam-readcount output file for tumor DNA BAM and indels"
-        required: false
-        type: "string"
-        default: ""
-      - name: "trna_snvs_coverage_file"
-        in: "formData"
-        description: "Tumor RNA Coverage File: Filepath to bam-readcount output file for tumor RNA BAM and snvs"
-        required: false
-        type: "string"
-        default: ""
-      - name: "trna_indels_coverage_file"
-        in: "formData"
-        description: "Tumor RNA Coverage File: Filepath to bam-readcount output file for tumor RNA BAM and indels"
-        required: false
-        type: "string"
-        default: ""
-      - name: "net_chop_method"
-        in: "formData"
-        description: "Net Chop Method: Run NetChop using the specified method"
-        type: "string"
-        enum: ["cterm", "20s", ""]
-        required: false
-        default: ''
-      - name: "netmhc_stab"
-        in: "formData"
-        description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
-        required: false
-        type: "string"
-        default: ""
-      - name: "top_result_per_mutation"
-        in: "formData"
-        description: "Top Results per Mutation: Output top scoring candidate per allele-length per mutation"
-        required: false
-        type: "string"
-        default: ""
-      - name: "top_score_metric"
-        in: "formData"
-        description: "Top Score Metric: ic50 metric for choosing best epitopes during binding filtering"
-        required: false
-        type: "string"
-        enum: ["lowest", "median"]
-        default: "median"
-      - name: "binding_threshold"
-        in: "formData"
-        description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
-        required: false
-        type: "integer"
-        default: 500
-      - name: "minimum_fold_change"
-        in: "formData"
-        description: "Medium Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
-        required: false
-        type: "integer"
-        default: 0
-      - name: "normal_cov"
-        in: "formData"
-        description: "Normal Coverage Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: "5"
-      - name: "tdna_cov"
-        in: "formData"
-        description: "Tumor DNA Coverage Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: "10"
-      - name: "trna_cov"
-        in: "formData"
-        description: "Tumor RNA Coverage Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: "10"
-      - name: "normal_vaf"
-        in: "formData"
-        description: "Normal VAF Cutoff: Sites below this cutoff will be considered"
-        type: "integer"
-        default: "2"
-      - name: "tdna_vaf"
-        in: "formData"
-        description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: "40"
-      - name: "trna_vaf"
-        in: "formData"
-        description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: "40"
-      - name: "expn_val"
-        in: "formData"
-        description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
-        required: false
-        type: "integer"
-        default: 1
-      - name: "net_chop_threshold"
-        in: "formData"
-        description: "NetChop Threshold: NetChop prediction threshold"
-        required: false
-        type: "number"
-        default: 0.5
-      - name: "fasta_size"
-        in: "formData"
-        description: "FASTA Size: Number of entries submitted to IEDB in each request.  Must be an even number"
-        required: false
-        type: "integer"
-        default: 200
-      - name: "iedb_retries"
-        in: "formData"
-        description: "IEDB Retries: Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100"
-        type: "integer"
-        default: 5
-      - name: "iedb_install_dir"
-        in: "formData"
-        description: "Path to a local install of IEDB (if available)"
-        type: "string"
-        default: ""
-      - name: "downstream_sequence_length"
-        in : "formData"
-        description: "Downstream Sequence Length: Cap to limit the downstream sequence length for frameshifts when creating the fasta file. Use 'full' to include the full downstream sequence"
-        type: "integer"
-        default: 1000
-      - name: "keep_tmp_files"
-        in: "formData"
-        description: "Keep Temp Files? Keep temporary files in the output directory after completion"
-        required: false
-        type: "string"
-        default: ""
-      - name: "force"
-        in: "formData"
-        description: "Bypass the check for duplicate processes"
-        required: false
-        type: "boolean"
-        default: false
+        - name: "parameters"
+          in: body
+          description: "Parameters of process to stage"
+          schema:
+            type: object
+            required:
+              - input
+              - samplename
+              - alleles
+              - prediction_algorithms
+            properties:
+              input:
+                description: "Input VCF file: File ID of the input VCF file"
+                type: string
+              phased_proximal_variants_vcf:
+                description: "A VCF with phased proximal variant information"
+                type: string
+              samplename:
+                description: "Sample name: a name for the sample and process"
+                type: string
+              alleles:
+                description: "Alleles: a comma-separated list of alleles against which to run the sequences"
+                type: string
+              epitope_lengths:
+                description: "Epitope lengths: a comma-separated list of epitope lengths to produce"
+                type: string
+                default: 10
+              prediction_algorithms:
+                description: "Prediction Algorithm: a comma-separated list of prediction algorithms to use"
+                type: string
+              peptide_sequence_length:
+                description: "Peptide Sequence Length: length of the peptide sequences to produce in the FASTA"
+                type: integer
+                default: 21
+              gene_expn_file:
+                description: "Gene expression file: file ID of the genes.fpkm_tracking file from Cufflinks"
+                type: string
+                default: ""
+              transcript_expn_file:
+                type: string
+                default: ""
+              normal_snvs_coverage_file:
+                type: string
+                default: ""
+              normal_indels_coverage_file:
+                description: "Normal Indels Coverage File: file ID of the bam-readcount output file for normal BAM and indels"
+                type: string
+                default: ""
+              tdna_snvs_coverage_file:
+                description: "Tumor DNA Coverage File: file ID of the bam-readcount output file for tumor DNA BAM and snvs"
+                type: string
+                default: ""
+              trna_indels_coverage_file:
+                description: "Tumor RNA Coverage File: file ID of the bam-readcount output file for tumor RNA BAM and indels"
+                type: string
+                default: ""
+              net_chop_method:
+                description: "Net Chop Method: Run NetChop using the specified method"
+                type: string
+                enum: ["cterm", "20s", ""]
+                default: ""
+              netmhc_stab:
+                description: "NetMHC STAB: Run NetMHCStabPan at the end of the pipeline"
+                type: boolean
+                default: false
+              pass_only:
+                description: "Process only variants that are PASS"
+                type: boolean
+                default: false
+              top_result_per_mutation:
+                description: "Top Results per Mutation: Output top scoring candidate per allele-length per mutation"
+                type: boolean
+                default: false
+              top_score_metric:
+                description: "Top Score Metric: ic50 metric for choosing best epitopes during binding filtering"
+                type: string
+                enum: ["lowest", "median"]
+                default: "median"
+              binding_threshold:
+                description: "Binding Threshold: Report only epitopes with a predicted binding score below this value"
+                type: integer
+                default: 500
+              minimum_fold_coverage:
+                description: "Medium Fold Change: Report only epitopes with a fold change between the mutant and wildtype sequences above this value"
+                type: integer
+                default: 0
+              normal_cov:
+                description: "Normal Coverage Cutoff: Sites above this cutoff will be considered"
+                type: integer
+                default: 5
+              tdna_cov:
+                description: "Tumor DNA Coverage Cutoff: Sites above this cutoff will be considered"
+                type: integer
+                default: 10
+              trna_cov:
+                description: "Tumor RNA Coverage Cutoff: Sites above this cutoff will be considered"
+                type: integer
+                default: 10
+              normal_vaf:
+                description: "Normal VAF Cutoff: Sites below this cutoff will be considered"
+                type: integer
+                default: 2
+              tdna_vaf:
+                description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
+                type: integer
+                default: 40
+              trna_vaf:
+                description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
+                type: integer
+                default: 40
+              expn_val:
+                description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
+                type: integer
+                default: 1
+              net_chop_threshold:
+                description: "NetChop Threshold: NetChop prediction threshold"
+                type: number
+                default: 0.5
+              fast_size:
+                description: "FASTA Size: Number of entries submitted to IEDB in each request.  Must be an even number"
+                type: integer
+                default: 200
+              maximum_transcript_support_level:
+                description: "The threshold to use for filtering epitopes on the transcript support level. Keep all epitopes with a transcript support level <= to this cutoff."
+                type: integer
+                enum: [1,2,3,4,5]
+                default: 1
+              iedb_retries:
+                description: "IEDB Retries: Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100"
+                type: integer
+                default: 5
+              iedb_install_dir:
+                description: "Path to a local install of IEDB (if available)"
+                type: string
+                default: ""
+              downstrea_sequence_length:
+                description: "Downstream Sequence Length: Cap to limit the downstream sequence length for frameshifts when creating the fasta file. Use 'full' to include the full downstream sequence"
+                type: integer
+                default: 1000
+              keep_tmp_files:
+                description: "Keep Temp Files? Keep temporary files in the output directory after completion"
+                type: boolean
+                default: false
+              force:
+                description: "Bypass the check for duplicate processes"
+                type: boolean
+                default: false
+              allele_specific_cutoffs:
+                description: "Allele Specific Binding Thresholds: Use allele-specific cutoffs instead of the value provided with the Binding Threshold"
+                type: boolean
+                default: false
       responses:
         201:
           description: "Returns object with code 201, message, and  process ID of the newly started pVAC-Seq run"
@@ -739,12 +735,51 @@ paths:
             $ref: "#/definitions/Error"
   /api/v1/validalleles:
     get:
-      tags: 
+      tags:
         - "allele"
       summary: "Lists valid alleles for specified prediction algorithms"
-      description: "Takes a string of prediction algorithms and returns an object mapping each algorithm to valid alleles for that algorithm"
+      description: "Takes a string of prediction algorithms and returns an object mapping each allele to the prediction algorithms it can be used with"
       operationId: "utils.pvacapi.controllers.staging.valid_alleles"
-      parameters: 
+      parameters:
+        - name: "page"
+          in: "query"
+          description: "Page of results to return"
+          required: false
+          type: "integer"
+          default: 1
+        - name: "count"
+          in: "query"
+          description: "Number of results to return per page"
+          required: false
+          type: "integer"
+          default: 10
+        - name: "prediction_algorithms"
+          in: "query"
+          description: "Prediction algorithms to find valid alleles for"
+          in: "query"
+          type: "string"
+        - name: "name_filter"
+          in: "query"
+          description: "String to use for fuzzy matching to the allele names for typeahead search"
+          in: "query"
+          type: "string"
+      responses:
+        200:
+          description: "Returns object mapping each allele to an array of predcition algorithms it can be used with"
+          schema:
+            type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/validallelesperalgorithm:
+    get:
+      tags:
+        - "allele"
+      summary: "Lists valid alleles for specified prediction algorithms grouped by the algorithm"
+      description: "Takes a string of prediction algorithms and returns an object mapping each algorithm to valid alleles for that algorithm"
+      operationId: "utils.pvacapi.controllers.staging.valid_alleles_per_algorithm"
+      parameters:
         - name: "prediction_algorithms"
           in: "query"
           description: "Prediction algorithms to find valid alleles for"
@@ -806,18 +841,58 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/dropbox:
+  /api/v1/visualize:
     get:
       tags:
-        - "dropbox"
-      summary: "Get files currently in the dropbox"
-      description: "The dropbox endpoint returns a list of the files currently in\
-      the dropbox folder.  The user may drop result files into this folder to be\
+        - "visualize"
+      summary: "Get files currently in the visualize folder"
+      description: "The visualize endpoint returns a list of the files currently in\
+      the visualize folder.  The user may drop result files into this folder to be\
       displayed in the frontend UI"
-      operationId: "utils.pvacapi.controllers.files.list_dropbox"
+      operationId: "utils.pvacapi.controllers.files.list_visualize"
+      parameters:
+      - name: "type"
+        in: "query"
+        description: "Type of file to display"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        default: "default"
+      - name: "filters"
+        in: "query"
+        description: "Array of filters to be applied. ex: size>200"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "sorting"
+        in: "query"
+        description: "Ordered array of ways to sort data, + before property name\
+        indicating ascending, - indicating descending. ex: +size,-fileID"
+        required: false
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: 'csv'
+        default: "none"
+      - name: "page"
+        in: "query"
+        description: "Page of results to return"
+        required: false
+        type: "integer"
+        default: 1
+      - name: "count"
+        in: "query"
+        description: "Number of results to return per page"
+        required: false
+        type: "integer"
+        default: 10
       responses:
         200:
-          description: "An object containing metadata and a list of files in the dropbox"
+          description: "An object containing metadata and a list of files in the visualize folder"
           schema:
             type: "array"
             items:
@@ -836,7 +911,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -880,7 +955,7 @@ paths:
           default: 'ASC'
       responses:
         200:
-          description: "Returns a list of files in the dropbox"
+          description: "Returns a list of files in the visualize folder"
           schema:
             type: "array"
             items: {
@@ -902,7 +977,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -952,7 +1027,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -982,7 +1057,7 @@ paths:
       parameters:
         - name: "parentID"
           in: "path"
-          description: "ProcessID or -1 for dropbox"
+          description: "ProcessID or -1 for visualize"
           required: true
           type: "integer"
         - name: "fileID"
@@ -999,8 +1074,8 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/archive/{processID}:
-    get:
+  /api/v1/processes/{processID}/archive:
+    post:
       tags:
         - "archive"
       summary: "Archive a process"
@@ -1021,8 +1096,52 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /api/v1/restart/{processID}:
-    get:
+  /api/v1/processes/{processID}/export:
+    post:
+      tags:
+        - "export"
+      summary: "export a process"
+      description: "Copies the results of a process to the export folder"
+      operationId: "utils.pvacapi.controllers.processes.export"
+      parameters:
+        - name: "processID"
+          in: "path"
+          description: "Id of the process to export"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "No meaningful data to return"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{processID}/delete:
+    delete:
+      tags:
+        - "delete"
+      summary: "delete a process"
+      description: "Deletes the a process and all of its results"
+      operationId: "utils.pvacapi.controllers.processes.delete"
+      parameters:
+        - name: "processID"
+          in: "path"
+          description: "Id of the process to delete"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "No meaningful data to return"
+          schema:
+            type: "string"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /api/v1/processes/{processID}/restart:
+    post:
       tags:
         - "restart"
       summary: "Restart an old process"
@@ -1104,6 +1223,12 @@ definitions:
       display_name:
         type: "string"
         description: "Display name of result file (try to keep under 32 chars or so)"
+      is_visualizable:
+        type: "boolean"
+        description: "Indicates whether or not a result file can be visualized"
+      visualization_type:
+        type: "string"
+        description: "Type of visualization that this file can be used with"
       url:
         type: "string"
         description: "URL of results file"
@@ -1165,6 +1290,12 @@ definitions:
       description:
         type: "string"
         description: "A description of the file's contents in the context of pVAC-Seq"
+      is_visualizable:
+        type: "boolean"
+        description: "Indicates whether or not a result file can be visualized"
+      visualization_type:
+        type: "string"
+        description: "Type of visualization that this file can be used with"
   MetaData:
     type: "object"
     properties:
