@@ -3,6 +3,7 @@
 	"net_chop_method": "",
 	"normal_cov": 5,
 	"input": "/Users/agrauber/pVAC-Seq/input/input.vcf",
+	"phased_proximal_variants_vcf": "",
 	"downstream_sequence_length": 1000,
 	"minimum_fold_change": 0,
 	"top_score_metric": "median",
@@ -12,17 +13,18 @@
 		"HLA-G*01:09"
 	],
 	"fasta_size": 200,
+  "maximum_transcript_support_level": 1,
 	"netmhc_stab": false,
+	"pass_only": false,
 	"peptide_sequence_length": 21,
-	"additional_input_file_list": "",
 	"expn_val": 1,
 	"binding_threshold": 500,
+	"allele_specific_cutoffs": false,
 	"epitope_lengths": [
 		10
 	],
 	"samplename": "endpoint_input",
 	"trna_cov": 10,
-	"top_result_per_mutation": false,
 	"keep_tmp_files": false,
 	"normal_vaf": 2,
 	"trna_vaf": 40,

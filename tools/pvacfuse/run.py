@@ -5,9 +5,48 @@ from lib.prediction_class import *
 from lib.pipeline import *
 from tools.pvacseq.config_files import additional_input_file_list_options
 from lib.run_argument_parser import *
+from lib.post_processor import *
+import lib.call_iedb
 
 def define_parser():
     return PvacfuseRunArgumentParser().parser
+
+def combine_reports(input_files, output_file):
+    write_headers = True
+    with open(output_file, 'w') as fout:
+        writer = csv.writer(fout)
+        for filename in input_files:
+            with open(filename) as fin:
+                reader = csv.reader(fin)
+                headers = next(reader)
+                if write_headers:
+                    write_headers = False  # Only write headers once.
+                    writer.writerow(headers)
+                writer.writerows(reader)  # Write all remaining rows.
+
+def create_combined_reports(base_output_dir, args):
+    output_dir = os.path.join(base_output_dir, 'combined')
+    os.makedirs(output_dir, exist_ok=True)
+
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
+    combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+    combine_reports([file1, file2], combined_output_file)
+    filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+    condensed_report_file = os.path.join(output_dir, "{}.filtered.condensed.ranked.tsv".format(args.sample_name))
+
+    post_processing_params = vars(args)
+    post_processing_params['input_file'] = combined_output_file
+    post_processing_params['filtered_report_file'] = filtered_report_file
+    post_processing_params['condensed_report_file'] = condensed_report_file
+    post_processing_params['minimum_fold_change'] = 0
+    post_processing_params['run_coverage_filter'] = False
+    post_processing_params['run_transcript_support_level_filter'] = False
+    post_processing_params['run_net_chop'] = False
+    post_processing_params['run_netmhc_stab'] = False
+
+    PostProcessor(**post_processing_params).execute()
+    print("\nDone: Pipeline finished successfully. File {} contains ranked list of filtered putative neoantigens for class I and class II predictions.\n".format(condensed_report_file))
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
@@ -28,6 +67,9 @@ def main(args_input = sys.argv[1:]):
         downstream_sequence_length = int(args.downstream_sequence_length)
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
+
+    if args.iedb_install_directory:
+        lib.call_iedb.setup_iedb_conda_env()
 
     input_file_type = 'bedpe'
     base_output_dir = os.path.abspath(args.output_dir)
@@ -59,9 +101,9 @@ def main(args_input = sys.argv[1:]):
         'input_file'                : args.input_file,
         'input_file_type'           : input_file_type,
         'sample_name'               : args.sample_name,
-        'top_result_per_mutation'   : args.top_result_per_mutation,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
+        'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
         'additional_report_columns' : args.additional_report_columns,
@@ -97,6 +139,10 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
         pipeline = MHCIPipeline(**class_i_arguments)
         pipeline.execute()
+    elif len(class_i_prediction_algorithms) == 0:
+        print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
+    elif len(class_i_alleles) == 0:
+        print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
 
     if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         if args.iedb_install_directory:
@@ -119,6 +165,14 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments['netmhc_stab']           = False
         pipeline = MHCIIPipeline(**class_ii_arguments)
         pipeline.execute()
+    elif len(class_ii_prediction_algorithms) == 0:
+        print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
+    elif len(class_ii_alleles) == 0:
+        print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
+
+    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+        print("Creating combined reports")
+        create_combined_reports(base_output_dir, args)
 
 if __name__ == '__main__':
     main()

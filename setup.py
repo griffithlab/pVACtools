@@ -42,18 +42,39 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacapi"):
                 ),
                 filename
             ))
+client_data = []
+for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            client_data.append(os.path.join(
+                os.path.relpath(
+                    dirpath,
+                    'utils/pvacapi/client'
+                ),
+                filename
+            ))
 
 setup(
     name="pvactools",
-    version="1.0.9",
-    packages=["tools", "tools.pvacfuse", "tools.pvacvector", "tools.pvacseq", "lib", "utils.pvacapi", "utils.pvacapi.controllers"],
+    version="1.1.0",
+    packages=[
+        "tools",
+        "tools.pvacfuse",
+        "tools.pvacvector",
+        "tools.pvacseq",
+        "lib",
+        "utils.pvacapi",
+        "utils.pvacapi.controllers",
+        "utils.pvacviz"
+    ],
     entry_points={
         "console_scripts":[
             "pvactools = tools.main:main",
             "pvacseq = tools.pvacseq.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
-            #"pvacseq-api = utils.pvacapi.app:main [API]"
+            "pvacapi = utils.pvacapi.app:main [API]",
+            "pvacviz = utils.pvacviz.app:main [API]"
         ]
     },
     install_requires=[
@@ -66,12 +87,17 @@ setup(
         'simanneal',
         'pandas',
         'wget',
+        'mhcflurry',
+        'mhcnuggets',
+        'pysam',
+        'tensorflow==1.8.0'
     ],
     package_data={
-        'tools.pvacseq' : pvacseq_data_files,
-        'tools.pvacfuse' : pvacfuse_data_files,
-        'tools.pvacvector' : pvacvector_data_files,
-        'pvactools.server' : server_data,
+        'tools.pvacseq': pvacseq_data_files,
+        'tools.pvacfuse': pvacfuse_data_files,
+        'tools.pvacvector': pvacvector_data_files,
+        'utils.pvacapi': server_data,
+        'utils.pvacviz': client_data,
     },
     extras_require={
         'API':[
@@ -79,7 +105,8 @@ setup(
             'py-postgresql',
             'watchdog',
             'flask-cors',
-            'bokeh==0.12.6',
+            'bokeh==0.13.0',
+            'tornado==5.0.2',
             'swagger-spec-validator==2.1.0',
         ]
     },

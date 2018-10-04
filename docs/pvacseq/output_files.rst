@@ -10,6 +10,7 @@ which prediction algorithms were chosen:
 
 - ``MHC_Class_I``: for MHC class I prediction algorithms
 - ``MHC_Class_II``: for MHC class II prediction algorithms
+- ``combined``: If both MHC class I and MHC class II prediction algorithms were run, this folder combines the neoeptiope predictions from both
 
 Each folder will contain the same list of output files (listed in the order
 created):
@@ -17,20 +18,15 @@ created):
 =================================================== ===========
 File Name                                           Description
 =================================================== ===========
-``log``                                             A log file of the parameters used for this run
 ``<sample_name>.tsv``                               An intermediate file with variant, transcript, coverage, vaf, and expression information parsed from the input files.
 ``<sample_name>.tsv_<chunks>`` (multiple)           The above file but split into smaller chunks for easier processing with IEDB.
-``<sample_name>.combined.parsed.tsv``               A modified version of the ``<sample_name>.tsv`` file with binding scores from IEDB added.
-``<sample_name>.filtered.binding.tsv``              The above file after filtering by binding threshold.
-``<sample_name>.filtered.coverage.tsv`` (optional)  The above file after filtering on coverage, VAF, and expression values (optional).
-``<sample_name>.filtered.top.tsv`` (optional)       The above file after picking the top epitope for each variant (optional).
-``<sample_name>.chop.tsv`` (optional)               The above file with cleavage site predictions added (optional).
-``<sample_name>.stab.tsv`` (optional)               The above file with stability predictions added (optional).
-``<sample_name>.final.tsv`` (optional)              The final output file after all filtering and optional steps.
+``<sample_name>.all_epitopes.tsv``                  A list of all predicted epitopes and their binding affinity scores, with additional variant information the ``<sample_name>.tsv``.
+``<sample_name>.filtered.tsv``                      The above file after applying all filters, with cleavage site and stability predictions added.
+``<sample_name>.filtered.condensed.ranked.tsv``     A condensed version of the filtered TSV with only the most important columns remaining, with a score for each neoepitope candidate added.
 =================================================== ===========
 
-Final Report Columns
---------------------
+all_epitopes.tsv and filtered.tsv Report Columns
+------------------------------------------------
 
 =============================================================== ===========
 Column Name                                                     Description
@@ -41,11 +37,14 @@ Column Name                                                     Description
 ``Reference``                                                   The reference allele
 ``Variant``                                                     The alt allele
 ``Transcript``                                                  The Ensembl ID of the affected transcript
+``Transcript Support Level``                                    The `transcript support level (TSL) <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html#tsl>`_ of the affected transcript. ``NA`` if the VCF entry doesn't contain TSL information.
 ``Ensembl Gene ID``                                             The Ensembl ID of the affected gene
 ``Variant Type``                                                The type of variant. ``missense`` for missense mutations, ``inframe_ins`` for inframe insertions, ``inframe_del`` for inframe deletions, and ``FS`` for frameshift variants
 ``Mutation``                                                    The amnio acid change of this mutation
 ``Protein Position``                                            The protein position of the mutation
 ``Gene Name``                                                   The Ensembl gene name of the affected gene
+``HGVSc``                                                       The HGVS coding sequence name
+``HGVSp``                                                       The HGVS protein sequence name
 ``HLA Allele``                                                  The HLA allele for this prediction
 ``Peptide Length``                                              The peptide length of the epitope
 ``Sub-peptide Position``                                        The one-based position of the epitope in the protein sequence used to make the prediction
@@ -56,14 +55,14 @@ Column Name                                                     Description
 ``Best MT Score``                                               Lowest ic50 binding affinity of all prediction algorithms used
 ``Corresponding WT Score``                                      ic50 binding affinity of the wildtype epitope. ``NA`` if there is no ``WT Epitope Seq``.
 ``Corresponding Fold Change``                                   ``Corresponding WT Score`` / ``Best MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
-``Tumor DNA Depth``                                             Tumor DNA depth at this position. ``NA`` if no bam-readcount file provided.
-``Tumor DNA VAF``                                               Tumor DNA variant allele frequency at this position. ``NA`` if no bam-readcount file provided.
-``Tumor DNA Depth``                                             Tumor RNA depth at this position. ``NA`` if no bam-readcount file provided.
-``Tumor DNA VAF``                                               Tumor RNA variant allele frequency at this position. ``NA`` if no bam-readcount file provided.
-``Tumor DNA Depth``                                             Normal DNA depth at this position. ``NA`` if no bam-readcount file provided.
-``Tumor DNA VAF``                                               Normal DNA variant allele frequency at this position. ``NA`` if no bam-readcount file provided.
-``Gene Expression``                                             Gene expression value at this position. ``NA`` if no cufflinks file provided.
-``Transcript Expression``                                       Transcript expression value at this position. ``NA`` if no cufflinks file provided.
+``Tumor DNA Depth``                                             Tumor DNA depth at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
+``Tumor DNA VAF``                                               Tumor DNA variant allele frequency at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
+``Tumor RNA Depth``                                             Tumor RNA depth at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
+``Tumor RNA VAF``                                               Tumor RNA variant allele frequency at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
+``Normal DNA Depth``                                            Normal DNA depth at this position. ``NA`` if VCF entry does not contain normal DNA readcount annotation.
+``Normal DNA VAF``                                              Normal DNA variant allele frequency at this position. ``NA`` if VCF entry does not contain normal DNA readcount annotation.
+``Gene Expression``                                             Gene expression value at this position. ``NA`` if VCF entry does not contain gene expression annotation.
+``Transcript Expression``                                       Transcript expression value at this position. ``NA`` if VCF entry does not contain transcript expression annotation.
 ``Median MT Score``                                             Median ic50 binding affinity of the mutant epitope of all prediction algorithms used
 ``Median WT Score``                                             Median ic50 binding affinity of the wildtype epitope of all prediction algorithms used. ``NA`` if there is no ``WT Epitope Seq``.
 ``Median Fold Change``                                          ``Median WT Score`` / ``Median MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
@@ -76,6 +75,41 @@ Column Name                                                     Description
 ``NetMHCstab allele`` (optional)                                Nearest neighbor to the ``HLA Allele``. Used for NetMHCstab prediction
 =============================================================== ===========
 
-
 .. image:: ../images/output_file_columns.png
     :alt: pVACseq ouput file columns illustration
+
+filtered.condensed.ranked.tsv Report Columns
+--------------------------------------------
+
+==================== ===========
+Column Name          Description
+==================== ===========
+``Gene Name``        The Ensembl gene name of the affected gene.
+``Mutation``         The amnio acid change of this mutation.
+``Protein Position`` The protein position of the mutation.
+``HGVSc``            The HGVS coding sequence name.
+``HGVSp``            The HGVS protein sequence name.
+``HLA Allele``       The HLA allele for this prediction.
+``MT Epitope Seq``   Mutant epitope sequence.
+``MT IC50``          If ``--top-score-metric`` is set to ``lowest``, this corresponds to the ``Best MT Score`` in the full report. If ``--top-score-metric`` is set to ``median`` this corresponds to the ``Median MT Score`` in the full report.
+``WT IC50``          If ``--top-score-metric`` is set to ``lowest``, this corresponds to the ``Corresponding WT Score`` in the full report. If ``--top-score-metric`` is set to ``median`` this corresponds to the ``Median WT Score`` in the full report.
+``Fold Change``      If ``--top-score-metric`` is set to ``lowest``, this corresponds to the ``Corresponding Fold Change`` in the full report. If ``--top-score-metric`` is set to ``median`` this corresponds to the ``Median Fold Change`` in the full report.
+``Tumor DNA Depth``  Tumor DNA depth at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
+``Tumor DNA VAF``    Tumor DNA variant allele frequency at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
+``Tumor RNA Depth``  Tumor RNA depth at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
+``Tumor RNA VAF``    Tumor RNA variant allele frequency at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
+``Gene Expression``  Gene expression value at this position. ``NA`` if VCF entry does not contain gene expression annotation.
+``Score``            A priority score for the neoepitope. The higher the score, the better the neoepitope.
+==================== ===========
+
+The pVACseq Neoeptiope Priority Score
+_____________________________________
+
+Each of the following 4 criteria are assigned a rank-ordered value (worst = 1):
+
+- B = ``MT IC50`` binding affinity, with the lowest being the best.
+- F = ``Fold Change`` between MT and WT alleles, with the highest being the best.
+- M = Mutant allele expression, calculated as (``Gene Expression`` * ``Tumor RNA VAF``), with the highest being the best.
+- D = ``Tumor DNA VAF``, with the highest being the best.
+
+The ``Score`` is calculated from the above ranks with the following formula: ``B + F + (M * 2) + (D / 2)``

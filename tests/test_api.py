@@ -16,6 +16,7 @@ from socket import *
 from . import mock_api
 from subprocess import run, PIPE, Popen, DEVNULL, TimeoutExpired
 from filecmp import cmp
+import uuid
 pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(pvac_dir)
 
@@ -104,7 +105,7 @@ class APITests(unittest.TestCase):
         db = psql.open("localhost/pvacseq")
         for row in db.prepare("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'data\__%\__%'")():
             name = row[0]
-            if re.match(r'data_(dropbox|\d+)_\d+', name):
+            if re.match(r'data_(visualize|\d+)_\d+', name):
                 print("DROP TABLE", name)
                 db.execute("DROP TABLE %s"%name)
 
@@ -136,17 +137,30 @@ class APITests(unittest.TestCase):
         time.sleep(.5)
 
     def start_basic_run(self):
+        destination = os.path.expanduser(os.path.join(
+            '~',
+            'pVAC-Seq',
+            'input',
+            str(uuid.uuid4()) + '.vcf'
+        ))
+        os.symlink(
+            os.path.join(
+                self.test_data_directory,
+                'input.vcf'
+            ),
+            destination
+        )
+        time.sleep(1)
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,
-            data={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+            json={
+                'input':'0',
                 'samplename':'basic_run',
                 'alleles':'HLA-E*01:01',
                 'prediction_algorithms':'NetMHC',
+                'epitope_lengths': "10",
+                'downstream_sequence_length': '1000',
                 'force':True
             }
         )
@@ -186,7 +200,12 @@ class APITests(unittest.TestCase):
         self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
             '~',
             'pVAC-Seq',
-            'dropbox'
+            'visualize'
+        ))))
+        self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
+            '~',
+            'pVAC-Seq',
+            'export'
         ))))
         self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
             '~',
@@ -196,7 +215,7 @@ class APITests(unittest.TestCase):
         self.assertTrue(os.path.isdir(os.path.expanduser(os.path.join(
             '~',
             'pVAC-Seq',
-            'results'
+            '.processes'
         ))))
 
     def test_endpoint_input(self):
@@ -212,19 +231,33 @@ class APITests(unittest.TestCase):
                 'input.vcf'
             ))
         )
+        time.sleep(1)
         response = requests.get(
             self.urlBase+'/input',
             timeout=5,
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-        self.assertTrue(re.search(r'input\.vcf', response.content.decode()))
+        result = response.json()
+
+        def find_inp_file(result):
+            exist = False
+            for entity in result:
+                if entity['type'] == 'file':
+                    exist = re.search(r'input\.vcf', entity['display_name'])
+                elif entity['type'] == 'directory':
+                    exist = find_inp_file(entity['contents'])
+                if exist:
+                    break
+            return exist
+
+        self.assertTrue(find_inp_file(result))
         input_manifest = response.json()
         vcf_id = list(filter(lambda x:x['display_name']=='input.vcf', input_manifest))[0]
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,
-            data={
-                'input':vcf_id['fileID'],
+            json={
+                'input':str(vcf_id['fileID']),
                 'samplename':'endpoint_input',
                 'alleles':'HLA-G*01:09',
                 'prediction_algorithms':'NetMHC',
@@ -234,18 +267,15 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 201, response.url+' : '+response.content.decode())
         result = response.json()
         self.assertTrue(re.match(r'\d+', str(result['processid'])))
-        self.assertTrue(re.match(r'\d+', str(result['code'])))
+        self.assertTrue(re.match(r'\d+', str(result['status'])))
         self.assertTrue(re.match(r'\S+', result['message']))
     
     def test_endpoint_processes(self):
         response = requests.post(
             self.urlBase + '/staging',
             timeout = 5,
-            data={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+            json={
+                'input':'0',
                 'samplename':'endpoint_processes',
                 'alleles':'HLA-G*01:09',
                 'prediction_algorithms':'NetMHC',
@@ -255,7 +285,7 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 201, response.url+' : '+response.content.decode())
         result = response.json()
         self.assertTrue(re.match(r'\d+', str(result['processid'])))
-        self.assertTrue(re.match(r'\d+', str(result['code'])))
+        self.assertTrue(re.match(r'\d+', str(result['status'])))
         self.assertTrue(re.match(r'\S+', result['message']))     
         processID = result['processid']
         response = requests.get(
@@ -319,7 +349,7 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code,200)
         process_list = response.json()
         if not len(process_list['result']):
-            process_list = [{'id':self.start_basic_run()}]
+            process_list['result'] = [{'id':self.start_basic_run()}]
         response = requests.get(
             self.urlBase + '/processes/%d'%process_list['result'][0]['id'],
             timeout=5,
@@ -411,34 +441,64 @@ class APITests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         results = response.json()
-        self.assertIsInstance(results, dict)
-        self.assertIsInstance(results['result'], list)
-        for item in results['result']:
-            self.assertIsInstance(item, dict)
+        #previous implementation store in results['results'] section due to separate pagination attribute, no pagination currently:
+        def check_output(results):
+            self.assertIsInstance(results, list)
+            for item in results:
+                self.assertIsInstance(item, dict)
 
-            self.assertIn('description', item)
-            self.assertIsInstance(item['description'], str)
-            self.assertTrue(item['description'])
+                self.assertIn('type', item)
+                self.assertTrue(item['type'] == 'file' or item['type'] == 'directory')
+                if item['type'] == 'file':
+                    self.assertIn('description', item)
+                    self.assertIsInstance(item['description'], str)
+                    self.assertTrue(item['description'])
 
-            self.assertIn('display_name', item)
-            self.assertIsInstance(item['display_name'], str)
-            self.assertTrue(item['display_name'])
+                    self.assertIn('display_name', item)
+                    self.assertIsInstance(item['display_name'], str)
+                    self.assertTrue(item['display_name'])
 
-            self.assertIn('fileID', item)
-            self.assertIsInstance(item['fileID'], int)
-            self.assertGreaterEqual(int(item['fileID']), 0)
+                    self.assertIn('fileID', item)
+                    self.assertIsInstance(item['fileID'], int)
+                    self.assertGreaterEqual(int(item['fileID']), 0)
 
-            self.assertIn('rows', item)
-            self.assertIsInstance(item['rows'], int)
-            self.assertGreaterEqual(item['rows'], -1)
+                    self.assertIn('is_visualizable', item)
+                    self.assertIsInstance(item['is_visualizable'], bool)
 
-            self.assertIn('size', item)
-            self.assertIsInstance(item['size'], int)
+                    self.assertIn('visualization_type', item)
 
-            self.assertIn('url', item)
-            self.assertIsInstance(item['url'], str)
-            self.assertTrue(item['url'])
+                    self.assertIn('rows', item)
+                    self.assertIsInstance(item['rows'], int)
+                    self.assertGreaterEqual(item['rows'], -1)
 
+                    self.assertIn('size', item)
+                    self.assertIsInstance(item['size'], int)
+
+                    self.assertIn('url', item)
+                    self.assertIsInstance(item['url'], str)
+                    self.assertTrue(item['url'])
+                elif item['type'] == 'directory':
+                    self.assertIn('display_name', item)
+                    self.assertIsInstance(item['display_name'], str)
+                    self.assertTrue(item['display_name'])
+
+                    self.assertIn('contents', item)
+                    self.assertIsInstance(item['contents'], list)
+                    check_output(item['contents'])
+
+        check_output(results)
+
+        def is_fnl_file(result):
+            exist = True
+            for entity in result:
+                if entity['type'] == 'file':
+                    exist = re.search('final.tsv$', entity['display_name'])
+                elif entity['type'] == 'directory':
+                    exist = is_fnl_file(entity['contents'])
+                if not exist:
+                    break
+            return exist
+        
         for process in process_list['result']:
             response = requests.get(
                 # %2B = '+', %2C = ','
@@ -447,8 +507,8 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code,200)
             results = response.json()
-            for item in results['result']:
-                self.assertTrue(re.search('final.tsv$', item['display_name']))
+
+            self.assertTrue(is_fnl_file(results))
 
     def test_endpoint_process_results_data(self):
         response = requests.get(
@@ -481,30 +541,37 @@ class APITests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         results = response.json()
-        for item in results['result']:
-            if item['display_name'].endswith('.tsv') and item['rows']>0:
-                response = requests.get(
-                    'http://localhost:8080'+item['url'],
-                    timeout=5,
-                )
-                self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-                data = response.json()
-                self.assertIsInstance(data, list)
-                for row in data:
-                    self.assertIsInstance(row, dict)
-                    self.assertIn('rowid', row)
-                #check the cols endpoint
-                response = requests.get(
-                    'http://localhost:8080'+item['url']+'/cols',
-                    timeout = 5
-                )
-                self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-                #check the schema endpoint
-                response = requests.get(
-                    'http://localhost:8080'+item['url']+'/schema',
-                    timeout = 5
-                )
-                self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+
+        def check_output(self, results):
+            for item in results:
+                if item['type'] == 'file':
+                    if item['display_name'].endswith('.tsv') and item['rows']>0:
+                        response = requests.get(
+                            'http://localhost:8080'+item['url'],
+                            timeout=5,
+                        )
+                        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+                        data = response.json()
+                        self.assertIsInstance(data, list)
+                        for row in data:
+                            self.assertIsInstance(row, dict)
+                            self.assertIn('rowid', row)
+                        #check the cols endpoint
+                        response = requests.get(
+                            'http://localhost:8080'+item['url']+'/cols',
+                            timeout = 5
+                        )
+                        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+                        #check the schema endpoint
+                        response = requests.get(
+                            'http://localhost:8080'+item['url']+'/schema',
+                            timeout = 5
+                        )
+                        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+                elif item['type'] == 'directory':
+                    check_output(self, item['contents'])
+
+        check_output(self, results)
 
     def test_endpoint_stop(self):
         processID = self.start_basic_run()['processid']
@@ -540,48 +607,91 @@ class APITests(unittest.TestCase):
                 timeout = 5
             )
             self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-            process_data = response.json()
+            self.assertIsInstance(response.json(), dict)
+        response = requests.post(
+            self.urlBase+'/processes/%d/archive'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        self.assertIsInstance(response.json(), str)
         response = requests.get(
-            self.urlBase+'/archive/%d'%processID,
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 400, response.url+' : '+response.content.decode())
+
+    def test_endpoint_export(self):
+        processID = self.start_basic_run()['processid']
+        time.sleep(1)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        process_data = response.json()
+        self.assertIsInstance(process_data, dict)
+        self.assertIn('running', process_data)
+        while process_data['running']:
+            time.sleep(5)
+            response = requests.get(
+                self.urlBase+'/processes/%d'%processID,
+                timeout = 5
+            )
+            self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+            self.assertIsInstance(response.json(), dict)
+        response = requests.post(
+            self.urlBase+'/processes/%d/export'%processID,
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertIsInstance(response.json(), str)
 
+    def test_endpoint_delete(self):
+        processID = self.start_basic_run()['processid']
+        time.sleep(1)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        process_data = response.json()
+        self.assertIsInstance(process_data, dict)
+        self.assertIn('running', process_data)
+        while process_data['running']:
+            time.sleep(5)
+            response = requests.get(
+                self.urlBase+'/processes/%d'%processID,
+                timeout = 5
+            )
+            self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+            self.assertIsInstance(response.json(), dict)
+        response = requests.delete(
+            self.urlBase+'/processes/%d/delete'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        self.assertIsInstance(response.json(), str)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 400, response.url+' : '+response.content.decode())
+
     def test_full_api_pipeline(self):
         response = requests.post(
             self.urlBase + '/staging',
             timeout = 5,
-            data={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+            json={
+                'input':'0',
                 'samplename':'endpoint_full',
                 'alleles':'HLA-G*01:09,HLA-E*01:01',
                 'prediction_algorithms':'NetMHC,PickPocket',
                 'epitope_lengths':'9,10',
-                'gene_expn_file':os.path.join(
-                    self.test_data_directory,
-                    'genes.fpkm_tracking'
-                ),
-                'transcript_expn_file':os.path.join(
-                    self.test_data_directory,
-                    'isoforms.fpkm_tracking'
-                ),
-                'tdna_snvs_coverage_file':os.path.join(
-                    self.test_data_directory,
-                    'snvs.bam_readcount'
-                ),
-                'tdna_indels_coverage_file':os.path.join(
-                    self.test_data_directory,
-                    'indels.bam_readcount'
-                ),
                 'top_score_metric':'lowest',
-                'keep_tmp_files':'on',
-                'netmhc_stab':'on',
+                'keep_tmp_files':True,
+                'netmhc_stab':True,
                 'net_chop_method':'cterm',
-                'tdna_vaf':'40',
+                'tdna_vaf':40,
                 'binding_threshold':3000,
                 'force':True
 
@@ -606,16 +716,18 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
             process_data = response.json()
-        # time.sleep(1)
-        # response = requests.get(
-        #     self.urlBase+'/processes/%d'%processID,
-        #     timeout = 5
-        # )
-        # self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
-        # process_data = response.json()
+        time.sleep(10)
+        response = requests.get(
+            self.urlBase+'/processes/%d'%processID,
+            timeout = 5
+        )
+        self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
+        process_data = response.json()
         self.assertIn('files', process_data)
         self.assertIsInstance(process_data['files'], list)
+
         finaltsv = [item for item in process_data['files'] if item['display_name'].endswith('.final.tsv')]
+        #import pdb; pdb.set_trace()
         self.assertTrue(finaltsv)
         finaltsv = finaltsv[0]
         raw_reader = open(os.path.join(
@@ -671,9 +783,64 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         self.assertFalse(response.json())
 
-    def test_endpoint_validallele(self):
+    def test_endpoint_validalleles(self):
         response = requests.get(
             self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'prediction_algorithms':'NetMHC'
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('NetMHC' in results['result'][0]['prediction_algorithms'])
+        self.assertTrue(len(results['result']))
+
+        response = requests.get(
+            self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'prediction_algorithms':'NetMHC',
+                'name_filter':'LA-A*01',
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('NetMHC' in results['result'][0]['prediction_algorithms'])
+        self.assertTrue('HLA-A*01:01' in results['result'][0]['name'])
+        self.assertTrue(len(results['result']))
+
+        response = requests.get(
+            self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'name_filter':'LA-A*01',
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('LA-A*01' in results['result'][0]['name'])
+        self.assertTrue(len(results['result']))
+
+        response = requests.get(
+            self.urlBase+'/validalleles',
+            timeout=5,
+            params={
+                'name_filter':'la-a*01',
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        results = response.json()
+        self.assertIsInstance(results, dict)
+        self.assertTrue('LA-A*01' in results['result'][0]['name'])
+        self.assertTrue(len(results['result']))
+
+    def test_endpoint_validallelesperalgorithm(self):
+        response = requests.get(
+            self.urlBase+'/validallelesperalgorithm',
             timeout=5,
             params={
                 'prediction_algorithms':'NetMHC'
@@ -713,14 +880,13 @@ class APITests(unittest.TestCase):
         response = requests.post(
             self.urlBase+'/staging',
             timeout = 5,
-            data={
-                'input':os.path.join(
-                    self.test_data_directory,
-                    'input.vcf'
-                ),
+            json={
+                'input':'0',
                 'samplename':'basic_run',
                 'alleles':'HLA-E*01:01',
                 'prediction_algorithms':'NetMHC',
+                'epitope_lengths': "10",
+                'downstream_sequence_length': '1000',
             }
         )
         self.assertEqual(response.status_code, 400)
@@ -748,8 +914,8 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
             old_data = response.json()
-        response = requests.get(
-            self.urlBase+'/restart/%d'%processID,
+        response = requests.post(
+            self.urlBase+'/processes/%d/restart'%processID,
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
@@ -777,7 +943,7 @@ class APITests(unittest.TestCase):
         self.assertIn('results_url', process_data)
         self.assertEqual(process_data['results_url'], old_data['results_url'])
 
-    def test_endpoint_dropbox(self):
+    def test_endpoint_visualize(self):
         shutil.copyfile(
             os.path.join(
                 self.test_data_directory,
@@ -786,45 +952,71 @@ class APITests(unittest.TestCase):
             os.path.expanduser(os.path.join(
                 '~',
                 'pVAC-Seq',
-                'dropbox',
+                'visualize',
                 'Test.final.tsv'
             ))
         )
         time.sleep(1)
         response = requests.get(
-            self.urlBase+'/dropbox',
+            self.urlBase+'/visualize',
             timeout = 5
         )
         self.assertEqual(response.status_code, 200, response.url+' : '+response.content.decode())
         manifest = response.json()
-        self.assertIsInstance(manifest, list)
-        for item in manifest:
-            self.assertIsInstance(item, dict)
 
-            self.assertIn('description', item)
-            self.assertIsInstance(item['description'], str)
-            self.assertTrue(item['description'])
+        def check_output(manifest):
+            self.assertIsInstance(manifest, list)
+            for item in manifest:
+                self.assertIsInstance(item, dict)
 
-            self.assertIn('display_name', item)
-            self.assertIsInstance(item['display_name'], str)
-            self.assertTrue(item['display_name'])
+                self.assertIn('type', item)
+                self.assertTrue(item['type'] == 'file' or item['type'] == 'directory')
+                if item['type'] == 'file':
+                    self.assertIsInstance(item, dict)
 
-            self.assertIn('fileID', item)
-            self.assertIsInstance(item['fileID'], str)
-            self.assertGreaterEqual(int(item['fileID']), 0)
+                    self.assertIn('description', item)
+                    self.assertIsInstance(item['description'], str)
+                    self.assertTrue(item['description'])
 
-            self.assertIn('rows', item)
-            self.assertIsInstance(item['rows'], int)
-            self.assertGreaterEqual(item['rows'], -1)
+                    self.assertIn('display_name', item)
+                    self.assertIsInstance(item['display_name'], str)
+                    self.assertTrue(item['display_name'])
 
-            self.assertIn('size', item)
-            self.assertIsInstance(item['size'], int)
+                    self.assertIn('fileID', item)
+                    self.assertIsInstance(item['fileID'], str)
+                    self.assertGreaterEqual(int(item['fileID']), 0)
 
-            self.assertIn('url', item)
-            self.assertIsInstance(item['url'], str)
-            self.assertTrue(item['url'])
+                    self.assertIn('rows', item)
+                    self.assertIsInstance(item['rows'], int)
+                    self.assertGreaterEqual(item['rows'], -1)
 
-        target = [item for item in manifest if os.path.basename(item['display_name'])=='Test.final.tsv']
+                    self.assertIn('size', item)
+                    self.assertIsInstance(item['size'], int)
+
+                    self.assertIn('url', item)
+                    self.assertIsInstance(item['url'], str)
+                    self.assertTrue(item['url'])
+                elif item['type'] == 'directory':
+                    self.assertIn('display_name', item)
+                    self.assertIsInstance(item['display_name'], str)
+                    self.assertTrue(item['display_name'])
+
+                    self.assertIn('contents', item)
+                    self.assertIsInstance(item['contents'], list)
+                    check_output(item['contents'])
+
+        check_output(manifest)
+
+        def fnl_files(result):
+            files = []
+            for entity in result:
+                if entity['type'] == 'file' and entity['display_name'] == 'Test.final.tsv':
+                    files.append(entity)
+                elif entity['type'] == 'directory':
+                    files.extend(fnl_files(entity['contents']))
+            return files
+
+        target = fnl_files(manifest)
         self.assertTrue(target)
         target = target[0]
         self.assertEqual(target['rows'], 2)
@@ -890,8 +1082,38 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(response2.status_code,200)
             normal_result_list = response2.json()
-            normal_result_list['result'].sort(key = lambda x: (x['size'], x['fileID']))
-            self.assertEqual(result_list['result'], normal_result_list['result'])
+
+            def tree_size(data):
+                count = 0
+                for file in data:
+                    if file['type'] == 'file':
+                        count += 1
+                    elif file['type'] == 'directory':
+                        count += tree_size(file['contents'])
+                return count
+
+            def value_type(data,col):
+                for entity in data:
+                    if entity['type'] == 'file':
+                        return type(entity[col])()
+                    elif entity['type'] == 'directory' and tree_size(entity['contents']):
+                        return value_type(entity['contents'], col)
+
+            def sort_tree(data,col):
+                col_type = value_type(data,col[1:])
+                col_type = str() if col_type == None else col_type
+                data.sort(key=lambda x: x[col[1:]] if col[1:] in x and x[col[1:]] != None else col_type, reverse=True if col.startswith('-') else False)
+                for file in data:
+                    if file['type'] == 'directory':
+                        sort_tree(file['contents'], col)
+
+            #to simulate internal implementation, cols must list backwards and end with '-type' if type is not being tested
+            def sort_res(data,cols):
+                for col in cols:
+                    sort_tree(data,col)
+
+            sort_res(normal_result_list, ['+fileID','+size','-type'])
+            self.assertEqual(result_list, normal_result_list)
 
     def test_filter(self):
         response = requests.get(
@@ -937,9 +1159,22 @@ class APITests(unittest.TestCase):
             )
             filtered_results = response.json()
             self.assertEqual(response.status_code,200)
-            for item in filtered_results['result']:
-                self.assertGreater(item['fileID'], 2)
 
+            def check_res(result):
+                greater = True
+                for entity in result:
+                    if entity['type'] == 'file':
+                        greater = True if entity['fileID'] > 2 else False
+                    elif entity['type'] == 'directory':
+                        greater = check_res(entity['contents'])
+                    if not greater:
+                        break
+                return greater
+
+            self.assertTrue(check_res(filtered_results))
+
+    #pagination temporarily put on hold.
+    """
     def test_pagination(self):
         response = requests.get(
             self.urlBase + '/processes',
@@ -994,10 +1229,12 @@ class APITests(unittest.TestCase):
             self.assertEqual(response.status_code,200)
             paged_result = response.json()
 
-            self.assertEqual(len(paged_result['result']), 3 if len(full_result_list['result']) >= 6 else len(full_result_list['result']) - 3)
+            self.assertEqual(len(paged_result['result']), 3 if len(full_result_list['result']) >= 6 else \
+                len(full_result_list['result']) - 3 if len(full_result_list['result']) >= 3 else 0)
             self.assertEqual(paged_result['result'][0] if len(paged_result['result']) else [], full_result_list['result'][3] if len(full_result_list['result']) > 3 else [])
             self.assertEqual(paged_result['_meta']['per_page'], 3)
             self.assertEqual(paged_result['_meta']['current_page'], 2)
             self.assertEqual(paged_result['_meta']['total_count'], len(full_result_list['result']))
+    """
 
 
