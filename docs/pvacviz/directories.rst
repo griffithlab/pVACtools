@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACviz logo
 
+.. _pvacviz_directories:
+
 pVACapi Directories
 ===================
 
@@ -31,13 +33,13 @@ pVACviz provides an export function within its :ref:`Manage section <pvacviz_man
 The pVACviz :ref:`Start form <pvacviz_starting>` has Input VCF and Phased Proximal Variant fields that accept VCF files. The selectors for these fields list all relevant files placed within the `~/input` directory. You may sort these files into directories of any depth and the selectors will keep them grouped by directory.
 
 \/visualize
----------
+-----------
 The :ref:`Visualize feature <pvacviz_visualizing>` allows users to visualize any pVACseq result VCF files. Any pVACseq VCF file placed in this /visualize folder will be displayed on the Visualize page in the right column. Directory structures will be preserved so that users may group files in whatever manner they wish.
 
 \/.processes
-----------
+------------
 This is a hidden directory used to store all files related to processes that pVACapi is actively managing. These are the processes listed on the Manage page. You shouldn't touch anything in this directory. Instead, to gain access to these files use the Export or Archive function available in the pVACviz :ref:`Manage section <pvacviz_managing>`.
 
 \/.tmp
-----
+------
 This hidden directory is used by pVACapi to store temporary artifacts of the pVACseq pipeline. Editing or deleting anything in this directory may disrupt running pVACseq processes.
