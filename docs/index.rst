@@ -19,7 +19,7 @@ tools:
    users in launching, managing, reviewing, and visualizing the results of
    pVACtools processes.
 
-.. image:: images/pVACtools_main-figure_v2e.png
+.. image:: images/pVACtools_main-figure_v3d.png
     :align: center
     :alt: pVACtools immunotherapy workflow
 
@@ -53,26 +53,29 @@ This version adds a host of new features to pVACtools:
   order to incorporate those into the epitope predictions, you will need to
   provide a phased variants VCF to your pVACseq run using the
   ``--phased-proximal-variants-vcf`` option. For more information on how to
-  create the file, see the :ref:`prerequisites_label` page.
+  create this file, see the :ref:`prerequisites_label` page.
 - We added support to pVACseq for filtering on transcript support levels. This requires
-  the input VCF to be annotated with the TSL field by VEP.
+  the input VCF to be annotated with the TSL field by VEP. Be default, any
+  transcripts with a TSL above 1 will be filtered out.
 - The binding filter of pVACseq and pVACfuse can now be run with flexible, allele-specific
   binding-thresholds. This feature can be enabled using the
-  ``--allele-specific-binding-thresholds`` option.
+  ``--allele-specific-binding-thresholds`` flag. The thresholds used are taken
+  from `the IEDB recommendations
+  <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_.
 - pVACseq now supports a ``--pass-only`` flag that will result in any VCF
   entries with a ``FILTER`` to be skipped. Using this flag, only VCF entries
   with a ``FILTER`` of ``PASS`` or ``.`` will be processed.
-- We added support for MHCflurry and MHCnuggets prediction algorithms. These
-  can be run listing ``MHCflurry``, ``MHCnuggetsI`` (for MHC Class I alleles),
+- We added support for the `MHCflurry <http://www.biorxiv.org/content/early/2017/08/09/174243>`_ and
+  `MHCnuggets <http://karchinlab.org/apps/appMHCnuggets.html>`_ prediction algorithms. These
+  can be used by listing ``MHCflurry``, ``MHCnuggetsI`` (for MHC Class I alleles),
   and/or ``MHCnuggetsII`` (for MHC Class II alleles) as the prediction
-  algorithms.
+  algorithms in your run commands.
 - The default ``--tdna-vaf`` and ``--trna-vaf`` cutoff values have been
   updated from 0.4 to 0.25. This is the minimum VAF threshold that an epitope
   candidate must meet in order to pass the coverage filter.
-- We now offer a graphical user interface, :ref:`pvacviz`, to run pVACseq instead of using the
-  command line. pVACviz, can also be used to plot and filter your pVACseq
+- We now offer a graphical user interface, :ref:`pvacviz`, to run pVACseq as an alernative
+  to using the command line. pVACviz, can also be used to plot and filter your pVACseq
   results.
-
 
 Citation
 --------
