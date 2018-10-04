@@ -352,12 +352,12 @@ paths:
         in: "formData"
         description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
         type: "number"
-        default: 0.4
+        default: 0.25
       - name: "trna_vaf"
         in: "formData"
         description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
         type: "number"
-        default: 0.4
+        default: 0.25
       - name: "expn_val"
         in: "formData"
         description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"

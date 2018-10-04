@@ -66,6 +66,9 @@ This version adds a host of new features to pVACtools:
   can be run listing ``MHCflurry``, ``MHCnuggetsI`` (for MHC Class I alleles),
   and/or ``MHCnuggetsII`` (for MHC Class II alleles) as the prediction
   algorithms.
+- The default ``--tdna-vaf`` and ``--trna-vaf`` cutoff values have been
+  updated from 0.4 to 0.25. This is the minimum VAF threshold that an epitope
+  candidate must meet in order to pass the coverage filter.
 - We now offer a graphical user interface, :ref:`pvacviz`, to run pVACseq instead of using the
   command line. pVACviz, can also be used to plot and filter your pVACseq
   results.
