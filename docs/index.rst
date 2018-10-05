@@ -38,6 +38,7 @@ tools:
    install
    frequently_asked_questions
    contact
+   mailing_list
 
 New in version |version|
 ------------------------
@@ -76,6 +77,8 @@ This version adds a host of new features to pVACtools:
 - We now offer a graphical user interface, :ref:`pvacviz`, to run pVACseq as an alernative
   to using the command line. pVACviz, can also be used to plot and filter your pVACseq
   results.
+
+To stay up-to-date on the latest pVACtools releases please join our :ref:`mailing_list`.
 
 Citation
 --------
