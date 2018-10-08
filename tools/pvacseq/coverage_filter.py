@@ -53,7 +53,7 @@ def define_parser():
     )
     parser.add_argument(
         '--expn-val', type=int,
-        help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered"
+        help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered. "
              + "Default: 1",
         default=1
     )

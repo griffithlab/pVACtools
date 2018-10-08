@@ -61,7 +61,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         parser.add_argument(
             "-r", "--iedb-retries",type=int,
             default=5,
-            help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100."
+            help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100. "
                  + "Default: 5"
         )
         parser.add_argument(
