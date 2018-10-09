@@ -31,15 +31,15 @@ class TopScoreFilter:
 
     @classmethod
     def parser(cls, tool):
-        parser = argparse.ArgumentParser('%s top_score_filter' % tool)
+        parser = argparse.ArgumentParser('%s top_score_filter' % tool, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument(
             'input_file',
-            help="The final report .tsv file to filter"
+            help="The final report .tsv file to filter."
         )
         parser.add_argument(
             'output_file',
             help="Output .tsv file containing only the list of the top "
-                 + "epitope per variant"
+                 + "epitope per variant."
         )
         parser.add_argument(
             '-m', '--top-score-metric',
@@ -47,7 +47,6 @@ class TopScoreFilter:
             default='median',
             help="The ic50 scoring metric to use for filtering. "
                  + "lowest: Best MT Score - lowest MT ic50 binding score of all chosen prediction methods. "
-                 + "median: Median MT Score - median MT ic50 binding score of all chosen prediction methods. "
-                 + "Default: median"
+                 + "median: Median MT Score - median MT ic50 binding score of all chosen prediction methods."
         )
         return parser

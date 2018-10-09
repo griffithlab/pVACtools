@@ -3,15 +3,15 @@ import sys
 import csv
 
 def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser('pvacseq combine_parsed_outputs')
+    parser = argparse.ArgumentParser('pvacseq combine_parsed_outputs', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         'input_files',
         nargs="+",
-        help="List of parsed epitope files for different allele-length combinations (same sample)"
+        help="List of parsed epitope files for different allele-length combinations (same sample)."
     )
     parser.add_argument(
         'output_file', type=argparse.FileType('w'),
-        help="Combined output .tsv file"
+        help="Combined output .tsv file."
     )
     parser.add_argument(
         '--top-score-metric',
@@ -19,8 +19,7 @@ def main(args_input = sys.argv[1:]):
         default='median',
         help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
              + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
-             + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. "
-             + "Default: median"
+             + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods.",
     )
     args = parser.parse_args(args_input)
 

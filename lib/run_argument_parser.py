@@ -5,7 +5,7 @@ import lib
 
 class RunArgumentParser(metaclass=ABCMeta):
     def __init__(self, tool_name, input_file_help):
-        parser = argparse.ArgumentParser("%s run" % tool_name)
+        parser = argparse.ArgumentParser("%s run" % tool_name, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
         parser.add_argument(
             "input_file",
@@ -23,46 +23,45 @@ class RunArgumentParser(metaclass=ABCMeta):
             "allele", type=lambda s:[a for a in s.split(',')],
             help="Name of the allele to use for epitope prediction. "
                  + "Multiple alleles can be specified using a comma-separated list. "
-                 + "For a list of available alleles, use: `pvacseq valid_alleles`",
+                 + "For a list of available alleles, use: `pvacseq valid_alleles`.",
         )
         parser.add_argument(
             "prediction_algorithms",
             choices=PredictionClass.prediction_methods(),
             nargs="+",
-            help="The epitope prediction algorithms to use. Multiple prediction algorithms can be specified, separated by spaces",
+            help="The epitope prediction algorithms to use. Multiple prediction algorithms can be specified, separated by spaces.",
         )
         parser.add_argument(
             "output_dir",
-            help="The directory for writing all result files"
+            help="The directory for writing all result files."
         )
         parser.add_argument(
             "-e", "--epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
             help="Length of subpeptides (neoepitopes) to predict. "
                  + "Multiple epitope lengths can be specified using a comma-separated list. "
                  + "Typical epitope lengths vary between 8-11. "
-                 + "Required for Class I prediction algorithms",
+                 + "Required for Class I prediction algorithms.",
         )
         parser.add_argument(
             "--iedb-install-directory",
-            help="Directory that contains the local installation of IEDB MHC I and/or MHC II"
+            help="Directory that contains the local installation of IEDB MHC I and/or MHC II."
         )
         parser.add_argument(
             "-b","--binding-threshold", type=int,
             default=500,
-            help="Report only epitopes where the mutant allele has ic50 binding scores below this value. Default: 500",
+            help="Report only epitopes where the mutant allele has ic50 binding scores below this value.",
         )
         parser.add_argument(
             '--allele-specific-binding-thresholds',
             help="Use allele-specific binding thresholds. To print the allele-specific binding thresholds run `%s allele_specific_cutoffs`. " % tool_name
-                 + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used. Default: False",
+                 + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
             default=False,
             action='store_true',
         )
         parser.add_argument(
             "-r", "--iedb-retries",type=int,
             default=5,
-            help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100."
-                 + "Default: 5"
+            help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100.",
         )
         parser.add_argument(
             "-k", "--keep-tmp-files",
@@ -77,7 +76,7 @@ class PredictionRunArgumentParser(RunArgumentParser):
         self.parser.add_argument(
             "-l", "--peptide-sequence-length", type=int,
             default=21,
-            help="Length of the peptide sequence to use when creating the FASTA. Default: 21",
+            help="Length of the peptide sequence to use when creating the FASTA.",
         )
         self.parser.add_argument(
             '--normal-sample-name',
@@ -87,12 +86,12 @@ class PredictionRunArgumentParser(RunArgumentParser):
             '--net-chop-method',
             choices=lib.net_chop.methods,
             default=None,
-            help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0). ",
+            help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0).",
         )
         self.parser.add_argument(
             '--netmhc-stab',
             action='store_true',
-            help="Run NetMHCStabPan after all filtering and add stability predictions to predicted epitopes"
+            help="Run NetMHCStabPan after all filtering and add stability predictions to predicted epitopes."
         )
         self.parser.add_argument(
             '-m', '--top-score-metric',
@@ -100,35 +99,34 @@ class PredictionRunArgumentParser(RunArgumentParser):
             default='median',
             help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
                  + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
-                 + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. "
-                 + "Default: median"
+                 + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods."
         )
         self.parser.add_argument(
             '--net-chop-threshold', type=float,
             default=0.5,
-            help="NetChop prediction threshold. Default: 0.5",
+            help="NetChop prediction threshold.",
         )
         self.parser.add_argument(
             '-a', '--additional-report-columns',
             choices=['sample_name'],
-            help="Additional columns to output in the final report"
+            help="Additional columns to output in the final report."
         )
         self.parser.add_argument(
             "-s", "--fasta-size",type=int,
             default=200,
             help="Number of fasta entries per IEDB request. "
                  + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
-                 + "Needs to be an even number. Default: 200",
+                 + "Needs to be an even number.",
         )
         self.parser.add_argument(
             "-d", "--downstream-sequence-length",
             default='1000',
             help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
-                + "Use 'full' to include the full downstream sequence. Default: 1000"
+                + "Use 'full' to include the full downstream sequence."
         )
         self.parser.add_argument(
             '--exclude-NAs',
-            help="Exclude NA values from the filtered output. Default: False",
+            help="Exclude NA values from the filtered output.",
             default=False,
             action='store_true'
         )
@@ -149,66 +147,60 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         )
         self.parser.add_argument(
             "-p", "--phased-proximal-variants-vcf",
-            help="A VCF with phased proximal variant information"
+            help="A VCF with phased proximal variant information."
         )
         self.parser.add_argument(
             "-c", "--minimum-fold-change", type=int,
             default=0,
             help="Minimum fold change between mutant binding score and wild-type score. "
                  + "The default is 0, which filters no results, but 1 is often a sensible choice "
-                 + "(requiring that binding is better to the MT than WT). Default: 0",
+                 + "(requiring that binding is better to the MT than WT).",
         )
         self.parser.add_argument(
             '--normal-cov', type=int,
-            help="Normal Coverage Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 5",
+            help="Normal Coverage Cutoff. Sites above this cutoff will be considered.",
             default=5
         )
         self.parser.add_argument(
             '--tdna-cov', type=int,
-            help="Tumor DNA Coverage Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 10",
+            help="Tumor DNA Coverage Cutoff. Sites above this cutoff will be considered.",
             default=10
         )
         self.parser.add_argument(
             '--trna-cov', type=int,
-            help="Tumor RNA Coverage Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 10",
+            help="Tumor RNA Coverage Cutoff. Sites above this cutoff will be considered.",
             default=10
         )
         self.parser.add_argument(
             '--normal-vaf', type=int,
-            help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered. " +
-            "Default: 0.02",
+            help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered.",
             default=0.2
         )
         self.parser.add_argument(
             '--tdna-vaf', type=int,
-            help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 0.25",
+            help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered.",
             default=0.25
         )
         self.parser.add_argument(
             '--trna-vaf', type=int,
-            help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered. " +
-            "Default: 0.25",
+            help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered.",
             default=0.25
         )
         self.parser.add_argument(
             '--expn-val', type=int,
             default=1,
-            help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered. Default: 1",
+            help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered.",
         )
         self.parser.add_argument(
             "--maximum-transcript-support-level", type=int,
             help="The threshold to use for filtering epitopes on the transcript support level. "
-            +"Keep all epitopes with a transcript support level <= to this cutoff. Default: 1",
+            +"Keep all epitopes with a transcript support level <= to this cutoff.",
             default=1,
             choices=[1,2,3,4,5]
         )
         self.parser.add_argument(
             '--pass-only',
-            help="Only process VCF entries that are PASS. Default: False",
+            help="Only process VCF entries that are PASS.",
             default=False,
             action='store_true'
         )
@@ -230,5 +222,5 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
         )
         self.parser.add_argument(
             '-n', "--input-n-mer", default='25',
-            help="Length of the peptide sequence to use when creating the FASTA from the pVACseq TSV. Default: 21",
+            help="Length of the peptide sequence to use when creating the FASTA from the pVACseq TSV.",
         )
