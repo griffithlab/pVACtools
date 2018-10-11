@@ -61,7 +61,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         parser.add_argument(
             "-r", "--iedb-retries",type=int,
             default=5,
-            help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100."
+            help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100. "
                  + "Default: 5"
         )
         parser.add_argument(
@@ -177,19 +177,19 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
             default=10
         )
         self.parser.add_argument(
-            '--normal-vaf', type=int,
+            '--normal-vaf', type=float,
             help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered. " +
             "Default: 0.02",
-            default=0.2
+            default=0.02
         )
         self.parser.add_argument(
-            '--tdna-vaf', type=int,
+            '--tdna-vaf', type=float,
             help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered. " +
             "Default: 0.25",
             default=0.25
         )
         self.parser.add_argument(
-            '--trna-vaf', type=int,
+            '--trna-vaf', type=float,
             help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered. " +
             "Default: 0.25",
             default=0.25
