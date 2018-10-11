@@ -40,6 +40,15 @@ tools:
    contact
    mailing_list
 
+New in version |release|
+------------------------
+
+This is a hotfix release. It fixes the following issue(s):
+
+- In version 1.1 we updated VAFs to be fractions, rather than percentages. A
+  bug in this code change resulted in an error when using custom VAF cutoff values instead of the
+  default. This has now been fixed.
+
 New in version |version|
 ------------------------
 
