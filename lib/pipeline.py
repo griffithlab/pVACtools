@@ -61,6 +61,7 @@ class Pipeline(metaclass=ABCMeta):
         self.downstream_sequence_length  = kwargs.pop('downstream_sequence_length', 1000)
         self.keep_tmp_files              = kwargs.pop('keep_tmp_files', False)
         self.exclude_NAs                 = kwargs.pop('exclude_NAs', False)
+        self.pass_only                   = kwargs.pop('pass_only', False)
         self.normal_sample_name          = kwargs.pop('normal_sample_name', False)
         self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
@@ -153,6 +154,7 @@ class Pipeline(metaclass=ABCMeta):
             'input_file' : self.input_file,
             'output_file': self.tsv_file_path(),
             'sample_name': self.sample_name,
+            'pass_only': self.pass_only,
         }
         for attribute in [
             'gene_expn_file',
