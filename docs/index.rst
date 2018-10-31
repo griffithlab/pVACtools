@@ -45,9 +45,11 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issue(s):
 
-- In version 1.1 we updated VAFs to be fractions, rather than percentages. A
-  bug in this code change resulted in an error when using custom VAF cutoff values instead of the
-  default. This has now been fixed.
+- In version 1.1.0 we added a ``--pass-only`` flag to pVACseq that would
+  result in only variants with ``FILTER`` of ``PASS`` or ``.`` getting processed.
+  However, this option was not getting passed along to the pVACseq process
+  correctly, resulting in this option not taking effect. This hotfix release
+  fixes this issue and the ``--pass-only`` flag should now work as expected.
 
 New in version |version|
 ------------------------
