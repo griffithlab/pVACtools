@@ -213,11 +213,12 @@ class MHCflurry(MHCI):
                 seq_num = match.group(1)
             else:
                 epitopes = self.determine_neoepitopes(line.rstrip(), epitope_length)
-                df = predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
-                df['seq_num'] = seq_num
-                df['start'] = df.index+1
-                df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
-                results = results.append(df)
+                if len(epitopes) > 0:
+                    df = predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
+                    df['seq_num'] = seq_num
+                    df['start'] = df.index+1
+                    df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
+                    results = results.append(df)
         return (results, 'pandas')
 
 class MHCnuggetsI(MHCI):
