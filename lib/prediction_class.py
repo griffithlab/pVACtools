@@ -365,7 +365,7 @@ class MHCnuggetsII(MHCII):
 
     def find_neoepitopes(self, sequence):
         epitopes = defaultdict(list)
-        for i in range(0, len(sequence)-16):
+        for i in range(0, len(sequence)-14):
             epitope = sequence[i:i+15]
             epitopes[epitope].append(i+1)
         return epitopes
