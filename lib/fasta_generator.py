@@ -329,6 +329,7 @@ class VectorFastaGenerator():
         self.input_file       = kwargs['input_file']
         self.output_file      = kwargs['output_file']
         self.output_key_file  = kwargs['output_key_file']
+        self.epitope_length   = kwargs['epitope_length']
 
     def execute(self):
         seq_dict = dict()
@@ -359,6 +360,8 @@ class VectorFastaGenerator():
 
         for seq_id in epitopes:
             sequence = epitopes[seq_id]
+            if len(sequence) < self.epitope_length:
+                continue
             fasta_sequences.setdefault(sequence, []).append(seq_id)
 
         writer = open(self.output_file, 'w')
