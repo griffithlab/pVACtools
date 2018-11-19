@@ -45,6 +45,18 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issue(s):
 
+- When using the MHCnuggets prediction algorithm for MHC class II alleles
+  (``MHCnuggetsII``) not all epitope sequences were predicted for inframe
+  insertions. This issues has now been fixed.
+- For MHCflurry cases with peptide sequences that were shorter than the
+  desired epitope length were not handled correctly which resulted in an
+  error. This issues has been resolved in this release.
+
+New in version 1.1.2
+------------------------
+
+This is a hotfix release. It fixes the following issue(s):
+
 - In version 1.1.0 we added a ``--pass-only`` flag to pVACseq that would
   result in only variants with ``FILTER`` of ``PASS`` or ``.`` getting processed.
   However, this option was not getting passed along to the pVACseq process
