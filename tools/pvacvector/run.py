@@ -149,9 +149,10 @@ def create_graph(iedb_results, seq_tuples):
             else:
                 key = str(ID_1 + "|" + space + "|" + ID_2)
             worst_case = sys.maxsize
-            for allele in iedb_results[key]:
-                if iedb_results[key][allele]['min_score'] < worst_case:
-                    worst_case = iedb_results[key][allele]['min_score']
+            if key in iedb_results:
+                for allele in iedb_results[key]:
+                    if iedb_results[key][allele]['min_score'] < worst_case:
+                        worst_case = iedb_results[key][allele]['min_score']
             if Paths.has_edge(ID_1, ID_2) and Paths[ID_1][ID_2]['weight'] < worst_case:
                 Paths[ID_1][ID_2]['weight'] = worst_case
                 if space is not None:
