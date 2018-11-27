@@ -220,11 +220,8 @@ class VectorVisualization:
     #print turtle screen to a postscript file, convert to pdf
     def output_screen(self):
         ps_file = os.path.join(self.output_directory, "vector.ps")
-        out_file = os.path.join(self.output_directory, "vector.jpg")
         ts = self.turtle.getscreen()
         ts.getcanvas().postscript(file=ps_file)
-        os.system('convert -density 300 -quality 100 ' + ps_file + " " + out_file)
-        os.remove(ps_file)
 
     #select color from scheme
     def get_color(self, count):
