@@ -98,7 +98,7 @@ class VectorVisualization:
         #turtle.mainloop()
 
     def setup_turtle(self):
-        turtle.setup(800,600)
+        turtle.setup(1200,600)
         #myWin = turtle.Screen()
         turtle.colormode(255)
         turtle.mode("logo")
