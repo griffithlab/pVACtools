@@ -446,7 +446,7 @@ class VcfConverter(InputFileConverter):
                                     (transcript, value) = transcript_expression.split('|')
                                     if transcript == transcript_name:
                                         output_row['transcript_expression'] = value
-                            else:
+                            elif transcript_expressions is not None:
                                 (transcript, value) = transcript_expressions.split('|')
                                 if transcript == transcript_name:
                                     output_row['transcript_expression'] = value
@@ -465,7 +465,7 @@ class VcfConverter(InputFileConverter):
                                     (gene, value) = gene_expression.split('|')
                                     if ensembl_gene_id == gene or gene_name == gene:
                                         output_row['gene_expression'] = value
-                            else:
+                            elif gene_expressions is not None:
                                 (gene, value) = gene_expressions.split('|')
                                 if ensembl_gene_id == gene or gene_name == gene:
                                     output_row['gene_expression'] = value
