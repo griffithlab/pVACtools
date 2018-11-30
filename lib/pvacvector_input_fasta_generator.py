@@ -7,12 +7,13 @@ from .fasta_generator import *
 import math
 
 class PvacvectorInputFastaGenerator():
-    def __init__(self, pvacseq_tsv, input_vcf, output_dir, n_mer):
+    def __init__(self, pvacseq_tsv, input_vcf, output_dir, n_mer, sample_name):
         self.input_tsv = pvacseq_tsv
         self.input_vcf = input_vcf
         self.output_dir = output_dir
         self.output_file = os.path.join(self.output_dir, "vector_input.fa")
         self.n_mer = int(n_mer)
+        self.sample_name = sample_name
 
     def parse_choosen_epitopes(self):
         epitopes = {}
@@ -38,7 +39,7 @@ class PvacvectorInputFastaGenerator():
     #get necessary data from initial pvacseq input vcf
     def parse_original_vcf(self):
         tsv_file = tempfile.NamedTemporaryFile()
-        VcfConverter(**{'input_file': self.input_vcf, 'output_file': tsv_file.name}).execute()
+        VcfConverter(**{'input_file': self.input_vcf, 'output_file': tsv_file.name, 'sample_name': self.sample_name}).execute()
         fasta_file = tempfile.NamedTemporaryFile()
         key_file = tempfile.NamedTemporaryFile()
         FastaGenerator(**{
