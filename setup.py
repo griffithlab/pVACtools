@@ -90,7 +90,8 @@ setup(
         'mhcflurry',
         'mhcnuggets',
         'pysam',
-        'tensorflow==1.8.0'
+        'tensorflow==1.8.0',
+        'Pillow'
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,
