@@ -45,6 +45,17 @@ New in version |release|
 
 This is a hotfix release. It fixes the following issue(s):
 
+- When running pVACvector with a with a pVACseq input file and the
+  corresponding VCF, the sample name wasn't being passed along correctly which
+  would cause an error if the input VCF was a multi-sample VCF.
+- pVACseq would throw an error if the value of a gene or transcript expression
+  field was empty.
+
+New in version 1.1.3
+--------------------
+
+This is a hotfix release. It fixes the following issue(s):
+
 - When using the MHCnuggets prediction algorithm for MHC class II alleles
   (``MHCnuggetsII``) not all epitope sequences were predicted for inframe
   insertions. This issues has now been fixed.
