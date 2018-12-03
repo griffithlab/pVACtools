@@ -16,6 +16,7 @@ as visualizing the results of your runs.
    :maxdepth: 2
    :glob:
 
+   pvacviz/install
    pvacviz/run
    pvacviz/directories
    pvacviz/starting
