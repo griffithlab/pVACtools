@@ -101,7 +101,7 @@ class FastaGenerator(metaclass=ABCMeta):
         mutation_subsequence_stop_position = position
         wildtype_subsequence = full_wildtype_sequence[start_position:wildtype_subsequence_stop_position]
         mutation_start_subsequence = full_wildtype_sequence[start_position:mutation_subsequence_stop_position]
-        return start_position, wildtype_subsequence, mutation_start_subsequence
+        return wildtype_subsequence, mutation_start_subsequence
 
     def add_proximal_variants(self, somatic_variant_index, wildtype_subsequence, mutation_position, original_position, germline_variants_only):
         mutation_offset = original_position - mutation_position
@@ -213,10 +213,11 @@ class FastaGenerator(metaclass=ABCMeta):
                 mutant_amino_acid_with_proximal_variants = mutant_amino_acid
 
             if variant_type == 'FS':
-                mutation_start_position, wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
+                wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
                 downstream_sequence = line['downstream_amino_acid_sequence']
                 if self.downstream_sequence_length and len(downstream_sequence) > self.downstream_sequence_length:
                     downstream_sequence = downstream_sequence[0:self.downstream_sequence_length]
+                mutation_start_position = len(left_flanking_subsequence)
                 wildtype_subsequence = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, True)
                 left_flanking_subsequence_with_proximal_variants = self.add_proximal_variants(line['index'], left_flanking_subsequence, mutation_start_position, position, False)
                 #The caveat here is that if a nearby variant is in the downstream sequence, the protein sequence would be further altered, which we aren't taking into account.
