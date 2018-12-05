@@ -44,6 +44,17 @@ New in version |release|
 ------------------------
 
 This is a hotfix release. It fixes the following issue(s):
+- When running pVACseq with a phased input VCF the mutation position offset
+  of a framshift somatic variant to their proximal variants was not getting
+  calculated correctly, leading to errors.
+- For running pVACvector we removed a dependency on a commandline tool by
+  using a python library instead. This allowed us to remove a system call
+  to a tool that required standalone installation by the user.
+
+New in version 1.1.4
+--------------------
+
+This is a hotfix release. It fixes the following issue(s):
 
 - When running pVACvector with a with a pVACseq input file and the
   corresponding VCF, the sample name wasn't being passed along correctly which
