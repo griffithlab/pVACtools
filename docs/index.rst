@@ -44,6 +44,7 @@ New in version |release|
 ------------------------
 
 This is a hotfix release. It fixes the following issue(s):
+
 - When running pVACseq with a phased input VCF the mutation position offset
   of a framshift somatic variant to their proximal variants was not getting
   calculated correctly, leading to errors.
