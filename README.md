@@ -23,6 +23,8 @@ A browser-based user interface that assists users in launching, managing, review
 The pVACapi provides a HTTP REST interface to the pVACtools suite.
 
 ## Citation
+Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman, Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. <a href="https://doi.org/10.1038/s41588-018-0283-9">Accounting for proximal variants improves neoantigen prediction</a>. Nature Genetics. 2018, DOI: 10.1038/s41588-018-0283-9. PMID: <a href="https://www.ncbi.nlm.nih.gov/pubmed/30510237">30510237</a>.
+
 Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. <a href="http://www.genomemedicine.com/content/8/1/11">pVAC-Seq: A genome-guided in silico approach to identifying tumor neoantigens</a>. Genome Medicine. 2016, 8:11, DOI: 10.1186/s13073-016-0264-5. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/26825632">26825632</a>.
 
 ## License
