@@ -37,6 +37,7 @@ tools:
 
    install
    frequently_asked_questions
+   :ref:`citation`
    contact
    mailing_list
 
