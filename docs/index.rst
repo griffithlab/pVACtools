@@ -37,7 +37,7 @@ tools:
 
    install
    frequently_asked_questions
-   Citation <citation>
+   citation
    contact
    mailing_list
 
