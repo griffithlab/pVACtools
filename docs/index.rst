@@ -135,6 +135,8 @@ This version adds a host of new features to pVACtools:
 
 To stay up-to-date on the latest pVACtools releases please join our :ref:`mailing_list`.
 
+.. _citation:
+
 Citation
 --------
 
