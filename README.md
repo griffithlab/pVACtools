@@ -41,7 +41,7 @@ Once you have set up your Python 3.5 environment correctly you can use pip to in
 
 After you have pip installed/upgraded, type the following command on your Terminal:
 
-`pip install pvactools`
+`pip install pvactools[API]`
 
 You can check that pVACtools has been installed under the default environment by listing all installed packages:
 
@@ -55,7 +55,7 @@ You can also check the installed version:
 
 If you have an old version of pVACtools installed you might want to consider upgrading to the latest version:
 
-`pip install pvactools --upgrade`
+`pip install pvactools[API] --upgrade`
 
 ## Documentation
 
