@@ -136,10 +136,16 @@ This version adds a host of new features to pVACtools:
 
 To stay up-to-date on the latest pVACtools releases please join our :ref:`mailing_list`.
 
-.. _citation:
+Citations
+---------
 
-Citation
---------
+Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Christopher A Miller,
+Alexander T Wollam, Huiming Xia, Connor J Liu, Sidi Zhao, Yang-Yang Feng,
+Aaron P Graubert, Amber Z Wollam, Jonas Neichin, Megan Neveau, Jason Walker,
+William E Gillanders, Elaine R Mardis, Obi L Griffith, Malachi Griffith.
+`pVACtools: a computational toolkit to select and visualize cancer
+neoantigens <https://doi.org/10.1101/501817>`_.
+bioRxiv 501817; doi: https://doi.org/10.1101/501817
 
 Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman, Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. `Accounting for proximal variants improves neoantigen prediction <https://www.nature.com/articles/s41588-018-0283-9>`_. Nature Genetics. 2018, DOI: 10.1038/s41588-018-0283-9. PMID: `30510237 <https://www.ncbi.nlm.nih.gov/pubmed/30510237>`_.
 
