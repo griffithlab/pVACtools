@@ -10,6 +10,7 @@ dependencies:
 - wheel=0.29.0=py35_0
 - xz=5.0.5=1
 - zlib=1.2.8=0
+- requests
 - pip:
   - momoko>=2.2.3
   - psycopg2>=2.6.1
@@ -17,7 +18,6 @@ dependencies:
   - sphinxjp.themes.basicstrap
   - sphinxcontrib-programoutput
   - PyVCF
-  - requests
   - PyYAML
   - biopython
   - simanneal
