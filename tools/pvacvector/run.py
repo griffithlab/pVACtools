@@ -105,16 +105,19 @@ def run_pipelines(input_file, base_output_dir, args):
     return parsed_output_files
 
 def find_min_scores(parsed_output_files, args):
-    iedb_results = {}
-    epitopes = []
-    indexes = []
+    min_scores = {}
+    indexes_with_good_binders = []
+    #find indexes that contain a good binder so that they can be excluded from further processing
+    #we don't want any peptide-spacer-peptide combination (aka index) that contains a good binder
     for parsed_output_file in parsed_output_files:
         with open(parsed_output_file, 'r') as parsed:
             reader = csv.DictReader(parsed, delimiter="\t")
             for row in reader:
                 index = row['Index']
-                allele = row['HLA Allele']
+                if index in indexes_with_good_binders:
+                    continue
 
+                allele = row['HLA Allele']
                 score = float(row['Best MT Score'])
                 if args.allele_specific_binding_thresholds:
                     threshold = PredictionClass.cutoff_for_allele(entry[allele])
@@ -122,18 +125,23 @@ def find_min_scores(parsed_output_files, args):
                 else:
                     threshold = float(args.binding_threshold)
                 if score < threshold:
+                    indexes_with_good_binders.append(index)
+
+    for parsed_output_file in parsed_output_files:
+        with open(parsed_output_file, 'r') as parsed:
+            reader = csv.DictReader(parsed, delimiter="\t")
+            for row in reader:
+                index = row['Index']
+                if index in indexes_with_good_binders:
                     continue
 
-                if index not in iedb_results:
-                    iedb_results[index] = {}
-                if allele not in iedb_results[index]:
-                    iedb_results[index][allele] = {}
-                if 'min_score' in iedb_results[index][allele]:
-                    iedb_results[index][allele]['min_score'] = min(iedb_results[index][allele]['min_score'], score)
+                allele = row['HLA Allele']
+                score = float(row['Best MT Score'])
+                if index in min_scores:
+                    min_scores[index] = min(min_scores[index], score)
                 else:
-                    iedb_results[index][allele]['min_score'] = score
-                epitopes.append(row['MT Epitope Seq'])
-    return (iedb_results, epitopes)
+                    min_scores[index] = score
+    return min_scores
 
 def create_graph(iedb_results, seq_tuples):
     Paths = nx.DiGraph()
@@ -141,18 +149,22 @@ def create_graph(iedb_results, seq_tuples):
     for ep in seq_tuples:
         ID_1 = ep[0]
         ID_2 = ep[1]
-        Paths.add_node(ID_1)
-        Paths.add_node(ID_2)
         for space in spacers:
             if space is None:
                 key = str(ID_1 + "|" + ID_2)
             else:
                 key = str(ID_1 + "|" + space + "|" + ID_2)
-            worst_case = sys.maxsize
             if key in iedb_results:
-                for allele in iedb_results[key]:
-                    if iedb_results[key][allele]['min_score'] < worst_case:
-                        worst_case = iedb_results[key][allele]['min_score']
+                worst_case = iedb_results[key]
+            else:
+                continue
+
+            if not Paths.has_node(ID_1):
+                Paths.add_node(ID_1)
+
+            if not Paths.has_node(ID_2):
+                Paths.add_node(ID_2)
+
             if Paths.has_edge(ID_1, ID_2) and Paths[ID_1][ID_2]['weight'] < worst_case:
                 Paths[ID_1][ID_2]['weight'] = worst_case
                 if space is not None:
@@ -278,8 +290,8 @@ def main(args_input=sys.argv[1:]):
     seq_tuples = list(itertools.permutations(seq_keys, 2))
 
     parsed_output_files = run_pipelines(input_file, base_output_dir, args)
-    (iedb_scores, epitopes) = find_min_scores(parsed_output_files, args)
-    Paths = create_graph(iedb_scores, seq_tuples)
+    min_scores = find_min_scores(parsed_output_files, args)
+    Paths = create_graph(min_scores, seq_tuples)
     distance_matrix = create_distance_matrix(Paths)
     results_file = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
     if 'DISPLAY' in os.environ.keys():
