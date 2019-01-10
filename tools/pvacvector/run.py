@@ -197,7 +197,7 @@ def create_distance_matrix(Paths):
     return distance_matrix
 
 def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args):
-    init_state = sorted(seq_dict)
+    init_state = sorted(Paths.nodes())
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
     peptide = OptimalPeptide(init_state, distance_matrix)
@@ -205,7 +205,7 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
     peptide.save_state_on_exit = False
     state, e = peptide.anneal()
     while state[0] != seq_keys[0]:
-        state = state[1:] + state[:1] 
+        state = state[1:] + state[:1]
     print("%i distance :" % e)
 
     for id in state:
@@ -218,17 +218,19 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
         cumulative_weight = 0
         all_scores = list()
 
-        for i in range(0, len(state)):
+        for i in range(0, (len(state) - 1)):
             name.append(state[i])
-            try:
-                min_score = min(min_score, Paths[state[i]][state[i + 1]]['weight'])
-                cumulative_weight += Paths[state[i]][state[i + 1]]['weight']
-                all_scores.append(str(Paths[state[i]][state[i + 1]]['weight']))
-                spacer = Paths[state[i]][state[i + 1]]['spacer']
+            if Paths.has_edge(state[i], state[i + 1]):
+                edge = Paths[state[i]][state[i + 1]]
+                min_score = min(min_score, edge['weight'])
+                cumulative_weight += edge['weight']
+                all_scores.append(str(edge['weight']))
+                spacer = edge['spacer']
                 if spacer is not '':
                     name.append(spacer)
-            except IndexError:
-                continue
+            else:
+                sys.exit("Unable to find path. All possible peptides for edge '{} - spacer - {}' contain at least one eptiope that is a good binder.".format(state[i], state[i + 1]))
+        name.append(state[-1])
         median_score = str(cumulative_weight/len(all_scores))
         peptide_id_list = ','.join(name)
         score_list = ','.join(all_scores)
