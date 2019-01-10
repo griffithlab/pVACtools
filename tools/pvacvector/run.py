@@ -180,6 +180,32 @@ def create_graph(iedb_results, seq_tuples):
     print("Graph contains " + str(len(Paths)) + " nodes and " + str(Paths.size()) + " edges.")
     return Paths
 
+def check_graph_valid(Paths):
+    error_text = ('A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
+                 '1) increasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
+                 '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)')
+
+    n_nodes_without_outgoing_edges = 0
+    for node in Paths.nodes():
+        if len(Paths.out_edges(node)) == 0:
+            n_nodes_without_outgoing_edges += 1
+    if n_nodes_without_outgoing_edges > 1:
+        raise Exception("Unable to create valid graph. No outgoing edges for more than one node.\n {}".format(error_text))
+
+    n_nodes_without_incoming_edges = 0
+    for node in Paths.nodes():
+        if len(Paths.in_edges(node)) == 0:
+            n_nodes_without_incoming_edges += 1
+    if n_nodes_without_incoming_edges > 1:
+        raise Exception("Unable to create valid graph. No incoming edges for more than one node.\n {}".format(error_text))
+
+    n_nodes_without_any_edges = 0
+    for node in Paths.nodes():
+        if len(Paths.in_edges(node)) == 0 and len(Paths.out_edges(node)) == 0:
+            n_nodes_without_any_edges += 1
+    if n_nodes_without_any_edges > 0:
+        raise Exception("Unable to create valid graph. No edges for at least one node.\n {}".format(error_text))
+
 def create_distance_matrix(Paths):
     print("Finding path.")
     distance_matrix = {}
@@ -292,6 +318,7 @@ def main(args_input=sys.argv[1:]):
     parsed_output_files = run_pipelines(input_file, base_output_dir, args)
     min_scores = find_min_scores(parsed_output_files, args)
     Paths = create_graph(min_scores, seq_tuples)
+    check_graph_valid(Paths)
     distance_matrix = create_distance_matrix(Paths)
     results_file = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
     if 'DISPLAY' in os.environ.keys():
