@@ -177,6 +177,10 @@ def create_graph(iedb_results, seq_tuples):
                 else:
                     Paths.add_edge(ID_1, ID_2, weight=worst_case, spacer='')
 
+    for node in Paths.nodes():
+        if len(nx.edges(Paths, node)) == 0:
+            sys.exit("Unable to create cyclical graph. No outgoing edges for node {}. All possible combinations of '{} - spacer - other peptide' contain at least one good-binding epitope".format(node, node))
+
     print("Graph contains " + str(len(Paths)) + " nodes and " + str(Paths.size()) + " edges.")
     return Paths
 
