@@ -129,7 +129,8 @@ class TestPvacvector(unittest.TestCase):
                 '-v', self.input_vcf,
                 '-e', self.epitope_length,
                 '-n', self.input_n_mer,
-                '-k'
+                '-k',
+                '-b', '50',
             ])
 
             #conversion from vcf to fasta file producing correct output, input file for vaccine design algorithm
