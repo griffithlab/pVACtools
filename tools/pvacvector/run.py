@@ -149,11 +149,11 @@ def create_graph(iedb_results, seq_tuples):
     for ep in seq_tuples:
         ID_1 = ep[0]
         ID_2 = ep[1]
-        for space in spacers:
-            if space is None:
+        for spacer in spacers:
+            if spacer is None:
                 key = str(ID_1 + "|" + ID_2)
             else:
-                key = str(ID_1 + "|" + space + "|" + ID_2)
+                key = str(ID_1 + "|" + spacer + "|" + ID_2)
             if key in iedb_results:
                 worst_case = iedb_results[key]
             else:
@@ -167,13 +167,13 @@ def create_graph(iedb_results, seq_tuples):
 
             if Paths.has_edge(ID_1, ID_2) and Paths[ID_1][ID_2]['weight'] < worst_case:
                 Paths[ID_1][ID_2]['weight'] = worst_case
-                if space is not None:
-                    Paths[ID_1][ID_2]['spacer'] = space
+                if spacer is not None:
+                    Paths[ID_1][ID_2]['spacer'] = spacer
                 else:
                     Paths[ID_1][ID_2]['spacer'] = ''
             elif not Paths.has_edge(ID_1, ID_2):
-                if space is not None:
-                    Paths.add_edge(ID_1, ID_2, weight=worst_case, spacer=space)
+                if spacer is not None:
+                    Paths.add_edge(ID_1, ID_2, weight=worst_case, spacer=spacer)
                 else:
                     Paths.add_edge(ID_1, ID_2, weight=worst_case, spacer='')
 
