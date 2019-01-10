@@ -130,7 +130,6 @@ class TestPvacvector(unittest.TestCase):
                 '-e', self.epitope_length,
                 '-n', self.input_n_mer,
                 '-k',
-                '-b', '50',
             ])
 
             #conversion from vcf to fasta file producing correct output, input file for vaccine design algorithm
@@ -143,29 +142,5 @@ class TestPvacvector(unittest.TestCase):
             #vaccine visualization producing image
             self.assertTrue(os.path.exists(image_out))
             self.assertTrue(os.stat(image_out).st_size > 0)
-
-            output_dir.cleanup()
-
-    def test_error_path_not_cyclical(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            test_data_directory(),
-            'generate_fa',
-        ))) as mock_request:
-            output_dir = tempfile.TemporaryDirectory()
-
-            with self.assertRaises(Exception) as context:
-                run.main([
-                    self.input_tsv,
-                    self.test_run_name,
-                    self.allele,
-                    self.method,
-                    output_dir.name,
-                    '-v', self.input_vcf,
-                    '-e', self.epitope_length,
-                    '-n', self.input_n_mer,
-                    '-k',
-                ])
-            self.assertTrue('Unable to create cyclical graph. No outgoing edges for node ENOX1.ENST00000261488.FS.55C/CA_pos17_len9.' in str(context.exception))
 
             output_dir.cleanup()
