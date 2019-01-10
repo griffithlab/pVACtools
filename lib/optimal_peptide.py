@@ -20,7 +20,10 @@ class OptimalPeptide(Annealer):
         """Calculates the length of the route."""
         e = 0
         for i in range(len(self.state)):
-            e += self.distance_matrix[self.state[i - 1]][self.state[i]]
+            if self.state[i - 1] in self.distance_matrix and self.state[i] in self.distance_matrix[self.state[i - 1]]:
+                e += self.distance_matrix[self.state[i - 1]][self.state[i]]
+            else:
+                return 0
         return e
 
     def anneal(self):
