@@ -109,6 +109,7 @@ def find_min_scores(parsed_output_files, args):
     indexes_with_good_binders = []
     #find indexes that contain a good binder so that they can be excluded from further processing
     #we don't want any peptide-spacer-peptide combination (aka index) that contains a good binder
+    #Find min score of all the epitopes of each of the remaining peptide-spacer-peptide combinations 
     for parsed_output_file in parsed_output_files:
         with open(parsed_output_file, 'r') as parsed:
             reader = csv.DictReader(parsed, delimiter="\t")
@@ -129,24 +130,17 @@ def find_min_scores(parsed_output_files, args):
                     threshold = float(args.binding_threshold)
                 if score < threshold:
                     indexes_with_good_binders.append(index)
-
-    for parsed_output_file in parsed_output_files:
-        with open(parsed_output_file, 'r') as parsed:
-            reader = csv.DictReader(parsed, delimiter="\t")
-            for row in reader:
-                index = row['Index']
-                if index in indexes_with_good_binders:
                     continue
 
-                allele = row['HLA Allele']
-                if args.top_score_metric == 'lowest':
-                    score = float(row['Best MT Score'])
-                elif args.top_score_metric == 'median':
-                    score = float(row['Median MT Score'])
                 if index in min_scores:
                     min_scores[index] = min(min_scores[index], score)
                 else:
                     min_scores[index] = score
+
+    for index in indexes_with_good_binders:
+        if index in min_scores:
+            del min_scores[index]
+
     return min_scores
 
 def create_graph(iedb_results, seq_tuples):
