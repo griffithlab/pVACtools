@@ -59,6 +59,15 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true',
         )
         parser.add_argument(
+            '-m', '--top-score-metric',
+            choices=['lowest', 'median'],
+            default='median',
+            help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
+                 + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
+                 + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. "
+                 + "Default: median"
+        )
+        parser.add_argument(
             "-r", "--iedb-retries",type=int,
             default=5,
             help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100. "
@@ -93,15 +102,6 @@ class PredictionRunArgumentParser(RunArgumentParser):
             '--netmhc-stab',
             action='store_true',
             help="Run NetMHCStabPan after all filtering and add stability predictions to predicted epitopes"
-        )
-        self.parser.add_argument(
-            '-m', '--top-score-metric',
-            choices=['lowest', 'median'],
-            default='median',
-            help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
-                 + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
-                 + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. "
-                 + "Default: median"
         )
         self.parser.add_argument(
             '--net-chop-threshold', type=float,
