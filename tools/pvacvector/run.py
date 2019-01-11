@@ -255,7 +255,7 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
                 if spacer is not '':
                     name.append(spacer)
             else:
-                sys.exit("Unable to find path. All possible peptides for edge '{} - spacer - {}' contain at least one eptiope that is a good binder.".format(state[i], state[i + 1]))
+                sys.exit("Unable to find path. All possible peptides for edge '{} - spacer - {}' contain at least one epitope that is a good binder.".format(state[i], state[i + 1]))
         name.append(state[-1])
         median_score = str(cumulative_weight/len(all_scores))
         peptide_id_list = ','.join(name)
