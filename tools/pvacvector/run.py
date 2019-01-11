@@ -118,7 +118,10 @@ def find_min_scores(parsed_output_files, args):
                     continue
 
                 allele = row['HLA Allele']
-                score = float(row['Best MT Score'])
+                if args.top_score_metric == 'lowest':
+                    score = float(row['Best MT Score'])
+                elif args.top_score_metric == 'median':
+                    score = float(row['Median MT Score'])
                 if args.allele_specific_binding_thresholds:
                     threshold = PredictionClass.cutoff_for_allele(entry[allele])
                     threshold = float(args.binding_threshold) if threshold is None else float(threshold)
@@ -136,7 +139,10 @@ def find_min_scores(parsed_output_files, args):
                     continue
 
                 allele = row['HLA Allele']
-                score = float(row['Best MT Score'])
+                if args.top_score_metric == 'lowest':
+                    score = float(row['Best MT Score'])
+                elif args.top_score_metric == 'median':
+                    score = float(row['Median MT Score'])
                 if index in min_scores:
                     min_scores[index] = min(min_scores[index], score)
                 else:
