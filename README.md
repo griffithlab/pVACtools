@@ -23,6 +23,10 @@ A browser-based user interface that assists users in launching, managing, review
 The pVACapi provides a HTTP REST interface to the pVACtools suite.
 
 ## Citation
+Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Christopher A Miller, Alexander T Wollam, Huiming Xia, Connor J Liu, Sidi Zhao, Yang-Yang Feng, Aaron P Graubert, Amber Z Wollam, Jonas Neichin, Megan Neveau, Jason Walker, William E Gillanders, Elaine R Mardis, Obi L Griffith, Malachi Griffith. [pVACtools: a computational toolkit to select and visualize cancer neoantigens](https://doi.org/10.1101/501817). bioRxiv 501817; doi: https://doi.org/10.1101/501817
+
+Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman, Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. <a href="https://doi.org/10.1038/s41588-018-0283-9">Accounting for proximal variants improves neoantigen prediction</a>. Nature Genetics. 2018, DOI: 10.1038/s41588-018-0283-9. PMID: <a href="https://www.ncbi.nlm.nih.gov/pubmed/30510237">30510237</a>.
+
 Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. <a href="http://www.genomemedicine.com/content/8/1/11">pVAC-Seq: A genome-guided in silico approach to identifying tumor neoantigens</a>. Genome Medicine. 2016, 8:11, DOI: 10.1186/s13073-016-0264-5. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/26825632">26825632</a>.
 
 ## License
@@ -39,7 +43,7 @@ Once you have set up your Python 3.5 environment correctly you can use pip to in
 
 After you have pip installed/upgraded, type the following command on your Terminal:
 
-`pip install pvactools`
+`pip install pvactools[API]`
 
 You can check that pVACtools has been installed under the default environment by listing all installed packages:
 
@@ -53,7 +57,7 @@ You can also check the installed version:
 
 If you have an old version of pVACtools installed you might want to consider upgrading to the latest version:
 
-`pip install pvactools --upgrade`
+`pip install pvactools[API] --upgrade`
 
 ## Documentation
 
