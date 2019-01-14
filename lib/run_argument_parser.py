@@ -67,7 +67,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         parser.add_argument(
             "-k", "--keep-tmp-files",
             action='store_true',
-            help="Keep intermediate output files. This migt be useful for debugging purposes.",
+            help="Keep intermediate output files. This might be useful for debugging purposes.",
         )
         self.parser = parser
 
@@ -230,5 +230,5 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
         )
         self.parser.add_argument(
             '-n', "--input-n-mer", default='25',
-            help="Length of the peptide sequence to use when creating the FASTA from the pVACseq TSV. Default: 21",
+            help="Length of the peptide sequence to use when creating the FASTA from the pVACseq TSV. Default: 25",
         )
