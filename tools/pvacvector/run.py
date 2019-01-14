@@ -49,6 +49,7 @@ def run_pipelines(input_file, base_output_dir, args):
         'input_file'      : input_file,
         'input_file_type' : 'pvacvector_input_fasta',
         'sample_name'     : args.sample_name,
+        'n_threads'       : args.n_threads,
     }
 
     parsed_output_files = []
