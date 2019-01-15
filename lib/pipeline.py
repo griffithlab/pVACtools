@@ -328,25 +328,26 @@ class MHCIPipeline(Pipeline):
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
             fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
-            if self.input_file_type == 'pvacvector_input_fasta':
-                split_tsv_file_path = self.tsv_file_path()
-            else:
-                split_tsv_file_path       = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
-            split_fasta_file_path     = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
-            if os.path.exists(split_fasta_file_path):
-                status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
-                continue
-            split_fasta_key_file_path = split_fasta_file_path + '.key'
-            status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
             generate_fasta_params = {
-                'input_file'                : split_tsv_file_path,
                 'peptide_sequence_length'   : self.peptide_sequence_length,
-                'epitope_length'            : max(self.epitope_lengths),
-                'output_file'               : split_fasta_file_path,
-                'output_key_file'           : split_fasta_key_file_path,
                 'downstream_sequence_length': self.downstream_sequence_length,
                 'proximal_variants_file'    : self.proximal_variants_file,
             }
+            split_fasta_file_path = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
+            if os.path.exists(split_fasta_file_path):
+                status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
+                continue
+            if self.input_file_type == 'pvacvector_input_fasta':
+                generate_fasta_params['input_file'] = self.tsv_file_path()
+                generate_fasta_params['output_file_prefix'] = split_fasta_file_path
+                generate_fasta_params['epitope_lengths'] = self.epitope_lengths
+            else:
+                split_fasta_key_file_path = split_fasta_file_path + '.key'
+                generate_fasta_params['input_file'] = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
+                generate_fasta_params['epitope_length'] = max(self.epitope_lengths)
+                generate_fasta_params['output_file'] = split_fasta_file_path
+                generate_fasta_params['output_key_file'] = split_fasta_key_file_path
+            status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
             fasta_generator = self.fasta_generator(generate_fasta_params)
             fasta_generator.execute()
         status_message("Completed")
@@ -358,7 +359,10 @@ class MHCIPipeline(Pipeline):
             fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
             for a in self.alleles:
                 for epl in self.epitope_lengths:
-                    split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
+                    if self.input_file_type == 'pvacvector_input_fasta':
+                        split_fasta_file_path = "{}_1-2.{}.tsv".format(self.split_fasta_basename(), epl)
+                    else:
+                        split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
                     split_iedb_output_files = []
                     status_message("Processing entries for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk))
                     if os.path.getsize(split_fasta_file_path) == 0:
@@ -443,25 +447,29 @@ class MHCIIPipeline(Pipeline):
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
             fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
-            if self.input_file_type == 'pvacvector_input_fasta':
-                split_tsv_file_path = self.tsv_file_path()
-            else:
-                split_tsv_file_path       = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
-            split_fasta_file_path     = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
-            if os.path.exists(split_fasta_file_path):
-                status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
-                continue
-            split_fasta_key_file_path = split_fasta_file_path + '.key'
-            status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
             generate_fasta_params = {
-                'input_file'                : split_tsv_file_path,
                 'peptide_sequence_length'   : self.peptide_sequence_length,
-                'epitope_length'            : 15,
-                'output_file'               : split_fasta_file_path,
-                'output_key_file'           : split_fasta_key_file_path,
                 'downstream_sequence_length': self.downstream_sequence_length,
                 'proximal_variants_file'    : self.proximal_variants_file,
             }
+            split_fasta_file_path = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
+            if os.path.exists(split_fasta_file_path):
+                status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
+                continue
+            if self.input_file_type == 'pvacvector_input_fasta':
+                generate_fasta_params['input_file'] = self.tsv_file_path()
+                generate_fasta_params['output_file_prefix'] = split_fasta_file_path
+                generate_fasta_params['epitope_lengths'] = [15]
+            else:
+                split_fasta_file_path = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
+                split_fasta_key_file_path = split_fasta_file_path + '.key'
+                generate_fasta_params['input_file'] = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
+                generate_fasta_params['epitope_length'] = 15
+                generate_fasta_params['output_file'] = split_fasta_file_path
+                generate_fasta_params['output_key_file'] = split_fasta_key_file_path
+            if os.path.exists(split_fasta_file_path):
+                status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
+                continue
             fasta_generator = self.fasta_generator(generate_fasta_params)
             fasta_generator.execute()
         status_message("Completed")
@@ -472,7 +480,10 @@ class MHCIIPipeline(Pipeline):
             tsv_chunk = "%d-%d" % (split_start, split_end)
             fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
             for a in self.alleles:
-                split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
+                if self.input_file_type == 'pvacvector_input_fasta':
+                    split_fasta_file_path = "{}_1-2.15.tsv".format(self.split_fasta_basename())
+                else:
+                    split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
                 split_iedb_output_files = []
                 status_message("Processing entries for Allele %s - Entries %s" % (a, fasta_chunk))
                 if os.path.getsize(split_fasta_file_path) == 0:
