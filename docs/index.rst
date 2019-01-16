@@ -37,102 +37,14 @@ tools:
 
    install
    frequently_asked_questions
+   releases
    citation
    contact
    mailing_list
 
-New in version |release|
-------------------------
-
-This is a hotfix release. It fixes the following issue(s):
-
-- When running pVACseq with a phased input VCF the mutation position offset
-  of a framshift somatic variant to their proximal variants was not getting
-  calculated correctly, leading to errors.
-- For running pVACvector we removed a dependency on a commandline tool by
-  using a python library instead. This allowed us to remove a system call
-  to a tool that required standalone installation by the user.
-
-New in version 1.1.4
---------------------
-
-This is a hotfix release. It fixes the following issue(s):
-
-- When running pVACvector with a with a pVACseq input file and the
-  corresponding VCF, the sample name wasn't being passed along correctly which
-  would cause an error if the input VCF was a multi-sample VCF.
-- pVACseq would throw an error if the value of a gene or transcript expression
-  field was empty.
-
-New in version 1.1.3
---------------------
-
-This is a hotfix release. It fixes the following issue(s):
-
-- When using the MHCnuggets prediction algorithm for MHC class II alleles
-  (``MHCnuggetsII``) not all epitope sequences were predicted for inframe
-  insertions. This issues has now been fixed.
-- For MHCflurry cases with peptide sequences that were shorter than the
-  desired epitope length were not handled correctly which resulted in an
-  error. This issues has been resolved in this release.
-
-New in version 1.1.2
-------------------------
-
-This is a hotfix release. It fixes the following issue(s):
-
-- In version 1.1.0 we added a ``--pass-only`` flag to pVACseq that would
-  result in only variants with ``FILTER`` of ``PASS`` or ``.`` getting processed.
-  However, this option was not getting passed along to the pVACseq process
-  correctly, resulting in this option not taking effect. This hotfix release
-  fixes this issue and the ``--pass-only`` flag should now work as expected.
-
-New in version 1.1.1
---------------------
-
-This is a hotfix release. It fixes the following issue(s):
-
-- In version 1.1 we updated VAFs to be fractions, rather than percentages. A
-  bug in this code change resulted in an error when using custom VAF cutoff
-  values instead of the default. This has now been fixed.
-
 New in version |version|
 ------------------------
 
-This version adds a host of new features to pVACtools:
-
-- pVACseq is now able to parse VAF, depth, and expression information directly
-  from the VCF. This makes the ``--additional-input-file-list`` option
-  obsolete. The ``--additional-input-file-list`` option is now deprecated and will be removed in an
-  upcoming release. For more information on how to annotate your VCF with
-  readcount and expression information, see the :ref:`prerequisites_label` page.
-- pVACseq is now able to handle proximal germline and somatic variants. In
-  order to incorporate those into the epitope predictions, you will need to
-  provide a phased variants VCF to your pVACseq run using the
-  ``--phased-proximal-variants-vcf`` option. For more information on how to
-  create this file, see the :ref:`prerequisites_label` page.
-- We added support to pVACseq for filtering on transcript support levels. This requires
-  the input VCF to be annotated with the TSL field by VEP. Be default, any
-  transcripts with a TSL above 1 will be filtered out.
-- The binding filter of pVACseq and pVACfuse can now be run with flexible, allele-specific
-  binding-thresholds. This feature can be enabled using the
-  ``--allele-specific-binding-thresholds`` flag. The thresholds used are taken
-  from `the IEDB recommendations
-  <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_.
-- pVACseq now supports a ``--pass-only`` flag that will result in any VCF
-  entries with a ``FILTER`` to be skipped. Using this flag, only VCF entries
-  with a ``FILTER`` of ``PASS`` or ``.`` will be processed.
-- We added support for the `MHCflurry <http://www.biorxiv.org/content/early/2017/08/09/174243>`_ and
-  `MHCnuggets <http://karchinlab.org/apps/appMHCnuggets.html>`_ prediction algorithms. These
-  can be used by listing ``MHCflurry``, ``MHCnuggetsI`` (for MHC Class I alleles),
-  and/or ``MHCnuggetsII`` (for MHC Class II alleles) as the prediction
-  algorithms in your run commands.
-- The default ``--tdna-vaf`` and ``--trna-vaf`` cutoff values have been
-  updated from 0.4 to 0.25. This is the minimum VAF threshold that an epitope
-  candidate must meet in order to pass the coverage filter.
-- We now offer a graphical user interface, :ref:`pvacviz`, to run pVACseq as an alernative
-  to using the command line. pVACviz, can also be used to plot and filter your pVACseq
-  results.
 
 To stay up-to-date on the latest pVACtools releases please join our :ref:`mailing_list`.
 
