@@ -102,6 +102,8 @@ Column Name          Description
 ``Score``            A priority score for the neoepitope. The higher the score, the better the neoepitope.
 ==================== ===========
 
+.. _score:
+
 The pVACseq Neoeptiope Priority Score
 _____________________________________
 

@@ -72,17 +72,43 @@ MHCnuggets
 
 **Comprehensive filtering**
 
-Automatic filtering on the binding affinity ic50 value narrows down the results to only include "good" candidate peptides. The binding filter threshold can be adjusted by the user for each pVACseq run, and additional filtering can be manually done by the user on the final result file to narrow down the candidate epitopes even further.
+Automatic filtering on the binding affinity ic50 value narrows down the results to only include
+"good" candidate peptides. The binding filter threshold can be adjusted by the user for each
+pVACseq run. pVACseq also support the option of filtering on allele-specific binding thresholds
+as recommended by `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_.
+Additional filtering on the binding affitinity can be manually done by the user by running the
+:ref:`standalone binding filter <filter_commands>` on the filtered result file
+to narrow down the candidate epitopes even further or on the unfiltered
+all_epitopes file to apply different cutoffs.
 
-Readcount and expression data can be extracted from a annotated VCF to automatically filter with adjustable thresholds on depth, VAF, and/or expression value will narrow down the results. The user can also manually run the coverage filter to further narrow down their results from the final output file.
+Readcount and expression data are extracted from an annotated VCF to automatically filter with
+adjustable thresholds on depth, VAF, and/or expression values. The user can also manually run
+the :ref:`standalone coverage filter <filter_commands>` to further narrow down their results
+from the filtered output file.
 
-The user can also specify an option to only keep the top scoring result for each allele-peptide length combination for each variant.
+If the input VCF is annotated with transcript support levels, pVACseq will
+filter on the transcript support level to only keep high-confidence
+transcripts of level 1. This filter can also be run :ref:`standalone
+<filter_commands>`.
+
+As a last filtering step, pVACseq applies the top score filter to only keep the top scoring epitope
+for each variant. As with all previous filter, this filter can also be run
+:ref:`standalone <filter_commands>`.
 
 **Scoring of candidate neoepitopes**
 
-Filtered neoepitopes are scored and ranked based on the binding affinity,
+Filtered neoepitopes are :ref:`scored and ranked <score>` based on the binding affinity,
 fold change between mutant and wildtype binding affinity, gene expression, RNA
 and DNA VAF.
+
+**Incorporation of proximal germline and somatic variants**
+
+To incorporate proximal variants into the neoeptioe predictions, users can
+provide a :ref:`phased VCF of proximal variants <phased_vcf>`  as an input to their pVACseq runs.
+This VCF is then used to incorporate amino acid changes of nearby
+variants that are in-phase to a somatic variant of interest. This results in
+corrected mutant and wildtype protein sequences that account for proximal
+variants.
 
 **NetChop and NetMHCstab integration**
 

@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACseq logo
 
+.. _phased_vcf:
+
 Creating a phased VCF of proximal variants
 ==========================================
 

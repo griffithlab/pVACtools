@@ -59,6 +59,14 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true',
         )
         parser.add_argument(
+            '-m', '--top-score-metric',
+            choices=['lowest', 'median'],
+            default='median',
+            help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
+                 + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
+                 + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods."
+        )
+        parser.add_argument(
             "-r", "--iedb-retries",type=int,
             default=5,
             help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100.",
@@ -66,7 +74,12 @@ class RunArgumentParser(metaclass=ABCMeta):
         parser.add_argument(
             "-k", "--keep-tmp-files",
             action='store_true',
-            help="Keep intermediate output files. This migt be useful for debugging purposes.",
+            help="Keep intermediate output files. This might be useful for debugging purposes.",
+        )
+        parser.add_argument(
+            "-t", "--n-threads",type=int,
+            default=1,
+            help="Number of threads for parallelizing calls to IEDB.",
         )
         self.parser = parser
 
@@ -92,14 +105,6 @@ class PredictionRunArgumentParser(RunArgumentParser):
             '--netmhc-stab',
             action='store_true',
             help="Run NetMHCStabPan after all filtering and add stability predictions to predicted epitopes."
-        )
-        self.parser.add_argument(
-            '-m', '--top-score-metric',
-            choices=['lowest', 'median'],
-            default='median',
-            help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
-                 + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
-                 + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods."
         )
         self.parser.add_argument(
             '--net-chop-threshold', type=float,
@@ -172,17 +177,17 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
             default=10
         )
         self.parser.add_argument(
-            '--normal-vaf', type=int,
+            '--normal-vaf', type=float,
             help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered.",
             default=0.2
         )
         self.parser.add_argument(
-            '--tdna-vaf', type=int,
+            '--tdna-vaf', type=float,
             help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered.",
             default=0.25
         )
         self.parser.add_argument(
-            '--trna-vaf', type=int,
+            '--trna-vaf', type=float,
             help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered.",
             default=0.25
         )

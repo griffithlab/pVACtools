@@ -101,7 +101,7 @@ class FastaGenerator(metaclass=ABCMeta):
         mutation_subsequence_stop_position = position
         wildtype_subsequence = full_wildtype_sequence[start_position:wildtype_subsequence_stop_position]
         mutation_start_subsequence = full_wildtype_sequence[start_position:mutation_subsequence_stop_position]
-        return start_position, wildtype_subsequence, mutation_start_subsequence
+        return wildtype_subsequence, mutation_start_subsequence
 
     def add_proximal_variants(self, somatic_variant_index, wildtype_subsequence, mutation_position, original_position, germline_variants_only):
         mutation_offset = original_position - mutation_position
@@ -213,10 +213,11 @@ class FastaGenerator(metaclass=ABCMeta):
                 mutant_amino_acid_with_proximal_variants = mutant_amino_acid
 
             if variant_type == 'FS':
-                mutation_start_position, wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
+                wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
                 downstream_sequence = line['downstream_amino_acid_sequence']
                 if self.downstream_sequence_length and len(downstream_sequence) > self.downstream_sequence_length:
                     downstream_sequence = downstream_sequence[0:self.downstream_sequence_length]
+                mutation_start_position = len(left_flanking_subsequence)
                 wildtype_subsequence = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, True)
                 left_flanking_subsequence_with_proximal_variants = self.add_proximal_variants(line['index'], left_flanking_subsequence, mutation_start_position, position, False)
                 #The caveat here is that if a nearby variant is in the downstream sequence, the protein sequence would be further altered, which we aren't taking into account.
@@ -326,9 +327,9 @@ class FusionFastaGenerator(FastaGenerator):
 
 class VectorFastaGenerator():
     def __init__(self, **kwargs):
-        self.input_file       = kwargs['input_file']
-        self.output_file      = kwargs['output_file']
-        self.output_key_file  = kwargs['output_key_file']
+        self.input_file         = kwargs['input_file']
+        self.output_file_prefix = kwargs['output_file_prefix']
+        self.epitope_lengths    = kwargs['epitope_lengths']
 
     def execute(self):
         seq_dict = dict()
@@ -337,42 +338,40 @@ class VectorFastaGenerator():
         seq_keys = sorted(seq_dict)
 
         seq_tuples = list(itertools.permutations(seq_keys, 2))
-        epitopes = dict()
-        rev_lookup = dict()
 
-        fasta_sequences = OrderedDict()
-        for comb in seq_tuples:
-            seq1 = comb[0]
-            seq2 = comb[1]
-            for length in range(8, 11):
+        for length in self.epitope_lengths:
+            epitopes = dict()
+            fasta_sequences = OrderedDict()
+            wingspan_length = length - 1
+            for comb in seq_tuples:
+                seq1 = comb[0]
+                seq2 = comb[1]
                 seq_ID = seq1 + "|" + seq2
-                trunc_seq1 = seq_dict[seq1][(len(seq_dict[seq1]) - length):len(seq_dict[seq1])]
-                trunc_seq2 = seq_dict[seq2][0:(length - 1)]
+                trunc_seq1 = seq_dict[seq1][(len(seq_dict[seq1]) - wingspan_length):len(seq_dict[seq1])]
+                trunc_seq2 = seq_dict[seq2][0:wingspan_length]
                 epitopes[seq_ID] = trunc_seq1 + trunc_seq2
-                rev_lookup[(trunc_seq1 + trunc_seq2)] = seq_ID
 
                 spacers = ["HH", "HHC", "HHH", "HHHD", "HHHC", "AAY", "HHHH", "HHAA", "HHL", "AAL"]
                 for this_spacer in spacers:
                     seq_ID = seq1 + "|" + this_spacer + "|" + seq2
                     epitopes[seq_ID] = (trunc_seq1 + this_spacer + trunc_seq2)
-                    rev_lookup[(trunc_seq1 + this_spacer + trunc_seq2)] = seq_ID
 
-        for seq_id in epitopes:
-            sequence = epitopes[seq_id]
-            fasta_sequences.setdefault(sequence, []).append(seq_id)
+            for seq_id in epitopes:
+                sequence = epitopes[seq_id]
+                if len(sequence) < length:
+                    continue
+                fasta_sequences.setdefault(sequence, []).append(seq_id)
 
-        writer = open(self.output_file, 'w')
-        key_writer = open(self.output_key_file, 'w')
-        count  = 1
-        for (subsequence, keys) in sorted(fasta_sequences.items()):
-            writer.writelines('>%s\n' % count)
-            writer.writelines('%s\n' % subsequence)
-            yaml.dump({count: keys}, key_writer, default_flow_style=False)
-            count += 1
+            output_file = "{}.{}.tsv".format(self.output_file_prefix, length)
+            output_key_file = "{}.key".format(output_file)
+            writer = open(output_file, 'w')
+            key_writer = open(output_key_file, 'w')
+            count  = 1
+            for (subsequence, keys) in sorted(fasta_sequences.items()):
+                writer.writelines('>%s\n' % count)
+                writer.writelines('%s\n' % subsequence)
+                yaml.dump({count: keys}, key_writer, default_flow_style=False)
+                count += 1
 
-        writer.close()
-        key_writer.close()
-        self.epitopes = epitopes
-        self.seq_tuples = seq_tuples
-        self.seq_dict = seq_dict
-        self.seq_keys = seq_keys
+            writer.close()
+            key_writer.close()

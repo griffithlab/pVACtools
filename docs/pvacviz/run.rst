@@ -1,9 +1,14 @@
-.. image:: images/pVACviz_logo_trans-bg_sm_v4b.png
+.. image:: ../images/pVACviz_logo_trans-bg_sm_v4b.png
     :align: right
     :alt: pVACviz logo
 
 Running pVACviz
 ===============
+
+.. note::
+
+   In order to run pVACviz you need to install pVACtools including pVACapi
+   by running ``pip install pvactools[API]``.
 
 To run pVACviz you first need to start pVACapi, which is used to communicate
 between the user interface and the command line tool. pVACapi can be started
