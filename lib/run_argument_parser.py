@@ -78,6 +78,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true',
             help="Keep intermediate output files. This migt be useful for debugging purposes.",
         )
+        parser.add_argument(
+            "-t", "--n-threads",type=int,
+            default=1,
+            help="Number of threads for parallelizing calls to IEDB. Default: 1 (no parallelization)",
+        )
         self.parser = parser
 
 class PredictionRunArgumentParser(RunArgumentParser):
