@@ -262,7 +262,7 @@ class Pipeline(metaclass=ABCMeta):
             if total_n_threads > self.n_threads:
                 iteration_info[dimension]['threads'] -= 1
                 return iteration_info
-            #recalculcate how many iteration per thread that dimension will have with that new number of threads
+            #recalculate how many iterations per thread that dimension will have with the new number of threads
             iteration_info[dimension]['iterations_per_thread'] = iteration_info[dimension]['total_iterations'] / iteration_info[dimension]['threads']
             #if all dimension have less or equal to 1 iteration per thread then we can't optimize any further
             if ( iteration_info['file']['iterations_per_thread'] <= 1 and
