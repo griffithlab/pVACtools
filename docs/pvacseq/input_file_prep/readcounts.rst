@@ -64,6 +64,16 @@ will take the output from `bam-readcount
 <https://github.com/genome/bam-readcount#build-instructions>`_ and use it to
 add readcounts to your VCF.
 
+bam-readcount needs to be run separately for snvs and indels so it is
+recommended to first split multi-allelic sites by using a tool such as ``vt
+decompose``.
+
+Installing vt
+*************
+
+The ``vt`` tool suite can be installed by following the instructions `on their
+page <https://genome.sph.umich.edu/wiki/Vt#Installation>`_.
+
 Installing bam-readcount
 ************************
 
@@ -73,25 +83,6 @@ to obtain a file of readcounts for your variants.
 
 Follow the installation instructions on the
 `bam-readcount GitHub page <https://github.com/genome/bam-readcount#build-instructions>`_.
-
-Running bam-readcount
-*********************
-
-bam-readcount uses a bam file and regions file as input, and the bam regions may
-either contain snvs or indels. Indel regions must be run in a special insertion-centric
-mode. Any mixed input regions must be split into snvs and indels, and bam-reacount must
-then be run on each file individually using the same bam.
-
-**Example bam-readcount command**
-
-.. code-block:: none
-
-   bam-readcount -f <reference fasta> -l <site list> <bam_file> [-i] [-b 20]
-
-The ``-i`` option must be used when running indels bam in order to process indels in
-insertion-centric mode.
-
-A minimum base quality of 20 is recommended which can be enabled by ``-b 20``.
 
 Installing the vcf-readcount-annotator
 **************************************
@@ -103,22 +94,66 @@ You can install this package by running:
 
    pip install vcf-annotation-tools
 
+Running vt decompose
+********************
+
+**Example vt decompose command**
+
+.. code-block:: none
+
+   vt decompose -s <input_vcf> -o <decomposed_vcf>
+
+Running bam-readcount
+*********************
+
+bam-readcount uses a bam file and site list regions file as input. The site lists are
+created from your decomposed VCF, one for snvs and one for indels. Snvs and
+indels are then run separately through bam-readcount using the same bam. Indel regions
+must be run in a special insertion-centric mode.
+
+**Example bam-readcount command**
+
+.. code-block:: none
+
+   bam-readcount -f <reference_fasta> -l <site_list> <bam_file> [-i] [-b 20]
+
+The ``-i`` option must be used when running the indels site list in order to process indels in
+insertion-centric mode.
+
+A minimum base quality of 20 is recommended which can be enabled using the ``-b 20``
+option.
+
+The ``mgibio/bam_readcount_helper-cwl`` Docker container contains a
+``bam_readcount_helper.py`` script that will create the snv and indel site list files
+and run bam-readcount.
+
+**Example bam_readcount_helper.py command**
+
+.. code-block:: none
+
+   /usr/bin/python /usr/bin/bam_readcount_helper.py \
+   <decomposed_vcf> <sample_name> <reference_fasta> <bam_file> <output_dir>
+
+This will write two bam-readcount files to the ``<output_dir>``:
+``<sample_name>_bam_readcount_snv.tsv`` and
+``<sample_name>_bam_readcount_indel.tsv``, containing readcounts for the snv
+and indel positions, respectively.
+
 Running the vcf-readcount-annotator
 ***********************************
 
-If you have multiple files for SNVs and InDels you will first need
-to concatenate the two files together:
+The readcounts for snvs and indels are then added to your VCF separately, by
+running the ``vcf-readcount-annotator`` twice.
+
+**Example vcf-readcount-annotator commands**
 
 .. code-block:: none
 
-   cat snvs_bam_readcount_file indels_bam_readcount_file > bam_readcount_file
+   vcf-readcount-annotator <decomposed_vcf> <snv_bam_readcount_file> <DNA|RNA> \
+   -s <sample_name> -t snv -o <snv_annotated_vcf>
 
-You can now use the combined bam-readcount output file to add readcount information to
-your VCF.
-
-.. code-block:: none
-
-   vcf-readcount-annotator input_vcf bam_readcount_file DNA|RNA -s sample_name
+   vcf-readcount-annotator <snv_annotated_vcf> <indel_bam_readcount_file> <DNA|RNA> \
+   -s <sample_name> -t indel -o <annotated_vcf>
 
 The data type ``DNA`` or ``RNA`` identifies whether you are annotating DNA or RNA
 readcount. DNA readcount annotations will be written to the ``AD/DP/AF``
