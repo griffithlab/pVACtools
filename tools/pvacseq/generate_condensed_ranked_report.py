@@ -5,7 +5,7 @@ from lib.condense_final_report import *
 from lib.rank_epitopes import *
 
 def define_parser():
-    parser = argparse.ArgumentParser("pvacseq generate_condensed_ranked_report")
+    parser = argparse.ArgumentParser("pvacseq generate_condensed_ranked_report", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         "input_file",
@@ -21,8 +21,7 @@ def define_parser():
         default='median',
         help="The ic50 scoring metric to use for ranking epitopes by binding-threshold and minimum fold change. "
              + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
-             + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods. "
-             + "Default: median"
+             + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods."
     )
 
     return parser

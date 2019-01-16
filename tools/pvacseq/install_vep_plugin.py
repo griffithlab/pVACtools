@@ -4,7 +4,7 @@ import sys
 from shutil import copyfile
 
 def define_parser():
-    parser = argparse.ArgumentParser('pvacseq install_vep_plugin')
+    parser = argparse.ArgumentParser('pvacseq install_vep_plugin', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('vep_plugins_path', help='Path to your VEP_plugins directory',)
     return parser
 

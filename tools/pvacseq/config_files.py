@@ -15,7 +15,7 @@ def additional_input_file_list_options():
     ])
 
 def define_parser():
-    parser = argparse.ArgumentParser('pvacseq config_files')
+    parser = argparse.ArgumentParser('pvacseq config_files', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "config_file_type",
         choices=['additional_input_file_list'],

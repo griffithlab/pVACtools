@@ -21,7 +21,7 @@ def split_file(reader, lines=400):
             return
 
 def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser("pvacseq net_chop")
+    parser = argparse.ArgumentParser("pvacseq net_chop", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         'input_file',
         type=argparse.FileType('r'),
