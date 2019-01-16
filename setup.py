@@ -49,7 +49,7 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
             client_data.append(os.path.join(
                 os.path.relpath(
                     dirpath,
-                    'utils/pvacapi/client'
+                    'utils/pvacapi'
                 ),
                 filename
             ))
