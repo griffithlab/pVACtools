@@ -66,9 +66,13 @@ class VcfConverter(InputFileConverter):
         self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
         self.peptide_length = kwargs.pop('peptide_length', None)
         if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.peptide_length):
-            sys.exit("A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided")
+            sys.exit("A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided.")
+        if self.proximal_variants_vcf and not lib.utils.is_gz_file(self.input_file):
+            sys.exit("Input VCF {} needs to be bgzipped when running with a proximal variants VCF.".format(self.input_file))
+        if self.proximal_variants_vcf and not lib.utils.is_gz_file(self.proximal_variants_vcf):
+            sys.exit("Proximal variants VCF {} needs to be bgzipped.".format(self.proximal_variants_vcf))
         if self.proximal_variants_vcf and not os.path.exists(self.proximal_variants_vcf + '.tbi'):
-            sys.exit('No .tbi file found for proximal variants VCF {}. Proximal variants VCF needs to be tabix indexed'.format(self.proximal_variants_vcf))
+            sys.exit('No .tbi file found for proximal variants VCF {}. Proximal variants VCF needs to be tabix indexed.'.format(self.proximal_variants_vcf))
         if self.proximal_variants_vcf and not os.path.exists(self.input_file + '.tbi'):
             sys.exit('No .tbi file found for input VCF {}. Input VCF needs to be tabix indexed if processing with proximal variants.'.format(self.input_file))
         if lib.utils.is_gz_file(self.input_file):
@@ -446,7 +450,7 @@ class VcfConverter(InputFileConverter):
                                     (transcript, value) = transcript_expression.split('|')
                                     if transcript == transcript_name:
                                         output_row['transcript_expression'] = value
-                            else:
+                            elif transcript_expressions is not None:
                                 (transcript, value) = transcript_expressions.split('|')
                                 if transcript == transcript_name:
                                     output_row['transcript_expression'] = value
@@ -465,7 +469,7 @@ class VcfConverter(InputFileConverter):
                                     (gene, value) = gene_expression.split('|')
                                     if ensembl_gene_id == gene or gene_name == gene:
                                         output_row['gene_expression'] = value
-                            else:
+                            elif gene_expressions is not None:
                                 (gene, value) = gene_expressions.split('|')
                                 if ensembl_gene_id == gene or gene_name == gene:
                                     output_row['gene_expression'] = value

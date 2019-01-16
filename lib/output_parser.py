@@ -629,6 +629,7 @@ class VectorOutputParser(OutputParser):
                     best_mt_score_method = method
             value['best_mt_score']          = best_mt_score
             value['best_mt_score_method']   = best_mt_score_method
+            value['median_mt_score']        = median(mt_scores.values())
             iedb_results_with_metrics[key]  = value
         return iedb_results_with_metrics
 
@@ -642,6 +643,7 @@ class VectorOutputParser(OutputParser):
             value['allele'],
             value['best_mt_score'],
             value['best_mt_score_method'],
+            value['median_mt_score'],
         ) for value in iedb_results.values())
         return flattened_iedb_results
 
@@ -658,6 +660,7 @@ class VectorOutputParser(OutputParser):
             'MT Epitope Seq',
             'Best MT Score Method',
             'Best MT Score',
+            'Median MT Score',
             'Index',
         ]
 
@@ -676,6 +679,7 @@ class VectorOutputParser(OutputParser):
             allele,
             best_mt_score,
             best_mt_score_method,
+            median_mt_score,
         ) in iedb_results:
             row = {
                 'HLA Allele'          : allele,
@@ -683,6 +687,7 @@ class VectorOutputParser(OutputParser):
                 'MT Epitope Seq'      : mt_epitope_seq,
                 'Best MT Score Method': PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
                 'Best MT Score'       : best_mt_score,
+                'Median MT Score'     : median_mt_score,
                 'Index'               : tsv_index,
             }
             for method in self.prediction_methods():

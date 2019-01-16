@@ -1,6 +1,7 @@
 import turtle
 import os
 import sys
+from PIL import Image
 
 class VectorVisualization:
     def __init__(self, input_fasta, output_directory):
@@ -98,7 +99,7 @@ class VectorVisualization:
         #turtle.mainloop()
 
     def setup_turtle(self):
-        turtle.setup(800,600)
+        turtle.setup(1200,600)
         #myWin = turtle.Screen()
         turtle.colormode(255)
         turtle.mode("logo")
@@ -223,7 +224,7 @@ class VectorVisualization:
         out_file = os.path.join(self.output_directory, "vector.jpg")
         ts = self.turtle.getscreen()
         ts.getcanvas().postscript(file=ps_file)
-        os.system('convert -density 300 -quality 100 ' + ps_file + " " + out_file)
+        Image.open(ps_file).save(out_file)
         os.remove(ps_file)
 
     #select color from scheme
