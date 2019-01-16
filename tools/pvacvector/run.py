@@ -105,35 +105,43 @@ def run_pipelines(input_file, base_output_dir, args):
     return parsed_output_files
 
 def find_min_scores(parsed_output_files, args):
-    iedb_results = {}
-    epitopes = []
-    indexes = []
+    min_scores = {}
+    indexes_with_good_binders = []
+    #find indexes that contain a good binder so that they can be excluded from further processing
+    #we don't want any peptide-spacer-peptide combination (aka index) that contains a good binder
+    #Find min score of all the epitopes of each of the remaining peptide-spacer-peptide combinations 
     for parsed_output_file in parsed_output_files:
         with open(parsed_output_file, 'r') as parsed:
             reader = csv.DictReader(parsed, delimiter="\t")
             for row in reader:
                 index = row['Index']
-                allele = row['HLA Allele']
+                if index in indexes_with_good_binders:
+                    continue
 
-                score = float(row['Best MT Score'])
+                allele = row['HLA Allele']
+                if args.top_score_metric == 'lowest':
+                    score = float(row['Best MT Score'])
+                elif args.top_score_metric == 'median':
+                    score = float(row['Median MT Score'])
                 if args.allele_specific_binding_thresholds:
                     threshold = PredictionClass.cutoff_for_allele(entry[allele])
                     threshold = float(args.binding_threshold) if threshold is None else float(threshold)
                 else:
                     threshold = float(args.binding_threshold)
                 if score < threshold:
+                    indexes_with_good_binders.append(index)
                     continue
 
-                if index not in iedb_results:
-                    iedb_results[index] = {}
-                if allele not in iedb_results[index]:
-                    iedb_results[index][allele] = {}
-                if 'min_score' in iedb_results[index][allele]:
-                    iedb_results[index][allele]['min_score'] = min(iedb_results[index][allele]['min_score'], score)
+                if index in min_scores:
+                    min_scores[index] = min(min_scores[index], score)
                 else:
-                    iedb_results[index][allele]['min_score'] = score
-                epitopes.append(row['MT Epitope Seq'])
-    return (iedb_results, epitopes)
+                    min_scores[index] = score
+
+    for index in indexes_with_good_binders:
+        if index in min_scores:
+            del min_scores[index]
+
+    return min_scores
 
 def create_graph(iedb_results, seq_tuples):
     Paths = nx.DiGraph()
@@ -141,32 +149,62 @@ def create_graph(iedb_results, seq_tuples):
     for ep in seq_tuples:
         ID_1 = ep[0]
         ID_2 = ep[1]
-        Paths.add_node(ID_1)
-        Paths.add_node(ID_2)
-        for space in spacers:
-            if space is None:
+        for spacer in spacers:
+            if spacer is None:
                 key = str(ID_1 + "|" + ID_2)
             else:
-                key = str(ID_1 + "|" + space + "|" + ID_2)
-            worst_case = sys.maxsize
+                key = str(ID_1 + "|" + spacer + "|" + ID_2)
             if key in iedb_results:
-                for allele in iedb_results[key]:
-                    if iedb_results[key][allele]['min_score'] < worst_case:
-                        worst_case = iedb_results[key][allele]['min_score']
+                worst_case = iedb_results[key]
+            else:
+                continue
+
+            if not Paths.has_node(ID_1):
+                Paths.add_node(ID_1)
+
+            if not Paths.has_node(ID_2):
+                Paths.add_node(ID_2)
+
             if Paths.has_edge(ID_1, ID_2) and Paths[ID_1][ID_2]['weight'] < worst_case:
                 Paths[ID_1][ID_2]['weight'] = worst_case
-                if space is not None:
-                    Paths[ID_1][ID_2]['spacer'] = space
+                if spacer is not None:
+                    Paths[ID_1][ID_2]['spacer'] = spacer
                 else:
                     Paths[ID_1][ID_2]['spacer'] = ''
             elif not Paths.has_edge(ID_1, ID_2):
-                if space is not None:
-                    Paths.add_edge(ID_1, ID_2, weight=worst_case, spacer=space)
+                if spacer is not None:
+                    Paths.add_edge(ID_1, ID_2, weight=worst_case, spacer=spacer)
                 else:
                     Paths.add_edge(ID_1, ID_2, weight=worst_case, spacer='')
 
     print("Graph contains " + str(len(Paths)) + " nodes and " + str(Paths.size()) + " edges.")
     return Paths
+
+def check_graph_valid(Paths):
+    error_text = ('A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
+                 '1) increasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
+                 '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)')
+
+    n_nodes_without_outgoing_edges = 0
+    for node in Paths.nodes():
+        if len(Paths.out_edges(node)) == 0:
+            n_nodes_without_outgoing_edges += 1
+    if n_nodes_without_outgoing_edges > 1:
+        raise Exception("Unable to create valid graph. No outgoing edges for more than one node.\n {}".format(error_text))
+
+    n_nodes_without_incoming_edges = 0
+    for node in Paths.nodes():
+        if len(Paths.in_edges(node)) == 0:
+            n_nodes_without_incoming_edges += 1
+    if n_nodes_without_incoming_edges > 1:
+        raise Exception("Unable to create valid graph. No incoming edges for more than one node.\n {}".format(error_text))
+
+    n_nodes_without_any_edges = 0
+    for node in Paths.nodes():
+        if len(Paths.in_edges(node)) == 0 and len(Paths.out_edges(node)) == 0:
+            n_nodes_without_any_edges += 1
+    if n_nodes_without_any_edges > 0:
+        raise Exception("Unable to create valid graph. No edges for at least one node.\n {}".format(error_text))
 
 def create_distance_matrix(Paths):
     print("Finding path.")
@@ -181,15 +219,13 @@ def create_distance_matrix(Paths):
     return distance_matrix
 
 def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args):
-    init_state = sorted(seq_dict)
+    init_state = sorted(Paths.nodes())
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
     peptide = OptimalPeptide(init_state, distance_matrix)
     peptide.copy_strategy = "slice"
     peptide.save_state_on_exit = False
     state, e = peptide.anneal()
-    while state[0] != seq_keys[0]:
-        state = state[1:] + state[:1] 
     print("%i distance :" % e)
 
     for id in state:
@@ -202,17 +238,19 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
         cumulative_weight = 0
         all_scores = list()
 
-        for i in range(0, len(state)):
+        for i in range(0, (len(state) - 1)):
             name.append(state[i])
-            try:
-                min_score = min(min_score, Paths[state[i]][state[i + 1]]['weight'])
-                cumulative_weight += Paths[state[i]][state[i + 1]]['weight']
-                all_scores.append(str(Paths[state[i]][state[i + 1]]['weight']))
-                spacer = Paths[state[i]][state[i + 1]]['spacer']
+            if Paths.has_edge(state[i], state[i + 1]):
+                edge = Paths[state[i]][state[i + 1]]
+                min_score = min(min_score, edge['weight'])
+                cumulative_weight += edge['weight']
+                all_scores.append(str(edge['weight']))
+                spacer = edge['spacer']
                 if spacer is not '':
                     name.append(spacer)
-            except IndexError:
-                continue
+            else:
+                sys.exit("Unable to find path. All possible peptides for edge '{} - spacer - {}' contain at least one epitope that is a good binder.".format(state[i], state[i + 1]))
+        name.append(state[-1])
         median_score = str(cumulative_weight/len(all_scores))
         peptide_id_list = ','.join(name)
         score_list = ','.join(all_scores)
@@ -278,8 +316,9 @@ def main(args_input=sys.argv[1:]):
     seq_tuples = list(itertools.permutations(seq_keys, 2))
 
     parsed_output_files = run_pipelines(input_file, base_output_dir, args)
-    (iedb_scores, epitopes) = find_min_scores(parsed_output_files, args)
-    Paths = create_graph(iedb_scores, seq_tuples)
+    min_scores = find_min_scores(parsed_output_files, args)
+    Paths = create_graph(min_scores, seq_tuples)
+    check_graph_valid(Paths)
     distance_matrix = create_distance_matrix(Paths)
     results_file = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
     if 'DISPLAY' in os.environ.keys():
