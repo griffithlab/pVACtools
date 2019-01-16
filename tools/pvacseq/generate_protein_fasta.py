@@ -11,11 +11,11 @@ from lib.fasta_generator import *
 from lib.input_file_converter import *
 
 def define_parser():
-    parser = argparse.ArgumentParser("pvacseq generate_protein_fasta")
+    parser = argparse.ArgumentParser("pvacseq generate_protein_fasta", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         "input_file",
-        help="A VEP-annotated single-sample VCF containing transcript, Wildtype protein sequence, and Downstream protein sequence information"
+        help="A VEP-annotated single-sample VCF containing transcript, Wildtype protein sequence, and Downstream protein sequence information."
     )
     parser.add_argument(
         "peptide_sequence_length", type=int,
@@ -23,13 +23,13 @@ def define_parser():
     )
     parser.add_argument(
         "output_file",
-        help="The output fasta file"
+        help="The output fasta file."
     )
     parser.add_argument(
         "-d", "--downstream-sequence-length",
         default="1000",
         help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
-            + "Use 'full' to include the full downstream sequence. Default: 1000"
+            + "Use 'full' to include the full downstream sequence."
     )
     return parser
 

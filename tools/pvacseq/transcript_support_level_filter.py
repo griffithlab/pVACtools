@@ -3,10 +3,10 @@ import sys
 from lib.filter import *
 
 def define_parser():
-    parser = argparse.ArgumentParser('pvacseq transcript_support_level_filter')
+    parser = argparse.ArgumentParser('pvacseq transcript_support_level_filter', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         'input_file',
-        help="The all_epitopes.tsv or filtered.tsv pVACseq report file to filter"
+        help="The all_epitopes.tsv or filtered.tsv pVACseq report file to filter."
     )
     parser.add_argument(
         'output_file',
@@ -15,13 +15,13 @@ def define_parser():
     parser.add_argument(
         "--maximum-transcript-support-level", type=int,
         help="The threshold to use for filtering epitopes on the transcript support level. "
-        +"Keep all epitopes with a transcript support level <= to this cutoff. Default: 1",
+        +"Keep all epitopes with a transcript support level <= to this cutoff.",
         default=1,
         choices=[1,2,3,4,5]
     )
     parser.add_argument(
         '--exclude-NAs',
-        help="Exclude NA values from the filtered output. Default: False",
+        help="Exclude NA values from the filtered output.",
         default=False,
         action='store_true'
     )

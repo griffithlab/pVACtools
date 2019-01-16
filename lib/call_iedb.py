@@ -20,7 +20,7 @@ def setup_iedb_conda_env():
         sys.exit("Something went wrong while checking the pvactools_py27 conda environment. `conda env list | grep \"^pvactools_py27 \"` returns more then one environment.")
 
 def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser('pvacseq call_iedb')
+    parser = argparse.ArgumentParser('pvacseq call_iedb', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('input_file', type=argparse.FileType('r'),
                         help="Input FASTA file")
     parser.add_argument('output_file',
@@ -36,7 +36,6 @@ def main(args_input = sys.argv[1:]):
         "-r", "--iedb-retries",type=int,
         default=5,
         help="Number of retries when making requests to the IEDB RESTful web interface. Must be less than or equal to 100."
-             + "Default: 5"
     )
     parser.add_argument(
         "-e", "--iedb-executable-path",
