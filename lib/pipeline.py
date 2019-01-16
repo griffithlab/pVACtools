@@ -258,7 +258,7 @@ class Pipeline(metaclass=ABCMeta):
             iteration_info[dimension]['threads'] += 1
             #calculate how many total threads this combination would use since these are nested threads
             total_n_threads = iteration_info['file']['threads'] * iteration_info['allele']['threads'] * iteration_info['length']['threads'] * iteration_info['algorithm']['threads']
-            #if total_n_threads exceeds the total number of threads reqeusted, reset to previous state and return
+            #if total_n_threads exceeds the total number of threads requested, reset to previous state and return
             if total_n_threads > self.n_threads:
                 iteration_info[dimension]['threads'] -= 1
                 return iteration_info
