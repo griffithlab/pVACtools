@@ -1,0 +1,26 @@
+Version 1.2
+___________
+
+1.2.0
+-----
+
+This version introduces multithreading to pVACtools. This significantly speeds
+up the execution of pVACseq, pVACfuse, and pVACvector. To turn on
+multithreading simply set the ``--n-threads`` parameter to the desired number
+of threads. This implementation is not CPU-bound. However, when running the
+tools using the IEDB RESTful API, we recommend to keep this number small (<5)
+as too many parallel calls to their API might lead to IEDB blocking jobs
+submitted from your IP address. It is recommended to use a standalone IEDB
+installation when running with multiple threads. By default, multithreading is
+turned off.
+
+This version also fixes a few bugs:
+
+- In certain cases pVACvector was not calculating the junction scores
+  correctly, leading to potentially finding a peptide order that would include
+  high-binding junction epitopes or peptide orders that were not optimal.
+  This issue has now been fixed.
+- Due to a bug in our packaging code, the 1.1.x versions of pVACtools did not
+  include the latest version of the pVACviz code. This version now includes
+  the most up-to-date version of the graphical user interface.
+

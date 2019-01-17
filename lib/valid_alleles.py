@@ -15,7 +15,7 @@ class ValidAlleles:
 
     @classmethod
     def parser(cls, tool):
-        parser = argparse.ArgumentParser("%s valid_alleles" % tool)
+        parser = argparse.ArgumentParser("%s valid_alleles" % tool, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument(
             "-p", "--prediction-algorithm",
             choices=PredictionClass.prediction_methods(),

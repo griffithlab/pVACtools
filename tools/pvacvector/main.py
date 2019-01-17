@@ -3,7 +3,7 @@ import sys
 from tools.pvacvector import *
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subparsers = parser.add_subparsers()
 
     #add subcommands

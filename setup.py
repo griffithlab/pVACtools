@@ -49,14 +49,14 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
             client_data.append(os.path.join(
                 os.path.relpath(
                     dirpath,
-                    'utils/pvacapi/client'
+                    'utils/pvacapi'
                 ),
                 filename
             ))
 
 setup(
     name="pvactools",
-    version="1.1.5",
+    version="1.2.0",
     packages=[
         "tools",
         "tools.pvacfuse",
@@ -91,7 +91,8 @@ setup(
         'mhcnuggets',
         'pysam',
         'tensorflow==1.8.0',
-        'Pillow'
+        'Pillow',
+        'pymp-pypi',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,

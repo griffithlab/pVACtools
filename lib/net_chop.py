@@ -22,27 +22,27 @@ def split_file(reader, lines=400):
             return
 
 def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser("pvacseq net_chop")
+    parser = argparse.ArgumentParser("pvacseq net_chop", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         'input_file',
         type=argparse.FileType('r'),
-        help="Input filtered file with predicted epitopes"
+        help="Input filtered file with predicted epitopes."
     )
     parser.add_argument(
         'output_file',
         type=argparse.FileType('w'),
-        help="Output tsv filename for putative neoepitopes"
+        help="Output tsv filename for putative neoepitopes."
     )
     parser.add_argument(
         '--method',
         choices=methods,
-        help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0).  Default: \"cterm\" (C term 3.0)",
+        help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0).",
         default='cterm'
     )
     parser.add_argument(
         '--threshold',
         type=float,
-        help="NetChop prediction threshold.  Default: 0.5",
+        help="NetChop prediction threshold.",
         default=0.5
     )
     args = parser.parse_args(args_input)
