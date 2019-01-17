@@ -192,8 +192,11 @@ Docker and CWL
 --------------
 
 A Docker container for pVACtools is available on DockerHub using the
-`griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo. CWL
-tool wrappers for pVACseq, pVACfuse, and pVACvector can be downloaded
+`griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo. This Docker
+container includes installations of the IEDB class I and class II tools
+at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``.
+
+CWL tool wrappers for pVACseq, pVACfuse, and pVACvector can be downloaded
 using the ``pvactools download_cwls`` command.
 
 Download CWL tool wrappers
