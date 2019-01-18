@@ -188,6 +188,17 @@ You can check that the ``mhcnuggets`` package was installed successfully by runn
 
 This should show information about the mhcnuggets package.
 
+PostgreSQL
+----------
+
+pVACviz and pVACapi require a Postgres database. To install Postgres follow
+the `installation instructions <http://postgresguide.com/setup/install.html>`_.
+
+.. note::
+
+   On Debian-based Linux distributions version Postgres V9.6 or lower is
+   required.
+
 Docker and CWL
 --------------
 
