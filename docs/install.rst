@@ -19,7 +19,7 @@ After you have pip installed, type the following command on your Terminal:
 
 .. code-block:: none
 
-   pip install pvactools[API]
+   pip install pvactools
 
 You can check that ``pvactools`` has been installed under the default environment by listing all installed packages:
 
@@ -33,7 +33,7 @@ If you have an old version of pVACtools installed you might want to consider upg
 
 .. code-block:: none
 
-   pip install pvactools[API] --upgrade
+   pip install pvactools --upgrade
 
 .. _iedb_install:
 

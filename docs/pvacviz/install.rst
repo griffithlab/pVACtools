@@ -6,6 +6,6 @@ installation is necessary. To install pVACtools, execute the following command o
 
 .. code-block:: none
 
-   pip install pvactools[API]
+   pip install pvactools
 
 More detailed installation instructions can be found :ref:`here <install>`.
