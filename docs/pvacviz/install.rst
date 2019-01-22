@@ -9,6 +9,16 @@ pVACviz is part of the pVACtools package. To install pVACtools, execute the foll
 
 More detailed installation instructions can be found :ref:`here <install>`.
 
+MHCflurry
+---------
+
+When installing pVACtools for the first time, you will need to manually
+download the MHCflurry dataset:
+
+.. code-block:: none
+
+   mhcflurry-downloads fetch
+
 PostgreSQL
 ----------
 
