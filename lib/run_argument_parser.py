@@ -192,8 +192,8 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
             default=0.25
         )
         self.parser.add_argument(
-            '--expn-val', type=int,
-            default=1,
+            '--expn-val', type=float,
+            default=1.0,
             help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered.",
         )
         self.parser.add_argument(

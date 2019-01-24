@@ -46,9 +46,9 @@ def define_parser():
         default=0.25
     )
     parser.add_argument(
-        '--expn-val', type=int,
+        '--expn-val', type=float,
         help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered.",
-        default=1
+        default=1.0
     )
     parser.add_argument(
         '--exclude-NAs',
