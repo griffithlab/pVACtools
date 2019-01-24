@@ -351,7 +351,7 @@ class VectorFastaGenerator():
                 trunc_seq2 = seq_dict[seq2][0:wingspan_length]
 
                 for this_spacer in self.spacers:
-                    if this_spacer != '""':
+                    if this_spacer != 'None':
                         seq_ID = seq1 + "|" + this_spacer + "|" + seq2
                         epitopes[seq_ID] = (trunc_seq1 + this_spacer + trunc_seq2)
                     else:
