@@ -148,7 +148,7 @@ def staging(parameters):
         'normal_vaf': parameters.pop('normal_vaf', 0.02),  # normal_vaf
         'tdna_vaf': parameters.pop('tdna_vaf', 0.25),  # tdna_vaf
         'trna_vaf': parameters.pop('trna_vaf', 0.25),  # trna_vaf
-        'expn_val': parameters.pop('expn_val', 1),  # expn_val
+        'expn_val': parameters.pop('expn_val', 1.0),  # expn_val
         'net_chop_threshold': parameters.pop('net_chop_threshold', 0.5),
         'fasta_size': parameters.pop('fasta_size', 200),
         'maximum_transcript_support_level': parameters.pop('maximum_transcript_support_level', 1),
