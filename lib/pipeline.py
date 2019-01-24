@@ -26,8 +26,7 @@ def status_message(msg):
 
 def status_message_with_lock(msg, lock):
     lock.acquire()
-    print(msg)
-    sys.stdout.flush()
+    status_message(msg)
     lock.release()
 
 class Pipeline(metaclass=ABCMeta):
