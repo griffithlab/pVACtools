@@ -330,6 +330,7 @@ class VectorFastaGenerator():
         self.input_file         = kwargs['input_file']
         self.output_file_prefix = kwargs['output_file_prefix']
         self.epitope_lengths    = kwargs['epitope_lengths']
+        self.spacers            = kwargs['spacers']
 
     def execute(self):
         seq_dict = dict()
@@ -346,15 +347,16 @@ class VectorFastaGenerator():
             for comb in seq_tuples:
                 seq1 = comb[0]
                 seq2 = comb[1]
-                seq_ID = seq1 + "|" + seq2
                 trunc_seq1 = seq_dict[seq1][(len(seq_dict[seq1]) - wingspan_length):len(seq_dict[seq1])]
                 trunc_seq2 = seq_dict[seq2][0:wingspan_length]
-                epitopes[seq_ID] = trunc_seq1 + trunc_seq2
 
-                spacers = ["HH", "HHC", "HHH", "HHHD", "HHHC", "AAY", "HHHH", "HHAA", "HHL", "AAL"]
-                for this_spacer in spacers:
-                    seq_ID = seq1 + "|" + this_spacer + "|" + seq2
-                    epitopes[seq_ID] = (trunc_seq1 + this_spacer + trunc_seq2)
+                for this_spacer in self.spacers:
+                    if this_spacer != '""':
+                        seq_ID = seq1 + "|" + this_spacer + "|" + seq2
+                        epitopes[seq_ID] = (trunc_seq1 + this_spacer + trunc_seq2)
+                    else:
+                        seq_ID = seq1 + "|" + seq2
+                        epitopes[seq_ID] = trunc_seq1 + trunc_seq2
 
             for seq_id in epitopes:
                 sequence = epitopes[seq_id]
