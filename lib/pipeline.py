@@ -65,6 +65,7 @@ class Pipeline(metaclass=ABCMeta):
         self.pass_only                   = kwargs.pop('pass_only', False)
         self.normal_sample_name          = kwargs.pop('normal_sample_name', False)
         self.n_threads                   = kwargs.pop('n_threads', 1)
+        self.spacers                     = kwargs.pop('spacers', None)
         self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
@@ -365,6 +366,7 @@ class MHCIPipeline(Pipeline):
                 generate_fasta_params['input_file'] = self.tsv_file_path()
                 generate_fasta_params['output_file_prefix'] = split_fasta_file_path
                 generate_fasta_params['epitope_lengths'] = self.epitope_lengths
+                generate_fasta_params['spacers'] = self.spacers
             else:
                 split_fasta_key_file_path = split_fasta_file_path + '.key'
                 generate_fasta_params['input_file'] = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
@@ -520,6 +522,7 @@ class MHCIIPipeline(Pipeline):
                 generate_fasta_params['input_file'] = self.tsv_file_path()
                 generate_fasta_params['output_file_prefix'] = split_fasta_file_path
                 generate_fasta_params['epitope_lengths'] = [15]
+                generate_fasta_params['spacers'] = self.spacers
             else:
                 split_fasta_file_path = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
                 split_fasta_key_file_path = split_fasta_file_path + '.key'
