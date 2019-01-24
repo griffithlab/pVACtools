@@ -151,7 +151,7 @@ def create_graph(iedb_results, seq_tuples, spacers):
         ID_1 = ep[0]
         ID_2 = ep[1]
         for spacer in spacers:
-            if spacer == '""':
+            if spacer == 'None':
                 key = str(ID_1 + "|" + ID_2)
             else:
                 key = str(ID_1 + "|" + spacer + "|" + ID_2)
@@ -241,7 +241,7 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
                 cumulative_weight += edge['weight']
                 all_scores.append(str(edge['weight']))
                 spacer = edge['spacer']
-                if spacer != '""':
+                if spacer != 'None':
                     name.append(spacer)
             else:
                 sys.exit("Unable to find path. All possible peptides for edge '{} - spacer - {}' contain at least one epitope that is a good binder.".format(state[i], state[i + 1]))
