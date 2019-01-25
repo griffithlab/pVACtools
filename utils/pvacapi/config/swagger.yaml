@@ -11,6 +11,7 @@ schemes:
 consumes:
 - "application/json"
 - "multipart/form-data"
+
 produces:
 - "application/json"
 paths:
@@ -517,16 +518,16 @@ paths:
                 default: 10
               normal_vaf:
                 description: "Normal VAF Cutoff: Sites below this cutoff will be considered"
-                type: integer
-                default: 2
+                type: number
+                default: 0.02
               tdna_vaf:
                 description: "Tumor DNA VAF Cutoff: Sites above this cutoff will be considered"
-                type: integer
-                default: 40
+                type: number
+                default: 0.25
               trna_vaf:
                 description: "Tumor RNA VAF Cutoff: Sites above this cutoff will be considered"
-                type: integer
-                default: 40
+                type: number
+                default: 0.25
               expn_val:
                 description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
                 type: integer
