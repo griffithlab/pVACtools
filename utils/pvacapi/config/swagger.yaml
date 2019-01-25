@@ -994,26 +994,6 @@ paths:
           description: "Unexpected error"
           schema:
             $ref: "#/definitions/Error"
-  /static/testpage:
-    get:
-      tags:
-        - "test"
-      summary: "A test submission form"
-      description: "Returns a web page containing a form for submitting a new pVAC-Seq run. \
-        Submission is sent to the /api/v1/staging endpoint, where it is processed \
-        then forwarded to the /api/v1/start endpoint\n"
-      produces:
-        - "text/html"
-      operationId: "utils.pvacapi.controllers.staging.test"
-      responses:
-        200:
-          description: "Returns a static page"
-          schema:
-            type: "string"
-        default:
-          description: "Unexpected error"
-          schema:
-            $ref: "#/definitions/Error"
   /api/v1/processes/{parentID}/results/{fileID}/visualize:
     get:
       tags:

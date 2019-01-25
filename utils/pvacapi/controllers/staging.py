@@ -285,14 +285,6 @@ def start(input, phased_proximal_variants_vcf, samplename, alleles, epitope_leng
         data.save()
         return data['processid']
 
-def test():
-    """Return the submission page (a stand-in until there is a proper ui for submission)"""
-    reader = open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_start.html'))
-    data = reader.read()
-    reader.close()
-    return data
-
-
 def check_allele(allele):
     """Checks if the requested allele is supported by pVAC-Seq or not"""
     data = current_app.config['storage']['loader']()
