@@ -57,8 +57,11 @@ def main():
     finally:
         print(time.asctime(), "pVACviz server started at {}".format(url))
 
-    print(time.asctime(), "Opening pVACviz client at {} in default browser.".format(url))
-    webbrowser.get().open(url, new=1, autoraise=True)
+    try:
+        print(time.asctime(), "Opening pVACviz client at {} in default browser.".format(url))
+        webbrowser.get().open(url, new=1, autoraise=True)
+    except webbrowser.Error as err:
+        print("No default browser found. Open pVACviz by visiting {} in a browser of your choosing.".format(url))
 
 
 if __name__ == "__main__":
