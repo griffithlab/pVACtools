@@ -18,7 +18,7 @@
 	"netmhc_stab": false,
 	"pass_only": false,
 	"peptide_sequence_length": 21,
-	"expn_val": 1,
+	"expn_val": 1.0,
 	"binding_threshold": 3000,
 	"allele_specific_cutoffs": false,
 	"epitope_lengths": [
