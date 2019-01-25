@@ -38,6 +38,7 @@ def main():
     Handler = MyHandler
     httpd = HTTPServer((HOSTNAME, PORT), Handler)
     thread = threading.Thread(target=httpd.serve_forever)
+    url = "http://{}:{}".format(HOSTNAME, PORT)
 
     try:
         print(time.asctime(), "Starting pVACviz client webserver")
@@ -54,10 +55,10 @@ def main():
         pass
 
     finally:
-        print(time.asctime(), "pVACviz server started at http://%s:%s" % (HOSTNAME, PORT))
+        print(time.asctime(), "pVACviz server started at {}".format(url))
 
-    print(time.asctime(), "Opening pVACviz client at http://%s:%s in default browser." % (HOSTNAME, PORT))
-    webbrowser.get().open("http://%s:%s" % (HOSTNAME, PORT), new=1, autoraise=True)
+    print(time.asctime(), "Opening pVACviz client at {} in default browser.".format(url))
+    webbrowser.get().open(url, new=1, autoraise=True)
 
 
 if __name__ == "__main__":
