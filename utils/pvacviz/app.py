@@ -43,19 +43,16 @@ def main():
     try:
         print(time.asctime(), "Starting pVACviz client webserver")
         thread.start()
-
     except (KeyboardInterrupt, SystemExit):
         print(time.asctime(), "Stopping pVACviz client webserver")
         httpd.shutdown()
-        pass
-
+        return
     except OSError as err:
         print("OS error while starting pVACviz client server: {0}".format(err))
         httpd.shutdown()
-        pass
+        return
 
-    finally:
-        print(time.asctime(), "pVACviz server started at {}".format(url))
+    print(time.asctime(), "pVACviz server started at {}".format(url))
 
     try:
         print(time.asctime(), "Opening pVACviz client at {} in default browser.".format(url))
