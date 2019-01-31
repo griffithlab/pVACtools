@@ -9,6 +9,7 @@ dependencies:
 - wheel=0.29.0=py35_0
 - xz=5.0.5=1
 - zlib=1.2.8=0
+- requests
 - pip:
   - sphinxjp.themes.basicstrap
   - sphinxcontrib-programoutput
