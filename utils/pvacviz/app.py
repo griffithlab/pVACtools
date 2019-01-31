@@ -38,26 +38,27 @@ def main():
     Handler = MyHandler
     httpd = HTTPServer((HOSTNAME, PORT), Handler)
     thread = threading.Thread(target=httpd.serve_forever)
+    url = "http://{}:{}".format(HOSTNAME, PORT)
 
     try:
         print(time.asctime(), "Starting pVACviz client webserver")
         thread.start()
-
     except (KeyboardInterrupt, SystemExit):
         print(time.asctime(), "Stopping pVACviz client webserver")
         httpd.shutdown()
-        pass
-
+        return
     except OSError as err:
         print("OS error while starting pVACviz client server: {0}".format(err))
         httpd.shutdown()
-        pass
+        return
 
-    finally:
-        print(time.asctime(), "pVACviz server started at http://%s:%s" % (HOSTNAME, PORT))
+    print(time.asctime(), "pVACviz server started at {}".format(url))
 
-    print(time.asctime(), "Opening pVACviz client at http://%s:%s in default browser." % (HOSTNAME, PORT))
-    webbrowser.get().open("http://%s:%s" % (HOSTNAME, PORT), new=1, autoraise=True)
+    try:
+        print(time.asctime(), "Opening pVACviz client at {} in default browser.".format(url))
+        webbrowser.get().open(url, new=1, autoraise=True)
+    except webbrowser.Error as err:
+        print("No default browser found. Open pVACviz by visiting {} in a browser of your choosing.".format(url))
 
 
 if __name__ == "__main__":
