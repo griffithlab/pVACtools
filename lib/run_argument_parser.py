@@ -229,3 +229,8 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
             '-n', "--input-n-mer", default='25',
             help="Length of the peptide sequence to use when creating the FASTA from the pVACseq TSV.",
         )
+        self.parser.add_argument(
+            '--spacers', type=lambda s:[spacer for spacer in s.split(',')],
+            help="Comma-separated list of spacers to use for testing junction epitopes. Include None to test junctions without spacers.",
+            default="None,HH,HHC,HHH,HHHD,HHHC,AAY,HHHH,HHAA,HHL,AAL"
+        )
