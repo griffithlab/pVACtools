@@ -18,10 +18,16 @@ import shutil
 import yaml
 import pkg_resources
 import pymp
+from threading import Lock
 
 def status_message(msg):
     print(msg)
     sys.stdout.flush()
+
+def status_message_with_lock(msg, lock):
+    lock.acquire()
+    status_message(msg)
+    lock.release()
 
 class Pipeline(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -406,6 +412,7 @@ class MHCIPipeline(Pipeline):
         iteration_info = self.balance_multithreads(iteration_info)
 
         split_parsed_output_files = []
+        lock = Lock()
         with pymp.Parallel(iteration_info['file']['threads']) as p:
             for i in p.range(len(chunks)):
                 (split_start, split_end) = chunks[i]
@@ -422,9 +429,9 @@ class MHCIPipeline(Pipeline):
                                 else:
                                     split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
                                 split_iedb_output_files = []
-                                status_message("Processing entries for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk))
+                                status_message_with_lock("Processing entries for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk), lock)
                                 if os.path.getsize(split_fasta_file_path) == 0:
-                                    status_message("Fasta file is empty. Skipping")
+                                    status_message_with_lock("Fasta file is empty. Skipping", lock)
                                     continue
                                 with pymp.Parallel(iteration_info['algorithm']['threads']) as p4:
                                     for m in p4.range(len(prediction_algorithms)):
@@ -437,19 +444,19 @@ class MHCIPipeline(Pipeline):
                                             iedb_method = method
                                         valid_alleles = prediction.valid_allele_names()
                                         if a not in valid_alleles:
-                                            status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
+                                            status_message_with_lock("Allele %s not valid for Method %s. Skipping." % (a, method), lock)
                                             continue
                                         valid_lengths = prediction.valid_lengths_for_allele(a)
                                         if epl not in valid_lengths:
-                                            status_message("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
+                                            status_message_with_lock("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a), lock)
                                             continue
 
                                         split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, str(epl), "tsv_%s" % fasta_chunk]))
                                         if os.path.exists(split_iedb_out):
-                                            status_message("IEDB file for Allele %s and Epitope Length %s with Method %s (Entries %s) already exists. Skipping." % (a, epl, method, fasta_chunk))
+                                            status_message_with_lock("IEDB file for Allele %s and Epitope Length %s with Method %s (Entries %s) already exists. Skipping." % (a, epl, method, fasta_chunk), lock)
                                             split_iedb_output_files.append(split_iedb_out)
                                             continue
-                                        status_message("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, fasta_chunk))
+                                        status_message_with_lock("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, fasta_chunk), lock)
 
                                         if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
                                             if 'last_execute_timestamp' in locals() and not self.iedb_executable:
@@ -468,18 +475,18 @@ class MHCIPipeline(Pipeline):
                                             '-e', self.iedb_executable,
                                         ])
                                         last_execute_timestamp = datetime.datetime.now()
-                                        status_message("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s - Completed" % (a, epl, method, fasta_chunk))
+                                        status_message_with_lock("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s - Completed" % (a, epl, method, fasta_chunk), lock)
                                         split_iedb_output_files.append(split_iedb_out)
 
                                     split_parsed_file_path = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, str(epl), "parsed", "tsv_%s" % fasta_chunk]))
                                     if os.path.exists(split_parsed_file_path):
-                                        status_message("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, fasta_chunk))
+                                        status_message_with_lock("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, fasta_chunk), lock)
                                         split_parsed_output_files.append(split_parsed_file_path)
                                         continue
                                     split_fasta_key_file_path = split_fasta_file_path + '.key'
 
                                     if len(split_iedb_output_files) > 0:
-                                        status_message("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk))
+                                        status_message_with_lock("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk), lock)
                                         split_tsv_file_path = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
                                         params = {
                                             'input_iedb_files'       : split_iedb_output_files,
@@ -493,7 +500,7 @@ class MHCIPipeline(Pipeline):
                                             params['sample_name'] = None
                                         parser = self.output_parser(params)
                                         parser.execute()
-                                        status_message("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, epl, fasta_chunk))
+                                        status_message_with_lock("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, epl, fasta_chunk), lock)
                                         split_parsed_output_files.append(split_parsed_file_path)
         return split_parsed_output_files
 
@@ -563,6 +570,7 @@ class MHCIIPipeline(Pipeline):
         iteration_info = self.balance_multithreads(iteration_info)
 
         split_parsed_output_files = []
+        lock = Lock()
         with pymp.Parallel(iteration_info['file']['threads']) as p:
             for i in p.range(len(chunks)):
                 (split_start, split_end) = chunks[i]
@@ -576,9 +584,9 @@ class MHCIIPipeline(Pipeline):
                         else:
                             split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
                         split_iedb_output_files = []
-                        status_message("Processing entries for Allele %s - Entries %s" % (a, fasta_chunk))
+                        status_message_with_lock("Processing entries for Allele %s - Entries %s" % (a, fasta_chunk), lock)
                         if os.path.getsize(split_fasta_file_path) == 0:
-                            status_message("Fasta file is empty. Skipping")
+                            status_message_with_lock("Fasta file is empty. Skipping", lock)
                             continue
                         with pymp.Parallel(iteration_info['algorithm']['threads']) as p3:
                             for j in p3.range(len(prediction_algorithms)):
@@ -591,15 +599,15 @@ class MHCIIPipeline(Pipeline):
                                     iedb_method = method
                                 valid_alleles = prediction.valid_allele_names()
                                 if a not in valid_alleles:
-                                    status_message("Allele %s not valid for Method %s. Skipping." % (a, method))
+                                    status_message_with_lock("Allele %s not valid for Method %s. Skipping." % (a, method), lock)
                                     continue
 
                                 split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, "tsv_%s" % fasta_chunk]))
                                 if os.path.exists(split_iedb_out):
-                                    status_message("IEDB file for Allele %s with Method %s (Entries %s) already exists. Skipping." % (a, method, fasta_chunk))
+                                    status_message_with_lock("IEDB file for Allele %s with Method %s (Entries %s) already exists. Skipping." % (a, method, fasta_chunk), lock)
                                     split_iedb_output_files.append(split_iedb_out)
                                     continue
-                                status_message("Running IEDB on Allele %s with Method %s - Entries %s" % (a, method, fasta_chunk))
+                                status_message_with_lock("Running IEDB on Allele %s with Method %s - Entries %s" % (a, method, fasta_chunk), lock)
 
                                 if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
                                     if 'last_execute_timestamp' in locals() and not self.iedb_executable:
@@ -617,18 +625,18 @@ class MHCIIPipeline(Pipeline):
                                     '-e', self.iedb_executable,
                                 ])
                                 last_execute_timestamp = datetime.datetime.now()
-                                status_message("Running IEDB on Allele %s with Method %s - Entries %s - Completed" % (a, method, fasta_chunk))
+                                status_message_with_lock("Running IEDB on Allele %s with Method %s - Entries %s - Completed" % (a, method, fasta_chunk), lock)
                                 split_iedb_output_files.append(split_iedb_out)
 
                             split_parsed_file_path = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, "parsed", "tsv_%s" % fasta_chunk]))
                             if os.path.exists(split_parsed_file_path):
-                                status_message("Parsed Output File for Allele %s (Entries %s) already exists. Skipping" % (a, fasta_chunk))
+                                status_message_with_lock("Parsed Output File for Allele %s (Entries %s) already exists. Skipping" % (a, fasta_chunk), lock)
                                 split_parsed_output_files.append(split_parsed_file_path)
                                 continue
                             split_fasta_key_file_path = split_fasta_file_path + '.key'
 
                             if len(split_iedb_output_files) > 0:
-                                status_message("Parsing IEDB Output for Allele %s - Entries %s" % (a, fasta_chunk))
+                                status_message_with_lock("Parsing IEDB Output for Allele %s - Entries %s" % (a, fasta_chunk), lock)
                                 split_tsv_file_path = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
                                 params = {
                                     'input_iedb_files'       : split_iedb_output_files,
@@ -642,7 +650,7 @@ class MHCIIPipeline(Pipeline):
                                     params['sample_name'] = None
                                 parser = self.output_parser(params)
                                 parser.execute()
-                                status_message("Parsing IEDB Output for Allele %s - Entries %s - Completed" % (a, fasta_chunk))
+                                status_message_with_lock("Parsing IEDB Output for Allele %s - Entries %s - Completed" % (a, fasta_chunk), lock)
                                 split_parsed_output_files.append(split_parsed_file_path)
 
         return split_parsed_output_files
