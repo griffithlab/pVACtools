@@ -19,7 +19,7 @@ After you have pip installed, type the following command on your Terminal:
 
 .. code-block:: none
 
-   pip install pvactools[API]
+   pip install pvactools
 
 You can check that ``pvactools`` has been installed under the default environment by listing all installed packages:
 
@@ -33,7 +33,7 @@ If you have an old version of pVACtools installed you might want to consider upg
 
 .. code-block:: none
 
-   pip install pvactools[API] --upgrade
+   pip install pvactools --upgrade
 
 .. _iedb_install:
 
@@ -187,6 +187,17 @@ You can check that the ``mhcnuggets`` package was installed successfully by runn
    pip show mhcnuggets
 
 This should show information about the mhcnuggets package.
+
+PostgreSQL
+----------
+
+pVACviz and pVACapi require a Postgres database. To install Postgres follow
+the `installation instructions <http://postgresguide.com/setup/install.html>`_.
+
+.. note::
+
+   On Debian-based Linux distributions version Postgres V9.6 or lower is
+   required.
 
 Docker and CWL
 --------------
