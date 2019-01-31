@@ -5,7 +5,7 @@ pVACviz is part of the pVACtools package. To install pVACtools, execute the foll
 
 .. code-block:: none
 
-   pip install pvactools[API]
+   pip install pvactools
 
 More detailed installation instructions can be found :ref:`here <install>`.
 

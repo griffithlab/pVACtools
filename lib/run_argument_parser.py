@@ -179,7 +179,7 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         self.parser.add_argument(
             '--normal-vaf', type=float,
             help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered.",
-            default=0.2
+            default=0.02
         )
         self.parser.add_argument(
             '--tdna-vaf', type=float,
