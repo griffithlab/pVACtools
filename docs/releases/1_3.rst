@@ -1,0 +1,29 @@
+Version 1.3
+___________
+
+1.3.0
+-----
+
+This version adds a few features and updates:
+
+- pVACvector now accepts a list of spacers to use when testing junction
+  epitopes. These can be specified using the ``--spacers`` parameter with a
+  comma-separated list of spacer peptides. Including the string ``None`` will
+  also test each junction without spacers. The default is
+  ``None,HH,HHC,HHH,HHHD,HHHC,AAY,HHHH,HHAA,HHL,AAL``
+- The ``--expn-val`` cutoff parameter has been updated to be a float instead
+  of an integer. This allows the user to provide a decimal
+  cuttoff for the filtering on gene and transcript expression values.
+  Previously, only whole numbers were accepted.
+- Decimal numbers in the pVACseq reports are now rounded to three decimal
+  places. Previously, they were not rounded.
+
+In addition, this version also fixes a few bugs:
+
+- The ``--normal-vaf`` cutoff value was incorrectly defaulting to 0.2 instead
+  of 0.02. This resulted in the coverage filter not being as stringent as it
+  should've been.
+- There were a number of bugs in pVACapi and pVACviz that would prevent a user
+  from submitting jobs using the interface in certain conditions. These have been resolved.
+- pVACseq would previsouly not support SVs in the input VCF where the alt had
+  a value of ``<DEL>``. These kinds of variants are now supported.

@@ -45,25 +45,29 @@ tools:
 New in version |version|
 ------------------------
 
-This version introduces multithreading to pVACtools. This significantly speeds
-up the execution of pVACseq, pVACfuse, and pVACvector. To turn on
-multithreading simply set the ``--n-threads`` parameter to the desired number
-of threads. This implementation is not CPU-bound. However, when running the
-tools using the IEDB RESTful API, we recommend to keep this number small (<5)
-as too many parallel calls to their API might lead to IEDB blocking jobs
-submitted from your IP address. It is recommended to use a standalone IEDB
-installation when running with multiple threads. By default, multithreading is
-turned off.
+This version adds a few features and updates:
 
-This version also fixes a few bugs:
+- pVACvector now accepts a list of spacers to use when testing junction
+  epitopes. These can be specified using the ``--spacers`` parameter with a
+  comma-separated list of spacer peptides. Including the string ``None`` will
+  also test each junction without spacers. The default is
+  ``None,HH,HHC,HHH,HHHD,HHHC,AAY,HHHH,HHAA,HHL,AAL``
+- The ``--expn-val`` cutoff parameter has been updated to be a float instead
+  of an integer. This allows the user to provide a decimal
+  cuttoff for the filtering on gene and transcript expression values.
+  Previously, only whole numbers were accepted.
+- Decimal numbers in the pVACseq reports are now rounded to three decimal
+  places. Previously, they were not rounded.
 
-- In certain cases pVACvector was not calculating the junction scores
-  correctly, leading to potentially finding a peptide order that would include
-  high-binding junction epitopes or peptide orders that were not optimal.
-  This issue has now been fixed.
-- Due to a bug in our packaging code, the 1.1.x versions of pVACtools did not
-  include the latest version of the pVACviz code. This version now includes
-  the most up-to-date version of the graphical user interface.
+In addition, this version also fixes a few bugs:
+
+- The ``--normal-vaf`` cutoff value was incorrectly defaulting to 0.2 instead
+  of 0.02. This resulted in the coverage filter not being as stringent as it
+  should've been.
+- There were a number of bugs in pVACapi and pVACviz that would prevent a user
+  from submitting jobs using the interface in certain conditions. These have been resolved.
+- pVACseq would previsouly not support SVs in the input VCF where the alt had
+  a value of ``<DEL>``. These kinds of variants are now supported.
 
 Past release notes can be found on our :ref:`releases` page.
 
