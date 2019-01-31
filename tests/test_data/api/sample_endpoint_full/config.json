@@ -14,7 +14,7 @@
 		"HLA-E*01:01"
 	],
 	"fasta_size": 200,
-  "maximum_transcript_support_level": 1,
+    "maximum_transcript_support_level": 1,
 	"netmhc_stab": false,
 	"pass_only": false,
 	"peptide_sequence_length": 21,
@@ -28,13 +28,13 @@
 	"samplename": "endpoint_full",
 	"trna_cov": 10,
 	"keep_tmp_files": false,
-	"normal_vaf": 2,
-	"trna_vaf": 40,
+	"normal_vaf": 0.02,
+	"trna_vaf": 0.25,
 	"prediction_algorithms": [
 		"NetMHC",
 		"PickPocket"
 	],
 	"iedb_install_dir": "",
-	"tdna_vaf": 40,
+	"tdna_vaf": 0.25,
 	"tdna_cov": 10
 }
