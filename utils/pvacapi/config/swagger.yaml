@@ -362,8 +362,8 @@ paths:
       - name: "expn_val"
         in: "formData"
         description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 1
+        type: "number"
+        default: 1.0
       - name: "net_chop_threshold"
         in: "formData"
         description: "NetChop Threshold: NetChop prediction threshold"
