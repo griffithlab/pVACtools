@@ -11,7 +11,7 @@ pVACtools requires Python 3.5. Before running any installation steps, check the 
 
    python -V
 
-If you don't have Python 3.5 installed, we recommend using `Conda <http://conda.pydata.org/docs/py2or3.html>`_ to emulate a Python 3.5. environment. We've encountered problems with users that already have Python 2.x installed when they also try to install Python 3.5. The defaults will not be set correctly in that case. If you already have Python 2.x installed we **strongly** recommmend using Conda instead of installing Python 3.5 locally.
+If you don't have Python 3.5 installed, we recommend using `Conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ to emulate a Python 3.5. environment. We've encountered problems with users that already have Python 2.x installed when they also try to install Python 3.5. The defaults will not be set correctly in that case. If you already have Python 2.x installed we **strongly** recommmend using Conda instead of installing Python 3.5 locally.
 
 Once you have set up your Python 3.5 environment correctly you can use ``pip`` to install pVACtools. Make sure you have ``pip`` installed. ``pip`` is generally included in python distributions, but may need to be upgraded before use. See the `instructions <https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel>`_ for installing or upgrading ``pip``.
 
@@ -19,7 +19,7 @@ After you have pip installed, type the following command on your Terminal:
 
 .. code-block:: none
 
-   pip install pvactools[API]
+   pip install pvactools
 
 You can check that ``pvactools`` has been installed under the default environment by listing all installed packages:
 
@@ -33,7 +33,7 @@ If you have an old version of pVACtools installed you might want to consider upg
 
 .. code-block:: none
 
-   pip install pvactools[API] --upgrade
+   pip install pvactools --upgrade
 
 .. _iedb_install:
 
@@ -187,6 +187,17 @@ You can check that the ``mhcnuggets`` package was installed successfully by runn
    pip show mhcnuggets
 
 This should show information about the mhcnuggets package.
+
+PostgreSQL
+----------
+
+pVACviz and pVACapi require a Postgres database. To install Postgres follow
+the `installation instructions <http://postgresguide.com/setup/install.html>`_.
+
+.. note::
+
+   On Debian-based Linux distributions version Postgres V9.6 or lower is
+   required.
 
 Docker and CWL
 --------------

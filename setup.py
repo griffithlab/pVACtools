@@ -73,8 +73,8 @@ setup(
             "pvacseq = tools.pvacseq.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
-            "pvacapi = utils.pvacapi.app:main [API]",
-            "pvacviz = utils.pvacviz.app:main [API]"
+            "pvacapi = utils.pvacapi.app:main",
+            "pvacviz = utils.pvacviz.app:main"
         ]
     },
     install_requires=[
@@ -93,6 +93,13 @@ setup(
         'tensorflow==1.8.0',
         'Pillow',
         'pymp-pypi',
+        'connexion==1.4.2',
+        'py-postgresql',
+        'watchdog',
+        'flask-cors',
+        'bokeh==0.13.0',
+        'tornado==5.0.2',
+        'swagger-spec-validator==2.1.0',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,
@@ -100,17 +107,6 @@ setup(
         'tools.pvacvector': pvacvector_data_files,
         'utils.pvacapi': server_data,
         'utils.pvacviz': client_data,
-    },
-    extras_require={
-        'API':[
-            'connexion==1.4.2',
-            'py-postgresql',
-            'watchdog',
-            'flask-cors',
-            'bokeh==0.13.0',
-            'tornado==5.0.2',
-            'swagger-spec-validator==2.1.0',
-        ]
     },
     classifiers=[
         'Development Status :: 4 - Beta',
