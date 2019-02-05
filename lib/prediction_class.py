@@ -46,6 +46,9 @@ class IEDB(metaclass=ABCMeta):
             else:
                 remaining_lines.pop(0)
 
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
         if iedb_executable_path is not None:
             arguments = self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length)
@@ -77,6 +80,9 @@ class IEDB(metaclass=ABCMeta):
             return (response_text, 'w')
 
 class MHCnuggets(metaclass=ABCMeta):
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
     def valid_allele_names_for_class(self, class_type):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
         alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', class_type)
@@ -272,9 +278,6 @@ class MHCnuggetsI(MHCI, MHCnuggets):
     def valid_allele_names(self):
         return self.valid_allele_names_for_class('class_i')
 
-    def check_length_valid_for_allele(self, length, allele):
-        return True
-
     def valid_lengths_for_allele(self, allele):
         return [8,9,10,11,12,13,14]
 
@@ -363,9 +366,6 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
 class MHCnuggetsII(MHCII, MHCnuggets):
     def valid_allele_names(self):
         return self.valid_allele_names_for_class('class_ii')
-
-    def check_length_valid_for_allele(self, length, allele):
-        return True
 
     def valid_lengths_for_allele(self, allele):
         return [15]
