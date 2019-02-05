@@ -421,6 +421,9 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
                 alleles.append(row.rstrip())
         return alleles
 
+    def valid_lengths_for_allele(self, allele):
+        return [15]
+
     def valid_allele_names(self):
         method = self.iedb_prediction_method
         if not self.valid_allele_names_dict:

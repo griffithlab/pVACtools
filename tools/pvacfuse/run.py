@@ -138,7 +138,7 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
-        pipeline = MHCIPipeline(**class_i_arguments)
+        pipeline = Pipeline(**class_i_arguments)
         pipeline.execute()
     elif len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
@@ -159,12 +159,14 @@ def main(args_input = sys.argv[1:]):
         os.makedirs(output_dir, exist_ok=True)
 
         class_ii_arguments = shared_arguments.copy()
-        class_ii_arguments['alleles']               = class_ii_alleles
-        class_ii_arguments['prediction_algorithms'] = class_ii_prediction_algorithms
-        class_ii_arguments['iedb_executable']       = iedb_mhc_ii_executable
-        class_ii_arguments['output_dir']            = output_dir
-        class_ii_arguments['netmhc_stab']           = False
-        pipeline = MHCIIPipeline(**class_ii_arguments)
+        class_ii_arguments['alleles']                 = class_ii_alleles
+        class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
+        class_ii_arguments['peptide_sequence_length'] = 31
+        class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
+        class_ii_arguments['epitope_lengths']         = [15]
+        class_ii_arguments['output_dir']              = output_dir
+        class_ii_arguments['netmhc_stab']             = False
+        pipeline = Pipeline(**class_ii_arguments)
         pipeline.execute()
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
