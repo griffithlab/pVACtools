@@ -5,6 +5,8 @@ import sys
 import json
 import yaml
 import time
+import socket
+
 from flask import current_app
 from urllib.parse import urlencode
 from hashlib import md5
@@ -397,9 +399,12 @@ def visualize_script(parentID, fileID):
     else:
         sample = 'Unknown Sample'
 
+    HOSTNAME = socket.gethostname()
+    IPADDR = socket.gethostbyname(HOSTNAME)
+
     return (
         server_document(
-            url="http://localhost:5006/visualizations",
+            url="http://" + IPADDR + ":5006/visualizations",
             arguments={
                 'target-process': parentID,
                 'target-file': fileID,
