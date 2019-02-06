@@ -5,6 +5,9 @@ import os
 import sys
 import http.server
 import socketserver
+import socket
+import time
+
 from webbrowser import open_new_tab
 from flask_cors import CORS
 from utils.pvacapi.controllers.utils import initialize
@@ -28,13 +31,16 @@ def main():
     app.add_api('swagger.yaml', arguments={'title': 'API to support pVacSeq user interface for generating reports on pipeline results'})
     app.app.secret_key = os.urandom(1024)
 
-    #setup CORS
+    # setup CORS
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
     CORS(
         app.app,
-        #should match localhost at with any port, path, or protocol
-        origins=r'^(.+://)?localhost(:\d+)?(/.*)?$'
+        # should match IP address at with any port, path, or protocol
+        origins=r'^(.+://)?' + IPAddr + r'(:\d+)?(/.*)?$'
     )
 
+    print(time.asctime(), "Starting pVACapi server at http://" + IPAddr + ":8080")
     app.run(port=8080, debug='--debug' in sys.argv, threaded=True)
 
 if __name__ == '__main__':

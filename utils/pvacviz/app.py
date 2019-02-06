@@ -4,8 +4,11 @@ import threading
 import os
 import webbrowser
 import time
+import socket
 
-HOSTNAME = 'localhost'
+
+HOSTNAME = socket.gethostname()
+IPADDR = socket.gethostbyname(HOSTNAME)
 PORT = 4200
 INDEXFILE = 'index.html'
 CLIENTDIR = os.path.join(os.path.dirname(__file__), 'client')
@@ -36,7 +39,7 @@ def main():
     os.chdir(CLIENTDIR)
 
     Handler = MyHandler
-    httpd = HTTPServer((HOSTNAME, PORT), Handler)
+    httpd = HTTPServer((IPADDR, PORT), Handler)
     thread = threading.Thread(target=httpd.serve_forever)
 
     try:
@@ -54,10 +57,10 @@ def main():
         pass
 
     finally:
-        print(time.asctime(), "pVACviz server started at http://%s:%s" % (HOSTNAME, PORT))
+        print(time.asctime(), "pVACviz server started at http://%s:%s" % (IPADDR, PORT))
 
-    print(time.asctime(), "Opening pVACviz client at http://%s:%s in default browser." % (HOSTNAME, PORT))
-    webbrowser.get().open("http://%s:%s" % (HOSTNAME, PORT), new=1, autoraise=True)
+    print(time.asctime(), "Opening pVACviz client at http://%s:%s in default browser." % (IPADDR, PORT))
+    webbrowser.get().open("http://%s:%s" % (IPADDR, PORT), new=1, autoraise=True)
 
 
 if __name__ == "__main__":

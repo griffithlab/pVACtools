@@ -19,6 +19,7 @@ import threading
 from postgresql.exceptions import UndefinedTableError
 from math import ceil
 import operator
+import socket
 
 class dataObj(dict):
     def __init__(self, datafiles, sync):
@@ -243,9 +244,12 @@ def initialize(current_app, args):
         )
     )
     #Check if the bokeh port is already in use.  Attempt to reconnect?
+    HOSTNAME = socket.gethostname()
+    IPADDR = socket.gethostbyname(HOSTNAME)
+
     current_app.config['storage']['bokeh']=subprocess.Popen(
-        'bokeh serve %s --allow-websocket-origin=localhost:8080'%(
-            quote(visapp_path)
+        'bokeh serve %s --address %s --allow-websocket-origin=%s:8080' % (
+            quote(visapp_path), IPADDR, IPADDR
         ),
         shell=True,
         stdout=subprocess.DEVNULL
