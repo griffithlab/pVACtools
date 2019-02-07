@@ -11,6 +11,7 @@ import time
 from webbrowser import open_new_tab
 from flask_cors import CORS
 from utils.pvacapi.controllers.utils import initialize
+from utils.pvacapi.controllers.utils import getIpAddress
 #FIXME: sanitize sample name
 def main():
 
@@ -32,8 +33,7 @@ def main():
     app.app.secret_key = os.urandom(1024)
 
     # setup CORS
-    hostname = socket.gethostname()
-    IPAddr = socket.gethostbyname(hostname)
+    IPAddr = getIpAddress()
     CORS(
         app.app,
         # should match IP address at with any port, path, or protocol

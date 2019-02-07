@@ -244,8 +244,7 @@ def initialize(current_app, args):
         )
     )
     #Check if the bokeh port is already in use.  Attempt to reconnect?
-    HOSTNAME = socket.gethostname()
-    IPADDR = socket.gethostbyname(HOSTNAME)
+    IPADDR = getIpAddress()
 
     current_app.config['storage']['bokeh']=subprocess.Popen(
         'bokeh serve %s --address %s --allow-websocket-origin=%s:8080' % (
@@ -1218,3 +1217,17 @@ def filterprocess(data, filters, sorting, page, count):
             if j == len(filters)-1:
                 filteredlist.append(data[i])
     return sort(filteredlist, sorting, page, count, columns)
+
+# from https://stackoverflow.com/a/1267524
+# looks like a kludge but was the only method I found to reliably fetch the active IP across all platforms
+def getIpAddress():
+    return [l
+        for l in ([ip
+            for ip in socket.gethostbyname_ex(socket.gethostname())[2]
+            if not ip.startswith("127.")
+        ][: 1], [
+            [(s.connect(('8.8.8.8', 53)),
+              s.getsockname()[0],
+              s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
+        ]) if l
+    ][0][0]

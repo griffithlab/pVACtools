@@ -13,6 +13,7 @@ from hashlib import md5
 from bokeh.embed import server_document
 from .processes import fetch_process, is_running, process_info
 from .utils import column_filter
+from utils.pvacapi.controllers.utils import getIpAddress
 
 float_pattern = re.compile(r'^\d*\.\d+$')
 int_pattern = re.compile(r'^-?\d+$')
@@ -399,8 +400,7 @@ def visualize_script(parentID, fileID):
     else:
         sample = 'Unknown Sample'
 
-    HOSTNAME = socket.gethostname()
-    IPADDR = socket.gethostbyname(HOSTNAME)
+    IPADDR = getIpAddress()
 
     return (
         server_document(
