@@ -140,7 +140,7 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
     def __init__(self):
         tool_name = "pvacseq"
         input_file_help = (
-            "A VEP-annotated single-sample VCF containing transcript, "
+            "A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
             "Wildtype protein sequence, and Downstream protein sequence information."
         )
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
