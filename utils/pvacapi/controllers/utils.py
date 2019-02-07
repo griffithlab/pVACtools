@@ -116,25 +116,32 @@ _file_info = {
 }
 
 def descriptions(ext):
-    if ext in _file_info:
-        return _file_info[ext]['description']
-    elif re.search(r'(split|tsv)_\d+-\d+$', ext):
-        return "A temporary file to cache a subset of the data when working with IEDB"
-    elif re.search(r'key$', ext):
-        return "Data used by pVAC-Seq to parse results from IEDB"
+    while len(ext) > 0:
+        if ext in _file_info:
+            return _file_info[ext]['description']
+        elif re.search(r'(split|tsv)_\d+-\d+$', ext):
+            return "A temporary file to cache a subset of the data when working with IEDB"
+        elif re.search(r'key$', ext):
+            return "Data used by pVAC-Seq to parse results from IEDB"
+        else:
+            ext = '.'.join(ext.split('.')[1:])
     return "Unknown File"
 
 def is_visualizable(ext):
-    if ext in _file_info:
-        return _file_info[ext]['visualizable']
-    else:
-        return False
+    while len(ext) > 0:
+        if ext in _file_info:
+            return _file_info[ext]['visualizable']
+        else:
+            ext = '.'.join(ext.split('.')[1:])
+    return False
 
 def visualization_type(ext):
-    if ext in _file_info and 'visualization_type' in _file_info[ext]:
-        return _file_info[ext]['visualization_type']
-    else:
-        return None
+    while len(ext) > 0:
+        if ext in _file_info and 'visualization_type' in _file_info[ext]:
+            return _file_info[ext]['visualization_type']
+        else:
+            ext = '.'.join(ext.split('.')[1:])
+    return None
 
 def check_size(file, max_tries = 5):
     tries = 1

@@ -362,8 +362,8 @@ paths:
       - name: "expn_val"
         in: "formData"
         description: "Gene and Transcript Expression cutoff: Sites above this cutoff will be considered"
-        type: "integer"
-        default: 1
+        type: "number"
+        default: 1.0
       - name: "net_chop_threshold"
         in: "formData"
         description: "NetChop Threshold: NetChop prediction threshold"
@@ -991,26 +991,6 @@ paths:
           description: "Returns a mapping of column names to data type"
           schema:
             type: "object"
-        default:
-          description: "Unexpected error"
-          schema:
-            $ref: "#/definitions/Error"
-  /static/testpage:
-    get:
-      tags:
-        - "test"
-      summary: "A test submission form"
-      description: "Returns a web page containing a form for submitting a new pVAC-Seq run. \
-        Submission is sent to the /api/v1/staging endpoint, where it is processed \
-        then forwarded to the /api/v1/start endpoint\n"
-      produces:
-        - "text/html"
-      operationId: "utils.pvacapi.controllers.staging.test"
-      responses:
-        200:
-          description: "Returns a static page"
-          schema:
-            type: "string"
         default:
           description: "Unexpected error"
           schema:

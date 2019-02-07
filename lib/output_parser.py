@@ -411,11 +411,13 @@ class OutputParser(metaclass=ABCMeta):
                 if wt_epitope_seq == 'NA':
                     corresponding_fold_change = 'NA'
                 else:
-                    corresponding_fold_change = "%.3f" % (corresponding_wt_score/best_mt_score)
+                    corresponding_fold_change = round((corresponding_wt_score/best_mt_score), 3)
+                    corresponding_wt_score = round(corresponding_wt_score, 3)
                 if median_wt_score == 'NA':
                     median_fold_change = 'NA'
                 else:
-                    median_fold_change = "%.3f" % (median_wt_score/median_mt_score)
+                    median_fold_change = round((median_wt_score/median_mt_score), 3)
+                    median_wt_score = round(median_wt_score, 3)
                 row = {
                     'Chromosome'          : tsv_entry['chromosome_name'],
                     'Start'               : tsv_entry['start'],
@@ -438,10 +440,10 @@ class OutputParser(metaclass=ABCMeta):
                     'MT Epitope Seq'      : mt_epitope_seq,
                     'WT Epitope Seq'      : wt_epitope_seq,
                     'Best MT Score Method': PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
-                    'Best MT Score'       : best_mt_score,
+                    'Best MT Score'       : round(best_mt_score, 3),
                     'Corresponding WT Score'    : corresponding_wt_score,
                     'Corresponding Fold Change' : corresponding_fold_change,
-                    'Median MT Score'     : median_mt_score,
+                    'Median MT Score'     : round(median_mt_score, 3),
                     'Median WT Score'     : median_wt_score,
                     'Median Fold Change'  : median_fold_change,
                 }
@@ -455,22 +457,15 @@ class OutputParser(metaclass=ABCMeta):
                         row["%s MT Score" % pretty_method] = mt_scores[method]
                     else:
                         row["%s MT Score" % pretty_method] = 'NA'
-                if 'gene_expression' in tsv_entry:
-                    row['Gene Expression'] = tsv_entry['gene_expression']
-                if 'transcript_expression' in tsv_entry:
-                    row['Transcript Expression'] = tsv_entry['transcript_expression']
-                if 'normal_depth' in tsv_entry:
-                    row['Normal Depth'] = tsv_entry['normal_depth']
-                if 'normal_vaf' in tsv_entry:
-                    row['Normal VAF'] = tsv_entry['normal_vaf']
-                if 'tdna_depth' in tsv_entry:
-                    row['Tumor DNA Depth'] = tsv_entry['tdna_depth']
-                if 'tdna_vaf' in tsv_entry:
-                    row['Tumor DNA VAF'] = tsv_entry['tdna_vaf']
-                if 'trna_depth' in tsv_entry:
-                    row['Tumor RNA Depth'] = tsv_entry['trna_depth']
-                if 'trna_vaf' in tsv_entry:
-                    row['Tumor RNA VAF'] = tsv_entry['trna_vaf']
+                for (tsv_key, row_key) in zip(['gene_expression', 'transcript_expression', 'normal_vaf', 'tdna_vaf', 'trna_vaf'], ['Gene Expression', 'Transcript Expression', 'Normal VAF', 'Tumor DNA VAF', 'Tumor RNA VAF']):
+                    if tsv_key in tsv_entry:
+                        if tsv_entry[tsv_key] == 'NA':
+                            row[row_key] = 'NA'
+                        else:
+                            row[row_key] = round(float(tsv_entry[tsv_key]), 3)
+                for (tsv_key, row_key) in zip(['normal_depth', 'tdna_depth', 'trna_depth'], ['Normal Depth', 'Tumor DNA Depth', 'Tumor RNA Depth']):
+                    if tsv_key in tsv_entry:
+                        row[row_key] = tsv_entry[tsv_key]
                 if self.sample_name:
                     row['Sample Name'] = self.sample_name
                 tsv_writer.writerow(row)
