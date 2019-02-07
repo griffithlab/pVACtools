@@ -4,11 +4,9 @@ import threading
 import os
 import webbrowser
 import time
-import socket
+from utils.pvacapi.controllers.utils import getIpAddress
 
-
-HOSTNAME = socket.gethostname()
-IPADDR = socket.gethostbyname(HOSTNAME)
+IPADDR = getIpAddress()
 PORT = 4200
 INDEXFILE = 'index.html'
 CLIENTDIR = os.path.join(os.path.dirname(__file__), 'client')
