@@ -13,11 +13,11 @@
 		"HLA-G*01:09"
 	],
 	"fasta_size": 200,
-  "maximum_transcript_support_level": 1,
+    "maximum_transcript_support_level": 1,
 	"netmhc_stab": false,
 	"pass_only": false,
 	"peptide_sequence_length": 21,
-	"expn_val": 1,
+	"expn_val": 1.0,
 	"binding_threshold": 500,
 	"allele_specific_cutoffs": false,
 	"epitope_lengths": [
@@ -26,12 +26,12 @@
 	"samplename": "endpoint_input",
 	"trna_cov": 10,
 	"keep_tmp_files": false,
-	"normal_vaf": 2,
-	"trna_vaf": 40,
+	"normal_vaf": 0.02,
+	"trna_vaf": 0.4,
 	"prediction_algorithms": [
 		"NetMHC"
 	],
 	"iedb_install_dir": "",
-	"tdna_vaf": 40,
+	"tdna_vaf": 0.4,
 	"tdna_cov": 10
 }

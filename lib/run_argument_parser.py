@@ -179,7 +179,7 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         self.parser.add_argument(
             '--normal-vaf', type=float,
             help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered.",
-            default=0.2
+            default=0.02
         )
         self.parser.add_argument(
             '--tdna-vaf', type=float,
@@ -192,8 +192,8 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
             default=0.25
         )
         self.parser.add_argument(
-            '--expn-val', type=int,
-            default=1,
+            '--expn-val', type=float,
+            default=1.0,
             help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered.",
         )
         self.parser.add_argument(
@@ -228,4 +228,9 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
         self.parser.add_argument(
             '-n', "--input-n-mer", default='25',
             help="Length of the peptide sequence to use when creating the FASTA from the pVACseq TSV.",
+        )
+        self.parser.add_argument(
+            '--spacers', type=lambda s:[spacer for spacer in s.split(',')],
+            help="Comma-separated list of spacers to use for testing junction epitopes. Include None to test junctions without spacers.",
+            default="None,HH,HHC,HHH,HHHD,HHHC,AAY,HHHH,HHAA,HHL,AAL"
         )

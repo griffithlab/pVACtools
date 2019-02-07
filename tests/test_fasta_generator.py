@@ -833,6 +833,7 @@ class FastaGeneratorTests(unittest.TestCase):
             'epitope_lengths'           : [self.epitope_length],
             'output_file_prefix'        : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'spacers'                   : ['None','HH','HHC','HHH','HHHD','HHHC','AAY','HHHH','HHAA','HHL','AAL'],
         }
         generator = VectorFastaGenerator(**generate_fasta_params)
 

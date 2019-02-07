@@ -148,7 +148,7 @@ def staging(parameters):
         'normal_vaf': parameters.pop('normal_vaf', 0.02),  # normal_vaf
         'tdna_vaf': parameters.pop('tdna_vaf', 0.25),  # tdna_vaf
         'trna_vaf': parameters.pop('trna_vaf', 0.25),  # trna_vaf
-        'expn_val': parameters.pop('expn_val', 1),  # expn_val
+        'expn_val': parameters.pop('expn_val', 1.0),  # expn_val
         'net_chop_threshold': parameters.pop('net_chop_threshold', 0.5),
         'fasta_size': parameters.pop('fasta_size', 200),
         'maximum_transcript_support_level': parameters.pop('maximum_transcript_support_level', 1),
@@ -284,14 +284,6 @@ def start(input, phased_proximal_variants_vcf, samplename, alleles, epitope_leng
             )
         data.save()
         return data['processid']
-
-def test():
-    """Return the submission page (a stand-in until there is a proper ui for submission)"""
-    reader = open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_start.html'))
-    data = reader.read()
-    reader.close()
-    return data
-
 
 def check_allele(allele):
     """Checks if the requested allele is supported by pVAC-Seq or not"""

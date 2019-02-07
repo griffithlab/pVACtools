@@ -294,12 +294,13 @@ class VcfConverter(InputFileConverter):
         else:
             coverage_for_entry['tdna_depth'] = self.get_depth_from_vcf_genotype(genotype, 'DP')
             coverage_for_entry['trna_depth'] = self.get_depth_from_vcf_genotype(genotype, 'RDP')
-            coverage_for_entry['tdna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, entry.ALT, alt, 'AF', 'AD', 'DP')
-            coverage_for_entry['trna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, entry.ALT, alt, 'RAF', 'RAD', 'RDP')
+            alts = list(map(lambda x: str(x) , entry.ALT))
+            coverage_for_entry['tdna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, alts, alt, 'AF', 'AD', 'DP')
+            coverage_for_entry['trna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, alts, alt, 'RAF', 'RAD', 'RDP')
             if self.normal_sample_name is not None:
                 normal_genotype = entry.genotype(self.normal_sample_name)
                 coverage_for_entry['normal_depth'] = self.get_depth_from_vcf_genotype(normal_genotype, 'DP')
-                coverage_for_entry['normal_vaf'] = self.get_vaf_from_vcf_genotype(normal_genotype, entry.ALT, alt, 'AF', 'AD', 'DP')
+                coverage_for_entry['normal_vaf'] = self.get_vaf_from_vcf_genotype(normal_genotype, alts, alt, 'AF', 'AD', 'DP')
         return coverage_for_entry
 
     def write_proximal_variant_entries(self, entry, alt, transcript_name, index):

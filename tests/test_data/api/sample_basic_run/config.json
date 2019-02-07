@@ -13,11 +13,11 @@
 		"HLA-E*01:01"
 	],
 	"fasta_size": 200,
-  "maximum_transcript_support_level": 1,
+    "maximum_transcript_support_level": 1,
 	"netmhc_stab": false,
 	"pass_only": false,
 	"peptide_sequence_length": 21,
-	"expn_val": 1,
+	"expn_val": 1.0,
 	"binding_threshold": 500,
 	"allele_specific_cutoffs": false,
 	"epitope_lengths": [
