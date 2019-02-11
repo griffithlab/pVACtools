@@ -47,13 +47,3 @@ List Allele-Specific Cutoffs
 ----------------------------
 
 .. program-output:: pvacseq allele_specific_cutoffs -h
-
-Documentation For Configuration Files
--------------------------------------
-
-.. program-output:: pvacseq config_files -h
-
-.. .. argparse::
-    :module: lib.config_files
-    :func: define_parser
-    :prog: pvacseq config_files
