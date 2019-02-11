@@ -3,7 +3,6 @@ import argparse
 import os
 from lib.prediction_class import *
 from lib.pipeline import *
-from tools.pvacseq.config_files import additional_input_file_list_options
 from lib.run_argument_parser import *
 from lib.post_processor import *
 import lib.call_iedb
