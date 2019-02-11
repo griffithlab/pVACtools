@@ -37,6 +37,8 @@ class Pipeline(metaclass=ABCMeta):
         self.alleles                     = kwargs['alleles']
         self.prediction_algorithms       = kwargs['prediction_algorithms']
         self.output_dir                  = kwargs['output_dir']
+        self.peptide_sequence_length     = kwargs.pop('peptide_sequence_length', 21)
+        self.epitope_lengths             = kwargs['epitope_lengths']
         self.iedb_executable             = kwargs.pop('iedb_executable', None)
         self.gene_expn_file              = kwargs.pop('gene_expn_file', None)
         self.transcript_expn_file        = kwargs.pop('transcript_expn_file', None)
@@ -250,110 +252,6 @@ class Pipeline(metaclass=ABCMeta):
         status_message("Completed")
         return chunks
 
-    @abstractmethod
-    def generate_fasta(self):
-        pass
-
-    def split_fasta_basename(self):
-        return os.path.join(self.tmp_dir, self.sample_name + "_" + str(self.peptide_sequence_length) + ".fa.split")
-
-    def balance_multithreads(self, iteration_info):
-        for i in range(1,self.n_threads):
-            #find the dimension with the most iterations per thread
-            (max_iterations, dimension) = max(zip(map(lambda x: x['iterations_per_thread'], iteration_info.values()), iteration_info.keys()))
-            #assign that dimension one more thread
-            iteration_info[dimension]['threads'] += 1
-            #calculate how many total threads this combination would use since these are nested threads
-            total_n_threads = iteration_info['file']['threads'] * iteration_info['allele']['threads'] * iteration_info['length']['threads'] * iteration_info['algorithm']['threads']
-            #if total_n_threads exceeds the total number of threads requested, reset to previous state and return
-            if total_n_threads > self.n_threads:
-                iteration_info[dimension]['threads'] -= 1
-                return iteration_info
-            #recalculate how many iterations per thread that dimension will have with the new number of threads
-            iteration_info[dimension]['iterations_per_thread'] = iteration_info[dimension]['total_iterations'] / iteration_info[dimension]['threads']
-            #if all dimension have less or equal to 1 iteration per thread then we can't optimize any further
-            if ( iteration_info['file']['iterations_per_thread'] <= 1 and
-                 iteration_info['allele']['iterations_per_thread'] <= 1 and
-                 iteration_info['length']['iterations_per_thread'] <= 1 and
-                 iteration_info['algorithm']['iterations_per_thread'] <= 1 ):
-                return iteration_info
-        return iteration_info
-
-    @abstractmethod
-    def call_iedb_and_parse_outputs(self, chunks):
-        pass
-
-    def combined_parsed_path(self):
-        combined_parsed = "%s.all_epitopes.tsv" % self.sample_name
-        return os.path.join(self.output_dir, combined_parsed)
-
-    def combined_parsed_outputs(self, split_parsed_output_files):
-        status_message("Combining Parsed IEDB Output Files")
-        lib.combine_parsed_outputs.main([
-            *split_parsed_output_files,
-            self.combined_parsed_path(),
-            '--top-score-metric', self.top_score_metric,
-        ])
-        status_message("Completed")
-
-    def final_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".filtered.tsv")
-
-    def ranked_final_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".filtered.condensed.ranked.tsv")
-
-    def execute(self):
-        self.print_log()
-        self.convert_vcf()
-
-        total_row_count = self.tsv_entry_count()
-        if total_row_count == 0:
-            if self.input_file_type == 'vcf':
-                sys.exit("The TSV file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
-            elif self.input_file_type == 'bedpe':
-                sys.exit("The TSV file is empty. Please check that the input bedpe file contains fusion entries.")
-        chunks = self.split_tsv_file(total_row_count)
-
-        self.generate_fasta(chunks)
-        split_parsed_output_files = self.call_iedb_and_parse_outputs(chunks)
-
-        if len(split_parsed_output_files) == 0:
-            status_message("No output files were created. Aborting.")
-            return
-
-        self.combined_parsed_outputs(split_parsed_output_files)
-
-        post_processing_params = vars(self)
-        post_processing_params['input_file'] = self.combined_parsed_path()
-        post_processing_params['filtered_report_file'] = self.final_path()
-        post_processing_params['condensed_report_file'] = self.ranked_final_path()
-        if self.input_file_type == 'vcf':
-            post_processing_params['run_coverage_filter'] = True
-            post_processing_params['run_transcript_support_level_filter'] = True
-        else:
-            post_processing_params['run_coverage_filter'] = False
-            post_processing_params['run_transcript_support_level_filter'] = False
-        if self.net_chop_method:
-            post_processing_params['run_net_chop'] = True
-        else:
-            post_processing_params['run_net_chop'] = False
-        if self.netmhc_stab:
-            post_processing_params['run_netmhc_stab'] = True
-        else:
-            post_processing_params['run_netmhc_stab'] = False
-        PostProcessor(**post_processing_params).execute()
-
-        status_message("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.ranked_final_path()))
-
-        if self.keep_tmp_files is False:
-            shutil.rmtree(self.tmp_dir)
-
-class MHCIPipeline(Pipeline):
-    def __init__(self, **kwargs):
-        Pipeline.__init__(self, **kwargs)
-        self.peptide_sequence_length = kwargs.pop('peptide_sequence_length', 21)
-        self.epitope_lengths         = kwargs['epitope_lengths']
-
     def generate_fasta(self, chunks):
         status_message("Generating Variant Peptide FASTA and Key Files")
         for (split_start, split_end) in chunks:
@@ -383,6 +281,31 @@ class MHCIPipeline(Pipeline):
             fasta_generator = self.fasta_generator(generate_fasta_params)
             fasta_generator.execute()
         status_message("Completed")
+
+    def split_fasta_basename(self):
+        return os.path.join(self.tmp_dir, self.sample_name + "_" + str(self.peptide_sequence_length) + ".fa.split")
+
+    def balance_multithreads(self, iteration_info):
+        for i in range(1,self.n_threads):
+            #find the dimension with the most iterations per thread
+            (max_iterations, dimension) = max(zip(map(lambda x: x['iterations_per_thread'], iteration_info.values()), iteration_info.keys()))
+            #assign that dimension one more thread
+            iteration_info[dimension]['threads'] += 1
+            #calculate how many total threads this combination would use since these are nested threads
+            total_n_threads = iteration_info['file']['threads'] * iteration_info['allele']['threads'] * iteration_info['length']['threads'] * iteration_info['algorithm']['threads']
+            #if total_n_threads exceeds the total number of threads requested, reset to previous state and return
+            if total_n_threads > self.n_threads:
+                iteration_info[dimension]['threads'] -= 1
+                return iteration_info
+            #recalculate how many iterations per thread that dimension will have with the new number of threads
+            iteration_info[dimension]['iterations_per_thread'] = iteration_info[dimension]['total_iterations'] / iteration_info[dimension]['threads']
+            #if all dimension have less or equal to 1 iteration per thread then we can't optimize any further
+            if ( iteration_info['file']['iterations_per_thread'] <= 1 and
+                 iteration_info['allele']['iterations_per_thread'] <= 1 and
+                 iteration_info['length']['iterations_per_thread'] <= 1 and
+                 iteration_info['algorithm']['iterations_per_thread'] <= 1 ):
+                return iteration_info
+        return iteration_info
 
     def call_iedb_and_parse_outputs(self, chunks):
         pymp.config.nested = True
@@ -467,15 +390,17 @@ class MHCIPipeline(Pipeline):
                                                 if wait_time > 0:
                                                     time.sleep(wait_time)
 
-                                        lib.call_iedb.main([
+                                        arguments = [
                                             split_fasta_file_path,
                                             split_iedb_out,
                                             method,
                                             a,
-                                            '-l', str(epl),
                                             '-r', str(self.iedb_retries),
                                             '-e', self.iedb_executable,
-                                        ])
+                                        ]
+                                        if not isinstance(prediction, IEDBMHCII):
+                                            arguments.extend(['-l', str(epl),])
+                                        lib.call_iedb.main(arguments)
                                         last_execute_timestamp = datetime.datetime.now()
                                         status_message_with_lock("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s - Completed" % (a, epl, method, fasta_chunk), lock)
                                         split_iedb_output_files.append(split_iedb_out)
@@ -506,154 +431,67 @@ class MHCIPipeline(Pipeline):
                                         split_parsed_output_files.append(split_parsed_file_path)
         return split_parsed_output_files
 
-class MHCIIPipeline(Pipeline):
-    def __init__(self, **kwargs):
-        Pipeline.__init__(self, **kwargs)
-        self.peptide_sequence_length = 31
+    def combined_parsed_path(self):
+        combined_parsed = "%s.all_epitopes.tsv" % self.sample_name
+        return os.path.join(self.output_dir, combined_parsed)
 
-    def generate_fasta(self, chunks):
-        status_message("Generating Variant Peptide FASTA and Key Files")
-        for (split_start, split_end) in chunks:
-            tsv_chunk = "%d-%d" % (split_start, split_end)
-            fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
-            generate_fasta_params = {
-                'peptide_sequence_length'   : self.peptide_sequence_length,
-                'downstream_sequence_length': self.downstream_sequence_length,
-                'proximal_variants_file'    : self.proximal_variants_file,
-            }
-            split_fasta_file_path = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
-            if os.path.exists(split_fasta_file_path):
-                status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
-                continue
-            if self.input_file_type == 'pvacvector_input_fasta':
-                generate_fasta_params['input_file'] = self.tsv_file_path()
-                generate_fasta_params['output_file_prefix'] = split_fasta_file_path
-                generate_fasta_params['epitope_lengths'] = [15]
-                generate_fasta_params['spacers'] = self.spacers
-            else:
-                split_fasta_file_path = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
-                split_fasta_key_file_path = split_fasta_file_path + '.key'
-                generate_fasta_params['input_file'] = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
-                generate_fasta_params['epitope_length'] = 15
-                generate_fasta_params['output_file'] = split_fasta_file_path
-                generate_fasta_params['output_key_file'] = split_fasta_key_file_path
-            if os.path.exists(split_fasta_file_path):
-                status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
-                continue
-            fasta_generator = self.fasta_generator(generate_fasta_params)
-            fasta_generator.execute()
+    def combined_parsed_outputs(self, split_parsed_output_files):
+        status_message("Combining Parsed IEDB Output Files")
+        lib.combine_parsed_outputs.main([
+            *split_parsed_output_files,
+            self.combined_parsed_path(),
+            '--top-score-metric', self.top_score_metric,
+        ])
         status_message("Completed")
 
-    def call_iedb_and_parse_outputs(self, chunks):
-        pymp.config.nested = True
-        alleles = self.alleles
-        prediction_algorithms = self.prediction_algorithms
-        iteration_info = {
-            'file': {
-                'total_iterations': len(chunks),
-                'iterations_per_thread': len(chunks),
-                'threads': 1,
-            },
-            'allele': {
-                'total_iterations': len(alleles),
-                'iterations_per_thread': len(alleles),
-                'threads': 1,
-            },
-            'length': {
-                'total_iterations': 1,
-                'iterations_per_thread': 1,
-                'threads': 1,
-            },
-            'algorithm': {
-                'total_iterations': len(prediction_algorithms),
-                'iterations_per_thread': len(prediction_algorithms),
-                'threads': 1,
-            },
-        }
-        iteration_info = self.balance_multithreads(iteration_info)
+    def final_path(self):
+        return os.path.join(self.output_dir, self.sample_name+".filtered.tsv")
 
-        split_parsed_output_files = []
-        lock = Lock()
-        with pymp.Parallel(iteration_info['file']['threads']) as p:
-            for i in p.range(len(chunks)):
-                (split_start, split_end) = chunks[i]
-                tsv_chunk = "%d-%d" % (split_start, split_end)
-                fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
-                with pymp.Parallel(iteration_info['allele']['threads']) as p2:
-                    for j in p2.range(len(alleles)):
-                        a = alleles[j]
-                        if self.input_file_type == 'pvacvector_input_fasta':
-                            split_fasta_file_path = "{}_1-2.15.tsv".format(self.split_fasta_basename())
-                        else:
-                            split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
-                        split_iedb_output_files = []
-                        status_message_with_lock("Processing entries for Allele %s - Entries %s" % (a, fasta_chunk), lock)
-                        if os.path.getsize(split_fasta_file_path) == 0:
-                            status_message_with_lock("Fasta file is empty. Skipping", lock)
-                            continue
-                        with pymp.Parallel(iteration_info['algorithm']['threads']) as p3:
-                            for j in p3.range(len(prediction_algorithms)):
-                                method = prediction_algorithms[j]
-                                prediction_class = globals()[method]
-                                prediction = prediction_class()
-                                if hasattr(prediction, 'iedb_prediction_method'):
-                                    iedb_method = prediction.iedb_prediction_method
-                                else:
-                                    iedb_method = method
-                                valid_alleles = prediction.valid_allele_names()
-                                if a not in valid_alleles:
-                                    status_message_with_lock("Allele %s not valid for Method %s. Skipping." % (a, method), lock)
-                                    continue
+    def ranked_final_path(self):
+        return os.path.join(self.output_dir, self.sample_name+".filtered.condensed.ranked.tsv")
 
-                                split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, "tsv_%s" % fasta_chunk]))
-                                if os.path.exists(split_iedb_out):
-                                    status_message_with_lock("IEDB file for Allele %s with Method %s (Entries %s) already exists. Skipping." % (a, method, fasta_chunk), lock)
-                                    split_iedb_output_files.append(split_iedb_out)
-                                    continue
-                                status_message_with_lock("Running IEDB on Allele %s with Method %s - Entries %s" % (a, method, fasta_chunk), lock)
+    def execute(self):
+        self.print_log()
+        self.convert_vcf()
 
-                                if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
-                                    if 'last_execute_timestamp' in locals() and not self.iedb_executable:
-                                        elapsed_time = ( datetime.datetime.now() - last_execute_timestamp ).total_seconds()
-                                        wait_time = 60 - elapsed_time
-                                        if wait_time > 0:
-                                            time.sleep(wait_time)
+        total_row_count = self.tsv_entry_count()
+        if total_row_count == 0:
+            if self.input_file_type == 'vcf':
+                sys.exit("The TSV file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
+            elif self.input_file_type == 'bedpe':
+                sys.exit("The TSV file is empty. Please check that the input bedpe file contains fusion entries.")
+        chunks = self.split_tsv_file(total_row_count)
 
-                                lib.call_iedb.main([
-                                    split_fasta_file_path,
-                                    split_iedb_out,
-                                    method,
-                                    a,
-                                    '-r', str(self.iedb_retries),
-                                    '-e', self.iedb_executable,
-                                ])
-                                last_execute_timestamp = datetime.datetime.now()
-                                status_message_with_lock("Running IEDB on Allele %s with Method %s - Entries %s - Completed" % (a, method, fasta_chunk), lock)
-                                split_iedb_output_files.append(split_iedb_out)
+        self.generate_fasta(chunks)
+        split_parsed_output_files = self.call_iedb_and_parse_outputs(chunks)
 
-                            split_parsed_file_path = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, "parsed", "tsv_%s" % fasta_chunk]))
-                            if os.path.exists(split_parsed_file_path):
-                                status_message_with_lock("Parsed Output File for Allele %s (Entries %s) already exists. Skipping" % (a, fasta_chunk), lock)
-                                split_parsed_output_files.append(split_parsed_file_path)
-                                continue
-                            split_fasta_key_file_path = split_fasta_file_path + '.key'
+        if len(split_parsed_output_files) == 0:
+            status_message("No output files were created. Aborting.")
+            return
 
-                            if len(split_iedb_output_files) > 0:
-                                status_message_with_lock("Parsing IEDB Output for Allele %s - Entries %s" % (a, fasta_chunk), lock)
-                                split_tsv_file_path = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
-                                params = {
-                                    'input_iedb_files'       : split_iedb_output_files,
-                                    'input_tsv_file'         : split_tsv_file_path,
-                                    'key_file'               : split_fasta_key_file_path,
-                                    'output_file'            : split_parsed_file_path,
-                                }
-                                if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
-                                    params['sample_name'] = self.sample_name
-                                else:
-                                    params['sample_name'] = None
-                                parser = self.output_parser(params)
-                                parser.execute()
-                                status_message_with_lock("Parsing IEDB Output for Allele %s - Entries %s - Completed" % (a, fasta_chunk), lock)
-                                split_parsed_output_files.append(split_parsed_file_path)
+        self.combined_parsed_outputs(split_parsed_output_files)
 
-        return split_parsed_output_files
+        post_processing_params = vars(self)
+        post_processing_params['input_file'] = self.combined_parsed_path()
+        post_processing_params['filtered_report_file'] = self.final_path()
+        post_processing_params['condensed_report_file'] = self.ranked_final_path()
+        if self.input_file_type == 'vcf':
+            post_processing_params['run_coverage_filter'] = True
+            post_processing_params['run_transcript_support_level_filter'] = True
+        else:
+            post_processing_params['run_coverage_filter'] = False
+            post_processing_params['run_transcript_support_level_filter'] = False
+        if self.net_chop_method:
+            post_processing_params['run_net_chop'] = True
+        else:
+            post_processing_params['run_net_chop'] = False
+        if self.netmhc_stab:
+            post_processing_params['run_netmhc_stab'] = True
+        else:
+            post_processing_params['run_netmhc_stab'] = False
+        PostProcessor(**post_processing_params).execute()
+
+        status_message("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.ranked_final_path()))
+
+        if self.keep_tmp_files is False:
+            shutil.rmtree(self.tmp_dir)
