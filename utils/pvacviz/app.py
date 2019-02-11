@@ -4,8 +4,9 @@ import threading
 import os
 import webbrowser
 import time
+from utils.pvacapi.controllers.utils import getIpAddress
 
-HOSTNAME = 'localhost'
+IPADDR = getIpAddress()
 PORT = 4200
 INDEXFILE = 'index.html'
 CLIENTDIR = os.path.join(os.path.dirname(__file__), 'client')
@@ -36,9 +37,9 @@ def main():
     os.chdir(CLIENTDIR)
 
     Handler = MyHandler
-    httpd = HTTPServer((HOSTNAME, PORT), Handler)
+    httpd = HTTPServer((IPADDR, PORT), Handler)
     thread = threading.Thread(target=httpd.serve_forever)
-    url = "http://{}:{}".format(HOSTNAME, PORT)
+    url = "http://{}:{}".format(IPADDR, PORT)
 
     try:
         print(time.asctime(), "Starting pVACviz client webserver")
@@ -59,7 +60,6 @@ def main():
         webbrowser.get().open(url, new=1, autoraise=True)
     except webbrowser.Error as err:
         print("No default browser found. Open pVACviz by visiting {} in a browser of your choosing.".format(url))
-
 
 if __name__ == "__main__":
     main()
