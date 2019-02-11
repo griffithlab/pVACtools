@@ -61,7 +61,7 @@ class Pipeline(metaclass=ABCMeta):
         self.keep_tmp_files              = kwargs.pop('keep_tmp_files', False)
         self.exclude_NAs                 = kwargs.pop('exclude_NAs', False)
         self.pass_only                   = kwargs.pop('pass_only', False)
-        self.normal_sample_name          = kwargs.pop('normal_sample_name', False)
+        self.normal_sample_name          = kwargs.pop('normal_sample_name', None)
         self.n_threads                   = kwargs.pop('n_threads', 1)
         self.spacers                     = kwargs.pop('spacers', None)
         self.proximal_variants_file      = None
@@ -159,8 +159,6 @@ class Pipeline(metaclass=ABCMeta):
         }
         if self.normal_sample_name is not None:
             convert_params['normal_sample_name'] = self.normal_sample_name
-        else:
-            convert_params['normal_sample_name'] = None
         if self.phased_proximal_variants_vcf is not None:
             convert_params['proximal_variants_vcf'] = self.phased_proximal_variants_vcf
             proximal_variants_tsv = os.path.join(self.output_dir, self.sample_name + '.proximal_variants.tsv')
