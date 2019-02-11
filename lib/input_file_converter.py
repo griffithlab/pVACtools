@@ -329,31 +329,21 @@ class VcfConverter(InputFileConverter):
                     else:
                         output_row['codon_change'] = 'NA'
 
-                    if 'TX' in self.vcf_reader.formats:
-                        if 'TX' in genotype.data._asdict():
-                            transcript_expressions = genotype['TX']
-                            if isinstance(transcript_expressions, list):
-                                for transcript_expression in transcript_expressions:
-                                    (transcript, value) = transcript_expression.split('|')
-                                    if transcript == transcript_name:
-                                        output_row['transcript_expression'] = value
-                            elif transcript_expressions is not None:
-                                (transcript, value) = transcript_expressions.split('|')
-                                if transcript == transcript_name:
-                                    output_row['transcript_expression'] = value
-
-                    if 'GX' in self.vcf_reader.formats:
-                        if 'GX' in genotype.data._asdict():
-                            gene_expressions = genotype['GX']
-                            if isinstance(gene_expressions, list):
-                                for gene_expression in gene_expressions:
-                                    (gene, value) = gene_expression.split('|')
-                                    if ensembl_gene_id == gene or gene_name == gene:
-                                        output_row['gene_expression'] = value
-                            elif gene_expressions is not None:
-                                (gene, value) = gene_expressions.split('|')
-                                if ensembl_gene_id == gene or gene_name == gene:
-                                    output_row['gene_expression'] = value
+                    for (tag, key, comparison_fields) in zip(['TX', 'GX'], ['transcript_expression', 'gene_expression'], [[transcript_name], [ensembl_gene_id, gene_name]]):
+                        if tag in self.vcf_reader.formats:
+                            if tag in genotype.data._asdict():
+                                expressions = genotype[tag]
+                                if isinstance(expressions, list):
+                                    for expression in expressions:
+                                        (item, value) = expression.split('|')
+                                        for comparison_field in comparison_fields:
+                                            if item == comparison_field:
+                                                output_row[key] = value
+                                elif expressions is not None:
+                                    (item, value) = expressions.split('|')
+                                    for comparison_field in comparison_fields:
+                                        if item == comparison_field:
+                                            output_row[key] = value
 
                     output_row.update(coverage_for_entry)
 
