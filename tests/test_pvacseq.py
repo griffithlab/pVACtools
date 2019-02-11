@@ -251,14 +251,14 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'Test_31.fa.split_1-48',
                 'Test_31.fa.split_1-48.key',
-                'Test.nn_align.H2-IAb.tsv_1-48',
+                'Test.nn_align.H2-IAb.15.tsv_1-48',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
                 self.assertTrue(cmp(output_file, expected_file, False))
 
             for file_name in (
-                'Test.H2-IAb.parsed.tsv_1-48',
+                'Test.H2-IAb.15.parsed.tsv_1-48',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name)
