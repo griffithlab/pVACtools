@@ -31,24 +31,6 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
-    def test_input_vcf_with_cufflinks_files_generates_expected_tsv(self):
-        convert_vcf_input_file              = os.path.join(self.test_data_dir, 'full_input.vcf')
-        convert_vcf_output_file             = tempfile.NamedTemporaryFile()
-        convert_vcf_cufflinks_genes_file    = os.path.join(self.test_data_dir, 'genes.fpkm_tracking')
-        convert_vcf_cufflinks_isoforms_file = os.path.join(self.test_data_dir, 'isoforms.fpkm_tracking')
-
-        convert_vcf_params = {
-            'input_file'                 : convert_vcf_input_file,
-            'output_file'                : convert_vcf_output_file.name,
-            'gene_expn_file'             : convert_vcf_cufflinks_genes_file,
-            'transcript_expn_file'       : convert_vcf_cufflinks_isoforms_file,
-        }
-        converter = VcfConverter(**convert_vcf_params)
-
-        self.assertFalse(converter.execute())
-        expected_output_file = os.path.join(self.test_data_dir, 'output_cufflinks.tsv')
-        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
-
     def test_input_vcf_with_tx_annotation_generates_expected_tsv(self):
         convert_vcf_input_file              = os.path.join(self.test_data_dir, 'input.tx.vcf')
         convert_vcf_output_file             = tempfile.NamedTemporaryFile()
@@ -89,24 +71,6 @@ class InputFileConverterTests(unittest.TestCase):
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_gx.tsv')
-        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
-
-    def test_input_vcf_with_bam_readcount_files_generates_expected_tsv(self):
-        convert_vcf_input_file       = os.path.join(self.test_data_dir, 'full_input.vcf')
-        convert_vcf_output_file      = tempfile.NamedTemporaryFile()
-        convert_vcf_tdna_snvs_file   = os.path.join(self.test_data_dir, 'snvs.bam_readcount')
-        convert_vcf_tdna_indels_file = os.path.join(self.test_data_dir, 'indels.bam_readcount')
-
-        convert_vcf_params = {
-            'input_file'                 : convert_vcf_input_file,
-            'output_file'                : convert_vcf_output_file.name,
-            'tdna_snvs_coverage_file'    : convert_vcf_tdna_snvs_file,
-            'tdna_indels_coverage_file'  : convert_vcf_tdna_indels_file,
-        }
-        converter = VcfConverter(**convert_vcf_params)
-
-        self.assertFalse(converter.execute())
-        expected_output_file = os.path.join(self.test_data_dir, 'output_bam_readcount.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
     def test_input_vcf_with_multiple_transcripts_generates_expected_tsv(self):
