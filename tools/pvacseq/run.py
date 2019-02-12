@@ -3,27 +3,12 @@ import argparse
 import os
 from lib.prediction_class import *
 from lib.pipeline import *
-from config_files import additional_input_file_list_options
 from lib.run_argument_parser import *
 from lib.post_processor import *
 import lib.call_iedb
 
 import shutil
 import yaml
-
-def parse_additional_input_file_list(additional_input_file_list):
-    if additional_input_file_list:
-        with open(additional_input_file_list, 'r') as stream:
-            additional_input_files = yaml.load(stream)
-        for additional_input_file in additional_input_files:
-            if additional_input_file not in additional_input_file_list_options().keys():
-                sys.exit("%s not a valid key in the additional_input_file_list" % additional_input_file)
-    else:
-        additional_input_files = {}
-    for additional_input_file_list_option in additional_input_file_list_options().keys():
-        if additional_input_file_list_option not in additional_input_files:
-            additional_input_files[additional_input_file_list_option] = None
-    return additional_input_files
 
 def define_parser():
     return PvacseqRunArgumentParser().parser
@@ -41,7 +26,7 @@ def combine_reports(input_files, output_file):
                     writer.writerow(headers)
                 writer.writerows(reader)  # Write all remaining rows.
 
-def create_combined_reports(base_output_dir, args, additional_input_files):
+def create_combined_reports(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
 
@@ -140,8 +125,6 @@ def main(args_input = sys.argv[1:]):
         'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
         'n_threads'                 : args.n_threads,
     }
-    additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
-    shared_arguments.update(additional_input_files)
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
         if args.epitope_length is None:
@@ -202,7 +185,7 @@ def main(args_input = sys.argv[1:]):
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
-        create_combined_reports(base_output_dir, args, additional_input_files)
+        create_combined_reports(base_output_dir, args)
 
 if __name__ == '__main__':
     main()

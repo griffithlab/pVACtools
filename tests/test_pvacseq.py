@@ -122,7 +122,6 @@ class PvacseqTests(unittest.TestCase):
             "install_vep_plugin",
             "download_example_data",
             "valid_alleles",
-            "config_files",
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -150,15 +149,6 @@ class PvacseqTests(unittest.TestCase):
         ))) as mock_request:
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
-            additional_input_files = tempfile.NamedTemporaryFile('w')
-            additional_input_file_list = {
-                'gene_expn_file': os.path.join(self.test_data_directory, 'genes.fpkm_tracking'),
-                'transcript_expn_file': os.path.join(self.test_data_directory, 'isoforms.fpkm_tracking'),
-                'tdna_snvs_coverage_file': os.path.join(self.test_data_directory, 'snvs.bam_readcount'),
-                'tdna_indels_coverage_file': os.path.join(self.test_data_directory, 'indels.bam_readcount'),
-            }
-            yaml.dump(additional_input_file_list, additional_input_files, default_flow_style=False)
-
             run.main([
                 os.path.join(self.test_data_directory, "input.vcf"),
                 'Test',
@@ -167,7 +157,6 @@ class PvacseqTests(unittest.TestCase):
                 'PickPocket',
                 output_dir.name,
                 '-e', '9,10',
-                '-i', additional_input_files.name,
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
@@ -183,7 +172,6 @@ class PvacseqTests(unittest.TestCase):
                 'H2-IAb',
                 'NNalign',
                 output_dir.name,
-                '-i', additional_input_files.name,
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '-d', 'full',
@@ -281,7 +269,6 @@ class PvacseqTests(unittest.TestCase):
                     'H2-IAb',
                     'NNalign',
                     output_dir.name,
-                    '-i', additional_input_files.name,
                     '--top-score-metric=lowest',
                     '--keep-tmp-files',
                 ])
@@ -394,15 +381,6 @@ class PvacseqTests(unittest.TestCase):
             for item in os.listdir(test_data_dir):
                 os.symlink(os.path.join(test_data_dir, item), os.path.join(path, item))
 
-        additional_input_files = tempfile.NamedTemporaryFile('w')
-        additional_input_file_list = {
-            'gene_expn_file': os.path.join(self.test_data_directory, 'genes.fpkm_tracking'),
-            'transcript_expn_file': os.path.join(self.test_data_directory, 'isoforms.fpkm_tracking'),
-            'tdna_snvs_coverage_file': os.path.join(self.test_data_directory, 'snvs.bam_readcount'),
-            'tdna_indels_coverage_file': os.path.join(self.test_data_directory, 'indels.bam_readcount'),
-        }
-        yaml.dump(additional_input_file_list, additional_input_files, default_flow_style=False)
-
         run.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
@@ -412,7 +390,6 @@ class PvacseqTests(unittest.TestCase):
             'NNalign',
             output_dir.name,
             '-e', '9,10',
-            '-i', additional_input_files.name,
             '--top-score-metric=lowest',
             '--keep-tmp-files',
             '--tdna-vaf', '20',

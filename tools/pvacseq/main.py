@@ -87,13 +87,6 @@ def main():
     )
     allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
 
-    config_files_parser = subparsers.add_parser(
-        "config_files",
-        help="Documentation for the configuration files",
-        add_help=False
-    )
-    config_files_parser.set_defaults(func=config_files)
-
     args = parser.parse_known_args()
     try:
         args[0].func.main(args[1])

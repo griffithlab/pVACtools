@@ -38,14 +38,6 @@ class Pipeline(metaclass=ABCMeta):
         self.prediction_algorithms       = kwargs['prediction_algorithms']
         self.output_dir                  = kwargs['output_dir']
         self.iedb_executable             = kwargs.pop('iedb_executable', None)
-        self.gene_expn_file              = kwargs.pop('gene_expn_file', None)
-        self.transcript_expn_file        = kwargs.pop('transcript_expn_file', None)
-        self.normal_snvs_coverage_file   = kwargs.pop('normal_snvs_coverage_file', None)
-        self.normal_indels_coverage_file = kwargs.pop('normal_indels_coverage_file', None)
-        self.tdna_snvs_coverage_file     = kwargs.pop('tdna_snvs_coverage_file', None)
-        self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
-        self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
-        self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
         self.phased_proximal_variants_vcf = kwargs.pop('phased_proximal_variants_vcf', None)
         self.net_chop_method             = kwargs.pop('net_chop_method', None)
         self.net_chop_threshold          = kwargs.pop('net_chop_threshold', 0.5)
@@ -69,7 +61,7 @@ class Pipeline(metaclass=ABCMeta):
         self.keep_tmp_files              = kwargs.pop('keep_tmp_files', False)
         self.exclude_NAs                 = kwargs.pop('exclude_NAs', False)
         self.pass_only                   = kwargs.pop('pass_only', False)
-        self.normal_sample_name          = kwargs.pop('normal_sample_name', False)
+        self.normal_sample_name          = kwargs.pop('normal_sample_name', None)
         self.n_threads                   = kwargs.pop('n_threads', 1)
         self.spacers                     = kwargs.pop('spacers', None)
         self.proximal_variants_file      = None
@@ -165,21 +157,8 @@ class Pipeline(metaclass=ABCMeta):
             'sample_name': self.sample_name,
             'pass_only': self.pass_only,
         }
-        for attribute in [
-            'gene_expn_file',
-            'transcript_expn_file',
-            'normal_snvs_coverage_file',
-            'normal_indels_coverage_file',
-            'tdna_snvs_coverage_file',
-            'tdna_indels_coverage_file',
-            'trna_snvs_coverage_file',
-            'trna_indels_coverage_file',
-            'normal_sample_name',
-        ]:
-            if getattr(self, attribute):
-                convert_params[attribute] = getattr(self, attribute)
-            else:
-                convert_params[attribute] = None
+        if self.normal_sample_name is not None:
+            convert_params['normal_sample_name'] = self.normal_sample_name
         if self.phased_proximal_variants_vcf is not None:
             convert_params['proximal_variants_vcf'] = self.phased_proximal_variants_vcf
             proximal_variants_tsv = os.path.join(self.output_dir, self.sample_name + '.proximal_variants.tsv')
