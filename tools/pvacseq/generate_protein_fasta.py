@@ -39,14 +39,6 @@ def convert_vcf(input_file, temp_dir):
     convert_params = {
         'input_file' : input_file,
         'output_file': tsv_file,
-        'gene_expn_file'             : None,
-        'transcript_expn_file'       : None,
-        'normal_snvs_coverage_file'  : None,
-        'normal_indels_coverage_file': None,
-        'tdna_snvs_coverage_file'    : None,
-        'tdna_indels_coverage_file'  : None,
-        'trna_snvs_coverage_file'    : None,
-        'trna_indels_coverage_file'  : None,
     }
     converter = VcfConverter(**convert_params)
     converter.execute()

@@ -51,14 +51,6 @@ class InputFileConverter(metaclass=ABCMeta):
 class VcfConverter(InputFileConverter):
     def __init__(self, **kwargs):
         InputFileConverter.__init__(self, **kwargs)
-        self.gene_expn_file              = kwargs.pop('gene_expn_file', None)
-        self.transcript_expn_file        = kwargs.pop('transcript_expn_file', None)
-        self.normal_snvs_coverage_file   = kwargs.pop('normal_snvs_coverage_file', None)
-        self.normal_indels_coverage_file = kwargs.pop('normal_indels_coverage_file', None)
-        self.tdna_snvs_coverage_file     = kwargs.pop('tdna_snvs_coverage_file', None)
-        self.tdna_indels_coverage_file   = kwargs.pop('tdna_indels_coverage_file', None)
-        self.trna_snvs_coverage_file     = kwargs.pop('trna_snvs_coverage_file', None)
-        self.trna_indels_coverage_file   = kwargs.pop('trna_indels_coverage_file', None)
         self.pass_only                   = kwargs.pop('pass_only', False)
         self.sample_name        = kwargs.pop('sample_name', None)
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
@@ -104,45 +96,11 @@ class VcfConverter(InputFileConverter):
         self.tsv_writer.writeheader()
         self.csq_parser = self.create_csq_parser()
 
-    def parse_bam_readcount_file(self, bam_readcount_file):
-        with open(bam_readcount_file, 'r') as reader:
-            coverage_tsv_reader = csv.reader(reader, delimiter='\t')
-            coverage = {}
-            for row in coverage_tsv_reader:
-                chromosome     = row[0]
-                position       = row[1]
-                reference_base = row[2].upper()
-                depth          = row[3]
-                brct           = row[4:]
-                if chromosome not in coverage:
-                    coverage[chromosome] = {}
-                if position not in coverage[chromosome]:
-                    coverage[chromosome][position] = {}
-                coverage[chromosome][position][reference_base] = self.parse_brct_field(brct)
-                coverage[chromosome][position][reference_base]['depth'] = depth
-        return coverage
-
-    def parse_brct_field(self, brct_entry):
-        parsed_brct = {}
-        for brct in brct_entry:
-            (base, count, rest) = brct.split(':', 2)
-            parsed_brct[base.upper()] = count
-        return parsed_brct
-
     def is_insertion(self, ref, alt):
         return len(alt) > len(ref)
 
     def is_deletion(self, ref, alt):
         return len(alt) < len(ref)
-
-    def simplify_indel_allele(self, ref, alt):
-        while len(ref)> 0 and len(alt) > 0 and ref[-1] == alt[-1]:
-            ref = ref[0:-1]
-            alt = alt[0:-1]
-        while len(ref)> 0 and len(alt) > 0 and ref[0] == alt[0]:
-            ref = ref[1:]
-            alt = alt[1:]
-        return ref, alt
 
     def create_csq_parser(self):
         info_fields = self.vcf_reader.infos
@@ -182,58 +140,6 @@ class VcfConverter(InputFileConverter):
             return 'NA'
         else:
             return (var_count / depth)
-
-    def parse_gene_expns_file(self):
-        gene_expns = {}
-        if self.gene_expn_file is not None:
-            with open(self.gene_expn_file, 'r') as reader:
-                genes_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                for row in genes_tsv_reader:
-                    if row['tracking_id'] not in gene_expns.keys():
-                        gene_expns[row['tracking_id']] = {}
-                    gene_expns[row['tracking_id']][row['locus']] = row
-        return gene_expns
-
-    def parse_transcript_expns_file(self):
-        transcript_expns = {}
-        if self.transcript_expn_file is not None:
-            with open(self.transcript_expn_file, 'r') as reader:
-                isoforms_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                for row in isoforms_tsv_reader:
-                    transcript_expns[row['tracking_id']] = row
-        return transcript_expns
-
-    def parse_coverage_files(self):
-        coverage = {}
-        for variant_type in ['snvs', 'indels']:
-            for data_type in ['normal', 'tdna', 'trna']:
-                coverage_file_name = '_'.join([data_type, variant_type, 'coverage_file'])
-                coverage_file = getattr(self, coverage_file_name)
-                if coverage_file is not None:
-                    if variant_type not in coverage:
-                        coverage[variant_type] = {}
-                    coverage[variant_type][data_type] = self.parse_bam_readcount_file(coverage_file)
-        return coverage
-
-    def determine_bam_readcount_bases(self, entry, reference, alt, start):
-        if len(reference) == len(alt):
-            bam_readcount_position = entry.POS
-            variant_type = 'snvs'
-            ref_base = reference
-            var_base = alt
-        else:
-            if self.is_deletion(reference, alt):
-                bam_readcount_position = start + 1
-                (simplified_reference, simplified_alt) = self.simplify_indel_allele(reference, alt)
-                ref_base = reference[1:2]
-                var_base = '-' + simplified_reference
-            elif self.is_insertion(reference, alt):
-                bam_readcount_position = start
-                (simplified_reference, simplified_alt) = self.simplify_indel_allele(reference, alt)
-                ref_base = reference
-                var_base = '+' + simplified_alt
-            variant_type = 'indels'
-        return (bam_readcount_position, ref_base, var_base, variant_type)
 
     def get_depth_from_vcf_genotype(self, genotype, tag):
         try:
@@ -277,30 +183,17 @@ class VcfConverter(InputFileConverter):
                 vaf = 'NA'
         return vaf
 
-    def calculate_coverage_for_entry(self, coverage, entry, reference, alt, start, chromosome, genotype):
-        (bam_readcount_position, ref_base, var_base, variant_type) = self.determine_bam_readcount_bases(entry, reference, alt, start)
+    def calculate_coverage_for_entry(self, entry, reference, alt, start, chromosome, genotype):
         coverage_for_entry = {}
-        if variant_type in coverage:
-            for coverage_type in coverage[variant_type]:
-                if (
-                    chromosome in coverage[variant_type][coverage_type]
-                    and str(bam_readcount_position) in coverage[variant_type][coverage_type][chromosome]
-                    and ref_base in coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)]
-                ):
-                    brct = coverage[variant_type][coverage_type][chromosome][str(bam_readcount_position)][ref_base]
-                    if 'depth' in brct and var_base in brct:
-                        coverage_for_entry[coverage_type + '_depth'] = int(brct['depth'])
-                        coverage_for_entry[coverage_type + '_vaf']   = self.calculate_vaf(int(brct[var_base]), int(brct['depth']))
-        else:
-            coverage_for_entry['tdna_depth'] = self.get_depth_from_vcf_genotype(genotype, 'DP')
-            coverage_for_entry['trna_depth'] = self.get_depth_from_vcf_genotype(genotype, 'RDP')
-            alts = list(map(lambda x: str(x) , entry.ALT))
-            coverage_for_entry['tdna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, alts, alt, 'AF', 'AD', 'DP')
-            coverage_for_entry['trna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, alts, alt, 'RAF', 'RAD', 'RDP')
-            if self.normal_sample_name is not None:
-                normal_genotype = entry.genotype(self.normal_sample_name)
-                coverage_for_entry['normal_depth'] = self.get_depth_from_vcf_genotype(normal_genotype, 'DP')
-                coverage_for_entry['normal_vaf'] = self.get_vaf_from_vcf_genotype(normal_genotype, alts, alt, 'AF', 'AD', 'DP')
+        coverage_for_entry['tdna_depth'] = self.get_depth_from_vcf_genotype(genotype, 'DP')
+        coverage_for_entry['trna_depth'] = self.get_depth_from_vcf_genotype(genotype, 'RDP')
+        alts = list(map(lambda x: str(x) , entry.ALT))
+        coverage_for_entry['tdna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, alts, alt, 'AF', 'AD', 'DP')
+        coverage_for_entry['trna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, alts, alt, 'RAF', 'RAD', 'RDP')
+        if self.normal_sample_name is not None:
+            normal_genotype = entry.genotype(self.normal_sample_name)
+            coverage_for_entry['normal_depth'] = self.get_depth_from_vcf_genotype(normal_genotype, 'DP')
+            coverage_for_entry['normal_vaf'] = self.get_vaf_from_vcf_genotype(normal_genotype, alts, alt, 'AF', 'AD', 'DP')
         return coverage_for_entry
 
     def write_proximal_variant_entries(self, entry, alt, transcript_name, index):
@@ -337,10 +230,6 @@ class VcfConverter(InputFileConverter):
         return binascii.unhexlify(hex_string).decode('utf-8')
 
     def execute(self):
-        gene_expns = self.parse_gene_expns_file()
-        transcript_expns = self.parse_transcript_expns_file()
-        coverage = self.parse_coverage_files()
-
         indexes = []
         count = 1
         for entry in self.vcf_reader:
@@ -368,7 +257,7 @@ class VcfConverter(InputFileConverter):
                 if genotype.gt_bases and alt not in genotype.gt_bases.split('/'):
                     continue
 
-                coverage_for_entry = self.calculate_coverage_for_entry(coverage, entry, reference, alt, start, chromosome, genotype)
+                coverage_for_entry = self.calculate_coverage_for_entry(entry, reference, alt, start, chromosome, genotype)
 
                 transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)
                 if len(transcripts) == 0:
@@ -440,40 +329,21 @@ class VcfConverter(InputFileConverter):
                     else:
                         output_row['codon_change'] = 'NA'
 
-                    if transcript_name in transcript_expns.keys():
-                        transcript_expn_entry = transcript_expns[transcript_name]
-                        output_row['transcript_expression'] = transcript_expn_entry['FPKM']
-                    elif 'TX' in self.vcf_reader.formats:
-                        if 'TX' in genotype.data._asdict():
-                            transcript_expressions = genotype['TX']
-                            if isinstance(transcript_expressions, list):
-                                for transcript_expression in transcript_expressions:
-                                    (transcript, value) = transcript_expression.split('|')
-                                    if transcript == transcript_name:
-                                        output_row['transcript_expression'] = value
-                            elif transcript_expressions is not None:
-                                (transcript, value) = transcript_expressions.split('|')
-                                if transcript == transcript_name:
-                                    output_row['transcript_expression'] = value
-
-                    if ensembl_gene_id in gene_expns.keys():
-                        gene_expn_entries = gene_expns[ensembl_gene_id]
-                        gene_fpkm = 0
-                        for locus, gene_expn_entry in gene_expn_entries.items():
-                            gene_fpkm += float(gene_expn_entry['FPKM'])
-                        output_row['gene_expression'] = gene_fpkm
-                    elif 'GX' in self.vcf_reader.formats:
-                        if 'GX' in genotype.data._asdict():
-                            gene_expressions = genotype['GX']
-                            if isinstance(gene_expressions, list):
-                                for gene_expression in gene_expressions:
-                                    (gene, value) = gene_expression.split('|')
-                                    if ensembl_gene_id == gene or gene_name == gene:
-                                        output_row['gene_expression'] = value
-                            elif gene_expressions is not None:
-                                (gene, value) = gene_expressions.split('|')
-                                if ensembl_gene_id == gene or gene_name == gene:
-                                    output_row['gene_expression'] = value
+                    for (tag, key, comparison_fields) in zip(['TX', 'GX'], ['transcript_expression', 'gene_expression'], [[transcript_name], [ensembl_gene_id, gene_name]]):
+                        if tag in self.vcf_reader.formats:
+                            if tag in genotype.data._asdict():
+                                expressions = genotype[tag]
+                                if isinstance(expressions, list):
+                                    for expression in expressions:
+                                        (item, value) = expression.split('|')
+                                        for comparison_field in comparison_fields:
+                                            if item == comparison_field:
+                                                output_row[key] = value
+                                elif expressions is not None:
+                                    (item, value) = expressions.split('|')
+                                    for comparison_field in comparison_fields:
+                                        if item == comparison_field:
+                                            output_row[key] = value
 
                     output_row.update(coverage_for_entry)
 
