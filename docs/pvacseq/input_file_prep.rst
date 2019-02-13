@@ -7,8 +7,8 @@
 Input File Preparation
 ======================
 
-The main input file to the pVACseq pipeline is a VCF file. At a minimum, the
-VCF needs to be annotated with VEP to add transcript information.
+The main input file to the pVACseq pipeline is a VCF file. The VCF needs to
+contain sample genotype information. The VCF needs to be annotated with VEP to add transcript information.
 
 If filtering on VAFs, depth, and expression values is desired, the VCF also
 needs to be annotated with this data.

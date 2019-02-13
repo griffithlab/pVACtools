@@ -164,6 +164,7 @@ class CallIEDBClassIITests(CallIEDBTests):
             call_iedb_output_file.name,
             'MHCnuggetsII',
             'DPA1*01:03',
+            '-l', '15',
         ])
         expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
