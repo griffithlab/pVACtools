@@ -11,7 +11,7 @@ pVACseq offers epitope binding predictions for missense, inframe indel, and fram
 
 **VCF support**
 
-pVACseq uses a single-sample VCF file as its input. This VCF file must be annotated with VEP. See the :ref:`prerequisites_label` for more information.
+pVACseq uses a VCF file as its input. This VCF file must contain sample genotype information and be annotated with VEP. See the :ref:`prerequisites_label` for more information.
 
 **No local install of epitope prediction software needed**
 
