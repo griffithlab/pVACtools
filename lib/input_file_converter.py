@@ -113,7 +113,7 @@ class VcfConverter(InputFileConverter):
             csq_header = info_fields['CSQ']
             return CsqParser(csq_header.desc)
 
-    def resolve_consequence(self, consequence_string):
+    def resolve_consequence(self, consequence_string, ref, alt):
         if '&' in consequence_string:
             consequences = {consequence.lower() for consequence in consequence_string.split('&')}
         elif '.' in consequence_string:
@@ -131,6 +131,13 @@ class VcfConverter(InputFileConverter):
             consequence = 'inframe_ins'
         elif 'inframe_deletion' in consequences:
             consequence = 'inframe_del'
+        elif 'protein_altering_variant' in consequences:
+            if len(ref) > len(alt) and (len(ref) - len(alt)) % 3 == 0:
+                consequence = 'inframe_del'
+            elif len(alt) > len(ref) and (len(alt) - len(ref)) % 3 == 0:
+                consequence = 'inframe_ins'
+            else:
+                consequence = None
         else:
             consequence = None
         return consequence
@@ -268,7 +275,7 @@ class VcfConverter(InputFileConverter):
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
-                    consequence = self.resolve_consequence(transcript['Consequence'])
+                    consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
                     if consequence is None:
                         continue
                     elif consequence == 'FS':

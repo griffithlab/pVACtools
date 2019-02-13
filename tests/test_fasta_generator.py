@@ -843,6 +843,26 @@ class FastaGeneratorTests(unittest.TestCase):
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_pvacvector.key')
         self.assertTrue(cmp("{}.{}.tsv.key".format(generate_fasta_output_file.name, self.epitope_length), expected_key_output_file))
 
+    def test_input_file_with_protein_altering_variant_insertion_generates_expected_file(self):
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_protein_altering_variant_insertion.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_protein_altering_variant_insertion.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(self.test_data_dir, 'output_protein_altering_variant_insertion.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
 
 #Test for fusion position at relative beginning or end of fusion sequence
