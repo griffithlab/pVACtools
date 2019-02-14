@@ -10,6 +10,7 @@ dependencies:
 - xz=5.0.5=1
 - zlib=1.2.8=0
 - requests
+- pillow
 - pip:
   - sphinxjp.themes.basicstrap
   - sphinxcontrib-programoutput
