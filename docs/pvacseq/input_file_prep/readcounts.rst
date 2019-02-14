@@ -5,7 +5,7 @@
 Adding coverage data to your VCF
 ================================
 
-pVACseq is able to parse coverage and information directly from the
+pVACseq is able to parse coverage information directly from the
 VCF. The expected annotation format is outlined below.
 
 ===================== ==================================== =============================
@@ -23,7 +23,7 @@ tumor sample. If the VCF is a multi-sample VCF, pVACseq will look for the
 sample using the ``sample_name`` parameter and treat that sample as the tumor
 sample.
 
-For this tumor sample the tumor DNA depth is determined from the ``DP`` format field.
+For this tumor sample, the tumor DNA depth is determined from the ``DP`` format field.
 The tumor DNA VAF is determined from the ``AF`` field. If the VCF does not contain a
 ``AF`` format field, the tumor DNA VAF is calculated from the ``AD`` and ``DP`` fields
 by dividing the allele count by the total read depth.
@@ -35,7 +35,7 @@ tumor sample. If the VCF is a multi-sample VCF, pVACseq will look for the
 sample using the ``sample_name`` parameter and treat that sample as the tumor
 sample.
 
-For this tumor sample the tumor RNA depth is determined from the ``RDP`` format field.
+For this tumor sample, the tumor RNA depth is determined from the ``RDP`` format field.
 The tumor RNA VAF is determined from the ``RAF`` field. If the VCF does not contain a
 ``RAF`` format field, the tumor RNA VAF is calculated from the ``RAD`` and ``RDP`` fields
 by dividing the allele count by the total read depth.
@@ -48,7 +48,7 @@ the matched normal sample. The tumor sample is identified by the
 ``sample_name`` parameter while the normal sample can be specified with
 ``--normal-sample-name`` option.
 
-For this normal sample the normal DNA depth is determined from the ``DP`` format field.
+For this normal sample, the normal DNA depth is determined from the ``DP`` format field.
 The normal DNA VAF is determined from the ``AF`` field. If the VCF does not contain a
 ``AF`` format field, the normal DNA VAF is calculated from the ``AD`` and ``DP`` fields
 by dividing the allele count by the total read depth.
@@ -87,7 +87,8 @@ Follow the installation instructions on the
 Installing the vcf-readcount-annotator
 **************************************
 
-The ``vcf-readcount-annotator`` is part of the ``vcf-annotation-tools`` package.
+The ``vcf-readcount-annotator`` is part of the ``vcf-annotation-tools`` package. 
+Please visit `vatools.org <http://vatools.org>`_ for more details on this package.
 You can install this package by running:
 
 .. code-block:: none
@@ -125,7 +126,8 @@ option.
 
 The ``mgibio/bam_readcount_helper-cwl`` Docker container contains a
 ``bam_readcount_helper.py`` script that will create the snv and indel site list files
-and run bam-readcount.
+from a VCF and run bam-readcount. Information on that Docker container can be found here:
+`dockerhub mgibio/bam_readcount_helper-cwl <https://hub.docker.com/r/mgibio/bam_readcount_helper-cwl>`_.
 
 **Example bam_readcount_helper.py command**
 
@@ -158,6 +160,6 @@ running the ``vcf-readcount-annotator`` twice.
 The data type ``DNA`` or ``RNA`` identifies whether you are annotating DNA or RNA
 readcount. DNA readcount annotations will be written to the ``AD/DP/AF``
 format fields while RNA readcount annotations will be written to the
-``RAD/RDP/RAF`` format fields. Please see the `documentation
+``RAD/RDP/RAF`` format fields. Please see the `VAtools documentation
 <https://vcf-annotation-tools.readthedocs.io/en/latest/vcf_readcount_annotator.html>`_
 for more information.

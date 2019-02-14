@@ -27,7 +27,9 @@ format field. The ``TX`` format field is a comma-separated list of
 per-transcript expression values, where each individual transcript expression
 is listed as ``expression_id|expression_value``, e.g.
 ``ENST00000215794|2.35912,ENST00000215795|0.2``. The ``expression_id`` needs
-to match the ``Feature`` field of the VEP ``CSQ`` annotation.
+to match the ``Feature`` field of the VEP ``CSQ`` annotation. In other words,
+your expression abundance estimation should have been performed with the same transcript
+annotation version that you used to annotate your variants with VEP (e.g. Ensembl v95).
 
 **Gene Expression**
 
@@ -54,7 +56,7 @@ tab-delimited file.
 Installing the vcf-expression-annotator
 ***************************************
 
-The ``vcf-expression-annotator`` is part of the ``vcf-annotation-tools`` package.
+The ``vcf-expression-annotator`` is part of the ``vcf-annotation-tools`` package (`vatools.org <http://vatools.org>`_).
 You can install this package by running:
 
 .. code-block:: none
@@ -74,6 +76,6 @@ your VCF:
 The data type ``gene`` or ``transcript`` identifies whether you are annotating
 transcript or gene expression data. Transcript expression annotations will be
 written to the ``TX`` format field while gene expression annotations will be
-written to the ``GX`` format field. Please see the `documentation
+written to the ``GX`` format field. Please see the `VAtools documentation
 <https://vcf-annotation-tools.readthedocs.io/en/latest/vcf_readcount_annotator.html>`_
 for more information.
