@@ -156,8 +156,8 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
             help="A VCF with phased proximal variant information."
         )
         self.parser.add_argument(
-            "-c", "--minimum-fold-change", type=int,
-            default=0,
+            "-c", "--minimum-fold-change", type=float,
+            default=0.0,
             help="Minimum fold change between mutant binding score and wild-type score. "
                  + "The default is 0, which filters no results, but 1 is often a sensible choice "
                  + "(requiring that binding is better to the MT than WT).",
