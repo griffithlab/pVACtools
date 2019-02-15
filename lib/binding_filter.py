@@ -67,8 +67,8 @@ class BindingFilter:
             '-m', '--top-score-metric',
             choices=['lowest', 'median'],
             help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
-                 + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
-                 + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods.",
+                 + "lowest: Use the Best MT Score and corresponding Fold Change (i.e. use the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
+                 + "median: Use the Median MT Score and Median Fold Change (i.e. use the median MT ic50 binding score and fold change of all chosen prediction methods).",
             default='median',
         )
         parser.add_argument(
