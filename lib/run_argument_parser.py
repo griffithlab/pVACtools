@@ -79,7 +79,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         parser.add_argument(
             "-t", "--n-threads",type=int,
             default=1,
-            help="Number of threads for parallelizing calls to IEDB.",
+            help="Number of threads to use for parallelizing peptide-MHC binding prediction calls.",
         )
         self.parser = parser
 
@@ -115,7 +115,7 @@ class PredictionRunArgumentParser(RunArgumentParser):
         self.parser.add_argument(
             '-a', '--additional-report-columns',
             choices=['sample_name'],
-            help="Additional columns to output in the final report."
+            help="Additional columns to output in the final report. If sample_name is chosen, this will add a column with the sample name in every row of the output. This can be useful if you later want to concatenate results from multiple individuals into a single file."
         )
         self.parser.add_argument(
             "-s", "--fasta-size",type=int,
@@ -158,55 +158,56 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         self.parser.add_argument(
             "-c", "--minimum-fold-change", type=int,
             default=0,
-            help="Minimum fold change between mutant binding score and wild-type score. "
+            help="Minimum fold change between mutant (MT) binding score and wild-type (WT) score (fold change = WT/MT). "
                  + "The default is 0, which filters no results, but 1 is often a sensible choice "
-                 + "(requiring that binding is better to the MT than WT).",
+                 + "(requiring that binding is better to the MT than WT peptide). "
+		 + "This fold change is sometimes referred to as a differential agretopicity index.",
         )
         self.parser.add_argument(
             '--normal-cov', type=int,
-            help="Normal Coverage Cutoff. Sites above this cutoff will be considered.",
+            help="Normal Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
             default=5
         )
         self.parser.add_argument(
             '--tdna-cov', type=int,
-            help="Tumor DNA Coverage Cutoff. Sites above this cutoff will be considered.",
+            help="Tumor DNA Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
             default=10
         )
         self.parser.add_argument(
             '--trna-cov', type=int,
-            help="Tumor RNA Coverage Cutoff. Sites above this cutoff will be considered.",
+            help="Tumor RNA Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
             default=10
         )
         self.parser.add_argument(
             '--normal-vaf', type=float,
-            help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered.",
+            help="Normal VAF Cutoff. Only sites BELOW this cutoff in normal will be considered.",
             default=0.02
         )
         self.parser.add_argument(
             '--tdna-vaf', type=float,
-            help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered.",
+            help="Tumor DNA VAF Cutoff. Only sites above this cutoff will be considered.",
             default=0.25
         )
         self.parser.add_argument(
             '--trna-vaf', type=float,
-            help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered.",
+            help="Tumor RNA VAF Cutoff. Only sites above this cutoff will be considered.",
             default=0.25
         )
         self.parser.add_argument(
             '--expn-val', type=float,
             default=1.0,
-            help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered.",
+            help="Gene and Transcript Expression cutoff. Only sites above this cutoff will be considered.",
         )
         self.parser.add_argument(
             "--maximum-transcript-support-level", type=int,
-            help="The threshold to use for filtering epitopes on the transcript support level. "
+            help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
             +"Keep all epitopes with a transcript support level <= to this cutoff.",
             default=1,
             choices=[1,2,3,4,5]
         )
         self.parser.add_argument(
             '--pass-only',
-            help="Only process VCF entries that are PASS.",
+            help="Only process VCF entries with a PASS status.",
             default=False,
             action='store_true'
         )

@@ -20,9 +20,9 @@ File Name                                           Description
 =================================================== ===========
 ``<sample_name>.tsv``                               An intermediate file with variant and transcript information parsed from the input file.
 ``<sample_name>.tsv_<chunks>`` (multiple)           The above file but split into smaller chunks for easier processing with IEDB.
-``<sample_name>.all_epitopes.tsv``                  A list of all predicted epitopes and their binding affinity scores, with additional variant information the ``<sample_name>.tsv``.
+``<sample_name>.all_epitopes.tsv``                  A list of all predicted epitopes and their binding affinity scores, with additional variant information from the ``<sample_name>.tsv``.
 ``<sample_name>.filtered.tsv``                      The above file after applying all filters.
-``<sample_name>.filtered.condensed.ranked.tsv``     A condensed version of the filtered TSV with only the most important columns remaining, with a score for each neoepitope candidate added.
+``<sample_name>.filtered.condensed.ranked.tsv``     A condensed version of the filtered TSV with only the most important columns remaining, with a priority score for each neoepitope candidate added.
 =================================================== ===========
 
 Final Report Columns
