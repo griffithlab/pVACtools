@@ -12,7 +12,7 @@ class RunArgumentParser(metaclass=ABCMeta):
             help=input_file_help
         )
         if tool_name == 'pvacseq':
-            sample_name_help = "The name of the tumor sample being processed. Must be a sample in the input VCF."
+            sample_name_help = "The name of the tumor sample being processed. When processing a multi-sample VCF the sample name must be a sample ID in the input VCF #CHROM header line."
         else:
             sample_name_help = "The name of the sample being processed. This will be used as a prefix for output files."
         parser.add_argument(

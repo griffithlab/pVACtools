@@ -92,9 +92,9 @@ class VcfConverter(InputFileConverter):
             if not self.sample_name:
                 sys.exit("VCF contains more than one sample but sample_name is not set.")
             elif self.sample_name not in self.vcf_reader.samples:
-                sys.exit("sample_name {} not in VCF {}".format(self.sample_name, self.input_file))
+                sys.exit("sample_name {} not a sample ID in the #CHROM header of VCF {}".format(self.sample_name, self.input_file))
             if self.normal_sample_name is not None and self.normal_sample_name not in self.vcf_reader.samples:
-                sys.exit("normal_sample_name {} not in VCF {}".format(self.normal_sample_name, self.input_file))
+                sys.exit("normal_sample_name {} not a sample ID in the #CHROM header of VCF {}".format(self.normal_sample_name, self.input_file))
         elif len(self.vcf_reader.samples) ==  0:
             sys.exit("VCF doesn't contain any sample genotype information.")
         else:
