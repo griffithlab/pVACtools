@@ -139,6 +139,7 @@ def main(args_input = sys.argv[1:]):
         'normal_sample_name'        : args.normal_sample_name,
         'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
         'n_threads'                 : args.n_threads,
+        'maximum_transcript_support_level': args.maximum_transcript_support_level,
     }
     additional_input_files = parse_additional_input_file_list(args.additional_input_file_list)
     shared_arguments.update(additional_input_files)
