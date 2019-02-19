@@ -358,6 +358,7 @@ class Pipeline(metaclass=ABCMeta):
                                 if os.path.getsize(split_fasta_file_path) == 0:
                                     status_message_with_lock("Fasta file is empty. Skipping", lock)
                                     continue
+                                #begin of per-algorithm processing
                                 with pymp.Parallel(iteration_info['algorithm']['threads']) as p4:
                                     for m in p4.range(len(prediction_algorithms)):
                                         method = prediction_algorithms[m]
@@ -404,31 +405,33 @@ class Pipeline(metaclass=ABCMeta):
                                         last_execute_timestamp = datetime.datetime.now()
                                         status_message_with_lock("Running IEDB on Allele %s and Epitope Length %s with Method %s - Entries %s - Completed" % (a, epl, method, fasta_chunk), lock)
                                         split_iedb_output_files.append(split_iedb_out)
+                                #end of per-algorithm processing
 
-                                    split_parsed_file_path = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, str(epl), "parsed", "tsv_%s" % fasta_chunk]))
-                                    if os.path.exists(split_parsed_file_path):
-                                        status_message_with_lock("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, fasta_chunk), lock)
-                                        split_parsed_output_files.append(split_parsed_file_path)
-                                        continue
-                                    split_fasta_key_file_path = split_fasta_file_path + '.key'
+                                #parse all output files for one allele, epitope, and file chunk over all algorithms into one file
+                                split_parsed_file_path = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, str(epl), "parsed", "tsv_%s" % fasta_chunk]))
+                                if os.path.exists(split_parsed_file_path):
+                                    status_message_with_lock("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, fasta_chunk), lock)
+                                    split_parsed_output_files.append(split_parsed_file_path)
+                                    continue
+                                split_fasta_key_file_path = split_fasta_file_path + '.key'
 
-                                    if len(split_iedb_output_files) > 0:
-                                        status_message_with_lock("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk), lock)
-                                        split_tsv_file_path = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
-                                        params = {
-                                            'input_iedb_files'       : split_iedb_output_files,
-                                            'input_tsv_file'         : split_tsv_file_path,
-                                            'key_file'               : split_fasta_key_file_path,
-                                            'output_file'            : split_parsed_file_path,
-                                        }
-                                        if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
-                                            params['sample_name'] = self.sample_name
-                                        else:
-                                            params['sample_name'] = None
-                                        parser = self.output_parser(params)
-                                        parser.execute()
-                                        status_message_with_lock("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, epl, fasta_chunk), lock)
-                                        split_parsed_output_files.append(split_parsed_file_path)
+                                if len(split_iedb_output_files) > 0:
+                                    status_message_with_lock("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk), lock)
+                                    split_tsv_file_path = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
+                                    params = {
+                                        'input_iedb_files'       : split_iedb_output_files,
+                                        'input_tsv_file'         : split_tsv_file_path,
+                                        'key_file'               : split_fasta_key_file_path,
+                                        'output_file'            : split_parsed_file_path,
+                                    }
+                                    if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
+                                        params['sample_name'] = self.sample_name
+                                    else:
+                                        params['sample_name'] = None
+                                    parser = self.output_parser(params)
+                                    parser.execute()
+                                    status_message_with_lock("Parsing IEDB Output for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, epl, fasta_chunk), lock)
+                                    split_parsed_output_files.append(split_parsed_file_path)
         return split_parsed_output_files
 
     def combined_parsed_path(self):
