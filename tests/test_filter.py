@@ -161,3 +161,24 @@ class FilterTests(unittest.TestCase):
             os.path.join(self.test_data_path, "Test.filtered.exclude_NA.tsv"),
             False
         ))
+
+    def test_inf(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(Filter(
+            os.path.join(
+                self.test_data_path,
+                'input.inf.tsv'
+            ),
+            output_file.name,
+            [{
+                'column': "Corresponding Fold Change",
+                'operator': ">",
+                'threshold': "100",
+            }],
+            True,
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_path, "output.inf.tsv"),
+            False
+        ))
