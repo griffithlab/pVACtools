@@ -114,4 +114,4 @@ variants.
 
 Cleavage position predictions are added with optional processing through NetChop.
 
-Stability predictions can be added if desired by the user. These predictions are obtained via NetMHCstab.
+Stability predictions can be added if desired by the user. These predictions are obtained via NetMHCstabpan.
