@@ -3,7 +3,7 @@ import csv
 import re
 import operator
 import os
-from math import ceil
+from math import ceil, inf
 from statistics import median
 from lib.prediction_class import *
 import yaml
@@ -410,11 +410,17 @@ class OutputParser(metaclass=ABCMeta):
             if mt_epitope_seq != wt_epitope_seq:
                 if wt_epitope_seq == 'NA':
                     corresponding_fold_change = 'NA'
+                elif best_mt_score == 0:
+                    corresponding_fold_change = inf
+                    corresponding_wt_score = round(corresponding_wt_score, 3)
                 else:
                     corresponding_fold_change = round((corresponding_wt_score/best_mt_score), 3)
                     corresponding_wt_score = round(corresponding_wt_score, 3)
                 if median_wt_score == 'NA':
                     median_fold_change = 'NA'
+                elif median_mt_score == 0:
+                    median_fold_change = inf
+                    median_wt_score = round(median_wt_score, 3)
                 else:
                     median_fold_change = round((median_wt_score/median_mt_score), 3)
                     median_wt_score = round(median_wt_score, 3)
