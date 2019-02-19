@@ -115,3 +115,5 @@ Each of the following 4 criteria are assigned a rank-ordered value (worst = 1):
 - D = ``Tumor DNA VAF``, with the highest being the best.
 
 The ``Score`` is calculated from the above ranks with the following formula: ``B + F + (M * 2) + (D / 2)``
+
+Note that since this score is calculated from rank values for the current list of candidates, the score is entirely relative to each candidate list and can not be compared between lists. The Priority Score is simply a way of ordering candidates within a pvacseq result.

@@ -11,7 +11,7 @@ pVACseq offers epitope binding predictions for missense, in-frame insertion, in-
 
 **VCF support**
 
-pVACseq uses a VCF file as its input. This VCF file must contain sample genotype information and be annotated with the Ensembl Variant Effect Predictor (VEP). See the :ref:`prerequisites_label` for more information.
+pVACseq uses a VCF file as its input. This VCF file must contain sample genotype information and be annotated with the Ensembl Variant Effect Predictor (VEP). See the :ref:`prerequisites_label` section for more information.
 
 **No local install of epitope prediction software needed**
 
