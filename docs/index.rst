@@ -51,7 +51,7 @@ This version is a hotfix release. It fixes the following issues:
   lead to division by 0 errors when calculating the fold change. In this
   situation we now set the fold change to ``inf`` (infinity).
 - Previously the ``--maximum-transcript-support-level`` threshold was not
-  getting propagated to the main pipeline step correctly, resulting in errors
+  getting propagated to the main pipeline steps correctly, resulting in errors
   in the transcript support level filter.
 - There was a bug in the multithreading logic that would result in
   certain steps getting executed more than once, which in turn would lead to
