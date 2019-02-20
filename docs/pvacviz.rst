@@ -7,7 +7,7 @@
 pVACviz
 =======
 
-pVACviz is the browser-based, graphical user interface for the pVACtools command line tools.
+pVACviz is a browser-based, graphical user interface for the pVACtools command line tools.
 It currently supports starting and managing :ref:`pvacseq` runs as well
 as visualizing the results of your runs.
 
