@@ -15,3 +15,9 @@ There are two options for the input file when running the pVACvector tool:
   pVACseq run via the ``--input_vcf`` option. Output TSVs from MHC Class I and
   Class II pVACseq results can be combined into one by concatenating the two files and
   removing the duplicate header line.
+
+Note that if you supply a fasta file of peptides, these peptides will be used directly in the 
+analysis and used in the final output. However, if you use a pvacseq TSV and variants VCF 
+then the length of peptides extracted for junctional epitope testing and reporting in your output 
+will be determined by the ``--input-n-mer`` option. 
+
