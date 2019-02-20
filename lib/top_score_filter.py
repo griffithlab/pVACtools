@@ -46,7 +46,7 @@ class TopScoreFilter:
             choices=['lowest', 'median'],
             default='median',
             help="The ic50 scoring metric to use for filtering. "
-                 + "lowest: Best MT Score - lowest MT ic50 binding score of all chosen prediction methods. "
-                 + "median: Median MT Score - median MT ic50 binding score of all chosen prediction methods."
+                 + "lowest: Use the best MT Score (i.e. the lowest MT ic50 binding score of all chosen prediction methods). "
+                 + "median: Use the median MT Score (i.e. the median MT ic50 binding score of all chosen prediction methods)."
         )
         return parser

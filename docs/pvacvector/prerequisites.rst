@@ -7,7 +7,7 @@ Prerequisites
 
 There are two options for the input file when running the pVACvector tool:
 
-- A fasta file. This file contains protein sequences of candidate neoeptiopes
+- A fasta file. This file contains protein sequences of candidate neoepitopes
   to use for vector design.
 - A :ref:`pvacseq` output TSV. This file has been filtered to include
   only the neoepitopes to use for vector design. If this file type is
