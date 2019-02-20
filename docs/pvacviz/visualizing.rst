@@ -31,7 +31,7 @@ Any final results TSV file produced by pVACseq processes - whether launched via 
 
 Scatterplot Visualization
 -------------------------
-On the visualization's scatterplot are placed all of the data points contained in the tsv results file, one dot per row. A set of tools along the right side of the visualization allow you to select and manipulate the plot in various ways.
+On the visualization's scatterplot are placed all of the data points contained in the tsv results file, one dot per row. A set of tools along the side of the visualization allow you to select and manipulate the plot in various ways.
 
 .. figure:: ../images/screenshots/pvacviz-visualize.png
     :width: 847px
@@ -50,7 +50,7 @@ Icon               Name              Function
 |pan|              **Pan**           The pan tool allows the user to pan the plot by left-dragging a mouse or dragging a finger across the plot region.
 |box_zoom|         **Box Zoom**      The box zoom tool allows the user to define a rectangular region to zoom the plot bounds too, by left-dragging a mouse, or dragging a finger across the plot area.
 |wheel_zoom|       **Wheel Zoom**    The wheel zoom tool will zoom the plot in and out, centered on the current mouse location. It will respect any min and max values and ranges preventing zooming in and out beyond these.
-|tap|              **Tap**           The tap selection tool allows the user to select at single points by clicking a left mouse button, or tapping with a finger.
+|tap|              **Tap**           The tap selection tool allows the user to select single points by clicking a left mouse button, or tapping with a finger.
 |save|             **Save**          The save tool pops up a modal dialog that allows the user to save a PNG image of the plot.
 |reset|            **Reset**         The reset tool will restore the plot ranges to their original values.
 |hover|            **Hover**         The hover tool is a passive inspector tool. It is generally on at all times, but can be configured in the inspector’s menu associated with the toolbar.
