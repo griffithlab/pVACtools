@@ -67,7 +67,7 @@ Coverage Filter
 
 If the input VCF contains readcount and/or expression annotations, then the coverage filter
 can be run again on the filtered.tsv report file to narrow down the results even further.
-You can also run this filter again on the all_eptiopes.tsv report file to apply different cutoffs. 
+You can also run this filter again on the all_epitopes.tsv report file to apply different cutoffs. 
 
 The general goals of these filters are to limit variants for neoepitope prediction to those 
 with good read support and/or remove possible sub-clonal variants. In some cases the input 

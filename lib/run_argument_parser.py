@@ -63,8 +63,8 @@ class RunArgumentParser(metaclass=ABCMeta):
             choices=['lowest', 'median'],
             default='median',
             help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
-                 + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
-                 + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods."
+                 + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
+                 + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
         )
         parser.add_argument(
             "-r", "--iedb-retries",type=int,
@@ -100,7 +100,7 @@ class PredictionRunArgumentParser(RunArgumentParser):
             '--net-chop-method',
             choices=lib.net_chop.methods,
             default=None,
-            help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0).",
+            help="NetChop prediction method to use (\"cterm\" for C term 3.0, \"20s\" for 20S 3.0). C-term 3.0 is trained with publicly available MHC class I ligands and the authors believe that is performs best in predicting the boundaries of CTL epitopes. 20S is trained with in vitro degradation data.",
         )
         self.parser.add_argument(
             '--netmhc-stab',
@@ -110,7 +110,7 @@ class PredictionRunArgumentParser(RunArgumentParser):
         self.parser.add_argument(
             '--net-chop-threshold', type=float,
             default=0.5,
-            help="NetChop prediction threshold.",
+            help="NetChop prediction threshold (increasing the threshold results in better specificity, but worse sensitivity).",
         )
         self.parser.add_argument(
             '-a', '--additional-report-columns',
@@ -215,13 +215,13 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
 class PvacfuseRunArgumentParser(PredictionRunArgumentParser):
     def __init__(self):
         tool_name = "pvacfuse"
-        input_file_help = "A INTEGRATE-Neo bedpe file with fusions."
+        input_file_help = "An INTEGRATE-Neo annotated bedpe file with fusions."
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
 class PvacvectorRunArgumentParser(RunArgumentParser):
     def __init__(self):
         tool_name = 'pvacvector'
-        input_file_help = "A .fa file with peptides or a pVACseq .tsv file with eptiopes to use for vector design."
+        input_file_help = "A .fa file with peptides or a pVACseq .tsv file with epitopes to use for vector design."
         RunArgumentParser.__init__(self, tool_name, input_file_help)
         self.parser.add_argument(
             '-v', "--input_vcf",
