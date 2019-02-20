@@ -14,7 +14,7 @@ sequences might be incorrect because the amino acid changes of those proximal
 variants were not taken into account.
 
 To solve this problem, we added a new option to pVACseq in the ``pvactools``
-release 1.1 and above. This option, ``--phased-proximal-variants-vcf``, can be
+release 1.1. This option, ``--phased-proximal-variants-vcf``, can be
 used to provide the path to a phased VCF of proximal variants in addition to
 the normal input VCF. This VCF is then used to incorporate amino acid changes of nearby
 variants that are in-phase to a somatic variant of interest. This results in

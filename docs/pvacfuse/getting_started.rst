@@ -5,7 +5,8 @@
 Getting Started
 ---------------
 
-pVACfuse provides a set of example data to show the expected input and output files. You can download the data set by running the ``pvacfuse download_example_data`` :ref:`command <pvacfuse_example_data>`.
+pVACfuse provides a set of example data to show the expected format of input and output files. 
+You can download the data set by running the ``pvacfuse download_example_data`` :ref:`command <pvacfuse_example_data>`.
 
 The example data output can be reproduced by running the following command:
 

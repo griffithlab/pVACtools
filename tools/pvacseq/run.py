@@ -124,6 +124,7 @@ def main(args_input = sys.argv[1:]):
         'normal_sample_name'        : args.normal_sample_name,
         'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
         'n_threads'                 : args.n_threads,
+        'maximum_transcript_support_level': args.maximum_transcript_support_level,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:

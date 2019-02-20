@@ -11,7 +11,9 @@ and a top score filter.
 The binding filter and top score filter are always run automatically as part
 of the pVACfuse pipeline.
 
-All filters can also be run manually to narrow the final results down further.
+All filters can also be run manually to narrow the final results down further 
+or to redefine the filters entirely and produce a new candidate list from the 
+all_epitopes.tsv file.
 
 Binding Filter
 --------------
