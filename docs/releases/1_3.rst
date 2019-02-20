@@ -27,3 +27,19 @@ In addition, this version also fixes a few bugs:
   from submitting jobs using the interface in certain conditions. These have been resolved.
 - pVACseq would previsouly not support SVs in the input VCF where the alt had
   a value of ``<DEL>``. These kinds of variants are now supported.
+
+1.3.1
+-----
+
+This version is a hotfix release. It fixes the following issues:
+
+- Some prediction algorithms might predict a binding affinity of 0 which could
+  lead to division by 0 errors when calculating the fold change. In this
+  situation we now set the fold change to ``inf`` (infinity).
+- Previously the ``--maximum-transcript-support-level`` threshold was not
+  getting propagated to the main pipeline step correctly, resulting in errors
+  in the transcript support level filter.
+- There was a bug in the multithreading logic that would result in
+  certain steps getting executed more than once, which in turn would lead to
+  FileNotFound errors when these duplicate executions were happening at the
+  same time.
