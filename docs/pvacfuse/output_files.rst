@@ -20,9 +20,9 @@ File Name                                           Description
 =================================================== ===========
 ``<sample_name>.tsv``                               An intermediate file with variant and transcript information parsed from the input file.
 ``<sample_name>.tsv_<chunks>`` (multiple)           The above file but split into smaller chunks for easier processing with IEDB.
-``<sample_name>.all_epitopes.tsv``                  A list of all predicted epitopes and their binding affinity scores, with additional variant information the ``<sample_name>.tsv``.
+``<sample_name>.all_epitopes.tsv``                  A list of all predicted epitopes and their binding affinity scores, with additional variant information from the ``<sample_name>.tsv``.
 ``<sample_name>.filtered.tsv``                      The above file after applying all filters.
-``<sample_name>.filtered.condensed.ranked.tsv``     A condensed version of the filtered TSV with only the most important columns remaining, with a score for each neoepitope candidate added.
+``<sample_name>.filtered.condensed.ranked.tsv``     A condensed version of the filtered TSV with only the most important columns remaining, with a priority score for each neoepitope candidate added.
 =================================================== ===========
 
 Final Report Columns
@@ -50,7 +50,7 @@ Column Name                                                     Description
 ``HLA Allele``                                                  The HLA allele for this prediction
 ``Peptide Length``                                              The peptide length of the epitope
 ``Sub-peptide Position``                                        The one-based position of the epitope in the protein sequence used to make the prediction
-``Mutation Position``                                           ``NA```
+``Mutation Position``                                           ``NA``
 ``MT Epitope Seq``                                              Mutant epitope sequence
 ``WT Epitope Seq``                                              ``NA``
 ``Best MT Score Method``                                        Prediction algorithm with the lowest mutant ic50 binding affinity for this epitope
@@ -68,7 +68,7 @@ Column Name                                                     Description
 ``Median MT Score``                                             Median ic50 binding affinity of the mutant epitope of all prediction algorithms used
 ``Median WT Score``                                             ``NA``
 ``Median Fold Change``                                          ``NA``
-``Individual Prediction Algorithm WT and MT Scores`` (multiple) ic50 scores for the ``MT Epitope Seq`` and ``WT Eptiope Seq`` for the individual prediction algorithms used
+``Individual Prediction Algorithm WT and MT Scores`` (multiple) ic50 scores for the ``MT Epitope Seq`` and ``WT Epitope Seq`` for the individual prediction algorithms used
 ``Best Cleavage Position`` (optional)                           Position of the highest predicted cleavage score
 ``Best Cleavage Score`` (optional)                              Highest predicted cleavage score
 ``Cleavage Sites`` (optional)                                   List of all cleavage positions and their cleavage score

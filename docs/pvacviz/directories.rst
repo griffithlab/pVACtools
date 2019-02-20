@@ -16,7 +16,7 @@ pVACapi Directories
 
     pVACapi directories
 
-pVACviz, in order to provide all its features, communicates with a pVACtools component called pVACapi. pVACapi serves as an interface between pVACviz and the pVACseq pipeline proceses, launching pVACseq processes, managing them as they execute, and generating the visualizations the pVACviz displays.
+pVACviz, in order to provide all its features, communicates with a pVACtools component called pVACapi. pVACapi serves as an interface between pVACviz and the pVACseq pipeline proceses, launching pVACseq processes, managing them as they execute, and generating the visualizations that pVACviz displays.
 
 Upon installation, pVACapi creates several directories in the user's home directory in `~/pVAC-Seq/`. These directories are used to hold input files to pVACseq processes, results files for visualization, archives, and exported projects. Additionally two hidden directories controlled by pVACapi are used to store files related to managing and running processes.
 
@@ -34,7 +34,7 @@ The pVACviz :ref:`Start form <pvacviz_starting>` has Input VCF and Phased Proxim
 
 \/visualize
 -----------
-The :ref:`Visualize feature <pvacviz_visualizing>` allows users to visualize any pVACseq result VCF files. Any pVACseq VCF file placed in this /visualize folder will be displayed on the Visualize page in the right column. Directory structures will be preserved so that users may group files in whatever manner they wish.
+The :ref:`Visualize feature <pvacviz_visualizing>` allows users to visualize any pVACseq result TSV files. Any pVACseq TSV file placed in this /visualize folder will be displayed on the Visualize page in the right column. Directory structures will be preserved so that users may group files in whatever manner they wish.
 
 \/.processes
 ------------

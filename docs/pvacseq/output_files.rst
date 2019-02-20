@@ -20,9 +20,9 @@ File Name                                           Description
 =================================================== ===========
 ``<sample_name>.tsv``                               An intermediate file with variant, transcript, coverage, vaf, and expression information parsed from the input files.
 ``<sample_name>.tsv_<chunks>`` (multiple)           The above file but split into smaller chunks for easier processing with IEDB.
-``<sample_name>.all_epitopes.tsv``                  A list of all predicted epitopes and their binding affinity scores, with additional variant information the ``<sample_name>.tsv``.
+``<sample_name>.all_epitopes.tsv``                  A list of all predicted epitopes and their binding affinity scores, with additional variant information from the ``<sample_name>.tsv``.
 ``<sample_name>.filtered.tsv``                      The above file after applying all filters, with cleavage site and stability predictions added.
-``<sample_name>.filtered.condensed.ranked.tsv``     A condensed version of the filtered TSV with only the most important columns remaining, with a score for each neoepitope candidate added.
+``<sample_name>.filtered.condensed.ranked.tsv``     A condensed version of the filtered TSV with only the most important columns remaining, with a priority score for each neoepitope candidate added.
 =================================================== ===========
 
 all_epitopes.tsv and filtered.tsv Report Columns
@@ -43,28 +43,28 @@ Column Name                                                     Description
 ``Mutation``                                                    The amnio acid change of this mutation
 ``Protein Position``                                            The protein position of the mutation
 ``Gene Name``                                                   The Ensembl gene name of the affected gene
-``HGVSc``                                                       The HGVS coding sequence name
-``HGVSp``                                                       The HGVS protein sequence name
+``HGVSc``                                                       The HGVS coding sequence variant name
+``HGVSp``                                                       The HGVS protein sequence variant name
 ``HLA Allele``                                                  The HLA allele for this prediction
 ``Peptide Length``                                              The peptide length of the epitope
-``Sub-peptide Position``                                        The one-based position of the epitope in the protein sequence used to make the prediction
-``Mutation Position``                                           The one-based position of the start of the mutation in the epitope. ``0`` if the start of the mutation is before the epitope
-``MT Epitope Seq``                                              Mutant epitope sequence
-``WT Epitope Seq``                                              Wildtype (reference) epitope sequence at the same position in the full protein sequence. ``NA`` if there is no wildtype sequence at this position or if more than half of the amino acids of the mutant epitope are mutated
+``Sub-peptide Position``                                        The one-based position of the epitope within the protein sequence used to make the prediction
+``Mutation Position``                                           The one-based position of the start of the mutation within the epitope sequence. ``0`` if the start of the mutation is before the epitope
+``MT Epitope Seq``                                              The mutant epitope sequence
+``WT Epitope Seq``                                              The wildtype (reference) epitope sequence at the same position in the full protein sequence. ``NA`` if there is no wildtype sequence at this position or if more than half of the amino acids of the mutant epitope are mutated
 ``Best MT Score Method``                                        Prediction algorithm with the lowest mutant ic50 binding affinity for this epitope
 ``Best MT Score``                                               Lowest ic50 binding affinity of all prediction algorithms used
 ``Corresponding WT Score``                                      ic50 binding affinity of the wildtype epitope. ``NA`` if there is no ``WT Epitope Seq``.
 ``Corresponding Fold Change``                                   ``Corresponding WT Score`` / ``Best MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
 ``Tumor DNA Depth``                                             Tumor DNA depth at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
-``Tumor DNA VAF``                                               Tumor DNA variant allele frequency at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
+``Tumor DNA VAF``                                               Tumor DNA variant allele frequency (VAF) at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
 ``Tumor RNA Depth``                                             Tumor RNA depth at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
-``Tumor RNA VAF``                                               Tumor RNA variant allele frequency at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
+``Tumor RNA VAF``                                               Tumor RNA variant allele frequency (VAF) at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
 ``Normal DNA Depth``                                            Normal DNA depth at this position. ``NA`` if VCF entry does not contain normal DNA readcount annotation.
-``Normal DNA VAF``                                              Normal DNA variant allele frequency at this position. ``NA`` if VCF entry does not contain normal DNA readcount annotation.
-``Gene Expression``                                             Gene expression value at this position. ``NA`` if VCF entry does not contain gene expression annotation.
-``Transcript Expression``                                       Transcript expression value at this position. ``NA`` if VCF entry does not contain transcript expression annotation.
-``Median MT Score``                                             Median ic50 binding affinity of the mutant epitope of all prediction algorithms used
-``Median WT Score``                                             Median ic50 binding affinity of the wildtype epitope of all prediction algorithms used. ``NA`` if there is no ``WT Epitope Seq``.
+``Normal DNA VAF``                                              Normal DNA variant allele frequency (VAF) at this position. ``NA`` if VCF entry does not contain normal DNA readcount annotation.
+``Gene Expression``                                             Gene expression value for the annotated gene containing the variant. ``NA`` if VCF entry does not contain gene expression annotation.
+``Transcript Expression``                                       Transcript expression value for the annotated transcript containing the variant. ``NA`` if VCF entry does not contain transcript expression annotation.
+``Median MT Score``                                             Median ic50 binding affinity of the mutant epitope across all prediction algorithms used
+``Median WT Score``                                             Median ic50 binding affinity of the wildtype epitope across all prediction algorithms used. ``NA`` if there is no ``WT Epitope Seq``.
 ``Median Fold Change``                                          ``Median WT Score`` / ``Median MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
 ``Individual Prediction Algorithm WT and MT Scores`` (multiple) ic50 scores for the ``MT Epitope Seq`` and ``WT Eptiope Seq`` for the individual prediction algorithms used
 ``Best Cleavage Position`` (optional)                           Position of the highest predicted cleavage score
@@ -85,7 +85,7 @@ filtered.condensed.ranked.tsv Report Columns
 Column Name          Description
 ==================== ===========
 ``Gene Name``        The Ensembl gene name of the affected gene.
-``Mutation``         The amnio acid change of this mutation.
+``Mutation``         The amino acid change of this mutation.
 ``Protein Position`` The protein position of the mutation.
 ``HGVSc``            The HGVS coding sequence name.
 ``HGVSp``            The HGVS protein sequence name.
@@ -115,3 +115,5 @@ Each of the following 4 criteria are assigned a rank-ordered value (worst = 1):
 - D = ``Tumor DNA VAF``, with the highest being the best.
 
 The ``Score`` is calculated from the above ranks with the following formula: ``B + F + (M * 2) + (D / 2)``
+
+Note that since this score is calculated from rank values for the current list of candidates, the score is entirely relative to each candidate list and can not be compared between lists. The Priority Score is simply a way of ordering candidates within a pvacseq result.

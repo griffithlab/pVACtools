@@ -21,7 +21,8 @@ as ``missense_variant``, ``inframe_insertions``, ``inframe_deletion``, or
 ``frameshift_variant`` by VEP as long as the transcript was not also annotated
 as ``start_lost``. In addition, pVACseq only includes variants that were
 called as homozygous or heterozygous variant. Variants that were not called
-are skipped.
+in the sample specified are skipped (determined by examining the ``GT`` genotype 
+field in the VCF).
 
 :large:`My pVACseq command has been running for a long time. Why is
 that?`
@@ -33,14 +34,15 @@ made to the IEDB software for binding score predictions.
 
   It is generally faster to make IEDB calls using a local install of IEDB than
   using the IEDB web API. It is, therefore, recommended to use a local IEDB
-  install for any in-depth analysis.
+  install for any in-depth analysis. You should either install IEDB locally yourself
+  or use the pvactools docker image that includes it.
 
 There are a number of factors that determine the number of IEDB calls to be made:
 
 - Number of variants in your VCF
 
-  pVACseq will make predictions for each missense, inframe indel, and
-  frameshift variant in your VCF.
+  pVACseq will make predictions for each missense, inframe insertion, inframe deleletion, 
+  and frameshift variant in your VCF.
 
   **Speedup suggestion**: Split the VCF into smaller subsets and process each one
   individually, in parallel.
@@ -68,9 +70,9 @@ There are a number of factors that determine the number of IEDB calls to be made
 - Number of prediction algorithms, epitope lengths, and HLA-alleles
 
   One call to IEDB is made for each combination of these parameters for each chunk
-  of fasta sequences. That means, for example, when 7 prediction
-  algorithms, 4 epitope lengths, and 6 HLA-alleles are chosen, 7*4*6=168 calls to
-  IEDB have to be made for each chunk of fastas.
+  of fasta sequences. That means, for example, when 8 prediction
+  algorithms, 4 epitope lengths (8-11), and 6 HLA-alleles are chosen, 7*4*6=192 calls 
+  to IEDB have to be made for each chunk of fastas.
 
   **Speedup suggestion**: Reduce the number of prediction algorithms,
   epitope lengths, and/or HLA-alleles to the ones that will be the most
@@ -82,12 +84,20 @@ There are a number of factors that determine the number of IEDB calls to be made
 
 - ``--downstream-sequence-length`` parameter value
 
-  This parameter determines how many amino acids of the downstream sequence after a
-  frameshift mutation will be included in the wildtype fasta sequence. The
-  shorter the downstream sequence length, the lower the number of epitopes
+  This parameter determines how many amino acids of the downstream sequence 
+  after a frameshift mutation will be included in the wildtype fasta sequence. 
+  The shorter the downstream sequence length, the lower the number of epitopes
   that IEDB needs to make binding predictions for.
 
   **Speedup suggestion**: Reduce the value of this parameter.
+
+- ``-t`` parameter value
+
+  This parameter determines the number of threads pvacseq will use for parallel 
+  processing.
+
+  **Speedup suggestion**: Use a host with multiple cores and sufficient memory and 
+  use a larger number of threads.
 
 :large:`My pVACseq output file does not contain entries for all of the
 alleles I chose. Why is that?`
@@ -95,15 +105,15 @@ alleles I chose. Why is that?`
 There could be a few reasons why the pVACseq output does not contain
 predictions for alleles:
 
-- The alleles you picked might've not been compatible with the prediction algorithm and/or epitope lengths chosen. In that case no calls for that allele would've been made and a status message would've printed to the screen.
+- The alleles you picked might have not been compatible with the prediction algorithm and/or epitope lengths chosen. In that case no calls for that allele would've been made and a status message would've printed to the screen.
 
 - It could be that all epitope predictions for some alleles got filtered out. You can check the ``<sample_name>.all_epitopes.tsv`` file to see all called epitopes before filtering.
 
 :large:`Why are some values in the` :large-code:`WT Epitope Seq` :large:`column` :large-code:`NA` :large:`?`
 
-Not all mutant epitope sequences will have a corresponding wildtype epitope sequence. This
-occurs when the mutant epitope sequence is novel and a comparison is therefore not
-meaningful:
+Not all mutant epitope sequences will have a corresponding wildtype epitope sequence. 
+This occurs when the mutant epitope sequence is novel and a comparison is therefore not
+meaningful. For example:
 
 - An epitope in the downstream portion of a frameshift might not have a corresponding wildtype epitope at the same position at all. The epitope is completely novel.
 
@@ -113,7 +123,7 @@ meaningful:
 
 By default we filter the neoepitopes on their binding score. If readcount
 and/or expression annotations are available in the VCF we also filter on the depth, VAF,
-and FPKM. In addition, candidates where the mutant epitope sequence is the
+and gene/trancript FPKM. In addition, candidates where the mutant epitope sequence is the
 same as the wildtype epitope sequence will also be filtered out.
 
 :large:`How can I see all of the candidate epitopes without any filters
@@ -138,7 +148,7 @@ filtered?`
 We do not filter out ``NA`` entries for depth and VAF since there is not
 enough information to determine whether the cutoff has been met one way or another.
 
-:large:`Why don't some of my epitopes have score predictions for certain prediction methods?`
+:large:`Why do some of my epitopes have no score predictions for certain prediction methods?`
 
 Not all prediction methods support all epitope lengths or all alleles. To see
 a list of supported alleles for a prediction method you may use the
@@ -148,20 +158,25 @@ and `Class II <http://tools.iedb.org/mhcii/help/#Method>`_ documentation.
 
 :large:`How is pVACseq licensed?`
 
-pVACseq is licensed under `NPOSL-3.0
-<http://opensource.org/licenses/NPOSL-3.0>`_.
+pVACseq is licensed under the open source license `NPOSL-3.0
+<http://opensource.org/licenses/NPOSL-3.0>`_. If you would like to discuss a license for
+commercial applications, please contact us.
 
 :large:`How do I cite pVACseq?`
 
-Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Christopher A Miller,
+Jasreet Hundal+, Susanna Kiwala+, Joshua McMichael, Christopher A Miller,
 Alexander T Wollam, Huiming Xia, Connor J Liu, Sidi Zhao, Yang-Yang Feng,
 Aaron P Graubert, Amber Z Wollam, Jonas Neichin, Megan Neveau, Jason Walker,
 William E Gillanders, Elaine R Mardis, Obi L Griffith, Malachi Griffith.
 `pVACtools: a computational toolkit to select and visualize cancer
-neoantigens <https://doi.org/10.1101/501817>`_.
+neoantigens <https://doi.org/10.1101/501817>`_. (+)equal contribution.
 bioRxiv 501817; doi: https://doi.org/10.1101/501817
 
-Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman, Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. `Accounting for proximal variants improves neoantigen prediction <https://www.nature.com/articles/s41588-018-0283-9>`_. Nature Genetics. 2018, DOI: 10.1038/s41588-018-0283-9. PMID: `30510237 <https://www.ncbi.nlm.nih.gov/pubmed/30510237>`_.
+Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, 
+William C. Chapman, Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, 
+Elaine R. Mardis, and Malachi Griffith. `Accounting for proximal variants improves 
+neoantigen prediction <https://www.nature.com/articles/s41588-018-0283-9>`_. Nature Genetics. 
+2018, DOI: 10.1038/s41588-018-0283-9. PMID: `30510237 <https://www.ncbi.nlm.nih.gov/pubmed/30510237>`_.
 
 Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi
 L. Griffith, Elaine R. Mardis, and Malachi Griffith. `pVACseq: A genome-guided
