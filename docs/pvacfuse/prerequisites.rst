@@ -10,11 +10,13 @@ Fusion detection and annotation
 
 pVACfuse expects an annotated bedpe file with fusion information. Fusion
 detection will be preformed using `INTEGRATE <https://sourceforge.net/p/integrate-fusion/wiki/Home>`_ 
-with annotations from `INTEGRATE-Neo <https://github.com/ChrisMaherLab/INTEGRATE-Neo>`_.
+with annotations from `INTEGRATE-Neo <https://github.com/ChrisMaherLab/INTEGRATE-Neo>`_. It should be 
+possible to start with fusions from another caller, convert the output to bedpe format, annotate the 
+bedpe with INTEGRATE-Neo and then feed these candidates into pVACfuse.
 
-1. Align RNA with Tophat2 to obtain accepted_hits.bam and unmapped.bam
-2. (OPTIONAL) Align WGS DNA with BWA aln/sampe (NOT MEM) to obtain tumor.dna.bam and normal.dna.bam
-3. Produce gene annotations file with `gtfToGenePred <https://bioconda.github.io/recipes/ucsc-gtftogenepred/README.html>`_
+1. Align RNA with Tophat2 (a requirement of INTEGRATE) to obtain accepted_hits.bam and unmapped.bam
+2. (OPTIONAL) Align WGS DNA with BWA aln/sampe (NOT MEM, a requirement of INTEGRATE) to obtain tumor.dna.bam and normal.dna.bam
+3. Produce a gene annotations file with `gtfToGenePred <https://bioconda.github.io/recipes/ucsc-gtftogenepred/README.html>`_
 
 .. code-block:: none
 
@@ -37,11 +39,10 @@ with annotations from `INTEGRATE-Neo <https://github.com/ChrisMaherLab/INTEGRATE
 
 .. <===== pVACfuse =====>
     pvacfuse run --net-chop-method cterm --netmhc-stab --iedb-install-directory
-    /gscmnt/gc2502/griffithlab/yafeng -e 8,9,10,11 fusions.bedpe.annot sample
+    IEDB_INSTALL_DIRECTORY -e 8,9,10,11 fusions.bedpe.annot sample
     HLA-A*29:02,HLA-A*29:02,HLA-B*08:01,HLA-B*45:01,HLA-C*07:01,HLA-C*06:02
     NNalign NetMHC NetMHCIIpan NetMHCcons NetMHCpan PickPocket SMM SMMPMBEC
-    SMMalign hcc1395_fuse
-
+    SMMalign output_dir
 
 .. Describe how to install and run INTEGRATE-Neo
 .. Describe input file format

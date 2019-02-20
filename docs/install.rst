@@ -48,7 +48,7 @@ Installing IEDB binding prediction tools (strongly recommended)
 .. warning::
    The IEDB binding prediction tools are only compatible with Linux.
 
-You may create a local install of the IEDB binding prediction tools by first downloading the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ from the IEDB website. If using both the Class I and the Class II tools, they both need to be installed into the same parent directory.
+You may create a local install of the IEDB binding prediction tools by first downloading the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ from the IEDB website. If using both the Class I and the Class II tools, they both need to be installed into the same parent directory. Note that we have tested pVACtools with the versions of IEDB class I and II listed below. Using a different version may cause problems.
 
 .. important::
    By using the IEDB software, you are consenting to be bound by and become a
@@ -205,9 +205,9 @@ Docker and CWL
 A Docker container for pVACtools is available on DockerHub using the
 `griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo. This Docker
 container includes installations of the IEDB class I and class II tools
-at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``.
+at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
 
-CWL tool wrappers for pVACseq, pVACfuse, and pVACvector can be downloaded
+Common Workflow Language (CWL) tool wrappers for pVACseq, pVACfuse, and pVACvector can be downloaded
 using the ``pvactools download_cwls`` command.
 
 Download CWL tool wrappers
