@@ -74,7 +74,7 @@ ____________________
 - The ``--hgvs`` option will result in HGVS identifiers being added to the
   annotation.
 - Using the ``--hgvs`` option requires the usage of the ``--fasta`` argument to
-  specify the location of the reference build fasta file.
+  specify the location of the reference genome build fasta file.
 - The ``--offline`` option will eliminate all network connections for speed
   and/or privacy.
 - The ``--cache`` option will result in the VEP cache being used for
@@ -99,10 +99,11 @@ __________________
   location of the VEP cache is at ``$HOME/.vep``.
 - The ``--dir_plugins <VEP_plugins directory>`` option may need to be set
   depending on where the VEP_plugins were installed to.
-- The ``--pick`` option might be useful to limit the annotation to the top
-  transcripts. Otherwise, VEP will annotate each variant with all possible
+- The ``--pick`` option might be useful to limit the annotation to the "top"
+  transcript for each variant (the one for which the most dramatic consequence 
+  is predicted). Otherwise, VEP will annotate each variant with all possible
   transcripts. pVACseq will provide predictions for all transcripts in the VEP
-  CSQ field. Running VEP without the ``--pick`` option can therefor drastically
+  CSQ field. Running VEP without the ``--pick`` option can therefore drastically
   increase the runtime of pVACseq.
 - The ``--transcript_version`` option will add the transcript version to the
   transcript identifiers. This option might be needed if you intend to
