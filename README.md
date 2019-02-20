@@ -16,7 +16,7 @@ A tool designed to aid specifically in the construction of DNA vector-based canc
 
 **pVACviz**
 
-A browser-based user interface that assists users in launching, managing, reviewing, and visualizing the results of pVACtools processes.
+A browser-based user interface that assists users in launching, managing, reviewing, and visualizing the results of pVACtools processes. pVACviz relies on the pVACapi and a client application. The source code for the client application can be found <a href="https://github.com/griffithlab/BGA-interface-projects/tree/master/apps/pvacviz">here</a>.
 
 **pVACapi**
 
