@@ -34,7 +34,7 @@ The pVACviz :ref:`Start form <pvacviz_starting>` has Input VCF and Phased Proxim
 
 \/visualize
 -----------
-The :ref:`Visualize feature <pvacviz_visualizing>` allows users to visualize any pVACseq result VCF files. Any pVACseq VCF file placed in this /visualize folder will be displayed on the Visualize page in the right column. Directory structures will be preserved so that users may group files in whatever manner they wish.
+The :ref:`Visualize feature <pvacviz_visualizing>` allows users to visualize any pVACseq result TSV files. Any pVACseq TSV file placed in this /visualize folder will be displayed on the Visualize page in the right column. Directory structures will be preserved so that users may group files in whatever manner they wish.
 
 \/.processes
 ------------
