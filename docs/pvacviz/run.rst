@@ -19,4 +19,5 @@ Depending on the number of completed and running processes it must check, the AP
 
    pvacviz
 
-The command will start a HTTP server that provides the web client files and assets, and opens up the client in the default web browser specified by your operating system. In some cases, pvacviz will not be able to automatically open the web browser. If no browser launches after starting pvacviz, you will need to manually load the URL, `http://localhost:4200/`, in a Firefox, Chrome, or Safari browser.
+This command will start a HTTP server that provides the web client files and assets, and opens up the client in the default web browser specified by your operating system. In some cases, pvacviz will not be able to automatically open the web browser. If no browser launches after starting pvacviz, you will need to manually load the URL, `http://localhost:4200/`, in a Firefox, Chrome, or Safari browser. If you are running pVACviz
+on a public instance, to access it over the web you will need to replace `localhost` with the correct IP address (or associated domain name).

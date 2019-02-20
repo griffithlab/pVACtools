@@ -7,7 +7,10 @@ pVACviz is part of the pVACtools package. To install pVACtools, execute the foll
 
    pip install pvactools
 
-More detailed installation instructions can be found :ref:`here <install>`.
+More detailed installation instructions can be found :ref:`here <install>`. Note that the following are the bare minimum you 
+need to run pVACviz. Most users will probably just want to complete the full pvactools install as described :ref:`here <install>`. 
+That includes pVACviz along with all the other components, local installation of IEDB, etc.  You can also use the pvactools docker 
+container which contains all tools and their dependencies (including those for pVACviz).
 
 MHCflurry
 ---------
