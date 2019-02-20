@@ -20,8 +20,8 @@ def define_parser():
         choices=['lowest', 'median'],
         default='median',
         help="The ic50 scoring metric to use for ranking epitopes by binding-threshold and minimum fold change. "
-             + "lowest: Best MT Score/Corresponding Fold Change - lowest MT ic50 binding score/corresponding fold change of all chosen prediction methods. "
-             + "median: Median MT Score/Median Fold Change - median MT ic50 binding score/fold change of all chosen prediction methods."
+             + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
+             + "median: Use the median MT Score and Median Fold Change (i.e. the median MT ic50 binding score and fold change of all chosen prediction methods)."
     )
 
     return parser
