@@ -3,18 +3,14 @@
 import connexion
 import os
 import sys
-import http.server
-import socketserver
-import socket
 import time
 
-from webbrowser import open_new_tab
 from flask_cors import CORS
 from utils.pvacapi.controllers.utils import initialize
 from utils.pvacapi.controllers.utils import getIpAddress
+
 #FIXME: sanitize sample name
 def main():
-
     app = connexion.App(
         "pVAC-Seq Visualization Server",
         specification_dir=os.path.join(
@@ -32,8 +28,9 @@ def main():
     app.add_api('swagger.yaml', arguments={'title': 'API to support pVacSeq user interface for generating reports on pipeline results'})
     app.app.secret_key = os.urandom(1024)
 
-    # setup CORS
+    # determine IP address and setup CORS
     IPAddr = getIpAddress()
+
     CORS(
         app.app,
         # should match IP address at with any port, path, or protocol
