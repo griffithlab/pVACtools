@@ -4,6 +4,7 @@ import connexion
 import os
 import sys
 import time
+import argparse
 
 from flask_cors import CORS
 from utils.pvacapi.controllers.utils import initialize
@@ -11,6 +12,10 @@ from utils.pvacapi.controllers.utils import getIpAddress
 
 #FIXME: sanitize sample name
 def main():
+    parser = argparse.ArgumentParser(description='parse pvacapi arguments')
+    parser.add_argument('--ip_address', help='IP address for the HTTP server to bind')
+    args = parser.parse_args()
+
     app = connexion.App(
         "pVAC-Seq Visualization Server",
         specification_dir=os.path.join(
@@ -29,7 +34,13 @@ def main():
     app.app.secret_key = os.urandom(1024)
 
     # determine IP address and setup CORS
-    IPAddr = getIpAddress()
+    IPAddr = None
+    if args.ip_address is None:
+        IPAddr = getIpAddress()
+    else:
+        IPAddr = args.ip_address
+
+    import pdb; pdb.set_trace()
 
     CORS(
         app.app,
