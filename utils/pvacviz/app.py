@@ -4,9 +4,9 @@ import threading
 import os
 import webbrowser
 import time
+import argparse
 from utils.pvacapi.controllers.utils import getIpAddress
 
-IPADDR = getIpAddress()
 PORT = 4200
 INDEXFILE = 'index.html'
 CLIENTDIR = os.path.join(os.path.dirname(__file__), 'client')
@@ -35,11 +35,20 @@ class MyHandler(SimpleHTTPRequestHandler):
 
 def main():
     os.chdir(CLIENTDIR)
+    parser = argparse.ArgumentParser(description='parse pvacviz arguments')
+    parser.add_argument('--ip_address', help='IP address for the viz HTTP server to bind')
+    args = parser.parse_args()
+
+    IPAddr = None
+    if args.ip_address is None:
+        IPAddr = getIpAddress()
+    else:
+        IPAddr = args.ip_address
 
     Handler = MyHandler
-    httpd = HTTPServer((IPADDR, PORT), Handler)
+    httpd = HTTPServer((IPAddr, PORT), Handler)
     thread = threading.Thread(target=httpd.serve_forever)
-    url = "http://{}:{}".format(IPADDR, PORT)
+    url = "http://{}:{}".format(IPAddr, PORT)
 
     try:
         print(time.asctime(), "Starting pVACviz client webserver")
