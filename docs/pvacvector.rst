@@ -10,10 +10,21 @@ DNA vector based personalized cancer vaccines. It takes as input either a pVACse
 tsv file or a fasta file containing peptide sequences and returns a peptide ordering that
 minimizes the effects of junctional epitopes (that may create novel peptides)
 between the sequences. It does this by using the core pVACseq services to
-predict the binding scores for each junctional peptide. It also tests
-junctions with spacer amino acid sequences that may help to eliminate junctional epitopes.
-These spacer amino acid sequences can be "HH", "HHC", "HHH", "HHHD", "HHHC",
-"AAY", "HHHH", "HHAA", "HHL" or "AAL. The final vaccine ordering is
+predict the binding scores for each junctional peptide separated by a spacer amino acid
+sequence that may help to eliminate junctional epitopes. The list of spacers
+to be tested is specified using the ``--spacers`` parameter. Peptide combinations without a
+spacer can be tested by including ``None`` in the list of spacers.
+
+Peptide junctions are tested with
+each spacer in the order that they are specified. If a valid peptide ordering
+is found that doesn't result in any well-binding junction epitopes, that
+ordering is returned. No other spacer are tested, even if they could
+potentially result in better junction scores. This reduces runtime.
+If no valid path is found, the next spacer in the input list is tested.
+The default spacer amino acid sequences are "None", "AAY", "HHHH", "GGS", "GPGPG", "HHAA",
+"AAL", "HH", "HHC", "HHH", "HHHD", "HHL", "HHHC".
+
+The final vaccine ordering is
 achieved through a simulated annealing procedure that returns a near-optimal
 solution, when one exists.
 
