@@ -228,6 +228,6 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
         )
         self.parser.add_argument(
             '--spacers', type=lambda s:[spacer for spacer in s.split(',')],
-            help="Comma-separated list of spacers to use for testing junction epitopes. Include None to test junctions without spacers.",
+            help="Comma-separated list of spacers to use for testing junction epitopes. Include None to test junctions without spacers. Peptide combinations will be tested with each spacer in the order specified.",
             default="None,AAY,HHHH,GGS,GPGPG,HHAA,AAL,HH,HHC,HHH,HHHD,HHL,HHHC"
         )
