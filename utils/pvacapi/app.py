@@ -12,8 +12,8 @@ from utils.pvacapi.controllers.utils import getIpAddress
 
 #FIXME: sanitize sample name
 def main():
-    parser = argparse.ArgumentParser(description='parse pvacapi arguments')
-    parser.add_argument('--ip_address', help='IP address for the HTTP server to bind')
+    parser = argparse.ArgumentParser(description='pVACapi provides a REST API to pVACtools')
+    parser.add_argument('--ip_address', help='IP address for the HTTP server to bind. If not provided, the default socket address will be used.')
     parser.add_argument('--debug', default=False, action='store_true', help='Start sever in debug mode.')
     args = parser.parse_args()
 
@@ -30,26 +30,27 @@ def main():
         regex = r'-?\d+'
 
     # determine IP address and setup CORS
-    IPAddr = None
+    IP_ADDRESS = None
     if args.ip_address is None:
-        IPAddr = getIpAddress()
+        IP_ADDRESS = getIpAddress()
     else:
-        IPAddr = args.ip_address
+        IP_ADDRESS = args.ip_address
 
     app.app.url_map.converters['int'] = IntConverter
-    initialize(app.app, IPAddr) #initialize the app configuration
+    initialize(app.app, IP_ADDRESS) #initialize the app configuration
     app.add_api('swagger.yaml', arguments={'title': 'API to support pVacSeq user interface for generating reports on pipeline results'})
     app.app.secret_key = os.urandom(1024)
 
     # remove all CORS restrictions
     CORS(app.app)
+
+    # should match IP address at with any port, path, or protocol
     # CORS(
     #     app.app,
-    #     # should match IP address at with any port, path, or protocol
-    #     origins=r'^(.+://)?' + IPAddr + r'(:\d+)?(/.*)?$'
+    #     origins=r'^(.+://)?' + IP_ADDRESS + r'(:\d+)?(/.*)?$'
     # )
 
-    print(time.asctime(), "Starting pVACapi server at http://" + IPAddr + ":8080")
+    print(time.asctime(), "Starting pVACapi server at http://" + IP_ADDRESS + ":8080")
     app.run(port=8080, debug=args.debug, threaded=True)
 
 if __name__ == '__main__':
