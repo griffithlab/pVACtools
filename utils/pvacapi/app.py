@@ -14,6 +14,7 @@ from utils.pvacapi.controllers.utils import getIpAddress
 def main():
     parser = argparse.ArgumentParser(description='parse pvacapi arguments')
     parser.add_argument('--ip_address', help='IP address for the HTTP server to bind')
+    parser.add_argument('--debug', default=False, action='store_true', help='Start sever in debug mode.')
     args = parser.parse_args()
 
     app = connexion.App(
@@ -40,14 +41,16 @@ def main():
     app.add_api('swagger.yaml', arguments={'title': 'API to support pVacSeq user interface for generating reports on pipeline results'})
     app.app.secret_key = os.urandom(1024)
 
-    CORS(
-        app.app,
-        # should match IP address at with any port, path, or protocol
-        origins=r'^(.+://)?' + IPAddr + r'(:\d+)?(/.*)?$'
-    )
+    # remove all CORS restrictions
+    CORS(app.app)
+    # CORS(
+    #     app.app,
+    #     # should match IP address at with any port, path, or protocol
+    #     origins=r'^(.+://)?' + IPAddr + r'(:\d+)?(/.*)?$'
+    # )
 
     print(time.asctime(), "Starting pVACapi server at http://" + IPAddr + ":8080")
-    app.run(port=8080, debug='--debug' in sys.argv, threaded=True)
+    app.run(port=8080, debug=args.debug, threaded=True)
 
 if __name__ == '__main__':
     main()
