@@ -35,20 +35,20 @@ class MyHandler(SimpleHTTPRequestHandler):
 
 def main():
     os.chdir(CLIENTDIR)
-    parser = argparse.ArgumentParser(description='parse pvacviz arguments')
-    parser.add_argument('--ip_address', help='IP address for the viz HTTP server to bind')
+    parser = argparse.ArgumentParser(description='pVACviz serves the files for the pVACviz browser client')
+    parser.add_argument('--ip_address', help='IP address to which the HTTP server will bind. If not provided, the default socket address will be used.')
     args = parser.parse_args()
 
-    IPAddr = None
+    IP_ADDRESS = None
     if args.ip_address is None:
-        IPAddr = getIpAddress()
+        IP_ADDRESS = getIpAddress()
     else:
-        IPAddr = args.ip_address
+        IP_ADDRESS = args.ip_address
 
     Handler = MyHandler
-    httpd = HTTPServer((IPAddr, PORT), Handler)
+    httpd = HTTPServer((IP_ADDRESS, PORT), Handler)
     thread = threading.Thread(target=httpd.serve_forever)
-    url = "http://{}:{}".format(IPAddr, PORT)
+    url = "http://{}:{}".format(IP_ADDRESS, PORT)
 
     try:
         print(time.asctime(), "Starting pVACviz client webserver")
