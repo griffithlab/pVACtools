@@ -21,7 +21,7 @@ import lib.call_iedb
 def define_parser():
     return PvacvectorRunArgumentParser().parser
 
-def run_pipelines(input_file, base_output_dir, args):
+def run_pipelines(input_file, base_output_dir, args, spacer):
     class_i_prediction_algorithms = []
     class_ii_prediction_algorithms = []
     for prediction_algorithm in sorted(args.prediction_algorithms):
@@ -50,7 +50,7 @@ def run_pipelines(input_file, base_output_dir, args):
         'input_file_type' : 'pvacvector_input_fasta',
         'sample_name'     : args.sample_name,
         'n_threads'       : args.n_threads,
-        'spacers'         : args.spacers,
+        'spacers'         : [spacer],
     }
 
     parsed_output_files = []
@@ -177,31 +177,33 @@ def create_graph(iedb_results, seq_tuples, spacers):
     print("Graph contains " + str(len(Paths)) + " nodes and " + str(Paths.size()) + " edges.")
     return Paths
 
-def check_graph_valid(Paths):
-    error_text = ('A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
-                 '1) increasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
-                 '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)')
-
+def check_graph_valid(Paths, seq_dict):
     n_nodes_without_outgoing_edges = 0
+
+    if len(Paths.nodes()) < len(seq_dict.keys()):
+        return False
+
     for node in Paths.nodes():
         if len(Paths.out_edges(node)) == 0:
             n_nodes_without_outgoing_edges += 1
     if n_nodes_without_outgoing_edges > 1:
-        raise Exception("Unable to create valid graph. No outgoing edges for more than one node.\n {}".format(error_text))
+        return False
 
     n_nodes_without_incoming_edges = 0
     for node in Paths.nodes():
         if len(Paths.in_edges(node)) == 0:
             n_nodes_without_incoming_edges += 1
     if n_nodes_without_incoming_edges > 1:
-        raise Exception("Unable to create valid graph. No incoming edges for more than one node.\n {}".format(error_text))
+        return False
 
     n_nodes_without_any_edges = 0
     for node in Paths.nodes():
         if len(Paths.in_edges(node)) == 0 and len(Paths.out_edges(node)) == 0:
             n_nodes_without_any_edges += 1
     if n_nodes_without_any_edges > 0:
-        raise Exception("Unable to create valid graph. No edges for at least one node.\n {}".format(error_text))
+        return False
+
+    return True
 
 def create_distance_matrix(Paths):
     print("Finding path.")
@@ -231,7 +233,10 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
     results_file = os.path.join(base_output_dir, args.sample_name + '_results.fa')
     with open(results_file, 'w') as f:
         name = list()
-        min_score = Paths[state[0]][state[1]]['weight']
+        if Paths.has_edge(state[0], state[1]):
+            min_score = Paths[state[0]][state[1]]['weight']
+        else:
+            return None
         cumulative_weight = 0
         all_scores = list()
 
@@ -246,7 +251,7 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
                 if spacer != 'None':
                     name.append(spacer)
             else:
-                sys.exit("Unable to find path. All possible peptides for edge '{} - spacer - {}' contain at least one epitope that is a good binder.".format(state[i], state[i + 1]))
+                return None
         name.append(state[-1])
         median_score = str(cumulative_weight/len(all_scores))
         peptide_id_list = ','.join(name)
@@ -312,12 +317,35 @@ def main(args_input=sys.argv[1:]):
     seq_keys = sorted(seq_dict)
     seq_tuples = list(itertools.permutations(seq_keys, 2))
 
-    parsed_output_files = run_pipelines(input_file, base_output_dir, args)
-    min_scores = find_min_scores(parsed_output_files, args)
-    Paths = create_graph(min_scores, seq_tuples, args.spacers)
-    check_graph_valid(Paths)
-    distance_matrix = create_distance_matrix(Paths)
-    results_file = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
+    all_parsed_output_files = []
+    processed_spacers = []
+    results_file = None
+    for spacer in args.spacers:
+        print("Processing spacer {}".format(spacer))
+        processed_spacers.append(spacer)
+        current_output_dir = os.path.join(base_output_dir, spacer)
+        parsed_output_files = run_pipelines(input_file, current_output_dir, args, spacer)
+        all_parsed_output_files.extend(parsed_output_files)
+        min_scores = find_min_scores(all_parsed_output_files, args)
+        Paths = create_graph(min_scores, seq_tuples, processed_spacers)
+        if not check_graph_valid(Paths, seq_dict):
+            print("No valid path found.")
+            continue
+        distance_matrix = create_distance_matrix(Paths)
+        results_file = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
+        if results_file is not None:
+            break
+        else:
+            print("No valid path found.")
+
+    if results_file is None:
+        sys.exit(
+            'Unable to find path. ' +
+            'A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
+            '1) increasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
+            '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)'
+        )
+
     if 'DISPLAY' in os.environ.keys():
         VectorVisualization(results_file, base_output_dir).draw()
 
