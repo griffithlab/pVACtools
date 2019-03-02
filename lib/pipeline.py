@@ -431,6 +431,10 @@ class Pipeline(metaclass=ABCMeta):
                         status_message("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, fasta_chunk))
                         split_parsed_output_files.append(split_parsed_file_path)
                         continue
+                    if self.input_file_type == 'pvacvector_input_fasta':
+                        split_fasta_file_path = "{}_1-2.{}.tsv".format(self.split_fasta_basename(), epl)
+                    else:
+                        split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
                     split_fasta_key_file_path = split_fasta_file_path + '.key'
 
                     if len(split_iedb_output_files) > 0:
