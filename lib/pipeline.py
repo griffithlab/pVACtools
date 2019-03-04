@@ -307,7 +307,7 @@ class Pipeline(metaclass=ABCMeta):
                 return iteration_info
         return iteration_info
 
-    def call_iedb_and_parse_outputs(self, chunks):
+    def call_iedb(self, chunks):
         pymp.config.nested = True
         alleles = self.alleles
         epitope_lengths = self.epitope_lengths
@@ -402,15 +402,16 @@ class Pipeline(metaclass=ABCMeta):
                                         last_execute_timestamp = datetime.datetime.now()
                                         status_message_with_lock("Making binding predictions on Allele %s and Epitope Length %s with Method %s - Entries %s - Completed" % (a, epl, method, fasta_chunk), lock)
 
+    def parse_outputs(self, chunks):
         split_parsed_output_files = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
             fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
-            for a in alleles:
-              	for epl in epitope_lengths:
+            for a in self.alleles:
+                for epl in self.epitope_lengths:
                     split_iedb_output_files = []
                     status_message("Parsing binding predictions for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk))
-                    for method in prediction_algorithms:
+                    for method in self.prediction_algorithms:
                         prediction_class = globals()[method]
                         prediction = prediction_class()
                         if hasattr(prediction, 'iedb_prediction_method'):
@@ -425,7 +426,7 @@ class Pipeline(metaclass=ABCMeta):
                             continue
                         split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, str(epl), "tsv_%s" % fasta_chunk]))
                         split_iedb_output_files.append(split_iedb_out)
-                    
+
                     split_parsed_file_path = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, str(epl), "parsed", "tsv_%s" % fasta_chunk]))
                     if os.path.exists(split_parsed_file_path):
                         status_message("Parsed Output File for Allele %s and Epitope Length %s (Entries %s) already exists. Skipping" % (a, epl, fasta_chunk))
@@ -489,7 +490,8 @@ class Pipeline(metaclass=ABCMeta):
         chunks = self.split_tsv_file(total_row_count)
 
         self.generate_fasta(chunks)
-        split_parsed_output_files = self.call_iedb_and_parse_outputs(chunks)
+        self.call_iedb(chunks)
+        split_parsed_output_files = self.parse_outputs(chunks)
 
         if len(split_parsed_output_files) == 0:
             status_message("No output files were created. Aborting.")
