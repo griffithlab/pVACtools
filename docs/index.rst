@@ -42,7 +42,7 @@ tools:
    contact
    mailing_list
 
-New in version |version|
+New in version |release|
 ------------------------
 
 This version is a hotfix release. It fixes the following issues:
