@@ -47,16 +47,12 @@ New in version |version|
 
 This version is a hotfix release. It fixes the following issues:
 
-- Some prediction algorithms might predict a binding affinity of 0 which could
-  lead to division by 0 errors when calculating the fold change. In this
-  situation we now set the fold change to ``inf`` (infinity).
-- Previously the ``--maximum-transcript-support-level`` threshold was not
-  getting propagated to the main pipeline step correctly, resulting in errors
-  in the transcript support level filter.
-- There was a bug in the multithreading logic that would result in
-  certain steps getting executed more than once, which in turn would lead to
-  FileNotFound errors when these duplicate executions were happening at the
-  same time.
+- A bug in the parsing code of the binding prediction output files would
+  result in only some binding predictionn output files getting processed when using multithreading.
+  This would potentially cause incomplete output reports that were missing
+  predictions for some input variants. pVACseq, pVACfuse, and
+  pVACvector runs that were done without multithreading should've been
+  unaffected by this bug.
 
 Past release notes can be found on our :ref:`releases` page.
 
