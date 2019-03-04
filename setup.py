@@ -100,6 +100,7 @@ setup(
         'bokeh==0.13.0',
         'tornado==5.0.2',
         'swagger-spec-validator==2.1.0',
+        'jsonschema==2.6.0',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,
