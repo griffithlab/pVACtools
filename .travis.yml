@@ -12,8 +12,7 @@ install:
   #Remove the following line when pvacseq-client is first pushed to the live pypi site
   #This has been updated to pull from the live pypi site, instead of test pypi.
   #Not sure if it can or needs to be deleted altogether.
-  - pip install pvacseq-client
-  - pip install -e .[API]
+  - pip install -e .
   - mhcflurry-downloads fetch
   #with the newest version of the spec validator our swagger yml doesn't
   #validate anymore. Use a version that works.
@@ -24,6 +23,7 @@ install:
   - pip install connexion==1.4.2
   - pip install bokeh==0.13.0
   - pip install tornado==5.0.2
+  - pip install jsonschema==2.6.0
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
