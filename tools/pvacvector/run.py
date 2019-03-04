@@ -79,7 +79,8 @@ def run_pipelines(input_file, base_output_dir, args):
         class_i_arguments['output_dir']              = output_dir
         pipeline_i = Pipeline(**class_i_arguments)
         pipeline_i.generate_fasta([[1, 1]])
-        parsed_output_files.extend(pipeline_i.call_iedb_and_parse_outputs([[1, 1]]))
+        pipeline_i.call_iedb([[1, 1]])
+        parsed_output_files.extend(pipeline_i.parse_outputs([[1, 1]]))
 
     if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         if args.iedb_install_directory:
@@ -104,7 +105,8 @@ def run_pipelines(input_file, base_output_dir, args):
         class_ii_arguments['netmhc_stab']             = False
         pipeline_ii = Pipeline(**class_ii_arguments)
         pipeline_ii.generate_fasta([[1, 1]])
-        parsed_output_files.extend(pipeline_ii.call_iedb_and_parse_outputs([[1, 1]]))
+        pipeline_ii.call_iedb([[1, 1]])
+        parsed_output_files.extend(pipeline_ii.parse_outputs([[1, 1]]))
 
     return parsed_output_files
 
