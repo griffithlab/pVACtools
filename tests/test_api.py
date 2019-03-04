@@ -116,7 +116,6 @@ class APITests(unittest.TestCase):
                 [
                     sys.executable,
                     os.path.join(os.path.dirname(__file__),'mock_api.py'),
-                    'api'
                 ],
                 stdout = DEVNULL,
                 stderr = DEVNULL,
