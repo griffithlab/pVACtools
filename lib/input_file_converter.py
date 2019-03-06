@@ -95,6 +95,10 @@ class VcfConverter(InputFileConverter):
         self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         self.tsv_writer.writeheader()
         self.csq_parser = self.create_csq_parser()
+        if 'DownstreamProtein' not in self.csq_parser.csq_format:
+            sys.exit("VCF doesn't contain VEP DownstreamProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.")
+        if 'WildtypeProtein' not in self.csq_parser.csq_format:
+            sys.exit("VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.")
 
     def is_insertion(self, ref, alt):
         return len(alt) > len(ref)
