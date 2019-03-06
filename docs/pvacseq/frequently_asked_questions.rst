@@ -17,7 +17,8 @@ Frequently Asked Questions
 :large:`What type of variants does pVACseq support?`
 
 pVACseq makes predictions for all transcripts of a variant that were annotated
-as ``missense_variant``, ``inframe_insertions``, ``inframe_deletion``, or
+as ``missense_variant``, ``inframe_insertion``, ``inframe_deletion``,
+inframe ``protein_altering_variant``, or
 ``frameshift_variant`` by VEP as long as the transcript was not also annotated
 as ``start_lost``. In addition, pVACseq only includes variants that were
 called as homozygous or heterozygous variant. Variants that were not called
@@ -41,8 +42,8 @@ There are a number of factors that determine the number of IEDB calls to be made
 
 - Number of variants in your VCF
 
-  pVACseq will make predictions for each missense, inframe insertion, inframe deleletion, 
-  and frameshift variant in your VCF.
+  pVACseq will make predictions for each missense, inframe insertion,
+  inframe deletion, protein altering, and frameshift variant in your VCF.
 
   **Speedup suggestion**: Split the VCF into smaller subsets and process each one
   individually, in parallel.
