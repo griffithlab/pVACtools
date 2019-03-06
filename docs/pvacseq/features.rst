@@ -7,7 +7,8 @@ Features
 
 **SNV and Indel support**
 
-pVACseq offers epitope binding predictions for missense, in-frame insertion, in-frame deletion, and frameshift mutations.
+
+pVACseq offers epitope binding predictions for missense, in-frame insertion, in-frame deletion, protein-altering, and frameshift mutations.
 
 **VCF support**
 
