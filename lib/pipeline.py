@@ -24,11 +24,6 @@ def status_message(msg):
     print(msg)
     sys.stdout.flush()
 
-def status_message_with_lock(msg, lock):
-    lock.acquire()
-    status_message(msg)
-    lock.release()
-
 class Pipeline(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.input_file                  = kwargs['input_file']
@@ -352,9 +347,9 @@ class Pipeline(metaclass=ABCMeta):
                                     split_fasta_file_path = "{}_1-2.{}.tsv".format(self.split_fasta_basename(), epl)
                                 else:
                                     split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
-                                status_message_with_lock("Making binding predictions for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk), lock)
+                                p3.print("Making binding predictions for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk))
                                 if os.path.getsize(split_fasta_file_path) == 0:
-                                    status_message_with_lock("Fasta file is empty. Skipping", lock)
+                                    p3.print("Fasta file is empty. Skipping")
                                     continue
                                 #begin of per-algorithm processing
                                 with pymp.Parallel(iteration_info['algorithm']['threads']) as p4:
@@ -368,18 +363,18 @@ class Pipeline(metaclass=ABCMeta):
                                             iedb_method = method
                                         valid_alleles = prediction.valid_allele_names()
                                         if a not in valid_alleles:
-                                            status_message_with_lock("Allele %s not valid for Method %s. Skipping." % (a, method), lock)
+                                            p4.print("Allele %s not valid for Method %s. Skipping." % (a, method))
                                             continue
                                         valid_lengths = prediction.valid_lengths_for_allele(a)
                                         if epl not in valid_lengths:
-                                            status_message_with_lock("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a), lock)
+                                            p4.print("Epitope Length %s is not valid for Method %s and Allele %s. Skipping." % (epl, method, a))
                                             continue
 
                                         split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, str(epl), "tsv_%s" % fasta_chunk]))
                                         if os.path.exists(split_iedb_out):
-                                            status_message_with_lock("Prediction file for Allele %s and Epitope Length %s with Method %s (Entries %s) already exists. Skipping." % (a, epl, method, fasta_chunk), lock)
+                                            p4.print("Prediction file for Allele %s and Epitope Length %s with Method %s (Entries %s) already exists. Skipping." % (a, epl, method, fasta_chunk))
                                             continue
-                                        status_message_with_lock("Making binding predictions on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, fasta_chunk), lock)
+                                        p4.print("Making binding predictions on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, fasta_chunk))
 
                                         if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
                                             if 'last_execute_timestamp' in locals() and not self.iedb_executable:
@@ -400,7 +395,7 @@ class Pipeline(metaclass=ABCMeta):
                                             arguments.extend(['-l', str(epl),])
                                         lib.call_iedb.main(arguments)
                                         last_execute_timestamp = datetime.datetime.now()
-                                        status_message_with_lock("Making binding predictions on Allele %s and Epitope Length %s with Method %s - Entries %s - Completed" % (a, epl, method, fasta_chunk), lock)
+                                        p4.print("Making binding predictions on Allele %s and Epitope Length %s with Method %s - Entries %s - Completed" % (a, epl, method, fasta_chunk))
 
     def parse_outputs(self, chunks):
         split_parsed_output_files = []
