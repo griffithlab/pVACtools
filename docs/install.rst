@@ -5,15 +5,15 @@ Installation
 
 pVACtools is written for Linux but some users have been able to run it successfully on Mac OS X. If you are using Windows you will need to set up a Linux environment, for example by setting up a virtual machine.
 
-pVACtools requires Python 3.5. or 3.6. Before running any installation steps, check the Python version installed on your system:
+pVACtools requires Python 3.5., 3.6, or 3.7. Before running any installation steps, check the Python version installed on your system:
 
 .. code-block:: none
 
    python -V
 
-If you don't have Python 3.6 installed, we recommend using `Conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ to emulate a Python 3.6 environment. We've encountered problems with users that already have Python 2.x installed when they also try to install Python 3.6. The defaults will not be set correctly in that case. If you already have Python 2.x installed we **strongly** recommmend using Conda instead of installing Python 3.6 locally.
+If you don't have Python 3.7 installed, we recommend using `Conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ to emulate a Python 3.7 environment. We've encountered problems with users that already have Python 2.x installed when they also try to install Python 3.7. The defaults will not be set correctly in that case. If you already have Python 2.x installed we **strongly** recommmend using Conda instead of installing Python 3.7 locally.
 
-Once you have set up your Python 3.6 environment correctly you can use ``pip`` to install pVACtools. Make sure you have ``pip`` installed. ``pip`` is generally included in python distributions, but may need to be upgraded before use. See the `instructions <https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel>`_ for installing or upgrading ``pip``.
+Once you have set up your Python 3.7 environment correctly you can use ``pip`` to install pVACtools. Make sure you have ``pip`` installed. ``pip`` is generally included in python distributions, but may need to be upgraded before use. See the `instructions <https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel>`_ for installing or upgrading ``pip``.
 
 After you have pip installed, type the following command on your Terminal:
 
