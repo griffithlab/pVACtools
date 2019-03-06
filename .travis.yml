@@ -5,10 +5,6 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
-addons:
-  apt:
-   packages:
-     - xvfb
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y ghostscript
@@ -28,10 +24,6 @@ install:
   - pip install bokeh==0.13.0
   - pip install tornado==5.0.2
   - pip install jsonschema==2.6.0
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3
 services:
   - postgresql
 script:

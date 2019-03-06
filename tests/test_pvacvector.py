@@ -105,10 +105,11 @@ class TestPvacvector(unittest.TestCase):
                 os.path.join(self.test_data_dir, "Test.vector.results.output.fa")
             ))
 
-            image_out = os.path.join(output_dir.name, 'vector.jpg')
-            #vaccine visualization producing image
-            self.assertTrue(os.path.exists(image_out))
-            self.assertTrue(os.stat(image_out).st_size > 0)
+            if 'DISPLAY' in os.environ.keys():
+                image_out = os.path.join(output_dir.name, 'vector.jpg')
+                #vaccine visualization producing image
+                self.assertTrue(os.path.exists(image_out))
+                self.assertTrue(os.stat(image_out).st_size > 0)
 
             output_dir.cleanup()
 
@@ -138,9 +139,11 @@ class TestPvacvector(unittest.TestCase):
                     os.path.join(self.test_data_dir, "input_parse_test_output.fa")
                     ))
 
-            image_out = os.path.join(output_dir.name, 'vector.jpg')
-            #vaccine visualization producing image
-            self.assertTrue(os.path.exists(image_out))
-            self.assertTrue(os.stat(image_out).st_size > 0)
+
+            if 'DISPLAY' in os.environ.keys():
+                image_out = os.path.join(output_dir.name, 'vector.jpg')
+                #vaccine visualization producing image
+                self.assertTrue(os.path.exists(image_out))
+                self.assertTrue(os.stat(image_out).st_size > 0)
 
             output_dir.cleanup()
