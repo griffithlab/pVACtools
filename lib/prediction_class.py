@@ -5,8 +5,12 @@ import sys
 import inspect
 stderr = sys.stderr
 sys.stderr = open(os.devnull, 'w')
-from mhcflurry import Class1AffinityPredictor
-from mhcnuggets.src.predict import predict
+try:
+    from mhcflurry import Class1AffinityPredictor
+    from mhcnuggets.src.predict import predict
+except Exception as err:
+    sys.stderr = stderr
+    raise err
 sys.stderr = stderr
 import requests
 import re
