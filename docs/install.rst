@@ -84,8 +84,8 @@ Download the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and 
 .. code-block:: none
 
    apt-get update && apt-get install -y tcsh gawk
-   wget https://downloads.iedb.org/tools/mhci/2.19.1/IEDB_MHC_I-2.19.1.tar.gz
-   tar -zxvf IEDB_MHC_I-2.19.1.tar.gz
+   wget https://downloads.iedb.org/tools/mhci/2.19.2/IEDB_MHC_I-2.19.2.tar.gz
+   tar -zxvf IEDB_MHC_I-2.19.2.tar.gz
    cd mhc_i
    ./configure
 
@@ -101,8 +101,8 @@ Download the archives for `class II <http://tools.iedb.org/mhcii/download/>`_ an
 .. code-block:: none
 
    apt-get update && apt-get install -y tcsh gawk
-   wget https://downloads.iedb.org/tools/mhcii/2.17.5/IEDB_MHC_II-2.17.5.tar.gz
-   tar -zxvf IEDB_MHC_II-2.17.5.tar.gz
+   wget https://downloads.iedb.org/tools/mhcii/2.17.6/IEDB_MHC_II-2.17.6.tar.gz
+   tar -zxvf IEDB_MHC_II-2.17.6.tar.gz
    cd mhc_ii
    ./configure.py
 
