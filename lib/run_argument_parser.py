@@ -93,10 +93,6 @@ class PredictionRunArgumentParser(RunArgumentParser):
             help="Length of the peptide sequence to use when creating the FASTA.",
         )
         self.parser.add_argument(
-            '--normal-sample-name',
-            help="In a multi-sample VCF, the name of the matched normal sample."
-        )
-        self.parser.add_argument(
             '--net-chop-method',
             choices=lib.net_chop.methods,
             default=None,
@@ -146,6 +142,10 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         )
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
+        self.parser.add_argument(
+            '--normal-sample-name',
+            help="In a multi-sample VCF, the name of the matched normal sample."
+        )
         self.parser.add_argument(
             "-p", "--phased-proximal-variants-vcf",
             help="A VCF with phased proximal variant information."
