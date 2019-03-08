@@ -2,10 +2,11 @@ import csv
 import argparse
 
 class TopScoreFilter:
-    def __init__(self, input_file, output_file, top_score_metric):
+    def __init__(self, input_file, output_file, top_score_metric, file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.file_type = file_type
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -14,17 +15,30 @@ class TopScoreFilter:
             writer.writeheader()
             filtered_results = {}
             for line in reader:
-                chromosome = line['Chromosome']
-                start = line['Start']
-                stop = line['Stop']
-                ref = line['Reference']
-                var = line['Variant']
-                index = '%s.%s.%s.%s.%s' % (chromosome, start, stop, ref, var)
+                if self.file_type != 'pVACbind':
+                    chromosome = line['Chromosome']
+                    start = line['Start']
+                    stop = line['Stop']
+                    ref = line['Reference']
+                    var = line['Variant']
+                    index = '%s.%s.%s.%s.%s' % (chromosome, start, stop, ref, var)
+                else:
+                    index = line['Mutation']
                 if index not in filtered_results:
                     filtered_results[index] = line
                 else:
-                    if ((self.top_score_metric == 'median' and float(line['Median MT Score']) < float(filtered_results[index]['Median MT Score'])) or
-                        (self.top_score_metric == 'lowest' and float(line['Best MT Score']) < float(filtered_results[index]['Best MT Score']))):
+                    if self.file_type == 'pVACbind':
+                        top_median_score = float(filtered_results[index]['Median Score'])
+                        top_best_score = float(filtered_results[index]['Best Score'])
+                        median_score = float(line['Median Score'])
+                        best_score = float(line['Best Score'])
+                    else:
+                        top_median_score = float(filtered_results[index]['Median MT Score'])
+                        top_best_score = float(filtered_results[index]['Best MT Score'])
+                        median_score = float(line['Median MT Score'])
+                        best_score = float(line['Best MT Score'])
+                    if ((self.top_score_metric == 'median' and median_score < top_median_score) or
+                        (self.top_score_metric == 'lowest' and best_score < top_best_score)):
                         filtered_results[index] = line
 
             writer.writerows(filtered_results.values())

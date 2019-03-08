@@ -122,14 +122,14 @@ def find_min_scores(parsed_output_files, args):
         with open(parsed_output_file, 'r') as parsed:
             reader = csv.DictReader(parsed, delimiter="\t")
             for row in reader:
-                index = row['Index']
+                index = row['Mutation']
                 if index in indexes_with_good_binders:
                     continue
 
                 if args.top_score_metric == 'lowest':
-                    score = float(row['Best MT Score'])
+                    score = float(row['Best Score'])
                 elif args.top_score_metric == 'median':
-                    score = float(row['Median MT Score'])
+                    score = float(row['Median Score'])
                 if args.allele_specific_binding_thresholds:
                     allele = row['HLA Allele']
                     threshold = PredictionClass.cutoff_for_allele(allele)

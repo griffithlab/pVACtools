@@ -11,7 +11,7 @@ import shutil
 import yaml
 
 def define_parser():
-    return PvacseqRunArgumentParser().parser
+    return PvacbindRunArgumentParser().parser
 
 def combine_reports(input_files, output_file):
     write_headers = True
@@ -35,17 +35,17 @@ def create_combined_reports(base_output_dir, args):
     combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
     combine_reports([file1, file2], combined_output_file)
     filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
-    condensed_report_file = os.path.join(output_dir, "{}.filtered.condensed.ranked.tsv".format(args.sample_name))
 
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_output_file
     post_processing_params['filtered_report_file'] = filtered_report_file
-    post_processing_params['condensed_report_file'] = condensed_report_file
-    post_processing_params['run_coverage_filter'] = True
-    post_processing_params['run_transcript_support_level_filter'] = True
+    post_processing_params['run_coverage_filter'] = False
+    post_processing_params['minimum_fold_change'] = None
+    post_processing_params['file_type'] = 'pVACbind'
+    post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = False
-    post_processing_params['run_condense_report'] = True
+    post_processing_params['run_condense_report'] = False
 
     PostProcessor(**post_processing_params).execute()
     print("\nDone: Pipeline finished successfully. File {} contains ranked list of filtered putative neoantigens for class I and class II predictions.\n".format(condensed_report_file))
@@ -57,23 +57,13 @@ def main(args_input = sys.argv[1:]):
     if "." in args.sample_name:
         sys.exit("Sample name cannot contain '.'")
 
-    if args.fasta_size%2 != 0:
-        sys.exit("The fasta size needs to be an even number")
-
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
-
-    if args.downstream_sequence_length == 'full':
-        downstream_sequence_length = None
-    elif args.downstream_sequence_length.isdigit():
-        downstream_sequence_length = int(args.downstream_sequence_length)
-    else:
-        sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
     if args.iedb_install_directory:
         lib.call_iedb.setup_iedb_conda_env()
 
-    input_file_type = 'vcf'
+    input_file_type = 'fasta'
     base_output_dir = os.path.abspath(args.output_dir)
 
     class_i_prediction_algorithms = []
@@ -106,26 +96,13 @@ def main(args_input = sys.argv[1:]):
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
-        'minimum_fold_change'       : args.minimum_fold_change,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
-        'normal_cov'                : args.normal_cov,
-        'normal_vaf'                : args.normal_vaf,
-        'tdna_cov'                  : args.tdna_cov,
-        'tdna_vaf'                  : args.tdna_vaf,
-        'trna_cov'                  : args.trna_cov,
-        'trna_vaf'                  : args.trna_vaf,
-        'expn_val'                  : args.expn_val,
         'additional_report_columns' : args.additional_report_columns,
         'fasta_size'                : args.fasta_size,
         'iedb_retries'              : args.iedb_retries,
-        'downstream_sequence_length': downstream_sequence_length,
         'keep_tmp_files'            : args.keep_tmp_files,
-        'pass_only'                 : args.pass_only,
-        'normal_sample_name'        : args.normal_sample_name,
-        'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
         'n_threads'                 : args.n_threads,
-        'maximum_transcript_support_level': args.maximum_transcript_support_level,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
@@ -146,13 +123,12 @@ def main(args_input = sys.argv[1:]):
 
         class_i_arguments = shared_arguments.copy()
         class_i_arguments['alleles']                 = class_i_alleles
-        class_i_arguments['peptide_sequence_length'] = args.peptide_sequence_length
         class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
         class_i_arguments['epitope_lengths']         = args.epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
-        pipeline = Pipeline(**class_i_arguments)
+        pipeline = PvacbindPipeline(**class_i_arguments)
         pipeline.execute()
     elif len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
@@ -175,12 +151,11 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments = shared_arguments.copy()
         class_ii_arguments['alleles']                 = class_ii_alleles
         class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
-        class_ii_arguments['peptide_sequence_length'] = 31
         class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
         class_ii_arguments['epitope_lengths']         = [15]
         class_ii_arguments['output_dir']              = output_dir
         class_ii_arguments['netmhc_stab']             = False
-        pipeline = Pipeline(**class_ii_arguments)
+        pipeline = PvacbindPipeline(**class_ii_arguments)
         pipeline.execute()
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")

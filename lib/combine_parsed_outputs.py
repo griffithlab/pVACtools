@@ -21,6 +21,12 @@ def main(args_input = sys.argv[1:]):
              + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
              + "median: Use the median MT Score and Median Fold Change (i.e. the median MT ic50 binding score and fold change of all chosen prediction methods).",
     )
+    parser.add_argument(
+        '--file-type',
+        choices=['pVACseq', 'pVACfuse', 'pVACbind'],
+        default='pVACseq',
+        help="Pipeline that created files to be combined."
+    )
     args = parser.parse_args(args_input)
 
     fieldnames = []
@@ -45,25 +51,44 @@ def main(args_input = sys.argv[1:]):
                 rows.append(row)
 
     sorted_rows = sorted(rows, key=lambda row: (int(row['Sub-peptide Position'])))
-    sorted_rows = sorted(sorted_rows, key=lambda row: (float(row['Corresponding Fold Change']) if row['Corresponding Fold Change'].isdigit() else float('inf')), reverse=True)
-    if args.top_score_metric == 'median':
-        sorted_rows = sorted(
-            sorted_rows,
-            key=lambda row: (
-                row['Gene Name'],
-                row['Mutation'],
-                float(row['Median MT Score']),
+    if args.file_type == 'pVACbind':
+        if args.top_score_metric == 'median':
+            sorted_rows = sorted(
+                sorted_rows,
+                key=lambda row: (
+                    row['Mutation'],
+                    float(row['Median Score']),
+                )
             )
-        )
-    elif args.top_score_metric == 'lowest':
-        sorted_rows = sorted(
-            sorted_rows,
-            key=lambda row: (
-                row['Gene Name'],
-                row['Mutation'],
-                float(row['Best MT Score']),
+        elif args.top_score_metric == 'lowest':
+            sorted_rows = sorted(
+                sorted_rows,
+                key=lambda row: (
+                    row['Mutation'],
+                    float(row['Best Score']),
+                )
             )
-        )
+    else:
+        sorted_rows = sorted(sorted_rows, key=lambda row: (float(row['Corresponding Fold Change']) if row['Corresponding Fold Change'].isdigit() else float('inf')), reverse=True)
+        if args.top_score_metric == 'median':
+            sorted_rows = sorted(
+                sorted_rows,
+                key=lambda row: (
+                    row['Gene Name'],
+                    row['Mutation'],
+                    float(row['Median MT Score']),
+                )
+            )
+        elif args.top_score_metric == 'lowest':
+            sorted_rows = sorted(
+                sorted_rows,
+                key=lambda row: (
+                    row['Gene Name'],
+                    row['Mutation'],
+                    float(row['Best MT Score']),
+                )
+            )
+
 
     tsv_writer = csv.DictWriter(args.output_file, list(fieldnames), delimiter = '\t', lineterminator = '\n')
     tsv_writer.writeheader()

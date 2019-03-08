@@ -59,9 +59,13 @@ def main(args_input = sys.argv[1:]):
         for line in chunk:
             sequence_id = ('%010x'%x)[-10:]
             staging_file.write('>'+sequence_id+'\n')
-            staging_file.write(line['MT Epitope Seq']+'\n')
+            if 'Epitope Seq' in line:
+                staging_file.write(line['Epitope Seq']+'\n')
+                peptide_lengths.add(str(len(line['Epitope Seq'])))
+            else:
+                staging_file.write(line['MT Epitope Seq']+'\n')
+                peptide_lengths.add(str(len(line['MT Epitope Seq'])))
             alleles_in_chunk.add(line['HLA Allele'])
-            peptide_lengths.add(line['Peptide Length'])
             current_buffer[sequence_id] = {k:line[k] for k in line}
             x+=1
         staging_file.seek(0)
@@ -104,7 +108,11 @@ def main(args_input = sys.argv[1:]):
             for line in results[i].split('\n'):
                 data = [word for word in line.strip().split(' ') if len(word)]
                 line = current_buffer[data[3]]
-                if data[1] == line['HLA Allele'] and len(data[2]) == int(line['Peptide Length']):
+                if 'Epitope Seq' in line:
+                    length = len(line['Epitope Seq'])
+                else:
+                    length = len(line['MT Epitope Seq'])
+                if data[1] == line['HLA Allele'] and len(data[2]) == length:
                     line.update({
                         'Predicted Stability':data[4],
                         'Half Life':data[5],

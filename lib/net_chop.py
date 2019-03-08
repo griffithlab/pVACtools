@@ -70,7 +70,10 @@ def main(args_input = sys.argv[1:]):
         for line in chunk:
             sequence_id = ('%010x'%x)[-10:]
             staging_file.write('>'+sequence_id+'\n')
-            staging_file.write(line['MT Epitope Seq']+'\n')
+            if 'Epitope Seq' in line:
+                staging_file.write(line['Epitope Seq']+'\n')
+            else:
+                staging_file.write(line['MT Epitope Seq']+'\n')
             current_buffer[sequence_id] = {k:line[k] for k in line}
             x+=1
         staging_file.seek(0)

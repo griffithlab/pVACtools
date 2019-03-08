@@ -88,11 +88,6 @@ class PredictionRunArgumentParser(RunArgumentParser):
         RunArgumentParser.__init__(self, tool_name, input_file_help)
         #do we need a class-i-peptide-sequence-length and a class-ii-peptide-sequence-length?
         self.parser.add_argument(
-            "-l", "--peptide-sequence-length", type=int,
-            default=21,
-            help="Length of the peptide sequence to use when creating the FASTA.",
-        )
-        self.parser.add_argument(
             '--net-chop-method',
             choices=lib.net_chop.methods,
             default=None,
@@ -121,26 +116,42 @@ class PredictionRunArgumentParser(RunArgumentParser):
                  + "Needs to be an even number.",
         )
         self.parser.add_argument(
-            "-d", "--downstream-sequence-length",
-            default='1000',
-            help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
-                + "Use 'full' to include the full downstream sequence."
-        )
-        self.parser.add_argument(
             '--exclude-NAs',
             help="Exclude NA values from the filtered output.",
             default=False,
             action='store_true'
         )
 
-class PvacseqRunArgumentParser(PredictionRunArgumentParser):
+class PvacbindRunArgumentParser(PredictionRunArgumentParser):
+    def __init__(self):
+        tool_name = "pvacbind"
+        input_file_help = "A fasta file"
+        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+
+class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser):
+    def __init__(self, tool_name, input_file_help):
+        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+        #do we need a class-i-peptide-sequence-length and a class-ii-peptide-sequence-length?
+        self.parser.add_argument(
+            "-l", "--peptide-sequence-length", type=int,
+            default=21,
+            help="Length of the peptide sequence to use when creating the FASTA.",
+        )
+        self.parser.add_argument(
+            "-d", "--downstream-sequence-length",
+            default='1000',
+            help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
+                + "Use 'full' to include the full downstream sequence."
+        )
+
+class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
     def __init__(self):
         tool_name = "pvacseq"
         input_file_help = (
             "A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
             "Wildtype protein sequence, and Downstream protein sequence information."
         )
-        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+        PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
 
         self.parser.add_argument(
             '--normal-sample-name',
@@ -207,11 +218,11 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
             action='store_true'
         )
 
-class PvacfuseRunArgumentParser(PredictionRunArgumentParser):
+class PvacfuseRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
     def __init__(self):
         tool_name = "pvacfuse"
         input_file_help = "An INTEGRATE-Neo annotated bedpe file with fusions."
-        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+        PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
 
 class PvacvectorRunArgumentParser(RunArgumentParser):
     def __init__(self):
