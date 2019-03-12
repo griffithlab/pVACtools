@@ -254,8 +254,8 @@ def initialize(current_app):
     IP_ADDRESS = current_app.IP_ADDRESS
     #Check if the bokeh port is already in use.  Attempt to reconnect?
     current_app.config['storage']['bokeh']=subprocess.Popen(
-        'bokeh serve %s --address %s --allow-websocket-origin=%s:8080 --use-xheaders' % (
-            quote(visapp_path), IP_ADDRESS, IP_ADDRESS
+        'bokeh serve %s --address %s --allow-websocket-origin "*" --use-xheaders' % (
+            quote(visapp_path), IP_ADDRESS
         ),
         shell=True,
         stdout=subprocess.DEVNULL
