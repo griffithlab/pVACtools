@@ -346,7 +346,7 @@ def main(args_input=sys.argv[1:]):
         input_file = generator.output_file
 
     results_file = None
-    max_tries = 3
+    max_tries = args.max_clip_length + 1
     tries = 0
     while results_file is None and tries < max_tries:
         if tries > 0:
