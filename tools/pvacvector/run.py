@@ -276,6 +276,12 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
         f.write(''.join(output))
     return (results_file, "")
 
+def shorten_problematic_peptides(input_file, problematic_peptides):
+    return input_file
+
+def identify_problematic_peptides(Paths, seq_dict):
+    return []
+
 def main(args_input=sys.argv[1:]):
 
     parser = define_parser()
@@ -312,33 +318,42 @@ def main(args_input=sys.argv[1:]):
         generator.execute()
         input_file = generator.output_file
 
-    seq_dict = dict()
-    for record in SeqIO.parse(input_file, "fasta"):
-        seq_dict[record.id] = str(record.seq)
-    seq_keys = sorted(seq_dict)
-    seq_tuples = list(itertools.permutations(seq_keys, 2))
-
-    all_parsed_output_files = []
-    processed_spacers = []
     results_file = None
-    for spacer in args.spacers:
-        print("Processing spacer {}".format(spacer))
-        processed_spacers.append(spacer)
-        current_output_dir = os.path.join(base_output_dir, spacer)
-        parsed_output_files = run_pipelines(input_file, current_output_dir, args, spacer)
-        all_parsed_output_files.extend(parsed_output_files)
-        min_scores = find_min_scores(all_parsed_output_files, args)
-        Paths = create_graph(min_scores, seq_tuples, processed_spacers)
-        (valid, error) = check_graph_valid(Paths, seq_dict)
-        if not valid:
-            print("No valid path found. {}".format(error))
-            continue
-        distance_matrix = create_distance_matrix(Paths)
-        (results_file, error) = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
-        if results_file is not None:
-            break
-        else:
-            print("No valid path found. {}".format(error))
+    max_tries = 1
+    tries = 0
+    while results_file is None and tries < max_tries:
+        if tries > 0:
+            input_file = shorten_problematic_peptides(input_file, problematic_peptides)
+        seq_dict = dict()
+        for record in SeqIO.parse(input_file, "fasta"):
+            seq_dict[record.id] = str(record.seq)
+        seq_keys = sorted(seq_dict)
+        seq_tuples = list(itertools.permutations(seq_keys, 2))
+
+        all_parsed_output_files = []
+        processed_spacers = []
+        results_file = None
+        for spacer in args.spacers:
+            print("Processing spacer {}".format(spacer))
+            processed_spacers.append(spacer)
+            current_output_dir = os.path.join(base_output_dir, str(tries), spacer)
+            parsed_output_files = run_pipelines(input_file, current_output_dir, args, spacer)
+            all_parsed_output_files.extend(parsed_output_files)
+            min_scores = find_min_scores(all_parsed_output_files, args)
+            Paths = create_graph(min_scores, seq_tuples, processed_spacers)
+            (valid, error) = check_graph_valid(Paths, seq_dict)
+            if not valid:
+                problematic_peptides = identify_problematic_peptides(Paths, seq_dict)
+                print("No valid path found. {}".format(error))
+                continue
+            distance_matrix = create_distance_matrix(Paths)
+            (results_file, error) = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
+            if results_file is not None:
+                break
+            else:
+                problematic_peptides = identify_problematic_peptides(Paths, seq_dict)
+                print("No valid path found. {}".format(error))
+        tries += 1
 
     if results_file is None:
         sys.exit(
