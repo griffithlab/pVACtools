@@ -7,6 +7,7 @@ import time
 import argparse
 
 from flask_cors import CORS
+from flask import g
 from utils.pvacapi.controllers.utils import initialize
 from utils.pvacapi.controllers.utils import getIpAddress
 
@@ -14,6 +15,7 @@ from utils.pvacapi.controllers.utils import getIpAddress
 def main():
     parser = argparse.ArgumentParser(description='pVACapi provides a REST API to pVACtools')
     parser.add_argument('--ip_address', help='IP address for the HTTP server to bind. If not provided, the default socket address will be used.')
+    parser.add_argument('--proxy_ip_address', help='IP address of proxy server or public IP address. If provided, server will send X-Forward headers required for Bokeh to properly work through a proxy server or with AWS private/public IP addresses.')
     parser.add_argument('--debug', default=False, action='store_true', help='Start sever in debug mode.')
     args = parser.parse_args()
 
@@ -29,6 +31,7 @@ def main():
     class IntConverter(BaseIntConverter):
         regex = r'-?\d+'
 
+
     # determine IP address and setup CORS
     IP_ADDRESS = None
     if args.ip_address is None:
@@ -36,8 +39,24 @@ def main():
     else:
         IP_ADDRESS = args.ip_address
 
+    app.app.IP_ADDRESS = IP_ADDRESS
+
+    # add forwarding headers if proxy_ip_address specified
+    PROXY_IP_ADDRESS = None
+    if args.proxy_ip_address is not None:
+        PROXY_IP_ADDRESS = args.proxy_ip_address
+        @app.app.after_request
+        def apply_forwarding_headers(response):
+            response.headers["X-Forwarded-Proto"] = "http"
+            response.headers["X-Forwarded-Host"] = PROXY_IP_ADDRESS
+            response.headers["X-Forwarded-For"] = IP_ADDRESS
+            response.headers["X-Real-IP"] = IP_ADDRESS
+            return response
+
+    app.app.PROXY_IP_ADDRESS = PROXY_IP_ADDRESS
+
     app.app.url_map.converters['int'] = IntConverter
-    initialize(app.app, IP_ADDRESS) #initialize the app configuration
+    initialize(app.app) #initialize the app configuration
     app.add_api('swagger.yaml', arguments={'title': 'API to support pVacSeq user interface for generating reports on pipeline results'})
     app.app.secret_key = os.urandom(1024)
 
