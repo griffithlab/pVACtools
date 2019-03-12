@@ -6,6 +6,7 @@ import json
 import yaml
 import time
 import socket
+import connexion
 
 from flask import current_app
 from urllib.parse import urlencode
@@ -13,7 +14,6 @@ from hashlib import md5
 from bokeh.embed import server_document
 from .processes import fetch_process, is_running, process_info
 from .utils import column_filter
-from utils.pvacapi.controllers.utils import getIpAddress
 
 float_pattern = re.compile(r'^\d*\.\d+$')
 int_pattern = re.compile(r'^-?\d+$')
@@ -362,6 +362,7 @@ def visualize(parentID, fileID):
     return '<html><head></head><body>%s</body></html'%visualize_script(parentID, fileID)
 
 def visualize_script(parentID, fileID):
+    import pdb; pdb.set_trace()
     """Return an HTML document containing the requested table visualization"""
     from .files import results_getcols
     data = current_app.config['storage']['loader']()
@@ -400,11 +401,14 @@ def visualize_script(parentID, fileID):
     else:
         sample = 'Unknown Sample'
 
-    IPADDR = getIpAddress()
+    if current_app.PROXY_IP_ADDRESS is not None:
+        IP = current_app.PROXY_IP_ADDRESS
+    else:
+        IP = current_app.IP_ADDRESS
 
     return (
         server_document(
-            url="http://" + IPADDR + ":5006/visualizations",
+            url="http://" + IP + ":5006/visualizations",
             arguments={
                 'target-process': parentID,
                 'target-file': fileID,
