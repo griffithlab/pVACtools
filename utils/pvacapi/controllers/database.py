@@ -362,7 +362,6 @@ def visualize(parentID, fileID):
     return '<html><head></head><body>%s</body></html'%visualize_script(parentID, fileID)
 
 def visualize_script(parentID, fileID):
-    import pdb; pdb.set_trace()
     """Return an HTML document containing the requested table visualization"""
     from .files import results_getcols
     data = current_app.config['storage']['loader']()
