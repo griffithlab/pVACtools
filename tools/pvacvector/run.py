@@ -180,31 +180,40 @@ def create_graph(iedb_results, seq_tuples, spacers):
     return Paths
 
 def check_graph_valid(Paths, seq_dict):
+    graph_valid = True
+    errors = []
     if len(Paths.nodes()) < len(seq_dict.keys()):
-        return (False, "No valid junctions found for peptides: {}".format(set(seq_dict.keys()) - set(Paths.nodes())))
+        graph_valid = False
+        errors.append("No valid junctions found for peptides: {}".format(set(seq_dict.keys()) - set(Paths.nodes())))
 
     nodes_without_outgoing_edges = []
     for node in Paths.nodes():
         if len(Paths.out_edges(node)) == 0:
             nodes_without_outgoing_edges.append(node)
     if len(nodes_without_outgoing_edges) > 1:
-        return (False, "More than one peptide without valid outgoing junction: {}".format(nodes_without_outgoing_edges))
+        graph_valid = False
+        errors.append("More than one peptide without valid outgoing junction: {}".format(nodes_without_outgoing_edges))
 
     nodes_without_incoming_edges = []
     for node in Paths.nodes():
         if len(Paths.in_edges(node)) == 0:
             nodes_without_incoming_edges.append(node)
     if len(nodes_without_incoming_edges) > 1:
-        return (False, "More than one peptide without valid incoming junction: {}".format(nodes_without_incoming_edges))
+        graph_valid = False
+        errors.append("More than one peptide without valid incoming junction: {}".format(nodes_without_incoming_edges))
 
     nodes_without_any_edges = []
     for node in Paths.nodes():
         if len(Paths.in_edges(node)) == 0 and len(Paths.out_edges(node)) == 0:
             nodes_without_any_edges.append(node)
     if len(nodes_without_any_edges) > 0:
-        return (False, "No valid junctions found for peptides: {}".format(nodes_without_any_edges))
+        graph_valid = False
+        errors.append("No valid junctions found for peptides: {}".format(nodes_without_any_edges))
 
-    return (True, None)
+    if graph_valid:
+        return(graph_valid, None)
+    else:
+        return(graph_valid, "\n".join(errors))
 
 def create_distance_matrix(Paths):
     print("Finding path.")
