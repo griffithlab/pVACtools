@@ -232,7 +232,6 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
             default="None,AAY,HHHH,GGS,GPGPG,HHAA,AAL,HH,HHC,HHH,HHHD,HHL,HHHC"
         )
         self.parser.add_argument(
-            '--max-clip-length', type=int,
-            help="Number of amino acids to permit clipping from the start and/or end of peptides in order to test novel junction epitopes when the first pass on the full peptide fails.",
-            default=3,
+            '--minimum-peptide-length', type=int,
+            help="Minimum peptide length to enfroce when clipping amino acids from the start and/or end of peptides in order to test novel junction epitopes when the first pass on the full peptide fails.",
         )

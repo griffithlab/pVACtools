@@ -278,23 +278,33 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
         f.write(''.join(output))
     return (results_file, "")
 
-def shorten_problematic_peptides(input_file, problematic_start, problematic_end, output_dir):
-    print("Shortening problematic peptides")
+def shorten_problematic_peptides(input_file, problematic_start, problematic_end, output_dir, min_peptide_length):
     records = []
+    shortened = False
     for record in SeqIO.parse(input_file, "fasta"):
-        if record.id in problematic_start and record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)[1:-1], IUPAC.protein), id=record.id, description=record.description)
-        elif record.id in problematic_start:
-            record_new = SeqRecord(Seq(str(record.seq)[1:], IUPAC.protein), id=record.id, description=record.description)
-        elif record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)[:-1], IUPAC.protein), id=record.id, description=record.description)
+        if record.id not in problematic_start and record.id not in problematic_end:
+            records.append(record)
         else:
-            record_new = record
-        records.append(record_new)
-    os.makedirs(output_dir, exist_ok=True)
-    new_input_file = os.path.join(output_dir, "vector_input.fa")
-    SeqIO.write(records, new_input_file, "fasta")
-    return new_input_file
+            if record.id in problematic_start and record.id in problematic_end:
+                new_seq = str(record.seq)[1:-1]
+            elif record.id in problematic_start:
+                new_seq = str(record.seq)[1:]
+            elif record.id in problematic_end:
+                new_seq = str(record.seq)[:-1]
+            if len(new_seq) >= min_peptide_length:
+                record_new = SeqRecord(Seq(new_seq, IUPAC.protein), id=record.id, description=record.description)
+                records.append(record_new)
+                shortened = True
+            else:
+                records.append(record)
+    if shortened:
+        print("Shortening problematic peptides")
+        os.makedirs(output_dir, exist_ok=True)
+        new_input_file = os.path.join(output_dir, "vector_input.fa")
+        SeqIO.write(records, new_input_file, "fasta")
+        return new_input_file
+    else:
+        return None
 
 def identify_problematic_peptides(Paths, seq_dict):
     problematic_start = set(seq_dict.keys()) - set(Paths.nodes())
@@ -346,11 +356,8 @@ def main(args_input=sys.argv[1:]):
         input_file = generator.output_file
 
     results_file = None
-    max_tries = args.max_clip_length + 1
-    tries = 0
-    while results_file is None and tries < max_tries:
-        if tries > 0:
-            input_file = shorten_problematic_peptides(input_file, problematic_start, problematic_end, os.path.join(base_output_dir, str(tries)))
+    tries = 1
+    while results_file is None:
         seq_dict = dict()
         for record in SeqIO.parse(input_file, "fasta"):
             seq_dict[record.id] = str(record.seq)
@@ -370,7 +377,6 @@ def main(args_input=sys.argv[1:]):
             Paths = create_graph(min_scores, seq_tuples, processed_spacers)
             (valid, error) = check_graph_valid(Paths, seq_dict)
             if not valid:
-                (problematic_start, problematic_end) = identify_problematic_peptides(Paths, seq_dict)
                 print("No valid path found. {}".format(error))
                 continue
             distance_matrix = create_distance_matrix(Paths)
@@ -378,9 +384,15 @@ def main(args_input=sys.argv[1:]):
             if results_file is not None:
                 break
             else:
-                (problematic_start, problematic_end) = identify_problematic_peptides(Paths, seq_dict)
                 print("No valid path found. {}".format(error))
-        tries += 1
+        if results_file is None and args.minimum_peptide_length is not None:
+            (problematic_start, problematic_end) = identify_problematic_peptides(Paths, seq_dict)
+            input_file = shorten_problematic_peptides(input_file, problematic_start, problematic_end, os.path.join(base_output_dir, str(tries)), args.minimum_peptide_length)
+            if input_file is None:
+                break
+            tries += 1
+        else:
+            break
 
     if results_file is None:
         sys.exit(
