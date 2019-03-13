@@ -204,7 +204,7 @@ def check_graph_valid(Paths, seq_dict):
     if len(nodes_without_any_edges) > 0:
         return (False, "No valid junctions found for peptides: {}".format(nodes_without_any_edges))
 
-    return (True, "")
+    return (True, None)
 
 def create_distance_matrix(Paths):
     print("Finding path.")
@@ -274,7 +274,7 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
                 output.append(id)
             output.append("\n")
         f.write(''.join(output))
-    return (results_file, "")
+    return (results_file, None)
 
 def main(args_input=sys.argv[1:]):
 
