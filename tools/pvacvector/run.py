@@ -286,7 +286,9 @@ def shorten_problematic_peptides(input_file, problematic_start, problematic_end,
             records.append(record)
         else:
             if record.id in problematic_start and record.id in problematic_end:
-                new_seq = str(record.seq)[1:-1]
+                new_seq = str(record.seq)[1:]
+                if len(new_seq) > min_peptide_length:
+                    new_seq = new_seq[:-1]
             elif record.id in problematic_start:
                 new_seq = str(record.seq)[1:]
             elif record.id in problematic_end:
