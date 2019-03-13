@@ -233,5 +233,5 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
         )
         self.parser.add_argument(
             '--minimum-peptide-length', type=int,
-            help="Minimum peptide length to enfroce when clipping amino acids from the start and/or end of peptides in order to test novel junction epitopes when the first pass on the full peptide fails.",
+            help="Minimum peptide length to enforce when clipping amino acids from the start and/or end of peptides in order to test novel junction epitopes when the first pass on the full peptide fails.",
         )
