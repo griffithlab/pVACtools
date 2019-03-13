@@ -1,0 +1,2 @@
+Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median Score	Best Score	Best Score Method	NetMHC Score	PickPocket Score	Best Cleavage Position	Best Cleavage Score	Cleavage Sites	Predicted Stability	Half Life	Stability Rank	NetMHCstab allele
+30	HLA-G*01:09	2111	KYQDVYVEL	323.04	323.04	PickPocket	NA	323.04	9	0.978228	2:0.80013,5:0.59858,6:0.684623,7:0.831011,9:0.978228	0.093	0.29	0.10	HLA-A24:03
