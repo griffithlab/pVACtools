@@ -187,25 +187,22 @@ def check_graph_valid(Paths, seq_dict):
         errors.append("No valid junctions found for peptides: {}".format(set(seq_dict.keys()) - set(Paths.nodes())))
 
     nodes_without_outgoing_edges = []
+    nodes_without_incoming_edges = []
+    nodes_without_any_edges = []
     for node in Paths.nodes():
         if len(Paths.out_edges(node)) == 0:
             nodes_without_outgoing_edges.append(node)
+        if len(Paths.in_edges(node)) == 0:
+            nodes_without_incoming_edges.append(node)
+        if len(Paths.in_edges(node)) == 0 and len(Paths.out_edges(node)) == 0:
+            nodes_without_any_edges.append(node)
+
     if len(nodes_without_outgoing_edges) > 1:
         graph_valid = False
         errors.append("More than one peptide without valid outgoing junction: {}".format(nodes_without_outgoing_edges))
-
-    nodes_without_incoming_edges = []
-    for node in Paths.nodes():
-        if len(Paths.in_edges(node)) == 0:
-            nodes_without_incoming_edges.append(node)
     if len(nodes_without_incoming_edges) > 1:
         graph_valid = False
         errors.append("More than one peptide without valid incoming junction: {}".format(nodes_without_incoming_edges))
-
-    nodes_without_any_edges = []
-    for node in Paths.nodes():
-        if len(Paths.in_edges(node)) == 0 and len(Paths.out_edges(node)) == 0:
-            nodes_without_any_edges.append(node)
     if len(nodes_without_any_edges) > 0:
         graph_valid = False
         errors.append("No valid junctions found for peptides: {}".format(nodes_without_any_edges))
