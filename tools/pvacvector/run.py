@@ -176,36 +176,41 @@ def create_graph(iedb_results, seq_tuples, spacers):
             elif not Paths.has_edge(ID_1, ID_2):
                 Paths.add_edge(ID_1, ID_2, weight=worst_case, spacer=spacer)
 
-    print("Graph contains " + str(len(Paths)) + " nodes and " + str(Paths.size()) + " edges.")
+    print("Graph contains " + str(len(Paths)) + " nodes (peptides) and " + str(Paths.size()) + " edges (junctions).")
     return Paths
 
 def check_graph_valid(Paths, seq_dict):
-    n_nodes_without_outgoing_edges = 0
-
+    graph_valid = True
+    errors = []
     if len(Paths.nodes()) < len(seq_dict.keys()):
-        return False
+        graph_valid = False
+        errors.append("No valid junctions found for peptides: {}".format(set(seq_dict.keys()) - set(Paths.nodes())))
 
+    nodes_without_outgoing_edges = []
+    nodes_without_incoming_edges = []
+    nodes_without_any_edges = []
     for node in Paths.nodes():
         if len(Paths.out_edges(node)) == 0:
-            n_nodes_without_outgoing_edges += 1
-    if n_nodes_without_outgoing_edges > 1:
-        return False
-
-    n_nodes_without_incoming_edges = 0
-    for node in Paths.nodes():
+            nodes_without_outgoing_edges.append(node)
         if len(Paths.in_edges(node)) == 0:
-            n_nodes_without_incoming_edges += 1
-    if n_nodes_without_incoming_edges > 1:
-        return False
-
-    n_nodes_without_any_edges = 0
-    for node in Paths.nodes():
+            nodes_without_incoming_edges.append(node)
         if len(Paths.in_edges(node)) == 0 and len(Paths.out_edges(node)) == 0:
-            n_nodes_without_any_edges += 1
-    if n_nodes_without_any_edges > 0:
-        return False
+            nodes_without_any_edges.append(node)
 
-    return True
+    if len(nodes_without_outgoing_edges) > 1:
+        graph_valid = False
+        errors.append("More than one peptide without valid outgoing junction: {}".format(nodes_without_outgoing_edges))
+    if len(nodes_without_incoming_edges) > 1:
+        graph_valid = False
+        errors.append("More than one peptide without valid incoming junction: {}".format(nodes_without_incoming_edges))
+    if len(nodes_without_any_edges) > 0:
+        graph_valid = False
+        errors.append("No valid junctions found for peptides: {}".format(nodes_without_any_edges))
+
+    if graph_valid:
+        return(graph_valid, None)
+    else:
+        return(graph_valid, "\n".join(errors))
 
 def create_distance_matrix(Paths):
     print("Finding path.")
@@ -238,7 +243,7 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
         if Paths.has_edge(state[0], state[1]):
             min_score = Paths[state[0]][state[1]]['weight']
         else:
-            return None
+            return (None, "No valid junction between peptides {} and {}".format(state[0], state[1]))
         cumulative_weight = 0
         all_scores = list()
 
@@ -253,7 +258,7 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
                 if spacer != 'None':
                     name.append(spacer)
             else:
-                return None
+                return (None, "No valid junction between peptides {} and {}".format(state[i], state[i+1]))
         name.append(state[-1])
         median_score = str(cumulative_weight/len(all_scores))
         peptide_id_list = ','.join(name)
@@ -275,7 +280,7 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
                 output.append(id)
             output.append("\n")
         f.write(''.join(output))
-    return results_file
+    return (results_file, None)
 
 def main(args_input=sys.argv[1:]):
 
@@ -330,15 +335,16 @@ def main(args_input=sys.argv[1:]):
         all_parsed_output_files.extend(parsed_output_files)
         min_scores = find_min_scores(all_parsed_output_files, args)
         Paths = create_graph(min_scores, seq_tuples, processed_spacers)
-        if not check_graph_valid(Paths, seq_dict):
-            print("No valid path found.")
+        (valid, error) = check_graph_valid(Paths, seq_dict)
+        if not valid:
+            print("No valid path found. {}".format(error))
             continue
         distance_matrix = create_distance_matrix(Paths)
-        results_file = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
+        (results_file, error) = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
         if results_file is not None:
             break
         else:
-            print("No valid path found.")
+            print("No valid path found. {}".format(error))
 
     if results_file is None:
         sys.exit(
