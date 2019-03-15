@@ -90,7 +90,7 @@ setup(
         'mhcflurry',
         'mhcnuggets',
         'pysam',
-        'tensorflow==1.8.0',
+        'tensorflow==1.13.1',
         'Pillow',
         'pymp-pypi',
         'connexion==1.4.2',
@@ -101,6 +101,7 @@ setup(
         'tornado==5.0.2',
         'swagger-spec-validator==2.1.0',
         'jsonschema==2.6.0',
+        'mock',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,
