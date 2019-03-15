@@ -104,8 +104,8 @@ class CallIEDBClassITests(CallIEDBTests):
         ])
         if sys.platform == 'darwin':
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcflurry_osx.tsv')
-            expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
-            actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
+            expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,6,7])
+            actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,6,7])
             pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_less_precise=0)
 
     def test_mhcnuggets_method_generates_expected_files(self):
