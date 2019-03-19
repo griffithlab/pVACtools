@@ -116,6 +116,11 @@ class PvacbindTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
+            'binding_filter',
+            'valid_alleles',
+            'allele_specific_cutoffs',
+            'download_example_data',
+            'top_score_filter',
             ]:
             result = subprocess_run([
                 sys.executable,
