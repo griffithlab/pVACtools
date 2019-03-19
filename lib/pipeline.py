@@ -507,8 +507,6 @@ class Pipeline(metaclass=ABCMeta):
             post_processing_params['run_netmhc_stab'] = False
         PostProcessor(**post_processing_params).execute()
 
-        status_message("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.ranked_final_path()))
-
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir)
 
@@ -626,8 +624,6 @@ class PvacbindPipeline(Pipeline):
         else:
             post_processing_params['run_netmhc_stab'] = False
         PostProcessor(**post_processing_params).execute()
-
-        status_message("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.ranked_final_path()))
 
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir)

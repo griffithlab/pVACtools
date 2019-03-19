@@ -37,6 +37,10 @@ class PostProcessor:
         if self.run_condense_report:
             shutil.copy(self.ranked_epitopes_fh.name, self.condensed_report_file)
         self.close_filehandles()
+        if self.run_condense_report:
+            print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.condensed_report_file))
+        else:
+            print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
 
     def execute_binding_filter(self):
         print("Running Binding Filters")
