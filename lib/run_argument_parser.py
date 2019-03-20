@@ -111,7 +111,7 @@ class PredictionRunArgumentParser(RunArgumentParser):
         self.parser.add_argument(
             "-s", "--fasta-size",type=int,
             default=200,
-            help="Number of fasta entries per IEDB request. "
+            help="Number of FASTA entries per IEDB request. "
                  + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
                  + "Needs to be an even number.",
         )
@@ -125,7 +125,7 @@ class PredictionRunArgumentParser(RunArgumentParser):
 class PvacbindRunArgumentParser(PredictionRunArgumentParser):
     def __init__(self):
         tool_name = "pvacbind"
-        input_file_help = "A fasta file"
+        input_file_help = "A FASTA file"
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
 class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser):
@@ -140,7 +140,7 @@ class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser
         self.parser.add_argument(
             "-d", "--downstream-sequence-length",
             default='1000',
-            help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
+            help="Cap to limit the downstream sequence length for frameshifts when creating the FASTA file. "
                 + "Use 'full' to include the full downstream sequence."
         )
 

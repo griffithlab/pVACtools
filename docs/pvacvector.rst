@@ -7,7 +7,7 @@ pVACvector
 
 pVACvector is designed to aid specifically in the construction of
 DNA vector based personalized cancer vaccines. It takes as input either a pVACseq output 
-tsv file or a fasta file containing peptide sequences and returns a peptide ordering that
+tsv file or a FASTA file containing peptide sequences and returns a peptide ordering that
 minimizes the effects of junctional epitopes (that may create novel peptides)
 between the sequences. It does this by using the core pVACseq services to
 predict the binding scores for each junctional peptide separated by a spacer amino acid
