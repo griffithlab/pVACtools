@@ -531,7 +531,6 @@ class PvacbindPipeline(Pipeline):
         keys = {}
         for sequence, ids in fasta_sequences.items():
             record = SeqRecord(Seq(sequence, IUPAC.protein), id=str(count), description=str(count))
-            #, name="HokC", description="toxic membrane protein, small")
             uniq_records.append(record)
             keys[count] = ids
             count += 1
