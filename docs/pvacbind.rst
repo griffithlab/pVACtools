@@ -5,7 +5,7 @@
 pVACbind
 ====================================
 
-This component of the pVACtools is used to predict neoantigens for the peptides in a fasta file.
+This component of the pVACtools is used to predict neoantigens for the peptides in a FASTA file.
 
 .. toctree::
    :glob:

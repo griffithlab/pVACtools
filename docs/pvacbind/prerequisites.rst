@@ -5,4 +5,4 @@
 Prerequisites
 =============
 
-The input to pVACbind is a fasta file of peptide sequences.
+The input to pVACbind is a FASTA file of peptide sequences.
