@@ -1,6 +1,6 @@
 .. image:: ../images/pVACbind_logo_trans-bg_sm_v4b.png
     :align: right
-    :alt: pVACbund logo
+    :alt: pVACbind logo
 
 .. _filter_commands:
 
