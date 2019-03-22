@@ -207,6 +207,8 @@ A Docker container for pVACtools is available on DockerHub using the
 container includes installations of the IEDB class I and class II tools
 at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
 
+An example on how to run pVACseq using Docker can be found on the :ref:`Getting Started <pvacseq_docker>` page.
+
 Common Workflow Language (CWL) tool wrappers for pVACseq, pVACfuse, and pVACvector can be downloaded
 using the ``pvactools download_cwls`` command.
 
