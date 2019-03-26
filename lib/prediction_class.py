@@ -250,10 +250,11 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
     def needs_epitope_length(self):
         return True
 
+mhcflurry_predictor = Class1AffinityPredictor.load()
+
 class MHCflurry(MHCI):
     def valid_allele_names(self):
-        predictor = Class1AffinityPredictor.load()
-        return predictor.supported_alleles
+        return mhcflurry_predictor.supported_alleles
 
     def check_length_valid_for_allele(self, length, allele):
         return True
@@ -268,7 +269,6 @@ class MHCflurry(MHCI):
         return epitopes
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
-        predictor = Class1AffinityPredictor.load()
         results = pd.DataFrame()
         for line in input_file:
             match = re.search('^>([0-9]+)$', line)
@@ -277,7 +277,7 @@ class MHCflurry(MHCI):
             else:
                 epitopes = self.determine_neoepitopes(line.rstrip(), epitope_length)
                 if len(epitopes) > 0:
-                    df = predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
+                    df = mhcflurry_predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
                     df['seq_num'] = seq_num
                     df['start'] = df.index+1
                     df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
