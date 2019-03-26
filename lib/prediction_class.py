@@ -67,12 +67,13 @@ class IEDB(metaclass=ABCMeta):
             response_fh.close()
             return (response_text, 'wb')
         else:
-            data = {
-                'sequence_text': input_file.read(),
-                'method':        self.iedb_prediction_method,
-                'allele':        allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
-                'user_tool':     'pVac-seq',
-            }
+            with open(input_file, 'r') as input_fh:
+                data = {
+                    'sequence_text': input_fh.read(),
+                    'method':        self.iedb_prediction_method,
+                    'allele':        allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
+                    'user_tool':     'pVac-seq',
+                }
             if epitope_length is not None:
                 data['length'] = epitope_length
 
@@ -333,7 +334,7 @@ class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
             sys.exit("Length %s not valid for allele %s and method %s." % (length, allele, self.iedb_prediction_method))
 
     def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
-        return "{} {} {} {} {}".format(iedb_executable_path, method, allele, str(epitope_length), input_file.name)
+        return "{} {} {} {} {}".format(iedb_executable_path, method, allele, str(epitope_length), input_file)
 
 class NetMHC(IEDBMHCI):
     @property
@@ -411,7 +412,7 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
 
     def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
         allele = allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
-        return "{} {} {} {}".format(iedb_executable_path, method, allele, input_file.name)
+        return "{} {} {} {}".format(iedb_executable_path, method, allele, input_file)
 
 class NetMHCIIpan(IEDBMHCII):
     @property
