@@ -19,6 +19,7 @@ import time
 from subprocess import run, PIPE
 import tempfile
 from collections import defaultdict
+from Bio import SeqIO
 
 class IEDB(metaclass=ABCMeta):
     @classmethod
@@ -109,15 +110,13 @@ class MHCnuggets(metaclass=ABCMeta):
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, class_type):
         epitope_seq_nums = defaultdict(list)
-        for line in input_file:
-            match = re.search('^>([0-9]+)$', line)
-            if match:
-                seq_num = match.group(1)
-            else:
-                epitopes = self.find_neoepitopes(line.rstrip(), epitope_length)
-                for epitope, starts in epitopes.items():
-                    for start in starts:
-                        epitope_seq_nums[epitope].append((seq_num, start))
+        for record in SeqIO.parse(input_file, "fasta"):
+            seq_num = record.id
+            peptide = str(record.seq)
+            epitopes = self.find_neoepitopes(peptide, epitope_length)
+            for epitope, starts in epitopes.items():
+                for start in starts:
+                    epitope_seq_nums[epitope].append((seq_num, start))
         tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
         for epitope in epitope_seq_nums.keys():
             tmp_file.write("{}\n".format(epitope))
@@ -270,18 +269,16 @@ class MHCflurry(MHCI):
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
         results = pd.DataFrame()
-        for line in input_file:
-            match = re.search('^>([0-9]+)$', line)
-            if match:
-                seq_num = match.group(1)
-            else:
-                epitopes = self.determine_neoepitopes(line.rstrip(), epitope_length)
-                if len(epitopes) > 0:
-                    df = mhcflurry_predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
-                    df['seq_num'] = seq_num
-                    df['start'] = df.index+1
-                    df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
-                    results = results.append(df)
+        for record in SeqIO.parse(input_file, "fasta"):
+            seq_num = record.id
+            peptide = str(record.seq)
+            epitopes = self.determine_neoepitopes(peptide, epitope_length)
+            if len(epitopes) > 0:
+                df = mhcflurry_predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
+                df['seq_num'] = seq_num
+                df['start'] = df.index+1
+                df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
+                results = results.append(df)
         return (results, 'pandas')
 
 class MHCnuggetsI(MHCI, MHCnuggets):
