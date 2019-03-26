@@ -21,7 +21,7 @@ def setup_iedb_conda_env():
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq call_iedb', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('input_file', type=argparse.FileType('r'),
+    parser.add_argument('input_file',
                         help="Input FASTA file")
     parser.add_argument('output_file',
                         help="Output file from iedb")
@@ -55,8 +55,6 @@ def main(args_input = sys.argv[1:]):
         tmp_output_filehandle.write(response_text)
         tmp_output_filehandle.close()
     os.replace(tmp_output_file, args.output_file)
-
-    args.input_file.close()
 
 if __name__ == "__main__":
     main()
