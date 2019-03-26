@@ -377,7 +377,7 @@ class Pipeline(metaclass=ABCMeta):
                                         p4.print("Making binding predictions on Allele %s and Epitope Length %s with Method %s - Entries %s" % (a, epl, method, fasta_chunk))
 
                                         if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
-                                            if 'last_execute_timestamp' in locals() and not self.iedb_executable:
+                                            if 'last_execute_timestamp' in locals() and not self.iedb_executable and isinstance(prediction, IEDB):
                                                 elapsed_time = ( datetime.datetime.now() - last_execute_timestamp ).total_seconds()
                                                 wait_time = 60 - elapsed_time
                                                 if wait_time > 0:
