@@ -113,6 +113,8 @@ class PvacvectorInputFastaGenerator():
                 if end > len(full_sequence):
                     remainder = end - len(full_sequence)
                     start -= remainder
+                if start < 0:
+                    start = 0
                 extracted_sequence = full_sequence[int(start):int(end)]
             exists = False
             for other_index, other_extracted_sequence in extracted_peptides.items():
