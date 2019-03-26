@@ -43,16 +43,8 @@ def main(args_input = sys.argv[1:]):
     )
     args = parser.parse_args(args_input)
 
-    PredictionClass.check_alleles_valid([args.allele])
     prediction_class = getattr(sys.modules[__name__], args.method)
     prediction_class_object = prediction_class()
-    prediction_class_object.check_allele_valid(args.allele)
-
-    prediction_class_object.check_length_valid_for_allele(args.epitope_length, args.allele)
-
-    if args.epitope_length is None and prediction_class_object.needs_epitope_length:
-        sys.exit("Epitope length is required for class I binding predictions")
-
     (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries)
 
     tmp_output_file = args.output_file + '.tmp'
