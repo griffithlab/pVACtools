@@ -389,7 +389,7 @@ def main(args_input=sys.argv[1:]):
         tries += 1
 
     if results_file is None:
-        sys.exit(
+        raise Exception(
             'Unable to find path. ' +
             'A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
             '1) increasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
