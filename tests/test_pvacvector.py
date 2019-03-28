@@ -173,3 +173,28 @@ class TestPvacvector(unittest.TestCase):
                 os.path.join(self.test_data_dir, "output_negative_start.fa")
             ))
             output_dir.cleanup()
+
+    def test_pvacvector_clipping(self):
+        with self.assertRaises(Exception) as context:
+            output_dir = tempfile.TemporaryDirectory()
+
+            run.main([
+                self.input_tsv,
+                self.test_run_name,
+                self.allele,
+                self.method,
+                output_dir.name,
+                '-v', self.input_vcf,
+                '-e', self.epitope_length,
+                '-n', self.input_n_mer,
+                '-k',
+                '-b', '50000',
+                '--max-clip-length', '1',
+            ])
+
+            self.assertTrue(compare(
+                os.path.join(output_dir.name, "1", "vector_input.fa"),
+                os.path.join(self.test_data_dir, "clipped.fa")
+            ))
+
+            output_dir.cleanup()
