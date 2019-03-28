@@ -190,6 +190,7 @@ class TestPvacvector(unittest.TestCase):
                 '-k',
                 '-b', '50000',
                 '--max-clip-length', '1',
+                '--spacers', 'None',
             ])
 
             self.assertTrue(compare(
