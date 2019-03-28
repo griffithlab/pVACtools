@@ -47,12 +47,12 @@ New in version |release|
 
 This version is a hotfix release. It fixes the following issues:
 
-- A bug in the parsing code of the binding prediction output files would
-  result in only some binding predictionn output files getting processed when using multithreading.
-  This would potentially cause incomplete output reports that were missing
-  predictions for some input variants. pVACseq, pVACfuse, and
-  pVACvector runs that were done without multithreading should've been
-  unaffected by this bug.
+- We were previously using nested multi-threading which would cause defunct
+  child jobs and stalled runs. Switching to single-level multi-threading fixes
+  this issue.
+- When running pVACvector from a pVACseq result file the creation of the
+  peptide fasta file might cause an error if the epitope was situated near the
+  beginning of the transcript. This issue has been fixed.
 
 Past release notes can be found on our :ref:`releases` page.
 
