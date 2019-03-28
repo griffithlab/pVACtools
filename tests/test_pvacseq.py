@@ -345,46 +345,6 @@ class PvacseqTests(unittest.TestCase):
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
             self.assertTrue(cmp(output_file, expected_file, False))
 
-    @patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-        data,
-        files,
-        test_data_directory()
-    )))
-    def test_pvacseq_pipeline_sleep(self):
-        output_dir_1 = tempfile.TemporaryDirectory()
-        params_1 = [
-            os.path.join(self.test_data_directory, "input.vcf"),
-            'Test',
-            'HLA-E*01:01',
-            'NetMHC',
-            output_dir_1.name,
-            '-e', '9,10',
-        ]
-        os.environ["TEST_FLAG"] = '0'
-        start_1 = datetime.datetime.now()
-        run.main(params_1)
-        end_1 = datetime.datetime.now()
-        duration_1 = (end_1 - start_1).total_seconds()
-        output_dir_1.cleanup()
-
-        output_dir_2 = tempfile.TemporaryDirectory()
-        params_2 = [
-            os.path.join(self.test_data_directory, "input.vcf"),
-            'Test',
-            'HLA-E*01:01',
-            'NetMHC',
-            output_dir_2.name,
-            '-e', '9,10',
-        ]
-        os.environ["TEST_FLAG"] = '1'
-        start_2 = datetime.datetime.now()
-        run.main(params_2)
-        end_2 = datetime.datetime.now()
-        duration_2 = (end_2 - start_2).total_seconds()
-        output_dir_2.cleanup()
-
-        self.assertTrue(duration_1 > duration_2)
-
     def test_pvacseq_combine_and_condense_steps(self):
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
         for subdir in ['MHC_Class_I', 'MHC_Class_II']:
