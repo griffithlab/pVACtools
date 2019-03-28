@@ -21,7 +21,7 @@ def setup_iedb_conda_env():
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq call_iedb', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('input_file', type=argparse.FileType('r'),
+    parser.add_argument('input_file',
                         help="Input FASTA file")
     parser.add_argument('output_file',
                         help="Output file from iedb")
@@ -43,16 +43,8 @@ def main(args_input = sys.argv[1:]):
     )
     args = parser.parse_args(args_input)
 
-    PredictionClass.check_alleles_valid([args.allele])
     prediction_class = getattr(sys.modules[__name__], args.method)
     prediction_class_object = prediction_class()
-    prediction_class_object.check_allele_valid(args.allele)
-
-    prediction_class_object.check_length_valid_for_allele(args.epitope_length, args.allele)
-
-    if args.epitope_length is None and prediction_class_object.needs_epitope_length:
-        sys.exit("Epitope length is required for class I binding predictions")
-
     (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries)
 
     tmp_output_file = args.output_file + '.tmp'
@@ -63,8 +55,6 @@ def main(args_input = sys.argv[1:]):
         tmp_output_filehandle.write(response_text)
         tmp_output_filehandle.close()
     os.replace(tmp_output_file, args.output_file)
-
-    args.input_file.close()
 
 if __name__ == "__main__":
     main()
