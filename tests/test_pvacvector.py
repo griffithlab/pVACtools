@@ -146,22 +146,27 @@ class TestPvacvector(unittest.TestCase):
             output_dir.cleanup()
 
     def test_pvacvector_generate_fa_with_epitope_at_beginning_of_transcript(self):
-        output_dir = tempfile.TemporaryDirectory()
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            test_data_directory(),
+            'negative_start',
+        ))) as mock_request:
+            output_dir = tempfile.TemporaryDirectory()
 
-        run.main([
-            os.path.join(self.test_data_dir, "input_negative_start.tsv"),
-            'H_MT-10109-005',
-            self.allele,
-            self.method,
-            output_dir.name,
-            '-v', os.path.join(self.test_data_dir, "input_negative_start.vcf.gz"),
-            '-e', self.epitope_length,
-            '-n', self.input_n_mer,
-            '-k',
-        ])
+            run.main([
+                os.path.join(self.test_data_dir, "input_negative_start.tsv"),
+                'H_MT-10109-005',
+                self.allele,
+                self.method,
+                output_dir.name,
+                '-v', os.path.join(self.test_data_dir, "input_negative_start.vcf.gz"),
+                '-e', self.epitope_length,
+                '-n', self.input_n_mer,
+                '-k',
+            ])
 
-        self.assertTrue(compare(
-            os.path.join(output_dir.name, "vector_input.fa"),
-            os.path.join(self.test_data_dir, "output_negative_start.fa")
-        ))
-        output_dir.cleanup()
+            self.assertTrue(compare(
+                os.path.join(output_dir.name, "vector_input.fa"),
+                os.path.join(self.test_data_dir, "output_negative_start.fa")
+            ))
+            output_dir.cleanup()
