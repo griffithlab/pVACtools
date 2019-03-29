@@ -113,7 +113,7 @@ class PostProcessor:
 
     def condense_report(self):
         print("Creating Condensed Report")
-        CondenseFinalReport(self.netmhc_stab_fh.name, self.condensed_report_fh.name, self.top_score_metric).execute()
+        CondenseFinalReport(self.netmhc_stab_fh.name, self.condensed_report_fh.name).execute()
         print("Completed")
 
     def rank_epitopes(self):
