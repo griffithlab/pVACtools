@@ -118,7 +118,7 @@ class PostProcessor:
 
     def rank_epitopes(self):
         print("Ranking neoepitopes")
-        RankEpitopes(self.condensed_report_fh.name, self.ranked_epitopes_fh.name).execute()
+        RankEpitopes(self.condensed_report_fh.name, self.ranked_epitopes_fh.name, self.top_score_metric).execute()
         print("Completed")
 
     def close_filehandles(self):
