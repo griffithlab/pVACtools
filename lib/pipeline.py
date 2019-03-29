@@ -75,7 +75,7 @@ class Pipeline(metaclass=ABCMeta):
         log_file = os.path.join(self.log_dir(), 'inputs.yml')
         if os.path.exists(log_file):
             with open(log_file, 'r') as log_fh:
-                past_inputs = yaml.load(log_fh)
+                past_inputs = yaml.load(log_fh, Loader=yaml.FullLoader)
                 current_inputs = self.__dict__
                 current_inputs['pvactools_version'] = pkg_resources.get_distribution("pvactools").version
                 if past_inputs['pvactools_version'] != current_inputs['pvactools_version']:
