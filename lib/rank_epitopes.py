@@ -14,6 +14,7 @@ class RankEpitopes:
             'HGVSc',
             'HGVSp',
             'HLA Allele',
+            'Mutation Position',
             'MT Epitope Seq',
             'Median MT Score',
             'Median WT Score',
