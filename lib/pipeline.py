@@ -263,7 +263,8 @@ class Pipeline(metaclass=ABCMeta):
         alleles = self.alleles
         epitope_lengths = self.epitope_lengths
         prediction_algorithms = self.prediction_algorithms
-        argument_sets = []
+        argument_sets_iedb = []
+        argument_sets_other = []
         warning_messages = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
@@ -316,14 +317,17 @@ class Pipeline(metaclass=ABCMeta):
                         ]
                         if not isinstance(prediction, IEDBMHCII):
                             arguments.extend(['-l', str(epl),])
-                        argument_sets.append(arguments)
+                        if isinstance(prediction, IEDB):
+                            argument_sets_iedb.append(arguments)
+                        else:
+                            argument_sets_other.append(arguments)
 
         for msg in warning_messages:
             status_message(msg)
 
         with pymp.Parallel(self.n_threads) as p:
-            for index in p.range(len(argument_sets)):
-                arguments = argument_sets[index]
+            for index in p.range(len(argument_sets_iedb)):
+                arguments = argument_sets_iedb[index]
                 a = arguments[3]
                 method = arguments[2]
                 filename = arguments[1]
@@ -334,6 +338,18 @@ class Pipeline(metaclass=ABCMeta):
                 p.print("Making binding predictions on Allele %s and Epitope Length %s with Method %s - File %s" % (a, epl, method, filename))
                 lib.call_iedb.main(arguments)
                 p.print("Making binding predictions on Allele %s and Epitope Length %s with Method %s - File %s - Completed" % (a, epl, method, filename))
+
+        for arguments in argument_sets_other:
+            a = arguments[3]
+            method = arguments[2]
+            filename = arguments[1]
+            if len(arguments) == 10:
+                epl = arguments[9]
+            else:
+                epl = 15
+            status_message("Making binding predictions on Allele %s and Epitope Length %s with Method %s - File %s" % (a, epl, method, filename))
+            lib.call_iedb.main(arguments)
+            status_message("Making binding predictions on Allele %s and Epitope Length %s with Method %s - File %s - Completed" % (a, epl, method, filename))
 
     def parse_outputs(self, chunks):
         split_parsed_output_files = []
