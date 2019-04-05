@@ -36,7 +36,7 @@ class MyHandler(SimpleHTTPRequestHandler):
 def main():
     os.chdir(CLIENTDIR)
     parser = argparse.ArgumentParser(description='pVACviz serves the files for the pVACviz browser client')
-    parser.add_argument('--ip_address', help='IP address to which the HTTP server will bind. If not provided, the default socket address will be used.')
+    parser.add_argument('--ip-address', help='IP address to which the HTTP server will bind. If not provided, the default socket address will be used.')
     args = parser.parse_args()
 
     IP_ADDRESS = None

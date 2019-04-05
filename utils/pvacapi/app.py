@@ -14,8 +14,8 @@ from utils.pvacapi.controllers.utils import getIpAddress
 #FIXME: sanitize sample name
 def main():
     parser = argparse.ArgumentParser(description='pVACapi provides a REST API to pVACtools')
-    parser.add_argument('--ip_address', help='IP address for the HTTP server to bind. If not provided, the default socket address will be used.')
-    parser.add_argument('--proxy_ip_address', help='IP address of proxy server or public IP address. If provided, server will send X-Forward headers required for Bokeh to properly work through a proxy server or with AWS private/public IP addresses.')
+    parser.add_argument('--ip-address', help='IP address for the HTTP server to bind. If not provided, the default socket address will be used.')
+    parser.add_argument('--proxy-ip-address', help='IP address of proxy server or public IP address. If provided, server will send X-Forward headers required for Bokeh to properly work through a proxy server or with AWS private/public IP addresses.')
     parser.add_argument('--debug', default=False, action='store_true', help='Start sever in debug mode.')
     args = parser.parse_args()
 
