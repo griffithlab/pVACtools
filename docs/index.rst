@@ -42,21 +42,19 @@ tools:
    contact
    mailing_list
 
-New in version |version|
+New in version |release|
 ------------------------
 
 This version is a hotfix release. It fixes the following issues:
 
-- Some prediction algorithms might predict a binding affinity of 0 which could
-  lead to division by 0 errors when calculating the fold change. In this
-  situation we now set the fold change to ``inf`` (infinity).
-- Previously the ``--maximum-transcript-support-level`` threshold was not
-  getting propagated to the main pipeline step correctly, resulting in errors
-  in the transcript support level filter.
-- There was a bug in the multithreading logic that would result in
-  certain steps getting executed more than once, which in turn would lead to
-  FileNotFound errors when these duplicate executions were happening at the
-  same time.
+- While the previous release fixed the issue of stalled processes when running
+  IEDB-based prediction algorithms in multiprocessing mode, we were still experience a similar problem
+  when running with MHCflurry and MHCnuggets. These two prediction algorithms
+  are tensorflow-based which in the way it is currently used in pVACtools is
+  not compatible with being run in multiprocessing mode. As a stop-gap measure
+  this release removes MHCnuggets and MHCflurry from being run in
+  multiprocessing mode. This resolves the problem until we can change our
+  usage of these predictin algorithms to be multiprocessing-compatible.
 
 Past release notes can be found on our :ref:`releases` page.
 

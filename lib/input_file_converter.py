@@ -95,6 +95,10 @@ class VcfConverter(InputFileConverter):
         self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         self.tsv_writer.writeheader()
         self.csq_parser = self.create_csq_parser()
+        if 'DownstreamProtein' not in self.csq_parser.csq_format:
+            sys.exit("VCF doesn't contain VEP DownstreamProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.")
+        if 'WildtypeProtein' not in self.csq_parser.csq_format:
+            sys.exit("VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.")
 
     def is_insertion(self, ref, alt):
         return len(alt) > len(ref)
@@ -113,7 +117,7 @@ class VcfConverter(InputFileConverter):
             csq_header = info_fields['CSQ']
             return CsqParser(csq_header.desc)
 
-    def resolve_consequence(self, consequence_string):
+    def resolve_consequence(self, consequence_string, ref, alt):
         if '&' in consequence_string:
             consequences = {consequence.lower() for consequence in consequence_string.split('&')}
         elif '.' in consequence_string:
@@ -131,6 +135,13 @@ class VcfConverter(InputFileConverter):
             consequence = 'inframe_ins'
         elif 'inframe_deletion' in consequences:
             consequence = 'inframe_del'
+        elif 'protein_altering_variant' in consequences:
+            if len(ref) > len(alt) and (len(ref) - len(alt)) % 3 == 0:
+                consequence = 'inframe_del'
+            elif len(alt) > len(ref) and (len(alt) - len(ref)) % 3 == 0:
+                consequence = 'inframe_ins'
+            else:
+                consequence = None
         else:
             consequence = None
         return consequence
@@ -268,7 +279,7 @@ class VcfConverter(InputFileConverter):
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
-                    consequence = self.resolve_consequence(transcript['Consequence'])
+                    consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
                     if consequence is None:
                         continue
                     elif consequence == 'FS':
