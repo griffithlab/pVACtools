@@ -12,13 +12,15 @@ methods = ['cterm', '20s']
 
 def split_file(reader, lines=400):
     from itertools import islice, chain
-    tmp = next(reader)
-    while tmp!="":
-        yield chain([tmp], islice(reader, lines-1))
-        try:
-            tmp = next(reader)
-        except StopIteration:
-            return
+    for tmp in reader:
+        if tmp != "":
+            yield chain([tmp], islice(reader, lines-1))
+            try:
+                tmp = next(reader)
+            except StopIteration:
+                return
+        else:
+            break
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq net_chop", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
