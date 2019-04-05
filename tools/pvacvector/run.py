@@ -141,7 +141,7 @@ def write_min_scores(min_scores_rows, directory, args):
                 new_row['method'] = row['Best MT Score Method']
             elif args.top_score_metric == 'median':
                 new_row['junction_score'] = float(row['Median MT Score'])
-                new_row['method'] = 'NA'
+                new_row['method'] = 'median'
             rows.append(new_row)
         sorted_rows = sorted(rows, key=lambda k: k['junction_score'])
         writer.writerows(sorted_rows)
