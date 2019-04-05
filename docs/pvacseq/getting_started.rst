@@ -26,7 +26,7 @@ A detailed description of all command options can be found on the :ref:`Usage <p
 Running pVACseq using Docker
 ____________________________
 
-A pVACtools Docker image is available on DockerHub using the
+A pVACtools Docker image is available on `DockerHub <https://hub.docker.com/r/griffithlab/pvactools>`_ using the
 ``griffitlab/pvactools`` tag. After `installing Docker <https://docs.docker.com/install/>`_
 you can start an interactive Docker instance by running the following command:
 
