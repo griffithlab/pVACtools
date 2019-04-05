@@ -482,7 +482,7 @@ class OutputParser(metaclass=ABCMeta):
 class DefaultOutputParser(OutputParser):
     def parse_iedb_file(self, tsv_entries):
         with open(self.key_file, 'r') as key_file_reader:
-            protein_identifiers_from_label = yaml.load(key_file_reader)
+            protein_identifiers_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
         iedb_results = {}
         wt_iedb_results = {}
         for input_iedb_file in self.input_iedb_files:
@@ -542,7 +542,7 @@ class DefaultOutputParser(OutputParser):
 class FusionOutputParser(OutputParser):
     def parse_iedb_file(self, tsv_entries):
         with open(self.key_file, 'r') as key_file_reader:
-            tsv_indices_from_label = yaml.load(key_file_reader)
+            tsv_indices_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
         iedb_results = {}
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
@@ -587,7 +587,7 @@ class FusionOutputParser(OutputParser):
 class VectorOutputParser(OutputParser):
     def parse_iedb_file(self):
         with open(self.key_file, 'r') as key_file_reader:
-            tsv_indices_from_label = yaml.load(key_file_reader)
+            tsv_indices_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
         iedb_results = {}
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
