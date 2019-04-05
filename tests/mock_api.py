@@ -49,7 +49,7 @@ def mock_api():
     )
     import utils.pvacapi
     import utils.pvacapi.app
-    utils.pvacapi.app.sys.argv.append('--ip_address')
+    utils.pvacapi.app.sys.argv.append('--ip-address')
     utils.pvacapi.app.sys.argv.append('localhost')
     utils.pvacapi.app.main()
 
