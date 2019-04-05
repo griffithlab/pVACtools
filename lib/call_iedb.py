@@ -10,7 +10,7 @@ def setup_iedb_conda_env():
     response = env_check.stdout.decode("utf-8")
     if response.count("\n") == 1:
         #environment with name "pvactools_py27" already exists; check that it really runs python2.7
-        version_check = run("/bin/bash -c \"source activate pvactools_py27 && python -c \\\"import platform; print(platform.python_version())\\\"\"", stdout=PIPE, check=True, shell=True)
+        version_check = run("/bin/bash -c \"conda activate pvactools_py27 && python -c \\\"import platform; print(platform.python_version())\\\"\"", stdout=PIPE, check=True, shell=True)
         if "2.7." not in version_check.stdout.decode("utf-8"):
             sys.exit('The existing conda environment "pvactools_py27" does not use python2.7. Please delete the existing environment.')
     elif response.count("\n") == 0:
