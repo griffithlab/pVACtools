@@ -6,7 +6,6 @@ import inspect
 stderr = sys.stderr
 sys.stderr = open(os.devnull, 'w')
 try:
-    from mhcflurry import Class1AffinityPredictor
     from mhcnuggets.src.predict import predict
 except Exception as err:
     sys.stderr = stderr
@@ -250,11 +249,13 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
     def needs_epitope_length(self):
         return True
 
-mhcflurry_predictor = Class1AffinityPredictor.load()
-
 class MHCflurry(MHCI):
     def valid_allele_names(self):
-        return mhcflurry_predictor.supported_alleles
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_file_name = os.path.join(alleles_dir, "MHCflurry.txt")
+        with open(alleles_file_name, 'r') as fh:
+            return list(filter(None, fh.read().split('\n')))
 
     def check_length_valid_for_allele(self, length, allele):
         return True
@@ -275,10 +276,15 @@ class MHCflurry(MHCI):
             peptide = str(record.seq)
             epitopes = self.determine_neoepitopes(peptide, epitope_length)
             if len(epitopes) > 0:
-                df = mhcflurry_predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
+                tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+                arguments = ["mhcflurry-predict", "--alleles", allele, "--out", tmp_output_file.name, "--peptides"]
+                arguments.extend(epitopes)
+                response = run(arguments, check=True)
+                tmp_output_file.close()
+                df = pd.read_csv(tmp_output_file.name)
                 df['seq_num'] = seq_num
                 df['start'] = df.index+1
-                df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
+                df.rename(columns={'mhcflurry_prediction': 'ic50', 'mhcflurry_prediction_percentile': 'percentile'}, inplace=True)
                 results = results.append(df)
         return (results, 'pandas')
 
