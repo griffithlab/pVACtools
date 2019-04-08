@@ -20,6 +20,8 @@ from subprocess import run, PIPE
 import tempfile
 from collections import defaultdict
 from Bio import SeqIO
+import random
+import uuid
 
 class IEDB(metaclass=ABCMeta):
     @classmethod
@@ -80,10 +82,11 @@ class IEDB(metaclass=ABCMeta):
             response = requests.post(self.url, data=data)
             retries = 0
             while (response.status_code == 500 or response.status_code == 403) and retries < iedb_retries:
-                time.sleep(60 * retries)
-                response = requests.post(self.url, data=data)
-                print("IEDB: Retry %s of %s" % (retries, iedb_retries))
+                random.seed(uuid.uuid4().int)
+                time.sleep(random.randint(30,90) * retries)
                 retries += 1
+                print("IEDB: Retry %s of %s" % (retries, iedb_retries))
+                response = requests.post(self.url, data=data)
 
             if response.status_code != 200:
                 sys.exit("Error posting request to IEDB.\n%s" % response.text)
