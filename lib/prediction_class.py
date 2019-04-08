@@ -79,7 +79,7 @@ class IEDB(metaclass=ABCMeta):
 
             response = requests.post(self.url, data=data)
             retries = 0
-            while response.status_code == 500 and retries < iedb_retries:
+            while (response.status_code == 500 or response.status_code == 403) and retries < iedb_retries:
                 time.sleep(60 * retries)
                 response = requests.post(self.url, data=data)
                 print("IEDB: Retry %s of %s" % (retries, iedb_retries))
