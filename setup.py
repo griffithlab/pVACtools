@@ -90,7 +90,7 @@ setup(
         'mhcflurry',
         'mhcnuggets',
         'pysam',
-        'tensorflow==1.8.0',
+        'tensorflow==1.5.0',
         'Pillow',
         'pymp-pypi',
         'connexion==1.4.2',
