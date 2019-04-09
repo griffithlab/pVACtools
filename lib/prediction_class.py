@@ -3,14 +3,6 @@ import os
 import csv
 import sys
 import inspect
-stderr = sys.stderr
-sys.stderr = open(os.devnull, 'w')
-try:
-    from mhcnuggets.src.predict import predict
-except Exception as err:
-    sys.stderr = stderr
-    raise err
-sys.stderr = stderr
 import requests
 import re
 import pandas as pd
@@ -101,42 +93,14 @@ class MHCnuggets(metaclass=ABCMeta):
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
 
-    def find_neoepitopes(self, sequence, length):
-        epitopes = defaultdict(list)
-        for i in range(0, len(sequence)-length+1):
-            epitope = sequence[i:i+length]
-            epitopes[epitope].append(i+1)
-        return epitopes
-
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, class_type):
-        epitope_seq_nums = defaultdict(list)
-        for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = self.find_neoepitopes(peptide, epitope_length)
-            for epitope, starts in epitopes.items():
-                for start in starts:
-                    epitope_seq_nums[epitope].append((seq_num, start))
-        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
-        for epitope in epitope_seq_nums.keys():
-            tmp_file.write("{}\n".format(epitope))
-        tmp_file.close()
         tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-        predict(class_type, tmp_file.name, self.mhcnuggets_allele(allele), output=tmp_output_file.name)
+        script = os.path.join(os.path.dirname(os.path.realpath(__file__)), "call_mhcnuggets.py")
+        arguments = ["python", script, input_file, allele, str(epitope_length), class_type, tmp_output_file.name]
+        response = run(arguments, check=True)
         tmp_output_file.close()
         df = pd.read_csv(tmp_output_file.name)
-        processed_df = pd.DataFrame()
-        for index, row in df.iterrows():
-            seq_nums = epitope_seq_nums[row['peptide']]
-            for seq_num, start in seq_nums:
-                new_row = row.copy()
-                new_row['seq_num'] = seq_num
-                new_row['start'] = start
-                new_row['allele'] = allele
-                processed_df = processed_df.append(new_row)
-        processed_df['start'] = pd.to_numeric(processed_df['start'], downcast='integer')
-        processed_df = processed_df[['peptide', 'ic50', 'seq_num', 'start', 'allele']]
-        return (processed_df, 'pandas')
+        return (df, 'pandas')
 
 class PredictionClass(metaclass=ABCMeta):
     valid_allele_names_dict = {}
