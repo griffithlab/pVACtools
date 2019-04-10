@@ -3,15 +3,6 @@ import os
 import csv
 import sys
 import inspect
-stderr = sys.stderr
-sys.stderr = open(os.devnull, 'w')
-try:
-    from mhcflurry import Class1AffinityPredictor
-    from mhcnuggets.src.predict import predict
-except Exception as err:
-    sys.stderr = stderr
-    raise err
-sys.stderr = stderr
 import requests
 import re
 import pandas as pd
@@ -102,42 +93,14 @@ class MHCnuggets(metaclass=ABCMeta):
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
 
-    def find_neoepitopes(self, sequence, length):
-        epitopes = defaultdict(list)
-        for i in range(0, len(sequence)-length+1):
-            epitope = sequence[i:i+length]
-            epitopes[epitope].append(i+1)
-        return epitopes
-
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, class_type):
-        epitope_seq_nums = defaultdict(list)
-        for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = self.find_neoepitopes(peptide, epitope_length)
-            for epitope, starts in epitopes.items():
-                for start in starts:
-                    epitope_seq_nums[epitope].append((seq_num, start))
-        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
-        for epitope in epitope_seq_nums.keys():
-            tmp_file.write("{}\n".format(epitope))
-        tmp_file.close()
         tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-        predict(class_type, tmp_file.name, self.mhcnuggets_allele(allele), output=tmp_output_file.name)
+        script = os.path.join(os.path.dirname(os.path.realpath(__file__)), "call_mhcnuggets.py")
+        arguments = ["python", script, input_file, allele, str(epitope_length), class_type, tmp_output_file.name]
+        response = run(arguments, check=True)
         tmp_output_file.close()
         df = pd.read_csv(tmp_output_file.name)
-        processed_df = pd.DataFrame()
-        for index, row in df.iterrows():
-            seq_nums = epitope_seq_nums[row['peptide']]
-            for seq_num, start in seq_nums:
-                new_row = row.copy()
-                new_row['seq_num'] = seq_num
-                new_row['start'] = start
-                new_row['allele'] = allele
-                processed_df = processed_df.append(new_row)
-        processed_df['start'] = pd.to_numeric(processed_df['start'], downcast='integer')
-        processed_df = processed_df[['peptide', 'ic50', 'seq_num', 'start', 'allele']]
-        return (processed_df, 'pandas')
+        return (df, 'pandas')
 
 class PredictionClass(metaclass=ABCMeta):
     valid_allele_names_dict = {}
@@ -250,11 +213,13 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
     def needs_epitope_length(self):
         return True
 
-mhcflurry_predictor = Class1AffinityPredictor.load()
-
 class MHCflurry(MHCI):
     def valid_allele_names(self):
-        return mhcflurry_predictor.supported_alleles
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_file_name = os.path.join(alleles_dir, "MHCflurry.txt")
+        with open(alleles_file_name, 'r') as fh:
+            return list(filter(None, fh.read().split('\n')))
 
     def check_length_valid_for_allele(self, length, allele):
         return True
@@ -275,10 +240,15 @@ class MHCflurry(MHCI):
             peptide = str(record.seq)
             epitopes = self.determine_neoepitopes(peptide, epitope_length)
             if len(epitopes) > 0:
-                df = mhcflurry_predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
+                tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+                arguments = ["mhcflurry-predict", "--alleles", allele, "--out", tmp_output_file.name, "--peptides"]
+                arguments.extend(epitopes)
+                response = run(arguments, check=True)
+                tmp_output_file.close()
+                df = pd.read_csv(tmp_output_file.name)
                 df['seq_num'] = seq_num
                 df['start'] = df.index+1
-                df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
+                df.rename(columns={'mhcflurry_prediction': 'ic50', 'mhcflurry_prediction_percentile': 'percentile'}, inplace=True)
                 results = results.append(df)
         return (results, 'pandas')
 
