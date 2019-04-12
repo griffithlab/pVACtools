@@ -57,9 +57,16 @@ Top Score Filter
 
 .. program-output:: pvacfuse top_score_filter -h
 
-This filter picks the top epitope for a variant. By default the
+This filter picks the top epitope for a variant. Epitopes with the same
+Chromosome - Start - Stop - Reference - Variant are identified as coming from
+the same variant.
+
+By default the
 ``--top-score-metric`` option is set to ``median`` which will apply this
 filter to the ``Median MT Score`` column and pick the epitope with the lowest
 median mutant ic50 score for each variant. If the ``--top-score-metric``
 option is set to ``lowest``, the ``Best MT Score`` column is instead used to
 make this determination.
+
+If there are multiple top epitopes for a variant with the same ic50 score, the
+first one is chosen.
