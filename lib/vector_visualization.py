@@ -68,7 +68,7 @@ class VectorVisualization:
         num_peptides = 0
         for pep in self.pep_seqs:
             length = len(pep)
-            if pep not in self.spacers and length < self.max_pep_length:
+            if pep not in self.spacers:
                 num_peptides += 1
         return(num_peptides)
 
@@ -87,8 +87,9 @@ class VectorVisualization:
         junctions_parsed = 0
         peptides_parsed = 0
         for pep in self.pep_seqs:
-            junction_parsed, angle_parsed = self.draw_peptide(pep, peptides_parsed, junctions_parsed, angle_parsed)
-            junctions_parsed += junction_parsed
+            junction_drawn, angle_parsed = self.draw_peptide(pep, peptides_parsed, junctions_parsed, angle_parsed)
+            if junction_drawn:
+                junctions_parsed += 1
             peptides_parsed += 1
 
         #add white space in circle after genes
@@ -134,25 +135,27 @@ class VectorVisualization:
         self.turtle.forward(10)
         self.turtle.setheading(reset)
 
-    def draw_peptide(self, pep, peptides_parsed, junctions_parsed, angle_parsed):
-        junction_parsed = 0
-        pep_length = len(pep)
-        peptide = self.pep_ids[peptides_parsed]
+    def draw_peptide(self, peptide, peptide_index, junction_index, angle_parsed):
+        junction_drawn = False
+        peptide_length = len(peptide)
+        peptide_id = self.pep_ids[peptide_index]
         self.turtle.pensize(self.pen_thick)
-        angle_parsed += self.conversion_factor * pep_length
+        angle_parsed += self.conversion_factor * peptide_length
         #if pep is in the list of spacers, draw and label arc for junction
-        if pep in self.spacers:
-            self.draw_arc_junct(peptide, pep_length)
+        if peptide in self.spacers:
+            self.draw_arc_junct(peptide_id, peptide_length)
             self.draw_junction()
-        #if length within reasonable range, draw and label arc for peptide
-        elif pep_length <= self.max_pep_length:
-            self.draw_arc_peptide(peptide, pep_length, junctions_parsed, angle_parsed)
-            if junctions_parsed < len(self.junct_scores):
-                self.draw_junction_w_label(self.junct_scores[junctions_parsed], angle_parsed)
-                junction_parsed += 1
         else:
-            sys.exit("Error: Peptide sequence over 100 amino acids inputted")
-        return(junction_parsed, angle_parsed)
+            #if below reasonable range, draw and label arc for peptide with actual length
+            if peptide_length <= self.max_pep_length:
+                self.draw_arc_peptide(peptide_id, peptide_length, junction_index, angle_parsed)
+            #otherwise, draw and label arc for peptide with 100 length
+            else:
+                self.draw_arc_peptide(peptide_id, 100, junction_index, angle_parsed)
+            if junction_index < len(self.junct_scores):
+                self.draw_junction_w_label(self.junct_scores[junction_index], angle_parsed)
+                junction_drawn = True
+        return (junction_drawn, angle_parsed)
 
     #draw arc for peptide
     def draw_arc_peptide(self, peptide, length, count, angle):
