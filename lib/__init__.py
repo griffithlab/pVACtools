@@ -16,6 +16,7 @@ __all__ = [
     "rank_epitopes",
     "utils",
     "post_processor",
+    "vector_visualization",
 ]
 
 import os
