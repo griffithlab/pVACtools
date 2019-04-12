@@ -27,3 +27,15 @@ class FilterTests(unittest.TestCase):
                 self.spacers
             ).draw())
             self.assertTrue(os.path.exists(os.path.join(output_dir, 'vector.jpg')))
+
+    def test_fasta_with_long_peptide(self):
+        with tempfile.TemporaryDirectory() as output_dir:
+            self.assertFalse(VectorVisualization(
+                os.path.join(
+                    self.test_data_path,
+                    'input.long_peptide.fa'
+                ),
+                output_dir,
+                self.spacers
+            ).draw())
+            self.assertTrue(os.path.exists(os.path.join(output_dir, 'vector.jpg')))
