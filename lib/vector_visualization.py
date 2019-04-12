@@ -4,11 +4,12 @@ import sys
 from PIL import Image
 
 class VectorVisualization:
-    def __init__(self, input_fasta, output_directory):
+    def __init__(self, input_fasta, output_directory, spacers):
+
         self.input_fasta = input_fasta
         self.output_directory = output_directory
+        self.spacers = spacers
 
-        self.min_pep_length = 8
         self.max_pep_length = 100
 
         self.pep_seqs, self.pep_ids, self.junct_scores = self.parse_input()
@@ -67,7 +68,7 @@ class VectorVisualization:
         num_peptides = 0
         for pep in self.pep_seqs:
             length = len(pep)
-            if length > self.min_pep_length and length < self.max_pep_length:
+            if pep not in self.spacers and length < self.max_pep_length:
                 num_peptides += 1
         return(num_peptides)
 
@@ -139,16 +140,16 @@ class VectorVisualization:
         peptide = self.pep_ids[peptides_parsed]
         self.turtle.pensize(self.pen_thick)
         angle_parsed += self.conversion_factor * pep_length
+        #if pep is in the list of spacers, draw and label arc for junction
+        if pep in self.spacers:
+            self.draw_arc_junct(peptide, pep_length)
+            self.draw_junction()
         #if length within reasonable range, draw and label arc for peptide
-        if pep_length >= self.min_pep_length and pep_length <= self.max_pep_length:
+        elif pep_length <= self.max_pep_length:
             self.draw_arc_peptide(peptide, pep_length, junctions_parsed, angle_parsed)
             if junctions_parsed < len(self.junct_scores):
                 self.draw_junction_w_label(self.junct_scores[junctions_parsed], angle_parsed)
                 junction_parsed += 1
-        #if length is less than minimum peptide length, assume amino acid addition to junction
-        elif pep_length < self.min_pep_length:
-            self.draw_arc_junct(peptide, pep_length)
-            self.draw_junction()
         else:
             sys.exit("Error: Peptide sequence over 100 amino acids inputted")
         return(junction_parsed, angle_parsed)
