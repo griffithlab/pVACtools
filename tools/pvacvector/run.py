@@ -397,7 +397,7 @@ def main(args_input=sys.argv[1:]):
         )
 
     if 'DISPLAY' in os.environ.keys():
-        VectorVisualization(results_file, base_output_dir).draw()
+        VectorVisualization(results_file, base_output_dir, args.spacers).draw()
 
     if not args.keep_tmp_files:
         shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_I'), ignore_errors=True)
