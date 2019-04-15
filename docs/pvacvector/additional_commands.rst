@@ -14,7 +14,7 @@ By default, pVACvector will create a visualization of the vector design
 result. For this to happen, the DISPLAY environment variable has to be set.
 This is often not the case, for example, when running pVACvector on a compute
 cluster. We provide this convenience method to create the visualization
-graphic from a successful pVACvector result fasta file on any machine that has
+graphic from a successful pVACvector result FASTA file on any machine that has
 the DISPLAY environment variable set.
 
 .. program-output:: pvacvector visualize -h

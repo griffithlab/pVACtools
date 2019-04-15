@@ -6,7 +6,7 @@ def define_parser():
     parser = argparse.ArgumentParser("pvacvector visualizes", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "input_fasta",
-        help="A pVACvector result fasta file to visualize",
+        help="A pVACvector result FASTA file to visualize",
     )
     parser.add_argument(
         "output_directory",
