@@ -58,7 +58,10 @@ class VectorVisualization:
     def get_conversion_factor(self):
         total_len = 0
         for pep in self.pep_seqs:
-            total_len += len(pep)
+            if len(pep) <= self.max_pep_length:
+                total_len += len(pep)
+            else:
+                total_len += 100
         #30 degrees reserved for white space
         conversion_factor = 330 / total_len
         return conversion_factor
