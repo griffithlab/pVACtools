@@ -405,6 +405,21 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_sv.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
+    def test_total_length_protein_position(self):
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_total_length.vcf')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'        : convert_vcf_input_file,
+            'output_file'       : convert_vcf_output_file.name,
+            'sample_name'       : 'TUMOR',
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_total_length.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
     def test_integrate_input_generates_expected_tsv(self):
         convert_input_file  = os.path.join(self.test_data_dir, 'fusions_annotated.bedpe')
         convert_output_file = tempfile.NamedTemporaryFile()
