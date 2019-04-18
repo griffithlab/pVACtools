@@ -17,6 +17,19 @@ class InputFileConverterTests(unittest.TestCase):
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
+    def test_error_truncated_vcf_middle_of_entry(self):
+        with self.assertRaises(Exception) as context:
+            convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_truncated_middle.vcf')
+            convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+            convert_vcf_params = {
+                'input_file'        : convert_vcf_input_file,
+                'output_file'       : convert_vcf_output_file.name,
+            }
+            converter = VcfConverter(**convert_vcf_params)
+            converter.execute()
+            self.assertTrue("VCF is truncated in the middle of an entry near string " in str(context.exception))
+
     def test_input_vcf_generates_expected_tsv(self):
         convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
         convert_vcf_output_file = tempfile.NamedTemporaryFile()
