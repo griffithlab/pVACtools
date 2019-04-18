@@ -343,7 +343,13 @@ class VcfConverter(InputFileConverter):
 
         indexes = []
         count = 1
-        for entry in self.vcf_reader:
+        while True:
+            try:
+                entry = next(self.vcf_reader)
+            except StopIteration:
+                break
+            except Exception as e:
+                raise Exception(e)
             chromosome = entry.CHROM
             start      = entry.affected_start
             stop       = entry.affected_end
