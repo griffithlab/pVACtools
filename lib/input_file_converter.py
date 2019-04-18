@@ -350,6 +350,8 @@ class VcfConverter(InputFileConverter):
                 break
             except ValueError as e:
                 raise Exception("VCF is truncated in the middle of an entry near string '{}'".format(str(e).split("'")[1]))
+            except IndexError as e:
+                raise Exception("VCF is truncated at the end of the file")
             except Exception as e:
                 raise Exception(e)
             chromosome = entry.CHROM
