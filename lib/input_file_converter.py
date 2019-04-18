@@ -353,7 +353,7 @@ class VcfConverter(InputFileConverter):
             except IndexError as e:
                 raise Exception("VCF is truncated at the end of the file")
             except Exception as e:
-                raise Exception(e)
+                raise Exception("Error while reading VCF entry: {}".format(str(e)))
             chromosome = entry.CHROM
             start      = entry.affected_start
             stop       = entry.affected_end
