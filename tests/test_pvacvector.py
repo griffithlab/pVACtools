@@ -105,10 +105,11 @@ class TestPvacvector(unittest.TestCase):
                 os.path.join(self.test_data_dir, "Test.vector.results.output.fa")
             ))
 
-            image_out = os.path.join(output_dir.name, 'vector.jpg')
-            #vaccine visualization producing image
-            self.assertTrue(os.path.exists(image_out))
-            self.assertTrue(os.stat(image_out).st_size > 0)
+            if 'DISPLAY' in os.environ.keys():
+                image_out = os.path.join(output_dir.name, 'vector.jpg')
+                #vaccine visualization producing image
+                self.assertTrue(os.path.exists(image_out))
+                self.assertTrue(os.stat(image_out).st_size > 0)
 
             output_dir.cleanup()
 
@@ -138,9 +139,63 @@ class TestPvacvector(unittest.TestCase):
                     os.path.join(self.test_data_dir, "input_parse_test_output.fa")
                     ))
 
-            image_out = os.path.join(output_dir.name, 'vector.jpg')
-            #vaccine visualization producing image
-            self.assertTrue(os.path.exists(image_out))
-            self.assertTrue(os.stat(image_out).st_size > 0)
+
+            if 'DISPLAY' in os.environ.keys():
+                image_out = os.path.join(output_dir.name, 'vector.jpg')
+                #vaccine visualization producing image
+                self.assertTrue(os.path.exists(image_out))
+                self.assertTrue(os.stat(image_out).st_size > 0)
+
+            output_dir.cleanup()
+
+    def test_pvacvector_generate_fa_with_epitope_at_beginning_of_transcript(self):
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            test_data_directory(),
+            'negative_start',
+        ))) as mock_request:
+            output_dir = tempfile.TemporaryDirectory()
+
+            run.main([
+                os.path.join(self.test_data_dir, "input_negative_start.tsv"),
+                'H_MT-10109-005',
+                self.allele,
+                self.method,
+                output_dir.name,
+                '-v', os.path.join(self.test_data_dir, "input_negative_start.vcf.gz"),
+                '-e', self.epitope_length,
+                '-n', self.input_n_mer,
+                '-k',
+            ])
+
+            self.assertTrue(compare(
+                os.path.join(output_dir.name, "vector_input.fa"),
+                os.path.join(self.test_data_dir, "output_negative_start.fa")
+            ))
+            output_dir.cleanup()
+
+    def test_pvacvector_clipping(self):
+        with self.assertRaises(Exception) as context:
+            output_dir = tempfile.TemporaryDirectory()
+
+            run.main([
+                self.input_tsv,
+                self.test_run_name,
+                self.allele,
+                self.method,
+                output_dir.name,
+                '-v', self.input_vcf,
+                '-e', self.epitope_length,
+                '-n', self.input_n_mer,
+                '-k',
+                '-b', '50000',
+                '--max-clip-length', '1',
+                '--spacers', 'None',
+            ])
+
+            self.assertTrue(compare(
+                os.path.join(output_dir.name, "1", "vector_input.fa"),
+                os.path.join(self.test_data_dir, "clipped.fa")
+            ))
 
             output_dir.cleanup()
