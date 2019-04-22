@@ -347,7 +347,17 @@ class VcfConverter(InputFileConverter):
 
         indexes = []
         count = 1
-        for entry in self.vcf_reader:
+        while True:
+            try:
+                entry = next(self.vcf_reader)
+            except StopIteration:
+                break
+            except ValueError as e:
+                raise Exception("VCF is truncated in the middle of an entry near string '{}'".format(str(e).split("'")[1]))
+            except IndexError as e:
+                raise Exception("VCF is truncated at the end of the file")
+            except Exception as e:
+                raise Exception("Error while reading VCF entry: {}".format(str(e)))
             chromosome = entry.CHROM
             start      = entry.affected_start
             stop       = entry.affected_end
