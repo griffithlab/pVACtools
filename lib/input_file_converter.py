@@ -310,6 +310,10 @@ class VcfConverter(InputFileConverter):
                 proximal_variant_type = 'somatic'
             else:
                 proximal_variant_type = 'germline'
+            if '/' in csq_entry['Protein_position']:
+                protein_position = csq_entry['Protein_position'].split('/')[0]
+            else:
+                protein_position = csq_entry['Protein_position']
             proximal_variant_entry = {
                 'chromosome_name': proximal_variant.CHROM,
                 'start': proximal_variant.affected_start,
@@ -318,7 +322,7 @@ class VcfConverter(InputFileConverter):
                 'variant': proximal_variant.ALT[0],
                 'amino_acid_change': csq_entry['Amino_acids'],
                 'codon_change': csq_entry['Codons'],
-                'protein_position': csq_entry['Protein_position'],
+                'protein_position': protein_position,
                 'type': proximal_variant_type,
                 'main_somatic_variant': index,
             }
@@ -378,6 +382,10 @@ class VcfConverter(InputFileConverter):
                     transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], 'deletion')
 
                 for transcript in transcripts:
+                    if '/' in transcript['Protein_position']:
+                        protein_position = transcript['Protein_position'].split('/')[0]
+                    else:
+                        protein_position = transcript['Protein_position']
                     transcript_name = transcript['Feature']
                     consequence = self.resolve_consequence(transcript['Consequence'])
                     if consequence is None:
@@ -387,13 +395,13 @@ class VcfConverter(InputFileConverter):
                             print("frameshift_variant transcript does not contain a DownstreamProtein sequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                             continue
                         else:
-                            amino_acid_change_position = "%s%s/%s" % (transcript['Protein_position'], entry.REF, alt)
+                            amino_acid_change_position = "%s%s/%s" % (protein_position, entry.REF, alt)
                     else:
                         if transcript['Amino_acids'] == '':
                             print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                             continue
                         else:
-                            amino_acid_change_position = transcript['Protein_position'] + transcript['Amino_acids']
+                            amino_acid_change_position = protein_position + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
                     index = '%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
@@ -428,7 +436,7 @@ class VcfConverter(InputFileConverter):
                         'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
                         'fusion_amino_acid_sequence'     : '',
                         'variant_type'                   : consequence,
-                        'protein_position'               : transcript['Protein_position'],
+                        'protein_position'               : protein_position,
                         'index'                          : index,
                         'protein_length_change'          : transcript['ProteinLengthChange'],
                     }
