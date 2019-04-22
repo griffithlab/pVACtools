@@ -264,11 +264,11 @@ def update():
 #create range filters for various columns
 getters.append((
     'best_mt_score',
-    range_column_filter('best_mt_score', 50, 'Binding Threshold (best)')
+    range_column_filter('best_mt_score', 10, 'Binding Threshold (best)')
 ))
 getters.append((
     'median_mt_score',
-    range_column_filter('median_mt_score', 50, 'Binding Threshold (median)')
+    range_column_filter('median_mt_score', 10, 'Binding Threshold (median)')
 ))
 getters.append((
     'corresponding_fold_change',
@@ -288,15 +288,15 @@ getters.append((
 ))
 getters.append((
     'tumor_dna_vaf',
-    range_column_filter('tumor_dna_vaf', .5)
+    range_column_filter('tumor_dna_vaf', .01)
 ))
 getters.append((
     'tumor_rna_depth',
-    range_column_filter('tumor_rna_depth', 5)
+    range_column_filter('tumor_rna_depth', 10)
 ))
 getters.append((
     'tumor_rna_vaf',
-    range_column_filter('tumor_rna_vaf', .5)
+    range_column_filter('tumor_rna_vaf', .01)
 ))
 getters.append((
     'best_cleavage_score',
