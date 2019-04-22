@@ -6,9 +6,9 @@ ____________________________
 
 **VCF contains more than one sample but sample_name is not set.**
 
-pVACseq supports running with a multi-sample VCF as input. However, it still
+pVACseq supports running with a multi-sample VCF as input. However, in this case it
 requires the user to pick the sample to analyze, as only variants that are
-called in a sample will be processed.
+called in the specified sample will be processed.
 
 When running a multi-sample VCF the ``sample_name`` parameter is used to
 identify which sample to analyze. Take, for example, the following ``#CHROM``
@@ -60,7 +60,7 @@ run`` command to match the appropriate sample identifier.
 **VCF doesn't contain any sample genotype information.**
 
 pVACseq uses the sample genotype to identified which variants were called.
-Therefore, while a VCF with a ``FORMAT`` and sample column(s) is valid, it cannot be used
+Therefore, while a VCF without a ``FORMAT`` and sample column(s) is valid, it cannot be used
 in pVACseq. You will need to manually edit your VCF and add a ``FORMAT`` and
 sample column with the ``GT`` genotype field. For more information on this
 formatting please see the `VCF specification <https://github.com/samtools/hts-specs>`_ for your specific VCF version.
@@ -98,7 +98,7 @@ ________________________
 **Input VCF does not contain a CSQ header. Please annotate the VCF with VEP before running it.**
 
 pVACseq requires the input VCF to be annotated by VEP. The provided input VCF
-doesn't contain a ``CSQ`` ``INFO`` header which indicates that it has not been
+doesn't contain a ``CSQ`` ``INFO`` header. This indicates that it has not been
 annotated. :ref:`The Input File Preparation section <vep>` of the
 documentation provides instructions on how to annotate your VCF with VEP.
 
@@ -106,14 +106,14 @@ documentation provides instructions on how to annotate your VCF with VEP.
 
 Although the input VCF was annotated with VEP, it is missing the required
 annotations provided by the VEP Downstream plugin. The input VCF will need to
-be reannotated using all of the required arguments as outline in the :ref:`Input
+be reannotated using all of the required arguments as outlined in the :ref:`Input
 File Preparation section <vep>` of the documentation.
 
 **VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.**
 
 Although the input VCF was annotated with VEP, it is missing the required
 annotations provided by the VEP Wildtype plugin. The input VCF will need to
-be reannotated using all of the required arguments as outline in the :ref:`Input
+be reannotated using all of the required arguments as outlined in the :ref:`Input
 File Preparation section <vep>` of the documentation.
 
 **Proximal Variants VCF does not contain a CSQ header. Please annotate the VCF with VEP before running it.**
@@ -121,7 +121,7 @@ File Preparation section <vep>` of the documentation.
 When running pVACseq with the ``--proximal-variants-vcf`` argument, that
 proximal variants VCF needs to be annotated by VEP. The provided proximal
 variants VCF
-doesn't contain a ``CSQ`` ``INFO`` header which indicates that it has not been
+doesn't contain a ``CSQ`` ``INFO`` header. This indicates that it has not been
 annotated. :ref:`The Input File Preparation section <vep>` of the
 documentation provides instructions on how to annotate your VCF with VEP.
 
