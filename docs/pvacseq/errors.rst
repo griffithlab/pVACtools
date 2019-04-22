@@ -141,8 +141,9 @@ mismatch cannot be resolved by pVACseq, which is why this error is fatal.
 
 Here are a few things that might resolve this error:
 
-- If a VEP build 38 cache was accidentially used with a build 37 VCF (or vice
-  versa), the correct cache needs to be downloaded and used during VEP annotation.
+- Checking that the build of the VEP cache matches the alignment build and
+  downloading the correct cache if there is a build mismatch (such as a build
+  38 cache with a build 37 VCF, or vice versa)
 - Using the ``--assembly`` parameter during VEP annotation with the
   correct build version to match your VCF
 - Using the ``fasta`` parameter during VEP annotation with the reference used
