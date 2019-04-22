@@ -47,12 +47,14 @@ New in version |release|
 
 This version is a hotfix release. It fixes the following issues:
 
-- A bug in the parsing code of the binding prediction output files would
-  result in only some binding predictionn output files getting processed when using multithreading.
-  This would potentially cause incomplete output reports that were missing
-  predictions for some input variants. pVACseq, pVACfuse, and
-  pVACvector runs that were done without multithreading should've been
-  unaffected by this bug.
+- While the previous release fixed the issue of stalled processes when running
+  IEDB-based prediction algorithms in multiprocessing mode, we were still experience a similar problem
+  when running with MHCflurry and MHCnuggets. These two prediction algorithms
+  are tensorflow-based which in the way it is currently used in pVACtools is
+  not compatible with being run in multiprocessing mode. As a stop-gap measure
+  this release removes MHCnuggets and MHCflurry from being run in
+  multiprocessing mode. This resolves the problem until we can change our
+  usage of these predictin algorithms to be multiprocessing-compatible.
 
 Past release notes can be found on our :ref:`releases` page.
 

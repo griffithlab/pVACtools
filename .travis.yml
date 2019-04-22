@@ -1,10 +1,10 @@
 language: python
+sudo: required
+dist: xenial
 python:
   - "3.5"
-addons:
-  apt:
-   packages:
-     - xvfb
+  - "3.6"
+  - "3.7"
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y ghostscript
@@ -19,15 +19,11 @@ install:
   - pip install swagger-spec-validator==2.1.0
   #The MHCflurry output will differ depending on the version of tensorflow
   #The test data was created on tensorflow 1.8.0
-  - pip install tensorflow==1.8.0
+  - pip install tensorflow==1.13.1
   - pip install connexion==1.4.2
   - pip install bokeh==0.13.0
   - pip install tornado==5.0.2
   - pip install jsonschema==2.6.0
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3
 services:
   - postgresql
 script:

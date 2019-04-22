@@ -51,7 +51,7 @@ class PvacvectorInputFastaGenerator():
         }).execute()
 
         with open(key_file.name, 'r') as fasta_key_file:
-            keys = yaml.load(fasta_key_file)
+            keys = yaml.load(fasta_key_file, Loader=yaml.FullLoader)
 
         dataframe = OrderedDict()
         with open(fasta_file.name, 'r') as fasta_file:
@@ -113,7 +113,9 @@ class PvacvectorInputFastaGenerator():
                 if end > len(full_sequence):
                     remainder = end - len(full_sequence)
                     start -= remainder
-                extracted_sequence = full_sequence[start:end]
+                if start < 0:
+                    start = 0
+                extracted_sequence = full_sequence[int(start):int(end)]
             exists = False
             for other_index, other_extracted_sequence in extracted_peptides.items():
                 if other_extracted_sequence == extracted_sequence:

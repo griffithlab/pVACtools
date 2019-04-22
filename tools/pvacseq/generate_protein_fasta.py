@@ -67,7 +67,7 @@ def parse_files(output_file, temp_dir):
     fasta_key_file_path = os.path.join(temp_dir, 'tmp.fasta.key')
 
     with open(fasta_key_file_path, 'r') as fasta_key_file:
-        keys = yaml.load(fasta_key_file)
+        keys = yaml.load(fasta_key_file, Loader=yaml.FullLoader)
 
     dataframe = OrderedDict()
     with open(fasta_file_path, 'r') as fasta_file:
