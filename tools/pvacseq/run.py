@@ -29,17 +29,25 @@ def define_parser():
     return PvacseqRunArgumentParser().parser
 
 def combine_reports(input_files, output_file):
-    write_headers = True
+    fieldnames = []
+    for input_file in input_files:
+        with open(input_file, 'r') as input_file_handle:
+            reader = csv.DictReader(input_file_handle, delimiter='\t')
+            if len(fieldnames) == 0:
+                fieldnames = reader.fieldnames
+            else:
+                for fieldname in reader.fieldnames:
+                    if fieldname not in fieldnames:
+                        fieldnames.append(fieldname)
+
     with open(output_file, 'w') as fout:
-        writer = csv.writer(fout)
-        for filename in input_files:
-            with open(filename) as fin:
-                reader = csv.reader(fin)
-                headers = next(reader)
-                if write_headers:
-                    write_headers = False  # Only write headers once.
-                    writer.writerow(headers)
-                writer.writerows(reader)  # Write all remaining rows.
+        writer = csv.DictWriter(fout, delimiter="\t", restval='NA', fieldnames=fieldnames)
+        writer.writeheader()
+        for input_file in input_files:
+            with open(input_file, 'r') as input_file_handle:
+                reader = csv.DictReader(input_file_handle, delimiter='\t')
+                for row in reader:
+                    writer.writerow(row)
 
 def create_combined_reports(base_output_dir, args, additional_input_files):
     output_dir = os.path.join(base_output_dir, 'combined')
