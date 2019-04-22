@@ -95,6 +95,8 @@ _____________________________________________
    -L combined_somatic_plus_germline.sorted.vcf \
    -o phased.vcf
 
+.. _bgzip_phased_vcf:
+
 bgzip and index the phased VCF
 ______________________________
 
@@ -105,6 +107,8 @@ ______________________________
 
 The resulting ``phased.vcf.gz`` file can be used as the input to the
 ``--phased-proximal-variants-vcf`` option.
+
+.. _bgzip_input_vcf:
 
 bgzip and index the input VCF
 ______________________________
