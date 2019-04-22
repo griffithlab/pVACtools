@@ -110,6 +110,10 @@ This version is a hotfix release. It fixes the following issues:
   which allowed us to remove our direct imports of these modules and allows us
   to parallelize the calls to these two prediction algorithms. All prediction
   algorithms supported by pVACtools can now be used in multiprocessing mode.
+- Some users were reporting ``Illegal instruction (core dumped)`` errors
+  because their hardware was incompatible with the version of tensorflow we
+  were using. Pinning the tensorflow version to 1.5.0 with this release should
+  solve this problem.
 - When running in multiprocessing mode while using the IEDB API, users would
   experience a higher probability of failed requests to the API. The IEDB API
   would throw a 403 error when rejecting requests due to too
