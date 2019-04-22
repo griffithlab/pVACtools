@@ -14,6 +14,13 @@ def main():
     )
     run_main_program_parser.set_defaults(func=run)
 
+    run_main_program_parser = subparsers.add_parser(
+        "visualize",
+        help="Create a visualization of the vector from a pVACvector result fasta",
+        add_help=False
+    )
+    run_main_program_parser.set_defaults(func=visualize)
+
     valid_alleles_parser = subparsers.add_parser(
         "valid_alleles",
         help="Shows a list of valid allele names",
