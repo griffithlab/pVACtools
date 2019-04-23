@@ -56,7 +56,7 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
 
 setup(
     name="pvactools",
-    version="1.3.5",
+    version="1.3.6",
     packages=[
         "tools",
         "tools.pvacfuse",
@@ -90,7 +90,7 @@ setup(
         'mhcflurry',
         'mhcnuggets',
         'pysam',
-        'tensorflow==1.13.1',
+        'tensorflow==1.5.0',
         'Pillow',
         'pymp-pypi',
         'connexion==1.4.2',
