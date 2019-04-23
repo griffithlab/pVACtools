@@ -147,6 +147,11 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
         self.parser.add_argument(
+            "-i", "--additional-input-file-list",
+            help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
+                 + "For an example of this yaml file run `pvacseq config_files additional_input_file_list`."
+        )
+        self.parser.add_argument(
             "-p", "--phased-proximal-variants-vcf",
             help="A VCF with phased proximal variant information."
         )
