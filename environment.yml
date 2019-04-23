@@ -4,10 +4,10 @@ dependencies:
 - pip=8.1.1=py35_0
 - python=3.5.2
 - readline=6.2=2
-- sqlite=3.9.2=0
-- tk=8.5.18=0
-- wheel=0.29.0=py35_0
-- zlib=1.2.8=0
+- sqlite
+- tk
+- wheel
+- zlib
 - requests
 - pillow
 - pip:
