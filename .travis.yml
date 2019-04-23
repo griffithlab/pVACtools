@@ -9,6 +9,9 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y ghostscript
 install:
+  #Install tensorflow from goggle apis since version 1.5.0 can't be found in
+  #python 3.7 using pypi
+  - pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.5.0-cp34-cp34m-linux_x86_64.whl
   #Remove the following line when pvacseq-client is first pushed to the live pypi site
   #This has been updated to pull from the live pypi site, instead of test pypi.
   #Not sure if it can or needs to be deleted altogether.
