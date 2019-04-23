@@ -11,6 +11,7 @@ dependencies:
 - requests
 - pillow
 - pip:
+  - sphinx==1.7.6
   - sphinxjp.themes.basicstrap
   - sphinxcontrib-programoutput
   - pvactools
