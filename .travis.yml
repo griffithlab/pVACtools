@@ -4,7 +4,8 @@ dist: xenial
 python:
   - "3.5"
   - "3.6"
-  - "3.7"
+#Tensorflow 1.5.0 is not available for python 3.7
+#  - "3.7"
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y ghostscript
