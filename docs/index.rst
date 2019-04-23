@@ -47,36 +47,10 @@ New in version |release|
 
 This version is a hotfix release. It fixes the following issues:
 
-- Tensorflow is incompatible with multiprocessing when the parent process
-  imports tensorflow or a tensorflow-dependent module. For this reason
-  MHCflurry and MHCnuggets were removed from parallelization. In this
-  release we moved to calling MHCflurry and MHCnuggets on the command line,
-  which allowed us to remove our direct imports of these modules and allows us
-  to parallelize the calls to these two prediction algorithms. All prediction
-  algorithms supported by pVACtools can now be used in multiprocessing mode.
-- Some users were reporting ``Illegal instruction (core dumped)`` errors
-  because their hardware was incompatible with the version of tensorflow we
-  were using. Pinning the tensorflow version to 1.5.0 with this release should
-  solve this problem.
-- When running in multiprocessing mode while using the IEDB API, users would
-  experience a higher probability of failed requests to the API. The IEDB API
-  would throw a 403 error when rejecting requests due to too
-  many simultaneous requests. pVACtools would previously not retry on this type of
-  error. This release now adds retries on this error code. We also improved
-  the random wait time calculation between requests so that the likelihood of
-  multiple retries hitting at the same time has now been reduced.
-- When encountering a truncated input VCF, the VCF parser used by pVACtools
-  would throw an error that was not indicative of the real error source.
-  pVACseq now catches these errors and emmits a more descriptive error message
-  when encountering a truncated VCF.
-- One option when annotating a VCF with VEP is the ``-total-length`` flag. When
-  using this flag, the total length would be written to the
-  ``Protein_position`` field. pVACseq previously did not support a VCF with a
-  ``Protein_position`` field in this format. This release adds support for it.
-- When creating the combined MHC class I and MHC class II all_epitopes file,
-  we were previously not correctly determining all necessary headers which
-  would lead to incorrect output of the individual prediction algorithm score
-  columns. This release fixes this issue.
+- The previous version accidentially removed the
+  ``--additional-input-file-list`` option. It has been restored in this
+  version. Please note that it is slated for permanent removal in the next
+  feature release (1.4.0).
 
 Past release notes can be found on our :ref:`releases` page.
 
