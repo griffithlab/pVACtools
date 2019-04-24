@@ -20,7 +20,7 @@ ______________________________
   before proceeding. If you do not agree to all of the terms of these two agreements,
   you must not install or use the product. Companies (for-profit entities) interested
   in downloading the command-line versions of the IEDB tools or running the entire analysis
-  resource locally, should contact us (license@iedb.org) for details on licensing options.
+  resource locally, should contact IEDB (license@iedb.org) for details on licensing options.
 
 MHCflurry
 _________
