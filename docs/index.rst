@@ -36,6 +36,7 @@ tools:
    :maxdepth: 1
 
    install
+   tools
    frequently_asked_questions
    releases
    citation
