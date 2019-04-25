@@ -410,38 +410,12 @@ class IntegrateConverter(InputFileConverter):
                 fusions.append("%s-%s"% (five_p_transcript, three_p_transcript))
         return fusions
 
-    def execute(self):
+    def parse_integrate_neo_file(self):
         reader = open(self.input_file, 'r')
         csv_reader = csv.DictReader(reader, delimiter='\t', fieldnames=self.input_fieldnames())
-        writer = open(self.output_file, 'w')
-        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
-        tsv_writer.writeheader()
         count = 1
+        output_rows = []
         for entry in csv_reader:
-            output_row = {
-                'chromosome_name'            : "%s / %s" % (entry['chr 5p'], entry['chr 3p']),
-                'start'                      : "%s / %s" % (entry['start 5p'], entry['start 3p']),
-                'stop'                       : "%s / %s" % (entry['end 5p'], entry['end 3p']),
-                'reference'                  : 'fusion',
-                'variant'                    : 'fusion',
-                'gene_name'                  : entry['name of fusion'],
-                'wildtype_amino_acid_sequence'   : '',
-                'downstream_amino_acid_sequence' : '',
-                'protein_length_change'      : '',
-                'amino_acid_change'          : 'NA',
-                'codon_change'               : 'NA',
-                'ensembl_gene_id'            : 'NA',
-                'amino_acid_change'          : 'NA',
-                'transcript_expression'      : 'NA',
-                'gene_expression'            : 'NA',
-                'normal_depth'               : 'NA',
-                'normal_vaf'                 : 'NA',
-                'tdna_depth'                 : 'NA',
-                'tdna_vaf'                   : 'NA',
-                'trna_depth'                 : 'NA',
-                'trna_vaf'                   : 'NA',
-            }
-
             if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':
                 continue
             for (fusion_position, transcript_set, fusion_amino_acid_sequence) in zip(entry['fusion positions'].split(','), entry['transcripts'].split(','), entry['peptides'].split(',')):
@@ -456,14 +430,44 @@ class IntegrateConverter(InputFileConverter):
                 else:
                     variant_type = 'frameshift_fusion'
 
+                output_row = {
+                    'chromosome_name'            : "%s / %s" % (entry['chr 5p'], entry['chr 3p']),
+                    'start'                      : "%s / %s" % (entry['start 5p'], entry['start 3p']),
+                    'stop'                       : "%s / %s" % (entry['end 5p'], entry['end 3p']),
+                    'reference'                  : 'fusion',
+                    'variant'                    : 'fusion',
+                    'gene_name'                  : entry['name of fusion'],
+                    'wildtype_amino_acid_sequence'   : '',
+                    'downstream_amino_acid_sequence' : '',
+                    'protein_length_change'      : '',
+                    'amino_acid_change'          : 'NA',
+                    'codon_change'               : 'NA',
+                    'ensembl_gene_id'            : 'NA',
+                    'amino_acid_change'          : 'NA',
+                    'transcript_expression'      : 'NA',
+                    'gene_expression'            : 'NA',
+                    'normal_depth'               : 'NA',
+                    'normal_vaf'                 : 'NA',
+                    'tdna_depth'                 : 'NA',
+                    'tdna_vaf'                   : 'NA',
+                    'trna_depth'                 : 'NA',
+                    'trna_vaf'                   : 'NA',
+                }
                 output_row['variant_type']               = variant_type
                 output_row['protein_position']           = fusion_position
                 output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
                 output_row['transcript_name']            = ';'.join(fusions)
                 output_row['index']                      = '%s.%s.%s.%s' % (count, entry['name of fusion'], variant_type, fusion_position)
-                tsv_writer.writerow(output_row)
-
+                output_rows.append(output_row)
                 count += 1
 
-        writer.close()
         reader.close()
+        return output_rows
+
+    def execute(self):
+        writer = open(self.output_file, 'w')
+        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
+        tsv_writer.writeheader()
+        output_rows = self.parse_integrate_neo_file()
+        tsv_writer.writerows(output_rows)
+        writer.close()
