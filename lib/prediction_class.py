@@ -7,7 +7,7 @@ import requests
 import re
 import pandas as pd
 import time
-from subprocess import run, PIPE
+from subprocess import run, DEVNULL, STDOUT
 import tempfile
 from collections import defaultdict
 from Bio import SeqIO
@@ -100,7 +100,7 @@ class MHCnuggets(metaclass=ABCMeta):
         tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
         script = os.path.join(os.path.dirname(os.path.realpath(__file__)), "call_mhcnuggets.py")
         arguments = ["python", script, input_file, allele, str(epitope_length), class_type, tmp_output_file.name]
-        response = run(arguments, check=True)
+        response = run(arguments, check=True, stdout=DEVNULL, stderr=STDOUT)
         tmp_output_file.close()
         df = pd.read_csv(tmp_output_file.name)
         return (df, 'pandas')
@@ -246,7 +246,7 @@ class MHCflurry(MHCI):
                 tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
                 arguments = ["mhcflurry-predict", "--alleles", allele, "--out", tmp_output_file.name, "--peptides"]
                 arguments.extend(epitopes)
-                response = run(arguments, check=True)
+                response = run(arguments, check=True, stdout=DEVNULL, stderr=STDOUT)
                 tmp_output_file.close()
                 df = pd.read_csv(tmp_output_file.name)
                 df['seq_num'] = seq_num
