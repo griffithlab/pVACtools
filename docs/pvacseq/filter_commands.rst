@@ -111,3 +111,38 @@ make this determination.
 
 If there are multiple top epitopes for a variant with the same ic50 score, the
 first one is chosen.
+
+It is important to note that there are several reasons why a particular variant can lead to multiple peptides
+with different predicted binding affinities. The following can result in multiple peptides and/or binding predictions for a single
+variant:
+
+1. Different epitope lengths: specifying multiple epitope lengths results in similar but non-identical epitope sequences for each 
+variant (e.g. KLPEPCPS, KLPEPCPST, KLPEPCPSTT, KLPEPCPSTTP).
+2. Different registers: pVACseq will test epitopes where the mutation is in every position (e.g. EPCPSTTP, PEPCPSTT, LPEPCPST, KLPEPCPS, ...).
+3. Different transcripts: in some case the peptide sequence surrounding a variant will depend on the reference transcript sequence, particularly
+if there are alternative splice sites near the variant position.
+4. Different HLA alleles: the HLA allele that produces the best predicted binding affinity is chosen.
+5. A homozygous somatic variant with heterozygous proximal variants nearby may produce multiple different peptides.
+
+The significance of choosing a single representative peptide can depend on your experimental or clinical aims.
+For example, if you are planning to use short peptide sequences exactly as they were assessed 
+for binding affinity in pVACseq (e.g. specific 9-mers for in vitro experimental validation or perhaps a dendritic cell vaccine delivery 
+approach) then the selection of a specific peptide from the possibilities caused by different lengths, registers, etc. 
+is very important. In some cases you may wish to consider more criteria beyond which of these candidates has the best 
+predicted binding affinity and gets chosen by the Top Score Filter. 
+
+On the other hand, if you plan to use synthetic long peptides (SLPs) or encode your candidates in a DNA vector, you will likely include 
+flanking amino acids. This means that you often get a lot of the different short peptides that correspond to slightly different lengths or 
+registers within the longer containing sequence. In this scenario, pVACseq's choice of a single candidate peptide by the Top Score Filter 
+isn't actually that critical in the sense of losing other good candidates, because you may get them all anyway.
+
+One important exception to this is the rare case where the same variant leads to different peptides in different transcripts 
+(due to different splice site usage). In this case, pVACseq still selects the top candidate as described above but including flanking 
+amino acid sequence won't help because you are only doing this from a single transcript. If multiple transcripts are expressed and 
+lead to distinct peptides, you may want to include both in your final list of candidates. The Top Score Filter doesn't yet support 
+this but the unfiltered results will still contain these candidates. This assumes you did not start with only a single transcript
+model for each gene (e.g. using the ``--pick`` option in VEP) and also that if you are requiring transcripts with TSL=1 that there
+are multiple qualifying transcripts that lead to different peptide sequences at the site of the variant. This will be fairly rare.
+Even though most genes have alternative transcripts, they often have only subtle differences in open reading frame and overall
+protein sequence, and only differences within the window that would influence a neoantigen candidate are consequential here.
+

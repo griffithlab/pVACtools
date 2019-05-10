@@ -24,6 +24,11 @@ variants.
 At this time, this option only handles missense proximal variants but we are
 working on a more comprehensive approach to this problem.
 
+Note that if you do not perform the proximal variants step, you should manually 
+review the sequence data for all candidates (e.g. in IGV) for proximal variants
+and either account for these manually, or eliminate these candidates. Failure to 
+do so may lead to inclusion of incorrect peptide sequences.
+
 How to create the phased VCF of proximal variants
 -------------------------------------------------
 
