@@ -126,7 +126,7 @@ if there are alternative splice sites near the variant position.
 
 The significance of choosing a single representative peptide can depend on your experimental or clinical aims.
 For example, if you are planning to use short peptide sequences exactly as they were assessed 
-for binding affinity in pvacseq (e.g. specific 9-mers for in vitro experimental validation or perhaps a dendritic cell vaccine delivery 
+for binding affinity in pVACseq (e.g. specific 9-mers for in vitro experimental validation or perhaps a dendritic cell vaccine delivery 
 approach) then the selection of a specific peptide from the possibilities caused by different lengths, registers, etc. 
 is very important. In some cases you may wish to consider more criteria beyond which of these candidates has the best 
 predicted binding affinity and gets chosen by the Top Score Filter. 
