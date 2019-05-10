@@ -141,7 +141,7 @@ One important exception to this is the rare case where the same variant leads to
 amino acid sequence won't help because you are only doing this from a single transcript. If multiple transcripts are expressed and 
 lead to distinct peptides, you may want to include both in your final list of candidates. The Top Score Filter doesn't yet support 
 this but the unfiltered results will still contain these candidates. This assumes you did not start with only a single transcript
-model for each gene (e.g. using the --pick option in ensembl) and also that if you are requiring transcripts with TSL=1 that there
+model for each gene (e.g. using the ``--pick`` option in VEP) and also that if you are requiring transcripts with TSL=1 that there
 are multiple qualifying transcripts that lead to different peptide sequences at the site of the variant. This will be fairly rare.
 Even though most genes have alternative transcripts, they often have only subtle differences in open reading frame and overall
 protein sequence, and only differences within the window that would influence a neoantigen candidate are consequential here.
