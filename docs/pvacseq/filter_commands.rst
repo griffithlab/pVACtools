@@ -116,7 +116,7 @@ It is important to note that there are several reasons why a particular variant 
 with different predicted binding affinities. The following can result in multiple peptides and/or binding predictions for a single
 variant:
 
-1. Different peptide lengths. e.g. if you specify multiple lengths, you get similar but non-idential peptide sequences for each 
+1. Different epitope lengths: specifying multiple epitope lengths results in similar but non-identical epitope sequences for each 
 variant (e.g. KLPEPCPS, KLPEPCPST, KLPEPCPSTT, KLPEPCPSTTP).
 2. Different registers. pvacseq will test peptides where the mutation is in every postion (e.g. EPCPSTTP, PEPCPSTT, LPEPCPST, KLPEPCPS, ...).
 3. Different transcripts. In some case the peptide sequence surrounding a variant will depend on the reference transcript sequence, particularly
