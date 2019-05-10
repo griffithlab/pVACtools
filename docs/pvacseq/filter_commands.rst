@@ -137,7 +137,7 @@ registers within the longer containing sequence. In this scenario, pVACseq's cho
 isn't actually that critical in the sense of losing other good candidates, because you may get them all anyway.
 
 One important exception to this is the rare case where the same variant leads to different peptides in different transcripts 
-(due to different splice site usage). In this case, pvacseq still selects the top candidate as described above but including flanking 
+(due to different splice site usage). In this case, pVACseq still selects the top candidate as described above but including flanking 
 amino acid sequence won't help because you are only doing this from a single transcript. If multiple transcripts are expressed and 
 lead to distinct peptides, you may want to include both in your final list of candidates. The Top Score Filter doesn't yet support 
 this but the unfiltered results will still contain these candidates. This assumes you did not start with only a single transcript
