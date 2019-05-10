@@ -121,7 +121,7 @@ variant (e.g. KLPEPCPS, KLPEPCPST, KLPEPCPSTT, KLPEPCPSTTP).
 2. Different registers: pVACseq will test epitopes where the mutation is in every position (e.g. EPCPSTTP, PEPCPSTT, LPEPCPST, KLPEPCPS, ...).
 3. Different transcripts: in some case the peptide sequence surrounding a variant will depend on the reference transcript sequence, particularly
 if there are alternative splice sites near the variant position.
-4. Different HLA alleles. The HLA allele that produces the best predicted binding affinity is chosen.
+4. Different HLA alleles: the HLA allele that produces the best predicted binding affinity is chosen.
 5. A homozygous somatic variant with heterozygous proximal variants nearby may produce multiple different peptides.
 
 The significance of choosing a single representative peptide can depend on your experimental or clinical aims.
