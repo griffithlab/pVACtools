@@ -133,7 +133,7 @@ predicted binding affinity and gets chosen by the Top Score Filter.
 
 On the other hand, if you plan to use synthetic long peptides (SLPs) or encode your candidates in a DNA vector, you will likely include 
 flanking amino acids. This means that you often get a lot of the different short peptides that correspond to slightly different lengths or 
-registers within the longer containing sequence. In this scenario, pvacseq's choice of a single candidate peptide by the Top Score Filter 
+registers within the longer containing sequence. In this scenario, pVACseq's choice of a single candidate peptide by the Top Score Filter 
 isn't actually that critical in the sense of losing other good candidates, because you may get them all anyway.
 
 One important exception to this is the rare case where the same variant leads to different peptides in different transcripts 
