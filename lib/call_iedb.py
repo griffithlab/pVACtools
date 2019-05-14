@@ -10,7 +10,7 @@ def setup_iedb_conda_env():
     response = env_check.stdout.decode("utf-8")
     if response.count("\n") == 1:
         #environment with name "pvactools_py27" already exists; check that it really runs python2.7
-        version_check = run("/bin/bash -c \"source activate pvactools_py27 && python -c \\\"import platform; print(platform.python_version())\\\"\"", stdout=PIPE, check=True, shell=True)
+        version_check = run("/bin/bash -c \"conda activate pvactools_py27 && python -c \\\"import platform; print(platform.python_version())\\\"\"", stdout=PIPE, check=True, shell=True)
         if "2.7." not in version_check.stdout.decode("utf-8"):
             sys.exit('The existing conda environment "pvactools_py27" does not use python2.7. Please delete the existing environment.')
     elif response.count("\n") == 0:
@@ -45,7 +45,14 @@ def main(args_input = sys.argv[1:]):
 
     prediction_class = getattr(sys.modules[__name__], args.method)
     prediction_class_object = prediction_class()
-    (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries)
+
+    try:
+        (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries)
+    except Exception as err:
+        if str(err) == 'len(peptide_list) != len(scores)':
+            (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries)
+        else:
+            raise err
 
     tmp_output_file = args.output_file + '.tmp'
     if output_mode == 'pandas':
