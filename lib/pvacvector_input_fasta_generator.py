@@ -51,7 +51,7 @@ class PvacvectorInputFastaGenerator():
         }).execute()
 
         with open(key_file.name, 'r') as fasta_key_file:
-            keys = yaml.load(fasta_key_file)
+            keys = yaml.load(fasta_key_file, Loader=yaml.FullLoader)
 
         dataframe = OrderedDict()
         with open(fasta_file.name, 'r') as fasta_file:

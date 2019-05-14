@@ -1,6 +1,7 @@
 import argparse
 import sys
 import csv
+import lib.sort
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser('pvacseq combine_parsed_outputs', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -44,27 +45,7 @@ def main(args_input = sys.argv[1:]):
                         row[fieldname] = 'NA'
                 rows.append(row)
 
-    sorted_rows = sorted(rows, key=lambda row: (int(row['Sub-peptide Position'])))
-    sorted_rows = sorted(sorted_rows, key=lambda row: (float(row['Corresponding Fold Change']) if row['Corresponding Fold Change'].isdigit() else float('inf')), reverse=True)
-    if args.top_score_metric == 'median':
-        sorted_rows = sorted(
-            sorted_rows,
-            key=lambda row: (
-                row['Gene Name'],
-                row['Mutation'],
-                float(row['Median MT Score']),
-            )
-        )
-    elif args.top_score_metric == 'lowest':
-        sorted_rows = sorted(
-            sorted_rows,
-            key=lambda row: (
-                row['Gene Name'],
-                row['Mutation'],
-                float(row['Best MT Score']),
-            )
-        )
-
+    sorted_rows = lib.sort.default_sort(rows, args.top_score_metric)
     tsv_writer = csv.DictWriter(args.output_file, list(fieldnames), delimiter = '\t', lineterminator = '\n')
     tsv_writer.writeheader()
     tsv_writer.writerows(sorted_rows)
