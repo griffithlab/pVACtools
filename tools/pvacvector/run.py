@@ -114,7 +114,7 @@ def run_pipelines(input_file, base_output_dir, args, spacer):
 
 def write_min_scores(min_scores_rows, directory, args):
     #This will write the junction scores for all tested spacers
-    min_scores_file = os.path.join(directory, '..', '..', 'junction_scores.tsv')
+    min_scores_file = os.path.join(directory, 'junction_scores.tsv')
     rows = []
     with open(min_scores_file, 'w') as fh:
         fieldnames = ['left_peptide', 'spacer', 'right_peptide', 'junction_score', 'epitope', 'allele', 'method']
@@ -158,14 +158,14 @@ def write_min_scores(min_scores_rows, directory, args):
             best_spacers_min_scores[index] = score
             best_spacers_min_scores_rows[index] = row
     sorted_best_spacers_min_scores_rows = sorted(best_spacers_min_scores_rows.values(), key=lambda k: k['junction_score'])
-    best_spacers_min_scores_file = os.path.join(directory, '..', '..', 'junction_scores.best_spacers.tsv')
+    best_spacers_min_scores_file = os.path.join(directory, 'junction_scores.best_spacers.tsv')
     with open(best_spacers_min_scores_file, 'w') as fh:
         fieldnames = ['left_peptide', 'spacer', 'right_peptide', 'junction_score', 'epitope', 'allele', 'method']
         writer = csv.DictWriter(fh, delimiter="\t", fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(sorted_best_spacers_min_scores_rows)
 
-def find_min_scores(parsed_output_files, args):
+def find_min_scores(parsed_output_files, current_output_dir, args):
     min_scores = {}
     min_scores_rows = {}
     indexes_with_good_binders = []
@@ -197,8 +197,7 @@ def find_min_scores(parsed_output_files, args):
                     min_scores[index] = score
                     min_scores_rows[index] = row
 
-    directory = os.path.dirname(parsed_output_files[0])
-    write_min_scores(min_scores_rows.values(), directory, args)
+    write_min_scores(min_scores_rows.values(), current_output_dir, args)
 
     for index in indexes_with_good_binders:
         if index in min_scores:
@@ -427,7 +426,7 @@ def main(args_input=sys.argv[1:]):
             current_output_dir = os.path.join(base_output_dir, str(tries), spacer)
             parsed_output_files = run_pipelines(input_file, current_output_dir, args, spacer)
             all_parsed_output_files.extend(parsed_output_files)
-            min_scores = find_min_scores(all_parsed_output_files, args)
+            min_scores = find_min_scores(all_parsed_output_files, current_output_dir, args)
             Paths = create_graph(min_scores, seq_tuples, processed_spacers)
             (valid, error) = check_graph_valid(Paths, seq_dict)
             if not valid:
