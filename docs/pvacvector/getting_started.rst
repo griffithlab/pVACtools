@@ -18,12 +18,11 @@ Here is an example of how to run pVACvector with a pVACseq output TSV:
    pvacvector run \
    <example_data_dir>/input.tsv \
    Test \
-   H-2-Kb \
-   NetMHC \
+   HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
+   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
    <output_dir> \
-   -e 8 \
+   -e 8,9,10 \
    -v <example_data_dir>/input.vcf
-   --keep-tmp-files
 
 In this example pVACvector is run with an input FASTA file:
 
@@ -32,10 +31,9 @@ In this example pVACvector is run with an input FASTA file:
    pvacvector run \
    <example_data_dir>/input.fa \
    Test \
-   H-2-Kb \
-   NetMHC \
+   HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
+   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
    <output_dir> \
-   -e 8 \
-   --keep-tmp-files
+   -e 8,9,10
 
 A detailed description of all command options can be found on the :ref:`Usage <pvacvector_run>` page.
