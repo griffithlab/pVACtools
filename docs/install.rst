@@ -162,6 +162,15 @@ You can check that the ``mhcflurry`` package was installed successfully by runni
 
 This should pull up the help page for the MHCflurry predictor.
 
+Please note that MHCflurry depends on tensorflow, which will automatically be installed as a
+dependency to the ``mhcflurry`` package. Newer versions of tensorflow might not be compatible
+with older CPUs. In that case you will see a core dump failure. Downgrading
+tensorflow manually to version 1.5.0 should solve this problem:
+
+.. code-block:: none
+
+   pip install tensorflow==1.5.0
+
 Installing MHCnuggets
 ---------------------
 
@@ -187,6 +196,15 @@ You can check that the ``mhcnuggets`` package was installed successfully by runn
    pip show mhcnuggets
 
 This should show information about the mhcnuggets package.
+
+Please note that MHCnuggets depends on tensorflow, which will automatically be installed as a
+dependency to the ``mhcnuggets`` package. Newer versions of tensorflow might not be compatible
+with older CPUs. In that case you will see a core dump failure. Downgrading
+tensorflow manually to version 1.5.0 should solve this problem:
+
+.. code-block:: none
+
+   pip install tensorflow==1.5.0
 
 PostgreSQL
 ----------

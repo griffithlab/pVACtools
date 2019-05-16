@@ -163,6 +163,14 @@ _____
 
 None of the variants in the VCF file are supported by pVACseq.
 
+**Illegal instruction (core dumped)**
+
+This issue may occur when you are trying to run the tensorflow-based
+prediction algorithms MHCnuggets and/or MHCflurry. This indicates that your
+computer's hardware does not support the version of tensorflow that is
+installed. Downgrading tensorflow manually to version 1.5.0 (``pip install
+tensorflow==1.5.0``) should solve this problem.
+
 
 .. A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided.")
    'Failed to extract format string from info description for tag (CSQ)')
