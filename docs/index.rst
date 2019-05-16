@@ -71,7 +71,7 @@ This version adds the following features:
   ``missense_variant``, ``inframe_insertion``, ``inframe_deletion``, or ``frameshift_variant``.
 - We resolved some syntax differences that prevented pVACtools from being run
   under python 3.6 or python 3.7. pVACtools should now be compatible with all
-  python versions.
+  python3 versions.
 
 Past release notes can be found on our :ref:`releases` page.
 
