@@ -30,3 +30,13 @@ This version adds the following features:
 - We resolved some syntax differences that prevented pVACtools from being run
   under python 3.6 or python 3.7. pVACtools should now be compatible with all
   python versions.
+
+1.4.1
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- In version 1.4 we updated our usage of conda to use ``conda activate``
+  instead of ``source activate`` to make it compatible with newer conda
+  versions. However, this was leading to errors due to the way that we were
+  calling conda. This has been updated and should resolve these types of
