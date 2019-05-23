@@ -63,4 +63,4 @@ _____________
   doi: `https://doi.org/10.4049/jimmunol.1600582 <https://doi.org/10.4049/jimmunol.1600582>`_.
   PubMed PMID: `27402703 <https://www.ncbi.nlm.nih.gov/pubmed/27402703>`_.
 - License: `Academic License
-  <http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?netMHCstabpan`_
+  <http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?netMHCstabpan>`_
