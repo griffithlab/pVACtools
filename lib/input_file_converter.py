@@ -499,7 +499,7 @@ class IntegrateConverter(InputFileConverter):
     def parse_agfusion_files(self):
         output_rows = []
         count = 1
-        for input_file in glob.glob(os.path.join(self.input_file, '*', '*_protein.fa')):
+        for input_file in sorted(glob.glob(os.path.join(self.input_file, '*', '*_protein.fa'))):
             (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end) = self.parse_exon_file(input_file)
             for record in SeqIO.parse(input_file, "fasta"):
                 record_info = dict(map(lambda x: x.split(': '), record.description.split(', ')[1:]))
