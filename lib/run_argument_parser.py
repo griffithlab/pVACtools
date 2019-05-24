@@ -215,7 +215,7 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
 class PvacfuseRunArgumentParser(PredictionRunArgumentParser):
     def __init__(self):
         tool_name = "pvacfuse"
-        input_file_help = "An INTEGRATE-Neo annotated bedpe file with fusions."
+        input_file_help = "An INTEGRATE-Neo annotated bedpe file with fusions or a AGfusion output directory."
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
 class PvacvectorRunArgumentParser(RunArgumentParser):
