@@ -7,6 +7,7 @@ import yaml
 import time
 import socket
 import connexion
+import postgresql as psql
 
 from flask import current_app
 from urllib.parse import urlencode
@@ -100,9 +101,10 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     )
 
     # check if the table exists:
-    db = current_app.config['storage']['db']
+    lock = current_app.config['storage']['db']
+    db = psql.open("localhost/pvacseq")
     fileID = str(fileID)
-    with db.synchronizer:
+    with lock.synchronizer:
         query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
         response = query(tablekey)
     if not len(response):  # table does not exist
@@ -163,62 +165,66 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
             rowid SERIAL PRIMARY KEY NOT NULL,\
             %s\
         )" % (tablekey, tablecolumns)
-        with db.xact():
-            db.execute(CREATE_TABLE)
-            # mark the table for deletion when the server shuts down
-            if 'db-clean' not in current_app.config:
-                current_app.config['db-clean'] = [tablekey]
-            else:
-                current_app.config['db-clean'].append(tablekey)
-            # prepare the insertion query
-            insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
-                tablekey,
-                ','.join(column_names),
-                ','.join('$%d' % i for (_, i) in zip(
-                    column_names, range(1, sys.maxsize)
-                ))
-            ))
-            update = "ALTER TABLE %s " % tablekey
-            for row in reader:
-                # process each row
-                # We format the data in the row and update column data types, if
-                # necessary
-                (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
-                if len(changes):
-                    #Generate a query to alter the table schema, if any changes are required
-                    alter_cols = []
-                    for (k, v) in changes.items():
-                        # if there were any changes to the data type, update the table
-                        # since we only ever update a text column to int/decimal, then
-                        # it's okay to nullify the data
-                        typ = ''
-                        if v == int:
-                            typ = 'bigint' if k in {'start', 'stop'} else 'integer'
-                        elif v == float:
-                            typ = 'decimal'
-                        alter_cols.append(
-                            "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
-                                k,
-                                typ
-                            )
-                        )
-                    # Re-generate the insert statement since the data types changed
-                    print("Alter:", update + ','.join(alter_cols))
-                    db.execute(update + ','.join(alter_cols))
-                    insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
-                        tablekey,
-                        ','.join(column_names),
-                        ','.join('$%d' % i for (_, i) in zip(
-                            column_names, range(1, sys.maxsize)
-                        ))
+        try:
+            with db.xact():
+                db.execute(CREATE_TABLE)
+                # mark the table for deletion when the server shuts down
+                if 'db-clean' not in current_app.config:
+                    current_app.config['db-clean'] = [tablekey]
+                else:
+                    current_app.config['db-clean'].append(tablekey)
+                db.prepare("LOCK TABLE %s IN ACCESS EXCLUSIVE MODE" % (tablekey))
+                # prepare the insertion query
+                insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
+                    tablekey,
+                    ','.join(column_names),
+                    ','.join('$%d' % i for (_, i) in zip(
+                        column_names, range(1, sys.maxsize)
                     ))
-                # insert the row
-                insert(*[formatted[column] for column in column_names])
-            raw_reader.close()
+                ))
+                update = "ALTER TABLE %s " % tablekey
+                for row in reader:
+                    # process each row
+                    # We format the data in the row and update column data types, if
+                    # necessary
+                    (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
+                    if len(changes):
+                        #Generate a query to alter the table schema, if any changes are required
+                        alter_cols = []
+                        for (k, v) in changes.items():
+                            # if there were any changes to the data type, update the table
+                            # since we only ever update a text column to int/decimal, then
+                            # it's okay to nullify the data
+                            typ = ''
+                            if v == int:
+                                typ = 'bigint' if k in {'start', 'stop'} else 'integer'
+                            elif v == float:
+                                typ = 'decimal'
+                            alter_cols.append(
+                                "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
+                                    k,
+                                    typ
+                                )
+                            )
+                        # Re-generate the insert statement since the data types changed
+                        print("Alter:", update + ','.join(alter_cols))
+                        db.execute(update + ','.join(alter_cols))
+                        insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
+                            tablekey,
+                            ','.join(column_names),
+                            ','.join('$%d' % i for (_, i) in zip(
+                                column_names, range(1, sys.maxsize)
+                            ))
+                        ))
+                    # insert the row
+                    insert(*[formatted[column] for column in column_names])
+        except psql.exceptions.UniqueError: #If another transaction already created specified table, pass
+            pass
+        raw_reader.close()
     #with db.synchronizer:
     #    test_query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     #    test_response = query(tablekey)
-    with db.synchronizer:
+    with lock.synchronizer:
         typequery = db.prepare(
             "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1"
         )
@@ -302,7 +308,8 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     if page:
         raw_query += " OFFSET %d" % (page * count)
     print("Query:", raw_query)
-    query = db.prepare(raw_query)
+    with db.xact('SERIALIZABLE', 'READ ONLY DEFERRABLE'):
+        query = db.prepare(raw_query)
     import decimal
     decimalizer = lambda x: (float(x) if type(x) == decimal.Decimal else x)
     return [
@@ -323,7 +330,7 @@ def fileschema(parentID, fileID):
     )
 
     # check if the table exists:
-    db = current_app.config['storage']['db']
+    db = psql.open("localhost/pvacseq")
     query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     if not len(query(tablekey)):  # table does not exist
         return ({
