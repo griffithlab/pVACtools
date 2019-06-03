@@ -87,6 +87,120 @@ def column_mapping(row, mapping, schema):
             output[col] = None
     return (mapping, output, changes)
 
+def create_table(parentID, fileID, data, tablekey, db):
+    # Open a reader to cache the file in the database
+    if parentID != -1:
+        process = fetch_process(parentID, data, current_app.config['storage']['children'])
+        if not process[0]:
+            return (
+                {
+                    "code": 400,
+                    "message": "The requested process (%d) does not exist" % parentID,
+                    "fields": "parentID"
+                }, 400
+            )
+        if is_running(process):
+            return []
+        if str(fileID) not in process[0]['files']:
+            return (
+                {
+                    "code": 400,
+                    "message": "The requested fileID (%s) does not exist for this process (%d)" % (fileID, parentID),
+                    "fields": "fileID"
+                }, 400
+            )
+        raw_reader = open(process[0]['files'][fileID]['fullname'])
+    else:
+        if str(fileID) not in data['visualize']:
+            return (
+                {
+                    "code": 400,
+                    "message": "The requested fileID (%s) does not exist in the visualize" % fileID,
+                    "fields": "fileID"
+                }, 400
+            )
+        raw_reader = open(data['visualize'][str(fileID)]['fullname'])
+    if not raw_reader.name.endswith('.tsv'):
+        ext = os.path.splitext(raw_reader.name)[1].lower()
+        if len(ext) and ext[0] == '.':
+            ext = ext[1:]
+        return serve_as(raw_reader, ext)
+    reader = csv.DictReader(raw_reader, delimiter='\t')
+
+    tmp_reader = open(raw_reader.name)
+    tmp = csv.DictReader(tmp_reader, delimiter='\t')
+    try:
+        init = next(tmp)
+    except StopIteration:
+        return []
+    tmp_reader.close()
+
+    # Get an initial estimate of column datatypes from the first row
+    (mapping, column_names) = init_column_mapping(init, current_app.config['schema'])
+    tablecolumns = "\n".join(  # use the estimated types to create the table
+        "%s %s," % (colname, column_names[colname])
+        for colname in column_names
+    )[:-1]
+    CREATE_TABLE = "CREATE TABLE %s (\
+        rowid SERIAL PRIMARY KEY NOT NULL,\
+        %s\
+    )" % (tablekey, tablecolumns)
+    try:
+        with db.xact():
+            db.execute(CREATE_TABLE)
+            # mark the table for deletion when the server shuts down
+            if 'db-clean' not in current_app.config:
+                current_app.config['db-clean'] = [tablekey]
+            else:
+                current_app.config['db-clean'].append(tablekey)
+            db.prepare("LOCK TABLE %s IN ACCESS EXCLUSIVE MODE" % (tablekey))
+            # prepare the insertion query
+            insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
+                tablekey,
+                ','.join(column_names),
+                ','.join('$%d' % i for (_, i) in zip(
+                    column_names, range(1, sys.maxsize)
+                ))
+            ))
+            update = "ALTER TABLE %s " % tablekey
+            for row in reader:
+                # process each row
+                # We format the data in the row and update column data types, if
+                # necessary
+                (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
+                if len(changes):
+                    #Generate a query to alter the table schema, if any changes are required
+                    alter_cols = []
+                    for (k, v) in changes.items():
+                        # if there were any changes to the data type, update the table
+                        # since we only ever update a text column to int/decimal, then
+                        # it's okay to nullify the data
+                        typ = ''
+                        if v == int:
+                            typ = 'bigint' if k in {'start', 'stop'} else 'integer'
+                        elif v == float:
+                            typ = 'decimal'
+                        alter_cols.append(
+                            "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
+                                k,
+                                typ
+                            )
+                        )
+                    # Re-generate the insert statement since the data types changed
+                    print("Alter:", update + ','.join(alter_cols))
+                    db.execute(update + ','.join(alter_cols))
+                    insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
+                        tablekey,
+                        ','.join(column_names),
+                        ','.join('$%d' % i for (_, i) in zip(
+                            column_names, range(1, sys.maxsize)
+                        ))
+                    ))
+                # insert the row
+                insert(*[formatted[column] for column in column_names])
+    except psql.exceptions.UniqueError: #If another transaction already created specified table, pass
+        pass
+    raw_reader.close()
 
 def filterfile(parentID, fileID, count, page, filters, sort, direction):
     """Gets the file ID belonging to the parent.\
@@ -108,119 +222,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
         query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
         response = query(tablekey)
     if not len(response):  # table does not exist
-        # Open a reader to cache the file in the database
-        if parentID != -1:
-            process = fetch_process(parentID, data, current_app.config['storage']['children'])
-            if not process[0]:
-                return (
-                    {
-                        "code": 400,
-                        "message": "The requested process (%d) does not exist" % parentID,
-                        "fields": "parentID"
-                    }, 400
-                )
-            if is_running(process):
-                return []
-            if str(fileID) not in process[0]['files']:
-                return (
-                    {
-                        "code": 400,
-                        "message": "The requested fileID (%s) does not exist for this process (%d)" % (fileID, parentID),
-                        "fields": "fileID"
-                    }, 400
-                )
-            raw_reader = open(process[0]['files'][fileID]['fullname'])
-        else:
-            if str(fileID) not in data['visualize']:
-                return (
-                    {
-                        "code": 400,
-                        "message": "The requested fileID (%s) does not exist in the visualize" % fileID,
-                        "fields": "fileID"
-                    }, 400
-                )
-            raw_reader = open(data['visualize'][str(fileID)]['fullname'])
-        if not raw_reader.name.endswith('.tsv'):
-            ext = os.path.splitext(raw_reader.name)[1].lower()
-            if len(ext) and ext[0] == '.':
-                ext = ext[1:]
-            return serve_as(raw_reader, ext)
-        reader = csv.DictReader(raw_reader, delimiter='\t')
-
-        tmp_reader = open(raw_reader.name)
-        tmp = csv.DictReader(tmp_reader, delimiter='\t')
-        try:
-            init = next(tmp)
-        except StopIteration:
-            return []
-        tmp_reader.close()
-
-        # Get an initial estimate of column datatypes from the first row
-        (mapping, column_names) = init_column_mapping(init, current_app.config['schema'])
-        tablecolumns = "\n".join(  # use the estimated types to create the table
-            "%s %s," % (colname, column_names[colname])
-            for colname in column_names
-        )[:-1]
-        CREATE_TABLE = "CREATE TABLE %s (\
-            rowid SERIAL PRIMARY KEY NOT NULL,\
-            %s\
-        )" % (tablekey, tablecolumns)
-        try:
-            with db.xact():
-                db.execute(CREATE_TABLE)
-                # mark the table for deletion when the server shuts down
-                if 'db-clean' not in current_app.config:
-                    current_app.config['db-clean'] = [tablekey]
-                else:
-                    current_app.config['db-clean'].append(tablekey)
-                db.prepare("LOCK TABLE %s IN ACCESS EXCLUSIVE MODE" % (tablekey))
-                # prepare the insertion query
-                insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
-                    tablekey,
-                    ','.join(column_names),
-                    ','.join('$%d' % i for (_, i) in zip(
-                        column_names, range(1, sys.maxsize)
-                    ))
-                ))
-                update = "ALTER TABLE %s " % tablekey
-                for row in reader:
-                    # process each row
-                    # We format the data in the row and update column data types, if
-                    # necessary
-                    (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
-                    if len(changes):
-                        #Generate a query to alter the table schema, if any changes are required
-                        alter_cols = []
-                        for (k, v) in changes.items():
-                            # if there were any changes to the data type, update the table
-                            # since we only ever update a text column to int/decimal, then
-                            # it's okay to nullify the data
-                            typ = ''
-                            if v == int:
-                                typ = 'bigint' if k in {'start', 'stop'} else 'integer'
-                            elif v == float:
-                                typ = 'decimal'
-                            alter_cols.append(
-                                "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
-                                    k,
-                                    typ
-                                )
-                            )
-                        # Re-generate the insert statement since the data types changed
-                        print("Alter:", update + ','.join(alter_cols))
-                        db.execute(update + ','.join(alter_cols))
-                        insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
-                            tablekey,
-                            ','.join(column_names),
-                            ','.join('$%d' % i for (_, i) in zip(
-                                column_names, range(1, sys.maxsize)
-                            ))
-                        ))
-                    # insert the row
-                    insert(*[formatted[column] for column in column_names])
-        except psql.exceptions.UniqueError: #If another transaction already created specified table, pass
-            pass
-        raw_reader.close()
+        create_table(parentID, fileID, data, tablekey, db)
     #with db.synchronizer:
     #    test_query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     #    test_response = query(tablekey)
