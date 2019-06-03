@@ -49,11 +49,8 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- In version 1.4 we updated our usage of conda to use ``conda activate``
-  instead of ``source activate`` to make it compatible with newer conda
-  versions. However, this was leading to errors due to the way that we were
-  calling conda. This has been updated and should resolve these types of
-  errors.
+- This releases fixes a concurrency issue with pVACapi/pVACviz that would occurr when
+  users would try to visualize multiple files at the same time
 
 New in version |version|
 ------------------------
