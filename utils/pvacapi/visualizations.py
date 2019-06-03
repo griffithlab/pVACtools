@@ -112,7 +112,8 @@ tablekey = "data_%s_%s" % (
 )
 # Fetch table data from postgres
 db = psql.open('localhost/pvacseq')
-raw_data = db.prepare("SELECT %s FROM %s" % (','.join(cols), tablekey))()
+with db.xact('SERIALIZABLE', 'READ ONLY DEFERRABLE'):
+    raw_data = db.prepare("SELECT %s FROM %s" % (','.join(cols), tablekey))()
 entries = [
     {
         col:float(val) if isinstance(val, decimal.Decimal) else val
