@@ -7,6 +7,7 @@ import yaml
 import time
 import socket
 import connexion
+import postgresql as psql
 
 from flask import current_app
 from urllib.parse import urlencode
@@ -86,83 +87,65 @@ def column_mapping(row, mapping, schema):
             output[col] = None
     return (mapping, output, changes)
 
-
-def filterfile(parentID, fileID, count, page, filters, sort, direction):
-    """Gets the file ID belonging to the parent.\
-    For result files, the parentID is the process ID that spawned them.\
-    For visualize files, the parentID is -1"""
-    data = current_app.config['storage']['loader']()
-
-    # first, generate the key
-    tablekey = "data_%s_%s" % (
-        (parentID if parentID >= 0 else 'visualize'),
-        fileID
-    )
-
-    # check if the table exists:
-    db = current_app.config['storage']['db']
-    fileID = str(fileID)
-    with db.synchronizer:
-        query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
-        response = query(tablekey)
-    if not len(response):  # table does not exist
-        # Open a reader to cache the file in the database
-        if parentID != -1:
-            process = fetch_process(parentID, data, current_app.config['storage']['children'])
-            if not process[0]:
-                return (
-                    {
-                        "code": 400,
-                        "message": "The requested process (%d) does not exist" % parentID,
-                        "fields": "parentID"
-                    }, 400
-                )
-            if is_running(process):
-                return []
-            if str(fileID) not in process[0]['files']:
-                return (
-                    {
-                        "code": 400,
-                        "message": "The requested fileID (%s) does not exist for this process (%d)" % (fileID, parentID),
-                        "fields": "fileID"
-                    }, 400
-                )
-            raw_reader = open(process[0]['files'][fileID]['fullname'])
-        else:
-            if str(fileID) not in data['visualize']:
-                return (
-                    {
-                        "code": 400,
-                        "message": "The requested fileID (%s) does not exist in the visualize" % fileID,
-                        "fields": "fileID"
-                    }, 400
-                )
-            raw_reader = open(data['visualize'][str(fileID)]['fullname'])
-        if not raw_reader.name.endswith('.tsv'):
-            ext = os.path.splitext(raw_reader.name)[1].lower()
-            if len(ext) and ext[0] == '.':
-                ext = ext[1:]
-            return serve_as(raw_reader, ext)
-        reader = csv.DictReader(raw_reader, delimiter='\t')
-
-        tmp_reader = open(raw_reader.name)
-        tmp = csv.DictReader(tmp_reader, delimiter='\t')
-        try:
-            init = next(tmp)
-        except StopIteration:
+def create_table(parentID, fileID, data, tablekey, db):
+    # Open a reader to cache the file in the database
+    if parentID != -1:
+        process = fetch_process(parentID, data, current_app.config['storage']['children'])
+        if not process[0]:
+            return (
+                {
+                    "code": 400,
+                    "message": "The requested process (%d) does not exist" % parentID,
+                    "fields": "parentID"
+                }, 400
+            )
+        if is_running(process):
             return []
-        tmp_reader.close()
+        if str(fileID) not in process[0]['files']:
+            return (
+                {
+                    "code": 400,
+                    "message": "The requested fileID (%s) does not exist for this process (%d)" % (fileID, parentID),
+                    "fields": "fileID"
+                }, 400
+            )
+        raw_reader = open(process[0]['files'][fileID]['fullname'])
+    else:
+        if str(fileID) not in data['visualize']:
+            return (
+                {
+                    "code": 400,
+                    "message": "The requested fileID (%s) does not exist in the visualize" % fileID,
+                    "fields": "fileID"
+                }, 400
+            )
+        raw_reader = open(data['visualize'][str(fileID)]['fullname'])
+    if not raw_reader.name.endswith('.tsv'):
+        ext = os.path.splitext(raw_reader.name)[1].lower()
+        if len(ext) and ext[0] == '.':
+            ext = ext[1:]
+        return serve_as(raw_reader, ext)
+    reader = csv.DictReader(raw_reader, delimiter='\t')
 
-        # Get an initial estimate of column datatypes from the first row
-        (mapping, column_names) = init_column_mapping(init, current_app.config['schema'])
-        tablecolumns = "\n".join(  # use the estimated types to create the table
-            "%s %s," % (colname, column_names[colname])
-            for colname in column_names
-        )[:-1]
-        CREATE_TABLE = "CREATE TABLE %s (\
-            rowid SERIAL PRIMARY KEY NOT NULL,\
-            %s\
-        )" % (tablekey, tablecolumns)
+    tmp_reader = open(raw_reader.name)
+    tmp = csv.DictReader(tmp_reader, delimiter='\t')
+    try:
+        init = next(tmp)
+    except StopIteration:
+        return []
+    tmp_reader.close()
+
+    # Get an initial estimate of column datatypes from the first row
+    (mapping, column_names) = init_column_mapping(init, current_app.config['schema'])
+    tablecolumns = "\n".join(  # use the estimated types to create the table
+        "%s %s," % (colname, column_names[colname])
+        for colname in column_names
+    )[:-1]
+    CREATE_TABLE = "CREATE TABLE %s (\
+        rowid SERIAL PRIMARY KEY NOT NULL,\
+        %s\
+    )" % (tablekey, tablecolumns)
+    try:
         with db.xact():
             db.execute(CREATE_TABLE)
             # mark the table for deletion when the server shuts down
@@ -170,6 +153,7 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                 current_app.config['db-clean'] = [tablekey]
             else:
                 current_app.config['db-clean'].append(tablekey)
+            db.prepare("LOCK TABLE %s IN ACCESS EXCLUSIVE MODE" % (tablekey))
             # prepare the insertion query
             insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
                 tablekey,
@@ -214,11 +198,35 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
                     ))
                 # insert the row
                 insert(*[formatted[column] for column in column_names])
-            raw_reader.close()
+    except psql.exceptions.UniqueError: #If another transaction already created specified table, pass
+        pass
+    raw_reader.close()
+
+def filterfile(parentID, fileID, count, page, filters, sort, direction):
+    """Gets the file ID belonging to the parent.\
+    For result files, the parentID is the process ID that spawned them.\
+    For visualize files, the parentID is -1"""
+    data = current_app.config['storage']['loader']()
+
+    # first, generate the key
+    tablekey = "data_%s_%s" % (
+        (parentID if parentID >= 0 else 'visualize'),
+        fileID
+    )
+
+    # check if the table exists:
+    lock = current_app.config['storage']['db']
+    db = psql.open("localhost/pvacseq")
+    fileID = str(fileID)
+    with lock.synchronizer:
+        query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+        response = query(tablekey)
+    if not len(response):  # table does not exist
+        create_table(parentID, fileID, data, tablekey, db)
     #with db.synchronizer:
     #    test_query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     #    test_response = query(tablekey)
-    with db.synchronizer:
+    with lock.synchronizer:
         typequery = db.prepare(
             "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1"
         )
@@ -302,7 +310,8 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     if page:
         raw_query += " OFFSET %d" % (page * count)
     print("Query:", raw_query)
-    query = db.prepare(raw_query)
+    with db.xact('SERIALIZABLE', 'READ ONLY DEFERRABLE'):
+        query = db.prepare(raw_query)
     import decimal
     decimalizer = lambda x: (float(x) if type(x) == decimal.Decimal else x)
     return [
@@ -323,7 +332,7 @@ def fileschema(parentID, fileID):
     )
 
     # check if the table exists:
-    db = current_app.config['storage']['db']
+    db = psql.open("localhost/pvacseq")
     query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     if not len(query(tablekey)):  # table does not exist
         return ({
