@@ -60,8 +60,9 @@ def column_mapping(row, mapping, schema):
     output = {}
     changes = {}
     for (col, val) in row.items():
+        #print(col + ': ' + str(type(val)) + ' ' + str(val))
         col = column_filter(col)
-        if val == None or NA_pattern.match(val):
+        if val == None or NA_pattern.match(str(val)):
             output[col] = None
             continue
         if col not in schema and mapping[col] == str:
@@ -154,50 +155,39 @@ def create_table(parentID, fileID, data, tablekey, db):
             else:
                 current_app.config['db-clean'].append(tablekey)
             db.prepare("LOCK TABLE %s IN ACCESS EXCLUSIVE MODE" % (tablekey))
-            # prepare the insertion query
-            insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
-                tablekey,
-                ','.join(column_names),
-                ','.join('$%d' % i for (_, i) in zip(
-                    column_names, range(1, sys.maxsize)
-                ))
-            ))
+            ordered_cols = raw_reader.readline()[:-1].split('\t')
+            copy_cols = ', '.join(column_filter(col) for col in ordered_cols)
+            copy_query = "COPY %s (%s) FROM '%s' WITH FREEZE NULL 'NA' DELIMITER E'\t' CSV HEADER" % (tablekey, copy_cols, raw_reader.name)
+            db.execute(copy_query)
+            col_val_query = "SELECT "
+            for col_name in column_names:
+                col_val_query += "(select %s from %s where %s is not null limit 1), "%(col_name, tablekey, col_name)
+            col_val_query = col_val_query[:-2]
+            col_values = db.prepare(col_val_query)
+            values = col_values()[0]
             update = "ALTER TABLE %s " % tablekey
-            for row in reader:
-                # process each row
-                # We format the data in the row and update column data types, if
-                # necessary
-                (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
-                if len(changes):
-                    #Generate a query to alter the table schema, if any changes are required
-                    alter_cols = []
-                    for (k, v) in changes.items():
-                        # if there were any changes to the data type, update the table
-                        # since we only ever update a text column to int/decimal, then
-                        # it's okay to nullify the data
-                        typ = ''
-                        if v == int:
-                            typ = 'bigint' if k in {'start', 'stop'} else 'integer'
-                        elif v == float:
-                            typ = 'decimal'
-                        alter_cols.append(
-                            "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
-                                k,
-                                typ
-                            )
+            row = dict(zip(col_values.column_names, values))
+            (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
+            if len(changes):
+            #Generate a query to alter the table schema, if any changes are required
+                alter_cols = []
+                for (k, v) in changes.items():
+                    # if there were any changes to the data type, update the table
+                    # since we only ever update a text column to int/decimal, then
+                    # it's okay to nullify the data
+                    typ = ''
+                    if v == int:
+                        typ = 'bigint' if k in {'start', 'stop'} else 'integer'
+                    elif v == float:
+                        typ = 'decimal'
+                    alter_cols.append(
+                        "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
+                            k,
+                            typ
                         )
-                    # Re-generate the insert statement since the data types changed
-                    print("Alter:", update + ','.join(alter_cols))
-                    db.execute(update + ','.join(alter_cols))
-                    insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
-                        tablekey,
-                        ','.join(column_names),
-                        ','.join('$%d' % i for (_, i) in zip(
-                            column_names, range(1, sys.maxsize)
-                        ))
-                    ))
-                # insert the row
-                insert(*[formatted[column] for column in column_names])
+                    )
+                print("Alter:", update + ','.join(alter_cols))
+                db.execute(update + ','.join(alter_cols))
     except psql.exceptions.UniqueError: #If another transaction already created specified table, pass
         pass
     raw_reader.close()
