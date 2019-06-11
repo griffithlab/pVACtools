@@ -188,6 +188,8 @@ def create_table(parentID, fileID, data, tablekey, db):
                     )
                 print("Alter:", update + ','.join(alter_cols))
                 db.execute(update + ','.join(alter_cols))
+            #TEMPORARY: remove "protein_position" column from tables as visualization of ranges not currently possible
+            db.execute(update + "DROP COLUMN protein_position")
     except psql.exceptions.UniqueError: #If another transaction already created specified table, pass
         pass
     raw_reader.close()
