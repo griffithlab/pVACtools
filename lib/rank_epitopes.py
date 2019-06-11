@@ -27,7 +27,7 @@ class RankEpitopes:
             'Tumor RNA Depth',
             'Tumor RNA VAF',
             'Gene Expression',
-            'Score',
+            'Rank',
         ]
 
     def execute(self):
@@ -43,6 +43,7 @@ class RankEpitopes:
         df['mt_allele_exp'] = df['Tumor RNA VAF'] * df['Gene Expression']
         df['mt_allele_exp_rank'] = df['mt_allele_exp'].rank(numeric_only=True, ascending=True, method='dense').fillna(value=0.0)
         df['tumor_dna_vaf_rank'] = df['Tumor DNA VAF'].rank(numeric_only=True, ascending=True, method='dense').fillna(value=0.0)
-        df['Score'] = df['mt_score_rank'] + df['fold_change_rank'] + (df['mt_allele_exp_rank'] * 2) + (df['tumor_dna_vaf_rank'] / 2)
-        df.sort_values(by=['Score'], inplace=True, ascending=False)
+        df['score'] = df['mt_score_rank'] + df['fold_change_rank'] + (df['mt_allele_exp_rank'] * 2) + (df['tumor_dna_vaf_rank'] / 2)
+        df['Rank'] = df['score'].rank(ascending=False, method='dense').astype(int)
+        df.sort_values(by=['Rank'], inplace=True, ascending=True)
         df.to_csv(self.output_file, sep='\t', na_rep='NA', columns=self.headers(), index=False)

@@ -1,2 +1,2 @@
-Gene Name	Mutation	Protein Position	HGVSc	HGVSp	HLA Allele	Mutation Position	MT Epitope Seq	Median MT Score	Median WT Score	Median Fold Change	Best MT Score	Corresponding WT Score	Corresponding Fold Change	Tumor DNA Depth	Tumor DNA VAF	Tumor RNA Depth	Tumor RNA VAF	Gene Expression	Score
-MPDU1>>GLP2R	NA	36	NA	NA	H2-IAb	NA	PAVWGLPGPNLHFHS	108.7	NA	NA	108.7	NA	NA	NA	NA	NA	NA	NA	1.0
+Gene Name	Mutation	Protein Position	HGVSc	HGVSp	HLA Allele	Mutation Position	MT Epitope Seq	Median MT Score	Median WT Score	Median Fold Change	Best MT Score	Corresponding WT Score	Corresponding Fold Change	Tumor DNA Depth	Tumor DNA VAF	Tumor RNA Depth	Tumor RNA VAF	Gene Expression	Rank
+MPDU1>>GLP2R	NA	36	NA	NA	H2-IAb	NA	PAVWGLPGPNLHFHS	108.7	NA	NA	108.7	NA	NA	NA	NA	NA	NA	NA	1
