@@ -4,8 +4,7 @@ dist: xenial
 python:
   - "3.5"
   - "3.6"
-#Tensorflow 1.5.0 is not available for python 3.7
-#  - "3.7"
+  - "3.7"
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y ghostscript
@@ -26,4 +25,3 @@ services:
   - postgresql
 script:
   - TEST_FLAG=1 python3 -m unittest discover -v
-  - prove --recurse --verbose

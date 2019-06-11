@@ -36,21 +36,51 @@ tools:
    :maxdepth: 1
 
    install
+   tools
    frequently_asked_questions
    releases
    citation
    contact
    mailing_list
 
-New in version |release|
+
+New in release |release|
 ------------------------
 
-This version is a hotfix release. It fixes the following issues:
+This is a hotfix release. It fixes the following issues:
 
-- The previous version accidentially removed the
-  ``--additional-input-file-list`` option. It has been restored in this
-  version. Please note that it is slated for permanent removal in the next
-  feature release (1.4.0).
+- This releases fixes a concurrency issue with pVACapi/pVACviz that would occurr when
+  users would try to visualize multiple files at the same time
+
+New in version |version|
+------------------------
+
+This version adds the following features:
+
+- pVACvector now tests spacers iteratively. During the first iteration, the
+  first spacer in the list of ``--spacers`` gets tested. In the next
+  iteration, the next spacer in the list gets added to the pool of spacers to
+  tests, and so on. If at any point a valid ordering is found, pVACvector will
+  finish its run and output the result. This might result in slightly
+  less optimal (but still valid) ordering but improves runtime significantly.
+- If, after testing all spacers, no valid ordering if found, pVACvector will
+  clip the beginning and/or ends of problematic peptides by one amino acid.
+  The ordering finding process is then repeated on the updated list of
+  peptides. This process may be repeated up to a maximum set by the
+  ``--max-clip-length`` parameter.
+- This version adds a standalone command to create the pVACvector
+  visualizations that can be run by calling ``pvacvector visualize`` using a
+  pVACvector result file as the input.
+- We removed the ``--aditional-input-file-list`` option to pVACseq. Readcount and
+  expression information are now taken directly from the VCF annotations.
+  Instructions on how to add these annotations to your input VCF can be found
+  on the :ref:`prerequisites_label` page.
+- We added support for variants to pVACseq that are only annotated as
+  ``protein_altering_variant`` without a more specific consequence of
+  ``missense_variant``, ``inframe_insertion``, ``inframe_deletion``, or ``frameshift_variant``.
+- We resolved some syntax differences that prevented pVACtools from being run
+  under python 3.6 or python 3.7. pVACtools should now be compatible with all
+  python3 versions.
 
 Past release notes can be found on our :ref:`releases` page.
 

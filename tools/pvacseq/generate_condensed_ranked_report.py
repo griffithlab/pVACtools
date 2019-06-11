@@ -33,7 +33,7 @@ def main(args_input = sys.argv[1:]):
     tmp_fh = tempfile.NamedTemporaryFile()
 
     print("Creating Condensed Report")
-    CondenseFinalReport(args.input_file, tmp_fh.name, args.top_score_metric).execute()
+    CondenseFinalReport(args.input_file, tmp_fh.name).execute()
     print("Completed")
 
     print("Ranking neoepitopes")

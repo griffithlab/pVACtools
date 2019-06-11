@@ -59,7 +59,7 @@ You may create a local install of the IEDB binding prediction tools by first dow
    before proceeding. If you do not agree to all of the terms of these two agreements,
    you must not install or use the product. Companies (for-profit entities) interested
    in downloading the command-line versions of the IEDB tools or running the entire analysis
-   resource locally, should contact us (license@iedb.org) for details on licensing options.
+   resource locally, should contact IEDB (license@iedb.org) for details on licensing options.
 
    Citing the IEDB
 
@@ -162,6 +162,15 @@ You can check that the ``mhcflurry`` package was installed successfully by runni
 
 This should pull up the help page for the MHCflurry predictor.
 
+Please note that MHCflurry depends on tensorflow, which will automatically be installed as a
+dependency to the ``mhcflurry`` package. Newer versions of tensorflow might not be compatible
+with older CPUs. In that case you will see a core dump failure. Downgrading
+tensorflow manually to version 1.5.0 should solve this problem:
+
+.. code-block:: none
+
+   pip install tensorflow==1.5.0
+
 Installing MHCnuggets
 ---------------------
 
@@ -187,6 +196,15 @@ You can check that the ``mhcnuggets`` package was installed successfully by runn
    pip show mhcnuggets
 
 This should show information about the mhcnuggets package.
+
+Please note that MHCnuggets depends on tensorflow, which will automatically be installed as a
+dependency to the ``mhcnuggets`` package. Newer versions of tensorflow might not be compatible
+with older CPUs. In that case you will see a core dump failure. Downgrading
+tensorflow manually to version 1.5.0 should solve this problem:
+
+.. code-block:: none
+
+   pip install tensorflow==1.5.0
 
 PostgreSQL
 ----------
