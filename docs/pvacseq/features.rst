@@ -99,7 +99,7 @@ for each variant. As with all previous filters, this filter can also be run
 
 **Ranking of candidate neoepitopes**
 
-Filtered neoepitopes are :ref:`ranked <score>` based on the binding affinity,
+Filtered neoepitopes are :ref:`ranked <rank>` based on the binding affinity,
 fold change between mutant and wildtype binding affinity (agretopicity), gene expression, RNA
 and DNA VAF.
 
