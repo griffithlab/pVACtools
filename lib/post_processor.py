@@ -120,12 +120,12 @@ class PostProcessor:
 
     def condense_report(self):
         print("Creating Condensed Report")
-        CondenseFinalReport(self.manufacturability_fh.name, self.condensed_report_fh.name, self.top_score_metric).execute()
+        CondenseFinalReport(self.manufacturability_fh.name, self.condensed_report_fh.name).execute()
         print("Completed")
 
     def rank_epitopes(self):
         print("Ranking neoepitopes")
-        RankEpitopes(self.condensed_report_fh.name, self.ranked_epitopes_fh.name).execute()
+        RankEpitopes(self.condensed_report_fh.name, self.ranked_epitopes_fh.name, self.top_score_metric).execute()
         print("Completed")
 
     def close_filehandles(self):

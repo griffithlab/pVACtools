@@ -21,7 +21,7 @@ class CondenseFinalReportTests(unittest.TestCase):
     def test_condense_final_report_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile()
-        self.assertFalse(RankEpitopes(os.path.join(self.test_data_dir, 'input.tsv'), output_file.name).execute())
+        self.assertFalse(RankEpitopes(os.path.join(self.test_data_dir, 'input.tsv'), output_file.name, 'median').execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "output.tsv"),
