@@ -1,0 +1,3 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+COX7A1	CAPNS1	ENST00000292907	ENST00000246533	PF02238	COX7a	Cytochrome c oxidase subunit VII	24	72
+COX7A1	CAPNS1	ENST00000292907	ENST00000246533	TMhelix	None	None	51	73

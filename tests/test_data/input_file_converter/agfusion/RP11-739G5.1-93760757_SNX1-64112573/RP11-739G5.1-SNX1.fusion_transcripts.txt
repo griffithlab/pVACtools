@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+RP11-739G5.1	SNX1	ENST00000554318	ENST00000261889	lincRNA	protein_coding	exon-exon	NA	NA
