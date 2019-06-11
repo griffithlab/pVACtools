@@ -143,6 +143,7 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         input_file_help = (
             "A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
             "Wildtype protein sequence, and Downstream protein sequence information."
+            "The VCF may be gzipped (requires tabix index)."
         )
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
@@ -153,7 +154,7 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
         )
         self.parser.add_argument(
             "-p", "--phased-proximal-variants-vcf",
-            help="A VCF with phased proximal variant information."
+            help="A VCF with phased proximal variant information. Must be gzipped and tabix indexed."
         )
         self.parser.add_argument(
             "-c", "--minimum-fold-change", type=float,
@@ -215,7 +216,7 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
 class PvacfuseRunArgumentParser(PredictionRunArgumentParser):
     def __init__(self):
         tool_name = "pvacfuse"
-        input_file_help = "An INTEGRATE-Neo annotated bedpe file with fusions."
+        input_file_help = "An INTEGRATE-Neo annotated bedpe file with fusions or a AGfusion output directory."
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
 class PvacvectorRunArgumentParser(RunArgumentParser):

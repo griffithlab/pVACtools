@@ -5,7 +5,7 @@ from lib.filter import *
 from lib.top_score_filter import *
 from lib.condense_final_report import *
 from lib.rank_epitopes import *
-from lib.post_processor import *
+from lib.calculate_manufacturability import *
 import lib.net_chop
 import lib.netmhc_stab
 
@@ -19,6 +19,7 @@ class PostProcessor:
         self.top_score_filter_fh = tempfile.NamedTemporaryFile()
         self.net_chop_fh = tempfile.NamedTemporaryFile()
         self.netmhc_stab_fh = tempfile.NamedTemporaryFile()
+        self.manufacturability_fh = tempfile.NamedTemporaryFile()
         self.condensed_report_fh = tempfile.NamedTemporaryFile()
         self.ranked_epitopes_fh = tempfile.NamedTemporaryFile()
 
@@ -29,9 +30,10 @@ class PostProcessor:
         self.execute_top_score_filter()
         self.call_net_chop()
         self.call_netmhc_stab()
+        self.calculate_manufacturability()
         self.condense_report()
         self.rank_epitopes()
-        shutil.copy(self.netmhc_stab_fh.name, self.filtered_report_file)
+        shutil.copy(self.manufacturability_fh.name, self.filtered_report_file)
         shutil.copy(self.ranked_epitopes_fh.name, self.condensed_report_file)
         self.close_filehandles()
 
@@ -111,14 +113,19 @@ class PostProcessor:
         else:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
 
+    def calculate_manufacturability(self):
+        print("Calculating Manufacturability Metrics")
+        CalculateManufacturability(self.netmhc_stab_fh.name, self.manufacturability_fh.name).execute()
+        print("Completed")
+
     def condense_report(self):
         print("Creating Condensed Report")
-        CondenseFinalReport(self.netmhc_stab_fh.name, self.condensed_report_fh.name, self.top_score_metric).execute()
+        CondenseFinalReport(self.manufacturability_fh.name, self.condensed_report_fh.name).execute()
         print("Completed")
 
     def rank_epitopes(self):
         print("Ranking neoepitopes")
-        RankEpitopes(self.condensed_report_fh.name, self.ranked_epitopes_fh.name).execute()
+        RankEpitopes(self.condensed_report_fh.name, self.ranked_epitopes_fh.name, self.top_score_metric).execute()
         print("Completed")
 
     def close_filehandles(self):
