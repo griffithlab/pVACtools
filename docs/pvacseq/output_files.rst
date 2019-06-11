@@ -102,7 +102,7 @@ Column Name          Description
 ``Rank``             A priority rank for the neoepitope (best = 1).
 ==================== ===========
 
-.. _score:
+.. _rank:
 
 The pVACseq Neoeptiope Priority Rank
 ____________________________________
