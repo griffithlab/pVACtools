@@ -21,6 +21,7 @@ install:
   - pip install bokeh==0.13.0
   - pip install tornado==5.0.2
   - pip install jsonschema==2.6.0
+  - pip install mhcnuggets==2.2
 services:
   - postgresql
 script:
