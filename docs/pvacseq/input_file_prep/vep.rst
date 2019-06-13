@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACseq logo
 
+.. _vep:
+
 Annotating your VCF with VEP
 ============================
 

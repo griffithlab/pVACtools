@@ -4,6 +4,7 @@ import sys
 import tempfile
 from filecmp import cmp
 import py_compile
+from .test_utils import *
 from lib.input_file_converter import *
 
 class InputFileConverterTests(unittest.TestCase):
@@ -16,6 +17,32 @@ class InputFileConverterTests(unittest.TestCase):
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
+
+    def test_error_truncated_vcf_middle_of_entry(self):
+        with self.assertRaises(Exception) as context:
+            convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_truncated_middle.vcf')
+            convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+            convert_vcf_params = {
+                'input_file'        : convert_vcf_input_file,
+                'output_file'       : convert_vcf_output_file.name,
+            }
+            converter = VcfConverter(**convert_vcf_params)
+            converter.execute()
+            self.assertTrue("VCF is truncated in the middle of an entry near string " in str(context.exception))
+
+    def test_error_truncated_vcf_end_of_file(self):
+        with self.assertRaises(Exception) as context:
+            convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_truncated_end.vcf')
+            convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+            convert_vcf_params = {
+                'input_file'        : convert_vcf_input_file,
+                'output_file'       : convert_vcf_output_file.name,
+            }
+            converter = VcfConverter(**convert_vcf_params)
+            converter.execute()
+            self.assertTrue('VCF is truncated at the end of the file' in str(context.exception))
 
     def test_input_vcf_generates_expected_tsv(self):
         convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
@@ -369,6 +396,21 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_sv.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
+    def test_total_length_protein_position(self):
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_total_length.vcf')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'        : convert_vcf_input_file,
+            'output_file'       : convert_vcf_output_file.name,
+            'sample_name'       : 'TUMOR',
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_total_length.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
     def test_integrate_input_generates_expected_tsv(self):
         convert_input_file  = os.path.join(self.test_data_dir, 'fusions_annotated.bedpe')
         convert_output_file = tempfile.NamedTemporaryFile()
@@ -382,6 +424,20 @@ class InputFileConverterTests(unittest.TestCase):
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_integrate.tsv')
         self.assertTrue(cmp(convert_output_file.name, expected_output_file))
+
+    def test_agfusion_input_generates_expected_tsv(self):
+        convert_input_file  = os.path.join(self.test_data_dir, 'agfusion')
+        convert_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'                 : convert_input_file,
+            'output_file'                : convert_output_file.name,
+        }
+        converter = IntegrateConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_agfusion.tsv')
+        self.assertTrue(compare(convert_output_file.name, expected_output_file))
 
     def test_proximal_variants_input(self):
         convert_input_file = os.path.join(self.test_data_dir, 'somatic.vcf.gz')

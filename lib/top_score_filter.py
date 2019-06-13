@@ -1,5 +1,6 @@
 import csv
 import argparse
+import lib.sort
 
 class TopScoreFilter:
     def __init__(self, input_file, output_file, top_score_metric, file_type='pVACseq'):
@@ -9,12 +10,23 @@ class TopScoreFilter:
         self.file_type = file_type
 
     def execute(self):
-        with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
+        rows = []
+        with open(self.input_file) as input_fh:
             reader = csv.DictReader(input_fh, delimiter = "\t")
-            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames = reader.fieldnames)
+            fieldnames = reader.fieldnames
+            for line in reader:
+                rows.append(line)
+
+
+        if self.file_type != 'pVACbind':
+            sorted_rows = lib.sort.default_sort(rows, self.top_score_metric)
+        else:
+            sorted_rows = lib.sort.pvacbind_sort(rows, self.top_score_metric)
+        with open(self.output_file, 'w') as output_fh:
+            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames = fieldnames)
             writer.writeheader()
             filtered_results = {}
-            for line in reader:
+            for line in sorted_rows:
                 if self.file_type != 'pVACbind':
                     chromosome = line['Chromosome']
                     start = line['Start']

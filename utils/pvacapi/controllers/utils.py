@@ -21,6 +21,7 @@ from math import ceil
 import operator
 import socket
 
+import argparse
 class dataObj(dict):
     def __init__(self, datafiles, sync):
         super().__init__()
@@ -181,7 +182,7 @@ def loaddata(datafiles, sync):
     sync.release()
     return data
 
-def initialize(current_app, args):
+def initialize(current_app):
     """Setup anything that needs to be configured before the app start"""
     #This section is run once, when the API spins up
     print("Initializing app configuration")
@@ -250,12 +251,11 @@ def initialize(current_app, args):
             'visualizations.py'
         )
     )
+    IP_ADDRESS = current_app.IP_ADDRESS
     #Check if the bokeh port is already in use.  Attempt to reconnect?
-    IPADDR = getIpAddress()
-
     current_app.config['storage']['bokeh']=subprocess.Popen(
-        'bokeh serve %s --address %s --allow-websocket-origin=%s:8080' % (
-            quote(visapp_path), IPADDR, IPADDR
+        'bokeh serve %s --address %s --allow-websocket-origin "*" --use-xheaders' % (
+            quote(visapp_path), IP_ADDRESS
         ),
         shell=True,
         stdout=subprocess.DEVNULL

@@ -3,22 +3,16 @@ import os
 import csv
 import sys
 import inspect
-stderr = sys.stderr
-sys.stderr = open(os.devnull, 'w')
-try:
-    from mhcflurry import Class1AffinityPredictor
-    from mhcnuggets.src.predict import predict
-except Exception as err:
-    sys.stderr = stderr
-    raise err
-sys.stderr = stderr
 import requests
 import re
 import pandas as pd
 import time
-from subprocess import run, PIPE
+from subprocess import run, DEVNULL, STDOUT
 import tempfile
 from collections import defaultdict
+from Bio import SeqIO
+import random
+import uuid
 
 class IEDB(metaclass=ABCMeta):
     @classmethod
@@ -59,26 +53,31 @@ class IEDB(metaclass=ABCMeta):
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
         if iedb_executable_path is not None:
             arguments = self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length)
-            response = run("/bin/bash -c \"source activate pvactools_py27; python {}\"".format(arguments), stdout=PIPE, check=True, shell=True)
-            response_text = self.filter_response(response.stdout)
+            response_fh = tempfile.TemporaryFile()
+            response = run(['/bin/bash', '-l', '-c', 'conda activate pvactools_py27; python {}'.format(arguments)], stdout=response_fh, check=True)
+            response_fh.seek(0)
+            response_text = self.filter_response(response_fh.read())
+            response_fh.close()
             return (response_text, 'wb')
         else:
-            data = {
-                'sequence_text': input_file.read(),
-                'method':        self.iedb_prediction_method,
-                'allele':        allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
-                'user_tool':     'pVac-seq',
-            }
+            with open(input_file, 'r') as input_fh:
+                data = {
+                    'sequence_text': input_fh.read(),
+                    'method':        self.iedb_prediction_method,
+                    'allele':        allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
+                    'user_tool':     'pVac-seq',
+                }
             if epitope_length is not None:
                 data['length'] = epitope_length
 
             response = requests.post(self.url, data=data)
             retries = 0
-            while response.status_code == 500 and retries < iedb_retries:
-                time.sleep(60 * retries)
-                response = requests.post(self.url, data=data)
-                print("IEDB: Retry %s of %s" % (retries, iedb_retries))
+            while (response.status_code == 500 or response.status_code == 403) and retries < iedb_retries:
+                random.seed(uuid.uuid4().int)
+                time.sleep(random.randint(30,90) * retries)
                 retries += 1
+                print("IEDB: Retry %s of %s" % (retries, iedb_retries))
+                response = requests.post(self.url, data=data)
 
             if response.status_code != 200:
                 sys.exit("Error posting request to IEDB.\n%s" % response.text)
@@ -97,44 +96,24 @@ class MHCnuggets(metaclass=ABCMeta):
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
 
-    def find_neoepitopes(self, sequence, length):
-        epitopes = defaultdict(list)
-        for i in range(0, len(sequence)-length+1):
-            epitope = sequence[i:i+length]
-            epitopes[epitope].append(i+1)
-        return epitopes
-
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, class_type):
-        epitope_seq_nums = defaultdict(list)
-        for line in input_file:
-            match = re.search('^>([0-9]+)$', line)
-            if match:
-                seq_num = match.group(1)
-            else:
-                epitopes = self.find_neoepitopes(line.rstrip(), epitope_length)
-                for epitope, starts in epitopes.items():
-                    for start in starts:
-                        epitope_seq_nums[epitope].append((seq_num, start))
-        tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
-        for epitope in epitope_seq_nums.keys():
-            tmp_file.write("{}\n".format(epitope))
-        tmp_file.close()
         tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-        predict(class_type, tmp_file.name, self.mhcnuggets_allele(allele), output=tmp_output_file.name)
+        script = os.path.join(os.path.dirname(os.path.realpath(__file__)), "call_mhcnuggets.py")
+        arguments = ["python", script, input_file, allele, str(epitope_length), class_type, tmp_output_file.name]
+        stderr_fh = tempfile.NamedTemporaryFile('w', delete=False)
+        try:
+            response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
+        except:
+            stderr_fh.close()
+            with open(stderr_fh.name, 'r') as fh:
+                err = fh.read()
+            os.unlink(stderr_fh.name)
+            raise Exception("An error occurred while calling MHCnuggets:\n{}".format(err))
+        stderr_fh.close()
+        os.unlink(stderr_fh.name)
         tmp_output_file.close()
         df = pd.read_csv(tmp_output_file.name)
-        processed_df = pd.DataFrame()
-        for index, row in df.iterrows():
-            seq_nums = epitope_seq_nums[row['peptide']]
-            for seq_num, start in seq_nums:
-                new_row = row.copy()
-                new_row['seq_num'] = seq_num
-                new_row['start'] = start
-                new_row['allele'] = allele
-                processed_df = processed_df.append(new_row)
-        processed_df['start'] = pd.to_numeric(processed_df['start'], downcast='integer')
-        processed_df = processed_df[['peptide', 'ic50', 'seq_num', 'start', 'allele']]
-        return (processed_df, 'pandas')
+        return (df, 'pandas')
 
 class PredictionClass(metaclass=ABCMeta):
     valid_allele_names_dict = {}
@@ -249,8 +228,11 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
 
 class MHCflurry(MHCI):
     def valid_allele_names(self):
-        predictor = Class1AffinityPredictor.load()
-        return predictor.supported_alleles
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_file_name = os.path.join(alleles_dir, "MHCflurry.txt")
+        with open(alleles_file_name, 'r') as fh:
+            return list(filter(None, fh.read().split('\n')))
 
     def check_length_valid_for_allele(self, length, allele):
         return True
@@ -265,20 +247,32 @@ class MHCflurry(MHCI):
         return epitopes
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
-        predictor = Class1AffinityPredictor.load()
         results = pd.DataFrame()
-        for line in input_file:
-            match = re.search('^>([0-9]+)$', line)
-            if match:
-                seq_num = match.group(1)
-            else:
-                epitopes = self.determine_neoepitopes(line.rstrip(), epitope_length)
-                if len(epitopes) > 0:
-                    df = predictor.predict_to_dataframe(allele=allele, peptides=epitopes)
-                    df['seq_num'] = seq_num
-                    df['start'] = df.index+1
-                    df.rename(columns={'prediction': 'ic50', 'prediction_percentile': 'percentile'}, inplace=True)
-                    results = results.append(df)
+        for record in SeqIO.parse(input_file, "fasta"):
+            seq_num = record.id
+            peptide = str(record.seq)
+            epitopes = self.determine_neoepitopes(peptide, epitope_length)
+            if len(epitopes) > 0:
+                tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+                arguments = ["mhcflurry-predict", "--alleles", allele, "--out", tmp_output_file.name, "--peptides"]
+                arguments.extend(epitopes)
+                stderr_fh = tempfile.NamedTemporaryFile('w', delete=False)
+                try:
+                    response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
+                except:
+                    stderr_fh.close()
+                    with open(stderr_fh.name, 'r') as fh:
+                        err = fh.read()
+                    os.unlink(stderr_fh.name)
+                    raise Exception("An error occurred while calling MHCflurry:\n{}".format(err))
+                stderr_fh.close()
+                os.unlink(stderr_fh.name)
+                tmp_output_file.close()
+                df = pd.read_csv(tmp_output_file.name)
+                df['seq_num'] = seq_num
+                df['start'] = df.index+1
+                df.rename(columns={'mhcflurry_prediction': 'ic50', 'mhcflurry_prediction_percentile': 'percentile'}, inplace=True)
+                results = results.append(df)
         return (results, 'pandas')
 
 class MHCnuggetsI(MHCI, MHCnuggets):
@@ -333,7 +327,7 @@ class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
             sys.exit("Length %s not valid for allele %s and method %s." % (length, allele, self.iedb_prediction_method))
 
     def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
-        return "{} {} {} {} {}".format(iedb_executable_path, method, allele, str(epitope_length), input_file.name)
+        return "{} {} {} {} {}".format(iedb_executable_path, method, allele, str(epitope_length), input_file)
 
 class NetMHC(IEDBMHCI):
     @property
@@ -411,7 +405,7 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
 
     def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
         allele = allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
-        return "{} {} {} {}".format(iedb_executable_path, method, allele, input_file.name)
+        return "{} {} {} {}".format(iedb_executable_path, method, allele, input_file)
 
 class NetMHCIIpan(IEDBMHCII):
     @property

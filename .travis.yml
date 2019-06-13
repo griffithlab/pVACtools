@@ -17,15 +17,12 @@ install:
   #with the newest version of the spec validator our swagger yml doesn't
   #validate anymore. Use a version that works.
   - pip install swagger-spec-validator==2.1.0
-  #The MHCflurry output will differ depending on the version of tensorflow
-  #The test data was created on tensorflow 1.8.0
-  - pip install tensorflow==1.13.1
   - pip install connexion==1.4.2
   - pip install bokeh==0.13.0
   - pip install tornado==5.0.2
   - pip install jsonschema==2.6.0
+  - pip install mhcnuggets==2.2
 services:
   - postgresql
 script:
   - TEST_FLAG=1 python3 -m unittest discover -v
-  - prove --recurse --verbose
