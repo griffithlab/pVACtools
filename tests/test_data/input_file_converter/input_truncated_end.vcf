@@ -1,0 +1,54 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##INFO=<ID=HOMLEN,Number=1,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=PF,Number=1,Type=Integer,Description="The number of samples carry the variant">
+##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=NTLEN,Number=.,Type=Integer,Description="Number of bases inserted in place of deleted code">
+##FILTER=<ID=LowQual,Description="Low quality">
+##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification">
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency, for each ALT allele, in the same order as listed">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##INFO=<ID=BaseQRankSum,Number=1,Type=Float,Description="Z-score from Wilcoxon rank sum test of Alt Vs. Ref base qualities">
+##INFO=<ID=ClippingRankSum,Number=1,Type=Float,Description="Z-score From Wilcoxon rank sum test of Alt vs. Ref number of hard clipped bases">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth; some reads may have been filtered">
+##INFO=<ID=DS,Number=0,Type=Flag,Description="Were any of the samples downsampled?">
+##INFO=<ID=ExcessHet,Number=1,Type=Float,Description="Phred-scaled p-value for exact test of excess heterozygosity">
+##INFO=<ID=FS,Number=1,Type=Float,Description="Phred-scaled p-value using Fisher's exact test to detect strand bias">
+##INFO=<ID=HaplotypeScore,Number=1,Type=Float,Description="Consistency of the site with at most two segregating haplotypes">
+##INFO=<ID=InbreedingCoeff,Number=1,Type=Float,Description="Inbreeding coefficient as estimated from the genotype likelihoods per-sample when compared against the Hardy-Weinberg expectation">
+##INFO=<ID=MLEAC,Number=A,Type=Integer,Description="Maximum likelihood expectation (MLE) for the allele counts (not necessarily the same as the AC), for each ALT allele, in the same order as listed">
+##INFO=<ID=MLEAF,Number=A,Type=Float,Description="Maximum likelihood expectation (MLE) for the allele frequency (not necessarily the same as the AF), for each ALT allele, in the same order as listed">
+##INFO=<ID=MQ,Number=1,Type=Float,Description="RMS Mapping Quality">
+##INFO=<ID=MQRankSum,Number=1,Type=Float,Description="Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities">
+##INFO=<ID=QD,Number=1,Type=Float,Description="Variant Confidence/Quality by Depth">
+##INFO=<ID=ReadPosRankSum,Number=1,Type=Float,Description="Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias">
+##INFO=<ID=SOR,Number=1,Type=Float,Description="Symmetric Odds Ratio of 2x2 contingency table to detect strand bias">
+##FILTER=<ID=indelError,Description="Likely artifact due to indel reads at this position">
+##FILTER=<ID=str10,Description="Less than 10% or more than 90% of variant supporting reads on one strand">
+##FORMAT=<ID=ABQ,Number=1,Type=Integer,Description="Average quality of variant-supporting bases (qual2)">
+##FORMAT=<ID=AD,Number=.,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed">
+##FORMAT=<ID=ADF,Number=1,Type=Integer,Description="Depth of variant-supporting bases on forward strand (reads2plus)">
+##FORMAT=<ID=ADR,Number=1,Type=Integer,Description="Depth of variant-supporting bases on reverse strand (reads2minus)">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Quality Read Depth of bases with Phred score >= 15">
+##FORMAT=<ID=FREQ,Number=1,Type=String,Description="Variant allele frequency">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=PVAL,Number=1,Type=String,Description="P-value from Fisher's Exact Test">
+##FORMAT=<ID=RBQ,Number=1,Type=Integer,Description="Average quality of reference-supporting bases (qual1)">
+##FORMAT=<ID=RD,Number=1,Type=Integer,Description="Depth of reference-supporting bases (reads1)">
+##FORMAT=<ID=RDF,Number=1,Type=Integer,Description="Depth of reference-supporting bases on forward strand (reads1plus)">
+##FORMAT=<ID=RDR,Number=1,Type=Integer,Description="Depth of reference-supporting bases on reverse strand (reads1minus)">
+##FORMAT=<ID=SDP,Number=1,Type=Integer,Description="Raw Read Depth as reported by SAMtools">
+##INFO=<ID=ADP,Number=1,Type=Integer,Description="Average per-sample depth of bases with Phred score >= 15">
+##INFO=<ID=HET,Number=1,Type=Integer,Description="Number of samples called heterozygous-variant">
+##INFO=<ID=HOM,Number=1,Type=Integer,Description="Number of samples called homozygous-variant">
+##INFO=<ID=NC,Number=1,Type=Integer,Description="Number of samples not called">
+##INFO=<ID=WT,Number=1,Type=Integer,Description="Number of samples called reference (wild-type)">
+##INFO=<ID=SF,Number=.,Type=String,Description="Source File (index to sourceFiles, f when filtered)">
+##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|DownstreamProtein|ProteinLengthChange|WildtypeProtein">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	TCGA-EE-A3J5-10A-01D-A20D-08
+1	17900351	.	CTG	C	267.73	.	ExcessHet=3.0103;FS=0;MQ=57.52;QD=25.42;SOR=1.022;SF=1;BaseQRankSum=-0.296;ClippingRankSum=-1.58;MQRankSum=0.296;ReadPosRankSum=0.731;DP=99;AF=1;MLEAC=2;MLEAF=1;AN=0;AC=0;CSQ=-|intron_variant|MODIFIER|ARHGEF10L|ENSG00000074964|Transcript|ENST00000361221|protein_coding||1/28||||||||||1||HGNC|25540|||MASSNPPPQPAIGDQLVPGVPGPSSEAEDDPGEAFEFDDSDDEEDTSAALGVPSLAPERDTDPPLIHLDSIPVTDPDPAAAPPGTGVPAWVSNGDAADAAFSGARHSSWKRKSSRRIDRFTFPALEEDVIYDDVPCESPDAHQPGAERNLLYEDAHRAGAPRQAEDLGWSSSEFESYSEDSGEEAKPEVEVEPAKHRVSFQPKLSPDLTRLKERYARTKRDILALRVGGRDMQELKHKYDCKMTQLMKAAKSGTKDGLEKTRMAVMRKVSFLHRKDVLGDSEEEDMGLLEVSVSDIKPPAPELGPMPEGLSPQQVVRRHILGSIVQSEGSYVESLKRILQDYRNPLMEMEPKALSARKCQVVFFRVKEILHCHSMFQIALSSRVAEWDSTEKIGDLFVASFSKSMVLDVYSDYVNNFTSAMSIIKKACLTKPAFLEFLKRRQVCSPDRVTLYGLMVKPIQRFPQFILLLQDMLKNTPRGHPDRLSLQLALTELETLAEKLNEQKRLADQVAEIQQLTKSVSDRSSLNKLLTSGQRQLLLCETLTETVYGDRGQLIKSKERRVFLLNDMLVCANINFKPANHRGQLEISSLVPLGPKYVVKWNTALPQVQVVEVGQDGGTYDKDNVLIQHSGAKKASASGQAQNKVYLGPPRLFQELQDLQKDLAVVEQITLLISTLHGTYQNLNMTVAQDWCLALQRLMRVKEEEIHSANKCRLRLLLPGKPDKSGRPISFMVVFITPNPLSKISWVNRLHLAKIGLREENQPGWLCPDEDKKSKAPFWCPILACCIPAFSSRALSLQLGALVHSPVNCPLLGFSAVSTSLPQGYLWVGGGQEGAGGQVEIFSLNRPSPRTVKSFPLAAPVLCMEYIPELEEEAESRDESPTVADPSATVHPTICLGLQDGSILLYSSVDTGTQCLVSCRSPGLQPVLCLRHSPFHLLAGLQDGTLAAYPRTSGGVLWDLESPPVCLTVGPGPVRTLLSLEDAVWASCGPWVTVLEATTLQPQQSFEAHQDEAVSVTHMVKAGSGVWMAFSSGTSIRLFHTETLEHLQEINIATRTTFLLPGQKHLCVTSLLICQGLLWVGTDQGVIVLLPVPRLEGIPKITGKGMVSLNGHCGPVAFLAVATSILAPDILRSDQEEAEGPRAEEDKPDGQAHEPMPDSHVGRELTRKKGILLQYRLRSTAHLPGPLLSMREPAPADGAALEHSEEDGSIYEMADDPDIWVRSRPCARDAHRKEICSVAIISGGQGYRNFGSALGSSGRQAPCGETDSTLLIWQVPLML,-|intron_variant|MODIFIER|ARHGEF10L|ENSG00000074964|Transcript|ENST00000434513|protein_coding||1/26||||||||||1||HGNC|25540|||MASSNPPPQPAIGDQLVPGVPGPSSEAEDDPGEAFEFDDSDDEEDTSAALGVPSLAPERDTDPPLIHLDSIPVTDPDPAAAPPGTGVPAWVSNGDAADAA1	

@@ -112,8 +112,62 @@ def run_pipelines(input_file, base_output_dir, args, spacer):
 
     return parsed_output_files
 
-def find_min_scores(parsed_output_files, args):
+def write_min_scores(min_scores_rows, directory, args):
+    #This will write the junction scores for all tested spacers
+    min_scores_file = os.path.join(directory, 'junction_scores.tsv')
+    rows = []
+    with open(min_scores_file, 'w') as fh:
+        fieldnames = ['left_peptide', 'spacer', 'right_peptide', 'junction_score', 'epitope', 'allele', 'method']
+        writer = csv.DictWriter(fh, delimiter="\t", fieldnames=fieldnames)
+        writer.writeheader()
+        for row in min_scores_rows:
+            index_parts = row['Mutation'].split('|')
+            left_peptide = index_parts[0]
+            if len(index_parts) == 2:
+                spacer = 'None'
+                right_peptide = index_parts[1]
+            else:
+                spacer = index_parts[1]
+                right_peptide = index_parts[2]
+            new_row = {
+                'left_peptide': left_peptide,
+                'spacer': spacer,
+                'right_peptide': right_peptide,
+                'epitope': row['Epitope Seq'],
+                'allele': row['HLA Allele'],
+            }
+            if args.top_score_metric == 'lowest':
+                new_row['junction_score'] = float(row['Best Score'])
+                new_row['method'] = row['Best Score Method']
+            elif args.top_score_metric == 'median':
+                new_row['junction_score'] = float(row['Median Score'])
+                new_row['method'] = 'median'
+            rows.append(new_row)
+        sorted_rows = sorted(rows, key=lambda k: k['junction_score'])
+        writer.writerows(sorted_rows)
+
+    #This will filter `rows` to only the ones with the best spacer for each junction
+    best_spacers_min_scores = {}
+    best_spacers_min_scores_rows = {}
+    for row in rows:
+        index = (row['left_peptide'], row['right_peptide'])
+        score = row['junction_score']
+        if index in best_spacers_min_scores and score >= best_spacers_min_scores[index]:
+            continue
+        else:
+            best_spacers_min_scores[index] = score
+            best_spacers_min_scores_rows[index] = row
+    sorted_best_spacers_min_scores_rows = sorted(best_spacers_min_scores_rows.values(), key=lambda k: k['junction_score'])
+    best_spacers_min_scores_file = os.path.join(directory, 'junction_scores.best_spacers.tsv')
+    with open(best_spacers_min_scores_file, 'w') as fh:
+        fieldnames = ['left_peptide', 'spacer', 'right_peptide', 'junction_score', 'epitope', 'allele', 'method']
+        writer = csv.DictWriter(fh, delimiter="\t", fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(sorted_best_spacers_min_scores_rows)
+
+def find_min_scores(parsed_output_files, current_output_dir, args):
     min_scores = {}
+    min_scores_rows = {}
     indexes_with_good_binders = []
     #find indexes that contain a good binder so that they can be excluded from further processing
     #we don't want any peptide-spacer-peptide combination (aka index) that contains a good binder
@@ -123,8 +177,6 @@ def find_min_scores(parsed_output_files, args):
             reader = csv.DictReader(parsed, delimiter="\t")
             for row in reader:
                 index = row['Mutation']
-                if index in indexes_with_good_binders:
-                    continue
 
                 if args.top_score_metric == 'lowest':
                     score = float(row['Best Score'])
@@ -138,12 +190,14 @@ def find_min_scores(parsed_output_files, args):
                     threshold = float(args.binding_threshold)
                 if score < threshold:
                     indexes_with_good_binders.append(index)
-                    continue
 
-                if index in min_scores:
-                    min_scores[index] = min(min_scores[index], score)
+                if index in min_scores and score >= min_scores[index]:
+                    continue
                 else:
                     min_scores[index] = score
+                    min_scores_rows[index] = row
+
+    write_min_scores(min_scores_rows.values(), current_output_dir, args)
 
     for index in indexes_with_good_binders:
         if index in min_scores:
@@ -372,7 +426,7 @@ def main(args_input=sys.argv[1:]):
             current_output_dir = os.path.join(base_output_dir, str(tries), spacer)
             parsed_output_files = run_pipelines(input_file, current_output_dir, args, spacer)
             all_parsed_output_files.extend(parsed_output_files)
-            min_scores = find_min_scores(all_parsed_output_files, args)
+            min_scores = find_min_scores(all_parsed_output_files, current_output_dir, args)
             Paths = create_graph(min_scores, seq_tuples, processed_spacers)
             (valid, error) = check_graph_valid(Paths, seq_dict)
             if not valid:
@@ -389,7 +443,7 @@ def main(args_input=sys.argv[1:]):
         tries += 1
 
     if results_file is None:
-        sys.exit(
+        raise Exception(
             'Unable to find path. ' +
             'A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
             '1) increasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
@@ -397,7 +451,7 @@ def main(args_input=sys.argv[1:]):
         )
 
     if 'DISPLAY' in os.environ.keys():
-        VectorVisualization(results_file, base_output_dir).draw()
+        VectorVisualization(results_file, base_output_dir, args.spacers).draw()
 
     if not args.keep_tmp_files:
         shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_I'), ignore_errors=True)

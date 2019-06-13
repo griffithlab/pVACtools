@@ -24,6 +24,11 @@ variants.
 At this time, this option only handles missense proximal variants but we are
 working on a more comprehensive approach to this problem.
 
+Note that if you do not perform the proximal variants step, you should manually 
+review the sequence data for all candidates (e.g. in IGV) for proximal variants
+and either account for these manually, or eliminate these candidates. Failure to 
+do so may lead to inclusion of incorrect peptide sequences.
+
 How to create the phased VCF of proximal variants
 -------------------------------------------------
 
@@ -95,6 +100,8 @@ _____________________________________________
    -L combined_somatic_plus_germline.sorted.vcf \
    -o phased.vcf
 
+.. _bgzip_phased_vcf:
+
 bgzip and index the phased VCF
 ______________________________
 
@@ -105,6 +112,8 @@ ______________________________
 
 The resulting ``phased.vcf.gz`` file can be used as the input to the
 ``--phased-proximal-variants-vcf`` option.
+
+.. _bgzip_input_vcf:
 
 bgzip and index the input VCF
 ______________________________

@@ -99,13 +99,13 @@ Column Name          Description
 ``Tumor RNA Depth``  Tumor RNA depth at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
 ``Tumor RNA VAF``    Tumor RNA variant allele frequency at this position. ``NA`` if VCF entry does not contain tumor RNA readcount annotation.
 ``Gene Expression``  Gene expression value at this position. ``NA`` if VCF entry does not contain gene expression annotation.
-``Score``            A priority score for the neoepitope. The higher the score, the better the neoepitope.
+``Rank``             A priority rank for the neoepitope (best = 1).
 ==================== ===========
 
-.. _score:
+.. _rank:
 
-The pVACseq Neoeptiope Priority Score
-_____________________________________
+The pVACseq Neoeptiope Priority Rank
+____________________________________
 
 Each of the following 4 criteria are assigned a rank-ordered value (worst = 1):
 
@@ -114,6 +114,4 @@ Each of the following 4 criteria are assigned a rank-ordered value (worst = 1):
 - M = Mutant allele expression, calculated as (``Gene Expression`` * ``Tumor RNA VAF``), with the highest being the best.
 - D = ``Tumor DNA VAF``, with the highest being the best.
 
-The ``Score`` is calculated from the above ranks with the following formula: ``B + F + (M * 2) + (D / 2)``
-
-Note that since this score is calculated from rank values for the current list of candidates, the score is entirely relative to each candidate list and can not be compared between lists. The Priority Score is simply a way of ordering candidates within a pvacseq result.
+A score is calculated from the above ranks with the following formula: ``B + F + (M * 2) + (D / 2)``. This score is then converted to a rank (best = 1).

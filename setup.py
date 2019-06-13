@@ -56,7 +56,7 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
 
 setup(
     name="pvactools",
-    version="1.3.2",
+    version="1.4.2",
     packages=[
         "tools",
         "tools.pvacfuse",
@@ -91,7 +91,6 @@ setup(
         'mhcflurry',
         'mhcnuggets',
         'pysam',
-        'tensorflow==1.13.1',
         'Pillow',
         'pymp-pypi',
         'connexion==1.4.2',
@@ -103,6 +102,7 @@ setup(
         'swagger-spec-validator==2.1.0',
         'jsonschema==2.6.0',
         'mock',
+        'vaxrank',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,

@@ -1,5 +1,6 @@
 __all__ = [
     "binding_filter",
+    "calculate_manufacturability",
     "call_iedb",
     "combine_parsed_outputs",
     "condense_final_report",
@@ -16,6 +17,7 @@ __all__ = [
     "rank_epitopes",
     "utils",
     "post_processor",
+    "vector_visualization",
 ]
 
 import os
