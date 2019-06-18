@@ -67,9 +67,9 @@ This is a hotfix release. It fixes the following issue(s):
 - When using the MHCnuggets prediction algorithm for MHC class II alleles
   (``MHCnuggetsII``) not all epitope sequences were predicted for inframe
   insertions. This issues has now been fixed.
-- For MHCflurry cases with peptide sequences that were shorter than the
+- For MHCflurry, cases with peptide sequences that were shorter than the
   desired epitope length were not handled correctly which resulted in an
-  error. This issues has been resolved in this release.
+  error. This issue has been resolved in this release.
 
 1.1.4
 -----
@@ -88,7 +88,7 @@ This is a hotfix release. It fixes the following issue(s):
 This is a hotfix release. It fixes the following issue(s):
 
 - When running pVACseq with a phased input VCF the mutation position offset
-  of a framshift somatic variant to their proximal variants was not getting
+  of a frameshift somatic variant to their proximal variants was not getting
   calculated correctly, leading to errors.
 - For running pVACvector we removed a dependency on a commandline tool by
   using a python library instead. This allowed us to remove a system call
