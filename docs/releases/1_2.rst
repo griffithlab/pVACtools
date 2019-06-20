@@ -11,7 +11,7 @@ of parallel processes. When running the
 tools using the IEDB RESTful API, we recommend to keep this number small (<5)
 as too many parallel calls to their API might lead to IEDB blocking jobs
 submitted from your IP address. It is recommended to use a standalone IEDB
-installation when running with in multiprocessing mode. By default, multiprocessing is
+installation when running in multiprocessing mode. By default, multiprocessing is
 turned off.
 
 This version also fixes a few bugs:

@@ -10,13 +10,13 @@ This version adds the following features:
   first spacer in the list of ``--spacers`` gets tested. In the next
   iteration, the next spacer in the list gets added to the pool of spacers to
   tests, and so on. If at any point a valid ordering is found, pVACvector will
-  finish its run and output the result. This might result in slightly
+  finish its run and output the result. This might result in a slightly
   less optimal (but still valid) ordering but improves runtime significantly.
 - If, after testing all spacers, no valid ordering if found, pVACvector will
   clip the beginning and/or ends of problematic peptides by one amino acid.
   The ordering finding process is then repeated on the updated list of
-  peptides. This process may be repeated up to a maximum set by the
-  ``--max-clip-length`` parameter.
+  peptides. This process may be repeated a number of times, depending on the
+  value of the  ``--max-clip-length`` parameter.
 - This version adds a standalone command to create the pVACvector
   visualizations that can be run by calling ``pvacvector visualize`` using a
   pVACvector result file as the input.
@@ -29,7 +29,7 @@ This version adds the following features:
   ``missense_variant``, ``inframe_insertion``, ``inframe_deletion``, or ``frameshift_variant``.
 - We resolved some syntax differences that prevented pVACtools from being run
   under python 3.6 or python 3.7. pVACtools should now be compatible with all
-  python versions.
+  python >= 3.5 versions.
 
 1.4.1
 -----
@@ -40,6 +40,7 @@ This is a hotfix release. It fixes the following issues:
   instead of ``source activate`` to make it compatible with newer conda
   versions. However, this was leading to errors due to the way that we were
   calling conda. This has been updated and should resolve these types of
+  errors.
 
 1.4.2
 -----
