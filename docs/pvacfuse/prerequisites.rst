@@ -10,15 +10,15 @@ Fusion detection and annotation
 
 pVACfuse accepts two types of inputs, either an annotated bedpe file with
 fusion information from `INTEGRATE-Neo <https://github.com/ChrisMaherLab/INTEGRATE-Neo>`_
-or a output directory from `AGfusion <https://github.com/murphycj/AGFusion>`_ (recommended).
+or a output directory from `AGFusion <https://github.com/murphycj/AGFusion>`_ (recommended).
 
-AGfusion
+AGFusion
 ________
 
-AGfusion allows a user to annotate output files from several fusion callers
+AGFusion allows a user to annotate output files from several fusion callers
 using the ``agfusion batch`` command. The below example is for annotating the
 output from the STAR-Fusion caller but many other fusion callers are supported.
-For a full list see the `AGfusion documentation <https://github.com/murphycj/AGFusion#input-from-fusion-finding-algorithms>`_.
+For a full list see the `AGFusion documentation <https://github.com/murphycj/AGFusion#input-from-fusion-finding-algorithms>`_.
 
 .. code-block:: none
 
@@ -27,7 +27,7 @@ For a full list see the `AGfusion documentation <https://github.com/murphycj/AGF
    -a starfusion \
    -db agfusion.homo_sapiens.87.db \
    - <output_directory> \
-   --middlestart \
+   --middlestar \
    --noncanonical
 
 The ``--middlestar`` flag is required in order to use the ouput with pVACfuse.
