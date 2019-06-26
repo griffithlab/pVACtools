@@ -59,6 +59,7 @@ setup(
     version="1.4.2",
     packages=[
         "tools",
+        "tools.pvacbind",
         "tools.pvacfuse",
         "tools.pvacvector",
         "tools.pvacseq",
