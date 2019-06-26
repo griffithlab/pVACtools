@@ -60,7 +60,6 @@ def column_mapping(row, mapping, schema):
     output = {}
     changes = {}
     for (col, val) in row.items():
-        #print(col + ': ' + str(type(val)) + ' ' + str(val))
         col = column_filter(col)
         if val == None or NA_pattern.match(str(val)):
             output[col] = None
@@ -101,7 +100,13 @@ def create_table(parentID, fileID, data, tablekey, db):
                 }, 400
             )
         if is_running(process):
-            return []
+            return (
+                {
+                    "code": 400,
+                    "message": "The requested process (%d) is still running" % parentID,
+                    "fields": "parentID"
+                }, 400
+            )
         if str(fileID) not in process[0]['files']:
             return (
                 {
@@ -214,7 +219,9 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
         query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
         response = query(tablekey)
     if not len(response):  # table does not exist
-        create_table(parentID, fileID, data, tablekey, db)
+        table_errors = create_table(parentID, fileID, data, tablekey, db)
+        if table_errors != None:
+            return table_errors
     #with db.synchronizer:
     #    test_query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     #    test_response = query(tablekey)
@@ -360,7 +367,8 @@ def serve_as(reader, filetype):
         }
 
 def visualize(parentID, fileID):
-    return '<html><head></head><body>%s</body></html'%visualize_script(parentID, fileID)
+    vis = visualize_script(parentID, fileID)
+    return '<html><head></head><body>%s</body></html'%(vis if type(vis)!=tuple else vis[0])
 
 def visualize_script(parentID, fileID):
     """Return an HTML document containing the requested table visualization"""
