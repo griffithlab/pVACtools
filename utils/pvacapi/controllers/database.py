@@ -163,7 +163,17 @@ def create_table(parentID, fileID, data, tablekey, db):
             ordered_cols = raw_reader.readline()[:-1].split('\t')
             copy_cols = ', '.join(column_filter(col) for col in ordered_cols)
             copy_query = "COPY %s (%s) FROM '%s' WITH FREEZE NULL 'NA' DELIMITER E'\t' CSV HEADER" % (tablekey, copy_cols, raw_reader.name)
+            #can occur when postgres user unable to open file due to permissions; specifically for travis-ci tests
+            #attempt to resolve by copying file to /tmp/, changing its permissions, and accessing it there
+            import subprocess
+            filedest = "/tmp/"+os.path.basename(raw_reader.name)
+            subprocess.run(["mktemp", filedest])
+            subprocess.run(["cp", raw_reader.name, filedest])
+            subprocess.run(["chmod", "666", filedest])
+            copy_query = "COPY %s (%s) FROM '%s' WITH FREEZE NULL 'NA' DELIMITER E'\t' CSV HEADER" % (tablekey, copy_cols, filedest)
             db.execute(copy_query)
+            subprocess.run(["rm", filedest])
+
             col_val_query = "SELECT "
             for col_name in column_names:
                 col_val_query += "(select %s from %s where %s is not null limit 1), "%(col_name, tablekey, col_name)
