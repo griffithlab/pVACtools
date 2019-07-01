@@ -33,6 +33,18 @@ class CalculateManufacturability:
             'asparagine_proline_bond_count'
         ]
 
+    def append_manufacturability_metrics(self, line, peptide):
+        metrics = peptide.manufacturability_scores
+        line['cterm_7mer_gravy_score'] = metrics.cterm_7mer_gravy_score
+        line['max_7mer_gravy_score'] = metrics.max_7mer_gravy_score
+        line['difficult_n_terminal_residue'] = metrics.difficult_n_terminal_residue
+        line['c_terminal_cysteine'] = metrics.c_terminal_cysteine
+        line['c_terminal_proline'] = metrics.c_terminal_proline
+        line['cysteine_count'] = metrics.cysteine_count
+        line['n_terminal_asparagine'] = metrics.n_terminal_asparagine
+        line['asparagine_proline_bond_count'] = metrics.asparagine_proline_bond_count
+        return line
+
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
             reader = csv.DictReader(input_fh, delimiter = "\t")
@@ -43,13 +55,5 @@ class CalculateManufacturability:
                     peptide = PvacpeptideVaccinePeptide(line['Epitope Seq'])
                 else:
                     peptide = PvacpeptideVaccinePeptide(line['MT Epitope Seq'])
-                metrics = peptide.manufacturability_scores
-                line['cterm_7mer_gravy_score'] = metrics.cterm_7mer_gravy_score
-                line['max_7mer_gravy_score'] = metrics.max_7mer_gravy_score
-                line['difficult_n_terminal_residue'] = metrics.difficult_n_terminal_residue
-                line['c_terminal_cysteine'] = metrics.c_terminal_cysteine
-                line['c_terminal_proline'] = metrics.c_terminal_proline
-                line['cysteine_count'] = metrics.cysteine_count
-                line['n_terminal_asparagine'] = metrics.n_terminal_asparagine
-                line['asparagine_proline_bond_count'] = metrics.asparagine_proline_bond_count
+                line = self.append_manufacturability_metrics(line, peptide)
                 writer.writerow(line)
