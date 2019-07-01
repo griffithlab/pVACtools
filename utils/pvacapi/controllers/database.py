@@ -151,62 +151,82 @@ def create_table(parentID, fileID, data, tablekey, db):
         rowid SERIAL PRIMARY KEY NOT NULL,\
         %s\
     )" % (tablekey, tablecolumns)
-    try:
-        with db.xact():
-            db.execute(CREATE_TABLE)
-            # mark the table for deletion when the server shuts down
-            if 'db-clean' not in current_app.config:
-                current_app.config['db-clean'] = [tablekey]
-            else:
-                current_app.config['db-clean'].append(tablekey)
-            db.prepare("LOCK TABLE %s IN ACCESS EXCLUSIVE MODE" % (tablekey))
-            ordered_cols = raw_reader.readline()[:-1].split('\t')
-            copy_cols = ', '.join(column_filter(col) for col in ordered_cols)
-            copy_query = "COPY %s (%s) FROM '%s' WITH FREEZE NULL 'NA' DELIMITER E'\t' CSV HEADER" % (tablekey, copy_cols, raw_reader.name)
+    file_permissions = True
+    retry_transaction = True
+    ordered_file_cols = raw_reader.readline()[:-1].split('\t')
+    all_tablecolumns = ', '.join(column_filter(col) for col in ordered_file_cols)
+    while(retry_transaction):
+        try:
+            with db.xact():
+                db.execute(CREATE_TABLE)
+                # mark the table for deletion when the server shuts down
+                if 'db-clean' not in current_app.config:
+                    current_app.config['db-clean'] = [tablekey]
+                else:
+                    current_app.config['db-clean'].append(tablekey)
+                db.prepare("LOCK TABLE %s IN ACCESS EXCLUSIVE MODE" % (tablekey))
+                copy_query = "COPY %s (%s) FROM '%s' WITH FREEZE NULL 'NA' DELIMITER E'\t' CSV HEADER" % (tablekey, all_tablecolumns, raw_reader.name)
+                #copy_query may result in psql.exceptions.InsufficientPrivilegeError when run; workaround attempted below
+                if file_permissions:
+                    db.execute(copy_query)
+                else:
+                    retry_transaction = False
+                    import subprocess
+                    filedest = "/tmp/"+os.path.basename(raw_reader.name)
+                    subprocess.run(["mktemp", filedest], stdout=subprocess.DEVNULL)
+                    subprocess.run(["cp", raw_reader.name, filedest])
+                    subprocess.run(["chmod", "666", filedest])
+                    copy_query = "COPY %s (%s) FROM '%s' WITH FREEZE NULL 'NA' DELIMITER E'\t' CSV HEADER" % (tablekey, all_tablecolumns, filedest)
+                    try:
+                        db.execute(copy_query)
+                        print("...Success")
+                    finally:
+                        subprocess.run(["rm", filedest])
+                col_val_query = "SELECT "
+                for col_name in column_names:
+                    col_val_query += "(select %s from %s where %s is not null limit 1), "%(col_name, tablekey, col_name)
+                col_val_query = col_val_query[:-2]
+                col_values = db.prepare(col_val_query)
+                values = col_values()[0]
+                update = "ALTER TABLE %s " % tablekey
+                row = dict(zip(col_values.column_names, values))
+                (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
+                if len(changes):
+                #Generate a query to alter the table schema, if any changes are required
+                    alter_cols = []
+                    for (k, v) in changes.items():
+                        # if there were any changes to the data type, update the table
+                        # since we only ever update a text column to int/decimal, then
+                        # it's okay to nullify the data
+                        typ = ''
+                        if v == int:
+                            typ = 'bigint' if k in {'start', 'stop'} else 'integer'
+                        elif v == float:
+                            typ = 'decimal'
+                        alter_cols.append(
+                            "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
+                                k,
+                                typ
+                            )
+                        )
+                    print("Alter:", update + ','.join(alter_cols))
+                    db.execute(update + ','.join(alter_cols))
+                #TEMPORARY: remove "protein_position" column from tables as visualization of ranges not currently possible
+                db.execute(update + "DROP COLUMN protein_position")
+        except psql.exceptions.UniqueError: #If another transaction already created specified table, pass
+            pass
+        except psql.exceptions.InsufficientPrivilegeError:
             #can occur when postgres user unable to open file due to permissions; specifically for travis-ci tests
             #attempt to resolve by copying file to /tmp/, changing its permissions, and accessing it there
-            import subprocess
-            filedest = "/tmp/"+os.path.basename(raw_reader.name)
-            subprocess.run(["mktemp", filedest])
-            subprocess.run(["cp", raw_reader.name, filedest])
-            subprocess.run(["chmod", "666", filedest])
-            copy_query = "COPY %s (%s) FROM '%s' WITH FREEZE NULL 'NA' DELIMITER E'\t' CSV HEADER" % (tablekey, copy_cols, filedest)
-            db.execute(copy_query)
-            subprocess.run(["rm", filedest])
-
-            col_val_query = "SELECT "
-            for col_name in column_names:
-                col_val_query += "(select %s from %s where %s is not null limit 1), "%(col_name, tablekey, col_name)
-            col_val_query = col_val_query[:-2]
-            col_values = db.prepare(col_val_query)
-            values = col_values()[0]
-            update = "ALTER TABLE %s " % tablekey
-            row = dict(zip(col_values.column_names, values))
-            (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
-            if len(changes):
-            #Generate a query to alter the table schema, if any changes are required
-                alter_cols = []
-                for (k, v) in changes.items():
-                    # if there were any changes to the data type, update the table
-                    # since we only ever update a text column to int/decimal, then
-                    # it's okay to nullify the data
-                    typ = ''
-                    if v == int:
-                        typ = 'bigint' if k in {'start', 'stop'} else 'integer'
-                    elif v == float:
-                        typ = 'decimal'
-                    alter_cols.append(
-                        "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
-                            k,
-                            typ
-                        )
-                    )
-                print("Alter:", update + ','.join(alter_cols))
-                db.execute(update + ','.join(alter_cols))
-            #TEMPORARY: remove "protein_position" column from tables as visualization of ranges not currently possible
-            db.execute(update + "DROP COLUMN protein_position")
-    except psql.exceptions.UniqueError: #If another transaction already created specified table, pass
-        pass
+            if file_permissions:
+                print("InsufficientPrivilegeError raised in accessing file.\nAttempting workaround...")
+                file_permissions = False
+            else:
+                print("Postgres could not access file.  Check to make sure that both the "
+                    "file and your current postgres user has the appropriate permissions.")
+                raise
+        else:
+            retry_transaction = False
     raw_reader.close()
 
 def filterfile(parentID, fileID, count, page, filters, sort, direction):
