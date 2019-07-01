@@ -16,9 +16,10 @@ class PvacpeptideVaccinePeptide(VaccinePeptide):
         )
 
 class CalculateManufacturability:
-    def __init__(self, input_file, output_file):
+    def __init__(self, input_file, output_file, file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
+        self.file_type = file_type
 
     def manufacturability_headers(self):
         return [
@@ -38,7 +39,10 @@ class CalculateManufacturability:
             writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + self.manufacturability_headers(), extrasaction='ignore')
             writer.writeheader()
             for line in reader:
-                peptide = PvacpeptideVaccinePeptide(line['MT Epitope Seq'])
+                if self.file_type == 'pVACbind':
+                    peptide = PvacpeptideVaccinePeptide(line['Epitope Seq'])
+                else:
+                    peptide = PvacpeptideVaccinePeptide(line['MT Epitope Seq'])
                 metrics = peptide.manufacturability_scores
                 line['cterm_7mer_gravy_score'] = metrics.cterm_7mer_gravy_score
                 line['max_7mer_gravy_score'] = metrics.max_7mer_gravy_score

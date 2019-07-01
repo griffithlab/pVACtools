@@ -338,7 +338,7 @@ class OutputParserTests(unittest.TestCase):
             'output_file'            : parse_output_output_file.name,
             'sample_name'            : None,
         }
-        parser = VectorOutputParser(**parse_output_params)
+        parser = UnmatchedSequencesOutputParser(**parse_output_params)
 
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output_pvacvector.iedb.parsed.tsv")

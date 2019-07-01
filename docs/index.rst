@@ -5,7 +5,10 @@ pVACtools is a cancer immunotherapy tools suite consisting of the following
 tools:
 
 **pVACseq**
-   A cancer immunotherapy pipeline for identifying and prioritizing neoantigens from a list of tumor mutations.
+   A cancer immunotherapy pipeline for identifying and prioritizing neoantigens from a VCF file.
+
+**pVACbind**
+   A cancer immunotherapy pipeline for identifying and prioritizing neoantigens from a FASTA file.
 
 **pVACfuse**
    A tool for detecting neoantigens resulting from gene fusions.
@@ -28,6 +31,7 @@ tools:
    :maxdepth: 2
 
    pvacseq
+   pvacbind
    pvacfuse
    pvacvector
    pvacviz
