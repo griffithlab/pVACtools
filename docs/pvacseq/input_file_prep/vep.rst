@@ -44,7 +44,7 @@ Running VEP
    ./vep \
    --input_file <input VCF> --output_file <output VCF> \
    --format vcf --vcf --symbol --terms SO --tsl\
-   --hgvs --fasta <reference build fasta file location> \
+   --hgvs --fasta <reference build FASTA file location> \
    --offline --cache [--dir_cache <VEP cache directory>] \
    --plugin Downstream --plugin Wildtype \
    [--dir_plugins <VEP_plugins directory>] [--pick] [--transcript_version]
@@ -60,7 +60,7 @@ ____________________
    --terms SO
    --tsl
    --hgvs
-   --fasta <reference build fasta location>
+   --fasta <reference build FASTA location>
    --offline
    --cache
    --plugin Downstream
@@ -76,7 +76,7 @@ ____________________
 - The ``--hgvs`` option will result in HGVS identifiers being added to the
   annotation.
 - Using the ``--hgvs`` option requires the usage of the ``--fasta`` argument to
-  specify the location of the reference genome build fasta file.
+  specify the location of the reference genome build FASTA file.
 - The ``--offline`` option will eliminate all network connections for speed
   and/or privacy.
 - The ``--cache`` option will result in the VEP cache being used for

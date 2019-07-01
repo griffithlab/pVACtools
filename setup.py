@@ -59,6 +59,7 @@ setup(
     version="1.4.2",
     packages=[
         "tools",
+        "tools.pvacbind",
         "tools.pvacfuse",
         "tools.pvacvector",
         "tools.pvacseq",
@@ -71,6 +72,7 @@ setup(
         "console_scripts":[
             "pvactools = tools.main:main",
             "pvacseq = tools.pvacseq.main:main",
+            "pvacbind = tools.pvacbind.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
             "pvacapi = utils.pvacapi.app:main",

@@ -20,8 +20,10 @@ class PostProcessor:
         self.net_chop_fh = tempfile.NamedTemporaryFile()
         self.netmhc_stab_fh = tempfile.NamedTemporaryFile()
         self.manufacturability_fh = tempfile.NamedTemporaryFile()
-        self.condensed_report_fh = tempfile.NamedTemporaryFile()
-        self.ranked_epitopes_fh = tempfile.NamedTemporaryFile()
+        self.file_type = kwargs.pop('file_type', None)
+        if self.run_condense_report:
+            self.condensed_report_fh = tempfile.NamedTemporaryFile()
+            self.ranked_epitopes_fh = tempfile.NamedTemporaryFile()
 
     def execute(self):
         self.execute_binding_filter()
@@ -34,8 +36,13 @@ class PostProcessor:
         self.condense_report()
         self.rank_epitopes()
         shutil.copy(self.manufacturability_fh.name, self.filtered_report_file)
-        shutil.copy(self.ranked_epitopes_fh.name, self.condensed_report_file)
+        if self.run_condense_report:
+            shutil.copy(self.ranked_epitopes_fh.name, self.condensed_report_file)
         self.close_filehandles()
+        if self.run_condense_report:
+            print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.condensed_report_file))
+        else:
+            print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
 
     def execute_binding_filter(self):
         print("Running Binding Filters")
@@ -47,6 +54,7 @@ class PostProcessor:
             self.top_score_metric,
             self.exclude_NAs,
             self.allele_specific_binding_thresholds,
+            self.file_type,
         ).execute()
         print("Completed")
 
@@ -84,7 +92,7 @@ class PostProcessor:
 
     def execute_top_score_filter(self):
         print("Running Top Score Filter")
-        TopScoreFilter(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric).execute()
+        TopScoreFilter(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric, self.file_type).execute()
         print("Completed")
 
     def call_net_chop(self):
@@ -115,18 +123,20 @@ class PostProcessor:
 
     def calculate_manufacturability(self):
         print("Calculating Manufacturability Metrics")
-        CalculateManufacturability(self.netmhc_stab_fh.name, self.manufacturability_fh.name).execute()
+        CalculateManufacturability(self.netmhc_stab_fh.name, self.manufacturability_fh.name, self.file_type).execute()
         print("Completed")
 
     def condense_report(self):
-        print("Creating Condensed Report")
-        CondenseFinalReport(self.manufacturability_fh.name, self.condensed_report_fh.name).execute()
-        print("Completed")
+        if self.run_condense_report:
+            print("Creating Condensed Report")
+            CondenseFinalReport(self.netmhc_stab_fh.name, self.condensed_report_fh.name).execute()
+            print("Completed")
 
     def rank_epitopes(self):
-        print("Ranking neoepitopes")
-        RankEpitopes(self.condensed_report_fh.name, self.ranked_epitopes_fh.name, self.top_score_metric).execute()
-        print("Completed")
+        if self.run_condense_report:
+            print("Ranking neoepitopes")
+            RankEpitopes(self.condensed_report_fh.name, self.ranked_epitopes_fh.name, self.top_score_metric).execute()
+            print("Completed")
 
     def close_filehandles(self):
         self.binding_filter_fh.close()
@@ -135,5 +145,6 @@ class PostProcessor:
         self.top_score_filter_fh.close()
         self.net_chop_fh.close()
         self.netmhc_stab_fh.close()
-        self.condensed_report_fh.close()
-        self.ranked_epitopes_fh.close()
+        if self.run_condense_report:
+            self.condensed_report_fh.close()
+            self.ranked_epitopes_fh.close()

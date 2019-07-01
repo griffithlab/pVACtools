@@ -584,7 +584,7 @@ class FusionOutputParser(OutputParser):
 
         return iedb_results
 
-class VectorOutputParser(OutputParser):
+class UnmatchedSequencesOutputParser(OutputParser):
     def parse_iedb_file(self):
         with open(self.key_file, 'r') as key_file_reader:
             tsv_indices_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
@@ -656,14 +656,23 @@ class VectorOutputParser(OutputParser):
 
     def base_headers(self):
         return[
+            'Mutation',
             'HLA Allele',
             'Sub-peptide Position',
-            'MT Epitope Seq',
-            'Best MT Score Method',
-            'Best MT Score',
-            'Median MT Score',
-            'Index',
+            'Epitope Seq',
+            'Median Score',
+            'Best Score',
+            'Best Score Method',
         ]
+
+    def output_headers(self):
+        headers = self.base_headers()
+        for method in self.prediction_methods():
+            pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
+            headers.append("%s Score" % pretty_method)
+        if self.sample_name:
+            headers.append("Sample Name")
+        return headers
 
     def execute(self):
         tmp_output_file = self.output_file + '.tmp'
@@ -685,18 +694,18 @@ class VectorOutputParser(OutputParser):
             row = {
                 'HLA Allele'          : allele,
                 'Sub-peptide Position': position,
-                'MT Epitope Seq'      : mt_epitope_seq,
-                'Best MT Score Method': PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
-                'Best MT Score'       : best_mt_score,
-                'Median MT Score'     : median_mt_score,
-                'Index'               : tsv_index,
+                'Epitope Seq'         : mt_epitope_seq,
+                'Best Score Method'   : PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
+                'Best Score'          : best_mt_score,
+                'Median Score'        : round(median_mt_score, 3),
+                'Mutation'            : tsv_index,
             }
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                 if method in mt_scores:
-                    row["%s MT Score" % pretty_method] = mt_scores[method]
+                    row["%s Score" % pretty_method] = mt_scores[method]
                 else:
-                    row["%s MT Score" % pretty_method] = 'NA'
+                    row["%s Score" % pretty_method] = 'NA'
             tsv_writer.writerow(row)
 
         tmp_output_filehandle.close()

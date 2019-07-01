@@ -22,6 +22,12 @@ def main(args_input = sys.argv[1:]):
              + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
              + "median: Use the median MT Score and Median Fold Change (i.e. the median MT ic50 binding score and fold change of all chosen prediction methods).",
     )
+    parser.add_argument(
+        '--file-type',
+        choices=['pVACseq', 'pVACfuse', 'pVACbind'],
+        default='pVACseq',
+        help="Pipeline that created files to be combined."
+    )
     args = parser.parse_args(args_input)
 
     fieldnames = []
@@ -45,7 +51,10 @@ def main(args_input = sys.argv[1:]):
                         row[fieldname] = 'NA'
                 rows.append(row)
 
-    sorted_rows = lib.sort.default_sort(rows, args.top_score_metric)
+    if args.file_type == 'pVACbind':
+        sorted_rows = lib.sort.pvacbind_sort(rows, args.top_score_metric)
+    else:
+        sorted_rows = lib.sort.default_sort(rows, args.top_score_metric)
     tsv_writer = csv.DictWriter(args.output_file, list(fieldnames), delimiter = '\t', lineterminator = '\n')
     tsv_writer.writeheader()
     tsv_writer.writerows(sorted_rows)
