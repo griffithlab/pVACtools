@@ -31,6 +31,12 @@ def define_parser():
         help="The output fasta file."
     )
     parser.add_argument(
+        "--mutant-only",
+        help="Only output mutant peptide sequences",
+        default=False,
+        action='store_true',
+    )
+    parser.add_argument(
         "-d", "--downstream-sequence-length",
         default="1000",
         help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
@@ -66,7 +72,7 @@ def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir
     fasta_generator.execute()
     print("Completed")
 
-def parse_files(output_file, temp_dir):
+def parse_files(output_file, temp_dir, mutant_only):
     print("Parsing the Variant Peptide FASTA and Key File")
     fasta_file_path = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file_path = os.path.join(temp_dir, 'tmp.fasta.key')
@@ -79,6 +85,8 @@ def parse_files(output_file, temp_dir):
     for record in SeqIO.parse(fasta_file_path, "fasta"):
         ids = keys[int(record.id)]
         for record_id in ids:
+            if mutant_only and record_id.startswith('WT.'):
+                continue
             new_record = SeqRecord(record.seq, id=record_id, description=record_id)
             output_records.append(new_record)
 
@@ -99,7 +107,7 @@ def main(args_input = sys.argv[1:]):
     temp_dir = tempfile.mkdtemp()
     convert_vcf(args.input_file, temp_dir)
     generate_fasta(args.peptide_sequence_length, downstream_sequence_length, temp_dir)
-    parse_files(args.output_file, temp_dir)
+    parse_files(args.output_file, temp_dir, args.mutant_only)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")
     CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()
