@@ -7,6 +7,10 @@ import tempfile
 import os
 import yaml
 from collections import OrderedDict
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import IUPAC
 from lib.fasta_generator import *
 from lib.input_file_converter import *
 from lib.calculate_manufacturability import *
@@ -71,22 +75,14 @@ def parse_files(output_file, temp_dir):
         keys = yaml.load(fasta_key_file, Loader=yaml.FullLoader)
 
     dataframe = OrderedDict()
-    with open(fasta_file_path, 'r') as fasta_file:
-        for line in fasta_file:
-            key      = line.rstrip().replace(">","")
-            sequence = fasta_file.readline().rstrip()
-            ids      = keys[int(key)]
-            for id in ids:
-                (type, index) = id.split('.', 1)
-                if index not in dataframe:
-                    dataframe[index] = {}
-                dataframe[index][type] = sequence
+    output_records = []
+    for record in SeqIO.parse(fasta_file_path, "fasta"):
+        ids = keys[int(record.id)]
+        for record_id in ids:
+            new_record = SeqRecord(record.seq, id=record_id, description=record_id)
+            output_records.append(new_record)
 
-    with open(output_file, 'w') as parsed_fasta_file:
-        for index, sequences in dataframe.items():
-            for type in ('WT', 'MT'):
-                parsed_fasta_file.write(">%s.%s\n" % (type, index))
-                parsed_fasta_file.write("%s\n" % sequences[type])
+    SeqIO.write(output_records, output_file, "fasta")
     print("Completed")
 
 def main(args_input = sys.argv[1:]):
