@@ -178,7 +178,7 @@ class PvacbindTests(unittest.TestCase):
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name)
-                self.assertTrue(cmp(output_file, expected_file))
+                self.assertTrue(compare(output_file, expected_file))
 
             for file_name in (
                 'Test.fa.split_1-48',
