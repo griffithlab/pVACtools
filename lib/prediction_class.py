@@ -226,6 +226,23 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
     def needs_epitope_length(self):
         return True
 
+    @classmethod
+    def species_for_allele(self, allele):
+        if allele.startswith('HLA'):
+            return 'human'
+        elif allele.startswith('Patr'):
+            return 'chimpanzee'
+        elif allele.startswith('Mamu'):
+            return 'macaque'
+        elif allele.startswith('BoLA'):
+            return 'cow'
+        elif allele.startswith('Eqca'):
+            return 'horse'
+        elif allele.startswith('H-2'):
+            return 'mouse'
+        elif allele.startswith('SLA'):
+            return 'pig'
+
 class MHCflurry(MHCI):
     def valid_allele_names(self):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
@@ -363,6 +380,13 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
     def needs_epitope_length(self):
         return False
+
+    @classmethod
+    def species_for_allele(self, allele):
+        if allele.startswith('H2'):
+            return 'mouse'
+        else:
+            return 'human'
 
 class MHCnuggetsII(MHCII, MHCnuggets):
     def valid_allele_names(self):

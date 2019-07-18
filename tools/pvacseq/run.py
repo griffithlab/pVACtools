@@ -98,10 +98,10 @@ def main(args_input = sys.argv[1:]):
     class_ii_alleles = []
     for allele in sorted(set(args.allele)):
         valid = 0
-        if allele in MHCI.all_valid_allele_names():
+        if allele in MHCI.all_valid_allele_names() and args.species == MHCI.species_for_allele(allele):
             class_i_alleles.append(allele)
             valid = 1
-        if allele in MHCII.all_valid_allele_names():
+        if allele in MHCII.all_valid_allele_names() and args.species == MHCII.species_for_allele(allele):
             class_ii_alleles.append(allele)
             valid = 1
         if not valid:

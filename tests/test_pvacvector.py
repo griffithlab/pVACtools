@@ -44,7 +44,7 @@ class TestPvacvector(unittest.TestCase):
         cls.input_file = os.path.join(cls.test_data_dir, 'Test.vector.results.input.fa')
         cls.method = 'NetMHC'
         cls.keep_tmp = 'True'
-        cls.allele = 'H-2-Kb'
+        cls.allele = 'HLA-A*02:01'
         cls.epitope_length = '8'
         cls.input_n_mer = '25'
 
