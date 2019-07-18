@@ -242,10 +242,9 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     )
 
     # check if the table exists:
-    lock = current_app.config['storage']['db']
     db = psql.open("localhost/pvacseq")
     fileID = str(fileID)
-    with lock.synchronizer:
+    with db.xact():
         query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
         response = query(tablekey)
     if not len(response):  # table does not exist
@@ -255,19 +254,19 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     #with db.synchronizer:
     #    test_query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     #    test_response = query(tablekey)
-    with lock.synchronizer:
+    with db.xact():
         typequery = db.prepare(
             "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1"
         )
         column_defs = typequery(tablekey)
-    column_maps = {}
-    for (col, typ) in column_defs:
-        if 'int' in typ:
-            column_maps[col] = int
-        elif typ == 'numeric'or typ == 'decimal':
-            column_maps[col] = float
-        else:
-            column_maps[col] = str
+        column_maps = {}
+        for (col, typ) in column_defs:
+            if 'int' in typ:
+                column_maps[col] = int
+            elif typ == 'numeric'or typ == 'decimal':
+                column_maps[col] = float
+            else:
+                column_maps[col] = str
     formatted_filters = []
     for i in range(len(filters)):
         f = filters[i].strip()
@@ -339,18 +338,20 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     if page:
         raw_query += " OFFSET %d" % (page * count)
     print("Query:", raw_query)
+    import decimal
     with db.xact('SERIALIZABLE', 'READ ONLY DEFERRABLE'):
         query = db.prepare(raw_query)
-    import decimal
-    decimalizer = lambda x: (float(x) if type(x) == decimal.Decimal else x)
-    return [
-        {
-            colname: decimalizer(value) for (colname, value) in zip(
-                [k[0] for k in column_defs],
-                [val for val in row]
-            )
-        } for row in query.rows()
-    ]
+        decimalizer = lambda x: (float(x) if type(x) == decimal.Decimal else x)
+        result = [
+            {
+                colname: decimalizer(value) for (colname, value) in zip(
+                    [k[0] for k in column_defs],
+                    [val for val in row]
+                )
+            } for row in query.rows()
+        ]
+    db.close()
+    return result
 
 
 def fileschema(parentID, fileID):
@@ -362,17 +363,20 @@ def fileschema(parentID, fileID):
 
     # check if the table exists:
     db = psql.open("localhost/pvacseq")
-    query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
-    if not len(query(tablekey)):  # table does not exist
-        return ({
-            'code': 400,
-            'message': "The requested file has not been loaded into the Postgres database",
-            'fields': "fileID"
-        }, 400)
-    typequery = db.prepare("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1")
-    return {
-        key: val for (key, val) in typequery(tablekey)
-    }
+    with db.xact():
+        query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+        if not len(query(tablekey)):  # table does not exist
+            return ({
+                'code': 400,
+                'message': "The requested file has not been loaded into the Postgres database",
+                'fields': "fileID"
+            }, 400)
+        typequery = db.prepare("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1")
+        result = {
+            key: val for (key, val) in typequery(tablekey)
+        }
+    db.close()
+    return result
 
 def serve_as(reader, filetype):
     if filetype == 'json':

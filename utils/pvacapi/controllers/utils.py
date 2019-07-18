@@ -285,20 +285,18 @@ def initialize(current_app):
         tmp.execute("CREATE DATABASE pvacseq")
     tmp.close()
     db = psql.open("localhost/pvacseq")
-    db.synchronizer = threading.RLock()
-    current_app.config['storage']['db'] = db
 
     @atexit.register
     def cleanup_database():
         print("Cleaning up database connections")
         if 'db-clean' in current_app.config:
-            with db.synchronizer:
+            with db.xact():
                 for table in current_app.config['db-clean']:
                     try:
-                        current_app.config['storage']['db'].execute("DROP TABLE %s"%table)
+                        db.execute("DROP TABLE %s"%table)
                     except UndefinedTableError:
                         pass
-        current_app.config['storage']['db'].close()
+        db.close()
 
     #setup directory structure:
     os.makedirs(
@@ -692,7 +690,7 @@ def initialize(current_app):
             if data['visualize'][key]['display_name'] == filename:
                 del data['visualize'][key]
                 print("Deleting file:",key,'-->', filename)
-                with db.synchronizer:
+                with db.xact():
                     query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
                     if len(query('data_visualize_'+str(key))):
                         db.execute("DROP TABLE data_visualize_"+str(key))
@@ -895,7 +893,7 @@ def initialize(current_app):
                     if filedata['fullname'] == filepath:
                         del data[processkey]['files'][file_id]
                         print("Deleted file:", file_id,'-->',filepath)
-                        with db.synchronizer:
+                        with db.xact():
                             query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
                             if len(query('data_%d_%s'%(parentID, file_id))):
                                 db.execute("DROP TABLE data_%d_%s"%(parentID, file_id))
