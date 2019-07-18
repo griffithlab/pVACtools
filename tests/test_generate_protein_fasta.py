@@ -55,6 +55,24 @@ class GenerateFastaTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutant_only.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
+    def test_input_tsv(self):
+        peptide_sequence_length            = '21'
+        generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
+        generate_protein_fasta_input_tsv   = os.path.join(self.test_data_dir, 'input.tsv')
+        generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            generate_protein_fasta_input_file,
+            peptide_sequence_length,
+            generate_protein_fasta_output_file.name,
+            '-d', 'full',
+            '--input-tsv', generate_protein_fasta_input_tsv,
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_with_tsv.fasta')
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
     def test_output_peptide_sequence_length_longer_that_wildtype(self):
         peptide_sequence_length            = '600'
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
