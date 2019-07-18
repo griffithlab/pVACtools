@@ -80,7 +80,7 @@ setup(
     install_requires=[
         'PyVCF',
         'requests',
-        'PyYAML',
+        'PyYAML>=5.1',
         'connexion==1.4.2',
         'biopython',
         'networkx',
