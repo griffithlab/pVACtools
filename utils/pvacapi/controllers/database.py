@@ -61,7 +61,7 @@ def column_mapping(row, mapping, schema):
     changes = {}
     for (col, val) in row.items():
         col = column_filter(col)
-        if val == None or NA_pattern.match(val):
+        if val == None or NA_pattern.match(str(val)):
             output[col] = None
             continue
         if col not in schema and mapping[col] == str:
@@ -100,7 +100,13 @@ def create_table(parentID, fileID, data, tablekey, db):
                 }, 400
             )
         if is_running(process):
-            return []
+            return (
+                {
+                    "code": 400,
+                    "message": "The requested process (%d) is still running" % parentID,
+                    "fields": "parentID"
+                }, 400
+            )
         if str(fileID) not in process[0]['files']:
             return (
                 {
@@ -145,31 +151,48 @@ def create_table(parentID, fileID, data, tablekey, db):
         rowid SERIAL PRIMARY KEY NOT NULL,\
         %s\
     )" % (tablekey, tablecolumns)
-    try:
-        with db.xact():
-            db.execute(CREATE_TABLE)
-            # mark the table for deletion when the server shuts down
-            if 'db-clean' not in current_app.config:
-                current_app.config['db-clean'] = [tablekey]
-            else:
-                current_app.config['db-clean'].append(tablekey)
-            db.prepare("LOCK TABLE %s IN ACCESS EXCLUSIVE MODE" % (tablekey))
-            # prepare the insertion query
-            insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
-                tablekey,
-                ','.join(column_names),
-                ','.join('$%d' % i for (_, i) in zip(
-                    column_names, range(1, sys.maxsize)
-                ))
-            ))
-            update = "ALTER TABLE %s " % tablekey
-            for row in reader:
-                # process each row
-                # We format the data in the row and update column data types, if
-                # necessary
+    file_permissions = True
+    retry_transaction = True
+    ordered_file_cols = raw_reader.readline()[:-1].split('\t')
+    all_tablecolumns = ', '.join(column_filter(col) for col in ordered_file_cols)
+    while(retry_transaction):
+        try:
+            with db.xact():
+                db.execute(CREATE_TABLE)
+                # mark the table for deletion when the server shuts down
+                if 'db-clean' not in current_app.config:
+                    current_app.config['db-clean'] = [tablekey]
+                else:
+                    current_app.config['db-clean'].append(tablekey)
+                db.prepare("LOCK TABLE %s IN ACCESS EXCLUSIVE MODE" % (tablekey))
+                copy_query = "COPY %s (%s) FROM '%s' WITH FREEZE NULL 'NA' DELIMITER E'\t' CSV HEADER" % (tablekey, all_tablecolumns, raw_reader.name)
+                #copy_query may result in psql.exceptions.InsufficientPrivilegeError when run; workaround attempted below
+                if file_permissions:
+                    db.execute(copy_query)
+                else:
+                    retry_transaction = False
+                    import subprocess
+                    filedest = "/tmp/"+os.path.basename(raw_reader.name)
+                    subprocess.run(["mktemp", filedest], stdout=subprocess.DEVNULL)
+                    subprocess.run(["cp", raw_reader.name, filedest])
+                    subprocess.run(["chmod", "666", filedest])
+                    copy_query = "COPY %s (%s) FROM '%s' WITH FREEZE NULL 'NA' DELIMITER E'\t' CSV HEADER" % (tablekey, all_tablecolumns, filedest)
+                    try:
+                        db.execute(copy_query)
+                        print("...Success")
+                    finally:
+                        subprocess.run(["rm", filedest])
+                col_val_query = "SELECT "
+                for col_name in column_names:
+                    col_val_query += "(select %s from %s where %s is not null limit 1), "%(col_name, tablekey, col_name)
+                col_val_query = col_val_query[:-2]
+                col_values = db.prepare(col_val_query)
+                values = col_values()[0]
+                update = "ALTER TABLE %s " % tablekey
+                row = dict(zip(col_values.column_names, values))
                 (mapping, formatted, changes) = column_mapping(row, mapping, current_app.config['schema'])
                 if len(changes):
-                    #Generate a query to alter the table schema, if any changes are required
+                #Generate a query to alter the table schema, if any changes are required
                     alter_cols = []
                     for (k, v) in changes.items():
                         # if there were any changes to the data type, update the table
@@ -186,20 +209,24 @@ def create_table(parentID, fileID, data, tablekey, db):
                                 typ
                             )
                         )
-                    # Re-generate the insert statement since the data types changed
                     print("Alter:", update + ','.join(alter_cols))
                     db.execute(update + ','.join(alter_cols))
-                    insert = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (
-                        tablekey,
-                        ','.join(column_names),
-                        ','.join('$%d' % i for (_, i) in zip(
-                            column_names, range(1, sys.maxsize)
-                        ))
-                    ))
-                # insert the row
-                insert(*[formatted[column] for column in column_names])
-    except psql.exceptions.UniqueError: #If another transaction already created specified table, pass
-        pass
+                #TEMPORARY: remove "protein_position" column from tables as visualization of ranges not currently possible
+                db.execute(update + "DROP COLUMN protein_position")
+        except psql.exceptions.UniqueError: #If another transaction already created specified table, pass
+            pass
+        except psql.exceptions.InsufficientPrivilegeError:
+            #can occur when postgres user unable to open file due to permissions; specifically for travis-ci tests
+            #attempt to resolve by copying file to /tmp/, changing its permissions, and accessing it there
+            if file_permissions:
+                print("InsufficientPrivilegeError raised in accessing file.\nAttempting workaround...")
+                file_permissions = False
+            else:
+                print("Postgres could not access file.  Check to make sure that both the "
+                    "file and your current postgres user has the appropriate permissions.")
+                raise
+        else:
+            retry_transaction = False
     raw_reader.close()
 
 def filterfile(parentID, fileID, count, page, filters, sort, direction):
@@ -215,30 +242,31 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     )
 
     # check if the table exists:
-    lock = current_app.config['storage']['db']
     db = psql.open("localhost/pvacseq")
     fileID = str(fileID)
-    with lock.synchronizer:
+    with db.xact():
         query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
         response = query(tablekey)
     if not len(response):  # table does not exist
-        create_table(parentID, fileID, data, tablekey, db)
+        table_errors = create_table(parentID, fileID, data, tablekey, db)
+        if table_errors != None:
+            return table_errors
     #with db.synchronizer:
     #    test_query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
     #    test_response = query(tablekey)
-    with lock.synchronizer:
+    with db.xact():
         typequery = db.prepare(
             "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1"
         )
         column_defs = typequery(tablekey)
-    column_maps = {}
-    for (col, typ) in column_defs:
-        if 'int' in typ:
-            column_maps[col] = int
-        elif typ == 'numeric'or typ == 'decimal':
-            column_maps[col] = float
-        else:
-            column_maps[col] = str
+        column_maps = {}
+        for (col, typ) in column_defs:
+            if 'int' in typ:
+                column_maps[col] = int
+            elif typ == 'numeric'or typ == 'decimal':
+                column_maps[col] = float
+            else:
+                column_maps[col] = str
     formatted_filters = []
     for i in range(len(filters)):
         f = filters[i].strip()
@@ -310,18 +338,20 @@ def filterfile(parentID, fileID, count, page, filters, sort, direction):
     if page:
         raw_query += " OFFSET %d" % (page * count)
     print("Query:", raw_query)
+    import decimal
     with db.xact('SERIALIZABLE', 'READ ONLY DEFERRABLE'):
         query = db.prepare(raw_query)
-    import decimal
-    decimalizer = lambda x: (float(x) if type(x) == decimal.Decimal else x)
-    return [
-        {
-            colname: decimalizer(value) for (colname, value) in zip(
-                [k[0] for k in column_defs],
-                [val for val in row]
-            )
-        } for row in query.rows()
-    ]
+        decimalizer = lambda x: (float(x) if type(x) == decimal.Decimal else x)
+        result = [
+            {
+                colname: decimalizer(value) for (colname, value) in zip(
+                    [k[0] for k in column_defs],
+                    [val for val in row]
+                )
+            } for row in query.rows()
+        ]
+    db.close()
+    return result
 
 
 def fileschema(parentID, fileID):
@@ -333,17 +363,20 @@ def fileschema(parentID, fileID):
 
     # check if the table exists:
     db = psql.open("localhost/pvacseq")
-    query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
-    if not len(query(tablekey)):  # table does not exist
-        return ({
-            'code': 400,
-            'message': "The requested file has not been loaded into the Postgres database",
-            'fields': "fileID"
-        }, 400)
-    typequery = db.prepare("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1")
-    return {
-        key: val for (key, val) in typequery(tablekey)
-    }
+    with db.xact():
+        query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
+        if not len(query(tablekey)):  # table does not exist
+            return ({
+                'code': 400,
+                'message': "The requested file has not been loaded into the Postgres database",
+                'fields': "fileID"
+            }, 400)
+        typequery = db.prepare("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1")
+        result = {
+            key: val for (key, val) in typequery(tablekey)
+        }
+    db.close()
+    return result
 
 def serve_as(reader, filetype):
     if filetype == 'json':
@@ -368,7 +401,8 @@ def serve_as(reader, filetype):
         }
 
 def visualize(parentID, fileID):
-    return '<html><head></head><body>%s</body></html'%visualize_script(parentID, fileID)
+    vis = visualize_script(parentID, fileID)
+    return '<html><head></head><body>%s</body></html'%(vis if type(vis)!=tuple else vis[0])
 
 def visualize_script(parentID, fileID):
     """Return an HTML document containing the requested table visualization"""
