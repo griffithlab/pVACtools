@@ -110,18 +110,21 @@ tablekey = "data_%s_%s" % (
     (parentID if parentID >= 0 else 'visualize'),
     fileID
 )
+#TEMPORARY: Remove column "protein_position" from list of columns since currently not visualizable
+cols.pop('protein_position', None)
 # Fetch table data from postgres
 db = psql.open('localhost/pvacseq')
 with db.xact('SERIALIZABLE', 'READ ONLY DEFERRABLE'):
     raw_data = db.prepare("SELECT %s FROM %s" % (','.join(cols), tablekey))()
-entries = [
-    {
-        col:float(val) if isinstance(val, decimal.Decimal) else val
-        for (col, val) in zip(cols, entry)
-    }
-    for entry in raw_data
-]
+    entries = [
+        {
+            col:float(val) if isinstance(val, decimal.Decimal) else val
+            for (col, val) in zip(cols, entry)
+        }
+        for entry in raw_data
+    ]
 
+db.close()
 entries.sort(key=lambda x:x['rowid'])
 del raw_data
 
