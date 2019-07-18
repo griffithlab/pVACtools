@@ -68,6 +68,7 @@ def main(args_input = sys.argv[1:]):
         'iedb_retries'              : args.iedb_retries,
         'keep_tmp_files'            : args.keep_tmp_files,
         'n_threads'                 : args.n_threads,
+        'species'                   : args.species,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
