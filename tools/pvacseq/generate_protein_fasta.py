@@ -7,6 +7,10 @@ import tempfile
 import os
 import yaml
 from collections import OrderedDict
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import IUPAC
 from lib.fasta_generator import *
 from lib.input_file_converter import *
 from lib.calculate_manufacturability import *
@@ -25,6 +29,12 @@ def define_parser():
     parser.add_argument(
         "output_file",
         help="The output fasta file."
+    )
+    parser.add_argument(
+        "--mutant-only",
+        help="Only output mutant peptide sequences",
+        default=False,
+        action='store_true',
     )
     parser.add_argument(
         "-d", "--downstream-sequence-length",
@@ -62,7 +72,7 @@ def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir
     fasta_generator.execute()
     print("Completed")
 
-def parse_files(output_file, temp_dir):
+def parse_files(output_file, temp_dir, mutant_only):
     print("Parsing the Variant Peptide FASTA and Key File")
     fasta_file_path = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file_path = os.path.join(temp_dir, 'tmp.fasta.key')
@@ -71,22 +81,16 @@ def parse_files(output_file, temp_dir):
         keys = yaml.load(fasta_key_file, Loader=yaml.FullLoader)
 
     dataframe = OrderedDict()
-    with open(fasta_file_path, 'r') as fasta_file:
-        for line in fasta_file:
-            key      = line.rstrip().replace(">","")
-            sequence = fasta_file.readline().rstrip()
-            ids      = keys[int(key)]
-            for id in ids:
-                (type, index) = id.split('.', 1)
-                if index not in dataframe:
-                    dataframe[index] = {}
-                dataframe[index][type] = sequence
+    output_records = []
+    for record in SeqIO.parse(fasta_file_path, "fasta"):
+        ids = keys[int(record.id)]
+        for record_id in ids:
+            if mutant_only and record_id.startswith('WT.'):
+                continue
+            new_record = SeqRecord(record.seq, id=record_id, description=record_id)
+            output_records.append(new_record)
 
-    with open(output_file, 'w') as parsed_fasta_file:
-        for index, sequences in dataframe.items():
-            for type in ('WT', 'MT'):
-                parsed_fasta_file.write(">%s.%s\n" % (type, index))
-                parsed_fasta_file.write("%s\n" % sequences[type])
+    SeqIO.write(output_records, output_file, "fasta")
     print("Completed")
 
 def main(args_input = sys.argv[1:]):
@@ -103,7 +107,7 @@ def main(args_input = sys.argv[1:]):
     temp_dir = tempfile.mkdtemp()
     convert_vcf(args.input_file, temp_dir)
     generate_fasta(args.peptide_sequence_length, downstream_sequence_length, temp_dir)
-    parse_files(args.output_file, temp_dir)
+    parse_files(args.output_file, temp_dir, args.mutant_only)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")
     CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()
