@@ -56,7 +56,7 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
 
 setup(
     name="pvactools",
-    version="1.4.2",
+    version="1.4.3",
     packages=[
         "tools",
         "tools.pvacfuse",
