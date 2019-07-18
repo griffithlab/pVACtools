@@ -116,14 +116,15 @@ cols.pop('protein_position', None)
 db = psql.open('localhost/pvacseq')
 with db.xact('SERIALIZABLE', 'READ ONLY DEFERRABLE'):
     raw_data = db.prepare("SELECT %s FROM %s" % (','.join(cols), tablekey))()
-entries = [
-    {
-        col:float(val) if isinstance(val, decimal.Decimal) else val
-        for (col, val) in zip(cols, entry)
-    }
-    for entry in raw_data
-]
+    entries = [
+        {
+            col:float(val) if isinstance(val, decimal.Decimal) else val
+            for (col, val) in zip(cols, entry)
+        }
+        for entry in raw_data
+    ]
 
+db.close()
 entries.sort(key=lambda x:x['rowid'])
 del raw_data
 
