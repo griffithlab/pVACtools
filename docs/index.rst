@@ -53,13 +53,9 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- IEDB will output a warning if an epitope contains only amino acid symbols
-  that could also be nucleotides. This would cause an error during parsing of
-  the IEDB output files. This version updates the parser to ignore these
-  warnings.
-- We added some improvements to pVACapi regarding database file read
-  speeds and transaction handling. This version also starts enforcing a file
-  size limit (14MB) for result files. Larger files will no longer be
+- This version starts enforcing a file
+  size limit (14MB) to be able to visualize a result file in pVACviz.
+  Larger files will no longer be
   visualizable in pVACviz since they take too long to load.
 
 New in version |version|
