@@ -144,7 +144,7 @@ def visualization_type(ext):
             ext = '.'.join(ext.split('.')[1:])
     return None
 
-def check_size(file, max_tries = 5):
+def file_not_empty(file, max_tries = 5):
     tries = 1
     while tries <= max_tries:
         try:
@@ -152,10 +152,26 @@ def check_size(file, max_tries = 5):
                 read = csv.DictReader(f, delimiter='\t')
                 try:
                     next(read)
+                    break
                 except StopIteration:
                     if tries >= max_tries:
                         return False
-        except IOError as e:
+        except IOError:
+            if tries >= max_tries:
+                print('Could not check size of file',file)
+        time.sleep(1)
+        tries += 1
+    return True
+
+def file_not_max(file, max_tries = 5):
+    max_file_size = 14*1024*1024 #14 MiB in bytes
+    tries = 1
+    while tries <= max_tries:
+        try:
+            if os.path.getsize(file) >= max_file_size: #NOTE: max_file_size not determined yet
+                return False
+            break
+        except os.error:
             if tries >= max_tries:
                 print('Could not check size of file',file)
         time.sleep(1)
@@ -285,20 +301,18 @@ def initialize(current_app):
         tmp.execute("CREATE DATABASE pvacseq")
     tmp.close()
     db = psql.open("localhost/pvacseq")
-    db.synchronizer = threading.RLock()
-    current_app.config['storage']['db'] = db
 
     @atexit.register
     def cleanup_database():
         print("Cleaning up database connections")
         if 'db-clean' in current_app.config:
-            with db.synchronizer:
+            with db.xact():
                 for table in current_app.config['db-clean']:
                     try:
-                        current_app.config['storage']['db'].execute("DROP TABLE %s"%table)
+                        db.execute("DROP TABLE %s"%table)
                     except UndefinedTableError:
                         pass
-        current_app.config['storage']['db'].close()
+        db.close()
 
     #setup directory structure:
     os.makedirs(
@@ -401,7 +415,8 @@ def initialize(current_app):
             print("Updating input entry",key,"to new format")
             fullname = os.path.join(inputdir, filename)
             viz = is_visualizable(ext)
-            size = check_size(fullname, 1) if viz else None
+            size = file_not_empty(fullname, 1) if viz else None
+            check_max = file_not_max(fullname, 1) if size else None
             data['input'][key] = {
                 'fullname':fullname,
                 'display_name':os.path.relpath(
@@ -409,8 +424,9 @@ def initialize(current_app):
                     inputdir
                 ),
                 'description':descriptions(ext),
-                'is_visualizable': viz and size,
-                'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                'is_visualizable': viz and size and check_max,
+                'visualization_type': 'File contains no data' if viz and not size else \
+                                      'File exceeds max size' if viz and not check_max else visualization_type(ext),
             }
     recorded = {item['fullname'] for item in data['input'].values()}
     targets = {k for k in data['input'] if data['input'][k]['fullname'] in recorded-current}
@@ -424,7 +440,8 @@ def initialize(current_app):
         print("Assigning file:", file_id,"-->",filename)
         fullname = os.path.abspath(os.path.join(inputdir, filename))
         viz = is_visualizable(ext)
-        size = check_size(fullname, 1) if viz else None
+        size = file_not_empty(fullname, 1) if viz else None
+        check_max = file_not_max(fullname, 1) if size else None
         data['input'][str(file_id)] = {
             'fullname':fullname,
             'display_name':os.path.relpath(
@@ -432,22 +449,25 @@ def initialize(current_app):
                 inputdir
             ),
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         }
     for filename in current:
         file_path = os.path.abspath(os.path.join(inputdir, filename))
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         file_id = str([k for k,v in data['input'].items() if v['fullname'] == file_path][0])
         viz = is_visualizable(ext)
-        size = check_size(data['input'][file_id]['fullname'], 1) if viz else None
+        size = file_not_empty(data['input'][file_id]['fullname'], 1) if viz else None
+        check_max = file_not_max(data['input'][file_id]['fullname'], 1) if size else None
         nav_to_dir(file_path, inputdir, hier_inp).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
             'fileID':file_id,
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         })
 
     def _create(event):
@@ -462,7 +482,8 @@ def initialize(current_app):
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         print("Creating file:", file_id, "-->",filename)
         viz = is_visualizable(ext)
-        size = check_size(event.src_path) if viz else None
+        size = file_not_empty(event.src_path) if viz else None
+        check_max = file_not_max(event.src_path) if size else None
         data['input'][str(file_id)] = {
             'fullname':os.path.abspath(os.path.join(
                 inputdir,
@@ -470,16 +491,18 @@ def initialize(current_app):
             )),
             'display_name':filename,
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         }
         nav_to_dir(event.src_path, inputdir, hier_inp).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
             'fileID':str(file_id),
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         })
         data.save()
     input_watcher.subscribe(
@@ -521,7 +544,8 @@ def initialize(current_app):
         ) 
         ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
         viz = is_visualizable(ext)
-        size = check_size(event.dest_path) if viz else None
+        size = file_not_empty(event.dest_path) if viz else None
+        check_max = file_not_max(event.dest_path) if size else None
         #This accounts for how Watchdog records duplicate symlinks (i.e. symlinks of the same file) 
         #as File Moved Events from the previously added duplicate symlink, resulting in said symlinks not being 
         #properly recorded and causing situations where the source file of such events may not also be recorded.
@@ -546,8 +570,9 @@ def initialize(current_app):
             'type':'file',
             'fileID':str(file_id),
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         })
         clean_tree(hier_inp)
 
@@ -558,8 +583,9 @@ def initialize(current_app):
             )),
             'display_name':filedest,
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         }
         print("Moving file:", key,'(',filesrc,'-->',filedest,')')
         data.save()
@@ -589,7 +615,8 @@ def initialize(current_app):
             print("Updating visualize entry",key,"to new format")
             fullname = os.path.join(vsz, filename)
             viz = is_visualizable(ext)
-            size = check_size(fullname, 1) if viz else None
+            size = file_not_empty(fullname, 1) if viz else None
+            check_max = file_not_max(fullname, 1) if size else None
             data['visualize'][key] = {
                 'fullname':fullname,
                 'display_name':os.path.relpath(
@@ -597,8 +624,9 @@ def initialize(current_app):
                     vsz
                 ),
                 'description':descriptions(ext),
-                'is_visualizable': viz and size,
-                'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                'is_visualizable': viz and size and check_max,
+                'visualization_type': 'File contains no data' if viz and not size else \
+                                      'File exceeds max size' if viz and not check_max else visualization_type(ext),
             }
     recorded = {item['fullname'] for item in data['visualize'].values()}
     targets = {k for k in data['visualize'] if data['visualize'][k]['fullname'] in recorded-current}
@@ -612,7 +640,8 @@ def initialize(current_app):
         print("Assigning file:", file_id,"-->",filename)
         fullname = os.path.abspath(os.path.join(vsz, filename))
         viz = is_visualizable(ext)
-        size = check_size(fullname, 1) if viz else None
+        size = file_not_empty(fullname, 1) if viz else None
+        check_max = file_not_max(fullname, 1) if size else None
         data['visualize'][str(file_id)] = {
             'fullname':fullname,
             'display_name':os.path.relpath(
@@ -620,22 +649,25 @@ def initialize(current_app):
                 vsz
             ),
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         }
     for filename in current:
         file_path = os.path.abspath(os.path.join(vsz, filename))
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         file_id = str([k for k,v in data['visualize'].items() if v['fullname'] == file_path][0])
         viz = is_visualizable(ext)
-        size = check_size(data['visualize'][file_id]['fullname'], 1) if viz else None
+        size = file_not_empty(data['visualize'][file_id]['fullname'], 1) if viz else None
+        check_max = file_not_max(data['visualize'][file_id]['fullname'], 1) if size else None
         nav_to_dir(file_path, vsz, hier_vz).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
             'fileID':file_id,
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         })
 
     data_path = current_app.config['files']
@@ -652,7 +684,8 @@ def initialize(current_app):
         ext = '.'.join(os.path.basename(filename).split('.')[0b1:])
         print("Creating file:", file_id, "-->",filename)
         viz = is_visualizable(ext)
-        size = check_size(event.src_path) if viz else None
+        size = file_not_empty(event.src_path) if viz else None
+        check_max = file_not_max(event.src_path) if size else None
         data['visualize'][str(file_id)] = {
             'fullname':os.path.abspath(os.path.join(
                 vsz,
@@ -660,16 +693,18 @@ def initialize(current_app):
             )),
             'display_name':filename,
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         }
         nav_to_dir(event.src_path, vsz, hier_vz).append({
             'display_name':filename[filename.rfind('/')+1:],
             'type':'file',
             'fileID':str(file_id),
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         })
         data.save()
     visualize_watcher.subscribe(
@@ -692,7 +727,7 @@ def initialize(current_app):
             if data['visualize'][key]['display_name'] == filename:
                 del data['visualize'][key]
                 print("Deleting file:",key,'-->', filename)
-                with db.synchronizer:
+                with db.xact():
                     query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
                     if len(query('data_visualize_'+str(key))):
                         db.execute("DROP TABLE data_visualize_"+str(key))
@@ -716,15 +751,17 @@ def initialize(current_app):
         file_id = [k for k in data['visualize'] if data['visualize'][k]['display_name'] == filesrc][0]
         ext = '.'.join(os.path.basename(filedest).split('.')[0b1:])
         viz = is_visualizable(ext)
-        size = check_size(event.dest_path) if viz else None
+        size = file_not_empty(event.dest_path) if viz else None
+        check_max = file_not_max(event.dest_path) if size else None
         current_src = nav_to_dir(event.src_path, vsz, hier_vz)
         nav_to_dir(event.dest_path, vsz, hier_vz).append({
             'display_name':filedest[filedest.rfind('/')+1:],
             'type':'file',
             'fileID':str(file_id),
             'description':descriptions(ext),
-            'is_visualizable': viz and size,
-            'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+            'is_visualizable': viz and size and check_max,
+            'visualization_type': 'File contains no data' if viz and not size else \
+                                  'File exceeds max size' if viz and not check_max else visualization_type(ext),
         })
         current_src.remove([
             entity for entity in current_src if entity['type'] == 'file' and entity['fileID'] == str(file_id)
@@ -739,8 +776,9 @@ def initialize(current_app):
                     )),
                     'display_name':filedest,
                     'description':descriptions(ext),
-                    'is_visualizable': viz and size,
-                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                    'is_visualizable': viz and size and check_max,
+                    'visualization_type': 'File contains no data' if viz and not size else \
+                                          'File exceeds max size' if viz and not check_max else visualization_type(ext),
                 }
                 print("Moving file:", key,'(',filesrc,'-->',filedest,')')
                 data.save()
@@ -767,7 +805,8 @@ def initialize(current_app):
                     for (filename, file_id) in zip(data[processkey]['files'], range(sys.maxsize)):
                         ext = '.'.join(os.path.basename(filename).split('.')[1:])
                         viz = is_visualizable(ext)
-                        size = check_size(filename, 1) if viz else None
+                        size = file_not_empty(filename, 1) if viz else None
+                        check_max = file_not_max(filename, 1) if size else None
                         data[processkey]['files']={
                             file_id:{
                                 'fullname':filename,
@@ -778,8 +817,9 @@ def initialize(current_app):
                                 'description':descriptions(
                                     '.'.join(os.path.basename(filename).split('.')[1:])
                                 ),
-                                'is_visualizable': viz and size,
-                                'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                                'is_visualizable': viz and size and check_max,
+                                'visualization_type': 'File contains no data' if viz and not size else \
+                                                      'File exceeds max size' if viz and not check_max else visualization_type(ext),
                             }
                         }
             else:
@@ -802,7 +842,8 @@ def initialize(current_app):
                 ext = '.'.join(os.path.basename(filename).split('.')[1:])
                 print("Assigning file:",file_id,"-->",filename)
                 viz = is_visualizable(ext)
-                size = check_size(filename, 1) if viz else None
+                size = file_not_empty(filename, 1) if viz else None
+                check_max = file_not_max(filename, 1) if size else None
                 data[processkey]['files'][file_id] = {
                     'fullname':filename,
                     'display_name':os.path.relpath(
@@ -810,22 +851,25 @@ def initialize(current_app):
                         data[processkey]['output']
                     ),
                     'description':descriptions(ext),
-                    'is_visualizable': viz and size,
-                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                    'is_visualizable': viz and size and check_max,
+                    'visualization_type': 'File contains no data' if viz and not size else \
+                                          'File exceeds max size' if viz and not check_max else visualization_type(ext),
                 }
             for filename in current:
                 file_path = os.path.abspath(os.path.join(data[processkey]['output'], filename))
                 ext = '.'.join(os.path.basename(filename).split('.')[1:])
                 file_id = str([k for k,v in data[processkey]['files'].items() if v['fullname'] == file_path][0])
                 viz = is_visualizable(ext)
-                size = check_size(data[processkey]['files'][file_id]['fullname'], 1) if viz else None
+                size = file_not_empty(data[processkey]['files'][file_id]['fullname'], 1) if viz else None
+                check_max = file_not_max(data[processkey]['files'][file_id]['fullname'], 1) if size else None
                 nav_to_dir(file_path, resultdir, hier_res).append({
                     'display_name':filename[filename.rfind('/')+1:],
                     'type':'file',
                     'fileID':file_id,
                     'description':descriptions(ext),
-                    'is_visualizable': viz and size,
-                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                    'is_visualizable': viz and size and check_max,
+                    'visualization_type': 'File contains no data' if viz and not size else \
+                                          'File exceeds max size' if viz and not check_max else visualization_type(ext),
                 })
 
     def _create(event):
@@ -851,21 +895,24 @@ def initialize(current_app):
                 ext = '.'.join(os.path.basename(filepath).split('.')[1:])
                 print("Assigning id",file_id,'-->',display_name)
                 viz = is_visualizable(ext)
-                size = check_size(filepath) if viz else None
+                size = file_not_empty(filepath) if viz else None
+                check_max = file_not_max(filepath) if size else None 
                 data[processkey]['files'][file_id] = {
                     'fullname':filepath,
                     'display_name':display_name,
                     'description':descriptions(ext),
-                    'is_visualizable': viz and size,
-                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                    'is_visualizable': viz and size and check_max,
+                    'visualization_type': 'File contains no data' if viz and not size else \
+                                          'File exceeds max size' if viz and not check_max else visualization_type(ext),
                 }
                 nav_to_dir(filepath, resultdir, hier_res).append({
                     'display_name':filepath[filepath.rfind('/')+1:],
                     'type':'file',
                     'fileID':file_id,
                     'description':descriptions(ext),
-                    'is_visualizable': viz and size,
-                    'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                    'is_visualizable': viz and size and check_max,
+                    'visualization_type': 'File contains no data' if viz and not size else \
+                                          'File exceeds max size' if viz and not check_max else visualization_type(ext),
                 })
                 data.save()
                 return
@@ -895,7 +942,7 @@ def initialize(current_app):
                     if filedata['fullname'] == filepath:
                         del data[processkey]['files'][file_id]
                         print("Deleted file:", file_id,'-->',filepath)
-                        with db.synchronizer:
+                        with db.xact():
                             query = db.prepare("SELECT 1 FROM information_schema.tables WHERE table_name = $1")
                             if len(query('data_%d_%s'%(parentID, file_id))):
                                 db.execute("DROP TABLE data_%d_%s"%(parentID, file_id))
@@ -925,7 +972,8 @@ def initialize(current_app):
 
         ext = '.'.join(os.path.basename(filedest).split('.')[1:])
         viz = is_visualizable(ext)
-        size = check_size(filedest) if viz else None
+        size = file_not_empty(filedest) if viz else None
+        check_max = file_not_max(filedest) if size else None
         if srckey == destkey:
             for (file_id, filedata) in data[srckey]['files'].items():
                 if filedata['fullname'] == filesrc:
@@ -934,8 +982,9 @@ def initialize(current_app):
                         'type':'file',
                         'fileID':file_id,
                         'description':descriptions(ext),
-                        'is_visualizable': viz and size,
-                        'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                        'is_visualizable': viz and size and check_max,
+                        'visualization_type': 'File contains no data' if viz and not size else \
+                                              'File exceeds max size' if viz and not check_max else visualization_type(ext),
                     })
                     current_src = nav_to_dir(filesrc, resultdir, hier_res)
                     current_src.remove([
@@ -948,8 +997,9 @@ def initialize(current_app):
                             data[srckey]['output']
                         ),
                         'description':descriptions(ext),
-                        'is_visualizable': viz and size,
-                        'visualization_type': 'File contains no data' if viz and not size else visualization_type(ext),
+                        'is_visualizable': viz and size and check_max,
+                        'visualization_type': 'File contains no data' if viz and not size else \
+                                              'File exceeds max size' if viz and not check_max else visualization_type(ext),
                     }
         else:
             _delete(event)

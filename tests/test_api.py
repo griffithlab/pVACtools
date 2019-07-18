@@ -1172,6 +1172,11 @@ class APITests(unittest.TestCase):
 
             self.assertTrue(check_res(filtered_results))
 
+    def test_max_file_size(self):
+        with unittest.mock.patch('os.path.getsize', return_value=14*1024*1024):
+            from utils.pvacapi.controllers.utils import file_not_max
+            self.assertFalse(file_not_max('arbitrary/file/path'))
+
     #pagination temporarily put on hold.
     """
     def test_pagination(self):
