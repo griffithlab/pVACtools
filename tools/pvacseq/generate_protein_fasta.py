@@ -9,6 +9,7 @@ import yaml
 from collections import OrderedDict
 from lib.fasta_generator import *
 from lib.input_file_converter import *
+from lib.calculate_manufacturability import *
 
 def define_parser():
     parser = argparse.ArgumentParser("pvacseq generate_protein_fasta", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -103,6 +104,10 @@ def main(args_input = sys.argv[1:]):
     convert_vcf(args.input_file, temp_dir)
     generate_fasta(args.peptide_sequence_length, downstream_sequence_length, temp_dir)
     parse_files(args.output_file, temp_dir)
+    manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
+    print("Calculating Manufacturability Metrics")
+    CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()
+    print("Completed")
 
 if __name__ == '__main__':
     main()

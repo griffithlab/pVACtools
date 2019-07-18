@@ -1,6 +1,7 @@
 import csv
 from vaxrank.manufacturability import ManufacturabilityScores
 from vaxrank.vaccine_peptide import *
+from Bio import SeqIO
 
 class PvacpeptideVaccinePeptide(VaccinePeptide):
     def __new__(cls, peptide):
@@ -33,23 +34,42 @@ class CalculateManufacturability:
             'asparagine_proline_bond_count'
         ]
 
+    def append_manufacturability_metrics(self, line, peptide):
+        metrics = peptide.manufacturability_scores
+        line['cterm_7mer_gravy_score'] = metrics.cterm_7mer_gravy_score
+        line['max_7mer_gravy_score'] = metrics.max_7mer_gravy_score
+        line['difficult_n_terminal_residue'] = metrics.difficult_n_terminal_residue
+        line['c_terminal_cysteine'] = metrics.c_terminal_cysteine
+        line['c_terminal_proline'] = metrics.c_terminal_proline
+        line['cysteine_count'] = metrics.cysteine_count
+        line['n_terminal_asparagine'] = metrics.n_terminal_asparagine
+        line['asparagine_proline_bond_count'] = metrics.asparagine_proline_bond_count
+        return line
+
     def execute(self):
-        with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
-            reader = csv.DictReader(input_fh, delimiter = "\t")
-            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + self.manufacturability_headers(), extrasaction='ignore')
-            writer.writeheader()
-            for line in reader:
-                if self.file_type == 'pVACbind':
-                    peptide = PvacpeptideVaccinePeptide(line['Epitope Seq'])
-                else:
-                    peptide = PvacpeptideVaccinePeptide(line['MT Epitope Seq'])
-                metrics = peptide.manufacturability_scores
-                line['cterm_7mer_gravy_score'] = metrics.cterm_7mer_gravy_score
-                line['max_7mer_gravy_score'] = metrics.max_7mer_gravy_score
-                line['difficult_n_terminal_residue'] = metrics.difficult_n_terminal_residue
-                line['c_terminal_cysteine'] = metrics.c_terminal_cysteine
-                line['c_terminal_proline'] = metrics.c_terminal_proline
-                line['cysteine_count'] = metrics.cysteine_count
-                line['n_terminal_asparagine'] = metrics.n_terminal_asparagine
-                line['asparagine_proline_bond_count'] = metrics.asparagine_proline_bond_count
-                writer.writerow(line)
+        if self.file_type == 'fasta':
+            with open(self.output_file, 'w') as output_fh:
+                writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=['id', 'peptide_sequence'] + self.manufacturability_headers(), extrasaction='ignore')
+                writer.writeheader()
+                for record in SeqIO.parse(self.input_file, "fasta"):
+                    seq_num = record.id
+                    peptide = str(record.seq)
+                    line = {
+                        'id': seq_num,
+                        'peptide_sequence': peptide
+                    }
+                    peptide = PvacpeptideVaccinePeptide(peptide)
+                    line = self.append_manufacturability_metrics(line, peptide)
+                    writer.writerow(line)
+        else:
+            with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
+                reader = csv.DictReader(input_fh, delimiter = "\t")
+                writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + self.manufacturability_headers(), extrasaction='ignore')
+                writer.writeheader()
+                for line in reader:
+                    if self.file_type == 'pVACbind':
+                        peptide = PvacpeptideVaccinePeptide(line['Epitope Seq'])
+                    else:
+                        peptide = PvacpeptideVaccinePeptide(line['MT Epitope Seq'])
+                    line = self.append_manufacturability_metrics(line, peptide)
+                    writer.writerow(line)
