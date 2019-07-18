@@ -307,6 +307,22 @@ class OutputParserTests(unittest.TestCase):
         expected_output_file  = os.path.join(self.test_data_dir, "output_mnp2.iedb.parsed.tsv")
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
 
+    def test_parse_output_runs_with_iedb_dna_warning(self):
+        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_iedb_dna_warning.ann.HLA-A*29:02.9.tsv")]
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
+        parse_output_key_file = os.path.join(self.test_data_dir, "Test_21.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'input_iedb_files'       : parse_output_input_iedb_file,
+            'input_tsv_file'         : parse_output_input_tsv_file,
+            'key_file'               : parse_output_key_file,
+            'output_file'            : parse_output_output_file.name,
+            'sample_name'            : None,
+        }
+        parser = DefaultOutputParser(**parse_output_params)
+        self.assertFalse(parser.execute())
+
     def test_parse_output_runs_and_produces_expected_output_for_fusions(self):
         parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_fusions.ann.HLA-A*29:02.9.tsv")]
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_fusions.tsv")

@@ -56,7 +56,7 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
 
 setup(
     name="pvactools",
-    version="1.4.2",
+    version="1.4.3",
     packages=[
         "tools",
         "tools.pvacfuse",
@@ -80,7 +80,7 @@ setup(
     install_requires=[
         'PyVCF',
         'requests',
-        'PyYAML',
+        'PyYAML>=5.1',
         'connexion==1.4.2',
         'biopython',
         'networkx',
