@@ -169,7 +169,7 @@ class PvacseqTests(unittest.TestCase):
             run.main([
                 os.path.join(self.test_data_directory, "input.vcf"),
                 'sample.name',
-                'H2-IAb',
+                'DRB1*11:01',
                 'NNalign',
                 output_dir.name,
                 '--top-score-metric=lowest',
@@ -245,14 +245,14 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'sample.name_31.fa.split_1-48',
                 'sample.name_31.fa.split_1-48.key',
-                'sample.name.nn_align.H2-IAb.15.tsv_1-48',
+                'sample.name.nn_align.DRB1*11:01.15.tsv_1-48',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name.replace('sample.name', 'Test'))
                 self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name.H2-IAb.15.parsed.tsv_1-48',
+                'sample.name.DRB1*11:01.15.parsed.tsv_1-48',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name.replace('sample.name', 'Test'))
@@ -265,14 +265,14 @@ class PvacseqTests(unittest.TestCase):
                 self.assertTrue(os.path.exists(output_file))
 
             mock_request.assert_has_calls([
-                generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name, 'sample.name')
+                generate_class_ii_call('nn_align', 'DRB1*11:01', self.test_data_directory, output_dir.name, 'sample.name')
             ])
 
             with self.assertRaises(SystemExit) as cm:
                 run.main([
                     os.path.join(self.test_data_directory, "input.vcf"),
                     'Test',
-                    'H2-IAb',
+                    'DRB1*11:01',
                     'NNalign',
                     output_dir.name,
                     '--top-score-metric=lowest',
@@ -354,7 +354,7 @@ class PvacseqTests(unittest.TestCase):
         run.main([
             os.path.join(self.test_data_directory, "input.vcf"),
             'Test',
-            'HLA-G*01:09,HLA-E*01:01,H2-IAb',
+            'HLA-G*01:09,HLA-E*01:01,DRB1*11:01',
             'NetMHC',
             'PickPocket',
             'NNalign',

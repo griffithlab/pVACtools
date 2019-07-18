@@ -43,6 +43,12 @@ class RunArgumentParser(metaclass=ABCMeta):
                  + "Required for Class I prediction algorithms.",
         )
         parser.add_argument(
+            "--species",
+            help="The species of the test subject(s). Will be used to check allele validity and for reference proteome search.",
+            default="human",
+            choices=['human', 'mouse', 'chimpanzee', 'macaque', 'cow', 'horse', 'pig'],
+        )
+        parser.add_argument(
             "--iedb-install-directory",
             help="Directory that contains the local installation of IEDB MHC I and/or MHC II."
         )

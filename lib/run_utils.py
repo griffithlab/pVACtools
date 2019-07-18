@@ -23,15 +23,15 @@ def split_algorithms(prediction_algorithms):
             class_ii_prediction_algorithms.add(prediction_algorithm)
     return (sorted(list(class_i_prediction_algorithms)), sorted(list(class_ii_prediction_algorithms)))
 
-def split_alleles(alleles):
+def split_alleles(alleles, species):
     class_i_alleles = []
     class_ii_alleles = []
     for allele in sorted(set(alleles)):
         valid = 0
-        if allele in MHCI.all_valid_allele_names():
+        if allele in MHCI.all_valid_allele_names() and species == MHCI.species_for_allele(allele):
             class_i_alleles.append(allele)
             valid = 1
-        if allele in MHCII.all_valid_allele_names():
+        if allele in MHCII.all_valid_allele_names() and species == MHCII.species_for_allele(allele):
             class_ii_alleles.append(allele)
             valid = 1
         if not valid:
