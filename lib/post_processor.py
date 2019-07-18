@@ -6,6 +6,7 @@ from lib.top_score_filter import *
 from lib.condense_final_report import *
 from lib.rank_epitopes import *
 from lib.calculate_manufacturability import *
+from lib.calculate_reference_proteome_similarity import *
 import lib.net_chop
 import lib.netmhc_stab
 
@@ -20,6 +21,7 @@ class PostProcessor:
         self.net_chop_fh = tempfile.NamedTemporaryFile()
         self.netmhc_stab_fh = tempfile.NamedTemporaryFile()
         self.manufacturability_fh = tempfile.NamedTemporaryFile()
+        self.reference_similarity_fh = tempfile.NamedTemporaryFile()
         self.file_type = kwargs.pop('file_type', None)
         if self.run_condense_report:
             self.condensed_report_fh = tempfile.NamedTemporaryFile()
@@ -33,9 +35,10 @@ class PostProcessor:
         self.execute_top_score_filter()
         self.call_net_chop()
         self.call_netmhc_stab()
+        self.calculate_reference_proteome_similarity()
         self.condense_report()
         self.rank_epitopes()
-        shutil.copy(self.netmhc_stab_fh.name, self.filtered_report_file)
+        shutil.copy(self.reference_similarity_fh.name, self.filtered_report_file)
         if self.run_condense_report:
             shutil.copy(self.ranked_epitopes_fh.name, self.condensed_report_file)
         self.close_filehandles()
@@ -128,6 +131,11 @@ class PostProcessor:
         else:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
 
+    def calculate_reference_proteome_similarity(self):
+        print("Calculating Reference Proteome Similarity")
+        CalculateReferenceProteomeSimilarity(self.netmhc_stab_fh.name, self.reference_similarity_fh.name, self.species, self.file_type).execute()
+        print("Completed")
+
     def condense_report(self):
         if self.run_condense_report:
             print("Creating Condensed Report")
@@ -147,6 +155,8 @@ class PostProcessor:
         self.top_score_filter_fh.close()
         self.net_chop_fh.close()
         self.netmhc_stab_fh.close()
+        self.manufacturability_fh.close()
+        self.reference_similarity_fh.close()
         if self.run_condense_report:
             self.condensed_report_fh.close()
             self.ranked_epitopes_fh.close()
