@@ -450,6 +450,7 @@ class Pipeline(metaclass=ABCMeta):
         post_processing_params['filtered_report_file'] = self.final_path()
         post_processing_params['condensed_report_file'] = self.ranked_final_path()
         post_processing_params['run_condense_report'] = True
+        post_processing_params['run_manufacturability_metrics'] = True
         if self.input_file_type == 'vcf':
             post_processing_params['run_coverage_filter'] = True
             post_processing_params['run_transcript_support_level_filter'] = True
@@ -573,6 +574,7 @@ class PvacbindPipeline(Pipeline):
         post_processing_params['minimum_fold_change'] = None
         post_processing_params['file_type'] = 'pVACbind'
         post_processing_params['run_condense_report'] = False
+        post_processing_params['run_manufacturability_metrics'] = True
         if self.net_chop_method:
             post_processing_params['run_net_chop'] = True
         else:

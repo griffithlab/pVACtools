@@ -26,16 +26,16 @@ class PostProcessor:
             self.ranked_epitopes_fh = tempfile.NamedTemporaryFile()
 
     def execute(self):
+        self.calculate_manufacturability()
         self.execute_binding_filter()
         self.execute_coverage_filter()
         self.execute_transcript_support_level_filter()
         self.execute_top_score_filter()
         self.call_net_chop()
         self.call_netmhc_stab()
-        self.calculate_manufacturability()
         self.condense_report()
         self.rank_epitopes()
-        shutil.copy(self.manufacturability_fh.name, self.filtered_report_file)
+        shutil.copy(self.netmhc_stab_fh.name, self.filtered_report_file)
         if self.run_condense_report:
             shutil.copy(self.ranked_epitopes_fh.name, self.condensed_report_file)
         self.close_filehandles()
@@ -43,6 +43,13 @@ class PostProcessor:
             print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.condensed_report_file))
         else:
             print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
+
+    def calculate_manufacturability(self):
+        if self.run_manufacturability_metrics:
+            print("Calculating Manufacturability Metrics")
+            CalculateManufacturability(self.input_file, self.manufacturability_fh.name, self.file_type).execute()
+            shutil.copy(self.manufacturability_fh.name, self.input_file)
+            print("Completed")
 
     def execute_binding_filter(self):
         print("Running Binding Filters")
@@ -120,11 +127,6 @@ class PostProcessor:
             print("Completed")
         else:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
-
-    def calculate_manufacturability(self):
-        print("Calculating Manufacturability Metrics")
-        CalculateManufacturability(self.netmhc_stab_fh.name, self.manufacturability_fh.name, self.file_type).execute()
-        print("Completed")
 
     def condense_report(self):
         if self.run_condense_report:
