@@ -186,7 +186,7 @@ class PvacfuseTests(unittest.TestCase):
         run.main([
             os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
             'Test',
-            'HLA-A*29:02,H2-IAb',
+            'HLA-A*29:02,DRB1*11:01',
             'NetMHC', 'NNalign',
             output_dir.name,
             '-e', '9',

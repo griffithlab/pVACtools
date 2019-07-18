@@ -26,7 +26,7 @@ def define_parser():
 
 def run_pipelines(input_file, base_output_dir, args, spacer):
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
-    (class_i_alleles, class_ii_alleles) = split_alleles(args.allele)
+    (class_i_alleles, class_ii_alleles) = split_alleles(args.allele, args.species)
 
     shared_arguments = {
         'input_file'      : input_file,

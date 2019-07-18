@@ -62,7 +62,7 @@ def main(args_input = sys.argv[1:]):
     base_output_dir = os.path.abspath(args.output_dir)
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
-    (class_i_alleles, class_ii_alleles) = split_alleles(args.allele)
+    (class_i_alleles, class_ii_alleles) = split_alleles(args.allele, args.species)
 
     shared_arguments = {
         'input_file'                : args.input_file,
