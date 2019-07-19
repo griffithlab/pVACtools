@@ -306,12 +306,12 @@ def initialize(current_app):
     def cleanup_database():
         print("Cleaning up database connections")
         if 'db-clean' in current_app.config:
-            with db.xact():
-                for table in current_app.config['db-clean']:
-                    try:
+            try:
+                with db.xact():
+                    for table in current_app.config['db-clean']:
                         db.execute("DROP TABLE %s"%table)
-                    except UndefinedTableError:
-                        pass
+            except UndefinedTableError:
+                pass
         db.close()
 
     #setup directory structure:
