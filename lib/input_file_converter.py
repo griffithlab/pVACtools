@@ -458,8 +458,9 @@ class FusionInputConverter(InputFileConverter):
                 output_row['variant_type']               = variant_type
                 output_row['protein_position']           = fusion_position
                 output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
-                output_row['transcript_name']            = ';'.join(fusions)
-                output_row['index']                      = '%s.%s.%s.%s' % (count, entry['name of fusion'], variant_type, fusion_position)
+                transcripts                              = ';'.join(fusions)
+                output_row['transcript_name']            = transcripts
+                output_row['index']                      = '{}.{}.{}.{}.{}'.format(count, entry['name of fusion'], transcripts, variant_type, fusion_position)
                 output_rows.append(output_row)
                 count += 1
 
