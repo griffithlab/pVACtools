@@ -1,0 +1,3 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+TTC39B	C6orf62	ENST00000512701	ENST00000378119	PF10300	DUF3808	Protein of unknown function (DUF3808)	142	465
+TTC39B	C6orf62	ENST00000512701	ENST00000378119	PF15130	DUF4566	Domain of unknown function (DUF4566)	465	548

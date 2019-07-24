@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+TIMP3	COL3A1	ENST00000266085	ENST00000304636	protein_coding	protein_coding	out-of-frame	219	24.89854290000002
