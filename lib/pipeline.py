@@ -119,7 +119,7 @@ class Pipeline(metaclass=ABCMeta):
     def converter(self, params):
         converter_types = {
             'vcf'  : 'VcfConverter',
-            'bedpe': 'IntegrateConverter',
+            'bedpe': 'FusionInputConverter',
         }
         converter_type = converter_types[self.input_file_type]
         converter = getattr(sys.modules[__name__], converter_type)
