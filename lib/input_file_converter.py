@@ -382,7 +382,7 @@ class VcfConverter(InputFileConverter):
 
         self.close_filehandles()
 
-class IntegrateConverter(InputFileConverter):
+class FusionInputConverter(InputFileConverter):
     def input_fieldnames(self):
         return [
             'chr 5p',

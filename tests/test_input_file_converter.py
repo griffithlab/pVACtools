@@ -419,7 +419,7 @@ class InputFileConverterTests(unittest.TestCase):
             'input_file'                 : convert_input_file,
             'output_file'                : convert_output_file.name,
         }
-        converter = IntegrateConverter(**convert_vcf_params)
+        converter = FusionInputConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_integrate.tsv')
@@ -433,7 +433,7 @@ class InputFileConverterTests(unittest.TestCase):
             'input_file'                 : convert_input_file,
             'output_file'                : convert_output_file.name,
         }
-        converter = IntegrateConverter(**convert_vcf_params)
+        converter = FusionInputConverter(**convert_vcf_params)
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_agfusion.tsv')
