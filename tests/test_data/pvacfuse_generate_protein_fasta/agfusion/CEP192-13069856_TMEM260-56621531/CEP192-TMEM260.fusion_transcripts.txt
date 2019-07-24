@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+CEP192	TMEM260	ENST00000506447	ENST00000261556	protein_coding	protein_coding	in-frame (with mutation)	2023	223.71858219999984
