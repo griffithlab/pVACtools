@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/griffithlab/pVACtools/badge.svg?branch=master)](https://coveralls.io/github/griffithlab/pVACtools?branch=master)
+
 # pVACtools
 
 pVACtools is a cancer immunotherapy suite consisting of the following tools:
