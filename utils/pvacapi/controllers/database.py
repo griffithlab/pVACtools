@@ -118,9 +118,8 @@ def old_file_read(db, CREATE_TABLE, tablekey, column_names, reader, mapping):
                     elif v == float:
                         typ = 'decimal'
                     alter_cols.append(
-                        "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
-                            k,
-                            typ
+                        "ALTER COLUMN %s SET DATA TYPE %s USING %s::%s" % (
+                            k, typ, k, typ
                         )
                     )
                 # Re-generate the insert statement since the data types changed
@@ -135,8 +134,6 @@ def old_file_read(db, CREATE_TABLE, tablekey, column_names, reader, mapping):
                 ))
             # insert the row
             insert(*[formatted[column] for column in column_names])
-        #remove "protein_position" column from tables as visualization of ranges not currently possible
-        db.execute(update + "DROP COLUMN protein_position")
 
 def table_transaction(file_permissions, db, CREATE_TABLE, tablekey, all_tablecolumns, raw_reader, column_names, mapping):
     with db.xact():
@@ -187,15 +184,12 @@ def table_transaction(file_permissions, db, CREATE_TABLE, tablekey, all_tablecol
                 elif v == float:
                     typ = 'decimal'
                 alter_cols.append(
-                    "ALTER COLUMN %s SET DATA TYPE %s USING null" % (
-                        k,
-                        typ
+                    "ALTER COLUMN %s SET DATA TYPE %s USING %s::%s" % (
+                        k, typ, k, typ
                     )
                 )
             print("Alter:", update + ','.join(alter_cols))
             db.execute(update + ','.join(alter_cols))
-        #remove "protein_position" column from tables as visualization of ranges not currently possible
-        db.execute(update + "DROP COLUMN protein_position")
 
 def create_table(parentID, fileID, data, tablekey, db):
     # Open a reader to cache the file in the database

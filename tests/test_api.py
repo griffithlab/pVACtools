@@ -755,11 +755,12 @@ class APITests(unittest.TestCase):
         mapping['rowid'] = 'rowid'
         testlines = [row for row in reader]
         self.assertEqual(len(testlines), len(content), "Line count mismatch")
+        stringified_columns = ['chromosome', 'protein_position']
         for (testrow, outputrow) in zip(testlines, content):
             self.assertEqual({mapping[key] for key in outputrow}-testrow.keys(), {'rowid'})
             del outputrow['rowid']
             for key in outputrow:
-                testval = testrow[mapping[key]] if key == 'chromosome' else parsedata(testrow[mapping[key]])
+                testval = testrow[mapping[key]] if key in stringified_columns else parsedata(testrow[mapping[key]])
                 self.assertEqual(outputrow[key], testval, "Mismatch: %s"%key)
         raw_reader.close()
 
