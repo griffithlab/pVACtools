@@ -4,7 +4,7 @@ import os
 import pkg_resources
 from tools.pvacfuse import *
 
-def main():
+def define_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subparsers = parser.add_subparsers()
 
@@ -57,7 +57,10 @@ def main():
         add_help=False
     )
     download_example_data_parser.set_defaults(func=download_example_data)
+    return parser
 
+def main():
+    parser = define_parser()
     args = parser.parse_known_args()
     try:
         args[0].func.main(args[1])
