@@ -14,6 +14,8 @@ import datetime
 from tools.pvacfuse import *
 from mock import patch
 from .test_utils import *
+import tools.pvacfuse.main as pvacfuse_main
+import argparse
 
 def make_response(data, files, path):
     if not files:
@@ -96,6 +98,10 @@ class PvacfuseTests(unittest.TestCase):
         ))
         self.assertTrue(compiled_pvac_path)
 
+    def test_parser(self):
+        parser = pvacfuse_main.define_parser()
+        self.assertEqual(type(parser), argparse.ArgumentParser)
+
     def test_pvacfuse_commands(self):
         pvac_script_path = os.path.join(
             self.pVac_directory,
@@ -106,9 +112,11 @@ class PvacfuseTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
+            "allele_specific_cutoffs",
             "binding_filter",
             "valid_alleles",
             "download_example_data",
+            "top_score_filter",
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -127,6 +135,71 @@ class PvacfuseTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
+
+    def test_allele_specific_cutoffs_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacfuse",
+            "allele_specific_cutoffs.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_allele_specific_cutoffs_runs(self):
+        allele_specific_cutoffs.main([])
+
+    def test_binding_filter_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacfuse",
+            "binding_filter.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_binding_filter_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        binding_filter.main([input_file, output_file.name])
+
+    def test_download_example_data_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacfuse",
+            "download_example_data.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_download_example_data_runs(self):
+        output_dir = tempfile.TemporaryDirectory()
+        download_example_data.main([output_dir.name])
+
+    def test_top_score_filter_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacfuse",
+            "top_score_filter.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_top_score_filter_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        top_score_filter.main([input_file, output_file.name])
+
+    def test_valid_alleles_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacfuse",
+            "valid_alleles.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_alleles_runs(self):
+        valid_alleles.main(["-p", "SMM"])
 
     def test_pvacfuse_pipeline(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
