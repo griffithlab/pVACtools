@@ -759,7 +759,8 @@ class APITests(unittest.TestCase):
             self.assertEqual({mapping[key] for key in outputrow}-testrow.keys(), {'rowid'})
             del outputrow['rowid']
             for key in outputrow:
-                self.assertEqual(outputrow[key], parsedata(testrow[mapping[key]]), "Mismatch: %s"%key)
+                testval = testrow[mapping[key]] if key == 'chromosome' else parsedata(testrow[mapping[key]])
+                self.assertEqual(outputrow[key], testval, "Mismatch: %s"%key)
         raw_reader.close()
 
     def test_endpoint_allele(self):
