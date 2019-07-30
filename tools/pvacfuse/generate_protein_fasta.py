@@ -33,7 +33,7 @@ def define_parser():
     )
     parser.add_argument(
         "--input-tsv",
-        help = "A pVACseq all_epitopes or filtered TSV file with epitopes to use for subsetting the input file to peptides of interest. Only the peptide sequences for the epitopes in the TSV will be used when creating the FASTA."
+        help = "A pVACfuse all_epitopes or filtered TSV file with epitopes to use for subsetting the input file to peptides of interest. Only the peptide sequences for the epitopes in the TSV will be used when creating the FASTA."
     )
     parser.add_argument(
         "-d", "--downstream-sequence-length",
