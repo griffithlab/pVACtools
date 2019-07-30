@@ -72,3 +72,7 @@ The pVACtools documentation can be found on <a href="http://pvactools.readthedoc
 
 ## Contact
 Bug reports or feature requests can be submitted on the <a href="https://github.com/griffithlab/pVACtools/issues">pVACtools Github page</a>. You may also contact us by email at help@pvactools.org.
+
+## Stable release with DOI
+
+[![DOI](https://zenodo.org/badge/102625109.svg)](https://zenodo.org/badge/latestdoi/102625109)
