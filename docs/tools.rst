@@ -45,3 +45,22 @@ __________
   Submitted [`bioRxiv preprint
   <https://www.biorxiv.org/content/early/2017/07/27/154757>`_].
 - License: `Apache License 2.0 <https://github.com/KarchinLab/mhcnuggets-2.0/blob/master/LICENSE>`_
+
+NetChop
+_______
+
+- Website: http://www.cbs.dtu.dk/services/NetChop/
+- Citation: The role of the proteasome in generating cytotoxic T cell epitopes: Insights obtained from improved predictions of proteasomal cleavage. M. Nielsen, C. Lundegaard, O. Lund, and C. Kesmir. Immunogenetics., 57(1-2):33-41, 2005.
+  PubMed PMID: `11983929 <https://www.ncbi.nlm.nih.gov/pubmed/11983929>`_.
+- License: `Academic License
+  <http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?netchop>`_
+
+NetMHCstabpan
+_____________
+
+- Website: http://www.cbs.dtu.dk/services/NetMHCstabpan/
+- Citation: Pan-specific prediction of peptide-MHC-I complex stability; a correlate of T cell immunogenicity. Michael Rasmussen, Emilio Fenoy, Mikkel Harndahl, Anne Bregnballe Kristensen, Ida Kallehauge Nielsen, Morten Nielsen, Soren Buus. J Immunol. 2016 Aug 15;197(4):1517-24.
+  doi: `https://doi.org/10.4049/jimmunol.1600582 <https://doi.org/10.4049/jimmunol.1600582>`_.
+  PubMed PMID: `27402703 <https://www.ncbi.nlm.nih.gov/pubmed/27402703>`_.
+- License: `Academic License
+  <http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?netMHCstabpan>`_

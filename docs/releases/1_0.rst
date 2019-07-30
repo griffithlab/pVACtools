@@ -1,0 +1,123 @@
+Version 1.0
+___________
+
+1.0.0
+-----
+
+This is the initial release of pVACtools, a cancer immunotherapy suite consisting of the following tools:
+
+**pVACseq**
+
+A cancer immunotherapy pipeline for identifying and prioritizing neoantigens from a list of tumor mutations.
+
+**pVACfuse**
+
+A tool for detecting neoantigens resulting from gene fusions.
+
+**pVACvector**
+
+A tool designed to aid specifically in the construction of DNA vector-based cancer vaccines.
+
+
+1.0.1
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- Additional data, like example data and VEP plugins were not included in the
+  package correctly so the commands to download these files would fail. This
+  has been corrected.
+- Class II predictions would fail if the protein sequences used for binding
+  predictions in IEDB were shorter than 15 peptide sequences. This has been
+  fixed.
+
+1.0.2
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- The epitope length used for generating the peptide fasta when running with
+  multiple epitope lengths was incorrect. This would potentially result in including
+  fasta sequences that were shorter than the largest epitope length which
+  would cause an error during calls to IEDB.
+- pVACseq would fail with a nondescript error message if the input VCF was not
+  annotated with VEP before running. A more descriptive error message has been
+  added.
+- IEDB changed the format of class II IEDB alleles which would cause an error
+  when running with those alleles. pVACtools will now handle transposing the
+  affected alleles into the new format.
+- The standalone binding filters had a few bugs that would result in syntax
+  errors during runtime.
+- The indexes created for each fusion entry with pVACfuse had the potential to
+  not be unique which would result in parsing errors downstream.
+- pVACseq had the potential to use the incorrect VEP allele for positions with
+  multiple alternate alleles which would result in the incorrect CSQ entry
+  getting used for some of those alternate alleles.
+- pVACseq would throw an error if the chosen peptide sequence length exceeds
+  the wildtype protein sequence length of a transcript.
+
+1.0.3
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- Stop-gain mutation were previously not handled correctly. If a mutation had
+  a \* (stop gain) in the VEP Amino_acids field, pVACseq would throw an error.
+  We now ensure that those cases are handled. pVACseq will also skip stop-gain
+  mutations if the resulting mutant peptide sequence is not novel.
+- pVACseq would previously throw an error if multiple mutations resulted
+  in the same consequence. This is now handled by assigning a unique
+  identifier to each mutation.
+- We added a better warning messages if the chosen prediction algorithms and
+  alleles MHC classes are mutually exclusive, e.g., if only class I prediction
+  algorithms were chosen with only class II alleles. Previously, pVACseq would
+  simply finish without producing any output or errors.
+
+1.0.4
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- We discovered a couple more cases of mutations involving stop codons that
+  would result in errors. These are amino acid changes (VEP Amino_acids field)
+  for large indels that would span exon boundaries (multiple \* in the Amino_acids
+  field), or amino acid changes involving the transcript stop codon (ending in X).
+  These cases are now handled.
+
+1.0.5
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- IEDB changed the format of combinatorial class II alleles to use ``/`` as a
+  delimiter instead of ``-``. DP alleles were previously fixed in pull request
+  `#85 <https://github.com/griffithlab/pVACtools/pull/85>`_ but this failed to
+  address DQ alleles. This version fixes this oversight.
+
+1.0.6
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- There was a bug in how alternate alleles were resolved when matching VEP
+  consequence fields to an entry which resulted in certain indels to be
+  skipped. This has now been fixed.
+
+1.0.7
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- VEP82 and higher supports selenocysteine modicfications (amino acid "U"), which is
+  not supported by downstream IEDB prediction algorithms. pVACtools now skips
+  sequences containing this amino acid with a warning.
+
+1.0.8
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- The log directories were accidentially included with the pVACseq example data.
+  They are now removed.
+- Some users were reporting mixed type warnings for pandas when running
+  pVACseq. We added some options to avoid this warning.
