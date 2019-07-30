@@ -1,5 +1,5 @@
 {
-  "chromosome":"integer",
+  "chromosome":"text",
   "start":"bigint",
   "stop":"bigint",
   "hla_allele":"text",
