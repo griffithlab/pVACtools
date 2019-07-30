@@ -53,10 +53,13 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- This version starts enforcing a file
-  size limit (14MB) to be able to visualize a result file in pVACviz.
-  Larger files will no longer be
-  visualizable in pVACviz since they take too long to load.
+- In a previous version we implemented a faster method for reading data from
+  the database in pVACapi. However, this would fail if the postgres user is
+  not a superuser. This version fixes this issue by using the previous
+  database file read method in this situation.
+- This version marks certain columns of the output reports as not visualizable
+  in pVACviz/pVACapi because they contain string content that cannot be
+  plotted in a scatterplot.
 
 New in version |version|
 ------------------------
