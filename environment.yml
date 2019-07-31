@@ -1,9 +1,9 @@
-name: py35
+name: py37
 dependencies:
-- openssl=1.0.2g=0
-- pip=8.1.1=py35_0
-- python=3.5.2
-- readline=6.2=2
+- openssl
+- pip
+- python=3.7.2
+- readline
 - sqlite
 - tk
 - wheel
