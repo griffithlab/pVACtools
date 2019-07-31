@@ -53,8 +53,13 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- This releases fixes a concurrency issue with pVACapi/pVACviz that would occurr when
-  users would try to visualize multiple files at the same time
+- In a previous version we implemented a faster method for reading data from
+  the database in pVACapi. However, this would fail if the postgres user is
+  not a superuser. This version fixes this issue by using the previous
+  database file read method in this situation.
+- This version marks certain columns of the output reports as not visualizable
+  in pVACviz/pVACapi because they contain string content that cannot be
+  plotted in a scatterplot.
 
 New in version |version|
 ------------------------

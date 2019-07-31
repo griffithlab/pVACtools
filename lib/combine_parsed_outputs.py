@@ -41,24 +41,13 @@ def main(args_input = sys.argv[1:]):
                     if fieldname not in fieldnames:
                         fieldnames.append(fieldname)
 
-    rows = []
+    tsv_writer = csv.DictWriter(args.output_file, list(fieldnames), delimiter = '\t', lineterminator = '\n', restval='NA')
+    tsv_writer.writeheader()
     for input_file in args.input_files:
         with open(input_file, 'r') as input_file_handle:
             reader = csv.DictReader(input_file_handle, delimiter='\t')
             for row in reader:
-                for fieldname in fieldnames:
-                    if fieldname not in row:
-                        row[fieldname] = 'NA'
-                rows.append(row)
-
-    if args.file_type == 'pVACbind':
-        sorted_rows = lib.sort.pvacbind_sort(rows, args.top_score_metric)
-    else:
-        sorted_rows = lib.sort.default_sort(rows, args.top_score_metric)
-    tsv_writer = csv.DictWriter(args.output_file, list(fieldnames), delimiter = '\t', lineterminator = '\n')
-    tsv_writer.writeheader()
-    tsv_writer.writerows(sorted_rows)
-
+                tsv_writer.writerow(row)
     args.output_file.close()
 
 if __name__ == "__main__":

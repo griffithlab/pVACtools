@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+CLEC16A	RMI2	ENST00000409790	ENST00000312499	protein_coding	protein_coding	out-of-frame	257	29.921622900000038

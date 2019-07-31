@@ -1,5 +1,5 @@
 {
-  "chromosome":"integer",
+  "chromosome":"text",
   "start":"bigint",
   "stop":"bigint",
   "hla_allele":"text",
@@ -13,7 +13,7 @@
   "ensembl_gene_id":"text",
   "median_wt_score":"numeric",
   "mt_epitope_seq":"text",
-  "protein_position":"integer",
+  "protein_position":"text",
   "median_fold_change":"numeric",
   "corresponding_fold_change":"numeric",
   "reference":"text",

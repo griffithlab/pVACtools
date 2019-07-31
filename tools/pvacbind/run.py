@@ -46,6 +46,7 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = False
     post_processing_params['run_condense_report'] = False
+    post_processing_params['run_manufacturability_metrics'] = False
 
     PostProcessor(**post_processing_params).execute()
 

@@ -23,6 +23,11 @@ for dirpath, dirnames, filenames in os.walk("tools/pvacvector/example_data"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             pvacvector_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
+pvacbind_data_files = []
+for dirpath, dirnames, filenames in os.walk("tools/pvacbind/example_data"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            pvacbind_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
 for dirpath, dirnames, filenames in os.walk("tools/pvacseq/VEP_plugins"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
@@ -56,7 +61,7 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
 
 setup(
     name="pvactools",
-    version="1.4.2",
+    version="1.4.5",
     packages=[
         "tools",
         "tools.pvacbind",
@@ -82,7 +87,7 @@ setup(
     install_requires=[
         'PyVCF',
         'requests',
-        'PyYAML',
+        'PyYAML>=5.1',
         'connexion==1.4.2',
         'biopython',
         'networkx',
@@ -109,6 +114,7 @@ setup(
         'tools.pvacseq': pvacseq_data_files,
         'tools.pvacfuse': pvacfuse_data_files,
         'tools.pvacvector': pvacvector_data_files,
+        'tools.pvacbind': pvacbind_data_files,
         'utils.pvacapi': server_data,
         'utils.pvacviz': client_data,
     },

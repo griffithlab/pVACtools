@@ -109,9 +109,9 @@ ____________________________________
 
 Each of the following 4 criteria are assigned a rank-ordered value (worst = 1):
 
-- B = ``MT IC50`` binding affinity, with the lowest being the best.
-- F = ``Fold Change`` between MT and WT alleles, with the highest being the best.
-- M = Mutant allele expression, calculated as (``Gene Expression`` * ``Tumor RNA VAF``), with the highest being the best.
-- D = ``Tumor DNA VAF``, with the highest being the best.
+- B = Rank of ``MT IC50`` binding affinity, with the lowest being the best.
+- F = Rank of ``Fold Change`` between MT and WT alleles, with the highest being the best.
+- M = Rank of mutant allele expression, calculated as (``Gene Expression`` * ``Tumor RNA VAF``), with the highest being the best.
+- D = Rank of ``Tumor DNA VAF``, with the highest being the best.
 
 A score is calculated from the above ranks with the following formula: ``B + F + (M * 2) + (D / 2)``. This score is then converted to a rank (best = 1).

@@ -755,11 +755,13 @@ class APITests(unittest.TestCase):
         mapping['rowid'] = 'rowid'
         testlines = [row for row in reader]
         self.assertEqual(len(testlines), len(content), "Line count mismatch")
+        stringified_columns = ['chromosome', 'protein_position']
         for (testrow, outputrow) in zip(testlines, content):
             self.assertEqual({mapping[key] for key in outputrow}-testrow.keys(), {'rowid'})
             del outputrow['rowid']
             for key in outputrow:
-                self.assertEqual(outputrow[key], parsedata(testrow[mapping[key]]), "Mismatch: %s"%key)
+                testval = testrow[mapping[key]] if key in stringified_columns else parsedata(testrow[mapping[key]])
+                self.assertEqual(outputrow[key], testval, "Mismatch: %s"%key)
         raw_reader.close()
 
     def test_endpoint_allele(self):
@@ -1184,7 +1186,10 @@ class APITests(unittest.TestCase):
         run(['python', pvacapi_main_path, 'clear_cache'], stdout = DEVNULL) #use 'python ~/Documents/work/pVACtools/utils/pvacapi/main.py clear_cache' instead
         self.assertEqual(os.path.getsize(cache_file), 3)
 
-
+    def test_max_file_size(self):
+        with unittest.mock.patch('os.path.getsize', return_value=14*1024*1024):
+            from utils.pvacapi.controllers.utils import file_not_max
+            self.assertFalse(file_not_max('arbitrary/file/path'))
 
 
     #pagination temporarily put on hold.

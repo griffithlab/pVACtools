@@ -178,9 +178,15 @@ class PvacseqTests(unittest.TestCase):
             ])
 
             for file_name in (
+                'Test.all_epitopes.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name)
+                self.assertTrue(compare(output_file, expected_file))
+
+            for file_name in (
                 'Test.tsv',
                 'Test.tsv_1-24',
-                'Test.all_epitopes.tsv',
                 'Test.filtered.tsv',
                 'Test.filtered.condensed.ranked.tsv',
             ):
@@ -327,7 +333,11 @@ class PvacseqTests(unittest.TestCase):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', 'tmp', file_name)
             self.assertTrue(cmp(output_file, expected_file, False))
-        for file_name in ['Test.proximal_variants.tsv', 'Test.all_epitopes.tsv', 'Test.filtered.tsv']:
+        for file_name in ['Test.all_epitopes.tsv']:
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
+            self.assertTrue(compare(output_file, expected_file))
+        for file_name in ['Test.proximal_variants.tsv', 'Test.filtered.tsv']:
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
             self.assertTrue(cmp(output_file, expected_file, False))

@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+NBPF3	EIF3H	ENST00000318249	ENST00000521861	PF01398	JAB	JAB1/Mov34/MPN/PAD-1 ubiquitin protease	44	93
