@@ -20,3 +20,4 @@ be used for binding prediction.
    pvacfuse/output_files
    pvacfuse/filter_commands
    pvacfuse/additional_commands
+   pvacfuse/optional_downstream_analysis_tools
