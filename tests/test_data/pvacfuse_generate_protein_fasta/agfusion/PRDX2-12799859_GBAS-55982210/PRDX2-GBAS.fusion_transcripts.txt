@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+PRDX2	GBAS	ENST00000301522	ENST00000322090	protein_coding	protein_coding	in-frame (with mutation)	332	38.265308300000044

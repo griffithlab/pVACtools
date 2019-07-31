@@ -1,0 +1,206 @@
+Using default tag: latest
+latest: Pulling from zlskidmore/agfusion
+898c46f3b1a1: Already exists
+63366dfa0a50: Already exists
+041d4cd74a92: Already exists
+6e1bee0f8701: Already exists
+0345cf3466e6: Pulling fs layer
+3749e70b367c: Pulling fs layer
+685069b4f8f4: Pulling fs layer
+12095a1b7574: Pulling fs layer
+5b0ad0a9aa20: Pulling fs layer
+a34cfec228f8: Pulling fs layer
+26e806701b9e: Pulling fs layer
+4cb1654eaa9d: Pulling fs layer
+755f448f114f: Pulling fs layer
+98654f07e3a7: Pulling fs layer
+89cd1c8432b0: Pulling fs layer
+12095a1b7574: Waiting
+a34cfec228f8: Waiting
+98654f07e3a7: Waiting
+26e806701b9e: Waiting
+89cd1c8432b0: Waiting
+755f448f114f: Waiting
+685069b4f8f4: Download complete
+3749e70b367c: Verifying Checksum
+3749e70b367c: Download complete
+5b0ad0a9aa20: Download complete
+12095a1b7574: Verifying Checksum
+12095a1b7574: Download complete
+a34cfec228f8: Verifying Checksum
+a34cfec228f8: Download complete
+26e806701b9e: Verifying Checksum
+26e806701b9e: Download complete
+4cb1654eaa9d: Verifying Checksum
+4cb1654eaa9d: Download complete
+0345cf3466e6: Download complete
+755f448f114f: Verifying Checksum
+755f448f114f: Download complete
+98654f07e3a7: Verifying Checksum
+98654f07e3a7: Download complete
+89cd1c8432b0: Verifying Checksum
+89cd1c8432b0: Download complete
+0345cf3466e6: Pull complete
+3749e70b367c: Pull complete
+685069b4f8f4: Pull complete
+12095a1b7574: Pull complete
+5b0ad0a9aa20: Pull complete
+a34cfec228f8: Pull complete
+26e806701b9e: Pull complete
+4cb1654eaa9d: Pull complete
+755f448f114f: Pull complete
+98654f07e3a7: Pull complete
+89cd1c8432b0: Pull complete
+Digest: sha256:3326c85820b8c0daa8f5f76ba509343940a70a333b9a92752844a1fa9cc9c3ec
+Status: Downloaded newer image for zlskidmore/agfusion:latest
+2019-04-22 19:43:08,109 - AGFusion - WARNING - Output directory /gscmnt/gc2697/sclc/rna/agfusion already exists! Overwriting...
+WARNING:AGFusion:Output directory /gscmnt/gc2697/sclc/rna/agfusion already exists! Overwriting...
+2019-04-22 19:43:08,190 - AGFusion - INFO - Read 121 fusions from the file.
+INFO:AGFusion:Read 121 fusions from the file.
+2019-04-22 19:43:08,268 - AGFusion - ERROR - No Ensembl ID found for IGL-! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for IGL-! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:08,308 - AGFusion - ERROR - No Ensembl ID found for ENSG00000285819! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for ENSG00000285819! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:08,311 - AGFusion - ERROR - No Ensembl ID found for ENSG00000285819! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for ENSG00000285819! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:08,314 - AGFusion - ERROR - No Ensembl ID found for ENSG00000285819! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for ENSG00000285819! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:08,317 - AGFusion - ERROR - No Ensembl ID found for ENSG00000285819! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for ENSG00000285819! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:08,355 - AGFusion - ERROR - No Ensembl ID found for IGL! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for IGL! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:08,391 - AGFusion - ERROR - Junction 22893781 not within IGLC1 gene boundaries!
+ERROR:AGFusion:Junction 22893781 not within IGLC1 gene boundaries!
+INFO:pyensembl.sequence_data:Loaded sequence dictionary from /opt/pyensembl/GRCh38/ensembl87/Homo_sapiens.GRCh38.cdna.all.fa.gz.pickle
+INFO:pyensembl.sequence_data:Loaded sequence dictionary from /opt/pyensembl/GRCh38/ensembl87/Homo_sapiens.GRCh38.ncrna.fa.gz.pickle
+2019-04-22 19:43:09,221 - AGFusion - ERROR - No Ensembl ID found for IGL-! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for IGL-! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:09,224 - AGFusion - ERROR - No Ensembl ID found for IGL-! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for IGL-! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:09,226 - AGFusion - ERROR - No Ensembl ID found for IGL-! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for IGL-! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:09,228 - AGFusion - ERROR - No Ensembl ID found for IGL-! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for IGL-! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:09,351 - AGFusion - ERROR - Junction 22811778 not within IGLC3 gene boundaries!
+ERROR:AGFusion:Junction 22811778 not within IGLC3 gene boundaries!
+2019-04-22 19:43:09,472 - AGFusion - ERROR - Junction 22895372 not within IGLC3 gene boundaries!
+ERROR:AGFusion:Junction 22895372 not within IGLC3 gene boundaries!
+2019-04-22 19:43:09,507 - AGFusion - ERROR - Junction 22900973 not within IGLC3 gene boundaries!
+ERROR:AGFusion:Junction 22900973 not within IGLC3 gene boundaries!
+2019-04-22 19:43:09,542 - AGFusion - ERROR - Junction 22857820 not within IGLC3 gene boundaries!
+ERROR:AGFusion:Junction 22857820 not within IGLC3 gene boundaries!
+2019-04-22 19:43:09,577 - AGFusion - ERROR - Junction 22901039 not within IGLC3 gene boundaries!
+ERROR:AGFusion:Junction 22901039 not within IGLC3 gene boundaries!
+2019-04-22 19:43:09,611 - AGFusion - ERROR - Junction 22906339 not within IGLC3 gene boundaries!
+ERROR:AGFusion:Junction 22906339 not within IGLC3 gene boundaries!
+2019-04-22 19:43:09,734 - AGFusion - ERROR - Junction 22873007 not within IGLC3 gene boundaries!
+ERROR:AGFusion:Junction 22873007 not within IGLC3 gene boundaries!
+2019-04-22 19:43:09,769 - AGFusion - ERROR - Junction 22822979 not within IGLC3 gene boundaries!
+ERROR:AGFusion:Junction 22822979 not within IGLC3 gene boundaries!
+2019-04-22 19:43:09,843 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:10,263 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:11,287 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:11,952 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:12,523 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:12,995 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:13,504 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:15,541 - AGFusion - ERROR - No Ensembl ID found for IGH! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for IGH! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:15,736 - AGFusion - ERROR - Junction 19014506 not within DGCR9 gene boundaries!
+ERROR:AGFusion:Junction 19014506 not within DGCR9 gene boundaries!
+2019-04-22 19:43:16,597 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:17,163 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:17,745 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:18,295 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:19,047 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:20,371 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:20,800 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:21,231 - AGFusion - ERROR - Junction 136866299 not within EDF1 gene boundaries!
+ERROR:AGFusion:Junction 136866299 not within EDF1 gene boundaries!
+2019-04-22 19:43:21,897 - AGFusion - ERROR - Junction 2211951 not within BRICD5 gene boundaries!
+ERROR:AGFusion:Junction 2211951 not within BRICD5 gene boundaries!
+2019-04-22 19:43:22,621 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:23,278 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:23,791 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:24,437 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:24,966 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:25,391 - AGFusion - ERROR - No Ensembl ID found for ENSG00000284773! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for ENSG00000284773! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:25,743 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:26,333 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:27,488 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:27,947 - AGFusion - ERROR - Junction 203833853 not within ZBED6 gene boundaries!
+ERROR:AGFusion:Junction 203833853 not within ZBED6 gene boundaries!
+2019-04-22 19:43:28,067 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:28,488 - AGFusion - ERROR - No Ensembl ID found for ENSG00000285542! Check its spelling and if you are using the right genome build.
+ERROR:AGFusion:No Ensembl ID found for ENSG00000285542! Check its spelling and if you are using the right genome build.
+2019-04-22 19:43:32,367 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:33,038 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:33,727 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+2019-04-22 19:43:34,241 - AGFusion - ERROR - Junction 42331082 not within CTD-2307P3.1 gene boundaries!
+ERROR:AGFusion:Junction 42331082 not within CTD-2307P3.1 gene boundaries!
+2019-04-22 19:43:34,279 - AGFusion - ERROR - Junction 5003811 not within RP11-428J1.5 gene boundaries!
+ERROR:AGFusion:Junction 5003811 not within RP11-428J1.5 gene boundaries!
+2019-04-22 19:43:34,352 - AGFusion - WARNING - Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+WARNING:AGFusion:Fusion isoform effect is not out-of-frame but CDS is not a multiple of 3!
+
+------------------------------------------------------------
+Sender: LSF System <lsf9@blade17-1-10.gsc.wustl.edu>
+Subject: Job 7840501: <agfusion batch -f /gscmnt/gc2697/sclc/rna/star-fusion/star_fusion_outdir/star-fusion.fusion_predictions.tsv -a starfusion -db /opt/agfusiondb/agfusion.homo_sapiens.87.db -o /gscmnt/gc2697/sclc/rna/agfusion -ms> in cluster <lsfcluster9> Done
+
+Job <agfusion batch -f /gscmnt/gc2697/sclc/rna/star-fusion/star_fusion_outdir/star-fusion.fusion_predictions.tsv -a starfusion -db /opt/agfusiondb/agfusion.homo_sapiens.87.db -o /gscmnt/gc2697/sclc/rna/agfusion -ms> was submitted from host <virtual-workstation2.gsc.wustl.edu> by user <zskidmor> in cluster <lsfcluster9>.
+Job was executed on host(s) <8*blade17-1-10.gsc.wustl.edu>, in queue <research-hpc>, as user <zskidmor> in cluster <lsfcluster9>.
+</gscuser/zskidmor> was used as the home directory.
+</gscmnt/gc2697/sclc/rna/agfusion> was used as the working directory.
+Started at Mon Apr 22 14:41:52 2019
+Results reported on Mon Apr 22 14:43:37 2019
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+agfusion batch -f /gscmnt/gc2697/sclc/rna/star-fusion/star_fusion_outdir/star-fusion.fusion_predictions.tsv -a starfusion -db /opt/agfusiondb/agfusion.homo_sapiens.87.db -o /gscmnt/gc2697/sclc/rna/agfusion -ms
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               0.62 sec.
+    Max Memory :             13.62 MB
+    Average Memory :         13.58 MB
+    Total Requested Memory : 24000.00 MB
+    Delta Memory :           23986.38 MB
+    (Delta: the difference between Total Requested Memory and Max Memory.)
+    Max Swap :               470 MB
+    Max Processes :          5
+    Max Threads :            18
+
+The output (if any) is above this job summary.
+

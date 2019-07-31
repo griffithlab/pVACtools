@@ -25,3 +25,11 @@ class CalculateManufacturabilityTests(unittest.TestCase):
             output_file.name,
             os.path.join(self.test_data_dir, "output.tsv"),
         ))
+
+    def test_calculate_manufacturability_from_fasta(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(CalculateManufacturability(os.path.join(self.test_data_dir, 'input.fasta'), output_file.name, 'fasta').execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output_from_fasta.tsv"),
+        ))

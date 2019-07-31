@@ -110,18 +110,23 @@ tablekey = "data_%s_%s" % (
     (parentID if parentID >= 0 else 'visualize'),
     fileID
 )
+
 # Fetch table data from postgres
 db = psql.open('localhost/pvacseq')
 with db.xact('SERIALIZABLE', 'READ ONLY DEFERRABLE'):
-    raw_data = db.prepare("SELECT %s FROM %s" % (','.join(cols), tablekey))()
-entries = [
-    {
-        col:float(val) if isinstance(val, decimal.Decimal) else val
-        for (col, val) in zip(cols, entry)
-    }
-    for entry in raw_data
-]
+    select_query = db.prepare("SELECT %s FROM %s" % (','.join(cols), tablekey))
+    raw_data = select_query()
+    entries = [
+        {
+            col:float(val) if isinstance(val, decimal.Decimal) else val
+            for (col, val) in zip(cols, entry)
+        }
+        for entry in raw_data
+    ]
+    # list of columns of type Text (column has string values or is empty)
+    text_columns = [col[0] for col in zip(select_query.column_names, select_query.column_types) if col[1]==str]
 
+db.close()
 entries.sort(key=lambda x:x['rowid'])
 del raw_data
 
@@ -140,10 +145,12 @@ from bokeh.plotting import figure
 #Set up the x/y axis selectors and the toggle to hide null entries
 widgets = []
 getters = []
+excluded_columns = ['chromosome', 'protein_position'] #explicit list of columns to not be plotted
+removed_columns = excluded_columns + list(set(text_columns) - set(excluded_columns)) #all columns to not be plotted
 x_field = Select(
     title="X-Axis Value",
     options=sorted([
-        (key, val) for (key, val) in cols.items()
+        (key, val) for (key, val) in cols.items() if key not in removed_columns
     ], key = lambda x:x[1]),
     value = 'corresponding_wt_score' if 'corresponding_wt_score' in cols.keys() else 'wt_ic50'
 )
@@ -151,7 +158,7 @@ widgets.append(x_field)
 y_field = Select(
     title = 'Y-Axis Value',
     options=sorted([
-        (key, val) for (key, val) in cols.items()
+        (key, val) for (key, val) in cols.items() if key not in removed_columns
     ], key = lambda x:x[1]),
     value = 'best_mt_score' if 'best_mt_score' in cols.keys() else 'mt_ic50'
 )
@@ -178,6 +185,8 @@ p = figure(
     title = sample,
     # sizing_mode='stretch_both',
     plot_height=800, plot_width=900,
+    # arbitrary default axes ranges to prevent automatic range adjustment
+    x_range=[0, 1], y_range=[0, 1]
 )
 
 # every keyword argument can accept a constant value, or a column name
@@ -259,7 +268,16 @@ def update():
         'Show' if hide_null.active else 'Hide',
         len([entry for entry in entries if(entry[x] is None or entry[y] is None)])
     )
+    # min( ... or [0]) in case list empty; (i if i else 0 ...) in case i == None
+    x_minmax = (min(i if i else 0 for i in data_dict[x] or [0]), max(i if i else 0 for i in data_dict[x] or [1]))
+    y_minmax = (min(i if i else 0 for i in data_dict[y] or [0]), max(i if i else 0 for i in data_dict[y] or [1]))
+    #update data before axes ranges to minimize time between the two updates
     source.data = data_dict
+    #update axes ranges and pad by 5% for viewability + 1/20 in case min == max
+    p.x_range.start = x_minmax[0] - (x_minmax[1]-x_minmax[0] + 1)/20
+    p.x_range.end = x_minmax[1] + (x_minmax[1]-x_minmax[0] + 1)/20
+    p.y_range.start = y_minmax[0] - (y_minmax[1]-y_minmax[0] + 1)/20
+    p.y_range.end = y_minmax[1] + (y_minmax[1]-y_minmax[0] + 1)/20
     #end update function
 
 #create range filters for various columns
@@ -320,6 +338,20 @@ getters.append((
     range_column_filter('transcript_expression', 1)
 ))
 
+#same axes adjustment as done in update()
+def readjust_axes(event):
+    x = x_field.value
+    y = y_field.value
+    data = source.data
+    x_minmax = (min(i if i else 0 for i in data[x] or [0]), max(i if i else 0 for i in data[x] or [1]))
+    y_minmax = (min(i if i else 0 for i in data[y] or [0]), max(i if i else 0 for i in data[y] or [1]))
+    p.x_range.start = x_minmax[0] - (x_minmax[1]-x_minmax[0] + 1)/20
+    p.x_range.end = x_minmax[1] + (x_minmax[1]-x_minmax[0] + 1)/20
+    p.y_range.start = y_minmax[0] - (y_minmax[1]-y_minmax[0] + 1)/20
+    p.y_range.end = y_minmax[1] + (y_minmax[1]-y_minmax[0] + 1)/20
+
+# Maintain current axes ranges upon reset
+p.on_event('reset', readjust_axes)
 
 # Add callbacks to the 3 widgets manually created back at the start
 x_field.on_change('value', lambda a,r,g: update())

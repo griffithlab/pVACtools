@@ -490,6 +490,8 @@ class DefaultOutputParser(OutputParser):
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 (sample, method, remainder) = os.path.basename(input_iedb_file).split(".", 2)
                 for line in iedb_tsv_reader:
+                    if "Warning: Potential DNA sequence(s)" in line['allele']:
+                        continue
                     protein_label  = int(line['seq_num'])
                     if 'core_peptide' in line and int(line['end']) - int(line['start']) == 8:
                         #Start and end refer to the position of the core peptide
