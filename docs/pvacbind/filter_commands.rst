@@ -2,8 +2,6 @@
     :align: right
     :alt: pVACbind logo
 
-.. _filter_commands:
-
 Filtering Commands
 =============================
 

@@ -48,48 +48,81 @@ tools:
    mailing_list
 
 
-New in release |release|
-------------------------
-
-This is a hotfix release. It fixes the following issues:
-
-- In a previous version we implemented a faster method for reading data from
-  the database in pVACapi. However, this would fail if the postgres user is
-  not a superuser. This version fixes this issue by using the previous
-  database file read method in this situation.
-- This version marks certain columns of the output reports as not visualizable
-  in pVACviz/pVACapi because they contain string content that cannot be
-  plotted in a scatterplot.
-
 New in version |version|
 ------------------------
 
 This version adds the following features:
 
-- pVACvector now tests spacers iteratively. During the first iteration, the
-  first spacer in the list of ``--spacers`` gets tested. In the next
-  iteration, the next spacer in the list gets added to the pool of spacers to
-  tests, and so on. If at any point a valid ordering is found, pVACvector will
-  finish its run and output the result. This might result in slightly
-  less optimal (but still valid) ordering but improves runtime significantly.
-- If, after testing all spacers, no valid ordering if found, pVACvector will
-  clip the beginning and/or ends of problematic peptides by one amino acid.
-  The ordering finding process is then repeated on the updated list of
-  peptides. This process may be repeated up to a maximum set by the
-  ``--max-clip-length`` parameter.
-- This version adds a standalone command to create the pVACvector
-  visualizations that can be run by calling ``pvacvector visualize`` using a
-  pVACvector result file as the input.
-- We removed the ``--aditional-input-file-list`` option to pVACseq. Readcount and
-  expression information are now taken directly from the VCF annotations.
-  Instructions on how to add these annotations to your input VCF can be found
-  on the :ref:`prerequisites_label` page.
-- We added support for variants to pVACseq that are only annotated as
-  ``protein_altering_variant`` without a more specific consequence of
-  ``missense_variant``, ``inframe_insertion``, ``inframe_deletion``, or ``frameshift_variant``.
-- We resolved some syntax differences that prevented pVACtools from being run
-  under python 3.6 or python 3.7. pVACtools should now be compatible with all
-  python3 versions.
+- This version introduces a new tool, ``pVACbind``, which can be used
+  to run our immunotherapy pipeline with a peptides
+  FASTA file as input. This new tool is similar to pVACseq but certain
+  options and filters are removed:
+
+  - All input sequences are interpreted in isolation so corresponding
+    wildtype sequence and score information are not assigned. As a consequence,
+    the filter threshold option on fold change is removed.
+  - Because the input format doesn't allow for association of readcount,
+    expression or transcript support level data, pVACbind doesn't run the coverage
+    filter or transcript support level filter.
+  - No condensed report is generated.
+
+  Please see the :ref:`pvacbind` documentation for more information.
+
+- pVACfuse now support annotated fusion files from `AGFusion <https://github.com/murphycj/AGFusion>`_ as input. The
+  :ref:`pvacfuse` documentation has been updated with instructions on how to
+  run AGFusion in the Prerequisites section.
+- The top score filter has been updated to take into account alternative known
+  transcripts that might result in non-indentical peptide sequences/epitopes.
+  The top score filter now picks the best epitope for every available transcript of a
+  variant. If the resulting list of epitopes for one variant is not identical,
+  the filter will output all eptiopes. If the resulting list of epitopes for one
+  variant are identical, the filter only outputs the epitope for the transcript with the highest
+  transcript expression value. If no expression data is available, or if
+  multiple transcripts remain, the filter outputs the epitope for the
+  transcripts with the lowest transcript Ensembl ID.
+- This version adds a few new options to the ``pvacseq
+  generate_protein_fasta`` command:
+
+  - The ``--mutant-only`` option can be used to only output mutant peptide
+    sequences instead of mutant and wildtype sequences.
+  - This command now has an option to provide a pVACseq all_eptiopes or
+    filtered TSV file as an input (``--input-tsv``). This will limit the
+    output fasta to only sequences that originated from the variants in that file.
+
+- This release adds a ``pvacfuse generate_protein_fasta`` command that works
+  similarly to the ``pvacseq generate_protein_fasta`` command but works with
+  Integrate-NEO or AGFusion input files.
+- We removed the sorting of the all_epitopes result file in order to reduce
+  memory usage. Only the filtered files will be sorted. This version also updates the sorting algorithm of the
+  filtered files as follows:
+
+  - If the ``--top-score-metric`` is set to ``median`` the results are first
+    filtered by the ``Median MT Score``. If multiple epitopes have the same
+    ``Median MT Score`` they are then filtered by the ``Corresponding Fold
+    Change``. The last sorting criteria is the ``Best MT Score``.
+  - If the ``--top-score-metric`` is set to ``lowest`` the results are first
+    filtered by the ``Best MT Score``. If multiple epitopes have the same
+    ``Best MT Score`` they are then filtered by the ``Corresponding Fold
+    Change``. The last sorting criteria is the ``Median MT Score``.
+
+- pVACseq, pVACfuse, and pVACbind now calculcate manufacturability metrics
+  calculated for the predicted epitopes. Manufacturability metrics are also
+  calculcated for all protein sequences when running the ``pvacseq generate_protein_fasta``
+  and ``pvacfuse generate_protein_fasta`` commands. They are saved in the ``.manufacturability.tsv``
+  along to the result fasta.
+- The pVACseq score that gets calculated for epitopes in the condensed report
+  is now converted into a rank. This will hopefully remove any confusion about
+  whether the previous score could be treated as an absolute measure of
+  immunogencity, which it was not intended for. Converting this score to a
+  rank ensures that it gets treated in isolation for only the epitopes in the
+  condensed file.
+- The condensed report now also outputs the mutation position as well as the
+  full set of lowest and median wildtype and mutant scores.
+- This version adds a clear cache function to pVACapi that can be called by
+  running ``pvacapi clear_cache``. Sometimes pVACapi can get into a state
+  where the cache file contains conflicting data compared to the actual
+  process outputs which results in errors. Clearing the cache using the ``pvacapi clear_cache``
+  function can be used in that situation to resolve these errors.
 
 Past release notes can be found on our :ref:`releases` page.
 

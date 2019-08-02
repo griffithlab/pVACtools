@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+TIMP3	RP11-244H3.4	ENST00000266085	ENST00000487874	protein_coding	nonsense_mediated_decay	out-of-frame	174	19.95408650000002
