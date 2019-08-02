@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACbind logo
 
+.. _pvacbind:
+
 pVACbind
 ====================================
 

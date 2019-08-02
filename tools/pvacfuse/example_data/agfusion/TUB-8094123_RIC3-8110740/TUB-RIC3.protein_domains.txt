@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+TUB	RIC3	ENST00000305253	ENST00000309737	PF16322	Tub_N	Tubby N-terminal	84	165

@@ -1,0 +1,3 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+TTC26	NDUFV2	ENST00000464848	ENST00000318388	PF12895	ANAPC3	Anaphase-promoting complex, cyclosome, subunit 3	40	113
+TTC26	NDUFV2	ENST00000464848	ENST00000318388	PF01257	2Fe-2S_thioredx	Thioredoxin-like [2Fe-2S] ferredoxin	284	430

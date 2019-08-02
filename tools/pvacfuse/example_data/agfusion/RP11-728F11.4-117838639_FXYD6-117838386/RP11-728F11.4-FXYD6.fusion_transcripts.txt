@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+RP11-728F11.4	FXYD6	ENST00000534150	ENST00000526014	antisense	protein_coding	Outside transcript boundry	NA	NA

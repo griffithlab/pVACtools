@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+MED31	RFC1	ENST00000225728	ENST00000381897	PF05669	Med31	SOH1	16	108
