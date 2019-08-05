@@ -44,3 +44,12 @@ class TopScoreFilterTests(unittest.TestCase):
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_fusion.tsv')
         self.assertTrue(compare(output_file.name, expected_output_file))
+
+    def test_runs_and_creates_expected_file_pvacbind(self):
+        input_file = os.path.join(self.test_data_dir, 'input_pvacbind.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+
+        TopScoreFilter(input_file, output_file.name, 'median', 'pVACbind').execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_pvacbind.tsv')
+        self.assertTrue(compare(output_file.name, expected_output_file))
