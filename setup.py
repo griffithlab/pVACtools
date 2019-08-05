@@ -80,7 +80,7 @@ setup(
             "pvacbind = tools.pvacbind.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
-            "pvacapi = utils.pvacapi.app:main",
+            "pvacapi = utils.pvacapi.main:main",
             "pvacviz = utils.pvacviz.app:main"
         ]
     },
