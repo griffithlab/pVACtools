@@ -78,13 +78,14 @@ class TopScoreFilter:
                                     line_with_max_expression = line_with_transcript_expression
                             filtered_lines.append(line_with_max_expression)
                         else:
-                            line_with_lowest_transcript_no = lines[0]
+                            line_with_lowest_transcript_id = lines[0]
+                            lowest_transcript_id = re.compile('ENST(\d+)').match(line_with_lowest_transcript_id['Transcript']).group(1)
                             for line in lines:
                                 transcript_id = re.compile('ENST(\d+)').match(line['Transcript']).group(1)
-                                lowest_transcript_id = re.compile('ENST(\d+)').match(line_with_lowest_transcript_no['Transcript']).group(1)
                                 if transcript_id < lowest_transcript_id:
-                                    line_with_lowest_transcript_no = line
-                            filtered_lines.append(line_with_lowest_transcript_no)
+                                    lowest_transcript_id = transcript_id
+                                    line_with_lowest_transcript_id = line
+                            filtered_lines.append(line_with_lowest_transcript_id)
 
             if self.file_type != 'pVACbind':
                 sorted_rows = lib.sort.default_sort(filtered_lines, self.top_score_metric)
