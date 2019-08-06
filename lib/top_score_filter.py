@@ -1,6 +1,7 @@
 import csv
 import argparse
 import lib.sort
+import re
 
 class TopScoreFilter:
     def __init__(self, input_file, output_file, top_score_metric, file_type='pVACseq'):
@@ -69,7 +70,7 @@ class TopScoreFilter:
                     if len(lines) == 1:
                         filtered_lines.append(lines[0])
                     else:
-                        lines_with_transcript_expression = list(filter(lambda line: line['Transcript Expression'] != 'NA' in lines))
+                        lines_with_transcript_expression = list(filter(lambda line: line['Transcript Expression'] != 'NA', lines))
                         if len(lines_with_transcript_expression) > 0:
                             line_with_max_expression = lines_with_transcript_expression[0]
                             for line_with_transcript_expression in lines_with_transcript_expression:
@@ -77,11 +78,14 @@ class TopScoreFilter:
                                     line_with_max_expression = line_with_transcript_expression
                             filtered_lines.append(line_with_max_expression)
                         else:
-                            line_with_lowest_transcript_no = lines[0]
+                            line_with_lowest_transcript_id = lines[0]
+                            lowest_transcript_id = re.compile('ENST(\d+)').match(line_with_lowest_transcript_id['Transcript']).group(1)
                             for line in lines:
-                                if float(line['Transcript'].replace('ENST','')) < float(line_with_lowest_transcript_no['Transcript'].replace('ENST','')):
-                                    line_with_lowest_transcript_no = line
-                            filtered_lines.append(line_with_lowest_transcript_no)
+                                transcript_id = re.compile('ENST(\d+)').match(line['Transcript']).group(1)
+                                if transcript_id < lowest_transcript_id:
+                                    lowest_transcript_id = transcript_id
+                                    line_with_lowest_transcript_id = line
+                            filtered_lines.append(line_with_lowest_transcript_id)
 
             if self.file_type != 'pVACbind':
                 sorted_rows = lib.sort.default_sort(filtered_lines, self.top_score_metric)
