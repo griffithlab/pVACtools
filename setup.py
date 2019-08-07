@@ -23,6 +23,11 @@ for dirpath, dirnames, filenames in os.walk("tools/pvacvector/example_data"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             pvacvector_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
+pvacbind_data_files = []
+for dirpath, dirnames, filenames in os.walk("tools/pvacbind/example_data"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            pvacbind_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
 for dirpath, dirnames, filenames in os.walk("tools/pvacseq/VEP_plugins"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
@@ -56,9 +61,10 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
 
 setup(
     name="pvactools",
-    version="1.4.5",
+    version="1.5.0",
     packages=[
         "tools",
+        "tools.pvacbind",
         "tools.pvacfuse",
         "tools.pvacvector",
         "tools.pvacseq",
@@ -71,9 +77,10 @@ setup(
         "console_scripts":[
             "pvactools = tools.main:main",
             "pvacseq = tools.pvacseq.main:main",
+            "pvacbind = tools.pvacbind.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
-            "pvacapi = utils.pvacapi.app:main",
+            "pvacapi = utils.pvacapi.main:main",
             "pvacviz = utils.pvacviz.app:main"
         ]
     },
@@ -101,11 +108,13 @@ setup(
         'swagger-spec-validator==2.1.0',
         'jsonschema==2.6.0',
         'mock',
+        'vaxrank',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,
         'tools.pvacfuse': pvacfuse_data_files,
         'tools.pvacvector': pvacvector_data_files,
+        'tools.pvacbind': pvacbind_data_files,
         'utils.pvacapi': server_data,
         'utils.pvacviz': client_data,
     },

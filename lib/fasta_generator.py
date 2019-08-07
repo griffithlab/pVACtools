@@ -294,7 +294,11 @@ class FusionFastaGenerator(FastaGenerator):
                 stop_position = position + one_flanking_sequence_length
                 subsequence   = sequence[start_position:stop_position]
             elif variant_type == 'frameshift_fusion':
-                subsequence = sequence[start_position:]
+                if self.downstream_sequence_length:
+                    stop_position = position + self.downstream_sequence_length
+                    subsequence = sequence[start_position:stop_position]
+                else:
+                    subsequence = sequence[start_position:]
             else:
                 continue
 
