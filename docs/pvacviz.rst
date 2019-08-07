@@ -22,3 +22,4 @@ as visualizing the results of your runs.
    pvacviz/starting
    pvacviz/managing
    pvacviz/visualizing
+   pvacviz/troubleshooting

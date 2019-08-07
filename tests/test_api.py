@@ -1174,10 +1174,23 @@ class APITests(unittest.TestCase):
 
             self.assertTrue(check_res(filtered_results))
 
+    def test_clear_cache(self):
+        cache_file = os.path.expanduser(os.path.join(
+            '~',
+            '.pvacseq',
+            'processes.json'
+        ))
+        self.assertTrue(os.path.exists(cache_file))
+        self.assertGreater(os.path.getsize(cache_file), 3) #3 == size of 'cleared' cache file ("{\n}")
+        pvacapi_main_path = os.path.join(pvac_dir, 'utils', 'pvacapi', 'main.py')
+        run(['python', pvacapi_main_path, 'clear_cache'], stdout = DEVNULL) #use 'python ~/Documents/work/pVACtools/utils/pvacapi/main.py clear_cache' instead
+        self.assertEqual(os.path.getsize(cache_file), 3)
+
     def test_max_file_size(self):
         with unittest.mock.patch('os.path.getsize', return_value=14*1024*1024):
             from utils.pvacapi.controllers.utils import file_not_max
             self.assertFalse(file_not_max('arbitrary/file/path'))
+
 
     #pagination temporarily put on hold.
     """

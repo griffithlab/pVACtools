@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+CRYBG3	CD47	ENST00000389622	ENST00000361309	protein_coding	protein_coding	out-of-frame	122	13.870699899999991

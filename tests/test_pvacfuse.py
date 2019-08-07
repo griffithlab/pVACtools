@@ -175,30 +175,32 @@ class PvacfuseTests(unittest.TestCase):
             output_dir.cleanup()
 
     def test_pvacfuse_combine_and_condense_steps(self):
-            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
-            for subdir in ['MHC_Class_I', 'MHC_Class_II']:
-                path = os.path.join(output_dir.name, subdir)
-                os.mkdir(path)
-                test_data_dir = os.path.join(self.test_data_directory, 'combine_and_condense', subdir)
-                for item in os.listdir(test_data_dir):
-                    os.symlink(os.path.join(test_data_dir, item), os.path.join(path, item))
+        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+        for subdir in ['MHC_Class_I', 'MHC_Class_II']:
+            path = os.path.join(output_dir.name, subdir)
+            os.mkdir(path)
+            test_data_dir = os.path.join(self.test_data_directory, 'combine_and_condense', subdir)
+            for item in os.listdir(test_data_dir):
+                os.symlink(os.path.join(test_data_dir, item), os.path.join(path, item))
 
-            run.main([
-                os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
-                'Test',
-                'HLA-A*29:02,H2-IAb',
-                'NetMHC', 'NNalign',
-                output_dir.name,
-                '-e', '9',
-                '--top-score-metric=lowest',
-                '--keep-tmp-files',
-            ])
+        run.main([
+            os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
+            'Test',
+            'HLA-A*29:02,H2-IAb',
+            'NetMHC', 'NNalign',
+            output_dir.name,
+            '-e', '9',
+            '--top-score-metric=lowest',
+            '--keep-tmp-files',
+        ])
 
-            for file_name in (
-                'Test.all_epitopes.tsv',
-                'Test.filtered.tsv',
-                'Test.filtered.condensed.ranked.tsv',
-            ):
-                output_file   = os.path.join(output_dir.name, 'combined', file_name)
-                expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
-                self.assertTrue(compare(output_file, expected_file))
+        for file_name in (
+            'Test.all_epitopes.tsv',
+            'Test.filtered.tsv',
+            'Test.filtered.condensed.ranked.tsv',
+        ):
+            output_file   = os.path.join(output_dir.name, 'combined', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
+            self.assertTrue(compare(output_file, expected_file))
+
+
