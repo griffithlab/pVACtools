@@ -60,9 +60,9 @@ There are a number of factors that determine the number of IEDB calls to be made
 - The ``--fasta-size`` parameter value
 
   pVACseq takes an input VCF and creates a wildtype and a mutant
-  fasta for each transcript. The number of fasta entries that get submitted
+  FASTA for each transcript. The number of FASTA entries that get submitted
   to IEDB at a time is limited by the ``--fasta-size`` parameter in order
-  to reduce the load on the IEDB servers. The smaller the fasta-size, the
+  to reduce the load on the IEDB servers. The smaller the FASTA size, the
   more calls have to be made to IEDB.
 
   **Speedup suggestion**: When using a local IEDB install, increase the size
@@ -71,9 +71,9 @@ There are a number of factors that determine the number of IEDB calls to be made
 - Number of prediction algorithms, epitope lengths, and HLA-alleles
 
   One call to IEDB is made for each combination of these parameters for each chunk
-  of fasta sequences. That means, for example, when 8 prediction
-  algorithms, 4 epitope lengths (8-11), and 6 HLA-alleles are chosen, 7*4*6=192 calls 
-  to IEDB have to be made for each chunk of fastas.
+  of FASTA sequences. That means, for example, when 8 prediction
+  algorithms, 4 epitope lengths (8-11), and 6 HLA-alleles are chosen, 7*4*6=192 calls
+  to IEDB have to be made for each chunk of FASTA.
 
   **Speedup suggestion**: Reduce the number of prediction algorithms,
   epitope lengths, and/or HLA-alleles to the ones that will be the most
@@ -85,8 +85,8 @@ There are a number of factors that determine the number of IEDB calls to be made
 
 - ``--downstream-sequence-length`` parameter value
 
-  This parameter determines how many amino acids of the downstream sequence 
-  after a frameshift mutation will be included in the wildtype fasta sequence. 
+  This parameter determines how many amino acids of the downstream sequence
+  after a frameshift mutation will be included in the wildtype FASTA sequence.
   The shorter the downstream sequence length, the lower the number of epitopes
   that IEDB needs to make binding predictions for.
 

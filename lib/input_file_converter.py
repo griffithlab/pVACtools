@@ -10,6 +10,8 @@ from lib.proximal_variant import ProximalVariant
 import lib.utils
 import binascii
 import re
+import glob
+from Bio import SeqIO
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -380,7 +382,7 @@ class VcfConverter(InputFileConverter):
 
         self.close_filehandles()
 
-class IntegrateConverter(InputFileConverter):
+class FusionInputConverter(InputFileConverter):
     def input_fieldnames(self):
         return [
             'chr 5p',
@@ -410,38 +412,12 @@ class IntegrateConverter(InputFileConverter):
                 fusions.append("%s-%s"% (five_p_transcript, three_p_transcript))
         return fusions
 
-    def execute(self):
+    def parse_integrate_neo_file(self):
         reader = open(self.input_file, 'r')
         csv_reader = csv.DictReader(reader, delimiter='\t', fieldnames=self.input_fieldnames())
-        writer = open(self.output_file, 'w')
-        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
-        tsv_writer.writeheader()
         count = 1
+        output_rows = []
         for entry in csv_reader:
-            output_row = {
-                'chromosome_name'            : "%s / %s" % (entry['chr 5p'], entry['chr 3p']),
-                'start'                      : "%s / %s" % (entry['start 5p'], entry['start 3p']),
-                'stop'                       : "%s / %s" % (entry['end 5p'], entry['end 3p']),
-                'reference'                  : 'fusion',
-                'variant'                    : 'fusion',
-                'gene_name'                  : entry['name of fusion'],
-                'wildtype_amino_acid_sequence'   : '',
-                'downstream_amino_acid_sequence' : '',
-                'protein_length_change'      : '',
-                'amino_acid_change'          : 'NA',
-                'codon_change'               : 'NA',
-                'ensembl_gene_id'            : 'NA',
-                'amino_acid_change'          : 'NA',
-                'transcript_expression'      : 'NA',
-                'gene_expression'            : 'NA',
-                'normal_depth'               : 'NA',
-                'normal_vaf'                 : 'NA',
-                'tdna_depth'                 : 'NA',
-                'tdna_vaf'                   : 'NA',
-                'trna_depth'                 : 'NA',
-                'trna_vaf'                   : 'NA',
-            }
-
             if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':
                 continue
             for (fusion_position, transcript_set, fusion_amino_acid_sequence) in zip(entry['fusion positions'].split(','), entry['transcripts'].split(','), entry['peptides'].split(',')):
@@ -456,14 +432,125 @@ class IntegrateConverter(InputFileConverter):
                 else:
                     variant_type = 'frameshift_fusion'
 
+                output_row = {
+                    'chromosome_name'            : "%s / %s" % (entry['chr 5p'], entry['chr 3p']),
+                    'start'                      : "%s / %s" % (entry['start 5p'], entry['start 3p']),
+                    'stop'                       : "%s / %s" % (entry['end 5p'], entry['end 3p']),
+                    'reference'                  : 'fusion',
+                    'variant'                    : 'fusion',
+                    'gene_name'                  : entry['name of fusion'],
+                    'wildtype_amino_acid_sequence'   : '',
+                    'downstream_amino_acid_sequence' : '',
+                    'protein_length_change'      : '',
+                    'amino_acid_change'          : 'NA',
+                    'codon_change'               : 'NA',
+                    'ensembl_gene_id'            : 'NA',
+                    'amino_acid_change'          : 'NA',
+                    'transcript_expression'      : 'NA',
+                    'gene_expression'            : 'NA',
+                    'normal_depth'               : 'NA',
+                    'normal_vaf'                 : 'NA',
+                    'tdna_depth'                 : 'NA',
+                    'tdna_vaf'                   : 'NA',
+                    'trna_depth'                 : 'NA',
+                    'trna_vaf'                   : 'NA',
+                }
                 output_row['variant_type']               = variant_type
                 output_row['protein_position']           = fusion_position
                 output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
-                output_row['transcript_name']            = ';'.join(fusions)
-                output_row['index']                      = '%s.%s.%s.%s' % (count, entry['name of fusion'], variant_type, fusion_position)
-                tsv_writer.writerow(output_row)
-
+                transcripts                              = ';'.join(fusions)
+                output_row['transcript_name']            = transcripts
+                output_row['index']                      = '{}.{}.{}.{}.{}'.format(count, entry['name of fusion'], transcripts, variant_type, fusion_position)
+                output_rows.append(output_row)
                 count += 1
 
-        writer.close()
         reader.close()
+        return output_rows
+
+    def determine_fusion_sequence(self, full_sequence, variant_type):
+        if '*' not in full_sequence:
+            sys.exit("Fusion position marker '*' not found in fusion sequence. Please rerun AGfusion using the `--middlestar` option.")
+        else:
+            fusion_position = full_sequence.find('*')
+            sequence = full_sequence.replace('*', '')
+            return (fusion_position, sequence)
+
+    def parse_exon_file(self, input_file):
+        exon_file = input_file.replace('_protein.fa', '.exons.txt')
+        five_prime_positions, three_prime_positions = [], []
+        with open(exon_file, 'r') as fh:
+            reader = csv.DictReader(fh, delimiter='\t')
+            for record in reader:
+                exon_start = int(record['exon_start'])
+                exon_end = int(record['exon_end'])
+                if record['exon_gene_source'] == "'5 gene":
+                    five_prime_chr = record['exon_chr']
+                    five_prime_positions.append(exon_start)
+                    five_prime_positions.append(exon_end)
+                else:
+                    three_prime_chr = record['exon_chr']
+                    three_prime_positions.append(exon_start)
+                    three_prime_positions.append(exon_end)
+        five_prime_start = min(five_prime_positions)
+        five_prime_end = max(five_prime_positions)
+        three_prime_start = min(three_prime_positions)
+        three_prime_end = max(three_prime_positions)
+        return (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end)
+
+    def parse_agfusion_files(self):
+        output_rows = []
+        count = 1
+        for input_file in sorted(glob.glob(os.path.join(self.input_file, '*', '*_protein.fa'))):
+            (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end) = self.parse_exon_file(input_file)
+            for record in SeqIO.parse(input_file, "fasta"):
+                record_info = dict(map(lambda x: x.split(': '), record.description.split(', ')[1:]))
+                if record_info['effect'] == 'in-frame' or record_info['effect'] == 'in-frame (with mutation)':
+                    variant_type = 'inframe_fusion'
+                elif record_info['effect'] == 'out-of-frame':
+                    variant_type = 'frameshift_fusion'
+                else:
+                    sys.exit('Effect "{}" not supported'.format(record_info['effect']))
+
+                (fusion_position, fusion_amino_acid_sequence) = self.determine_fusion_sequence(str(record.seq), variant_type)
+                output_row = {
+                    'chromosome_name'            : "{} / {}".format(five_prime_chr, three_prime_chr),
+                    'start'                      : "{} / {}".format(five_prime_start, three_prime_start),
+                    'stop'                       : "{} / {}".format(five_prime_end, three_prime_end),
+                    'reference'                  : 'fusion',
+                    'variant'                    : 'fusion',
+                    'gene_name'                  : record_info['genes'],
+                    'wildtype_amino_acid_sequence'   : '',
+                    'downstream_amino_acid_sequence' : '',
+                    'protein_length_change'      : '',
+                    'amino_acid_change'          : 'NA',
+                    'codon_change'               : 'NA',
+                    'ensembl_gene_id'            : 'NA',
+                    'amino_acid_change'          : 'NA',
+                    'transcript_expression'      : 'NA',
+                    'gene_expression'            : 'NA',
+                    'normal_depth'               : 'NA',
+                    'normal_vaf'                 : 'NA',
+                    'tdna_depth'                 : 'NA',
+                    'tdna_vaf'                   : 'NA',
+                    'trna_depth'                 : 'NA',
+                    'trna_vaf'                   : 'NA',
+                    'variant_type'               : variant_type,
+                    'protein_position'           : fusion_position,
+                    'fusion_amino_acid_sequence' : fusion_amino_acid_sequence,
+                    'transcript_name'            : record_info['transcripts'],
+                    'index'                      : '%s.%s.%s.%s' % (count, record_info['genes'], variant_type, fusion_position),
+                }
+                output_rows.append(output_row)
+                count += 1
+        return output_rows
+
+    def execute(self):
+        writer = open(self.output_file, 'w')
+        tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
+        tsv_writer.writeheader()
+        if os.path.isfile(self.input_file):
+            output_rows = self.parse_integrate_neo_file()
+        elif os.path.isdir(self.input_file):
+            output_rows = self.parse_agfusion_files()
+        tsv_writer.writerows(output_rows)
+        writer.close()

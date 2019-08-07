@@ -61,6 +61,13 @@ This filter picks the top epitope for a variant. Epitopes with the same
 Chromosome - Start - Stop - Reference - Variant are identified as coming from
 the same variant.
 
+In order to account for different splice sites among the transcripts of a
+variant that would lead to different peptides, this filter also takes into
+account the different transcripts returned by Integrate-Neo/AGFusion and will return
+the top epitope for all transcripts if they are non-identical. If the
+resulting list of top epitopes for the transcripts of a variant is identical,
+the epitope for the transcript with the lowest Ensembl ID is returned.
+
 By default the
 ``--top-score-metric`` option is set to ``median`` which will apply this
 filter to the ``Median MT Score`` column and pick the epitope with the lowest

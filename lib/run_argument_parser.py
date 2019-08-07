@@ -88,15 +88,6 @@ class PredictionRunArgumentParser(RunArgumentParser):
         RunArgumentParser.__init__(self, tool_name, input_file_help)
         #do we need a class-i-peptide-sequence-length and a class-ii-peptide-sequence-length?
         self.parser.add_argument(
-            "-l", "--peptide-sequence-length", type=int,
-            default=21,
-            help="Length of the peptide sequence to use when creating the FASTA.",
-        )
-        self.parser.add_argument(
-            '--normal-sample-name',
-            help="In a multi-sample VCF, the name of the matched normal sample."
-        )
-        self.parser.add_argument(
             '--net-chop-method',
             choices=lib.net_chop.methods,
             default=None,
@@ -120,15 +111,9 @@ class PredictionRunArgumentParser(RunArgumentParser):
         self.parser.add_argument(
             "-s", "--fasta-size",type=int,
             default=200,
-            help="Number of fasta entries per IEDB request. "
+            help="Number of FASTA entries per IEDB request. "
                  + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
                  + "Needs to be an even number.",
-        )
-        self.parser.add_argument(
-            "-d", "--downstream-sequence-length",
-            default='1000',
-            help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
-                + "Use 'full' to include the full downstream sequence."
         )
         self.parser.add_argument(
             '--exclude-NAs',
@@ -137,23 +122,45 @@ class PredictionRunArgumentParser(RunArgumentParser):
             action='store_true'
         )
 
-class PvacseqRunArgumentParser(PredictionRunArgumentParser):
+class PvacbindRunArgumentParser(PredictionRunArgumentParser):
+    def __init__(self):
+        tool_name = "pvacbind"
+        input_file_help = "A FASTA file"
+        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+
+class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser):
+    def __init__(self, tool_name, input_file_help):
+        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+        #do we need a class-i-peptide-sequence-length and a class-ii-peptide-sequence-length?
+        self.parser.add_argument(
+            "-l", "--peptide-sequence-length", type=int,
+            default=21,
+            help="Length of the peptide sequence to use when creating the FASTA.",
+        )
+        self.parser.add_argument(
+            "-d", "--downstream-sequence-length",
+            default='1000',
+            help="Cap to limit the downstream sequence length for frameshifts when creating the FASTA file. "
+                + "Use 'full' to include the full downstream sequence."
+        )
+
+class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
     def __init__(self):
         tool_name = "pvacseq"
         input_file_help = (
             "A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
             "Wildtype protein sequence, and Downstream protein sequence information."
+            "The VCF may be gzipped (requires tabix index)."
         )
-        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+        PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
 
         self.parser.add_argument(
-            "-i", "--additional-input-file-list",
-            help="yaml file of additional files to be used as inputs, e.g. cufflinks output files. "
-                 + "For an example of this yaml file run `pvacseq config_files additional_input_file_list`."
+            '--normal-sample-name',
+            help="In a multi-sample VCF, the name of the matched normal sample."
         )
         self.parser.add_argument(
             "-p", "--phased-proximal-variants-vcf",
-            help="A VCF with phased proximal variant information."
+            help="A VCF with phased proximal variant information. Must be gzipped and tabix indexed."
         )
         self.parser.add_argument(
             "-c", "--minimum-fold-change", type=float,
@@ -212,11 +219,11 @@ class PvacseqRunArgumentParser(PredictionRunArgumentParser):
             action='store_true'
         )
 
-class PvacfuseRunArgumentParser(PredictionRunArgumentParser):
+class PvacfuseRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
     def __init__(self):
         tool_name = "pvacfuse"
-        input_file_help = "An INTEGRATE-Neo annotated bedpe file with fusions."
-        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+        input_file_help = "An INTEGRATE-Neo annotated bedpe file with fusions or a AGfusion output directory."
+        PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
 
 class PvacvectorRunArgumentParser(RunArgumentParser):
     def __init__(self):

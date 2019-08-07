@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+SMG1	PHF20	ENST00000446231	ENST00000374012	protein_coding	protein_coding	out-of-frame	3546	397.8325308000037

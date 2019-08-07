@@ -6,7 +6,7 @@ from lib.filter import *
 from lib.allele_specific_binding_filter import *
 
 class BindingFilter:
-    def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, exclude_nas, allele_specific_cutoffs):
+    def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, exclude_nas, allele_specific_cutoffs, file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
         self.binding_threshold = binding_threshold
@@ -14,17 +14,24 @@ class BindingFilter:
         self.top_score_metric = top_score_metric
         self.exclude_nas = exclude_nas
         self.allele_specific_cutoffs = allele_specific_cutoffs
+        self.file_type = file_type
 
     def execute(self):
         filter_criteria = []
 
         if self.allele_specific_cutoffs:
-            AlleleSpecificBindingFilter(self.input_file, self.output_file, self.binding_threshold, self.minimum_fold_change, self.top_score_metric, self.exclude_nas).execute()
+            AlleleSpecificBindingFilter(self.input_file, self.output_file, self.binding_threshold, self.minimum_fold_change, self.top_score_metric, self.exclude_nas, self.file_type).execute()
         else:
-            if self.top_score_metric == 'median':
-                column = 'Median MT Score'
-            elif self.top_score_metric == 'lowest':
-                column = 'Best MT Score'
+            if self.file_type == 'pVACbind':
+                if self.top_score_metric == 'median':
+                    column = 'Median Score'
+                elif self.top_score_metric == 'lowest':
+                    column = 'Best Score'
+            else:
+                if self.top_score_metric == 'median':
+                    column = 'Median MT Score'
+                elif self.top_score_metric == 'lowest':
+                    column = 'Best MT Score'
             filter_criteria.append({'column': column, 'operator': '<=', 'threshold': self.binding_threshold})
 
             if self.minimum_fold_change is not None:

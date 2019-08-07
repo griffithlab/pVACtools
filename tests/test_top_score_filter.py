@@ -4,7 +4,7 @@ import os
 import py_compile
 import tempfile
 from lib.top_score_filter import *
-from .test_utils import *
+from filecmp import cmp
 
 class TopScoreFilterTests(unittest.TestCase):
     @classmethod
@@ -25,7 +25,7 @@ class TopScoreFilterTests(unittest.TestCase):
         TopScoreFilter(input_file, output_file.name, 'median').execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_median.tsv')
-        self.assertTrue(compare(output_file.name, expected_output_file))
+        self.assertTrue(cmp(output_file.name, expected_output_file))
 
     def test_runs_and_creates_expected_file_lowest(self):
         input_file = os.path.join(self.test_data_dir, 'input.tsv')
@@ -34,7 +34,7 @@ class TopScoreFilterTests(unittest.TestCase):
         TopScoreFilter(input_file, output_file.name, 'lowest').execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_lowest.tsv')
-        self.assertTrue(compare(output_file.name, expected_output_file))
+        self.assertTrue(cmp(output_file.name, expected_output_file))
 
     def test_runs_and_creates_expected_file_fusion(self):
         input_file = os.path.join(self.test_data_dir, 'input_fusion.tsv')
@@ -43,4 +43,13 @@ class TopScoreFilterTests(unittest.TestCase):
         TopScoreFilter(input_file, output_file.name, 'median').execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_fusion.tsv')
-        self.assertTrue(compare(output_file.name, expected_output_file))
+        self.assertTrue(cmp(output_file.name, expected_output_file))
+
+    def test_runs_and_creates_expected_file_pvacbind(self):
+        input_file = os.path.join(self.test_data_dir, 'input_pvacbind.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+
+        TopScoreFilter(input_file, output_file.name, 'median', 'pVACbind').execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_pvacbind.tsv')
+        self.assertTrue(cmp(output_file.name, expected_output_file))

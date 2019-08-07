@@ -1,0 +1,3 @@
+Gene Name	Mutation	Protein Position	HGVSc	HGVSp	HLA Allele	Mutation Position	MT Epitope Seq	Median MT Score	Median WT Score	Median Fold Change	Best MT Score	Corresponding WT Score	Corresponding Fold Change	Tumor DNA Depth	Tumor DNA VAF	Tumor RNA Depth	Tumor RNA VAF	Gene Expression	Rank
+MPDU1>>GLP2R	NA	37	NA	NA	HLA-A*02:01	NA	SLARIFTSI	49.778999999999996	NA	NA	18.483	NA	NA	NA	NA	NA	NA	NA	1
+MPDU1>>GLP2R	NA	36	NA	NA	HLA-B*35:01	NA	WPESSLPF	157.55	NA	NA	11.435	NA	NA	NA	NA	NA	NA	NA	2

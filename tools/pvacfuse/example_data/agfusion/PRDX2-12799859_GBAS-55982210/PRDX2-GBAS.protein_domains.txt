@@ -1,0 +1,4 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+PRDX2	GBAS	ENST00000301522	ENST00000322090	PF00578	AhpC-TSA	AhpC/TSA family	8	140
+PRDX2	GBAS	ENST00000301522	ENST00000322090	PF10417	1-cysPrx_C	C-terminal domain of 1-Cys peroxiredoxin	161	170
+PRDX2	GBAS	ENST00000301522	ENST00000322090	PF07978	NIPSNAP	NIPSNAP 	233	330

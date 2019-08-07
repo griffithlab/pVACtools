@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+CLUAP1	NLRC3	ENST00000576634	ENST00000359128	PF10234	Cluap1	Clusterin-associated protein-1	14	282

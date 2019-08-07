@@ -1,5 +1,6 @@
 __all__ = [
     "binding_filter",
+    "calculate_manufacturability",
     "call_iedb",
     "combine_parsed_outputs",
     "condense_final_report",

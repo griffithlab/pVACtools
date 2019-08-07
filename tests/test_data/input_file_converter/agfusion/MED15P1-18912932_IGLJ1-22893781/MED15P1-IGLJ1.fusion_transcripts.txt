@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+MED15P1	IGLJ1	ENST00000620166	ENST00000390320	transcribed_unprocessed_pseudogene	IG_J_gene	exon-exon	NA	NA

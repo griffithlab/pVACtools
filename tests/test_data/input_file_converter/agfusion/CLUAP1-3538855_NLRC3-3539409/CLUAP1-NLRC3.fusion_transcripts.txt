@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+CLUAP1	NLRC3	ENST00000576634	ENST00000359128	protein_coding	protein_coding	in-frame	413	48.124514000000126

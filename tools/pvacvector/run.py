@@ -121,7 +121,7 @@ def write_min_scores(min_scores_rows, directory, args):
         writer = csv.DictWriter(fh, delimiter="\t", fieldnames=fieldnames)
         writer.writeheader()
         for row in min_scores_rows:
-            index_parts = row['Index'].split('|')
+            index_parts = row['Mutation'].split('|')
             left_peptide = index_parts[0]
             if len(index_parts) == 2:
                 spacer = 'None'
@@ -133,14 +133,14 @@ def write_min_scores(min_scores_rows, directory, args):
                 'left_peptide': left_peptide,
                 'spacer': spacer,
                 'right_peptide': right_peptide,
-                'epitope': row['MT Epitope Seq'],
+                'epitope': row['Epitope Seq'],
                 'allele': row['HLA Allele'],
             }
             if args.top_score_metric == 'lowest':
-                new_row['junction_score'] = float(row['Best MT Score'])
-                new_row['method'] = row['Best MT Score Method']
+                new_row['junction_score'] = float(row['Best Score'])
+                new_row['method'] = row['Best Score Method']
             elif args.top_score_metric == 'median':
-                new_row['junction_score'] = float(row['Median MT Score'])
+                new_row['junction_score'] = float(row['Median Score'])
                 new_row['method'] = 'median'
             rows.append(new_row)
         sorted_rows = sorted(rows, key=lambda k: k['junction_score'])
@@ -176,12 +176,12 @@ def find_min_scores(parsed_output_files, current_output_dir, args):
         with open(parsed_output_file, 'r') as parsed:
             reader = csv.DictReader(parsed, delimiter="\t")
             for row in reader:
-                index = row['Index']
+                index = row['Mutation']
 
                 if args.top_score_metric == 'lowest':
-                    score = float(row['Best MT Score'])
+                    score = float(row['Best Score'])
                 elif args.top_score_metric == 'median':
-                    score = float(row['Median MT Score'])
+                    score = float(row['Median Score'])
                 if args.allele_specific_binding_thresholds:
                     allele = row['HLA Allele']
                     threshold = PredictionClass.cutoff_for_allele(allele)

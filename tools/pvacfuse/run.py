@@ -43,9 +43,10 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = False
+    post_processing_params['run_condense_report'] = True
+    post_processing_params['run_manufacturability_metrics'] = False
 
     PostProcessor(**post_processing_params).execute()
-    print("\nDone: Pipeline finished successfully. File {} contains ranked list of filtered putative neoantigens for class I and class II predictions.\n".format(condensed_report_file))
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()

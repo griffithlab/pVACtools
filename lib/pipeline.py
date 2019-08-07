@@ -19,6 +19,9 @@ import yaml
 import pkg_resources
 import pymp
 from threading import Lock
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import IUPAC
 
 def status_message(msg):
     print(msg)
@@ -116,7 +119,7 @@ class Pipeline(metaclass=ABCMeta):
     def converter(self, params):
         converter_types = {
             'vcf'  : 'VcfConverter',
-            'bedpe': 'IntegrateConverter',
+            'bedpe': 'FusionInputConverter',
         }
         converter_type = converter_types[self.input_file_type]
         converter = getattr(sys.modules[__name__], converter_type)
@@ -136,7 +139,8 @@ class Pipeline(metaclass=ABCMeta):
         parser_types = {
             'vcf'  : 'DefaultOutputParser',
             'bedpe': 'FusionOutputParser',
-            'pvacvector_input_fasta': 'VectorOutputParser',
+            'pvacvector_input_fasta': 'UnmatchedSequencesOutputParser',
+            'fasta': 'UnmatchedSequencesOutputParser',
         }
         parser_type = parser_types[self.input_file_type]
         parser = getattr(sys.modules[__name__], parser_type)
@@ -267,7 +271,10 @@ class Pipeline(metaclass=ABCMeta):
         warning_messages = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
-            fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
+            if self.input_file_type == 'fasta':
+                fasta_chunk = tsv_chunk
+            else:
+                fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
             for a in alleles:
                 for epl in epitope_lengths:
                     if self.input_file_type == 'pvacvector_input_fasta':
@@ -339,7 +346,10 @@ class Pipeline(metaclass=ABCMeta):
         split_parsed_output_files = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
-            fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
+            if self.input_file_type == 'fasta':
+                fasta_chunk = tsv_chunk
+            else:
+                fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
             for a in self.alleles:
                 for epl in self.epitope_lengths:
                     split_iedb_output_files = []
@@ -397,11 +407,14 @@ class Pipeline(metaclass=ABCMeta):
 
     def combined_parsed_outputs(self, split_parsed_output_files):
         status_message("Combining Parsed Prediction Files")
-        lib.combine_parsed_outputs.main([
+        params = [
             *split_parsed_output_files,
             self.combined_parsed_path(),
             '--top-score-metric', self.top_score_metric,
-        ])
+        ]
+        if self.input_file_type == 'fasta':
+            params.extend(['--file-type', 'pVACbind'])
+        lib.combine_parsed_outputs.main(params)
         status_message("Completed")
 
     def final_path(self):
@@ -436,6 +449,8 @@ class Pipeline(metaclass=ABCMeta):
         post_processing_params['input_file'] = self.combined_parsed_path()
         post_processing_params['filtered_report_file'] = self.final_path()
         post_processing_params['condensed_report_file'] = self.ranked_final_path()
+        post_processing_params['run_condense_report'] = True
+        post_processing_params['run_manufacturability_metrics'] = True
         if self.input_file_type == 'vcf':
             post_processing_params['run_coverage_filter'] = True
             post_processing_params['run_transcript_support_level_filter'] = True
@@ -452,7 +467,123 @@ class Pipeline(metaclass=ABCMeta):
             post_processing_params['run_netmhc_stab'] = False
         PostProcessor(**post_processing_params).execute()
 
-        status_message("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.ranked_final_path()))
+        if self.keep_tmp_files is False:
+            shutil.rmtree(self.tmp_dir)
+
+class PvacbindPipeline(Pipeline):
+    def fasta_entry_count(self):
+        with open(self.input_file) as fasta_file:
+            row_count = 0
+            for row in fasta_file:
+                if not row.startswith('>'):
+                    row_count += 1
+        return row_count
+
+    def split_fasta_basename(self):
+        return os.path.join(self.tmp_dir, self.sample_name + ".fa.split")
+
+    def uniquify_records(self, records):
+        fasta_sequences = OrderedDict()
+        for record in records:
+            fasta_sequences.setdefault(str(record.seq), []).append(record.id)
+        count = 1
+        uniq_records = []
+        keys = {}
+        for sequence, ids in fasta_sequences.items():
+            record = SeqRecord(Seq(sequence, IUPAC.protein), id=str(count), description=str(count))
+            uniq_records.append(record)
+            keys[count] = ids
+            count += 1
+        return (uniq_records, keys)
+
+    def split_fasta_file(self):
+        fasta_entry_count = self.fasta_entry_count()
+        status_message("Splitting FASTA into smaller chunks")
+        chunks = []
+        peptides = []
+        row_count   = 1
+        split_start = row_count
+        split_end   = split_start + self.fasta_size - 1
+        if split_end > fasta_entry_count:
+            split_end = fasta_entry_count
+        status_message("Splitting FASTA into smaller chunks - Entries %d-%d" % (split_start, split_end))
+        split_fasta_file_path = "%s_%d-%d" % (self.split_fasta_basename(), split_start, split_end)
+        split_fasta_key_file_path = "{}.key".format(split_fasta_file_path)
+        chunks.append([split_start, split_end])
+        if os.path.exists(split_fasta_file_path):
+            status_message("Split FASTA file for Entries %d-%d already exists. Skipping." % (split_start, split_end))
+            skip = 1
+        else:
+            split_fasta_records = []
+            skip = 0
+        for record in SeqIO.parse(self.input_file, "fasta"):
+            if skip == 0:
+                split_fasta_records.append(record)
+            if row_count == fasta_entry_count:
+                break
+            if row_count % self.fasta_size == 0:
+                if skip == 0:
+                    (uniq_records, keys) = self.uniquify_records(split_fasta_records)
+                    with open(split_fasta_file_path, 'w') as split_fasta_file:
+                        SeqIO.write(uniq_records, split_fasta_file, "fasta")
+                    with open(split_fasta_key_file_path, 'w') as split_fasta_key_file:
+                        yaml.dump(keys, split_fasta_key_file, default_flow_style=False)
+                    split_fasta_file.close()
+                split_start = row_count + 1
+                split_end   = split_start + self.fasta_size - 1
+                if split_end > fasta_entry_count:
+                    split_end = fasta_entry_count
+                status_message("Splitting FASTA into smaller chunks - Entries %d-%d" % (split_start, split_end))
+                split_fasta_file_path = "%s_%d-%d" % (self.split_fasta_basename(), split_start, split_end)
+                split_fasta_key_file_path = "{}.key".format(split_fasta_file_path)
+                chunks.append([split_start, split_end])
+                if os.path.exists(split_fasta_file_path):
+                    status_message("Split FASTA file for Entries %d-%d already exists. Skipping." % (split_start, split_end))
+                    skip = 1
+                else:
+                    split_fasta_records = []
+                    skip = 0
+            row_count += 1
+        if skip == 0:
+            (uniq_records, keys) = self.uniquify_records(split_fasta_records)
+            with open(split_fasta_file_path, 'w') as split_fasta_file:
+                SeqIO.write(uniq_records, split_fasta_file, "fasta")
+            with open(split_fasta_key_file_path, 'w') as split_fasta_key_file:
+                yaml.dump(keys, split_fasta_key_file, default_flow_style=False)
+        status_message("Completed")
+        return chunks
+
+    def execute(self):
+        self.print_log()
+
+        chunks = self.split_fasta_file()
+        self.call_iedb(chunks)
+        split_parsed_output_files = self.parse_outputs(chunks)
+
+        if len(split_parsed_output_files) == 0:
+            status_message("No output files were created. Aborting.")
+            return
+
+        self.combined_parsed_outputs(split_parsed_output_files)
+
+        post_processing_params = vars(self)
+        post_processing_params['input_file'] = self.combined_parsed_path()
+        post_processing_params['filtered_report_file'] = self.final_path()
+        post_processing_params['run_coverage_filter'] = False
+        post_processing_params['run_transcript_support_level_filter'] = False
+        post_processing_params['minimum_fold_change'] = None
+        post_processing_params['file_type'] = 'pVACbind'
+        post_processing_params['run_condense_report'] = False
+        post_processing_params['run_manufacturability_metrics'] = True
+        if self.net_chop_method:
+            post_processing_params['run_net_chop'] = True
+        else:
+            post_processing_params['run_net_chop'] = False
+        if self.netmhc_stab:
+            post_processing_params['run_netmhc_stab'] = True
+        else:
+            post_processing_params['run_netmhc_stab'] = False
+        PostProcessor(**post_processing_params).execute()
 
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir)
