@@ -64,3 +64,11 @@ _____________
   PubMed PMID: `27402703 <https://www.ncbi.nlm.nih.gov/pubmed/27402703>`_.
 - License: `Academic License
   <http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?netMHCstabpan>`_
+
+Vaxrank
+_______
+
+- Website: https://github.com/openvax/vaxrank
+- Citation: Rubinsteyn, A., Hodes, I., Kodysh, J., & Hammerbacher, J. (2017). Vaxrank: a computational tool for designing personalized cancer vaccines.
+  bioRxiv, `142919 <https://www.biorxiv.org/content/10.1101/142919v2>`_.
+- License: `Apache License 2.0 <https://github.com/openvax/vaxrank/blob/master/LICENSE>`_

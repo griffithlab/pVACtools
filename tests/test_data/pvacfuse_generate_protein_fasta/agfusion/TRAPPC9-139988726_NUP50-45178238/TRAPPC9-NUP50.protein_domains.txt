@@ -1,0 +1,4 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+TRAPPC9	NUP50	ENST00000389328	ENST00000347635	PF08626	TRAPPC9-Trs120	Transport protein Trs120 or TRAPPC9, TRAPP II complex subunit	284	371
+TRAPPC9	NUP50	ENST00000389328	ENST00000347635	PF08626	TRAPPC9-Trs120	Transport protein Trs120 or TRAPPC9, TRAPP II complex subunit	458	767
+TRAPPC9	NUP50	ENST00000389328	ENST00000347635	PF08626	TRAPPC9-Trs120	Transport protein Trs120 or TRAPPC9, TRAPP II complex subunit	981	1034

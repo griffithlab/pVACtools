@@ -102,6 +102,14 @@ This filter picks the top epitope for a variant. Epitopes with the same
 Chromosome - Start - Stop - Reference - Variant are identified as coming from
 the same variant.
 
+In order to account for different splice sites among the transcripts of a
+variant that would lead to different peptides, this filter also takes into
+account the different transcripts returned by VEP and will return
+the top epitope for all transcripts if they are non-identical. If the
+resulting list of top epitopes for the transcripts of a variant is identical,
+the epitope for the transcript with the highest expression is returned. If
+this information is not available, the transcript with the lowest Ensembl ID is returned.
+
 By default the
 ``--top-score-metric`` option is set to ``median`` which will apply this
 filter to the ``Median MT Score`` column and pick the epitope with the lowest
@@ -109,8 +117,6 @@ median mutant ic50 score for each variant. If the ``--top-score-metric``
 option is set to ``lowest``, the ``Best MT Score`` column is instead used to
 make this determination.
 
-If there are multiple top epitopes for a variant with the same ic50 score, the
-first one is chosen.
 
 It is important to note that there are several reasons why a particular variant can lead to multiple peptides
 with different predicted binding affinities. The following can result in multiple peptides and/or binding predictions for a single
@@ -136,11 +142,11 @@ flanking amino acids. This means that you often get a lot of the different short
 registers within the longer containing sequence. In this scenario, pVACseq's choice of a single candidate peptide by the Top Score Filter 
 isn't actually that critical in the sense of losing other good candidates, because you may get them all anyway.
 
-One important exception to this is the rare case where the same variant leads to different peptides in different transcripts 
-(due to different splice site usage). In this case, pVACseq still selects the top candidate as described above but including flanking 
-amino acid sequence won't help because you are only doing this from a single transcript. If multiple transcripts are expressed and 
-lead to distinct peptides, you may want to include both in your final list of candidates. The Top Score Filter doesn't yet support 
-this but the unfiltered results will still contain these candidates. This assumes you did not start with only a single transcript
+One important exception to this is the rare case where the same variant leads to different peptides in different transcripts (due to different splice site usage).
+If multiple transcripts are expressed and 
+lead to distinct peptides, you may want to include both in your final list of candidates.
+The top score filter supports this case, as described above.
+This assumes you did not start with only a single transcript
 model for each gene (e.g. using the ``--pick`` option in VEP) and also that if you are requiring transcripts with TSL=1 that there
 are multiple qualifying transcripts that lead to different peptide sequences at the site of the variant. This will be fairly rare.
 Even though most genes have alternative transcripts, they often have only subtle differences in open reading frame and overall

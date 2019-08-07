@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+TIMP3	TMEM35B	ENST00000266085	ENST00000373337	protein_coding	protein_coding	out-of-frame	193	21.637909100000012
