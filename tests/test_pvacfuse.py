@@ -150,6 +150,7 @@ class PvacfuseTests(unittest.TestCase):
             for file_name in (
                 'Test.tsv',
                 'Test.tsv_1-4',
+                'Test.fasta',
                 'Test.all_epitopes.tsv',
                 'Test.filtered.tsv',
                 'Test.filtered.condensed.ranked.tsv',

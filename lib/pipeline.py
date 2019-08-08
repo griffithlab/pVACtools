@@ -116,6 +116,10 @@ class Pipeline(metaclass=ABCMeta):
             tsv_file = self.sample_name + '.tsv'
             return os.path.join(self.output_dir, tsv_file)
 
+    def fasta_file_path(self):
+        fasta_file = self.sample_name + '.fasta'
+        return os.path.join(self.output_dir, fasta_file)
+
     def converter(self, params):
         converter_types = {
             'vcf'  : 'VcfConverter',
@@ -145,6 +149,23 @@ class Pipeline(metaclass=ABCMeta):
         parser_type = parser_types[self.input_file_type]
         parser = getattr(sys.modules[__name__], parser_type)
         return parser(**params)
+
+    def generate_combined_fasta(self):
+        if self.input_file_type == 'vcf':
+            import tools.pvacseq.generate_protein_fasta as generate_combined_fasta
+        elif self.input_file_type == 'bedpe':
+            import tools.pvacfuse.generate_protein_fasta as generate_combined_fasta
+        params = [
+            self.input_file,
+            str(self.peptide_sequence_length),
+            self.fasta_file_path(),
+        ]
+        if self.downstream_sequence_length is not None:
+            params.extend(["-d", str(self.downstream_sequence_length)])
+        else:
+            params.extend(["-d", 'full'])
+        generate_combined_fasta.main(params)
+        os.unlink("{}.manufacturability.tsv".format(self.fasta_file_path()))
 
     def convert_vcf(self):
         status_message("Converting .%s to TSV" % self.input_file_type)
@@ -426,6 +447,8 @@ class Pipeline(metaclass=ABCMeta):
     def execute(self):
         self.print_log()
         self.convert_vcf()
+        if self.input_file_type != 'pvacvector_input_fasta':
+            self.generate_combined_fasta()
 
         total_row_count = self.tsv_entry_count()
         if total_row_count == 0:
