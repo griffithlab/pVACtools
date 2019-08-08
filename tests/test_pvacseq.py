@@ -187,6 +187,7 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'sample.name.tsv',
                 'sample.name.tsv_1-24',
+                'sample.name.fasta',
                 'sample.name.filtered.tsv',
                 'sample.name.filtered.condensed.ranked.tsv',
             ):
@@ -234,6 +235,7 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'sample.name.tsv',
                 'sample.name.tsv_1-24',
+                'sample.name.fasta',
                 'sample.name.all_epitopes.tsv',
                 'sample.name.filtered.tsv',
                 'sample.name.filtered.condensed.ranked.tsv',
