@@ -368,6 +368,7 @@ class OutputParser(metaclass=ABCMeta):
             headers.append("%s MT Score" % pretty_method)
         if self.sample_name:
             headers.append("Sample Name")
+        headers.append("Index")
 
         return headers
 
@@ -452,6 +453,7 @@ class OutputParser(metaclass=ABCMeta):
                     'Median MT Score'     : round(median_mt_score, 3),
                     'Median WT Score'     : median_wt_score,
                     'Median Fold Change'  : median_fold_change,
+                    'Index'               : tsv_index,
                 }
                 for method in self.prediction_methods():
                     pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
