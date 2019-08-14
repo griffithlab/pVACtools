@@ -151,15 +151,16 @@ class Pipeline(metaclass=ABCMeta):
         return parser(**params)
 
     def generate_combined_fasta(self):
-        if self.input_file_type == 'vcf':
-            import tools.pvacseq.generate_protein_fasta as generate_combined_fasta
-        elif self.input_file_type == 'bedpe':
-            import tools.pvacfuse.generate_protein_fasta as generate_combined_fasta
         params = [
             self.input_file,
             str(self.peptide_sequence_length),
             self.fasta_file_path(),
         ]
+        if self.input_file_type == 'vcf':
+            import tools.pvacseq.generate_protein_fasta as generate_combined_fasta
+            params.extend(["--sample-name", self.sample_name])
+        elif self.input_file_type == 'bedpe':
+            import tools.pvacfuse.generate_protein_fasta as generate_combined_fasta
         if self.downstream_sequence_length is not None:
             params.extend(["-d", str(self.downstream_sequence_length)])
         else:
