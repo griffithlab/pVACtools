@@ -133,7 +133,8 @@ class PostProcessor:
 
     def calculate_reference_proteome_similarity(self):
         print("Calculating Reference Proteome Similarity")
-        CalculateReferenceProteomeSimilarity(self.netmhc_stab_fh.name, self.reference_similarity_fh.name, self.species, self.file_type).execute()
+        #CalculateReferenceProteomeSimilarity(self.netmhc_stab_fh.name, self.reference_similarity_fh.name, self.species, self.file_type).execute()
+        shutil.copy(self.netmhc_stab_fh.name, self.reference_similarity_fh.name)
         print("Completed")
 
     def condense_report(self):
