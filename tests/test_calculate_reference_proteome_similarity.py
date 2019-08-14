@@ -1,10 +1,25 @@
 import unittest
+import unittest.mock
 import os
 import tempfile
 from filecmp import cmp
 import sys
 import py_compile
 from lib.calculate_reference_proteome_similarity import *
+from Bio.Blast import NCBIWWW
+
+mock_fhs = []
+
+def mock_ncbiwww_qblast(algorithm, reference, peptide, entrez_query):
+    base_dir      = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    test_data_dir = os.path.join(base_dir, "tests", "test_data", "calculate_reference_proteome_similarity")
+    fh = open(os.path.join(test_data_dir, 'response_{}.txt'.format(peptide)), 'r')
+    mock_fhs.append(fh)
+    return fh
+
+def close_mock_fhs():
+    for fh in mock_fhs:
+        fh.close()
 
 class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
     @classmethod
@@ -19,11 +34,13 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         self.assertTrue(py_compile.compile(self.executable))
 
     def test_calculate_self_similarity(self):
-        input_file = os.path.join(self.test_data_dir, 'input.tsv')
-        input_fasta = os.path.join(self.test_data_dir, 'input.fasta')
-        output_file = tempfile.NamedTemporaryFile()
-        self.assertFalse(CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, 31).execute())
-        self.assertTrue(cmp(
-            output_file.name,
-            os.path.join(self.test_data_dir, "output.tsv"),
-        ))
+        with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+            input_file = os.path.join(self.test_data_dir, 'input.tsv')
+            input_fasta = os.path.join(self.test_data_dir, 'input.fasta')
+            output_file = tempfile.NamedTemporaryFile()
+            self.assertFalse(CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, 31).execute())
+            self.assertTrue(cmp(
+                output_file.name,
+                os.path.join(self.test_data_dir, "output.tsv"),
+            ))
+            close_mock_fhs()
