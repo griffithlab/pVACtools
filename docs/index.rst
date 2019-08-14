@@ -97,17 +97,17 @@ This version adds the following features:
   filtered files as follows:
 
   - If the ``--top-score-metric`` is set to ``median`` the results are first
-    filtered by the ``Median MT Score``. If multiple epitopes have the same
-    ``Median MT Score`` they are then filtered by the ``Corresponding Fold
+    sorted by the ``Median MT Score``. If multiple epitopes have the same
+    ``Median MT Score`` they are then sorted by the ``Corresponding Fold
     Change``. The last sorting criteria is the ``Best MT Score``.
   - If the ``--top-score-metric`` is set to ``lowest`` the results are first
-    filtered by the ``Best MT Score``. If multiple epitopes have the same
-    ``Best MT Score`` they are then filtered by the ``Corresponding Fold
+    sorted by the ``Best MT Score``. If multiple epitopes have the same
+    ``Best MT Score`` they are then sorted by the ``Corresponding Fold
     Change``. The last sorting criteria is the ``Median MT Score``.
 
-- pVACseq, pVACfuse, and pVACbind now calculcate manufacturability metrics
-  calculated for the predicted epitopes. Manufacturability metrics are also
-  calculcated for all protein sequences when running the ``pvacseq generate_protein_fasta``
+- pVACseq, pVACfuse, and pVACbind now calculate manufacturability metrics
+  for the predicted epitopes. Manufacturability metrics are also
+  calculated for all protein sequences when running the ``pvacseq generate_protein_fasta``
   and ``pvacfuse generate_protein_fasta`` commands. They are saved in the ``.manufacturability.tsv``
   along to the result fasta.
 - The pVACseq score that gets calculated for epitopes in the condensed report
