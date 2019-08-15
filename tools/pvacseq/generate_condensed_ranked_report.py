@@ -37,7 +37,7 @@ def main(args_input = sys.argv[1:]):
     print("Completed")
 
     print("Ranking neoepitopes")
-    RankEpitopes(tmp_fh.name, args.output_file).execute()
+    RankEpitopes(tmp_fh.name, args.output_file, args.top_score_metric).execute()
     print("Completed")
 
     tmp_fh.close()
