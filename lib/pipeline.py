@@ -368,7 +368,8 @@ class Pipeline(metaclass=ABCMeta):
                         if epl not in valid_lengths:
                             continue
                         split_iedb_out = os.path.join(self.tmp_dir, ".".join([self.sample_name, iedb_method, a, str(epl), "tsv_%s" % fasta_chunk]))
-                        split_iedb_output_files.append(split_iedb_out)
+                        if os.path.exists(split_iedb_out):
+                            split_iedb_output_files.append(split_iedb_out)
 
                     split_parsed_file_path = os.path.join(self.tmp_dir, ".".join([self.sample_name, a, str(epl), "parsed", "tsv_%s" % fasta_chunk]))
                     if os.path.exists(split_parsed_file_path):
