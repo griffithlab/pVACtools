@@ -475,29 +475,13 @@ class FusionInputConverter(InputFileConverter):
             sequence = full_sequence.replace('*', '')
             return (fusion_position, sequence)
 
-    def determine_exon_file_delimiter(self, file_name):
-        with open(file_name, 'r') as fh:
-            reader = csv.DictReader(fh, delimiter='\t')
-            for record in reader:
-                if 'exon_start' in record:
-                    return "\t"
-                else:
-                    break
-        with open(file_name, 'r') as fh:
-            reader = csv.DictReader(fh)
-            for record in reader:
-                if 'exon_start' in record:
-                    return ","
-                else:
-                    break
-        sys.exit("Exon file {} is neither comma- nor tab-delimited. Aborting.".format(file_name))
-
     def parse_exon_file(self, input_file):
         exon_file = input_file.replace('_protein.fa', '.exons.txt')
         five_prime_positions, three_prime_positions = [], []
-        delimiter = self.determine_exon_file_delimiter(exon_file)
         with open(exon_file, 'r') as fh:
-            reader = csv.DictReader(fh, delimiter=delimiter)
+            dialect = csv.Sniffer().sniff(fh.read())
+            fh.seek(0)
+            reader = csv.DictReader(fh, delimiter=dialect.delimiter)
             for record in reader:
                 exon_start = int(record['exon_start'])
                 exon_end = int(record['exon_end'])
