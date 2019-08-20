@@ -469,7 +469,7 @@ class FusionInputConverter(InputFileConverter):
 
     def determine_fusion_sequence(self, full_sequence, variant_type):
         if '*' not in full_sequence:
-            sys.exit("Fusion position marker '*' not found in fusion sequence. Please rerun AGfusion using the `--middlestar` option.")
+            sys.exit("Fusion position marker '*' not found in fusion sequence. Please rerun AGFusion using the `--middlestar` option.")
         else:
             fusion_position = full_sequence.find('*')
             sequence = full_sequence.replace('*', '')
