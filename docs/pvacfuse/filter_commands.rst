@@ -15,6 +15,13 @@ All filters can also be run manually to narrow the final results down further
 or to redefine the filters entirely and produce a new candidate list from the 
 all_epitopes.tsv file.
 
+.. note::
+
+   The default values for filtering thresholds are not meant to be taken as gospel, but are reasonable starting points,
+   based on careful review of the literature and in consultation with our clinical and immunology colleagues. Depending on
+   your use case you might want to consider adjusting these thresholds to
+   appropriate values for your application.
+
 Binding Filter
 --------------
 
