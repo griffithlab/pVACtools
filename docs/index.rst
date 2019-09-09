@@ -52,12 +52,9 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- There was a syntax error in
-  ``tools/pvacseq/generate_condensed_ranked_report.py`` that would result in
-  an error when running the ``pvacseq generate-condensed-ranked-report``
-  commands.
-- We were previously not correctly catching cases where the intermediate fasta for
-  making binding prediction was empty. This would result in errors downstream.
+- AGFusion exon files may be comma-delimited. Previously, the file parser
+  assumed the files were tab-delimited. This release now allows AGFusion
+  inputs that are comma- or tab-delimited.
 
 New in version |version|
 ------------------------
