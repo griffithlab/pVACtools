@@ -469,7 +469,7 @@ class FusionInputConverter(InputFileConverter):
 
     def determine_fusion_sequence(self, full_sequence, variant_type):
         if '*' not in full_sequence:
-            sys.exit("Fusion position marker '*' not found in fusion sequence. Please rerun AGfusion using the `--middlestar` option.")
+            sys.exit("Fusion position marker '*' not found in fusion sequence. Please rerun AGFusion using the `--middlestar` option.")
         else:
             fusion_position = full_sequence.find('*')
             sequence = full_sequence.replace('*', '')
@@ -479,7 +479,9 @@ class FusionInputConverter(InputFileConverter):
         exon_file = input_file.replace('_protein.fa', '.exons.txt')
         five_prime_positions, three_prime_positions = [], []
         with open(exon_file, 'r') as fh:
-            reader = csv.DictReader(fh, delimiter='\t')
+            dialect = csv.Sniffer().sniff(fh.read())
+            fh.seek(0)
+            reader = csv.DictReader(fh, delimiter=dialect.delimiter)
             for record in reader:
                 exon_start = int(record['exon_start'])
                 exon_end = int(record['exon_end'])
