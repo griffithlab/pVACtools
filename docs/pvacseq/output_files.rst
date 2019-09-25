@@ -229,6 +229,7 @@ A score is calculated from the above ranks with the following formula: ``B + F +
 
 .. note::
 
-   The pVACseq rank calculation detailed above is just one way to prioritize neoeptiope candidates
-   and does not imply that our method of ranking neoeptiopes is the ultimate best solution. Rather, we want to  give end users
-   the tools they need to filter, rank, and sort candidates in advance of follow-on validation efforts.
+   The pVACseq rank calculation detailed above is just one of many ways to prioritize neoeptiope candidates.
+   The body of evidence in this area is still incomplete, and the methodology of ranking is likely to change
+   substantially in future releases. While we have found this ranking useful, it is not a substitute for
+   careful curation and validation efforts.
