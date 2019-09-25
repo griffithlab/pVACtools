@@ -226,3 +226,10 @@ Each of the following 4 criteria are assigned a rank-ordered value (worst = 1):
 - D = Rank of ``Tumor DNA VAF``, with the highest being the best.
 
 A score is calculated from the above ranks with the following formula: ``B + F + (M * 2) + (D / 2)``. This score is then converted to a rank (best = 1).
+
+.. note::
+
+   The pVACseq rank calculation detailed above is just one of many ways to prioritize neoeptiope candidates.
+   The body of evidence in this area is still incomplete, and the methodology of ranking is likely to change
+   substantially in future releases. While we have found this ranking useful, it is not a substitute for
+   careful curation and validation efforts.
