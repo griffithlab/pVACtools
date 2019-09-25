@@ -27,10 +27,8 @@ Further details on each of these filters is provided below.
 
 .. note::
 
-   The default values for filtering thresholds are not meant to be taken as gospel, but are reasonable starting points,
-   based on careful review of the literature and in consultation with our clinical and immunology colleagues. Depending on
-   your use case you might want to consider adjusting these thresholds to
-   appropriate values for your application.
+   The default values for filtering thresholds are suggestions only. While they are based on review of the literature
+   and consultation with our clinical and immunology colleagues, your specific use case will determine the appropriate values.
 
 Binding Filter
 --------------
