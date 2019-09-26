@@ -22,7 +22,7 @@ tools:
    users in launching, managing, reviewing, and visualizing the results of
    pVACtools processes.
 
-.. image:: images/pVACtools_main-figure_v3d.png
+.. image:: images/pVACtools_main-figure_v4c.png
     :align: center
     :alt: pVACtools immunotherapy workflow
 
