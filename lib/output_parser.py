@@ -551,6 +551,8 @@ class FusionOutputParser(OutputParser):
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 (sample, method, remainder) = os.path.basename(input_iedb_file).split(".", 2)
                 for line in iedb_tsv_reader:
+                    if "Warning: Potential DNA sequence(s)" in line['allele']:
+                        continue
                     protein_label  = int(line['seq_num'])
                     if 'core_peptide' in line:
                         position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
@@ -596,6 +598,8 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 (sample, method, remainder) = os.path.basename(input_iedb_file).split(".", 2)
                 for line in iedb_tsv_reader:
+                    if "Warning: Potential DNA sequence(s)" in line['allele']:
+                        continue
                     protein_label  = int(line['seq_num'])
                     if 'core_peptide' in line:
                         position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
