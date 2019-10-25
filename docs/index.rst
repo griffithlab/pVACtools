@@ -52,9 +52,21 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- AGFusion exon files may be comma-delimited. Previously, the file parser
-  assumed the files were tab-delimited. This release now allows AGFusion
-  inputs that are comma- or tab-delimited.
+- pVACbind would previously throw an error if a peptide sequence in the input
+  fasta was shorter than one of the chosen epitope lengths. This issue has
+  been fixed by first parsing the input fasta and creating individual fasta
+  files for each epitope length that enforce a minimum length of the peptide
+  sequences matching the respective epitope length.
+- Previous versions of pVACtools resolved an issue where IEDB would output a
+  warning line if one of the epitope sequences only contained A, C, G, or T
+  amino acids, since those sequences could also be nuclotide sequences.
+  However, this issue was only fixed in pVACseq, not pVACbind, or pVACvector.
+  This release fixes this issue for all tools.
+- The wrappers for NetChop or NetMHCstabpan split the set of input epitopes
+  into chunks of 100 before processing. Due to a bug in the file splitting
+  logic, one epitope for each chunk over 100 would be errenously dropped. This
+  effectively would result in less epitopes being returned in the filtered
+  report than if running the pipelines without NetChop or NetMHCstabpan.
 
 New in version |version|
 ------------------------
