@@ -6,21 +6,10 @@ import tempfile
 import re
 import os
 from time import sleep
+import lib.utils
 
 cycle = ['|', '/', '-', '\\']
 methods = ['cterm', '20s']
-
-def split_file(reader, lines=400):
-    from itertools import islice, chain
-    for tmp in reader:
-        if tmp != "":
-            yield chain([tmp], islice(reader, lines-1))
-            try:
-                tmp = next(reader)
-            except StopIteration:
-                return
-        else:
-            break
 
 def main(args_input = sys.argv[1:]):
     parser = argparse.ArgumentParser("pvacseq net_chop", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -51,7 +40,7 @@ def main(args_input = sys.argv[1:]):
     i=1
     print("Waiting for results from NetMHCStabPan... |", end='')
     sys.stdout.flush()
-    for chunk in split_file(reader, 100):
+    for chunk in lib.utils.split_file(reader, 100):
         peptide_lengths = set()
         staging_file = tempfile.NamedTemporaryFile(mode='w+')
         current_buffer = {}
