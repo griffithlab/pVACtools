@@ -60,7 +60,7 @@ def generate_class_ii_call(method, allele, path, input_path):
         input_path,
         "MHC_Class_II",
         "tmp",
-        "Test.fa.split_1-48"
+        "Test.15.fa.split_1-48"
     ), mode='r')
     text = reader.read()
     reader.close()
@@ -181,8 +181,10 @@ class PvacbindTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file))
 
             for file_name in (
-                'Test.fa.split_1-48',
-                'Test.fa.split_1-48.key',
+                'Test.9.fa.split_1-48',
+                'Test.9.fa.split_1-48.key',
+                'Test.10.fa.split_1-48',
+                'Test.10.fa.split_1-48.key',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name)
@@ -210,7 +212,7 @@ class PvacbindTests(unittest.TestCase):
                 for allele in methods[method].keys():
                     for length in methods[method][allele]:
                         mock_request.assert_has_calls([
-                            generate_class_i_call(method, allele, length, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test.fa.split_1-48"))
+                            generate_class_i_call(method, allele, length, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test.{}.fa.split_1-48".format(length)))
                         ])
                         output_file   = os.path.join(output_dir.name, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
                         expected_file = os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
@@ -226,8 +228,8 @@ class PvacbindTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file))
 
             for file_name in (
-                'Test.fa.split_1-48',
-                'Test.fa.split_1-48.key',
+                'Test.15.fa.split_1-48',
+                'Test.15.fa.split_1-48.key',
                 'Test.nn_align.H2-IAb.15.tsv_1-48',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
