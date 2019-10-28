@@ -20,6 +20,11 @@ and transcript annotations.
 
 Further details on each of these filters is provided below.
 
+.. note::
+
+   The default values for filtering thresholds are suggestions only. While they are based on review of the literature
+   and consultation with our clinical and immunology colleagues, your specific use case will determine the appropriate values.
+
 Binding Filter
 --------------
 
