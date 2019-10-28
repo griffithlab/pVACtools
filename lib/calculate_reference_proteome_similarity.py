@@ -6,11 +6,12 @@ import shutil
 import re
 
 class CalculateReferenceProteomeSimilarity:
-    def __init__(self, input_file, input_fasta, output_file, peptide_sequence_length, species='human', file_type='pVACseq'):
+    def __init__(self, input_file, input_fasta, output_file, peptide_sequence_length, match_length=8, species='human', file_type='pVACseq'):
         self.input_file = input_file
         self.input_fasta = input_fasta
         self.output_file = output_file
         self.peptide_sequence_length = peptide_sequence_length
+        self.match_length = match_length
         self.species = species
         self.file_type = file_type
         self.species_to_organism = {
@@ -37,7 +38,7 @@ class CalculateReferenceProteomeSimilarity:
         return records_dict
 
     def extract_n_mer(self, full_peptide, subpeptide_position, mutation_position, mt_length):
-        flanking_sequence_length = 7
+        flanking_sequence_length = self.match_length - 1
         mt_start = (subpeptide_position-1) + (mutation_position-1)
         start = mt_start - flanking_sequence_length
         if start < 0:
@@ -88,7 +89,7 @@ class CalculateReferenceProteomeSimilarity:
                             for hsps in alignment.hsps:
                                 matches = re.split('\+| ', hsps.match)
                                 for match in matches:
-                                    if len(match) >= 8:
+                                    if len(match) >= self.match_length:
                                         reference_match = True
                                         break
                 line['Reference Match'] = reference_match
