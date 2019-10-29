@@ -43,4 +43,8 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
                 output_file.name,
                 os.path.join(self.test_data_dir, "output.tsv"),
             ))
+            self.assertTrue(cmp(
+                "{}.reference_matches".format(output_file.name),
+                os.path.join(self.test_data_dir, "output.tsv.reference_matches"),
+            ))
             close_mock_fhs()
