@@ -10,6 +10,7 @@ class CalculateReferenceProteomeSimilarity:
         self.input_file = input_file
         self.input_fasta = input_fasta
         self.output_file = output_file
+        self.metric_file = "{}.reference_matches".format(output_file)
         self.peptide_sequence_length = peptide_sequence_length
         self.match_length = match_length
         self.species = species
@@ -57,6 +58,9 @@ class CalculateReferenceProteomeSimilarity:
         end = subpeptide_position + len(epitope) + flanking_sequence_length
         return full_peptide[start:end]
 
+    def metric_headers(self):
+        return ['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Hit ID', 'Hit Definition', 'Query Sequence', 'Match Sequence', 'Match Start', 'Match Stop']
+
     def execute(self):
         if self.species not in self.species_to_organism:
             print("Species {} not supported for Reference Proteome Similarity search. Skipping.".format(self.species))
@@ -65,10 +69,12 @@ class CalculateReferenceProteomeSimilarity:
 
         records_dict = self.get_peptides()
 
-        with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
-            reader = csv.DictReader(input_fh, delimiter = "\t")
-            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + self.reference_match_headers(), extrasaction='ignore')
+        with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh, open(self.metric_file, 'w') as metric_fh:
+            reader = csv.DictReader(input_fh, delimiter="\t")
+            writer = csv.DictWriter(output_fh, delimiter="\t", fieldnames=reader.fieldnames + self.reference_match_headers(), extrasaction='ignore')
+            metric_writer = csv.DictWriter(metric_fh, delimiter="\t", fieldnames=self.metric_headers(), extrasaction='ignore')
             writer.writeheader()
+            metric_writer.writeheader()
             for line in reader:
                 if self.file_type == 'pVACbind':
                     epitope = line['Epitope Seq']
@@ -86,11 +92,19 @@ class CalculateReferenceProteomeSimilarity:
                 for blast_record in NCBIXML.parse(result_handle):
                     if len(blast_record.alignments) > 0:
                         for alignment in blast_record.alignments:
-                            for hsps in alignment.hsps:
-                                matches = re.split('\+| ', hsps.match)
+                            for hsp in alignment.hsps:
+                                matches = re.split('\+| ', hsp.match)
                                 for match in matches:
                                     if len(match) >= self.match_length:
                                         reference_match = True
+                                        metric_line = line.copy()
+                                        metric_line['Hit ID'] = alignment.hit_id
+                                        metric_line['Hit Definition'] = alignment.hit_def
+                                        metric_line['Query Sequence'] = hsp.query
+                                        metric_line['Match Sequence'] = hsp.match
+                                        metric_line['Match Start'] = hsp.sbjct_start
+                                        metric_line['Match Stop'] = hsp.sbjct_end
+                                        metric_writer.writerow(metric_line)
                                         break
                 line['Reference Match'] = reference_match
                 writer.writerow(line)
