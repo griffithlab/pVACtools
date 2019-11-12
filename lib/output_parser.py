@@ -130,7 +130,7 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_epitope_seq'] = 'NA'
                 result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
             mutation_position = self.find_mutation_position(wt_epitope_seq, mt_epitope_seq)
-            if mutation_position == 1 and int(previous_result['mutation_position']) <= 1:
+            if mutation_position == 1 and previous_result is not None and int(previous_result['mutation_position']) <= 1:
                 #The true mutation position is to the left of the current MT eptiope
                 mutation_position = 0
             result['mutation_position'] = mutation_position
