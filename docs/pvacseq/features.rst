@@ -53,12 +53,12 @@ for `MHCflurry <http://www.biorxiv.org/content/early/2017/08/09/174243>`_ and
 ================================= =======
 MHC Class I Prediction Algorithm  Version
 ================================= =======
-NetMHCpan                         2.8
+NetMHCpan                         4.0
 NetMHC                            4.0
 NetMHCcons                        1.1
 PickPocket                        1.1
-SMM
-SMMPMBEC
+SMM                               1.0
+SMMPMBEC                          1.0
 MHCflurry
 MHCnuggets
 ================================= =======
@@ -66,9 +66,9 @@ MHCnuggets
 ================================= =======
 MHC Class II Prediction Algorithm Version
 ================================= =======
-NetMHCIIpan                       3.0
+NetMHCIIpan                       3.2
 SMMalign                          1.1
-NNalign                           2.2
+NNalign                           2.3
 MHCnuggets
 ================================= =======
 
