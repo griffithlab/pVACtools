@@ -58,7 +58,7 @@ class FastaGenerator(metaclass=ABCMeta):
     def determine_flanking_sequence_length(self, full_wildtype_sequence_length, peptide_sequence_length, line):
         actual_peptide_sequence_length = self.determine_peptide_sequence_length(full_wildtype_sequence_length, peptide_sequence_length, line)
         if actual_peptide_sequence_length%2 == 0:
-            return int((actual_peptide_sequence_length-2) / 2)
+            return int(actual_peptide_sequence_length / 2)
         else:
             return int((actual_peptide_sequence_length-1) / 2)
 
