@@ -49,27 +49,30 @@ class CalculateManufacturability:
     def execute(self):
         if self.file_type == 'fasta':
             with open(self.output_file, 'w') as output_fh:
-                writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=['id', 'peptide_sequence'] + self.manufacturability_headers(), extrasaction='ignore')
+                writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=['id', 'peptide_sequence'] + self.manufacturability_headers(), extrasaction='ignore', restval='NA')
                 writer.writeheader()
                 for record in SeqIO.parse(self.input_file, "fasta"):
                     seq_num = record.id
-                    peptide = str(record.seq)
+                    sequence = str(record.seq)
                     line = {
                         'id': seq_num,
-                        'peptide_sequence': peptide
+                        'peptide_sequence': sequence
                     }
-                    peptide = PvacpeptideVaccinePeptide(peptide)
-                    line = self.append_manufacturability_metrics(line, peptide)
+                    if len(sequence) >= 7:
+                        peptide = PvacpeptideVaccinePeptide(sequence)
+                        line = self.append_manufacturability_metrics(line, peptide)
                     writer.writerow(line)
         else:
             with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
                 reader = csv.DictReader(input_fh, delimiter = "\t")
-                writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + self.manufacturability_headers(), extrasaction='ignore')
+                writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + self.manufacturability_headers(), extrasaction='ignore', restval='NA')
                 writer.writeheader()
                 for line in reader:
                     if self.file_type == 'pVACbind':
-                        peptide = PvacpeptideVaccinePeptide(line['Epitope Seq'])
+                        sequence = line['Epitope Seq']
                     else:
-                        peptide = PvacpeptideVaccinePeptide(line['MT Epitope Seq'])
-                    line = self.append_manufacturability_metrics(line, peptide)
+                        sequence = line['MT Epitope Seq']
+                    if len(sequence) >= 7:
+                        peptide = PvacpeptideVaccinePeptide(sequence)
+                        line = self.append_manufacturability_metrics(line, peptide)
                     writer.writerow(line)
