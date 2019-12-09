@@ -55,7 +55,7 @@ This is a hotfix release. It fixes the following issues:
 - The ``pvacseq generate_protein_fasta`` command would previously error out
   when running with a selected ``peptide_sequence_length`` that would reduce
   in peptides < 7 amino acids long. This error would occur when calculating
-  manufacturability metrics. This release now only calculates these metrices
+  manufacturability metrics. This release now only calculates these metrics
   for peptides >=7 amino acids long.
 - We updated the calculation for the flanking sequence length when generating
   peptide sequences to result in peptides that are closer in length to the
