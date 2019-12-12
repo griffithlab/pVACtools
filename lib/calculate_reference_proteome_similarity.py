@@ -30,7 +30,7 @@ class CalculateReferenceProteomeSimilarity:
             'Reference Match',
         ]
 
-    def get_peptides(self):
+    def get_mt_peptides(self):
         records = list(SeqIO.parse(self.input_fasta, "fasta"))
         if self.file_type == 'pVACbind':
             pass
@@ -38,7 +38,18 @@ class CalculateReferenceProteomeSimilarity:
             records_dict = {x.id.replace('MT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
         return records_dict
 
+    def get_wt_peptides(self):
+        if self.file_type == 'pVACbind':
+            return []
+        else:
+            records = list(SeqIO.parse(self.input_fasta, "fasta"))
+            records_dict = {x.id.replace('WT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('WT.'), records)}
+        return records_dict
+
     def extract_n_mer(self, full_peptide, subpeptide_position, mutation_position, mt_length):
+        #For non-frameshifts this ensures that we only test match_length epitopes that overlap the mutation
+        #If we extract a larger region, we will get false-positive matches against the reference proteome
+        #from the native wildtype portion of the peptide
         flanking_sequence_length = self.match_length - 1
         mt_start = (subpeptide_position-1) + (mutation_position-1)
         start = mt_start - flanking_sequence_length
@@ -47,7 +58,9 @@ class CalculateReferenceProteomeSimilarity:
         end = mt_start + mt_length + flanking_sequence_length
         return full_peptide[start:end]
 
-    def extract_n_mer_from_fs(self, full_peptide, epitope, peptide_sequence_length, subpeptide_position):
+    def extract_n_mer_from_fs(self, full_peptide, wt_peptide, epitope, peptide_sequence_length, subpeptide_position):
+        #For frameshifts we want to test all downstream epitopes that would be part of the peptide_sequence_length
+        #peptide since they are all potentially novel
         if peptide_sequence_length%2 == 0:
             flanking_sequence_length = int(peptide_sequence_length/2)
         else:
@@ -55,11 +68,17 @@ class CalculateReferenceProteomeSimilarity:
         start = subpeptide_position - 1 - flanking_sequence_length
         if start < 0:
             start = 0
-        end = subpeptide_position + len(epitope) + flanking_sequence_length
+        #This catches cases where the start position would cause too many leading wildtype amino acids, which would result
+        #in false-positive reference matches
+        diff_position = [i for i in range(len(wt_peptide)) if wt_peptide[i] != full_peptide[i]][0]
+        min_start = diff_position - self.match_length + 1 
+        if min_start > start:
+            start = min_start
+        end = start + flanking_sequence_length + len(epitope) + flanking_sequence_length
         return full_peptide[start:end]
 
     def metric_headers(self):
-        return ['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Hit ID', 'Hit Definition', 'Query Sequence', 'Match Sequence', 'Match Start', 'Match Stop']
+        return ['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Peptide', 'Hit ID', 'Hit Definition', 'Query Sequence', 'Match Sequence', 'Match Start', 'Match Stop']
 
     def execute(self):
         if self.species not in self.species_to_organism:
@@ -67,7 +86,8 @@ class CalculateReferenceProteomeSimilarity:
             shutil.copy(self.input_file, self.output_file)
             return
 
-        records_dict = self.get_peptides()
+        mt_records_dict = self.get_mt_peptides()
+        wt_records_dict = self.get_wt_peptides()
 
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh, open(self.metric_file, 'w') as metric_fh:
             reader = csv.DictReader(input_fh, delimiter="\t")
@@ -81,12 +101,12 @@ class CalculateReferenceProteomeSimilarity:
                 else:
                     epitope = line['MT Epitope Seq']
                 if line['Variant Type'] == 'FS':
-                    peptide = self.extract_n_mer_from_fs(records_dict[line['Index']], epitope, self.peptide_sequence_length, int(line['Sub-peptide Position']))
+                    peptide = self.extract_n_mer_from_fs(mt_records_dict[line['Index']], wt_records_dict[line['Index']], epitope, self.peptide_sequence_length, int(line['Sub-peptide Position']))
                 else:
                     mt_amino_acids = line['Mutation'].split('/')[1]
                     if mt_amino_acids == '-':
                         mt_amino_acids = ''
-                    peptide = self.extract_n_mer(records_dict[line['Index']], int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
+                    peptide = self.extract_n_mer(mt_records_dict[line['Index']], int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
                 result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]))
                 reference_match = False
                 for blast_record in NCBIXML.parse(result_handle):
@@ -98,6 +118,7 @@ class CalculateReferenceProteomeSimilarity:
                                     if len(match) >= self.match_length:
                                         reference_match = True
                                         metric_line = line.copy()
+                                        metric_line['Peptide'] = peptide
                                         metric_line['Hit ID'] = alignment.hit_id
                                         metric_line['Hit Definition'] = alignment.hit_def
                                         metric_line['Query Sequence'] = hsp.query
