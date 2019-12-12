@@ -23,6 +23,7 @@ class PostProcessor:
         self.manufacturability_fh = tempfile.NamedTemporaryFile()
         self.reference_similarity_fh = tempfile.NamedTemporaryFile()
         self.file_type = kwargs.pop('file_type', None)
+        self.fasta = kwargs.pop('fasta', None)
         if self.run_condense_report:
             self.condensed_report_fh = tempfile.NamedTemporaryFile()
             self.ranked_epitopes_fh = tempfile.NamedTemporaryFile()
@@ -132,14 +133,24 @@ class PostProcessor:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
 
     def calculate_reference_proteome_similarity(self):
-        print("Calculating Reference Proteome Similarity")
-        CalculateReferenceProteomeSimilarity(self.netmhc_stab_fh.name, self.reference_similarity_fh.name, self.species, self.file_type).execute()
-        print("Completed")
+        if self.run_manufacturability_metrics:
+            print("Calculating Reference Proteome Similarity")
+            CalculateReferenceProteomeSimilarity(
+                self.netmhc_stab_fh.name,
+                self.fasta,
+                self.reference_similarity_fh.name,
+                self.peptide_sequence_length,
+                species=self.species,
+                file_type=self.file_type
+            ).execute()
+            print("Completed")
+        else:
+            shutil.copy(self.netmhc_stab_fh.name, self.reference_similarity_fh.name)
 
     def condense_report(self):
         if self.run_condense_report:
             print("Creating Condensed Report")
-            CondenseFinalReport(self.netmhc_stab_fh.name, self.condensed_report_fh.name).execute()
+            CondenseFinalReport(self.reference_similarity_fh.name, self.condensed_report_fh.name).execute()
             print("Completed")
 
     def rank_epitopes(self):

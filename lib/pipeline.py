@@ -477,6 +477,7 @@ class Pipeline(metaclass=ABCMeta):
         post_processing_params['input_file'] = self.combined_parsed_path()
         post_processing_params['filtered_report_file'] = self.final_path()
         post_processing_params['condensed_report_file'] = self.ranked_final_path()
+        post_processing_params['fasta'] = self.fasta_file_path()
         post_processing_params['run_condense_report'] = True
         post_processing_params['run_manufacturability_metrics'] = True
         if self.input_file_type == 'vcf':
