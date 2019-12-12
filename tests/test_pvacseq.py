@@ -16,6 +16,19 @@ from tools.pvacseq import *
 from mock import patch
 from .test_utils import *
 
+mock_fhs = []
+
+def mock_ncbiwww_qblast(algorithm, reference, peptide, entrez_query):
+    base_dir      = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    test_data_dir = os.path.join(base_dir, "tests", "test_data", "pvacseq")
+    fh = open(os.path.join(test_data_dir, 'response_{}.txt'.format(peptide)), 'r')
+    mock_fhs.append(fh)
+    return fh
+
+def close_mock_fhs():
+    for fh in mock_fhs:
+        fh.close()
+
 def make_response(data, files, path):
     if not files:
         if 'length' in data:
@@ -146,7 +159,7 @@ class PvacseqTests(unittest.TestCase):
             data,
             files,
             test_data_directory()
-        ))) as mock_request:
+        ))) as mock_request, unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
@@ -176,6 +189,7 @@ class PvacseqTests(unittest.TestCase):
                 '--keep-tmp-files',
                 '-d', 'full',
             ])
+            close_mock_fhs()
 
             for file_name in (
                 'Test.all_epitopes.tsv',
@@ -295,20 +309,23 @@ class PvacseqTests(unittest.TestCase):
         test_data_directory()
     )))
     def test_pvacseq_pipeline_additional_report_columns(self):
-        output_dir = tempfile.TemporaryDirectory()
-        params = [
-            os.path.join(self.test_data_directory, "input.vcf"),
-            'Test',
-            'HLA-E*01:01',
-            'NetMHC',
-            output_dir.name,
-            '-e', '9,10',
-            '-a', 'sample_name',
-        ]
-        run.main(params)
-        output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.filtered.tsv')
-        expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
-        self.assertTrue(cmp(output_file, expected_file, False))
+        with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+            output_dir = tempfile.TemporaryDirectory()
+            params = [
+                os.path.join(self.test_data_directory, "input.vcf"),
+                'Test',
+                'HLA-E*01:01',
+                'NetMHC',
+                output_dir.name,
+                '-e', '9,10',
+                '-a', 'sample_name',
+                '-d', 'full'
+            ]
+            run.main(params)
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.filtered.tsv')
+            expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
+            self.assertTrue(cmp(output_file, expected_file, False))
+            close_mock_fhs()
 
     @patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
         data,
