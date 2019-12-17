@@ -433,7 +433,10 @@ class Pipeline(metaclass=ABCMeta):
             if self.input_file_type == 'vcf':
                 sys.exit("The TSV file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
             elif self.input_file_type == 'bedpe':
-                sys.exit("The TSV file is empty. Please check that the input bedpe file contains fusion entries.")
+                if os.path.isfile(self.input_file):
+                    sys.exit("The TSV file is empty. Please check that the input bedpe file contains fusion entries.")
+                elif os.path.isdir(self.input_file):
+                    sys.exit("The TSV file is empty. Please check that the input AGfusion directory contains fusion entries with `*_protein.fa` files. Fusion entries without this file cannot be processed by pVACfuse.")
         chunks = self.split_tsv_file(total_row_count)
 
         self.generate_fasta(chunks)
