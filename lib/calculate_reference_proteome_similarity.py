@@ -4,9 +4,10 @@ from Bio.Blast import NCBIXML
 from Bio import SeqIO
 import shutil
 import re
+import os
 
 class CalculateReferenceProteomeSimilarity:
-    def __init__(self, input_file, input_fasta, output_file, peptide_sequence_length, match_length=8, species='human', file_type='pVACseq'):
+    def __init__(self, input_file, input_fasta, output_file, peptide_sequence_length, match_length=8, species='human', file_type='vcf'):
         self.input_file = input_file
         self.input_fasta = input_fasta
         self.output_file = output_file
@@ -32,18 +33,18 @@ class CalculateReferenceProteomeSimilarity:
 
     def get_mt_peptides(self):
         records = list(SeqIO.parse(self.input_fasta, "fasta"))
-        if self.file_type == 'pVACbind':
-            pass
-        else:
+        if self.file_type == 'vcf':
             records_dict = {x.id.replace('MT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
+        elif self.file_type == 'bedpe':
+            records_dict = {x.id: str(x.seq) for x in records}
         return records_dict
 
     def get_wt_peptides(self):
-        if self.file_type == 'pVACbind':
-            return []
-        else:
+        if self.file_type == 'vcf':
             records = list(SeqIO.parse(self.input_fasta, "fasta"))
             records_dict = {x.id.replace('WT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('WT.'), records)}
+        else:
+            return {}
         return records_dict
 
     def extract_n_mer(self, full_peptide, subpeptide_position, mutation_position, mt_length):
@@ -100,13 +101,17 @@ class CalculateReferenceProteomeSimilarity:
                     epitope = line['Epitope Seq']
                 else:
                     epitope = line['MT Epitope Seq']
-                if line['Variant Type'] == 'FS':
-                    peptide = self.extract_n_mer_from_fs(mt_records_dict[line['Index']], wt_records_dict[line['Index']], epitope, self.peptide_sequence_length, int(line['Sub-peptide Position']))
+                if self.file_type == 'vcf':
+                    if line['Variant Type'] == 'FS':
+                        peptide = self.extract_n_mer_from_fs(mt_records_dict[line['Index']], wt_records_dict[line['Index']], epitope, self.peptide_sequence_length, int(line['Sub-peptide Position']))
+                    else:
+                        mt_amino_acids = line['Mutation'].split('/')[1]
+                        if mt_amino_acids == '-':
+                            mt_amino_acids = ''
+                        peptide = self.extract_n_mer(mt_records_dict[line['Index']], int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
+                elif self.file_type == 'bedpe':
+                    peptide = mt_records_dict[line['Index']]
                 else:
-                    mt_amino_acids = line['Mutation'].split('/')[1]
-                    if mt_amino_acids == '-':
-                        mt_amino_acids = ''
-                    peptide = self.extract_n_mer(mt_records_dict[line['Index']], int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
                 result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]))
                 reference_match = False
                 for blast_record in NCBIXML.parse(result_handle):
