@@ -35,7 +35,7 @@ class CalculateReferenceProteomeSimilarity:
         records = list(SeqIO.parse(self.input_fasta, "fasta"))
         if self.file_type == 'vcf':
             records_dict = {x.id.replace('MT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
-        elif self.file_type == 'bedpe':
+        else:
             records_dict = {x.id: str(x.seq) for x in records}
         return records_dict
 
