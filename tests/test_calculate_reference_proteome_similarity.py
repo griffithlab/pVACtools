@@ -7,19 +7,7 @@ import sys
 import py_compile
 from lib.calculate_reference_proteome_similarity import *
 from Bio.Blast import NCBIWWW
-
-mock_fhs = []
-
-def mock_ncbiwww_qblast(algorithm, reference, peptide, entrez_query):
-    base_dir      = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    test_data_dir = os.path.join(base_dir, "tests", "test_data", "calculate_reference_proteome_similarity")
-    fh = open(os.path.join(test_data_dir, 'response_{}.txt'.format(peptide)), 'r')
-    mock_fhs.append(fh)
-    return fh
-
-def close_mock_fhs():
-    for fh in mock_fhs:
-        fh.close()
+from .test_utils import *
 
 class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
     @classmethod
