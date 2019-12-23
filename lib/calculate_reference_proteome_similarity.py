@@ -35,7 +35,7 @@ class CalculateReferenceProteomeSimilarity:
         records = list(SeqIO.parse(self.input_fasta, "fasta"))
         if self.file_type == 'vcf':
             records_dict = {x.id.replace('MT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
-        elif self.file_type == 'bedpe':
+        else:
             records_dict = {x.id: str(x.seq) for x in records}
         return records_dict
 
@@ -99,19 +99,19 @@ class CalculateReferenceProteomeSimilarity:
             for line in reader:
                 if self.file_type == 'pVACbind':
                     epitope = line['Epitope Seq']
+                    peptide = mt_records_dict[line['Mutation']]
                 else:
                     epitope = line['MT Epitope Seq']
-                if self.file_type == 'vcf':
-                    if line['Variant Type'] == 'FS':
-                        peptide = self.extract_n_mer_from_fs(mt_records_dict[line['Index']], wt_records_dict[line['Index']], epitope, self.peptide_sequence_length, int(line['Sub-peptide Position']))
+                    if self.file_type == 'vcf':
+                        if line['Variant Type'] == 'FS':
+                            peptide = self.extract_n_mer_from_fs(mt_records_dict[line['Index']], wt_records_dict[line['Index']], epitope, self.peptide_sequence_length, int(line['Sub-peptide Position']))
+                        else:
+                            mt_amino_acids = line['Mutation'].split('/')[1]
+                            if mt_amino_acids == '-':
+                                mt_amino_acids = ''
+                            peptide = self.extract_n_mer(mt_records_dict[line['Index']], int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
                     else:
-                        mt_amino_acids = line['Mutation'].split('/')[1]
-                        if mt_amino_acids == '-':
-                            mt_amino_acids = ''
-                        peptide = self.extract_n_mer(mt_records_dict[line['Index']], int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
-                elif self.file_type == 'bedpe':
-                    peptide = mt_records_dict[line['Index']]
-                else:
+                        peptide = mt_records_dict[line['Index']]
                 result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]))
                 reference_match = False
                 for blast_record in NCBIXML.parse(result_handle):

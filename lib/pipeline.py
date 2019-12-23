@@ -15,6 +15,7 @@ from lib.fasta_generator import *
 from lib.output_parser import *
 from lib.post_processor import *
 import shutil
+import copy
 import yaml
 import pkg_resources
 import pymp
@@ -471,7 +472,7 @@ class Pipeline(metaclass=ABCMeta):
 
         self.combined_parsed_outputs(split_parsed_output_files)
 
-        post_processing_params = vars(self)
+        post_processing_params = copy.copy(vars(self))
         post_processing_params['input_file'] = self.combined_parsed_path()
         post_processing_params['file_type'] = self.input_file_type
         post_processing_params['filtered_report_file'] = self.final_path()
@@ -737,16 +738,16 @@ class PvacbindPipeline(Pipeline):
 
         self.combined_parsed_outputs(split_parsed_output_files)
 
-        post_processing_params = vars(self)
+        post_processing_params = copy.copy(vars(self))
         post_processing_params['input_file'] = self.combined_parsed_path()
-        post_processing_params['file_type'] = self.input_file_type
+        post_processing_params['file_type'] = 'pVACbind'
         post_processing_params['filtered_report_file'] = self.final_path()
         post_processing_params['run_coverage_filter'] = False
         post_processing_params['run_transcript_support_level_filter'] = False
         post_processing_params['minimum_fold_change'] = None
-        post_processing_params['file_type'] = 'pVACbind'
         post_processing_params['run_condense_report'] = False
         post_processing_params['run_manufacturability_metrics'] = True
+        post_processing_params['fasta'] = self.input_file
         if self.net_chop_method:
             post_processing_params['run_net_chop'] = True
         else:
