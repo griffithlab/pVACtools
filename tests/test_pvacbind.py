@@ -16,19 +16,6 @@ from tools.pvacbind import *
 from mock import patch
 from .test_utils import *
 
-mock_fhs = []
-
-def mock_ncbiwww_qblast(algorithm, reference, peptide, entrez_query):
-    base_dir      = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    test_data_dir = os.path.join(base_dir, "tests", "test_data", "pvacbind")
-    fh = open(os.path.join(test_data_dir, 'response_{}.xml'.format(peptide[0:100])), 'r')
-    mock_fhs.append(fh)
-    return fh
-
-def close_mock_fhs():
-    for fh in mock_fhs:
-        fh.close()
-
 def make_response(data, files, path):
     if not files:
         if 'length' in data:
