@@ -5,6 +5,7 @@ from Bio import SeqIO
 import shutil
 import re
 import os
+from collections import defaultdict
 
 class CalculateReferenceProteomeSimilarity:
     def __init__(self, input_file, input_fasta, output_file, peptide_sequence_length, match_length=8, species='human', file_type='vcf'):
@@ -112,25 +113,32 @@ class CalculateReferenceProteomeSimilarity:
                             peptide = self.extract_n_mer(mt_records_dict[line['Index']], int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
                     else:
                         peptide = mt_records_dict[line['Index']]
-                result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]))
-                reference_match = False
-                for blast_record in NCBIXML.parse(result_handle):
-                    if len(blast_record.alignments) > 0:
-                        for alignment in blast_record.alignments:
-                            for hsp in alignment.hsps:
-                                matches = re.split('\+| ', hsp.match)
-                                for match in matches:
-                                    if len(match) >= self.match_length:
-                                        reference_match = True
-                                        metric_line = line.copy()
-                                        metric_line['Peptide'] = peptide
-                                        metric_line['Hit ID'] = alignment.hit_id
-                                        metric_line['Hit Definition'] = alignment.hit_def
-                                        metric_line['Query Sequence'] = hsp.query
-                                        metric_line['Match Sequence'] = hsp.match
-                                        metric_line['Match Start'] = hsp.sbjct_start
-                                        metric_line['Match Stop'] = hsp.sbjct_end
-                                        metric_writer.writerow(metric_line)
-                                        break
-                line['Reference Match'] = reference_match
+                reference_match_dict = defaultdict(list)
+                if peptide not in reference_match_dict:
+                    result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]))
+                    for blast_record in NCBIXML.parse(result_handle):
+                        if len(blast_record.alignments) > 0:
+                            for alignment in blast_record.alignments:
+                                for hsp in alignment.hsps:
+                                    matches = re.split('\+| ', hsp.match)
+                                    for match in matches:
+                                        if len(match) >= self.match_length:
+                                            reference_match_dict[peptide].append({
+                                                'Hit ID': alignment.hit_id,
+                                                'Hit Definition': alignment.hit_def,
+                                                'Query Sequence': hsp.query,
+                                                'Match Sequence': hsp.match,
+                                                'Match Start': hsp.sbjct_start,
+                                                'Match Stop': hsp.sbjct_end,
+                                            })
+                                            break
+                if peptide in reference_match_dict:
+                    line['Reference Match'] = True
+                    metric_line = line.copy()
+                    metric_line['Peptide'] = peptide
+                    for alignment in reference_match_dict[peptide]:
+                        metric_line.update(alignment)
+                        metric_writer.writerow(metric_line)
+                else:
+                    line['Reference Match'] = False
                 writer.writerow(line)
