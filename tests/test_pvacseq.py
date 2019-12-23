@@ -16,64 +16,6 @@ from tools.pvacseq import *
 from mock import patch
 from .test_utils import *
 
-def make_response(data, files, path):
-    if not files:
-        if 'length' in data:
-            filename = 'response_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'])
-        else:
-            filename = 'response_%s_%s.tsv' % (data['allele'], data['method'])
-        reader = open(os.path.join(
-            path,
-            filename
-        ), mode='r')
-        response_obj = lambda :None
-        response_obj.status_code = 200
-        response_obj.text = reader.read()
-        reader.close()
-        return response_obj
-    else:
-        basefile = os.path.basename(data['configfile'])
-        reader = open(os.path.join(
-            path,
-            'net_chop.html' if basefile == 'NetChop.cf' else 'Netmhcstab.html'
-        ), mode='rb')
-        response_obj = lambda :None
-        response_obj.status_code = 200
-        response_obj.content = reader.read()
-        reader.close()
-        return response_obj
-
-def generate_class_i_call(method, allele, length, input_file):
-    reader = open(input_file, mode='r')
-    text = reader.read()
-    reader.close()
-    return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhci/', data={
-        'sequence_text': ""+text,
-        'method':        method,
-        'allele':        allele,
-        'length':        length,
-        'user_tool':     'pVac-seq',
-    })
-
-def generate_class_ii_call(method, allele, path, input_path):
-    reader = open(os.path.join(
-        input_path,
-        "MHC_Class_II",
-        "tmp",
-        "Test_31.fa.split_1-48"
-    ), mode='r')
-    text = reader.read()
-    reader.close()
-    return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhcii/', data={
-        'sequence_text': ""+text,
-        'method':        method,
-        'allele':        allele,
-        'user_tool':     'pVac-seq',
-    })
-
-def pvac_directory():
-    return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-
 def test_data_directory():
     return os.path.join(
         pvac_directory(),
@@ -268,7 +210,7 @@ class PvacseqTests(unittest.TestCase):
                 self.assertTrue(os.path.exists(output_file))
 
             mock_request.assert_has_calls([
-                generate_class_ii_call('nn_align', 'DRB1*11:01', self.test_data_directory, output_dir.name)
+                generate_class_ii_call('nn_align', 'DRB1*11:01', os.path.join(output_dir.name, "MHC_Class_II", "tmp", "Test_31.fa.split_1-48"))
             ])
 
             with self.assertRaises(SystemExit) as cm:
