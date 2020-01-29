@@ -97,3 +97,41 @@ This is a hotfix release. It fixes the following issues:
 - AGFusion exon files may be comma-delimited. Previously, the file parser
   assumed the files were tab-delimited. This release now allows AGFusion
   inputs that are comma- or tab-delimited.
+
+1.5.3
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- pVACbind would previously throw an error if a peptide sequence in the input
+  fasta was shorter than one of the chosen epitope lengths. This issue has
+  been fixed by first parsing the input fasta and creating individual fasta
+  files for each epitope length that enforce a minimum length of the peptide
+  sequences matching the respective epitope length.
+- Previous versions of pVACtools resolved an issue where IEDB would output a
+  warning line if one of the epitope sequences only contained A, C, G, or T
+  amino acids, since those sequences could also be nuclotide sequences.
+  However, this issue was only fixed in pVACseq, not pVACbind, or pVACvector.
+  This release fixes this issue for all tools.
+- The wrappers for NetChop or NetMHCstabpan split the set of input epitopes
+  into chunks of 100 before processing. Due to a bug in the file splitting
+  logic, one epitope for each chunk over 100 would be errenously dropped. This
+  effectively would result in less epitopes being returned in the filtered
+  report than if running the pipelines without NetChop or NetMHCstabpan.
+
+1.5.4
+-----
+
+This is a hotfix release. It fixes the following issues:
+
+- The ``pvacseq generate_protein_fasta`` command would previously error out
+  when running with a selected ``peptide_sequence_length`` that would reduce
+  in peptides < 7 amino acids long. This error would occur when calculating
+  manufacturability metrics. This release now only calculates these metrics
+  for peptides >=7 amino acids long.
+- We updated the calculation for the flanking sequence length when generating
+  peptide sequences to result in peptides that are closer in length to the
+  requested ``peptide_sequence_length``.
+- This release fixes an edge case where a frameshift mutation impacted the
+  first amino acid of a transcript. This case would previously throw a fatal
+  error but will now be processed as expected.
