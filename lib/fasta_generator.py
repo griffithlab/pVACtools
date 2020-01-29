@@ -152,10 +152,14 @@ class FastaGenerator(metaclass=ABCMeta):
             variant_type = line['variant_type']
             full_wildtype_sequence = line['wildtype_amino_acid_sequence']
             if variant_type == 'FS':
+                position = int(line['protein_position'].split('-', 1)[0]) - 1
                 if line['amino_acid_change'] is not None and line['amino_acid_change'].split('/')[0] == '-':
-                    position = int(line['protein_position'].split('-', 1)[0])
-                else:
-                    position = int(line['protein_position'].split('-', 1)[0]) - 1
+                    if line['wildtype_amino_acid_sequence'][position] != line['downstream_amino_acid_sequence'][0]:
+                        raise Exception(
+                            "Leading amino acid of the Downstream protein sequence ({}) expected to match the wildtype amino acid at postion {} ({}). " \
+                            "You may need to reannotate your VCF with a newer version of VEP." \
+                            .format(line['downstream_amino_acid_sequence'], position, line['wildtype_amino_acid_sequence'][position])
+                        )
             elif variant_type == 'missense' or variant_type == 'inframe_ins':
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
                 if '*' in wildtype_amino_acid:
