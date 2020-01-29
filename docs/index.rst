@@ -52,17 +52,17 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The ``pvacseq generate_protein_fasta`` command would previously error out
-  when running with a selected ``peptide_sequence_length`` that would reduce
-  in peptides < 7 amino acids long. This error would occur when calculating
-  manufacturability metrics. This release now only calculates these metrics
-  for peptides >=7 amino acids long.
-- We updated the calculation for the flanking sequence length when generating
-  peptide sequences to result in peptides that are closer in length to the
-  requested ``peptide_sequence_length``.
-- This release fixes an edge case where a frameshift mutation impacted the
-  first amino acid of a transcript. This case would previously throw a fatal
-  error but will now be processed as expected.
+- The ``pvacfuse run`` command would previsouly output a misleading warning
+  message if an AGFusion input directory didn't contain any processable fusion
+  entries. This warning message has been fixed.
+- Between VEP versions, the Downstream protein sequence prediction for some
+  frameshift mutations was changed to now include a leading wildtype amino
+  acid. This potential difference in VEP-predicted Downstream protein
+  sequences was not accounted for and would result in frameshift mutation
+  protein prediction that would duplicate this leading wildtype amino acid.
+  This version updates our prediction pipeline to remove this duplicated amino
+  acid and output a fatal error if the Downstream protein sequence does not
+  contain the leading wildtype amino acid.
 
 New in version |version|
 ------------------------
