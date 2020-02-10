@@ -46,6 +46,7 @@ matrix:
             - pip install mhcnuggets==2.2
             - pip install tensorflow==1.14.0
             - pip install keras==2.2.5
+            - pip install pandas==0.25.2
           services:
             - postgresql
           script:
@@ -70,6 +71,7 @@ matrix:
             - pip install mhcnuggets==2.2
             - pip install tensorflow==1.14.0
             - pip install keras==2.2.5
+            - pip install pandas==0.25.2
           services:
             - postgresql
           script:

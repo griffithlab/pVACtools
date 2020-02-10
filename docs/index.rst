@@ -52,7 +52,7 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The ``pvacfuse run`` command would previsouly output a misleading warning
+- The ``pvacfuse run`` command would previously output a misleading warning
   message if an AGFusion input directory didn't contain any processable fusion
   entries. This warning message has been fixed.
 - Between VEP versions, the Downstream protein sequence prediction for some
