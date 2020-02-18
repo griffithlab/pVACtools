@@ -19,6 +19,9 @@ from lib.run_argument_parser import *
 from lib.pvacvector_input_fasta_generator import *
 from lib.pipeline import *
 import lib.call_iedb
+from urllib.parse import urlparse, urlencode
+from urllib.error import HTTPError
+from urllib.request import urlopen, Request
 
 def define_parser():
     return PvacvectorRunArgumentParser().parser
@@ -369,6 +372,46 @@ def identify_problematic_peptides(Paths, seq_dict):
             problematic_start.add(node)
     return (problematic_start, problematic_end)
 
+def create_dna_backtranslation(results_file, dna_results_file):
+    record = SeqIO.read(results_file, 'fasta')
+    seq_num = record.id
+    peptide = str(record.seq)
+    params = {
+        u'email': 'susanna.kiwala@wustl.edu',
+        u'sequence': peptide,
+        u'codontable': 'Ehuman.cut'
+    }
+    request_url = 'https://www.ebi.ac.uk/Tools/services/rest/emboss_backtranseq/run/'
+    request_data = urlencode(params)
+
+    try:
+        print("Retrieving DNA backtranslation of predicted vector")
+        print("Retrieving DNA backtranslation of predicted vector - Making request")
+        req = Request(request_url)
+        req_h = urlopen(req, request_data.encode(encoding=u'utf_8', errors=u'strict'))
+        job_id = str(req_h.read(), u'utf-8')
+        req_h.close()
+    except HTTPError as exception:
+        raise HTTPError(xmltramp.parse(unicode(exception.read(), u'utf-8'))[0][0])
+    time.sleep(15)
+    status = u'PENDING'
+    while status == u'RUNNING' or status == u'PENDING':
+        print("Retrieving DNA backtranslation of predicted vector - Polling status - Job ID {}".format(job_id))
+        status_url = 'https://www.ebi.ac.uk/Tools/services/rest/emboss_backtranseq/status/{}'.format(job_id)
+        status_req = Request(status_url)
+        status_response = urlopen(status_req).read()
+        status = str(status_response, u'utf-8')
+        if status == u'RUNNING' or status == u'PENDING':
+            time.sleep(15)
+    print("Retrieving DNA backtranslation of predicted vector - Retrieving Result")
+    result_url = 'https://www.ebi.ac.uk/Tools/services/rest/emboss_backtranseq/result/{}/out'.format(job_id)
+    result_req = Request(result_url)
+    result_response = urlopen(result_req).read()
+    dna_sequence = result_response.decode("utf-8").split("\n", 1)[1].replace("\n", "")
+    record = SeqRecord(Seq(dna_sequence, IUPAC.unambiguous_dna), id=str(seq_num), description=str(seq_num))
+    SeqIO.write([record], dna_results_file, 'fasta')
+    print("Retrieving DNA backtranslation of predicted vector - Completed")
+
 def main(args_input=sys.argv[1:]):
 
     parser = define_parser()
@@ -452,6 +495,9 @@ def main(args_input=sys.argv[1:]):
 
     if 'DISPLAY' in os.environ.keys():
         VectorVisualization(results_file, base_output_dir, args.spacers).draw()
+
+    dna_results_file = os.path.join(base_output_dir, args.sample_name + '_results.dna.fa')
+    create_dna_backtranslation(results_file, dna_results_file)
 
     if not args.keep_tmp_files:
         shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_I'), ignore_errors=True)
