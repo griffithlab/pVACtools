@@ -109,6 +109,7 @@ setup(
         'jsonschema==2.6.0',
         'mock',
         'vaxrank==1.0.2',
+        'xmltramp2',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,
