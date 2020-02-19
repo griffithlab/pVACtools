@@ -369,6 +369,41 @@ def identify_problematic_peptides(Paths, seq_dict):
             problematic_start.add(node)
     return (problematic_start, problematic_end)
 
+def get_codon_for_amino_acid(amino_acid):
+    amino_acid_to_codon = {
+       'A': 'GCA',
+       'C': 'TGC',
+       'D': 'GAT',
+       'E': 'GAA',
+       'F': 'TTT',
+       'G': 'GGA',
+       'H': 'CAC',
+       'I': 'ATA',
+       'K': 'AAA',
+       'L': 'CTA',
+       'M': 'ATG',
+       'N': 'AAT',
+       'P': 'CCA',
+       'Q': 'CAA',
+       'R': 'CGA',
+       'S': 'TCT',
+       'T': 'ACA',
+       'V': 'GTA',
+       'W': 'TGG',
+       'Y': 'TAT',
+    }
+    return amino_acid_to_codon[amino_acid]
+
+def create_dna_backtranslation(results_file, dna_results_file):
+    record = SeqIO.read(results_file, 'fasta')
+    seq_num = record.id
+    peptide = str(record.seq)
+    dna_sequence = ""
+    for amino_acid in peptide:
+        dna_sequence += get_codon_for_amino_acid(amino_acid)
+    output_record = SeqRecord(Seq(dna_sequence, IUPAC.unambiguous_dna), id=str(seq_num), description=str(seq_num))
+    SeqIO.write([output_record], dna_results_file, 'fasta')
+
 def main(args_input=sys.argv[1:]):
 
     parser = define_parser()
@@ -452,6 +487,9 @@ def main(args_input=sys.argv[1:]):
 
     if 'DISPLAY' in os.environ.keys():
         VectorVisualization(results_file, base_output_dir, args.spacers).draw()
+
+    dna_results_file = os.path.join(base_output_dir, args.sample_name + '_results.dna.fa')
+    create_dna_backtranslation(results_file, dna_results_file)
 
     if not args.keep_tmp_files:
         shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_I'), ignore_errors=True)
