@@ -22,6 +22,7 @@ import lib.call_iedb
 from urllib.parse import urlparse, urlencode
 from urllib.error import HTTPError
 from urllib.request import urlopen, Request
+from xmltramp2 import xmltramp
 
 def define_parser():
     return PvacvectorRunArgumentParser().parser
@@ -392,7 +393,7 @@ def create_dna_backtranslation(results_file, dna_results_file):
         job_id = str(req_h.read(), u'utf-8')
         req_h.close()
     except HTTPError as exception:
-        raise HTTPError(xmltramp.parse(unicode(exception.read(), u'utf-8'))[0][0])
+        raise Exception(xmltramp.parse(str(exception.read(), u'utf-8'))[0][0])
     time.sleep(15)
     status = u'PENDING'
     while status == u'RUNNING' or status == u'PENDING':
