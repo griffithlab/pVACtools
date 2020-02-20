@@ -135,7 +135,7 @@ class PredictionClass(metaclass=ABCMeta):
     @classmethod
     def prediction_methods_with_all(cls):
         methods = cls.prediction_methods()
-        methods.extend(['all', 'all_mhc_i', 'all_mhc_ii'])
+        methods.extend(['all', 'all_class_i', 'all_class_ii'])
         return methods
 
     @classmethod
