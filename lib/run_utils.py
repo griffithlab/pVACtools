@@ -6,13 +6,22 @@ from lib.prediction_class import *
 def split_algorithms(prediction_algorithms):
     class_i_prediction_algorithms = []
     class_ii_prediction_algorithms = []
-    for prediction_algorithm in sorted(prediction_algorithms):
-        prediction_class = globals()[prediction_algorithm]
-        prediction_class_object = prediction_class()
-        if isinstance(prediction_class_object, MHCI):
-            class_i_prediction_algorithms.append(prediction_algorithm)
-        elif isinstance(prediction_class_object, MHCII):
-            class_ii_prediction_algorithms.append(prediction_algorithm)
+    if 'all' in prediction_algorithms:
+        class_i_prediction_algorithms = MHCI.prediction_methods()
+        class_ii_prediction_algorithms = MHCII.prediction_methods()
+    elif 'all_class_i' in prediction_algorithms or 'all_class_ii' in prediction_algorithms:
+        if 'all_class_i' in prediction_algorithms:
+            class_i_prediction_algorithms = MHCI.prediction_methods()
+        if 'all_class_ii' in prediction_algorithms:
+            class_ii_prediction_algorithms = MHCII.prediction_methods()
+    else:
+        for prediction_algorithm in sorted(prediction_algorithms):
+            prediction_class = globals()[prediction_algorithm]
+            prediction_class_object = prediction_class()
+            if isinstance(prediction_class_object, MHCI):
+                class_i_prediction_algorithms.append(prediction_algorithm)
+            elif isinstance(prediction_class_object, MHCII):
+                class_ii_prediction_algorithms.append(prediction_algorithm)
     return (class_i_prediction_algorithms, class_ii_prediction_algorithms)
 
 def split_alleles(alleles):
