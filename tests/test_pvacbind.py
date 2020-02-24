@@ -140,6 +140,24 @@ class PvacbindTests(unittest.TestCase):
         ))
         self.assertTrue(compiled_run_path)
 
+    def test_process_stops(self):
+        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+        params = {
+            'input_file': os.path.join(self.test_data_directory, "input_with_stops.fasta"),
+            'input_file_type': 'fasta',
+            'sample_name': 'Test',
+            'alleles': ['HLA-G*01:09'],
+            'prediction_algorithms': ['NetMHC'],
+            'output_dir': output_dir.name,
+            'epitope_lengths': [9],
+        }
+        pipeline = PvacbindPipeline(**params)
+        pipeline.create_per_length_fasta_and_process_stops(9)
+        output_file   = os.path.join(output_dir.name, 'tmp', 'Test.9.fa')
+        expected_file = os.path.join(self.test_data_directory, 'output_with_stops.fasta')
+        self.assertTrue(cmp(output_file, expected_file))
+        output_dir.cleanup()
+
     def test_pvacbind_pipeline(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
