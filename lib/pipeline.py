@@ -406,7 +406,7 @@ class Pipeline(metaclass=ABCMeta):
         return os.path.join(self.output_dir, combined_parsed)
 
     def combined_parsed_outputs(self, split_parsed_output_files):
-        status_message(f"Combining Parsed Prediction Files {self.combined_parsed_path()}")
+        status_message("Combining Parsed Prediction Files")
         params = [
             *split_parsed_output_files,
             self.combined_parsed_path(),
