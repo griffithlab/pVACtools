@@ -52,9 +52,6 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    if "." in args.sample_name:
-        sys.exit("Sample name cannot contain '.'")
-
     if args.fasta_size%2 != 0:
         sys.exit("The fasta size needs to be an even number")
 

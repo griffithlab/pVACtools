@@ -54,9 +54,6 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    if "." in args.sample_name:
-        sys.exit("Sample name cannot contain '.'")
-
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
 
