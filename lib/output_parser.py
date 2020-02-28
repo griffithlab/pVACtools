@@ -17,6 +17,7 @@ class OutputParser(metaclass=ABCMeta):
         self.key_file                = kwargs['key_file']
         self.output_file             = kwargs['output_file']
         self.sample_name             = kwargs['sample_name']
+        self.add_sample_name         = kwargs.get('add_sample_name_column')
 
     def parse_input_tsv_file(self):
         with open(self.input_tsv_file, 'r') as reader:
@@ -366,7 +367,7 @@ class OutputParser(metaclass=ABCMeta):
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
             headers.append("%s WT Score" % pretty_method)
             headers.append("%s MT Score" % pretty_method)
-        if self.sample_name:
+        if self.add_sample_name:
             headers.append("Sample Name")
 
         return headers
@@ -473,7 +474,7 @@ class OutputParser(metaclass=ABCMeta):
                 for (tsv_key, row_key) in zip(['normal_depth', 'tdna_depth', 'trna_depth'], ['Normal Depth', 'Tumor DNA Depth', 'Tumor RNA Depth']):
                     if tsv_key in tsv_entry:
                         row[row_key] = tsv_entry[tsv_key]
-                if self.sample_name:
+                if self.add_sample_name:
                     row['Sample Name'] = self.sample_name
                 tsv_writer.writerow(row)
 
@@ -680,7 +681,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
         for method in self.prediction_methods():
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
             headers.append("%s Score" % pretty_method)
-        if self.sample_name:
+        if self.add_sample_name:
             headers.append("Sample Name")
         return headers
 
