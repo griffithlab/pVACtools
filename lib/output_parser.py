@@ -374,7 +374,8 @@ class OutputParser(metaclass=ABCMeta):
     def prediction_methods(self):
         methods = set()
         for input_iedb_file in self.input_iedb_files:
-            (sample, method, remainder) = os.path.basename(input_iedb_file).split(".", 2)
+            # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
+            method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
             methods.add(method)
 
         return sorted(list(methods))
@@ -488,7 +489,8 @@ class DefaultOutputParser(OutputParser):
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                (sample, method, remainder) = os.path.basename(input_iedb_file).split(".", 2)
+                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
+                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
                 for line in iedb_tsv_reader:
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
                         continue
@@ -549,7 +551,8 @@ class FusionOutputParser(OutputParser):
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                (sample, method, remainder) = os.path.basename(input_iedb_file).split(".", 2)
+                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
+                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
                 for line in iedb_tsv_reader:
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
                         continue
@@ -596,7 +599,8 @@ class UnmatchedSequencesOutputParser(OutputParser):
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                (sample, method, remainder) = os.path.basename(input_iedb_file).split(".", 2)
+                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
+                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
                 for line in iedb_tsv_reader:
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
                         continue
