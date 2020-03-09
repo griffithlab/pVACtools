@@ -5,7 +5,7 @@ import os
 import pkg_resources
 from tools.pvacseq import *
 
-def main():
+def define_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subparsers = parser.add_subparsers()
 
@@ -86,7 +86,10 @@ def main():
         add_help=False,
     )
     allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
+    return parser
 
+def main():
+    parser = define_parser()
     args = parser.parse_known_args()
     try:
         args[0].func.main(args[1])
