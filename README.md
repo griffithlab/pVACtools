@@ -1,4 +1,4 @@
-# pVACtools
+# pVACtools [![Build Status](https://travis-ci.org/griffithlab/pVACtools.svg?branch=master)](https://travis-ci.org/griffithlab/pVACtools)
 
 pVACtools is a cancer immunotherapy suite consisting of the following tools:
 
