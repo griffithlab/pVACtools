@@ -454,8 +454,10 @@ def main(args_input=sys.argv[1:]):
         VectorVisualization(results_file, base_output_dir, args.spacers).draw()
 
     if not args.keep_tmp_files:
-        shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_I'), ignore_errors=True)
-        shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_II'), ignore_errors=True)
+        for subdirectory in range(tries):
+            for spacer in processed_spacers:
+                shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
+                shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
 
 if __name__ == "__main__":
     main()
