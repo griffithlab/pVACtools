@@ -21,7 +21,9 @@ def define_parser():
 
     parser.add_argument(
         "input_vcf",
-        help="A VEP-annotated single-sample VCF containing transcript, Wildtype protein sequence, and Downstream protein sequence information."
+        help="A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
+            +"Wildtype protein sequence, and Downstream protein sequence information."
+            +"The VCF may be gzipped (requires tabix index)."
     )
     parser.add_argument(
         "peptide_sequence_length", type=int,
@@ -47,15 +49,21 @@ def define_parser():
         help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
             + "Use 'full' to include the full downstream sequence."
     )
+    parser.add_argument(
+        "-s", "--sample-name",
+        help="The name of the sample being processed. Required when processing a multi-sample VCF and must be a sample ID in the input VCF #CHROM header line."
+    )
     return parser
 
-def convert_vcf(input_vcf, temp_dir):
+def convert_vcf(input_vcf, temp_dir, sample_name):
     print("Converting VCF to TSV")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     convert_params = {
         'input_file' : input_vcf,
         'output_file': tsv_file,
     }
+    if sample_name is not None:
+        convert_params['sample_name'] = sample_name
     converter = VcfConverter(**convert_params)
     converter.execute()
     print("Completed")
@@ -132,7 +140,7 @@ def main(args_input = sys.argv[1:]):
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
     temp_dir = tempfile.mkdtemp()
-    convert_vcf(args.input_vcf, temp_dir)
+    convert_vcf(args.input_vcf, temp_dir, args.sample_name)
     generate_fasta(args.peptide_sequence_length, downstream_sequence_length, temp_dir)
     parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
