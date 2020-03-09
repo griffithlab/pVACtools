@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 matrix:
     include:
         - name: "Python 3.5"
