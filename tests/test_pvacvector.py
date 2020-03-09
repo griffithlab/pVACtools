@@ -104,6 +104,10 @@ class TestPvacvector(unittest.TestCase):
                 os.path.join(output_dir.name, self.test_run_name + '_results.fa'),
                 os.path.join(self.test_data_dir, "Test.vector.results.output.fa")
             ))
+            self.assertTrue(cmp(
+                os.path.join(output_dir.name, self.test_run_name + '_results.dna.fa'),
+                os.path.join(self.test_data_dir, "Test.vector.results.output.dna.fa")
+            ))
             self.assertTrue(compare(
                 os.path.join(output_dir.name, '0', 'None', 'junction_scores.tsv'),
                 os.path.join(self.test_data_dir, 'Test.vector.results.output.junction_scores.tsv')
