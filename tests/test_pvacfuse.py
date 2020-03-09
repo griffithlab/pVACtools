@@ -59,7 +59,7 @@ def generate_class_ii_call(method, allele, path, input_path):
         input_path,
         "MHC_Class_II",
         "tmp",
-        "Test_31.fa.split_1-48"
+        "sample.name_31.fa.split_1-48"
     ), mode='r')
     text = reader.read()
     reader.close()
@@ -138,7 +138,7 @@ class PvacfuseTests(unittest.TestCase):
 
             run.main([
                 os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
-                'Test',
+                'sample.name',
                 'HLA-A*29:02',
                 'NetMHC',
                 output_dir.name,
@@ -148,28 +148,28 @@ class PvacfuseTests(unittest.TestCase):
             ])
 
             for file_name in (
-                'Test.tsv',
-                'Test.tsv_1-4',
-                'Test.all_epitopes.tsv',
-                'Test.filtered.tsv',
-                'Test.filtered.condensed.ranked.tsv',
+                'sample.name.tsv',
+                'sample.name.tsv_1-4',
+                'sample.name.all_epitopes.tsv',
+                'sample.name.filtered.tsv',
+                'sample.name.filtered.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
-                expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', file_name)
-                self.assertTrue(compare(output_file, expected_file))
+                expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
+                self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'Test_21.fa.split_1-8',
-                'Test_21.fa.split_1-8.key',
-                'Test.ann.HLA-A*29:02.9.tsv_1-8',
-                'Test.HLA-A*29:02.9.parsed.tsv_1-8',
+                'sample.name_21.fa.split_1-8',
+                'sample.name_21.fa.split_1-8.key',
+                'sample.name.ann.HLA-A*29:02.9.tsv_1-8',
+                'sample.name.HLA-A*29:02.9.parsed.tsv_1-8',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
-                expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'tmp', file_name)
-                self.assertTrue(compare(output_file, expected_file))
+                expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'tmp', file_name.replace('sample.name', 'Test'))
+                self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             mock_request.assert_has_calls([
-                generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "Test_21.fa.split_1-8"))
+                generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "sample.name_21.fa.split_1-8"))
             ])
 
             output_dir.cleanup()
