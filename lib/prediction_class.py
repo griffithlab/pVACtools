@@ -133,6 +133,12 @@ class PredictionClass(metaclass=ABCMeta):
         return sorted([prediction_class.__name__ for prediction_class in cls.prediction_classes()])
 
     @classmethod
+    def prediction_methods_with_all(cls):
+        methods = cls.prediction_methods()
+        methods.extend(['all', 'all_class_i', 'all_class_ii'])
+        return methods
+
+    @classmethod
     def prediction_class_for_iedb_prediction_method(cls, method):
         prediction_classes = cls.prediction_classes()
         for prediction_class in prediction_classes:
