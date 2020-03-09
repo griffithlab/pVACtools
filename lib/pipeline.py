@@ -391,10 +391,9 @@ class Pipeline(metaclass=ABCMeta):
                             'key_file'               : split_fasta_key_file_path,
                             'output_file'            : split_parsed_file_path,
                         }
+                        params['sample_name'] = self.sample_name
                         if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
-                            params['sample_name'] = self.sample_name
-                        else:
-                            params['sample_name'] = None
+                            params['add_sample_name_column'] = True 
                         parser = self.output_parser(params)
                         parser.execute()
                         status_message("Parsing prediction file for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, epl, fasta_chunk))
@@ -686,10 +685,9 @@ class PvacbindPipeline(Pipeline):
                         'key_file'               : split_fasta_key_file_path,
                         'output_file'            : split_parsed_file_path,
                     }
+                    params['sample_name'] = self.sample_name
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
-                        params['sample_name'] = self.sample_name
-                    else:
-                        params['sample_name'] = None
+                        params['add_sample_name_column'] = True 
                     parser = self.output_parser(params)
                     parser.execute()
                     status_message("Parsing prediction file for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, length, fasta_chunk))
