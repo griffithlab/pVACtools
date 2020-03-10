@@ -152,3 +152,13 @@ This is a hotfix release. It fixes the following issues:
   This version updates our prediction pipeline to remove this duplicated amino
   acid and output a fatal error if the Downstream protein sequence does not
   contain the leading wildtype amino acid.
+
+1.5.6
+-----
+
+- The ``pvacbind run`` command would previously error out if one of the input
+  sequences would contain a X stop codon. This update will remove the X amino
+  acid and the downstream sequence before further processing the remaining
+  protein sequence.
+- A bug in the ``pvacfuse top_score_filter`` code would previsouly result
+  in an error when trying to run this command. This has now been fixed.
