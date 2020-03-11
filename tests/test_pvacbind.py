@@ -289,6 +289,23 @@ class PvacbindTests(unittest.TestCase):
 
             output_dir.cleanup()
 
+    def test_duplicate_fasta_header(self):
+        with self.assertRaises(Exception) as cm:
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+            run.main([
+                os.path.join(self.test_data_directory, "input.duplicate_header.fasta"),
+                'Test',
+                'HLA-A*02:01',
+                'NetMHC',
+                output_dir.name,
+                '-e', '8'
+            ])
+        self.assertEqual(
+            str(cm.exception),
+            "Duplicate fasta header 1. Please ensure that the input FASTA uses unique headers."
+        )
+        output_dir.cleanup()
+
     def test_pvacbind_combine_and_condense_steps(self):
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
         for subdir in ['MHC_Class_I', 'MHC_Class_II']:
