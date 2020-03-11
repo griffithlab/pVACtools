@@ -273,20 +273,19 @@ class PvacbindTests(unittest.TestCase):
 
             with self.assertRaises(SystemExit) as cm:
                 run.main([
-                    os.path.join(self.test_data_directory, "input.vcf"),
+                    os.path.join(self.test_data_directory, "input.fasta"),
                     'Test',
                     'H2-IAb',
                     'NNalign',
                     output_dir.name,
-                    '--top-score-metric=lowest',
                     '--keep-tmp-files',
                 ])
-                self.assertEqual(
-                    cm.exception,
-                    "Restart inputs are different from past inputs: \n" +
-                    "Past input: downstream_sequence_length - None\n" +
-                    "Current input: downstream_sequence_length - 1000"
-                )
+            self.assertEqual(
+                str(cm.exception),
+                "Restart inputs are different from past inputs: \n" +
+                "Past input: top_score_metric - lowest\n" +
+                "Current input: top_score_metric - median\nAborting."
+            )
 
             output_dir.cleanup()
 
