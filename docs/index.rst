@@ -52,17 +52,12 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The ``pvacfuse run`` command would previously output a misleading warning
-  message if an AGFusion input directory didn't contain any processable fusion
-  entries. This warning message has been fixed.
-- Between VEP versions, the Downstream protein sequence prediction for some
-  frameshift mutations was changed to now include a leading wildtype amino
-  acid. This potential difference in VEP-predicted Downstream protein
-  sequences was not accounted for and would result in frameshift mutation
-  protein prediction that would duplicate this leading wildtype amino acid.
-  This version updates our prediction pipeline to remove this duplicated amino
-  acid and output a fatal error if the Downstream protein sequence does not
-  contain the leading wildtype amino acid.
+- The ``pvacbind run`` command would previously error out if one of the input
+  sequences would contain a X stop codon. This update will remove the X amino
+  acid and the downstream sequence before further processing the remaining
+  protein sequence.
+- A bug in the ``pvacfuse top_score_filter`` code would previsouly result
+  in an error when trying to run this command. This has now been fixed.
 
 New in version |version|
 ------------------------

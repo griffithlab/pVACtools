@@ -35,7 +35,7 @@ def main():
         help="Generate an annotated fasta file from Integrate-Neo or AGFusion output",
         add_help=False,
     )
-    top_score_filter_parser.set_defaults(func=generate_protein_fasta_parser)
+    generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta_parser)
 
     valid_alleles_parser = subparsers.add_parser(
         "valid_alleles",
