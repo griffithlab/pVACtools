@@ -278,12 +278,12 @@ class PvacseqTests(unittest.TestCase):
                     '--top-score-metric=lowest',
                     '--keep-tmp-files',
                 ])
-                self.assertEqual(
-                    cm.exception,
-                    "Restart inputs are different from past inputs: \n" +
-                    "Past input: downstream_sequence_length - None\n" +
-                    "Current input: downstream_sequence_length - 1000"
-                )
+            self.assertEqual(
+                str(cm.exception),
+                "Restart inputs are different from past inputs: \n" +
+                "Past input: downstream_sequence_length - None\n" +
+                "Current input: downstream_sequence_length - 1000\nAborting."
+            )
 
             output_dir.cleanup()
 
