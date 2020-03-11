@@ -503,10 +503,16 @@ class PvacbindPipeline(Pipeline):
             count += 1
         return (uniq_records, keys)
 
-    def create_per_length_fasta(self, length):
+    def create_per_length_fasta_and_process_stops(self, length):
+        stop_chars = set('X*')
         records = []
         for record in SeqIO.parse(self.input_file, "fasta"):
-            if len(str(record.seq)) >= length:
+            sequence = str(record.seq).upper()
+            x_index = sequence.index('X') if 'X' in sequence else len(sequence)
+            star_index = sequence.index('*') if '*' in sequence else len(sequence)
+            sequence = sequence[0:min(x_index, star_index)]
+            if len(sequence) >= length:
+                record.seq = Seq(sequence, IUPAC.protein)
                 records.append(record)
         SeqIO.write(records, self.fasta_basename(length), "fasta")
 
@@ -702,7 +708,7 @@ class PvacbindPipeline(Pipeline):
 
         split_parsed_output_files = []
         for length in self.epitope_lengths:
-            self.create_per_length_fasta(length)
+            self.create_per_length_fasta_and_process_stops(length)
             chunks = self.split_fasta_file(length)
             self.call_iedb(chunks, length)
             split_parsed_output_files.extend(self.parse_outputs(chunks, length))
