@@ -24,10 +24,7 @@ import lib.call_iedb
 def define_parser():
     return PvacvectorRunArgumentParser().parser
 
-def run_pipelines(input_file, base_output_dir, args, spacer):
-    (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
-    (class_i_alleles, class_ii_alleles) = split_alleles(args.allele)
-
+def run_pipelines(input_file, base_output_dir, args, spacer, class_i_prediction_algorithms, class_ii_prediction_algorithms, class_i_alleles, class_ii_alleles):
     shared_arguments = {
         'input_file'      : input_file,
         'input_file_type' : 'pvacvector_input_fasta',
@@ -411,6 +408,21 @@ def main(args_input=sys.argv[1:]):
     else:
         sys.exit("Input file type not as expected. Needs to be a .fa or a .tsv file")
 
+    (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
+    if len(class_i_prediction_algorithms) == 0:
+        print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
+    elif len(class_ii_prediction_algorithms) == 0:
+        print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
+
+    (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
+    if len(class_i_alleles) == 0:
+        print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
+    elif len(class_ii_alleles) == 0:
+        print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
+
+    if len(class_i_prediction_algorithms) == 0 and len(class_i_alleles) == 0 and len(class_ii_prediction_algorithms) == 0 and len(class_ii_alleles) == 0:
+        return
+
     base_output_dir = os.path.abspath(args.output_dir)
     os.makedirs(base_output_dir, exist_ok=True)
 
@@ -440,7 +452,7 @@ def main(args_input=sys.argv[1:]):
             print("Processing spacer {}".format(spacer))
             processed_spacers.append(spacer)
             current_output_dir = os.path.join(base_output_dir, str(tries), spacer)
-            parsed_output_files = run_pipelines(input_file, current_output_dir, args, spacer)
+            parsed_output_files = run_pipelines(input_file, current_output_dir, args, spacer, class_i_prediction_algorithms, class_ii_prediction_algorithms, class_i_alleles, class_ii_alleles)
             all_parsed_output_files.extend(parsed_output_files)
             min_scores = find_min_scores(all_parsed_output_files, current_output_dir, args)
             Paths = create_graph(min_scores, seq_tuples, processed_spacers)
