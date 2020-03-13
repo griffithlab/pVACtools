@@ -23,20 +23,27 @@ def split_algorithms(prediction_algorithms):
             class_ii_prediction_algorithms.add(prediction_algorithm)
     return (sorted(list(class_i_prediction_algorithms)), sorted(list(class_ii_prediction_algorithms)))
 
-def split_alleles(alleles, species):
+def split_alleles(alleles):
     class_i_alleles = []
     class_ii_alleles = []
+    species = None
     for allele in sorted(set(alleles)):
         valid = 0
-        if allele in MHCI.all_valid_allele_names() and species == PredictionClass.species_for_allele(allele):
+        if allele in MHCI.all_valid_allele_names():
             class_i_alleles.append(allele)
             valid = 1
-        if allele in MHCII.all_valid_allele_names() and species == PredictionClass.species_for_allele(allele):
+        if allele in MHCII.all_valid_allele_names():
             class_ii_alleles.append(allele)
             valid = 1
         if not valid:
             print("Allele %s not valid. Skipping." % allele)
-    return (class_i_alleles, class_ii_alleles)
+        else:
+            allele_species = PredictionClass.species_for_allele(allele)
+            if species is None:
+                species = allele_species
+            elif species != allele_species:
+                raise Exception("Requested alleles are not from the same species.")
+    return (class_i_alleles, class_ii_alleles, species)
 
 def combine_reports(input_files, output_file):
     fieldnames = []

@@ -62,7 +62,7 @@ def main(args_input = sys.argv[1:]):
     base_output_dir = os.path.abspath(args.output_dir)
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
-    (class_i_alleles, class_ii_alleles) = split_alleles(args.allele, args.species)
+    (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
 
     shared_arguments = {
         'input_file'                : args.input_file,
@@ -91,7 +91,7 @@ def main(args_input = sys.argv[1:]):
         'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
         'n_threads'                 : args.n_threads,
         'maximum_transcript_support_level': args.maximum_transcript_support_level,
-        'species'                   : args.species,
+        'species'                   : species,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
