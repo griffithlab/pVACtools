@@ -28,10 +28,10 @@ def split_alleles(alleles, species):
     class_ii_alleles = []
     for allele in sorted(set(alleles)):
         valid = 0
-        if allele in MHCI.all_valid_allele_names() and species == MHCI.species_for_allele(allele):
+        if allele in MHCI.all_valid_allele_names() and species == PredictionClass.species_for_allele(allele):
             class_i_alleles.append(allele)
             valid = 1
-        if allele in MHCII.all_valid_allele_names() and species == MHCII.species_for_allele(allele):
+        if allele in MHCII.all_valid_allele_names() and species == PredictionClass.species_for_allele(allele):
             class_ii_alleles.append(allele)
             valid = 1
         if not valid:
