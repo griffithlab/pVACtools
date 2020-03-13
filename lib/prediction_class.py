@@ -189,6 +189,27 @@ class PredictionClass(metaclass=ABCMeta):
                 sys.exit("Allele %s not valid. Run `pvacseq valid_alleles` for a list of valid allele names." % allele)
 
     @classmethod
+    def species_for_allele(self, allele):
+        if allele.startswith('HLA'):
+            return 'human'
+        elif allele.startswith('Patr'):
+            return 'chimpanzee'
+        elif allele.startswith('Mamu'):
+            return 'macaque'
+        elif allele.startswith('BoLA'):
+            return 'cow'
+        elif allele.startswith('Eqca'):
+            return 'horse'
+        elif allele.startswith('H-2'):
+            return 'mouse'
+        elif allele.startswith('H2'):
+            return 'mouse'
+        elif allele.startswith('SLA'):
+            return 'pig'
+        else:
+            return 'human'
+
+    @classmethod
     def parse_allele_cutoff_file(cls):
         base_dir                = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
         iedb_alleles_dir        = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles')

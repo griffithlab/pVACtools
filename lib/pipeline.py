@@ -15,6 +15,7 @@ from lib.fasta_generator import *
 from lib.output_parser import *
 from lib.post_processor import *
 import shutil
+import copy
 import yaml
 import pkg_resources
 import pymp
@@ -64,6 +65,7 @@ class Pipeline(metaclass=ABCMeta):
         self.normal_sample_name          = kwargs.pop('normal_sample_name', None)
         self.n_threads                   = kwargs.pop('n_threads', 1)
         self.spacers                     = kwargs.pop('spacers', None)
+        self.species                     = kwargs.pop('species', 'human')
         self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
@@ -116,6 +118,10 @@ class Pipeline(metaclass=ABCMeta):
             tsv_file = self.sample_name + '.tsv'
             return os.path.join(self.output_dir, tsv_file)
 
+    def fasta_file_path(self):
+        fasta_file = self.sample_name + '.fasta'
+        return os.path.join(self.output_dir, fasta_file)
+
     def converter(self, params):
         converter_types = {
             'vcf'  : 'VcfConverter',
@@ -145,6 +151,24 @@ class Pipeline(metaclass=ABCMeta):
         parser_type = parser_types[self.input_file_type]
         parser = getattr(sys.modules[__name__], parser_type)
         return parser(**params)
+
+    def generate_combined_fasta(self):
+        params = [
+            self.input_file,
+            str(self.peptide_sequence_length),
+            self.fasta_file_path(),
+        ]
+        if self.input_file_type == 'vcf':
+            import tools.pvacseq.generate_protein_fasta as generate_combined_fasta
+            params.extend(["--sample-name", self.sample_name])
+        elif self.input_file_type == 'bedpe':
+            import tools.pvacfuse.generate_protein_fasta as generate_combined_fasta
+        if self.downstream_sequence_length is not None:
+            params.extend(["-d", str(self.downstream_sequence_length)])
+        else:
+            params.extend(["-d", 'full'])
+        generate_combined_fasta.main(params)
+        os.unlink("{}.manufacturability.tsv".format(self.fasta_file_path()))
 
     def convert_vcf(self):
         status_message("Converting .%s to TSV" % self.input_file_type)
@@ -426,6 +450,8 @@ class Pipeline(metaclass=ABCMeta):
     def execute(self):
         self.print_log()
         self.convert_vcf()
+        if self.input_file_type != 'pvacvector_input_fasta':
+            self.generate_combined_fasta()
 
         total_row_count = self.tsv_entry_count()
         if total_row_count == 0:
@@ -448,10 +474,12 @@ class Pipeline(metaclass=ABCMeta):
 
         self.combined_parsed_outputs(split_parsed_output_files)
 
-        post_processing_params = vars(self)
+        post_processing_params = copy.copy(vars(self))
         post_processing_params['input_file'] = self.combined_parsed_path()
+        post_processing_params['file_type'] = self.input_file_type
         post_processing_params['filtered_report_file'] = self.final_path()
         post_processing_params['condensed_report_file'] = self.ranked_final_path()
+        post_processing_params['fasta'] = self.fasta_file_path()
         post_processing_params['run_condense_report'] = True
         post_processing_params['run_manufacturability_metrics'] = True
         if self.input_file_type == 'vcf':
@@ -717,15 +745,16 @@ class PvacbindPipeline(Pipeline):
 
         self.combined_parsed_outputs(split_parsed_output_files)
 
-        post_processing_params = vars(self)
+        post_processing_params = copy.copy(vars(self))
         post_processing_params['input_file'] = self.combined_parsed_path()
+        post_processing_params['file_type'] = 'pVACbind'
         post_processing_params['filtered_report_file'] = self.final_path()
         post_processing_params['run_coverage_filter'] = False
         post_processing_params['run_transcript_support_level_filter'] = False
         post_processing_params['minimum_fold_change'] = None
-        post_processing_params['file_type'] = 'pVACbind'
         post_processing_params['run_condense_report'] = False
         post_processing_params['run_manufacturability_metrics'] = True
+        post_processing_params['fasta'] = self.input_file
         if self.net_chop_method:
             post_processing_params['run_net_chop'] = True
         else:

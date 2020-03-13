@@ -16,64 +16,6 @@ from tools.pvacseq import *
 from mock import patch
 from .test_utils import *
 
-def make_response(data, files, path):
-    if not files:
-        if 'length' in data:
-            filename = 'response_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'])
-        else:
-            filename = 'response_%s_%s.tsv' % (data['allele'], data['method'])
-        reader = open(os.path.join(
-            path,
-            filename
-        ), mode='r')
-        response_obj = lambda :None
-        response_obj.status_code = 200
-        response_obj.text = reader.read()
-        reader.close()
-        return response_obj
-    else:
-        basefile = os.path.basename(data['configfile'])
-        reader = open(os.path.join(
-            path,
-            'net_chop.html' if basefile == 'NetChop.cf' else 'Netmhcstab.html'
-        ), mode='rb')
-        response_obj = lambda :None
-        response_obj.status_code = 200
-        response_obj.content = reader.read()
-        reader.close()
-        return response_obj
-
-def generate_class_i_call(method, allele, length, input_file):
-    reader = open(input_file, mode='r')
-    text = reader.read()
-    reader.close()
-    return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhci/', data={
-        'sequence_text': ""+text,
-        'method':        method,
-        'allele':        allele,
-        'length':        length,
-        'user_tool':     'pVac-seq',
-    })
-
-def generate_class_ii_call(method, allele, path, input_path, sample_name):
-    reader = open(os.path.join(
-        input_path,
-        "MHC_Class_II",
-        "tmp",
-        sample_name+"_31.fa.split_1-48"
-    ), mode='r')
-    text = reader.read()
-    reader.close()
-    return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhcii/', data={
-        'sequence_text': ""+text,
-        'method':        method,
-        'allele':        allele,
-        'user_tool':     'pVac-seq',
-    })
-
-def pvac_directory():
-    return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-
 def test_data_directory():
     return os.path.join(
         pvac_directory(),
@@ -146,7 +88,7 @@ class PvacseqTests(unittest.TestCase):
             data,
             files,
             test_data_directory()
-        ))) as mock_request:
+        ))) as mock_request, unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
@@ -169,13 +111,14 @@ class PvacseqTests(unittest.TestCase):
             run.main([
                 os.path.join(self.test_data_directory, "input.vcf"),
                 'sample.name',
-                'H2-IAb',
+                'DRB1*11:01',
                 'NNalign',
                 output_dir.name,
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '-d', 'full',
             ])
+            close_mock_fhs()
 
             for file_name in (
                 'sample.name.all_epitopes.tsv',
@@ -187,6 +130,7 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'sample.name.tsv',
                 'sample.name.tsv_1-24',
+                'sample.name.fasta',
                 'sample.name.filtered.tsv',
                 'sample.name.filtered.condensed.ranked.tsv',
             ):
@@ -234,6 +178,7 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'sample.name.tsv',
                 'sample.name.tsv_1-24',
+                'sample.name.fasta',
                 'sample.name.all_epitopes.tsv',
                 'sample.name.filtered.tsv',
                 'sample.name.filtered.condensed.ranked.tsv',
@@ -245,14 +190,14 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'sample.name_31.fa.split_1-48',
                 'sample.name_31.fa.split_1-48.key',
-                'sample.name.nn_align.H2-IAb.15.tsv_1-48',
+                'sample.name.nn_align.DRB1*11:01.15.tsv_1-48',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name.replace('sample.name', 'Test'))
                 self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name.H2-IAb.15.parsed.tsv_1-48',
+                'sample.name.DRB1*11:01.15.parsed.tsv_1-48',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name.replace('sample.name', 'Test'))
@@ -265,14 +210,14 @@ class PvacseqTests(unittest.TestCase):
                 self.assertTrue(os.path.exists(output_file))
 
             mock_request.assert_has_calls([
-                generate_class_ii_call('nn_align', 'H2-IAb', self.test_data_directory, output_dir.name, 'sample.name')
+                generate_class_ii_call('nn_align', 'DRB1*11:01', os.path.join(output_dir.name, "MHC_Class_II", "tmp", "sample.name_31.fa.split_1-48"))
             ])
 
             with self.assertRaises(SystemExit) as cm:
                 run.main([
                     os.path.join(self.test_data_directory, "input.vcf"),
                     'Test',
-                    'H2-IAb',
+                    'DRB1*11:01',
                     'NNalign',
                     output_dir.name,
                     '--top-score-metric=lowest',
@@ -293,20 +238,24 @@ class PvacseqTests(unittest.TestCase):
         test_data_directory()
     )))
     def test_pvacseq_pipeline_additional_report_columns(self):
-        output_dir = tempfile.TemporaryDirectory()
-        params = [
-            os.path.join(self.test_data_directory, "input.vcf"),
-            'Test',
-            'HLA-E*01:01',
-            'NetMHC',
-            output_dir.name,
-            '-e', '9,10',
-            '-a', 'sample_name',
-        ]
-        run.main(params)
-        output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.filtered.tsv')
-        expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
-        self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
+        with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+            output_dir = tempfile.TemporaryDirectory()
+            params = [
+                os.path.join(self.test_data_directory, "input.vcf"),
+                'Test',
+                'HLA-E*01:01',
+                'NetMHC',
+                output_dir.name,
+                '-e', '9,10',
+                '-a', 'sample_name',
+                '-d', 'full'
+            ]
+            run.main(params)
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.filtered.tsv')
+            expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
+            self.assertTrue(cmp(output_file, expected_file, False))
+            close_mock_fhs()
+            output_dir.cleanup()
 
     @patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
         data,
@@ -341,36 +290,53 @@ class PvacseqTests(unittest.TestCase):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
             self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
+        output_dir.cleanup()
 
     def test_pvacseq_combine_and_condense_steps(self):
-        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
-        for subdir in ['MHC_Class_I', 'MHC_Class_II']:
-            path = os.path.join(output_dir.name, subdir)
-            os.mkdir(path)
-            test_data_dir = os.path.join(self.test_data_directory, 'combine_and_condense', subdir)
-            for item in os.listdir(test_data_dir):
-                os.symlink(os.path.join(test_data_dir, item), os.path.join(path, item))
+        with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+            for subdir in ['MHC_Class_I', 'MHC_Class_II']:
+                path = os.path.join(output_dir.name, subdir)
+                os.mkdir(path)
+                test_data_dir = os.path.join(self.test_data_directory, 'combine_and_condense', subdir)
+                for item in os.listdir(test_data_dir):
+                    os.symlink(os.path.join(test_data_dir, item), os.path.join(path, item))
 
-        run.main([
-            os.path.join(self.test_data_directory, "input.vcf"),
-            'Test',
-            'HLA-G*01:09,HLA-E*01:01,H2-IAb',
-            'NetMHC',
-            'PickPocket',
-            'NNalign',
-            output_dir.name,
-            '-e', '9,10',
-            '--top-score-metric=lowest',
-            '--keep-tmp-files',
-            '--tdna-vaf', '20',
-            '-d', 'full',
-        ])
+            run.main([
+                os.path.join(self.test_data_directory, "input.vcf"),
+                'Test',
+                'HLA-G*01:09,HLA-E*01:01,DRB1*11:01',
+                'NetMHC',
+                'PickPocket',
+                'NNalign',
+                output_dir.name,
+                '-e', '9,10',
+                '--top-score-metric=lowest',
+                '--keep-tmp-files',
+                '-d', 'full',
+            ])
 
-        for file_name in (
-            'Test.all_epitopes.tsv',
-            'Test.filtered.tsv',
-            'Test.filtered.condensed.ranked.tsv',
-        ):
-            output_file   = os.path.join(output_dir.name, 'combined', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
-            self.assertTrue(compare(output_file, expected_file))
+            for file_name in (
+                'Test.all_epitopes.tsv',
+                'Test.filtered.tsv',
+                'Test.filtered.condensed.ranked.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, 'combined', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
+                self.assertTrue(compare(output_file, expected_file))
+            output_dir.cleanup()
+            close_mock_fhs()
+
+    def test_mismatched_allele_species_raises_exception(self):
+        with self.assertRaises(Exception) as context:
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+            run.main([
+                os.path.join(self.test_data_directory, "input.vcf"),
+                'Test',
+                'HLA-G*01:09,H2-IAb',
+                'NetMHC',
+                output_dir.name,
+                '-e', '9',
+            ])
+            output_dir.cleanup()
+        self.assertTrue('Requested alleles are not from the same species.' in str(context.exception))
