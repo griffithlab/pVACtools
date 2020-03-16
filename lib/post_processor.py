@@ -133,7 +133,7 @@ class PostProcessor:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
 
     def calculate_reference_proteome_similarity(self):
-        if self.run_manufacturability_metrics:
+        if self.run_reference_proteome_similarity:
             print("Calculating Reference Proteome Similarity")
             CalculateReferenceProteomeSimilarity(
                 self.netmhc_stab_fh.name,

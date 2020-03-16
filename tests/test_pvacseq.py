@@ -106,6 +106,7 @@ class PvacseqTests(unittest.TestCase):
                 '--tdna-vaf', '20',
                 '-d', 'full',
                 '--pass-only',
+                '--run-reference-proteome-similarity',
             ])
 
             run.main([
@@ -117,6 +118,7 @@ class PvacseqTests(unittest.TestCase):
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '-d', 'full',
+                '--run-reference-proteome-similarity',
             ])
             close_mock_fhs()
 
@@ -222,6 +224,7 @@ class PvacseqTests(unittest.TestCase):
                     output_dir.name,
                     '--top-score-metric=lowest',
                     '--keep-tmp-files',
+                    '--run-reference-proteome-similarity',
                 ])
                 self.assertEqual(
                     cm.exception,
@@ -248,7 +251,8 @@ class PvacseqTests(unittest.TestCase):
                 output_dir.name,
                 '-e', '9,10',
                 '-a', 'sample_name',
-                '-d', 'full'
+                '-d', 'full',
+                '--run-reference-proteome-similarity',
             ]
             run.main(params)
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.filtered.tsv')
@@ -274,7 +278,8 @@ class PvacseqTests(unittest.TestCase):
             '-e', '8',
             '-s', '1000',
             '-k',
-            '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz')
+            '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz'),
+            '--run-reference-proteome-similarity',
         ]
         run.main(params)
 
@@ -314,6 +319,7 @@ class PvacseqTests(unittest.TestCase):
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '-d', 'full',
+                '--run-reference-proteome-similarity',
             ])
 
             for file_name in (
