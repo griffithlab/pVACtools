@@ -35,6 +35,7 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['run_netmhc_stab'] = False
     post_processing_params['run_condense_report'] = True
     post_processing_params['run_manufacturability_metrics'] = False
+    post_processing_params['run_reference_proteome_similarity'] = False
 
     PostProcessor(**post_processing_params).execute()
 
@@ -92,6 +93,7 @@ def main(args_input = sys.argv[1:]):
         'n_threads'                 : args.n_threads,
         'maximum_transcript_support_level': args.maximum_transcript_support_level,
         'species'                   : species,
+        'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:

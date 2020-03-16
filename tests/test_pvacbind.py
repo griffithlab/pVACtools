@@ -120,6 +120,7 @@ class PvacbindTests(unittest.TestCase):
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
                 '--netmhc-stab',
+                '--run-reference-proteome-similarity',
             ])
 
             run.main([
@@ -130,6 +131,7 @@ class PvacbindTests(unittest.TestCase):
                 output_dir.name,
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
+                '--run-reference-proteome-similarity',
             ])
             close_mock_fhs()
 
@@ -223,6 +225,7 @@ class PvacbindTests(unittest.TestCase):
                     output_dir.name,
                     '--top-score-metric=lowest',
                     '--keep-tmp-files',
+                    '--run-reference-proteome-similarity',
                 ])
                 self.assertEqual(
                     cm.exception,
@@ -255,6 +258,7 @@ class PvacbindTests(unittest.TestCase):
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--allele-specific-binding-thresholds',
+                '--run-reference-proteome-similarity',
             ])
             close_mock_fhs()
 
