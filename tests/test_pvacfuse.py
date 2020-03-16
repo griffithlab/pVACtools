@@ -87,6 +87,7 @@ class PvacfuseTests(unittest.TestCase):
                 '-e', '9',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
+                '--run-reference-proteome-similarity',
             ])
 
             for file_name in (
@@ -136,6 +137,7 @@ class PvacfuseTests(unittest.TestCase):
                 '-e', '9',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
+                '--run-reference-proteome-similarity',
             ])
             close_mock_fhs()
 
