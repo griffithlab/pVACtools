@@ -66,6 +66,7 @@ class Pipeline(metaclass=ABCMeta):
         self.n_threads                   = kwargs.pop('n_threads', 1)
         self.spacers                     = kwargs.pop('spacers', None)
         self.species                     = kwargs.pop('species', 'human')
+        self.run_reference_proteome_similarity = kwargs.pop('run_reference_proteome_similarity', False)
         self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
