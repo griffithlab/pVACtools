@@ -362,7 +362,7 @@ class PvacseqTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as cm:
                 run.main([
                     os.path.join(self.test_data_directory, "input.vcf"),
-                    'Test',
+                    'sample.name',
                     'DRB1*11:01',
                     'NNalign',
                     output_dir.name,
