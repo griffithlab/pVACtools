@@ -519,8 +519,12 @@ class PvacbindPipeline(Pipeline):
 
     def uniquify_records(self, records):
         fasta_sequences = OrderedDict()
+        ids = []
         for record in records:
+            if record.id in ids:
+                raise Exception("Duplicate fasta header {}. Please ensure that the input FASTA uses unique headers.".format(record.id))
             fasta_sequences.setdefault(str(record.seq), []).append(record.id)
+            ids.append(record.id)
         count = 1
         uniq_records = []
         keys = {}

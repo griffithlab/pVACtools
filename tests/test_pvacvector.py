@@ -12,6 +12,8 @@ from tools.pvacvector import *
 import unittest.mock
 from mock import patch
 from .test_utils import *
+import tools.pvacvector.main as pvacvector_main
+import argparse
 
 def make_response(data, path, test_name):
     filename = 'response_%s_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'], test_name)
@@ -60,6 +62,10 @@ class TestPvacvector(unittest.TestCase):
         ))
         self.assertTrue(compiled_path)
 
+    def test_parser(self):
+        parser = pvacvector_main.define_parser()
+        self.assertEqual(type(parser), argparse.ArgumentParser)
+
     def test_pvacvector_commands(self):
         pvac_script_path = os.path.join(
             self.base_dir,
@@ -70,6 +76,10 @@ class TestPvacvector(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
+            "visualize",
+            "valid_alleles",
+            "allele_specific_cutoffs",
+            "download_example_data",
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -79,6 +89,63 @@ class TestPvacvector(unittest.TestCase):
             ], shell=False, stdout=PIPE)
             self.assertFalse(result.returncode)
             self.assertRegex(result.stdout.decode(), usage_search)
+
+    def test_visualize_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.base_dir,
+            "tools",
+            "pvacvector",
+            "visualize.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_visualize_runs(self):
+        if 'DISPLAY' in os.environ.keys():
+            input_file = os.path.join(self.test_data_dir, 'Test.vector.results.output.fa')
+            output_dir = tempfile.TemporaryDirectory()
+            visualize.main([input_file, output_dir.name])
+        else:
+            with self.assertRaises(Exception) as context:
+                input_file = os.path.join(self.test_data_dir, 'Test.vector.results.output.fa')
+                output_dir = tempfile.TemporaryDirectory()
+                visualize.main([input_file, output_dir.name])
+
+    def test_allele_specific_cutoffs_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.base_dir,
+            "tools",
+            "pvacvector",
+            "allele_specific_cutoffs.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_allele_specific_cutoffs_runs(self):
+        allele_specific_cutoffs.main([])
+
+    def test_download_example_data_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.base_dir,
+            "tools",
+            "pvacvector",
+            "download_example_data.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_download_example_data_runs(self):
+        output_dir = tempfile.TemporaryDirectory()
+        download_example_data.main([output_dir.name])
+
+    def test_valid_alleles_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.base_dir,
+            "tools",
+            "pvacvector",
+            "valid_alleles.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_alleles_runs(self):
+        valid_alleles.main(["-p", "SMM"])
 
     def test_pvacvector_fa_input_runs_and_produces_expected_output(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data: make_response(

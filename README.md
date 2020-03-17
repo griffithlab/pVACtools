@@ -1,3 +1,10 @@
+[![Build Status](https://travis-ci.org/griffithlab/pVACtools.svg?branch=master)](https://travis-ci.org/griffithlab/pVACtools)
+[![Coverage Status](https://coveralls.io/repos/github/griffithlab/pVACtools/badge.svg?branch=master)](https://coveralls.io/github/griffithlab/pVACtools?branch=master)
+[![Docs](https://readthedocs.org/projects/pvactools/badge/?version=latest)](http://pvactools.readthedocs.io/en/latest/?badge=latest)
+<a href="https://pypi.python.org/pypi/pvactools/">
+    <img src="https://img.shields.io/pypi/v/pvactools.svg?maxAge=1000" alt="PyPI" />
+</a>
+
 # pVACtools
 
 pVACtools is a cancer immunotherapy suite consisting of the following tools:
@@ -69,3 +76,7 @@ The pVACtools documentation can be found on <a href="http://pvactools.readthedoc
 
 ## Contact
 Bug reports or feature requests can be submitted on the <a href="https://github.com/griffithlab/pVACtools/issues">pVACtools Github page</a>. You may also contact us by email at help@pvactools.org.
+
+## Stable release with DOI
+
+[![DOI](https://zenodo.org/badge/102625109.svg)](https://zenodo.org/badge/latestdoi/102625109)
