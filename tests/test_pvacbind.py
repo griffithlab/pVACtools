@@ -273,22 +273,38 @@ class PvacbindTests(unittest.TestCase):
 
             with self.assertRaises(SystemExit) as cm:
                 run.main([
-                    os.path.join(self.test_data_directory, "input.vcf"),
+                    os.path.join(self.test_data_directory, "input.fasta"),
                     'Test',
                     'H2-IAb',
                     'NNalign',
                     output_dir.name,
-                    '--top-score-metric=lowest',
                     '--keep-tmp-files',
                 ])
-                self.assertEqual(
-                    cm.exception,
-                    "Restart inputs are different from past inputs: \n" +
-                    "Past input: downstream_sequence_length - None\n" +
-                    "Current input: downstream_sequence_length - 1000"
-                )
+            self.assertEqual(
+                str(cm.exception),
+                "Restart inputs are different from past inputs: \n" +
+                "Past input: top_score_metric - lowest\n" +
+                "Current input: top_score_metric - median\nAborting."
+            )
 
             output_dir.cleanup()
+
+    def test_duplicate_fasta_header(self):
+        with self.assertRaises(Exception) as cm:
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+            run.main([
+                os.path.join(self.test_data_directory, "input.duplicate_header.fasta"),
+                'Test',
+                'HLA-A*02:01',
+                'NetMHC',
+                output_dir.name,
+                '-e', '8'
+            ])
+        self.assertEqual(
+            str(cm.exception),
+            "Duplicate fasta header 1. Please ensure that the input FASTA uses unique headers."
+        )
+        output_dir.cleanup()
 
     def test_pvacbind_combine_and_condense_steps(self):
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
