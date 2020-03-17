@@ -74,9 +74,6 @@ def main(args_input = sys.argv[1:]):
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
-        if args.epitope_length is None:
-            sys.exit("Epitope length is required for class I binding predictions")
-
         if args.iedb_install_directory:
             iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
             if not os.path.exists(iedb_mhc_i_executable):
@@ -92,7 +89,7 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments = shared_arguments.copy()
         class_i_arguments['alleles']                 = class_i_alleles
         class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
-        class_i_arguments['epitope_lengths']         = args.epitope_length
+        class_i_arguments['epitope_lengths']         = args.class_i_epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
@@ -120,7 +117,7 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments['alleles']                 = class_ii_alleles
         class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
         class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
-        class_ii_arguments['epitope_lengths']         = [15]
+        class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
         class_ii_arguments['output_dir']              = output_dir
         class_ii_arguments['netmhc_stab']             = False
         pipeline = PvacbindPipeline(**class_ii_arguments)
