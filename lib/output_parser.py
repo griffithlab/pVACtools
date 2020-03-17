@@ -63,6 +63,16 @@ class OutputParser(metaclass=ABCMeta):
                 return i+1
         return 0
 
+    def get_percentile(self, line):
+        if 'percentile' in line:
+            return float(line['percentile'])
+        elif 'percentile_rank' in line:
+            return float(line['percentile_rank'])
+        elif 'rank' in line:
+            return float(line['rank'])
+        else:
+            return 'NA'
+
     def match_wildtype_and_mutant_entry_for_missense(self, result, mt_position, wt_results, previous_result):
         #The WT epitope at the same position is the match
         match_position = mt_position
@@ -74,9 +84,11 @@ class OutputParser(metaclass=ABCMeta):
         if total_matches >= self.min_match_count(int(result['peptide_length'])):
             result['wt_epitope_seq'] = wt_epitope_seq
             result['wt_scores']      = wt_result['wt_scores']
+            result['wt_percentiles'] = wt_result['wt_percentiles']
         else:
             result['wt_epitope_seq'] = 'NA'
             result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+            result['wt_percentiles'] = dict.fromkeys(result['mt_percentiles'].keys(), 'NA')
 
         if mt_epitope_seq == wt_epitope_seq:
             result['mutation_position'] = 'NA'
@@ -99,6 +111,7 @@ class OutputParser(metaclass=ABCMeta):
         if match_position not in wt_results:
             result['wt_epitope_seq'] = 'NA'
             result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+            result['wt_percentiles'] = dict.fromkeys(result['mt_percentiles'].keys(), 'NA')
             result['wt_epitope_position'] = 'NA'
             if previous_result['mutation_position'] == 'NA':
                 result['mutation_position'] = 'NA'
@@ -115,6 +128,7 @@ class OutputParser(metaclass=ABCMeta):
             #The MT epitope does not overlap the frameshift mutation
             result['wt_epitope_seq']    = wt_result['wt_epitope_seq']
             result['wt_scores']         = wt_result['wt_scores']
+            result['wt_percentiles']    = wt_result['wt_percentiles']
             result['mutation_position'] = 'NA'
             result['wt_epitope_position'] = 'NA'
         else:
@@ -124,12 +138,14 @@ class OutputParser(metaclass=ABCMeta):
                 #The minimum amino acid match count is met
                 result['wt_epitope_seq'] = wt_result['wt_epitope_seq']
                 result['wt_scores']      = wt_result['wt_scores']
+                result['wt_percentiles'] = wt_result['wt_percentiles']
             else:
                 #The minimum amino acid match count is not met
                 #Even though there is a matching WT epitope there are not enough overlapping amino acids
                 #We don't include the matching WT epitope in the output
                 result['wt_epitope_seq'] = 'NA'
                 result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+                result['wt_percentiles'] = dict.fromkeys(result['mt_percentiles'].keys(), 'NA')
             mutation_position = self.find_mutation_position(wt_epitope_seq, mt_epitope_seq)
             if mutation_position == 1 and previous_result is not None and int(previous_result['mutation_position']) <= 1:
                 #The true mutation position is to the left of the current MT eptiope
@@ -155,12 +171,14 @@ class OutputParser(metaclass=ABCMeta):
                 #The minimum amino acid match count is met
                 result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
                 result['wt_scores']      = best_match_wt_result['wt_scores']
+                result['wt_percentiles'] = best_match_wt_result['wt_percentiles']
             else:
                 #The minimum amino acid match count is not met
                 #Even though there is a matching WT epitope there are not enough overlapping amino acids
                 #We don't include the matching WT epitope in the output
                 result['wt_epitope_seq'] = 'NA'
                 result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+                result['wt_percentiles'] = dict.fromkeys(result['mt_percentiles'].keys(), 'NA')
 
             return
 
@@ -172,6 +190,7 @@ class OutputParser(metaclass=ABCMeta):
         if baseline_best_match_position not in wt_results:
             result['wt_epitope_seq'] = 'NA'
             result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+            result['wt_percentiles'] = dict.fromkeys(result['mt_percentiles'].keys(), 'NA')
             #We then infer the mutation position and match direction from the previous MT epitope
             result['match_direction']= previous_result['match_direction']
             if previous_result['mutation_position'] > 0:
@@ -187,6 +206,7 @@ class OutputParser(metaclass=ABCMeta):
         if baseline_best_match_wt_epitope_seq == mt_epitope_seq:
             result['wt_epitope_seq']      = baseline_best_match_wt_result['wt_epitope_seq']
             result['wt_scores']           = baseline_best_match_wt_result['wt_scores']
+            result['wt_percentiles']      = baseline_best_match_wt_result['wt_percentiles']
             result['wt_epitope_position'] = int(baseline_best_match_position)
             result['mutation_position']   = 'NA'
             result['match_direction']     = 'left'
@@ -226,12 +246,14 @@ class OutputParser(metaclass=ABCMeta):
                 #The minimum amino acid match count is met
                 result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
                 result['wt_scores']      = best_match_wt_result['wt_scores']
+                result['wt_percentiles'] = best_match_wt_result['wt_percentiles']
             else:
                 #The minimum amino acid match count is not met
                 #Even though there is a matching WT epitope there are not enough overlapping amino acids
                 #We don't include the matching WT epitope in the output
                 result['wt_epitope_seq'] = 'NA'
                 result['wt_scores']      = dict.fromkeys(result['mt_scores'].keys(), 'NA')
+                result['wt_percentiles'] = dict.fromkeys(result['mt_percentiles'].keys(), 'NA')
 
             result['mutation_position']   = self.find_mutation_position(baseline_best_match_wt_epitope_seq, mt_epitope_seq)
             result['match_direction']     = match_direction
@@ -264,23 +286,32 @@ class OutputParser(metaclass=ABCMeta):
 
     def add_summary_metrics(self, iedb_results):
         iedb_results_with_metrics = {}
-        for key, value in iedb_results.items():
-            mt_scores     = value['mt_scores']
-            best_mt_score = sys.maxsize
-            for method, score in mt_scores.items():
-                if score < best_mt_score:
-                    best_mt_score        = score
-                    best_mt_score_method = method
-            value['best_mt_score']          = best_mt_score
-            value['corresponding_wt_score'] = value['wt_scores'][best_mt_score_method]
-            value['best_mt_score_method']   = best_mt_score_method
-            value['median_mt_score']        = median(mt_scores.values())
-            wt_scores_with_value = [score for score in value['wt_scores'].values() if score != 'NA']
-            if not wt_scores_with_value:
-                value['median_wt_score']    = 'NA'
-            else:
-                value['median_wt_score']    = median(wt_scores_with_value)
-            iedb_results_with_metrics[key]  = value
+        for key, result in iedb_results.items():
+            for metric in ['score', 'percentile']:
+                mt_values = { key:value for (key,value) in result['mt_{}s'.format(metric)].items() if value != 'NA'}
+                if not mt_values:
+                    result['best_mt_{}'.format(metric)]          = 'NA'
+                    result['corresponding_wt_{}'.format(metric)] = 'NA'
+                    result['best_mt_{}_method'.format(metric)]   = 'NA'
+                    result['median_mt_{}'.format(metric)]        = 'NA'
+                else:
+                    best_mt_value = sys.maxsize
+                    for method in sorted(mt_values.keys()):
+                        value = mt_values[method]
+                        if value < best_mt_value:
+                            best_mt_value        = value
+                            best_mt_value_method = method
+                    result['best_mt_{}'.format(metric)]          = best_mt_value
+                    result['corresponding_wt_{}'.format(metric)] = result['wt_{}s'.format(metric)][best_mt_value_method]
+                    result['best_mt_{}_method'.format(metric)]   = best_mt_value_method
+                    result['median_mt_{}'.format(metric)]        = median(mt_values.values())
+                wt_values = [score for score in result['wt_{}s'.format(metric)].values() if score != 'NA']
+                if not wt_values:
+                    result['median_wt_{}'.format(metric)]    = 'NA'
+                else:
+                    result['median_wt_{}'.format(metric)]    = median(wt_values)
+
+                iedb_results_with_metrics[key]  = result
 
         return iedb_results_with_metrics
 
@@ -296,6 +327,8 @@ class OutputParser(metaclass=ABCMeta):
                 'mutation_position',
                 'mt_scores',
                 'wt_scores',
+                'mt_percentiles',
+                'wt_percentiles',
                 'wt_epitope_seq',
                 'mt_epitope_seq',
                 'tsv_index',
@@ -306,6 +339,11 @@ class OutputParser(metaclass=ABCMeta):
                 'best_mt_score_method',
                 'median_mt_score',
                 'median_wt_score',
+                'best_mt_percentile',
+                'corresponding_wt_percentile',
+                'best_mt_percentile_method',
+                'median_mt_percentile',
+                'median_wt_percentile',
             ):
                 if key in value.keys():
                     row.append(value[key])
@@ -347,6 +385,9 @@ class OutputParser(metaclass=ABCMeta):
             'Best MT Score',
             'Corresponding WT Score',
             'Corresponding Fold Change',
+            'Best MT Percentile Method',
+            'Best MT Percentile',
+            'Corresponding WT Percentile',
             'Tumor DNA Depth',
             'Tumor DNA VAF',
             'Tumor RNA Depth',
@@ -358,6 +399,8 @@ class OutputParser(metaclass=ABCMeta):
             'Median MT Score',
             'Median WT Score',
             'Median Fold Change',
+            'Median MT Percentile',
+            'Median WT Percentile',
         ]
         return headers
 
@@ -367,6 +410,8 @@ class OutputParser(metaclass=ABCMeta):
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
             headers.append("%s WT Score" % pretty_method)
             headers.append("%s MT Score" % pretty_method)
+            headers.append("%s WT Percentile" % pretty_method)
+            headers.append("%s MT Percentile" % pretty_method)
         if self.add_sample_name:
             headers.append("Sample Name")
         headers.append("Index")
@@ -398,6 +443,8 @@ class OutputParser(metaclass=ABCMeta):
             mutation_position,
             mt_scores,
             wt_scores,
+            mt_percentiles,
+            wt_percentiles,
             wt_epitope_seq,
             mt_epitope_seq,
             tsv_index,
@@ -407,7 +454,12 @@ class OutputParser(metaclass=ABCMeta):
             corresponding_wt_score,
             best_mt_score_method,
             median_mt_score,
-            median_wt_score
+            median_wt_score,
+            best_mt_percentile,
+            corresponding_wt_percentile,
+            best_mt_percentile_method,
+            median_mt_percentile,
+            median_wt_percentile,
         ) in iedb_results:
             tsv_entry = tsv_entries[tsv_index]
             if mt_epitope_seq != wt_epitope_seq:
@@ -450,13 +502,18 @@ class OutputParser(metaclass=ABCMeta):
                     'WT Epitope Seq'      : wt_epitope_seq,
                     'Best MT Score Method': PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
                     'Best MT Score'       : round(best_mt_score, 3),
-                    'Corresponding WT Score'    : corresponding_wt_score,
+                    'Corresponding WT Score': corresponding_wt_score,
                     'Corresponding Fold Change' : corresponding_fold_change,
                     'Median MT Score'     : round(median_mt_score, 3),
                     'Median WT Score'     : median_wt_score,
                     'Median Fold Change'  : median_fold_change,
                     'Index'               : tsv_index,
                 }
+                row['Best MT Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
+                row['Best MT Percentile'] = 'NA' if best_mt_percentile == 'NA' else round(best_mt_percentile, 3)
+                row['Corresponding WT Percentile'] = 'NA' if corresponding_wt_percentile == 'NA' else round(corresponding_wt_percentile, 3)
+                row['Median MT Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
+                row['Median WT Percentile'] = 'NA' if median_wt_percentile == 'NA' else round(median_wt_percentile, 3)
                 for method in self.prediction_methods():
                     pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                     if method in wt_scores:
@@ -467,6 +524,14 @@ class OutputParser(metaclass=ABCMeta):
                         row["%s MT Score" % pretty_method] = mt_scores[method]
                     else:
                         row["%s MT Score" % pretty_method] = 'NA'
+                    if method in wt_percentiles:
+                        row["%s WT Percentile" % pretty_method] = wt_percentiles[method]
+                    else:
+                        row["%s WT Percentile" % pretty_method] = 'NA'
+                    if method in mt_percentiles:
+                        row["%s MT Percentile" % pretty_method] = mt_percentiles[method]
+                    else:
+                        row["%s MT Percentile" % pretty_method] = 'NA'
                 for (tsv_key, row_key) in zip(['gene_expression', 'transcript_expression', 'normal_vaf', 'tdna_vaf', 'trna_vaf'], ['Gene Expression', 'Transcript Expression', 'Normal VAF', 'Tumor DNA VAF', 'Tumor RNA VAF']):
                     if tsv_key in tsv_entry:
                         if tsv_entry[tsv_key] == 'NA':
@@ -504,6 +569,7 @@ class DefaultOutputParser(OutputParser):
                         position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
                     else:
                         position   = line['start']
+                    percentile     = self.get_percentile(line)
                     epitope        = line['peptide']
                     score          = line['ic50']
                     allele         = line['allele']
@@ -520,6 +586,7 @@ class DefaultOutputParser(OutputParser):
                             if key not in iedb_results:
                                 iedb_results[key]                      = {}
                                 iedb_results[key]['mt_scores']         = {}
+                                iedb_results[key]['mt_percentiles']    = {}
                                 iedb_results[key]['mt_epitope_seq']    = epitope
                                 iedb_results[key]['gene_name']         = tsv_entry['gene_name']
                                 iedb_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
@@ -529,20 +596,17 @@ class DefaultOutputParser(OutputParser):
                                 iedb_results[key]['allele']            = allele
                                 iedb_results[key]['peptide_length']    = peptide_length
                             iedb_results[key]['mt_scores'][method] = float(score)
-
-                        results = {
-                            'WT': wt_iedb_results,
-                        }
-                        if protein_type == 'MT':
-                            continue
-                        result_set = results[protein_type]
-                        if tsv_index not in result_set:
-                            result_set[tsv_index] = {}
-                        if position not in result_set[tsv_index]:
-                            result_set[tsv_index][position] = {}
-                            result_set[tsv_index][position][protein_type.lower() + '_scores'] = {}
-                        result_set[tsv_index][position][protein_type.lower() + '_epitope_seq'] = epitope
-                        result_set[tsv_index][position][protein_type.lower() + '_scores'][method] = float(score)
+                            iedb_results[key]['mt_percentiles'][method] = percentile
+                        else:
+                            if tsv_index not in wt_iedb_results:
+                                wt_iedb_results[tsv_index] = {}
+                            if position not in wt_iedb_results[tsv_index]:
+                                wt_iedb_results[tsv_index][position] = {}
+                                wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores'] = {}
+                                wt_iedb_results[tsv_index][position][protein_type.lower() + '_percentiles'] = {}
+                            wt_iedb_results[tsv_index][position][protein_type.lower() + '_epitope_seq'] = epitope
+                            wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores'][method] = float(score)
+                            wt_iedb_results[tsv_index][position][protein_type.lower() + '_percentiles'][method] = percentile
 
         return self.match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
 
@@ -568,6 +632,7 @@ class FusionOutputParser(OutputParser):
                     score          = line['ic50']
                     allele         = line['allele']
                     peptide_length = len(epitope)
+                    percentile     = self.get_percentile(line)
 
                     if tsv_indices_from_label[protein_label] is not None:
                         tsv_indices = tsv_indices_from_label[protein_label]
@@ -578,7 +643,9 @@ class FusionOutputParser(OutputParser):
                         if key not in iedb_results:
                             iedb_results[key]                      = {}
                             iedb_results[key]['mt_scores']         = {}
+                            iedb_results[key]['mt_percentiles']    = {}
                             iedb_results[key]['wt_scores']         = {}
+                            iedb_results[key]['wt_percentiles']    = {}
                             iedb_results[key]['mt_epitope_seq']    = epitope
                             iedb_results[key]['wt_epitope_seq']    = 'NA'
                             iedb_results[key]['gene_name']         = tsv_entry['gene_name']
@@ -590,7 +657,9 @@ class FusionOutputParser(OutputParser):
                             iedb_results[key]['peptide_length']    = peptide_length
                             iedb_results[key]['mutation_position'] = 'NA'
                         iedb_results[key]['mt_scores'][method] = float(score)
+                        iedb_results[key]['mt_percentiles'][method] = percentile
                         iedb_results[key]['wt_scores'][method] = 'NA'
+                        iedb_results[key]['wt_percentiles'][method] = 'NA'
 
         return iedb_results
 
@@ -616,6 +685,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
                     score          = line['ic50']
                     allele         = line['allele']
                     peptide_length = len(epitope)
+                    percentile     = self.get_percentile(line)
 
                     if tsv_indices_from_label[protein_label] is not None:
                         tsv_indices = tsv_indices_from_label[protein_label]
@@ -625,26 +695,35 @@ class UnmatchedSequencesOutputParser(OutputParser):
                         if key not in iedb_results:
                             iedb_results[key]                      = {}
                             iedb_results[key]['mt_scores']         = {}
+                            iedb_results[key]['mt_percentiles']    = {}
                             iedb_results[key]['mt_epitope_seq']    = epitope
                             iedb_results[key]['position']          = position
                             iedb_results[key]['tsv_index']         = index
                             iedb_results[key]['allele']            = allele
                         iedb_results[key]['mt_scores'][method] = float(score)
+                        iedb_results[key]['mt_percentiles'][method] = percentile
         return iedb_results
 
     def add_summary_metrics(self, iedb_results):
         iedb_results_with_metrics = {}
-        for key, value in iedb_results.items():
-            mt_scores     = value['mt_scores']
-            best_mt_score = sys.maxsize
-            for method, score in mt_scores.items():
-                if score < best_mt_score:
-                    best_mt_score        = score
-                    best_mt_score_method = method
-            value['best_mt_score']          = best_mt_score
-            value['best_mt_score_method']   = best_mt_score_method
-            value['median_mt_score']        = median(mt_scores.values())
-            iedb_results_with_metrics[key]  = value
+        for key, result in iedb_results.items():
+            for metric in ['score', 'percentile']:
+                mt_values = { key:value for (key,value) in result['mt_{}s'.format(metric)].items() if value != 'NA'}
+                if not mt_values:
+                    result['best_mt_{}'.format(metric)]          = 'NA'
+                    result['best_mt_{}_method'.format(metric)]   = 'NA'
+                    result['median_mt_{}'.format(metric)]        = 'NA'
+                else:
+                    best_mt_value = sys.maxsize
+                    for method in sorted(mt_values.keys()):
+                        value = mt_values[method]
+                        if value < best_mt_value:
+                            best_mt_value        = value
+                            best_mt_value_method = method
+                    result['best_mt_{}'.format(metric)]          = best_mt_value
+                    result['best_mt_{}_method'.format(metric)]   = best_mt_value_method
+                    result['median_mt_{}'.format(metric)]        = median(mt_values.values())
+                iedb_results_with_metrics[key]  = result
         return iedb_results_with_metrics
 
     def flatten_iedb_results(self, iedb_results):
@@ -652,12 +731,16 @@ class UnmatchedSequencesOutputParser(OutputParser):
         flattened_iedb_results = list((
             value['position'],
             value['mt_scores'],
+            value['mt_percentiles'],
             value['mt_epitope_seq'],
             value['tsv_index'],
             value['allele'],
             value['best_mt_score'],
             value['best_mt_score_method'],
             value['median_mt_score'],
+            value['best_mt_percentile'],
+            value['best_mt_percentile_method'],
+            value['median_mt_percentile'],
         ) for value in iedb_results.values())
         return flattened_iedb_results
 
@@ -676,6 +759,9 @@ class UnmatchedSequencesOutputParser(OutputParser):
             'Median Score',
             'Best Score',
             'Best Score Method',
+            'Median Percentile',
+            'Best Percentile',
+            'Best Percentile Method',
         ]
 
     def output_headers(self):
@@ -683,6 +769,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
         for method in self.prediction_methods():
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
             headers.append("%s Score" % pretty_method)
+            headers.append("%s Percentile" % pretty_method)
         if self.add_sample_name:
             headers.append("Sample Name")
         return headers
@@ -697,12 +784,16 @@ class UnmatchedSequencesOutputParser(OutputParser):
         for (
             position,
             mt_scores,
+            mt_percentiles,
             mt_epitope_seq,
             tsv_index,
             allele,
             best_mt_score,
             best_mt_score_method,
             median_mt_score,
+            best_mt_percentile,
+            best_mt_percentile_method,
+            median_mt_percentile,
         ) in iedb_results:
             row = {
                 'HLA Allele'          : allele,
@@ -711,14 +802,21 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 'Best Score Method'   : PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
                 'Best Score'          : best_mt_score,
                 'Median Score'        : round(median_mt_score, 3),
+                'Best Percentile'     : best_mt_percentile,
                 'Mutation'            : tsv_index,
             }
+            row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
+            row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                 if method in mt_scores:
                     row["%s Score" % pretty_method] = mt_scores[method]
                 else:
                     row["%s Score" % pretty_method] = 'NA'
+                if method in mt_percentiles:
+                    row["%s Percentile" % pretty_method] = mt_percentiles[method]
+                else:
+                    row["%s Percentile" % pretty_method] = 'NA'
             tsv_writer.writerow(row)
 
         tmp_output_filehandle.close()
