@@ -52,12 +52,10 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The ``pvacbind run`` command would previously error out if one of the input
-  sequences would contain a X stop codon. This update will remove the X amino
-  acid and the downstream sequence before further processing the remaining
-  protein sequence.
-- A bug in the ``pvacfuse top_score_filter`` code would previsouly result
-  in an error when trying to run this command. This has now been fixed.
+- The ``pvacbind run`` command would previously allow fasta input files with
+  duplicated headers. However, it would silently skip subsequent entries with
+  duplicated headers even if the fasta sequence was novel. With this release
+  pVACbind will now error out if a duplicate fasta header is encounterd.
 
 New in version |version|
 ------------------------
