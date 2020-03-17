@@ -30,7 +30,7 @@ def main(args_input = sys.argv[1:]):
                         help="The iedb analysis method to use")
     parser.add_argument('allele',
                         help="Allele for which to make prediction")
-    parser.add_argument('-l', '--epitope-length', type=int, choices=[8,9,10,11,12,13,14,15],
+    parser.add_argument('-l', '--epitope-length', type=int, choices=[8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],
                         help="Length of subpeptides (epitopes) to predict")
     parser.add_argument(
         "-r", "--iedb-retries",type=int,

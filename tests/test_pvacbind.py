@@ -115,7 +115,7 @@ class PvacbindTests(unittest.TestCase):
                 'NetMHC',
                 'PickPocket',
                 output_dir.name,
-                '-e', '9,10',
+                '-e1', '9,10',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
@@ -129,6 +129,7 @@ class PvacbindTests(unittest.TestCase):
                 'DRB1*11:01',
                 'NNalign',
                 output_dir.name,
+                '-e2', '15',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
@@ -223,6 +224,7 @@ class PvacbindTests(unittest.TestCase):
                     'DRB1*11:01',
                     'NNalign',
                     output_dir.name,
+                    '-e2', '15',
                     '--keep-tmp-files',
                     '--run-reference-proteome-similarity',
                 ])
@@ -244,7 +246,7 @@ class PvacbindTests(unittest.TestCase):
                 'HLA-A*02:01',
                 'NetMHC',
                 output_dir.name,
-                '-e', '8'
+                '-e1', '8'
             ])
         self.assertEqual(
             str(cm.exception),
@@ -270,7 +272,8 @@ class PvacbindTests(unittest.TestCase):
                 'PickPocket',
                 'NNalign',
                 output_dir.name,
-                '-e', '9,10',
+                '-e1', '9,10',
+                '-e2', '15',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--allele-specific-binding-thresholds',

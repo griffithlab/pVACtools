@@ -395,7 +395,7 @@ class MHCnuggetsII(MHCII, MHCnuggets):
         return self.valid_allele_names_for_class('class_ii')
 
     def valid_lengths_for_allele(self, allele):
-        return [15]
+        return [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
 
     def mhcnuggets_allele(self,allele):
         return "HLA-{}".format(allele).replace('*', '')
@@ -421,7 +421,7 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
         return alleles
 
     def valid_lengths_for_allele(self, allele):
-        return [15]
+        return [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
 
     def valid_allele_names(self):
         method = self.iedb_prediction_method
