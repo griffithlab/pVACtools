@@ -176,8 +176,8 @@ class PvacfuseTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name_21.fa.split_1-8',
-                'sample.name_21.fa.split_1-8.key',
+                'sample.name.9.fa.split_1-8',
+                'sample.name.9.fa.split_1-8.key',
                 'sample.name.ann.HLA-A*29:02.9.tsv_1-8',
                 'sample.name.HLA-A*29:02.9.parsed.tsv_1-8',
             ):
@@ -186,7 +186,7 @@ class PvacfuseTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             mock_request.assert_has_calls([
-                generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "sample.name_21.fa.split_1-8"))
+                generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "sample.name.9.fa.split_1-8"))
             ])
 
             output_dir.cleanup()

@@ -26,8 +26,8 @@ def define_parser():
             +"The VCF may be gzipped (requires tabix index)."
     )
     parser.add_argument(
-        "peptide_sequence_length", type=int,
-        help="Length of the peptide sequence to use when creating the FASTA.",
+        "flanking_sequence_length", type=int,
+        help="Number of amino acids to add on each side of the mutation when creating the FASTA.",
     )
     parser.add_argument(
         "output_file",
@@ -68,14 +68,14 @@ def convert_vcf(input_vcf, temp_dir, sample_name):
     converter.execute()
     print("Completed")
 
-def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir):
+def generate_fasta(flanking_sequence_length, downstream_sequence_length, temp_dir):
     print("Generating Variant Peptide FASTA and Key File")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     fasta_file = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file = os.path.join(temp_dir, 'tmp.fasta.key')
     generate_fasta_params = {
         'input_file'                : tsv_file,
-        'peptide_sequence_length'   : peptide_sequence_length,
+        'flanking_sequence_length'  : flanking_sequence_length,
         'epitope_length'            : 0,
         'output_file'               : fasta_file,
         'output_key_file'           : fasta_key_file,
@@ -141,7 +141,7 @@ def main(args_input = sys.argv[1:]):
 
     temp_dir = tempfile.mkdtemp()
     convert_vcf(args.input_vcf, temp_dir, args.sample_name)
-    generate_fasta(args.peptide_sequence_length, downstream_sequence_length, temp_dir)
+    generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir)
     parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")

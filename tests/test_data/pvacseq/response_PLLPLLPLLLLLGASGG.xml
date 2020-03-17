@@ -2,12 +2,12 @@
 <!DOCTYPE BlastOutput PUBLIC "-//NCBI//NCBI BlastOutput/EN" "http://www.ncbi.nlm.nih.gov/dtd/NCBI_BlastOutput.dtd">
 <BlastOutput>
   <BlastOutput_program>blastp</BlastOutput_program>
-  <BlastOutput_version>BLASTP 2.9.0+</BlastOutput_version>
+  <BlastOutput_version>BLASTP 2.10.0+</BlastOutput_version>
   <BlastOutput_reference>Stephen F. Altschul, Thomas L. Madden, Alejandro A. Sch&amp;auml;ffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), &quot;Gapped BLAST and PSI-BLAST: a new generation of protein database search programs&quot;, Nucleic Acids Res. 25:3389-3402.</BlastOutput_reference>
-  <BlastOutput_db>refseq_protein_v5</BlastOutput_db>
-  <BlastOutput_query-ID>Query_94085</BlastOutput_query-ID>
+  <BlastOutput_db>refseq_protein</BlastOutput_db>
+  <BlastOutput_query-ID>Query_41607</BlastOutput_query-ID>
   <BlastOutput_query-def>unnamed protein product</BlastOutput_query-def>
-  <BlastOutput_query-len>15</BlastOutput_query-len>
+  <BlastOutput_query-len>17</BlastOutput_query-len>
   <BlastOutput_param>
     <Parameters>
       <Parameters_matrix>BLOSUM62</Parameters_matrix>
@@ -20,15 +20,15 @@
 <BlastOutput_iterations>
 <Iteration>
   <Iteration_iter-num>1</Iteration_iter-num>
-  <Iteration_query-ID>Query_94085</Iteration_query-ID>
+  <Iteration_query-ID>Query_41607</Iteration_query-ID>
   <Iteration_query-def>unnamed protein product</Iteration_query-def>
-  <Iteration_query-len>15</Iteration_query-len>
+  <Iteration_query-len>17</Iteration_query-len>
 <Iteration_hits>
 </Iteration_hits>
   <Iteration_stat>
     <Statistics>
-      <Statistics_db-num>77896</Statistics_db-num>
-      <Statistics_db-len>53392937</Statistics_db-len>
+      <Statistics_db-num>82114</Statistics_db-num>
+      <Statistics_db-len>56264147</Statistics_db-len>
       <Statistics_hsp-len>0</Statistics_hsp-len>
       <Statistics_eff-space>0</Statistics_eff-space>
       <Statistics_kappa>0.041</Statistics_kappa>
