@@ -6,7 +6,8 @@ from Bio.Seq import translate
 import lib.utils
 
 class ProximalVariant:
-    def __init__(self, proximal_variants_vcf, pass_only):
+    #flanking_sequence_length is the number of bases (not amino acids!) to search on each side of a variant position
+    def __init__(self, proximal_variants_vcf, pass_only, flanking_sequence_length):
         if not os.path.exists(proximal_variants_vcf + '.tbi'):
             sys.exit('No .tbi file found for proximal variants VCF. Proximal variants VCF needs to be tabix indexed.')
 
@@ -25,9 +26,10 @@ class ProximalVariant:
         self.csq_parser = CsqParser(info_fields['CSQ'].desc)
 
         self.pass_only = pass_only
+        self.flanking_sequence_length = flanking_sequence_length
 
-    def extract(self, somatic_variant, alt, transcript, peptide_size):
-        (phased_somatic_variant, potential_proximal_variants) = self.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, alt, transcript, peptide_size)
+    def extract(self, somatic_variant, alt, transcript):
+        (phased_somatic_variant, potential_proximal_variants) = self.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, alt, transcript)
 
         if phased_somatic_variant is None:
             print("Warning: Main somatic variant not found in phased variants file: {}, {}".format(somatic_variant, alt))
@@ -70,11 +72,10 @@ class ProximalVariant:
 
         return proximal_variants
 
-    def find_phased_somatic_variant_and_potential_proximal_variants(self, somatic_variant, alt, transcript, peptide_size):
-        flanking_length = peptide_size * 3 / 2
+    def find_phased_somatic_variant_and_potential_proximal_variants(self, somatic_variant, alt, transcript):
         potential_proximal_variants = []
         phased_somatic_variant = None
-        for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.start - flanking_length, somatic_variant.end + flanking_length):
+        for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.start - self.flanking_sequence_length, somatic_variant.end + self.flanking_sequence_length):
             if self.pass_only:
                 filt = entry.FILTER
                 if not (filt is None or len(filt) == 0):

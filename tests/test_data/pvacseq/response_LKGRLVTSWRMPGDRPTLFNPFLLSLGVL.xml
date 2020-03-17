@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+<!DOCTYPE BlastOutput PUBLIC "-//NCBI//NCBI BlastOutput/EN" "http://www.ncbi.nlm.nih.gov/dtd/NCBI_BlastOutput.dtd">
+<BlastOutput>
+  <BlastOutput_program>blastp</BlastOutput_program>
+  <BlastOutput_version>BLASTP 2.10.0+</BlastOutput_version>
+  <BlastOutput_reference>Stephen F. Altschul, Thomas L. Madden, Alejandro A. Sch&amp;auml;ffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), &quot;Gapped BLAST and PSI-BLAST: a new generation of protein database search programs&quot;, Nucleic Acids Res. 25:3389-3402.</BlastOutput_reference>
+  <BlastOutput_db>refseq_protein</BlastOutput_db>
+  <BlastOutput_query-ID>Query_44237</BlastOutput_query-ID>
+  <BlastOutput_query-def>unnamed protein product</BlastOutput_query-def>
+  <BlastOutput_query-len>29</BlastOutput_query-len>
+  <BlastOutput_param>
+    <Parameters>
+      <Parameters_matrix>BLOSUM62</Parameters_matrix>
+      <Parameters_expect>10</Parameters_expect>
+      <Parameters_gap-open>11</Parameters_gap-open>
+      <Parameters_gap-extend>1</Parameters_gap-extend>
+      <Parameters_filter>F</Parameters_filter>
+    </Parameters>
+  </BlastOutput_param>
+<BlastOutput_iterations>
+<Iteration>
+  <Iteration_iter-num>1</Iteration_iter-num>
+  <Iteration_query-ID>Query_44237</Iteration_query-ID>
+  <Iteration_query-def>unnamed protein product</Iteration_query-def>
+  <Iteration_query-len>29</Iteration_query-len>
+<Iteration_hits>
+<Hit>
+  <Hit_num>1</Hit_num>
+  <Hit_id>ref|NP_001034230.1|</Hit_id>
+  <Hit_def>TRIO and F-actin-binding protein isoform 6 [Homo sapiens]</Hit_def>
+  <Hit_accession>NP_001034230</Hit_accession>
+  <Hit_len>2365</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>62.003</Hsp_bit-score>
+      <Hsp_score>149</Hsp_score>
+      <Hsp_evalue>2.47006e-13</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>29</Hsp_query-to>
+      <Hsp_hit-from>1743</Hsp_hit-from>
+      <Hsp_hit-to>1771</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>29</Hsp_identity>
+      <Hsp_positive>29</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>29</Hsp_align-len>
+      <Hsp_qseq>KGRLVTSWRMPGDRPTLFNPFLLSLGVLR</Hsp_qseq>
+      <Hsp_hseq>KGRLVTSWRMPGDRPTLFNPFLLSLGVLR</Hsp_hseq>
+      <Hsp_midline>KGRLVTSWRMPGDRPTLFNPFLLSLGVLR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>2</Hit_num>
+  <Hit_id>ref|NP_008993.1|</Hit_id>
+  <Hit_def>periodic tryptophan protein 1 homolog isoform 1 [Homo sapiens] &gt;ref|XP_003270027.1| periodic tryptophan protein 1 homolog [Nomascus leucogenys] &gt;ref|XP_030872505.1| periodic tryptophan protein 1 homolog [Gorilla gorilla gorilla] &gt;ref|XP_032024685.1| periodic tryptophan protein 1 homolog [Hylobates moloch]</Hit_def>
+  <Hit_accession>NP_008993</Hit_accession>
+  <Hit_len>501</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>25.0238</Hsp_bit-score>
+      <Hsp_score>53</Hsp_score>
+      <Hsp_evalue>3.22473</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>28</Hsp_query-to>
+      <Hsp_hit-from>398</Hsp_hit-from>
+      <Hsp_hit-to>433</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>14</Hsp_identity>
+      <Hsp_positive>20</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>36</Hsp_align-len>
+      <Hsp_qseq>KGRLVTS--------WRMPGDRPTLFNPFLLSLGVL</Hsp_qseq>
+      <Hsp_hseq>KGCLVTASADKYVKIWDILGDRPSLVHSRDMKMGVL</Hsp_hseq>
+      <Hsp_midline>KG LVT+        W + GDRP+L +   + +GVL</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>3</Hit_num>
+  <Hit_id>ref|NP_001304891.1|</Hit_id>
+  <Hit_def>periodic tryptophan protein 1 homolog isoform 2 [Homo sapiens]</Hit_def>
+  <Hit_accession>NP_001304891</Hit_accession>
+  <Hit_len>439</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>25.0238</Hsp_bit-score>
+      <Hsp_score>53</Hsp_score>
+      <Hsp_evalue>3.22814</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>28</Hsp_query-to>
+      <Hsp_hit-from>336</Hsp_hit-from>
+      <Hsp_hit-to>371</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>14</Hsp_identity>
+      <Hsp_positive>20</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>36</Hsp_align-len>
+      <Hsp_qseq>KGRLVTS--------WRMPGDRPTLFNPFLLSLGVL</Hsp_qseq>
+      <Hsp_hseq>KGCLVTASADKYVKIWDILGDRPSLVHSRDMKMGVL</Hsp_hseq>
+      <Hsp_midline>KG LVT+        W + GDRP+L +   + +GVL</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>4</Hit_num>
+  <Hit_id>ref|NP_001304892.1|</Hit_id>
+  <Hit_def>periodic tryptophan protein 1 homolog isoform 3 [Homo sapiens] &gt;ref|XP_025259430.1| periodic tryptophan protein 1 homolog isoform X4 [Theropithecus gelada] &gt;ref|XP_031506581.1| periodic tryptophan protein 1 homolog isoform X2 [Papio anubis]</Hit_def>
+  <Hit_accession>NP_001304892</Hit_accession>
+  <Hit_len>289</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>24.2534</Hsp_bit-score>
+      <Hsp_score>51</Hsp_score>
+      <Hsp_evalue>5.94023</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>28</Hsp_query-to>
+      <Hsp_hit-from>186</Hsp_hit-from>
+      <Hsp_hit-to>221</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>14</Hsp_identity>
+      <Hsp_positive>20</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>36</Hsp_align-len>
+      <Hsp_qseq>KGRLVTS--------WRMPGDRPTLFNPFLLSLGVL</Hsp_qseq>
+      <Hsp_hseq>KGCLVTASADKYVKIWDILGDRPSLVHSRDMKMGVL</Hsp_hseq>
+      <Hsp_midline>KG LVT+        W + GDRP+L +   + +GVL</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+</Iteration_hits>
+  <Iteration_stat>
+    <Statistics>
+      <Statistics_db-num>82114</Statistics_db-num>
+      <Statistics_db-len>56264147</Statistics_db-len>
+      <Statistics_hsp-len>0</Statistics_hsp-len>
+      <Statistics_eff-space>0</Statistics_eff-space>
+      <Statistics_kappa>0.041</Statistics_kappa>
+      <Statistics_lambda>0.267</Statistics_lambda>
+      <Statistics_entropy>0.14</Statistics_entropy>
+    </Statistics>
+  </Iteration_stat>
+</Iteration>
+</BlastOutput_iterations>
+</BlastOutput>

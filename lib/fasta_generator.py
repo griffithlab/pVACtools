@@ -24,7 +24,7 @@ class FastaGenerator(metaclass=ABCMeta):
 
     def __init__(self, **kwargs):
         self.input_file                 = kwargs['input_file']
-        self.peptide_sequence_length    = kwargs['peptide_sequence_length']
+        self.flanking_sequence_length   = kwargs['flanking_sequence_length']
         self.epitope_length             = kwargs['epitope_length']
         self.output_file                = kwargs['output_file']
         self.output_key_file            = kwargs['output_key_file']
@@ -43,30 +43,10 @@ class FastaGenerator(metaclass=ABCMeta):
     def distance_from_end(self, position, string):
         return len(string) - 1 - position
 
-    def determine_peptide_sequence_length(self, full_wildtype_sequence_length, peptide_sequence_length, line):
-        actual_peptide_sequence_length = peptide_sequence_length
-
-        #If the wildtype sequence is shorter than the desired peptide sequence
-        #length we use the wildtype sequence length instead so that the extraction
-        #algorithm below works correctly
-        if full_wildtype_sequence_length < actual_peptide_sequence_length:
-            actual_peptide_sequence_length = full_wildtype_sequence_length
-            print('Wildtype sequence length is shorter than desired peptide sequence length at position (%s, %s, %s). Using wildtype sequence length (%s) instead.' % (line['chromosome_name'], line['start'], line['stop'], actual_peptide_sequence_length))
-
-        return actual_peptide_sequence_length
-
-    def determine_flanking_sequence_length(self, full_wildtype_sequence_length, peptide_sequence_length, line):
-        actual_peptide_sequence_length = self.determine_peptide_sequence_length(full_wildtype_sequence_length, peptide_sequence_length, line)
-        if actual_peptide_sequence_length%2 == 0:
-            return int(actual_peptide_sequence_length / 2)
-        else:
-            return int((actual_peptide_sequence_length-1) / 2)
-
-    def get_wildtype_subsequence(self, position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line):
-        one_flanking_sequence_length = self.determine_flanking_sequence_length(len(full_wildtype_sequence), peptide_sequence_length, line)
+    def get_wildtype_subsequence(self, position, full_wildtype_sequence, wildtype_amino_acid_length, line):
         ##clip by wt sequence length, otherwise with deletions peptide_sequence_length may exceeds full wt sequence length,
         ##and the code below tries extracting ranges beyond the wt sequence
-        peptide_sequence_length = min(2 * one_flanking_sequence_length + wildtype_amino_acid_length,len(full_wildtype_sequence))
+        peptide_sequence_length = min(2 * self.flanking_sequence_length + wildtype_amino_acid_length, len(full_wildtype_sequence))
 
         # We want to extract a subset from full_wildtype_sequence that is
         # peptide_sequence_length long so that the position ends
@@ -74,30 +54,29 @@ class FastaGenerator(metaclass=ABCMeta):
         # If the position is too far toward the beginning or end of
         # full_wildtype_sequence there aren't enough amino acids on one side
         # to achieve this.
-        if self.distance_from_start(position, full_wildtype_sequence) < one_flanking_sequence_length:
+        if self.distance_from_start(position, full_wildtype_sequence) < self.flanking_sequence_length:
             wildtype_subsequence = full_wildtype_sequence[:peptide_sequence_length]
             mutation_position = position
-        elif self.distance_from_end(position, full_wildtype_sequence) < one_flanking_sequence_length:
+        elif self.distance_from_end(position, full_wildtype_sequence) < self.flanking_sequence_length:
             start_position = len(full_wildtype_sequence) - peptide_sequence_length
             wildtype_subsequence = full_wildtype_sequence[start_position:]
             mutation_position = peptide_sequence_length - self.distance_from_end(position, full_wildtype_sequence) - 1
-        elif self.distance_from_start(position, full_wildtype_sequence) >= one_flanking_sequence_length and self.distance_from_end(position, full_wildtype_sequence) >= one_flanking_sequence_length:
-            start_position = position - one_flanking_sequence_length
+        elif self.distance_from_start(position, full_wildtype_sequence) >= self.flanking_sequence_length and self.distance_from_end(position, full_wildtype_sequence) >= self.flanking_sequence_length:
+            start_position = position - self.flanking_sequence_length
             end_position   = start_position + peptide_sequence_length
             wildtype_subsequence = full_wildtype_sequence[start_position:end_position]
-            mutation_position = one_flanking_sequence_length
+            mutation_position = self.flanking_sequence_length
         else:
             sys.exit("ERROR: Something went wrong during the retrieval of the wildtype sequence at position(%s, %s, %s)" % line['chromsome_name'], line['start'], line['stop'])
 
         return mutation_position, wildtype_subsequence
 
-    def get_frameshift_subsequences(self, position, full_wildtype_sequence, peptide_sequence_length, line):
-        one_flanking_sequence_length = self.determine_flanking_sequence_length(len(full_wildtype_sequence), peptide_sequence_length, line)
-        if position < one_flanking_sequence_length:
+    def get_frameshift_subsequences(self, position, full_wildtype_sequence):
+        if position < self.flanking_sequence_length:
             start_position = 0
         else:
-            start_position = position - one_flanking_sequence_length
-        wildtype_subsequence_stop_position = position + one_flanking_sequence_length
+            start_position = position - self.flanking_sequence_length
+        wildtype_subsequence_stop_position = position + self.flanking_sequence_length
         mutation_subsequence_stop_position = position
         wildtype_subsequence = full_wildtype_sequence[start_position:wildtype_subsequence_stop_position]
         mutation_start_subsequence = full_wildtype_sequence[start_position:mutation_subsequence_stop_position]
@@ -144,7 +123,6 @@ class FastaGenerator(metaclass=ABCMeta):
         return wildtype_subsequence_with_proximal_variants
 
     def execute(self):
-        peptide_sequence_length = self.peptide_sequence_length
         reader                  = open(self.input_file, 'r')
         tsvin                   = csv.DictReader(reader, delimiter='\t')
         fasta_sequences         = OrderedDict()
@@ -217,7 +195,7 @@ class FastaGenerator(metaclass=ABCMeta):
                 mutant_amino_acid_with_proximal_variants = mutant_amino_acid
 
             if variant_type == 'FS':
-                wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, peptide_sequence_length, line)
+                wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence)
                 downstream_sequence = line['downstream_amino_acid_sequence']
                 if self.downstream_sequence_length and len(downstream_sequence) > self.downstream_sequence_length:
                     downstream_sequence = downstream_sequence[0:self.downstream_sequence_length]
@@ -228,7 +206,7 @@ class FastaGenerator(metaclass=ABCMeta):
                 #we would need to recalculate the downstream protein sequence taking all downstream variants into account.
                 mutant_subsequence = left_flanking_subsequence_with_proximal_variants + downstream_sequence
             else:
-                mutation_start_position, wildtype_subsequence = self.get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, peptide_sequence_length, line)
+                mutation_start_position, wildtype_subsequence = self.get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, line)
                 mutation_end_position = mutation_start_position + wildtype_amino_acid_length
                 if wildtype_amino_acid != '-' and wildtype_amino_acid != wildtype_subsequence[mutation_start_position:mutation_end_position]:
                     if line['amino_acid_change'].split('/')[0].count('*') > 1:
@@ -280,7 +258,6 @@ class FastaGenerator(metaclass=ABCMeta):
 
 class FusionFastaGenerator(FastaGenerator):
     def execute(self):
-        peptide_sequence_length = self.peptide_sequence_length
         reader                  = open(self.input_file, 'r')
         tsvin                   = csv.DictReader(reader, delimiter='\t')
         fasta_sequences         = OrderedDict()
@@ -288,14 +265,13 @@ class FusionFastaGenerator(FastaGenerator):
             variant_type = line['variant_type']
             position     = int(line['protein_position'])
             sequence     = line['fusion_amino_acid_sequence']
-            one_flanking_sequence_length = self.determine_flanking_sequence_length(len(sequence), peptide_sequence_length, line)
-            if position < one_flanking_sequence_length:
+            if position < self.flanking_sequence_length:
                 start_position = 0
             else:
-                start_position = position - one_flanking_sequence_length
+                start_position = position - self.flanking_sequence_length
 
             if variant_type == 'inframe_fusion':
-                stop_position = position + one_flanking_sequence_length
+                stop_position = position + self.flanking_sequence_length
                 subsequence   = sequence[start_position:stop_position]
             elif variant_type == 'frameshift_fusion':
                 if self.downstream_sequence_length:
