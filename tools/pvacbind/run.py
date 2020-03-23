@@ -32,6 +32,12 @@ def create_combined_reports(base_output_dir, args):
 
     file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
     file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
+    if not os.path.exists(file1):
+        print("File {} doesn't exist. Aborting.".format(file1))
+        return
+    if not os.path.exists(file2):
+        print("File {} doesn't exist. Aborting.".format(file2))
+        return
     combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
     combine_reports([file1, file2], combined_output_file)
     filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
