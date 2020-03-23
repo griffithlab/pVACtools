@@ -32,10 +32,7 @@ def close_mock_fhs():
 
 def make_response(data, files, path):
     if not files:
-        if 'length' in data:
-            filename = 'response_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'])
-        else:
-            filename = 'response_%s_%s.tsv' % (data['allele'], data['method'])
+        filename = 'response_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'])
         reader = open(os.path.join(
             path,
             filename
@@ -58,24 +55,19 @@ def make_response(data, files, path):
         return response_obj
 
 def generate_class_i_call(method, allele, length, input_file):
+    return generate_prediction_calls(method, allele, length, input_file, 'http://tools-cluster-interface.iedb.org/tools_api/mhci/')
+
+def generate_class_ii_call(method, allele, length, input_file):
+    return generate_prediction_calls(method, allele, length, input_file, 'http://tools-cluster-interface.iedb.org/tools_api/mhcii/')
+
+def generate_prediction_calls(method, allele, length, input_file, url):
     reader = open(input_file, mode='r')
     text = reader.read()
     reader.close()
-    return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhci/', data={
+    return unittest.mock.call(url, data={
         'sequence_text': ""+text,
         'method':        method,
         'allele':        allele,
         'length':        length,
-        'user_tool':     'pVac-seq',
-    })
-
-def generate_class_ii_call(method, allele, input_file):
-    reader = open(input_file, mode='r')
-    text = reader.read()
-    reader.close()
-    return unittest.mock.call('http://tools-cluster-interface.iedb.org/tools_api/mhcii/', data={
-        'sequence_text': ""+text,
-        'method':        method,
-        'allele':        allele,
         'user_tool':     'pVac-seq',
     })
