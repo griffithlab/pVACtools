@@ -345,9 +345,8 @@ class Pipeline(metaclass=ABCMeta):
                             a,
                             '-r', str(self.iedb_retries),
                             '-e', self.iedb_executable,
+                            '-l', str(epl),
                         ]
-                        if not isinstance(prediction, IEDBMHCII):
-                            arguments.extend(['-l', str(epl),])
                         argument_sets.append(arguments)
 
         for msg in warning_messages:
@@ -359,10 +358,7 @@ class Pipeline(metaclass=ABCMeta):
                 a = arguments[3]
                 method = arguments[2]
                 filename = arguments[1]
-                if len(arguments) == 10:
-                    epl = arguments[9]
-                else:
-                    epl = 15
+                epl = arguments[9]
                 p.print("Making binding predictions on Allele %s and Epitope Length %s with Method %s - File %s" % (a, epl, method, filename))
                 lib.call_iedb.main(arguments)
                 p.print("Making binding predictions on Allele %s and Epitope Length %s with Method %s - File %s - Completed" % (a, epl, method, filename))
@@ -657,9 +653,8 @@ class PvacbindPipeline(Pipeline):
                         a,
                         '-r', str(self.iedb_retries),
                         '-e', self.iedb_executable,
+                        '-l', str(length),
                     ]
-                    if not isinstance(prediction, IEDBMHCII):
-                        arguments.extend(['-l', str(length),])
                     argument_sets.append(arguments)
 
         for msg in warning_messages:
@@ -671,10 +666,7 @@ class PvacbindPipeline(Pipeline):
                 a = arguments[3]
                 method = arguments[2]
                 filename = arguments[1]
-                if len(arguments) == 10:
-                    epl = arguments[9]
-                else:
-                    epl = 15
+                epl = arguments[9]
                 p.print("Making binding predictions on Allele %s and Epitope Length %s with Method %s - File %s" % (a, epl, method, filename))
                 lib.call_iedb.main(arguments)
                 p.print("Making binding predictions on Allele %s and Epitope Length %s with Method %s - File %s - Completed" % (a, epl, method, filename))

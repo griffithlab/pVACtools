@@ -356,7 +356,7 @@ class PvacseqTests(unittest.TestCase):
                 self.assertTrue(os.path.exists(output_file))
 
             mock_request.assert_has_calls([
-                generate_class_ii_call('nn_align', 'DRB1*11:01', os.path.join(output_dir.name, "MHC_Class_II", "tmp", "sample.name_31.fa.split_1-48"))
+                generate_class_ii_call('nn_align', 'DRB1*11:01', 15, os.path.join(output_dir.name, "MHC_Class_II", "tmp", "sample.name_31.fa.split_1-48"))
             ])
 
             with self.assertRaises(SystemExit) as cm:

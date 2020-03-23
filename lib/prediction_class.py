@@ -65,10 +65,9 @@ class IEDB(metaclass=ABCMeta):
                     'sequence_text': input_fh.read(),
                     'method':        self.iedb_prediction_method,
                     'allele':        allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
+                    'length':        epitope_length,
                     'user_tool':     'pVac-seq',
                 }
-            if epitope_length is not None:
-                data['length'] = epitope_length
 
             response = requests.post(self.url, data=data)
             retries = 0
@@ -432,7 +431,7 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
 
     def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
         allele = allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
-        return "{} {} {} {}".format(iedb_executable_path, method, allele, input_file)
+        return "{} {} {} {} {}".format(iedb_executable_path, method, allele, input_file, epitope_length)
 
 class NetMHCIIpan(IEDBMHCII):
     @property
