@@ -161,7 +161,7 @@ class TestPvacvector(unittest.TestCase):
                 self.allele,
                 self.method,
                 output_dir.name,
-                '-e', self.epitope_length,
+                '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
                 '-k'
             ])
@@ -203,7 +203,7 @@ class TestPvacvector(unittest.TestCase):
                 self.method,
                 output_dir.name,
                 '-v', self.input_vcf,
-                '-e', self.epitope_length,
+                '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
                 '-k',
             ])
@@ -238,7 +238,7 @@ class TestPvacvector(unittest.TestCase):
                 self.method,
                 output_dir.name,
                 '-v', os.path.join(self.test_data_dir, "input_negative_start.vcf.gz"),
-                '-e', self.epitope_length,
+                '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
                 '-k',
             ])
@@ -260,7 +260,7 @@ class TestPvacvector(unittest.TestCase):
                 self.method,
                 output_dir.name,
                 '-v', self.input_vcf,
-                '-e', self.epitope_length,
+                '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
                 '-k',
                 '-b', '50000',

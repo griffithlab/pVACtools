@@ -242,7 +242,7 @@ class PvacseqTests(unittest.TestCase):
                 'NetMHC',
                 'PickPocket',
                 output_dir.name,
-                '-e', '9,10',
+                '-e1', '9,10',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
@@ -259,6 +259,7 @@ class PvacseqTests(unittest.TestCase):
                 'DRB1*11:01',
                 'NNalign',
                 output_dir.name,
+                '-e2', '15',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '-d', 'full',
@@ -356,7 +357,7 @@ class PvacseqTests(unittest.TestCase):
                 self.assertTrue(os.path.exists(output_file))
 
             mock_request.assert_has_calls([
-                generate_class_ii_call('nn_align', 'DRB1*11:01', os.path.join(output_dir.name, "MHC_Class_II", "tmp", "sample.name_31.fa.split_1-48"))
+                generate_class_ii_call('nn_align', 'DRB1*11:01', 15, os.path.join(output_dir.name, "MHC_Class_II", "tmp", "sample.name_31.fa.split_1-48"))
             ])
 
             with self.assertRaises(SystemExit) as cm:
@@ -366,6 +367,7 @@ class PvacseqTests(unittest.TestCase):
                     'DRB1*11:01',
                     'NNalign',
                     output_dir.name,
+                    '-e2', '15',
                     '--top-score-metric=lowest',
                     '--keep-tmp-files',
                     '--run-reference-proteome-similarity',
@@ -393,7 +395,7 @@ class PvacseqTests(unittest.TestCase):
                 'HLA-E*01:01',
                 'NetMHC',
                 output_dir.name,
-                '-e', '9,10',
+                '-e1', '9,10',
                 '-a', 'sample_name',
                 '-d', 'full',
                 '--run-reference-proteome-similarity',
@@ -419,7 +421,7 @@ class PvacseqTests(unittest.TestCase):
             'HLA-E*01:01',
             'NetMHC',
             output_dir.name,
-            '-e', '8',
+            '-e1', '8',
             '-s', '1000',
             '-k',
             '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz'),
@@ -459,7 +461,8 @@ class PvacseqTests(unittest.TestCase):
                 'PickPocket',
                 'NNalign',
                 output_dir.name,
-                '-e', '9,10',
+                '-e1', '9,10',
+                '-e2', '15',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '-d', 'full',
@@ -486,7 +489,7 @@ class PvacseqTests(unittest.TestCase):
                 'HLA-G*01:09,H2-IAb',
                 'NetMHC',
                 output_dir.name,
-                '-e', '9',
+                '-e1', '9',
             ])
             output_dir.cleanup()
         self.assertTrue('Requested alleles are not from the same species.' in str(context.exception))

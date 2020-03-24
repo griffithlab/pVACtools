@@ -36,11 +36,20 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="The directory for writing all result files."
         )
         parser.add_argument(
-            "-e", "--epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
-            help="Length of subpeptides (neoepitopes) to predict. "
+            "-e1", "--class-i-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+            default=[8,9,10,11],
+            help="Length of MHC Class I subpeptides (neoepitopes) to predict. "
                  + "Multiple epitope lengths can be specified using a comma-separated list. "
-                 + "Typical epitope lengths vary between 8-11. "
+                 + "Typical epitope lengths vary between 8-15. "
                  + "Required for Class I prediction algorithms.",
+        )
+        parser.add_argument(
+                "-e2", "--class-ii-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+            default=[12,13,14,15,16,17,18],
+            help="Length of MHC Class II subpeptides (neoepitopes) to predict. "
+                 + "Multiple epitope lengths can be specified using a comma-separated list. "
+                 + "Typical epitope lengths vary between 11-30. "
+                 + "Required for Class II prediction algorithms.",
         )
         parser.add_argument(
             "--iedb-install-directory",
