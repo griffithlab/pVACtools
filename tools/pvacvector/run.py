@@ -49,7 +49,6 @@ def run_pipelines(input_file, base_output_dir, args, spacer, class_i_prediction_
 
         class_i_arguments = shared_arguments.copy()
         class_i_arguments['alleles']                 = class_i_alleles
-        class_i_arguments['peptide_sequence_length'] = ""
         class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
         class_i_arguments['epitope_lengths']         = args.class_i_epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
@@ -75,7 +74,6 @@ def run_pipelines(input_file, base_output_dir, args, spacer, class_i_prediction_
         class_ii_arguments = shared_arguments.copy()
         class_ii_arguments['alleles']                 = class_ii_alleles
         class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
-        class_ii_arguments['peptide_sequence_length'] = ""
         class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
         class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
         class_ii_arguments['output_dir']              = output_dir
