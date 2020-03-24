@@ -8,12 +8,11 @@ import os
 from collections import defaultdict
 
 class CalculateReferenceProteomeSimilarity:
-    def __init__(self, input_file, input_fasta, output_file, peptide_sequence_length, match_length=8, species='human', file_type='vcf'):
+    def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='vcf'):
         self.input_file = input_file
         self.input_fasta = input_fasta
         self.output_file = output_file
         self.metric_file = "{}.reference_matches".format(output_file)
-        self.peptide_sequence_length = peptide_sequence_length
         self.match_length = match_length
         self.species = species
         self.file_type = file_type
@@ -60,13 +59,9 @@ class CalculateReferenceProteomeSimilarity:
         end = mt_start + mt_length + flanking_sequence_length
         return full_peptide[start:end]
 
-    def extract_n_mer_from_fs(self, full_peptide, wt_peptide, epitope, peptide_sequence_length, subpeptide_position):
-        #For frameshifts we want to test all downstream epitopes that would be part of the peptide_sequence_length
-        #peptide since they are all potentially novel
-        if peptide_sequence_length%2 == 0:
-            flanking_sequence_length = int(peptide_sequence_length/2)
-        else:
-            flanking_sequence_length = int((peptide_sequence_length-1)/2)
+    def extract_n_mer_from_fs(self, full_peptide, wt_peptide, epitope, subpeptide_position):
+        #For frameshifts we want to test all downstream epitopes in the flanking region since they are all potentially novel
+        flanking_sequence_length = self.match_length - 1
         start = subpeptide_position - 1 - flanking_sequence_length
         if start < 0:
             start = 0
@@ -105,7 +100,7 @@ class CalculateReferenceProteomeSimilarity:
                     epitope = line['MT Epitope Seq']
                     if self.file_type == 'vcf':
                         if line['Variant Type'] == 'FS':
-                            peptide = self.extract_n_mer_from_fs(mt_records_dict[line['Index']], wt_records_dict[line['Index']], epitope, self.peptide_sequence_length, int(line['Sub-peptide Position']))
+                            peptide = self.extract_n_mer_from_fs(mt_records_dict[line['Index']], wt_records_dict[line['Index']], epitope, int(line['Sub-peptide Position']))
                         else:
                             mt_amino_acids = line['Mutation'].split('/')[1]
                             if mt_amino_acids == '-':

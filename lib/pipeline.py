@@ -36,7 +36,6 @@ class Pipeline(metaclass=ABCMeta):
         self.alleles                     = kwargs['alleles']
         self.prediction_algorithms       = kwargs['prediction_algorithms']
         self.output_dir                  = kwargs['output_dir']
-        self.peptide_sequence_length     = kwargs.pop('peptide_sequence_length', 21)
         self.epitope_lengths             = kwargs['epitope_lengths']
         self.iedb_executable             = kwargs.pop('iedb_executable', None)
         self.phased_proximal_variants_vcf = kwargs.pop('phased_proximal_variants_vcf', None)

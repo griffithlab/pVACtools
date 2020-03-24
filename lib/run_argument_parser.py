@@ -95,7 +95,6 @@ class RunArgumentParser(metaclass=ABCMeta):
 class PredictionRunArgumentParser(RunArgumentParser):
     def __init__(self, tool_name, input_file_help):
         RunArgumentParser.__init__(self, tool_name, input_file_help)
-        #do we need a class-i-peptide-sequence-length and a class-ii-peptide-sequence-length?
         self.parser.add_argument(
             '--net-chop-method',
             choices=lib.net_chop.methods,
@@ -145,12 +144,6 @@ class PvacbindRunArgumentParser(PredictionRunArgumentParser):
 class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser):
     def __init__(self, tool_name, input_file_help):
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
-        #do we need a class-i-peptide-sequence-length and a class-ii-peptide-sequence-length?
-        self.parser.add_argument(
-            "-l", "--peptide-sequence-length", type=int,
-            default=21,
-            help="Length of the peptide sequence to use when creating the FASTA.",
-        )
         self.parser.add_argument(
             "-d", "--downstream-sequence-length",
             default='1000',
