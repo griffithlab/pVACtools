@@ -115,7 +115,7 @@ class PvacbindTests(unittest.TestCase):
                 'NetMHC',
                 'PickPocket',
                 output_dir.name,
-                '-e', '9,10',
+                '-e1', '9,10',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
@@ -129,6 +129,7 @@ class PvacbindTests(unittest.TestCase):
                 'DRB1*11:01',
                 'NNalign',
                 output_dir.name,
+                '-e2', '15',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
@@ -213,7 +214,7 @@ class PvacbindTests(unittest.TestCase):
                 self.assertTrue(os.path.exists(output_file))
 
             mock_request.assert_has_calls([
-                generate_class_ii_call('nn_align', 'DRB1*11:01', os.path.join(output_dir.name, "MHC_Class_II", "tmp", "sample.name.15.fa.split_1-48"))
+                generate_class_ii_call('nn_align', 'DRB1*11:01', 15, os.path.join(output_dir.name, "MHC_Class_II", "tmp", "sample.name.15.fa.split_1-48"))
             ])
 
             with self.assertRaises(SystemExit) as cm:
@@ -223,6 +224,7 @@ class PvacbindTests(unittest.TestCase):
                     'DRB1*11:01',
                     'NNalign',
                     output_dir.name,
+                    '-e2', '15',
                     '--keep-tmp-files',
                     '--run-reference-proteome-similarity',
                 ])
@@ -244,7 +246,7 @@ class PvacbindTests(unittest.TestCase):
                 'HLA-A*02:01',
                 'NetMHC',
                 output_dir.name,
-                '-e', '8'
+                '-e1', '8'
             ])
         self.assertEqual(
             str(cm.exception),
@@ -270,7 +272,8 @@ class PvacbindTests(unittest.TestCase):
                 'PickPocket',
                 'NNalign',
                 output_dir.name,
-                '-e', '9,10',
+                '-e1', '9,10',
+                '-e2', '15',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--allele-specific-binding-thresholds',
