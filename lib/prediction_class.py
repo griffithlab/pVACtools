@@ -264,7 +264,7 @@ class MHCflurry(MHCI):
         return True
 
     def valid_lengths_for_allele(self, allele):
-        return [8,9,10,11,12,13,14]
+        return [8,9,10,11,12,13,14,15]
 
     def determine_neoepitopes(self, sequence, length):
         epitopes = []
@@ -306,7 +306,7 @@ class MHCnuggetsI(MHCI, MHCnuggets):
         return self.valid_allele_names_for_class('class_i')
 
     def valid_lengths_for_allele(self, allele):
-        return [8,9,10,11,12,13,14]
+        return [8,9,10,11,12,13,14,15]
 
     def mhcnuggets_allele(self, allele):
         return allele.replace('*', '')
