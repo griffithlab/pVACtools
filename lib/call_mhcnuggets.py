@@ -33,7 +33,7 @@ def main(args_input = sys.argv[1:]):
                         help="Input FASTA file")
     parser.add_argument('allele',
                         help="Allele for which to make prediction")
-    parser.add_argument('epitope_length', type=int, choices=[8,9,10,11,12,13,14,15],
+    parser.add_argument('epitope_length', type=int, choices=list(range(1,31)),
                         help="Length of subpeptides (epitopes) to predict")
     parser.add_argument('class_type', choices=['I','II'],
                         help="Class I or class II")
