@@ -58,9 +58,9 @@ class VcfConverter(InputFileConverter):
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
         self.proximal_variants_vcf = kwargs.pop('proximal_variants_vcf', None)
         self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
-        self.flanking_sequence_length = kwargs.pop('flanking_sequence_length', None)
-        if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.flanking_sequence_length):
-            sys.exit("A proximal variants TSV output path and flanking sequence length need to be specified if a proximal variants input VCF is provided.")
+        self.flanking_bases = kwargs.pop('flanking_bases', None)
+        if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.flanking_bases):
+            sys.exit("A proximal variants TSV output path and number of flanking bases need to be specified if a proximal variants input VCF is provided.")
         if self.proximal_variants_vcf and not lib.utils.is_gz_file(self.input_file):
             sys.exit("Input VCF {} needs to be bgzipped when running with a proximal variants VCF.".format(self.input_file))
         if self.proximal_variants_vcf and not lib.utils.is_gz_file(self.proximal_variants_vcf):
@@ -77,7 +77,7 @@ class VcfConverter(InputFileConverter):
             self.proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
             self.proximal_variants_writer = csv.DictWriter(self.proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'codon_change', 'protein_position', 'type', 'main_somatic_variant'])
             self.proximal_variants_writer.writeheader()
-            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf, self.pass_only, self.flanking_sequence_length)
+            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf, self.pass_only, self.flanking_bases)
             self.somatic_vcf_fh = open(self.input_file, mode)
             self.somatic_vcf_reader = vcf.Reader(self.somatic_vcf_fh)
         self.reader = open(self.input_file, mode)
