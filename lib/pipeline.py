@@ -264,7 +264,7 @@ class Pipeline(metaclass=ABCMeta):
                 'proximal_variants_file'    : self.proximal_variants_file,
             }
             if self.input_file_type == 'pvacvector_input_fasta':
-                split_fasta_file_path = os.path.join(self.tmp_dir, "{}.fa.split_{}".format(self.sample_name, fasta_chunk))
+                split_fasta_file_path = "{}_{}".format(self.split_fasta_basename(None), fasta_chunk)
                 generate_fasta_params['input_file'] = self.tsv_file_path()
                 generate_fasta_params['output_file_prefix'] = split_fasta_file_path
                 generate_fasta_params['epitope_lengths'] = self.epitope_lengths
@@ -290,7 +290,10 @@ class Pipeline(metaclass=ABCMeta):
         status_message("Completed")
 
     def split_fasta_basename(self, epitope_length):
-        return os.path.join(self.tmp_dir, "{}.{}.fa.split".format(self.sample_name, epitope_length))
+        if epitope_length is None:
+            return os.path.join(self.tmp_dir, "{}.fa.split".format(self.sample_name))
+        else:
+            return os.path.join(self.tmp_dir, "{}.{}.fa.split".format(self.sample_name, epitope_length))
 
     def call_iedb(self, chunks):
         alleles = self.alleles
@@ -307,7 +310,7 @@ class Pipeline(metaclass=ABCMeta):
             for a in alleles:
                 for epl in epitope_lengths:
                     if self.input_file_type == 'pvacvector_input_fasta':
-                        split_fasta_file_path = os.path.join(self.tmp_dir, "{}.fa.split_1-2.{}.tsv".format(self.sample_name, epl))
+                        split_fasta_file_path = "{}_1-2.{}.tsv".format(self.split_fasta_basename(None), epl)
                     else:
                         split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(epl), fasta_chunk)
                     if os.path.getsize(split_fasta_file_path) == 0:
@@ -402,7 +405,7 @@ class Pipeline(metaclass=ABCMeta):
                         split_parsed_output_files.append(split_parsed_file_path)
                         continue
                     if self.input_file_type == 'pvacvector_input_fasta':
-                        split_fasta_file_path = os.path.join(self.tmp_dir, "{}.fa.split_1-2.{}.tsv".format(self.sample_name, epl))
+                        split_fasta_file_path = "{}_1-2.{}.tsv".format(self.split_fasta_basename(None), epl)
                     else:
                         split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(epl), fasta_chunk)
                     split_fasta_key_file_path = split_fasta_file_path + '.key'
