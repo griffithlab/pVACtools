@@ -161,6 +161,8 @@ class Pipeline(metaclass=ABCMeta):
         if self.input_file_type == 'vcf':
             import tools.pvacseq.generate_protein_fasta as generate_combined_fasta
             params.extend(["--sample-name", self.sample_name])
+            if self.phased_proximal_variants_vcf is not None:
+                params.extend(["--phased-proximal-variants-vcf", self.phased_proximal_variants_vcf])
         elif self.input_file_type == 'bedpe':
             import tools.pvacfuse.generate_protein_fasta as generate_combined_fasta
         if self.downstream_sequence_length is not None:
