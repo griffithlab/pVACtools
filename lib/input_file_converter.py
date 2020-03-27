@@ -477,6 +477,8 @@ class FusionInputConverter(InputFileConverter):
 
     def parse_exon_file(self, input_file):
         exon_file = input_file.replace('_protein.fa', '.exons.txt')
+        if not os.path.exists(exon_file):
+            exon_file = exon_file.replace('.txt', '.csv')
         five_prime_positions, three_prime_positions = [], []
         with open(exon_file, 'r') as fh:
             dialect = csv.Sniffer().sniff(fh.read())
