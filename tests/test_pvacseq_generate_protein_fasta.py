@@ -90,6 +90,23 @@ class GenerateFastaTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_with_tsv.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
+    def test_phase_proximal_variants_vcf(self):
+        generate_protein_fasta_input_file = os.path.join(self.test_data_dir, 'input_somatic.vcf.gz')
+        generate_protein_fasta_phased_proximal_variants_vcf = os.path.join(self.test_data_dir, 'phased.vcf.gz')
+        generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            generate_protein_fasta_input_file,
+            '7',
+            generate_protein_fasta_output_file.name,
+            '-d', 'full',
+            '--phased-proximal-variants-vcf', generate_protein_fasta_phased_proximal_variants_vcf,
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_with_phased_vcf.fasta')
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
     def test_output_peptide_sequence_length_longer_that_wildtype(self):
         flanking_sequence_length           = '300'
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
