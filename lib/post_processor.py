@@ -139,7 +139,6 @@ class PostProcessor:
                 self.netmhc_stab_fh.name,
                 self.fasta,
                 self.reference_similarity_fh.name,
-                self.peptide_sequence_length,
                 species=self.species,
                 file_type=self.file_type
             ).execute()

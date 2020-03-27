@@ -26,7 +26,7 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
             input_file = os.path.join(self.test_data_dir, 'input.tsv')
             input_fasta = os.path.join(self.test_data_dir, 'input.fasta')
             output_file = tempfile.NamedTemporaryFile()
-            self.assertFalse(CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, 31).execute())
+            self.assertFalse(CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name).execute())
             self.assertTrue(cmp(
                 output_file.name,
                 os.path.join(self.test_data_dir, "output.tsv"),

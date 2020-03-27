@@ -26,8 +26,8 @@ def define_parser():
             +"The VCF may be gzipped (requires tabix index)."
     )
     parser.add_argument(
-        "peptide_sequence_length", type=int,
-        help="Length of the peptide sequence to use when creating the FASTA.",
+        "flanking_sequence_length", type=int,
+        help="Number of amino acids to add on each side of the mutation when creating the FASTA.",
     )
     parser.add_argument(
         "output_file",
@@ -36,6 +36,10 @@ def define_parser():
     parser.add_argument(
         "--input-tsv",
         help = "A pVACseq all_epitopes or filtered TSV file with epitopes to use for subsetting the input VCF to peptides of interest. Only the peptide sequences for the epitopes in the TSV will be used when creating the FASTA."
+    )
+    parser.add_argument(
+        "-p", "--phased-proximal-variants-vcf",
+        help="A VCF with phased proximal variant information to incorporate into the predicted fasta sequences. Must be gzipped and tabix indexed."
     )
     parser.add_argument(
         "--mutant-only",
@@ -55,7 +59,7 @@ def define_parser():
     )
     return parser
 
-def convert_vcf(input_vcf, temp_dir, sample_name):
+def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, flanking_sequence_length):
     print("Converting VCF to TSV")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     convert_params = {
@@ -64,22 +68,31 @@ def convert_vcf(input_vcf, temp_dir, sample_name):
     }
     if sample_name is not None:
         convert_params['sample_name'] = sample_name
+    if phased_proximal_variants_vcf is not None:
+        convert_params['proximal_variants_vcf'] = phased_proximal_variants_vcf
+        proximal_variants_tsv = os.path.join(temp_dir, 'proximal_variants.tsv')
+        convert_params['proximal_variants_tsv'] = proximal_variants_tsv
+        convert_params['flanking_bases'] = flanking_sequence_length * 4
+    else:
+        proximal_variants_tsv = None
     converter = VcfConverter(**convert_params)
     converter.execute()
     print("Completed")
+    return proximal_variants_tsv
 
-def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir):
+def generate_fasta(flanking_sequence_length, downstream_sequence_length, temp_dir, proximal_variants_tsv):
     print("Generating Variant Peptide FASTA and Key File")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     fasta_file = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file = os.path.join(temp_dir, 'tmp.fasta.key')
     generate_fasta_params = {
         'input_file'                : tsv_file,
-        'peptide_sequence_length'   : peptide_sequence_length,
+        'flanking_sequence_length'  : flanking_sequence_length,
         'epitope_length'            : 0,
         'output_file'               : fasta_file,
         'output_key_file'           : fasta_key_file,
-        'downstream_sequence_length': downstream_sequence_length
+        'downstream_sequence_length': downstream_sequence_length,
+        'proximal_variants_file'    : proximal_variants_tsv,
     }
     fasta_generator = FastaGenerator(**generate_fasta_params)
     fasta_generator.execute()
@@ -140,8 +153,8 @@ def main(args_input = sys.argv[1:]):
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
     temp_dir = tempfile.mkdtemp()
-    convert_vcf(args.input_vcf, temp_dir, args.sample_name)
-    generate_fasta(args.peptide_sequence_length, downstream_sequence_length, temp_dir)
+    proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length)
+    generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir, proximal_variants_tsv)
     parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")
