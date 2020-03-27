@@ -1,20 +1,6 @@
 import csv
 from vaxrank.manufacturability import ManufacturabilityScores
-from vaxrank.vaccine_peptide import *
 from Bio import SeqIO
-
-class PvacpeptideVaccinePeptide(VaccinePeptide):
-    def __new__(cls, peptide):
-        return VaccinePeptideBase.__new__(
-            cls,
-            mutant_protein_fragment="",
-            mutant_epitope_predictions="",
-            wildtype_epitope_predictions="",
-            mutant_epitope_score="",
-            wildtype_epitope_score="",
-            num_mutant_epitopes_to_keep="",
-            manufacturability_scores=ManufacturabilityScores.from_amino_acids(peptide)
-        )
 
 class CalculateManufacturability:
     def __init__(self, input_file, output_file, file_type='pVACseq'):
@@ -34,8 +20,7 @@ class CalculateManufacturability:
             'asparagine_proline_bond_count'
         ]
 
-    def append_manufacturability_metrics(self, line, peptide):
-        metrics = peptide.manufacturability_scores
+    def append_manufacturability_metrics(self, line, metrics):
         line['cterm_7mer_gravy_score'] = metrics.cterm_7mer_gravy_score
         line['max_7mer_gravy_score'] = metrics.max_7mer_gravy_score
         line['difficult_n_terminal_residue'] = metrics.difficult_n_terminal_residue
@@ -59,8 +44,8 @@ class CalculateManufacturability:
                         'peptide_sequence': sequence
                     }
                     if len(sequence) >= 7:
-                        peptide = PvacpeptideVaccinePeptide(sequence)
-                        line = self.append_manufacturability_metrics(line, peptide)
+                        scores = ManufacturabilityScores.from_amino_acids(sequence)
+                        line = self.append_manufacturability_metrics(line, scores)
                     writer.writerow(line)
         else:
             with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -73,6 +58,6 @@ class CalculateManufacturability:
                     else:
                         sequence = line['MT Epitope Seq']
                     if len(sequence) >= 7:
-                        peptide = PvacpeptideVaccinePeptide(sequence)
-                        line = self.append_manufacturability_metrics(line, peptide)
+                        scores = ManufacturabilityScores.from_amino_acids(sequence)
+                        line = self.append_manufacturability_metrics(line, scores)
                     writer.writerow(line)

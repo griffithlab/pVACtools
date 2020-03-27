@@ -108,7 +108,7 @@ setup(
         'swagger-spec-validator==2.1.0',
         'jsonschema==2.6.0',
         'mock',
-        'vaxrank==1.0.2',
+        'vaxrank',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,
