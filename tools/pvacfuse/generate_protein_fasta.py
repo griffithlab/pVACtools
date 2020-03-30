@@ -17,11 +17,15 @@ from lib.input_file_converter import *
 from lib.calculate_manufacturability import *
 
 def define_parser():
-    parser = argparse.ArgumentParser("pvacfuse generate_protein_fasta", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser("pvacseq generate_protein_fasta", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
-        "input_file",
-        help="An INTEGRATE-Neo annotated bedpe file with fusions or a AGfusion output directory."
+        "input_vcf",
+        help="A VEP-annotated single-sample VCF containing transcript, Wildtype protein sequence, and Downstream protein sequence information."
+    )
+    parser.add_argument(
+        "sample_name",
+        help="Tumor sample name."
     )
     parser.add_argument(
         "peptide_sequence_length", type=int,
@@ -33,41 +37,67 @@ def define_parser():
     )
     parser.add_argument(
         "--input-tsv",
-        help = "A pVACfuse all_epitopes or filtered TSV file with epitopes to use for subsetting the input file to peptides of interest. Only the peptide sequences for the epitopes in the TSV will be used when creating the FASTA."
+        help = "A pVACseq all_epitopes or filtered TSV file with epitopes to use for subsetting the input VCF to peptides of interest. Only the peptide sequences for the epitopes in the TSV will be used when creating the FASTA."
+    )
+    parser.add_argument(
+        "--mutant-only",
+        help="Only output mutant peptide sequences",
+        default=False,
+        action='store_true',
     )
     parser.add_argument(
         "-d", "--downstream-sequence-length",
         default="1000",
-        help="Cap to limit the downstream sequence length for frameshift fusion when creating the fasta file. "
+        help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
             + "Use 'full' to include the full downstream sequence."
     )
+    parser.add_argument(
+        "-p", "--phased_proximal_variants_vcf",
+        help="A VCF with phased proximal variant information. Must be gzipped and tabix indexed. (default: None)"
+    )
+
     return parser
 
-def convert_fusion_input(input_file, temp_dir):
-    print("Converting Fusion file to TSV")
+def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, peptide_sequence_length):
+    print("Converting VCF to TSV")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     convert_params = {
-        'input_file' : input_file,
+        'input_file' : input_vcf,
         'output_file': tsv_file,
+        'sample_name': sample_name
     }
-    converter = FusionInputConverter(**convert_params)
+
+    if phased_proximal_variants_vcf is not None:
+        convert_params['proximal_variants_vcf'] = phased_proximal_variants_vcf
+        proximal_variants_tsv = os.path.join(temp_dir, 'phased_proximal_variants_tmp.tsv')
+        convert_params['proximal_variants_tsv'] = proximal_variants_tsv
+        proximal_variants_file = proximal_variants_tsv
+        convert_params['peptide_length'] = peptide_sequence_length # peptide_sequence_length
+
+    converter = VcfConverter(**convert_params)
     converter.execute()
     print("Completed")
 
-def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir):
+
+def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir, sample_name, phased_proximal_variants_vcf):
     print("Generating Variant Peptide FASTA and Key File")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
+    proximal_variants_tsv = None
+    if phased_proximal_variants_vcf is not None:
+        proximal_variants_tsv =  os.path.join(temp_dir, 'phased_proximal_variants_tmp.tsv')
     fasta_file = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file = os.path.join(temp_dir, 'tmp.fasta.key')
     generate_fasta_params = {
         'input_file'                : tsv_file,
+        'sample_name'               : sample_name,
         'peptide_sequence_length'   : peptide_sequence_length,
         'epitope_length'            : 0,
         'output_file'               : fasta_file,
         'output_key_file'           : fasta_key_file,
-        'downstream_sequence_length': downstream_sequence_length
+        'downstream_sequence_length': downstream_sequence_length,
+        'proximal_variants_file'    : proximal_variants_tsv
     }
-    fasta_generator = FusionFastaGenerator(**generate_fasta_params)
+    fasta_generator = FastaGenerator(**generate_fasta_params)
     fasta_generator.execute()
     print("Completed")
 
@@ -78,11 +108,16 @@ def parse_input_tsv(input_tsv):
     with open(input_tsv, 'r') as fh:
         reader = csv.DictReader(fh, delimiter = "\t")
         for line in reader:
-            index = '{}.{}.{}.{}'.format(line['Gene Name'], line['Transcript'], line['Variant Type'], line['Protein Position'])
+            consequence = line['Variant Type']
+            if consequence == 'FS':
+                amino_acid_change_position = "{}{}/{}".format(line['Protein Position'], line['Reference'], line['Variant'])
+            else:
+                amino_acid_change_position = "{}{}".format(line['Protein Position'], line['Mutation'])
+            index = '%s.%s.%s.%s' % (line['Gene Name'], line['Transcript'], consequence, amino_acid_change_position)
             indexes.append(index)
     return indexes
 
-def parse_files(output_file, temp_dir, input_tsv):
+def parse_files(output_file, temp_dir, mutant_only, input_tsv):
     print("Parsing the Variant Peptide FASTA and Key File")
     fasta_file_path = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file_path = os.path.join(temp_dir, 'tmp.fasta.key')
@@ -97,8 +132,10 @@ def parse_files(output_file, temp_dir, input_tsv):
     for record in SeqIO.parse(fasta_file_path, "fasta"):
         ids = keys[int(record.id)]
         for record_id in ids:
+            if mutant_only and record_id.startswith('WT.'):
+                continue
             if tsv_indexes is not None:
-                count, index = record_id.split('.', 1)
+                sequence_type, count, index = record_id.split('.', 2)
                 if index not in tsv_indexes:
                     continue
             new_record = SeqRecord(record.seq, id=record_id, description=record_id)
@@ -111,6 +148,9 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
+    if "." in args.sample_name:
+            sys.exit("Sample name cannot contain '.'")
+
     if args.downstream_sequence_length == 'full':
         downstream_sequence_length = None
     elif args.downstream_sequence_length.isdigit():
@@ -118,10 +158,12 @@ def main(args_input = sys.argv[1:]):
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
+
+    print(args.phased_proximal_variants_vcf)
     temp_dir = tempfile.mkdtemp()
-    convert_fusion_input(args.input_file, temp_dir)
-    generate_fasta(args.peptide_sequence_length, downstream_sequence_length, temp_dir)
-    parse_files(args.output_file, temp_dir, args.input_tsv)
+    convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.peptide_sequence_length)
+    generate_fasta(args.peptide_sequence_length, downstream_sequence_length, temp_dir, args.sample_name, args.phased_proximal_variants_vcf)
+    parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")
     CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()
