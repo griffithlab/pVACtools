@@ -1,4 +1,5 @@
 __all__ = [
+    "aggregate_all_epitopes",
     "binding_filter",
     "calculate_manufacturability",
     "call_iedb",
