@@ -115,7 +115,7 @@ class AggregateAllEpitopes:
         df["rank_expr"] = df["expr"].rank(ascending=False, method='dense')
         df["rank"] = df["rank_ic50"] + df["rank_expr"]
 
-        df.sort_values(by=["rank_tier", "rank"], inplace=True, ascending=True)
+        df.sort_values(by=["rank_tier", "rank", "Gene", "AA_change"], inplace=True, ascending=True)
 
         df.drop('rank_tier', 1, inplace=True)
         df.drop('rank_ic50', 1, inplace=True)
