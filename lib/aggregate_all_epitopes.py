@@ -150,4 +150,4 @@ class AggregateAllEpitopes:
             peptide_table = peptide_table.append(best_mut_line, sort=False)
         peptide_table = self.sort_table(peptide_table)
 
-        peptide_table.to_csv(self.output_file, sep='\t', index=False)
+        peptide_table.to_csv(self.output_file, sep='\t', na_rep='NA', index=False)
