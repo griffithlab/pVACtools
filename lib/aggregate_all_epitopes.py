@@ -57,7 +57,7 @@ class AggregateAllEpitopes:
 
     def get_best_mut_line(self, df, hla_types, vaf_clonal, max_ic50=1000):
         #order by best median score and get best ic50 peptide
-        df.sort_values(by=["Median MT Score"], inplace=True, ascending=True)
+        df.sort_values(by=["Median MT Score", "Median WT Score"], inplace=True, ascending=[True, False])
         best = df.iloc[0]
         tier = self.get_tier(best, vaf_clonal)
 
