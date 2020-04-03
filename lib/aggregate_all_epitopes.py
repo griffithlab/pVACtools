@@ -58,20 +58,34 @@ class AggregateAllEpitopes:
 
     def get_best_mut_line(self, df, hla_types, vaf_clonal, max_ic50=1000):
         #order by best median score and get best ic50 peptide
-        df.sort_values(by=["Median MT Score", "Median WT Score"], inplace=True, ascending=[True, False])
+        if self.file_type == 'pVACbind':
+            df.sort_values(by=["Median Score"], inplace=True, ascending=True)
+        else:
+            df.sort_values(by=["Median MT Score", "Median WT Score"], inplace=True, ascending=[True, False])
         best = df.iloc[0]
-        tier = self.get_tier(best, vaf_clonal)
+
+        if self.file_type == 'pVACbind':
+            tier = "NA"
+        else:
+            tier = self.get_tier(best, vaf_clonal)
 
         #these counts should represent only the "good binders" with ic50 < max
         #for all sites other than tier4 slop
-        good_binders = df[df["Median MT Score"] < max_ic50]
+        if self.file_type == 'pVACbind':
+            good_binders = df[df["Median Score"] < max_ic50]
+        else:
+            good_binders = df[df["Median MT Score"] < max_ic50]
         if len(good_binders) > 0:
             good_binders_hla = good_binders["HLA Allele"].unique()
             hla = dict(map(lambda x : (x, 'X') if x in good_binders_hla else (x, ""), hla_types))
             #get a list of all unique gene/transcript/aa_change combinations
-            anno_count = len(good_binders[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1).unique())
             #store a count of all unique peptides that passed
-            peptide_count = len(good_binders["MT Epitope Seq"].unique())
+            if self.file_type == 'pVACbind':
+                anno_count = "NA"
+                peptide_count = len(good_binders["Epitope Seq"].unique())
+            else:
+                anno_count = len(good_binders[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1).unique())
+                peptide_count = len(good_binders["MT Epitope Seq"].unique())
         else:
             hla = dict(map(lambda x : (x, ""), hla_types))
             anno_count = 0
@@ -90,57 +104,80 @@ class AggregateAllEpitopes:
 
         #assemble the line
         out_dict = hla
-        out_dict.update({
-            'Gene': [best["Gene Name"]],
-            'AA_change': [best["aachange"]],
-            'Num_Transcript': [anno_count],
-            'Peptide': [best["MT Epitope Seq"]],
-            'Pos': [best["Mutation Position"]],
-            'Num_Peptides': [peptide_count],
-            'ic50_MT': [best["Median MT Score"]],
-            'ic50_WT': [best["Median WT Score"]],
-            'RNA_expr': [best["Gene Expression"]],
-            'RNA_VAF': [best["Tumor RNA VAF"]],
-            'RNA_Depth': [best["Tumor RNA Depth"]],
-            'DNA_VAF': [best["Tumor DNA VAF"]],
-            'tier': [tier],
-        })
+        if self.file_type == 'pVACbind':
+            out_dict.update({
+                'Gene': ["NA"],
+                'AA_change': [best["aachange"]],
+                'Num_Transcript': [anno_count],
+                'Peptide': [best["Epitope Seq"]],
+                'Pos': ["NA"],
+                'Num_Peptides': [peptide_count],
+                'ic50_MT': [best["Median Score"]],
+                'ic50_WT': ["NA"],
+                'RNA_expr': ["NA"],
+                'RNA_VAF': ["NA"],
+                'RNA_Depth': ["NA"],
+                'DNA_VAF': ["NA"],
+                'tier': [tier],
+            })
+        else:
+            out_dict.update({
+                'Gene': [best["Gene Name"]],
+                'AA_change': [best["aachange"]],
+                'Num_Transcript': [anno_count],
+                'Peptide': [best["MT Epitope Seq"]],
+                'Pos': [best["Mutation Position"]],
+                'Num_Peptides': [peptide_count],
+                'ic50_MT': [best["Median MT Score"]],
+                'ic50_WT': [best["Median WT Score"]],
+                'RNA_expr': [best["Gene Expression"]],
+                'RNA_VAF': [best["Tumor RNA VAF"]],
+                'RNA_Depth': [best["Tumor RNA Depth"]],
+                'DNA_VAF': [best["Tumor DNA VAF"]],
+                'tier': [tier],
+            })
 
         df_out = pd.DataFrame.from_dict(out_dict)
         return df_out
 
+    def get_best_mut_linei_pvacbind(self, df, hla_types, max_ic50=1000):
+        #order by best median score and get best ic50 peptide
+        df.sort_values(by=["Median MT Score", "Median WT Score"], inplace=True, ascending=[True, False])
+        best = df.iloc[0]
+
     #sort the table in our preferred manner
     def sort_table(self, df):
-        #make sure the tiers sort in the expected order
-        tier_sorter = ["Pass", "Relaxed", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr"]
-        sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
-        df["rank_tier"] = df['tier'].map(sorter_index)
+        if self.file_type == 'pVACbind':
+            df.sort_values(by=["ic50_MT"], inplace=True, ascending=True)
+        else:
+            #make sure the tiers sort in the expected order
+            tier_sorter = ["Pass", "Relaxed", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr"]
+            sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
+            df["rank_tier"] = df['tier'].map(sorter_index)
 
-        df["rank_ic50"] = df["ic50_MT"].rank(ascending=True, method='dense')
-        df["expr"] = df["RNA_expr"] * df["RNA_VAF"]
-        df["rank_expr"] = df["expr"].rank(ascending=False, method='dense')
-        df["rank"] = df["rank_ic50"] + df["rank_expr"]
+            df["rank_ic50"] = df["ic50_MT"].rank(ascending=True, method='dense')
+            df["expr"] = df["RNA_expr"] * df["RNA_VAF"]
+            df["rank_expr"] = df["expr"].rank(ascending=False, method='dense')
+            df["rank"] = df["rank_ic50"] + df["rank_expr"]
 
-        df.sort_values(by=["rank_tier", "rank", "Gene", "AA_change"], inplace=True, ascending=True)
+            df.sort_values(by=["rank_tier", "rank", "Gene", "AA_change"], inplace=True, ascending=True)
 
-        df.drop('rank_tier', 1, inplace=True)
-        df.drop('rank_ic50', 1, inplace=True)
-        df.drop('expr', 1, inplace=True)
-        df.drop('rank_expr', 1, inplace=True)
-        df.drop('rank', 1, inplace=True)
+            df.drop('rank_tier', 1, inplace=True)
+            df.drop('rank_ic50', 1, inplace=True)
+            df.drop('expr', 1, inplace=True)
+            df.drop('rank_expr', 1, inplace=True)
+            df.drop('rank', 1, inplace=True)
 
         return df
 
     def execute(self):
         df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False)
         df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
-        for column in ['Chromosome', 'Start', 'Stop', 'Protein Position', 'Mutation']:
-            df[column] = df[column].astype(str)
 
         ## get a list of all represented hla types
         hla_types = df['HLA Allele'].unique()
+
         ## get a list of unique mutations
-        df["key"] = df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].agg('-'.join, axis=1)
         if self.file_type == 'pVACbind':
             df["key"] = df["Mutation"]
             vaf_clonal = None
@@ -156,10 +193,6 @@ class AggregateAllEpitopes:
             vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
 
         keys = df["key"].unique()
-
-        #do a crude estimate of clonal vaf/purity
-        vafs = np.sort(df['Tumor DNA VAF'].unique())[::-1]
-        vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
 
         columns = hla_types.tolist()
         columns.extend(['Gene', 'AA_change', 'Num_Transcript', 'Peptide', 'Pos', 'Num_Peptides', 'ic50_MT', 'ic50_WT', 'RNA_expr', 'RNA_VAF', 'RNA_Depth', 'DNA_VAF', 'tier'])
