@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 
 class AggregateAllEpitopes:
-    def __init__(self, input_file, output_file):
+    def __init__(self, input_file, output_file, file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
+        self.file_type = file_type
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
@@ -76,11 +77,16 @@ class AggregateAllEpitopes:
             anno_count = 0
             peptide_count = 0
 
-        if best['Variant Type'] == 'FS':
-            best['aachange'] = 'Frameshift'
+        if self.file_type == 'bedpe':
+            best['aachange'] = best['key']
+        elif self.file_type == 'pVACbind':
+            best['aachange'] = best['Mutation']
         else:
-            (wt_aa, mt_aa) = best["Mutation"].split("/")
-            best["aachange"] = "".join([wt_aa, best["Protein Position"], mt_aa])
+            if best['Variant Type'] == 'FS':
+                best['aachange'] = 'Frameshift'
+            else:
+                (wt_aa, mt_aa) = best["Mutation"].split("/")
+                best["aachange"] = "".join([wt_aa, best["Protein Position"], mt_aa])
 
         #assemble the line
         out_dict = hla
@@ -127,7 +133,7 @@ class AggregateAllEpitopes:
 
     def execute(self):
         df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False)
-        df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Gene Expression": 0}, inplace=True)
+        df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
         for column in ['Chromosome', 'Start', 'Stop', 'Protein Position', 'Mutation']:
             df[column] = df[column].astype(str)
 
@@ -135,6 +141,20 @@ class AggregateAllEpitopes:
         hla_types = df['HLA Allele'].unique()
         ## get a list of unique mutations
         df["key"] = df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].agg('-'.join, axis=1)
+        if self.file_type == 'pVACbind':
+            df["key"] = df["Mutation"]
+            vaf_clonal = None
+        else:
+            for column in ['Chromosome', 'Start', 'Stop', 'Protein Position', 'Mutation']:
+                df[column] = df[column].astype(str)
+            if self.file_type == 'bedpe':
+                df["key"] = df[['Chromosome', 'Start', 'Stop']].agg(' | '.join, axis=1)
+            else:
+                df["key"] = df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].agg('-'.join, axis=1)
+            #do a crude estimate of clonal vaf/purity
+            vafs = np.sort(df['Tumor DNA VAF'].unique())[::-1]
+            vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
+
         keys = df["key"].unique()
 
         #do a crude estimate of clonal vaf/purity

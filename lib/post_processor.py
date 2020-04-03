@@ -53,7 +53,7 @@ class PostProcessor:
 
     def aggregate_all_epitopes(self):
         print("Creating aggregated report")
-        AggregateAllEpitopes(self.input_file, self.aggregate_report).execute()
+        AggregateAllEpitopes(self.input_file, self.aggregate_report, self.file_type).execute()
         print("Completed")
 
     def calculate_manufacturability(self):
