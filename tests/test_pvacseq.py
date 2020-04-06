@@ -67,6 +67,7 @@ class PvacseqTests(unittest.TestCase):
             "binding_filter",
             "coverage_filter",
             "download_example_data",
+            "generate_aggregated_report",
             "generate_condensed_ranked_report",
             "generate_protein_fasta",
             "install_vep_plugin",
@@ -145,6 +146,20 @@ class PvacseqTests(unittest.TestCase):
     def test_download_example_data_runs(self):
         output_dir = tempfile.TemporaryDirectory()
         download_example_data.main([output_dir.name])
+
+    def test_generate_aggregated_report_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "generate_aggregated_report.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_generate_aggregated_report_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        generate_aggregated_report.main([input_file, output_file.name])
 
     def test_generate_condensed_ranked_report_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(

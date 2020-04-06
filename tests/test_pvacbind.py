@@ -63,6 +63,7 @@ class PvacbindTests(unittest.TestCase):
             'allele_specific_cutoffs',
             'download_example_data',
             'top_score_filter',
+            'generate_aggregated_report',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -81,6 +82,20 @@ class PvacbindTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
+
+    def test_generate_aggregated_report_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacbind",
+            "generate_aggregated_report.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_generate_aggregated_report_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        generate_aggregated_report.main([input_file, output_file.name])
 
     def test_process_stops(self):
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)

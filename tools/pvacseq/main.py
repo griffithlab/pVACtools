@@ -52,6 +52,13 @@ def define_parser():
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
 
+    generate_aggregated_report_parser = subparsers.add_parser(
+        "generate_aggregated_report",
+        help="Generate an aggregated report from a pVACseq .all_epitopes.tsv report file.",
+        add_help=False
+    )
+    generate_aggregated_report_parser.set_defaults(func=generate_aggregated_report)
+
     generate_condensed_ranked_report_parser = subparsers.add_parser(
         "generate_condensed_ranked_report",
         help="Generate a condensed, ranked report from a pVACseq .all_epitopes.tsv or .filtered.tsv report file.",
