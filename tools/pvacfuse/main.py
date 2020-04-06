@@ -37,6 +37,13 @@ def define_parser():
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta_parser)
 
+    generate_aggregated_report_parser = subparsers.add_parser(
+        "generate_aggregated_report",
+        help="Generate an aggregated report from a pVACseq .all_epitopes.tsv report file.",
+        add_help=False
+    )
+    generate_aggregated_report_parser.set_defaults(func=generate_aggregated_report)
+
     valid_alleles_parser = subparsers.add_parser(
         "valid_alleles",
         help="Shows a list of valid allele names",
