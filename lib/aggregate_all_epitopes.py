@@ -114,6 +114,8 @@ class AggregateAllEpitopes:
                 'Num_Peptides': [peptide_count],
                 'ic50_MT': [best["Median Score"]],
                 'ic50_WT': ["NA"],
+                'percentile_MT': [best["Median Percentile"]],
+                'percentile_WT': ["NA"],
                 'RNA_expr': ["NA"],
                 'RNA_VAF': ["NA"],
                 'RNA_Depth': ["NA"],
@@ -130,6 +132,8 @@ class AggregateAllEpitopes:
                 'Num_Peptides': [peptide_count],
                 'ic50_MT': [best["Median MT Score"]],
                 'ic50_WT': [best["Median WT Score"]],
+                'percentile_MT': [best["Median MT Percentile"]],
+                'percentile_WT': [best["Median WT Percentile"]],
                 'RNA_expr': [best["Gene Expression"]],
                 'RNA_VAF': [best["Tumor RNA VAF"]],
                 'RNA_Depth': [best["Tumor RNA Depth"]],
@@ -190,7 +194,7 @@ class AggregateAllEpitopes:
         keys = df["key"].unique()
 
         columns = hla_types.tolist()
-        columns.extend(['Gene', 'AA_change', 'Num_Transcript', 'Peptide', 'Pos', 'Num_Peptides', 'ic50_MT', 'ic50_WT', 'RNA_expr', 'RNA_VAF', 'RNA_Depth', 'DNA_VAF', 'tier'])
+        columns.extend(['Gene', 'AA_change', 'Num_Transcript', 'Peptide', 'Pos', 'Num_Peptides', 'ic50_MT', 'ic50_WT', 'percentile_MT', 'percentile_WT', 'RNA_expr', 'RNA_VAF', 'RNA_Depth', 'DNA_VAF', 'tier'])
         peptide_table = pd.DataFrame(columns=columns)
         for key in keys:
             df_subset = df[df["key"] == key]
