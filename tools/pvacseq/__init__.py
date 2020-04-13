@@ -7,7 +7,6 @@ __all__ = [
     'coverage_filter',
     'generate_protein_fasta',
     "generate_aggregated_report",
-    'generate_condensed_ranked_report',
     'install_vep_plugin',
     'top_score_filter',
     'transcript_support_level_filter',
