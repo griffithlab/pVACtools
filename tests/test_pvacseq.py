@@ -68,7 +68,6 @@ class PvacseqTests(unittest.TestCase):
             "coverage_filter",
             "download_example_data",
             "generate_aggregated_report",
-            "generate_condensed_ranked_report",
             "generate_protein_fasta",
             "install_vep_plugin",
             "run",
@@ -160,20 +159,6 @@ class PvacseqTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
         generate_aggregated_report.main([input_file, output_file.name])
-
-    def test_generate_condensed_ranked_report_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
-            "tools",
-            "pvacseq",
-            "generate_condensed_ranked_report.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_generate_condensed_ranked_report_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        generate_condensed_ranked_report.main([input_file, output_file.name])
 
     def test_generate_protein_fasta_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
@@ -295,7 +280,6 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.fasta',
                 'sample.name.all_epitopes.aggregated.tsv',
                 'sample.name.filtered.tsv',
-                'sample.name.filtered.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -344,7 +328,6 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.fasta',
                 'sample.name.all_epitopes.aggregated.tsv',
                 'sample.name.filtered.tsv',
-                'sample.name.filtered.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
@@ -495,7 +478,6 @@ class PvacseqTests(unittest.TestCase):
             for file_name in (
                 'Test.all_epitopes.tsv',
                 'Test.filtered.tsv',
-                'Test.filtered.condensed.ranked.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)

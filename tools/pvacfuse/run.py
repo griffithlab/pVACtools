@@ -20,18 +20,15 @@ def create_combined_reports(base_output_dir, args):
     combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
     combine_reports([file1, file2], combined_output_file)
     filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
-    condensed_report_file = os.path.join(output_dir, "{}.filtered.condensed.ranked.tsv".format(args.sample_name))
 
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_output_file
     post_processing_params['filtered_report_file'] = filtered_report_file
-    post_processing_params['condensed_report_file'] = condensed_report_file
     post_processing_params['minimum_fold_change'] = 0
     post_processing_params['run_coverage_filter'] = False
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = False
-    post_processing_params['run_condense_report'] = True
     post_processing_params['run_manufacturability_metrics'] = False
     post_processing_params['run_reference_proteome_similarity'] = False
     post_processing_params['file_type'] = 'bedpe'
