@@ -1,3 +1,10 @@
+[![Build Status](https://travis-ci.org/griffithlab/pVACtools.svg?branch=master)](https://travis-ci.org/griffithlab/pVACtools)
+[![Coverage Status](https://coveralls.io/repos/github/griffithlab/pVACtools/badge.svg?branch=master)](https://coveralls.io/github/griffithlab/pVACtools?branch=master)
+[![Docs](https://readthedocs.org/projects/pvactools/badge/?version=latest)](http://pvactools.readthedocs.io/en/latest/?badge=latest)
+<a href="https://pypi.python.org/pypi/pvactools/">
+    <img src="https://img.shields.io/pypi/v/pvactools.svg?maxAge=1000" alt="PyPI" />
+</a>
+
 # pVACtools
 
 pVACtools is a cancer immunotherapy suite consisting of the following tools:
@@ -26,8 +33,8 @@ A browser-based user interface that assists users in launching, managing, review
 
 The pVACapi provides a HTTP REST interface to the pVACtools suite.
 
-## Citation
-Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Christopher A Miller, Alexander T Wollam, Huiming Xia, Connor J Liu, Sidi Zhao, Yang-Yang Feng, Aaron P Graubert, Amber Z Wollam, Jonas Neichin, Megan Neveau, Jason Walker, William E Gillanders, Elaine R Mardis, Obi L Griffith, Malachi Griffith. [pVACtools: a computational toolkit to select and visualize cancer neoantigens](https://doi.org/10.1101/501817). bioRxiv 501817; doi: https://doi.org/10.1101/501817
+## Citations
+Jasreet Hundal , Susanna Kiwala , Joshua McMichael, Chris Miller, Huiming Xia, Alex Wollam, Conner Liu, Sidi Zhao, Yang-Yang Feng, Aaron Graubert, Amber Wollam, Jonas Neichin, Megan Neveau, Jason Walker, William Gillanders, Elaine Mardis, Obi Griffith, Malachi Griffith. pVACtools: A Computational Toolkit to Identify and Visualize Cancer Neoantigens. Cancer Immunology Research. 2020 Mar;8(3):409-420. doi: 10.1158/2326-6066.CIR-19-0401. PMID: <a href="https://www.ncbi.nlm.nih.gov/pubmed/31907209">31907209</a>.
 
 Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman, Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. <a href="https://doi.org/10.1038/s41588-018-0283-9">Accounting for proximal variants improves neoantigen prediction</a>. Nature Genetics. 2018, DOI: 10.1038/s41588-018-0283-9. PMID: <a href="https://www.ncbi.nlm.nih.gov/pubmed/30510237">30510237</a>.
 
@@ -68,4 +75,13 @@ If you have an old version of pVACtools installed you might want to consider upg
 The pVACtools documentation can be found on <a href="http://pvactools.readthedocs.io/">ReadTheDocs</a>.
 
 ## Contact
+
 Bug reports or feature requests can be submitted on the <a href="https://github.com/griffithlab/pVACtools/issues">pVACtools Github page</a>. You may also contact us by email at help@pvactools.org.
+
+## Container images
+
+pVACtools is available as a Docker Image at <a href="https://hub.docker.com/r/griffithlab/pvactools/">DockerHub griffithlab/pvactools</a>.
+
+## Stable release with DOI
+
+[![DOI](https://zenodo.org/badge/102625109.svg)](https://zenodo.org/badge/latestdoi/102625109)

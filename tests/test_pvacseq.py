@@ -15,6 +15,8 @@ import datetime
 from tools.pvacseq import *
 from mock import patch
 from .test_utils import *
+import tools.pvacseq.main as pvacseq_main
+import argparse
 
 def make_response(data, files, path):
     if not files:
@@ -106,6 +108,10 @@ class PvacseqTests(unittest.TestCase):
         ))
         self.assertTrue(compiled_pvac_path)
 
+    def test_parser(self):
+        parser = pvacseq_main.define_parser()
+        self.assertEqual(type(parser), argparse.ArgumentParser)
+
     def test_pvacseq_commands(self):
         pvac_script_path = os.path.join(
             self.pVac_directory,
@@ -115,12 +121,16 @@ class PvacseqTests(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
+            "allele_specific_cutoffs",
             "binding_filter",
             "coverage_filter",
-            "run",
+            "download_example_data",
+            "generate_condensed_ranked_report",
             "generate_protein_fasta",
             "install_vep_plugin",
-            "download_example_data",
+            "run",
+            "top_score_filter",
+            "transcript_support_level_filter",
             "valid_alleles",
             ]:
             result = subprocess_run([
@@ -140,6 +150,140 @@ class PvacseqTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
+
+    def test_allele_specific_cutoffs_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "allele_specific_cutoffs.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_allele_specific_cutoffs_runs(self):
+        allele_specific_cutoffs.main([])
+
+    def test_binding_filter_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "binding_filter.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_binding_filter_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        binding_filter.main([input_file, output_file.name])
+
+    def test_coverage_filter_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "binding_filter.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_coverage_filter_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        coverage_filter.main([input_file, output_file.name])
+
+    def test_download_example_data_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "download_example_data.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_download_example_data_runs(self):
+        output_dir = tempfile.TemporaryDirectory()
+        download_example_data.main([output_dir.name])
+
+    def test_generate_condensed_ranked_report_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "generate_condensed_ranked_report.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_generate_condensed_ranked_report_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        generate_condensed_ranked_report.main([input_file, output_file.name])
+
+    def test_generate_protein_fasta_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "generate_protein_fasta.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_generate_protein_fasta_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'input.vcf')
+        output_file = tempfile.NamedTemporaryFile()
+        generate_protein_fasta.main([input_file, "25", output_file.name])
+
+    def test_install_vep_pugin_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "install_vep_plugin.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_install_vep_pugin_runs(self):
+        output_dir = tempfile.TemporaryDirectory()
+        install_vep_plugin.main([output_dir.name])
+
+    def test_top_score_filter_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "top_score_filter.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_top_score_filter_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        top_score_filter.main([input_file, output_file.name])
+
+    def test_transcript_support_level_filter_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "transcript_support_level_filter.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_transcript_support_level_filter_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        transcript_support_level_filter.main([input_file, output_file.name])
+
+    def test_valid_alleles_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "valid_alleles.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_alleles_runs(self):
+        valid_alleles.main(["-p", "SMM"])
 
     def test_pvacseq_pipeline(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(

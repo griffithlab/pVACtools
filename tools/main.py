@@ -3,7 +3,7 @@ import sys
 import pkg_resources
 from tools import *
 
-def main():
+def define_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subparsers = parser.add_subparsers()
 
@@ -20,7 +20,10 @@ def main():
         action="store_true",
         help="Display the currently installed pvactools version",
     )
+    return parser
 
+def main():
+    parser = define_parser()
     args = parser.parse_known_args()
     if args[0].version is True:
         print(pkg_resources.get_distribution("pvactools").version)
