@@ -12,18 +12,19 @@ matrix:
             - sudo apt-get install -y gcc
           install:
             - pip install Cython
-            - pip install -e .
-            - mhcflurry-downloads fetch
             - pip install swagger-spec-validator==2.1.0
             - pip install connexion==1.4.2
             - pip install bokeh==0.13.0
             - pip install tornado==5.0.2
             - pip install jsonschema==2.6.0
             - pip install mhcnuggets==2.2
+            - pip install mhcflurry==1.4.3
             - pip install tensorflow==1.14.0
             - pip install keras==2.2.5
             - pip install Werkzeug==0.16.1
             - pip install coveralls
+            - pip install -e .
+            - mhcflurry-downloads fetch
           services:
             - postgresql
           script:
@@ -40,19 +41,20 @@ matrix:
             - sudo apt-get install -y ghostscript
             - sudo apt-get install -y gcc
           install:
-            - pip install -e .
-            - mhcflurry-downloads fetch
             - pip install swagger-spec-validator==2.1.0
             - pip install connexion==1.4.2
             - pip install bokeh==0.13.0
             - pip install tornado==5.0.2
             - pip install jsonschema==2.6.0
             - pip install mhcnuggets==2.2
+            - pip install mhcflurry==1.4.3
             - pip install tensorflow==1.14.0
             - pip install keras==2.2.5
             - pip install pandas==0.25.2
             - pip install Werkzeug==0.16.1
             - pip install coveralls
+            - pip install -e .
+            - mhcflurry-downloads fetch
           services:
             - postgresql
           script:
@@ -69,19 +71,20 @@ matrix:
             - sudo apt-get install -y ghostscript
             - sudo apt-get install -y gcc
           install:
-            - pip install -e .
-            - mhcflurry-downloads fetch
             - pip install swagger-spec-validator==2.1.0
             - pip install connexion==1.4.2
             - pip install bokeh==0.13.0
             - pip install tornado==5.0.2
             - pip install jsonschema==2.6.0
             - pip install mhcnuggets==2.2
+            - pip install mhcflurry==1.4.3
             - pip install tensorflow==1.14.0
             - pip install keras==2.2.5
             - pip install pandas==0.25.2
             - pip install Werkzeug==0.16.1
             - pip install coveralls
+            - pip install -e .
+            - mhcflurry-downloads fetch
           services:
             - postgresql
           script:
