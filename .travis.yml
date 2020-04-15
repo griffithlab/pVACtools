@@ -23,10 +23,13 @@ matrix:
             - pip install tensorflow==1.14.0
             - pip install keras==2.2.5
             - pip install Werkzeug==0.16.1
+            - pip install coveralls
           services:
             - postgresql
           script:
-            - TEST_FLAG=1 python3 -m unittest discover -v
+            - TEST_FLAG=1 coverage run --source=lib,tools -m unittest discover -v
+          after_success:
+            - coveralls
         - name: "Python 3.6"
           language: python
           sudo: required
@@ -49,10 +52,13 @@ matrix:
             - pip install keras==2.2.5
             - pip install pandas==0.25.2
             - pip install Werkzeug==0.16.1
+            - pip install coveralls
           services:
             - postgresql
           script:
-            - TEST_FLAG=1 python3 -m unittest discover -v
+            - TEST_FLAG=1 coverage run --source=lib,tools -m unittest discover -v
+          after_success:
+            - coveralls
         - name: "Python 3.7"
           language: python
           sudo: required
@@ -75,7 +81,10 @@ matrix:
             - pip install keras==2.2.5
             - pip install pandas==0.25.2
             - pip install Werkzeug==0.16.1
+            - pip install coveralls
           services:
             - postgresql
           script:
-            - TEST_FLAG=1 python3 -m unittest discover -v
+            - TEST_FLAG=1 coverage run --source=lib,tools -m unittest discover -v
+          after_success:
+            - coveralls
