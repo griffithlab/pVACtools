@@ -1,10 +1,13 @@
 import pandas as pd
 import numpy as np
+from collections import defaultdict, Counter
+import json
 
 class AggregateAllEpitopes:
     def __init__(self, input_file, output_file, file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
+        self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         self.file_type = file_type
 
     #assign mutations to a "Classification" based on their favorability
@@ -87,18 +90,49 @@ class AggregateAllEpitopes:
         else:
             good_binders = df[df["Median MT Score"] < max_ic50]
         if len(good_binders) > 0:
-            good_binders_hla = good_binders["HLA Allele"].unique()
-            hla = dict(map(lambda x : (x, 'X') if x in good_binders_hla else (x, ""), hla_types))
+            good_binders_hla = Counter(good_binders["HLA Allele"])
+            hla = dict(map(lambda x : (x, good_binders_hla[x]) if x in good_binders_hla else (x, ""), hla_types))
             #get a list of all unique gene/transcript/aa_change combinations
             #store a count of all unique peptides that passed
             if self.file_type == 'pVACbind':
                 anno_count = "NA"
+                peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict)))
+                for index, line in good_binders.to_dict(orient='index').items():
+                    peptides[line['annotation']][line['Epitope Seq']]['ic_50']["{} MT".format(line['HLA Allele'])] = line['Median Score']
+                    peptides[line['annotation']][line['Epitope Seq']]['ic_50']["{} WT".format(line['HLA Allele'])] = "NA"
                 peptide_count = len(good_binders["Epitope Seq"].unique())
             else:
-                anno_count = len(good_binders[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1).unique())
+                peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+                for peptide in good_binders["MT Epitope Seq"].unique():
+                    good_binders_peptide = good_binders[good_binders['MT Epitope Seq'] == peptide]
+                    for peptide_type in ['MT', 'WT']:
+                        ic50s = {}
+                        percentiles = {}
+                        for index, line in good_binders_peptide.to_dict(orient='index').items():
+                            ic50s[line['HLA Allele']] = line['Median {} Score'.format(peptide_type)]
+                            percentiles[line['HLA Allele']] = line['Median {} Percentile'.format(peptide_type)]
+                        sorted_ic50s = []
+                        sorted_percentiles = []
+                        for hla_type in sorted(hla_types):
+                            if hla_type in ic50s:
+                                sorted_ic50s.append(ic50s[hla_type])
+                            else:
+                                sorted_ic50s.append('X')
+                            if hla_type in percentiles:
+                                sorted_percentiles.append(percentiles[hla_type])
+                            else:
+                                sorted_percentiles.append('X')
+                        peptides[line['annotation']][peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
+                        peptides[line['annotation']][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
+                    peptides[line['annotation']][peptide]['hla_types'] = sorted(hla_types)
+                    peptides[line['annotation']][peptide]['mutation_position'] = str(good_binders_peptide.iloc[0]['Mutation Position'])
+                    peptides[line['annotation']][peptide]['wt_peptide'] = good_binders_peptide.iloc[0]['WT Epitope Seq']
+                    peptides[line['annotation']]['Transcript Expr'] = good_binders.iloc[0]['Transcript Expression']
+                anno_count = len(peptides.keys())
                 peptide_count = len(good_binders["MT Epitope Seq"].unique())
         else:
             hla = dict(map(lambda x : (x, ""), hla_types))
+            peptides = {}
             anno_count = 0
             peptide_count = 0
 
@@ -155,7 +189,7 @@ class AggregateAllEpitopes:
             })
 
         df_out = pd.DataFrame.from_dict(out_dict)
-        return df_out
+        return (df_out, peptides)
 
     #sort the table in our preferred manner
     def sort_table(self, df):
@@ -193,6 +227,7 @@ class AggregateAllEpitopes:
         ## get a list of unique mutations
         if self.file_type == 'pVACbind':
             df["key"] = df["Mutation"]
+            df['annotation'] = df['Mutation']
             vaf_clonal = None
         else:
             for column in ['Chromosome', 'Start', 'Stop', 'Protein Position', 'Mutation']:
@@ -201,6 +236,7 @@ class AggregateAllEpitopes:
                 df["key"] = df[['Chromosome', 'Start', 'Stop']].agg(' | '.join, axis=1)
             else:
                 df["key"] = df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].agg('-'.join, axis=1)
+            df['annotation'] = df[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1)
             #do a crude estimate of clonal vaf/purity
             vafs = np.sort(df['Tumor DNA VAF'].unique())[::-1]
             vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
@@ -208,13 +244,29 @@ class AggregateAllEpitopes:
         keys = df["key"].unique()
 
         columns = ['ID']
-        columns.extend(hla_types.tolist())
+        columns.extend(sorted(hla_types.tolist()))
         columns.extend(['Gene', 'AA_change', 'Num_Transcript', 'Peptide', 'Pos', 'Num_Peptides', 'ic50_MT', 'ic50_WT', 'percentile_MT', 'percentile_WT', 'RNA_expr', 'RNA_VAF', 'RNA_Depth', 'DNA_VAF', 'tier'])
         peptide_table = pd.DataFrame(columns=columns)
+        metrics = {}
         for key in keys:
             df_subset = df[df["key"] == key]
-            best_mut_line = self.get_best_mut_line(df_subset, hla_types, vaf_clonal, 1000)
+            (best_mut_line, peptides) = self.get_best_mut_line(df_subset, hla_types, vaf_clonal, 1000)
             peptide_table = peptide_table.append(best_mut_line, sort=False)
+            all_peptides = defaultdict(lambda: defaultdict(list))
+            for index, line in df_subset.to_dict(orient='index').items():
+                if self.file_type == 'pVACbind':
+                    all_peptides[line['annotation']][line['Epitope Seq']].append(line)
+                else:
+                    all_peptides[line['annotation']][line['MT Epitope Seq']].append(line)
+            metrics[key] = {
+                'good_binders': peptides,
+                'good_binders_transcripts': list(peptides.keys()),
+                'DNA VAF': float(best_mut_line['DNA_VAF']),
+                'RNA VAF': float(best_mut_line['RNA_VAF']),
+            }
         peptide_table = self.sort_table(peptide_table)
 
         peptide_table.to_csv(self.output_file, sep='\t', na_rep='NA', index=False)
+
+        with open(self.metrics_file, 'w') as fh:
+            json.dump(metrics, fh, indent=2, separators=(',', ': '))
