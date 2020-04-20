@@ -20,7 +20,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
 
     def test_aggregate_all_epitopes_pvacseq_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
-        output_file = tempfile.NamedTemporaryFile()
+        output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
         self.assertFalse(AggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'), output_file.name).execute())
         self.assertTrue(cmp(
             output_file.name,
