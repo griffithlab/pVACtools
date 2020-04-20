@@ -132,6 +132,7 @@ class AggregateAllEpitopes:
                 'RNA_Depth': ["NA"],
                 'DNA_VAF': ["NA"],
                 'tier': [tier],
+                'ID':[best['key']],
             })
         else:
             out_dict.update({
@@ -150,6 +151,7 @@ class AggregateAllEpitopes:
                 'RNA_Depth': [best["Tumor RNA Depth"]],
                 'DNA_VAF': [best["Tumor DNA VAF"]],
                 'tier': [tier],
+                'ID':[best['key']],
             })
 
         df_out = pd.DataFrame.from_dict(out_dict)
@@ -204,7 +206,8 @@ class AggregateAllEpitopes:
 
         keys = df["key"].unique()
 
-        columns = hla_types.tolist()
+        columns = ['ID']
+        columns.extend(hla_types.tolist())
         columns.extend(['Gene', 'AA_change', 'Num_Transcript', 'Peptide', 'Pos', 'Num_Peptides', 'ic50_MT', 'ic50_WT', 'percentile_MT', 'percentile_WT', 'RNA_expr', 'RNA_VAF', 'RNA_Depth', 'DNA_VAF', 'tier'])
         peptide_table = pd.DataFrame(columns=columns)
         for key in keys:
