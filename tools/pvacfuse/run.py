@@ -5,6 +5,7 @@ from lib.prediction_class import *
 from lib.pipeline import *
 from lib.run_argument_parser import *
 from lib.post_processor import *
+from lib.run_utils import *
 import lib.call_iedb
 
 def define_parser():
@@ -182,6 +183,8 @@ def main(args_input = sys.argv[1:]):
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
         create_combined_reports(base_output_dir, args)
+
+    change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
 if __name__ == '__main__':
     main()
