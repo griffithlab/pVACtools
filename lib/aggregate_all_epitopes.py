@@ -185,6 +185,7 @@ class AggregateAllEpitopes:
     def execute(self):
         df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False)
         df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
+        df.fillna(value="NA", inplace=True)
 
         ## get a list of all represented hla types
         hla_types = df['HLA Allele'].unique()
