@@ -67,6 +67,7 @@ class PvacseqTests(unittest.TestCase):
             "binding_filter",
             "coverage_filter",
             "download_example_data",
+            "generate_aggregated_report",
             "generate_condensed_ranked_report",
             "generate_protein_fasta",
             "install_vep_plugin",
@@ -145,6 +146,20 @@ class PvacseqTests(unittest.TestCase):
     def test_download_example_data_runs(self):
         output_dir = tempfile.TemporaryDirectory()
         download_example_data.main([output_dir.name])
+
+    def test_generate_aggregated_report_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacseq",
+            "generate_aggregated_report.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_generate_aggregated_report_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        generate_aggregated_report.main([input_file, output_file.name])
 
     def test_generate_condensed_ranked_report_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
@@ -278,6 +293,7 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.tsv',
                 'sample.name.tsv_1-24',
                 'sample.name.fasta',
+                'sample.name.all_epitopes.aggregated.tsv',
                 'sample.name.filtered.tsv',
                 'sample.name.filtered.condensed.ranked.tsv',
             ):
@@ -328,9 +344,16 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.tsv',
                 'sample.name.tsv_1-24',
                 'sample.name.fasta',
-                'sample.name.all_epitopes.tsv',
+                'sample.name.all_epitopes.aggregated.tsv',
                 'sample.name.filtered.tsv',
                 'sample.name.filtered.condensed.ranked.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
+                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+
+            for file_name in (
+                'sample.name.all_epitopes.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
@@ -439,7 +462,7 @@ class PvacseqTests(unittest.TestCase):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
             self.assertTrue(compare(output_file, expected_file))
-        for file_name in ['Test.proximal_variants.tsv', 'Test.filtered.tsv']:
+        for file_name in ['Test.proximal_variants.tsv', 'Test.all_epitopes.aggregated.tsv', 'Test.filtered.tsv']:
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
             self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))

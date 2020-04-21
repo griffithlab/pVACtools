@@ -6,7 +6,7 @@ import sys
 import py_compile
 from lib.rank_epitopes import *
 
-class CondenseFinalReportTests(unittest.TestCase):
+class RankEpitopesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         #locate the bin and test_data directories
@@ -18,7 +18,7 @@ class CondenseFinalReportTests(unittest.TestCase):
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
-    def test_condense_final_report_runs_and_produces_expected_output(self):
+    def test_rank_epitopes_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(RankEpitopes(os.path.join(self.test_data_dir, 'input.tsv'), output_file.name, 'median').execute())

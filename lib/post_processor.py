@@ -1,5 +1,6 @@
 import tempfile
 import shutil
+from lib.aggregate_all_epitopes import *
 from lib.binding_filter import *
 from lib.filter import *
 from lib.top_score_filter import *
@@ -14,6 +15,7 @@ class PostProcessor:
     def __init__(self, **kwargs):
         for (k,v) in kwargs.items():
            setattr(self, k, v)
+        self.aggregate_report = self.input_file.replace('.tsv', '.aggregated.tsv')
         self.binding_filter_fh = tempfile.NamedTemporaryFile()
         self.coverage_filter_fh = tempfile.NamedTemporaryFile()
         self.transcript_support_level_filter_fh = tempfile.NamedTemporaryFile()
@@ -29,6 +31,7 @@ class PostProcessor:
             self.ranked_epitopes_fh = tempfile.NamedTemporaryFile()
 
     def execute(self):
+        self.aggregate_all_epitopes()
         self.calculate_manufacturability()
         self.execute_binding_filter()
         self.execute_coverage_filter()
@@ -47,6 +50,11 @@ class PostProcessor:
             print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.condensed_report_file))
         else:
             print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
+
+    def aggregate_all_epitopes(self):
+        print("Creating aggregated report")
+        AggregateAllEpitopes(self.input_file, self.aggregate_report, self.file_type).execute()
+        print("Completed")
 
     def calculate_manufacturability(self):
         if self.run_manufacturability_metrics:
