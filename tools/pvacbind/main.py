@@ -32,6 +32,13 @@ def main():
     )
     top_score_filter_parser.set_defaults(func=top_score_filter)
 
+    generate_aggregated_report_parser = subparsers.add_parser(
+        "generate_aggregated_report",
+        help="Generate an aggregated report from a pVACbind .all_epitopes.tsv report file.",
+        add_help=False
+    )
+    generate_aggregated_report_parser.set_defaults(func=generate_aggregated_report)
+
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
         help="Downloads example input and output files",

@@ -34,6 +34,7 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['run_condense_report'] = True
     post_processing_params['run_manufacturability_metrics'] = False
     post_processing_params['run_reference_proteome_similarity'] = False
+    post_processing_params['file_type'] = 'bedpe'
 
     PostProcessor(**post_processing_params).execute()
 

@@ -59,6 +59,7 @@ class PvacfuseTests(unittest.TestCase):
             "valid_alleles",
             "download_example_data",
             "top_score_filter",
+            "generate_aggregated_report",
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -130,6 +131,20 @@ class PvacfuseTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
         top_score_filter.main([input_file, output_file.name])
+
+    def test_generate_aggregated_report_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pVac_directory,
+            "tools",
+            "pvacfuse",
+            "generate_aggregated_report.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_generate_aggregated_report_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        generate_aggregated_report.main([input_file, output_file.name])
 
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
