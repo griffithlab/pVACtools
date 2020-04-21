@@ -485,6 +485,8 @@ def main(args_input=sys.argv[1:]):
                 shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
                 shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
 
+    change_permissions_recursive(base_output_dir, 0o755, 0o644)
+
 if __name__ == "__main__":
     main()
 
