@@ -131,5 +131,7 @@ def main(args_input = sys.argv[1:]):
         print("Creating combined reports")
         create_combined_reports(base_output_dir, args)
 
+    change_permissions_recursive(base_output_dir, 0o755, 0o644)
+
 if __name__ == '__main__':
     main()
