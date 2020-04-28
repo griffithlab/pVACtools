@@ -1,2 +1,3 @@
-conda:
-    file: environment.yml
+python:
+    install:
+        - requirements: docs/requirements.txt
