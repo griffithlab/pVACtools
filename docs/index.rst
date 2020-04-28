@@ -52,10 +52,16 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The ``pvacbind run`` command would previously allow fasta input files with
-  duplicated headers. However, it would silently skip subsequent entries with
-  duplicated headers even if the fasta sequence was novel. With this release
-  pVACbind will now error out if a duplicate fasta header is encounterd.
+- The ``pvacseq run``, ``pvacfuse run``, and ``pvacbind run`` commands would
+  previously error out when running with both MHC class I and MHC class II
+  algorithms but one or the other would not produce an all_eptiopes.tsv file.
+  This version fixes this bug.
+- MHCflurry version 1.6.0 and higher changed the output file headers. This
+  would cause errors when trying to parse these output files. pVACtools now
+  supports both the old and the new headers.
+- AGFusion updated their output file naming convention in newer versions and
+  is now outputting .exons.csv files instead of .exons.txt files.
+  pVACfuse is now able to process either version.
 
 New in version |version|
 ------------------------
