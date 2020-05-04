@@ -31,6 +31,7 @@ class BindingFilterTests(unittest.TestCase):
             'median',
             False,
             False,
+            None,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,

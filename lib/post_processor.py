@@ -61,6 +61,7 @@ class PostProcessor:
             self.top_score_metric,
             self.exclude_NAs,
             self.allele_specific_binding_thresholds,
+            self.percentile_threshold,
             self.file_type,
         ).execute()
         print("Completed")
