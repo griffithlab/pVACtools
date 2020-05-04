@@ -4,8 +4,6 @@ from lib.aggregate_all_epitopes import *
 from lib.binding_filter import *
 from lib.filter import *
 from lib.top_score_filter import *
-from lib.condense_final_report import *
-from lib.rank_epitopes import *
 from lib.calculate_manufacturability import *
 from lib.calculate_reference_proteome_similarity import *
 import lib.net_chop
@@ -26,9 +24,6 @@ class PostProcessor:
         self.reference_similarity_fh = tempfile.NamedTemporaryFile()
         self.file_type = kwargs.pop('file_type', None)
         self.fasta = kwargs.pop('fasta', None)
-        if self.run_condense_report:
-            self.condensed_report_fh = tempfile.NamedTemporaryFile()
-            self.ranked_epitopes_fh = tempfile.NamedTemporaryFile()
 
     def execute(self):
         self.aggregate_all_epitopes()
@@ -40,16 +35,9 @@ class PostProcessor:
         self.call_net_chop()
         self.call_netmhc_stab()
         self.calculate_reference_proteome_similarity()
-        self.condense_report()
-        self.rank_epitopes()
         shutil.copy(self.reference_similarity_fh.name, self.filtered_report_file)
-        if self.run_condense_report:
-            shutil.copy(self.ranked_epitopes_fh.name, self.condensed_report_file)
         self.close_filehandles()
-        if self.run_condense_report:
-            print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.condensed_report_file))
-        else:
-            print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
+        print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
 
     def aggregate_all_epitopes(self):
         print("Creating aggregated report")
@@ -154,18 +142,6 @@ class PostProcessor:
         else:
             shutil.copy(self.netmhc_stab_fh.name, self.reference_similarity_fh.name)
 
-    def condense_report(self):
-        if self.run_condense_report:
-            print("Creating Condensed Report")
-            CondenseFinalReport(self.reference_similarity_fh.name, self.condensed_report_fh.name).execute()
-            print("Completed")
-
-    def rank_epitopes(self):
-        if self.run_condense_report:
-            print("Ranking neoepitopes")
-            RankEpitopes(self.condensed_report_fh.name, self.ranked_epitopes_fh.name, self.top_score_metric).execute()
-            print("Completed")
-
     def close_filehandles(self):
         self.binding_filter_fh.close()
         self.coverage_filter_fh.close()
@@ -175,6 +151,3 @@ class PostProcessor:
         self.netmhc_stab_fh.close()
         self.manufacturability_fh.close()
         self.reference_similarity_fh.close()
-        if self.run_condense_report:
-            self.condensed_report_fh.close()
-            self.ranked_epitopes_fh.close()

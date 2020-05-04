@@ -450,9 +450,6 @@ class Pipeline(metaclass=ABCMeta):
     def final_path(self):
         return os.path.join(self.output_dir, self.sample_name+".filtered.tsv")
 
-    def ranked_final_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".filtered.condensed.ranked.tsv")
-
     def execute(self):
         self.print_log()
         self.convert_vcf()
@@ -484,9 +481,7 @@ class Pipeline(metaclass=ABCMeta):
         post_processing_params['input_file'] = self.combined_parsed_path()
         post_processing_params['file_type'] = self.input_file_type
         post_processing_params['filtered_report_file'] = self.final_path()
-        post_processing_params['condensed_report_file'] = self.ranked_final_path()
         post_processing_params['fasta'] = self.fasta_file_path()
-        post_processing_params['run_condense_report'] = True
         post_processing_params['run_manufacturability_metrics'] = True
         if self.input_file_type == 'vcf':
             post_processing_params['run_coverage_filter'] = True
@@ -758,7 +753,6 @@ class PvacbindPipeline(Pipeline):
         post_processing_params['run_coverage_filter'] = False
         post_processing_params['run_transcript_support_level_filter'] = False
         post_processing_params['minimum_fold_change'] = None
-        post_processing_params['run_condense_report'] = False
         post_processing_params['run_manufacturability_metrics'] = True
         post_processing_params['fasta'] = self.input_file
         if self.net_chop_method:
