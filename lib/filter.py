@@ -3,11 +3,10 @@ import pandas as pd
 pd.options.mode.chained_assignment = None
 
 class Filter:
-    def __init__(self, input_file, output_file, filter_criteria, exclude_nas, int_filter_columns=[]):
+    def __init__(self, input_file, output_file, filter_criteria, int_filter_columns=[]):
         self.input_file = input_file
         self.output_file = output_file
         self.filter_criteria = filter_criteria
-        self.exclude_nas = exclude_nas
         self.int_filter_columns = int_filter_columns
 
     def execute(self):
@@ -18,7 +17,7 @@ class Filter:
         for criteria in self.filter_criteria:
             clean_column = criteria['column'].replace(' ', '_')
 #           #clean_column != clean_column is a hacky way to keep all NA values
-            if self.exclude_nas:
+            if criteria['exclude_nas']:
                 expression = "(%s %s %s)" % (clean_column, criteria['operator'], criteria['threshold'])
             else:
                 expression = "(%s %s %s) | (%s != %s)" % (clean_column, criteria['operator'], criteria['threshold'], clean_column, clean_column)
