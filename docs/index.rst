@@ -22,7 +22,7 @@ tools:
    users in launching, managing, reviewing, and visualizing the results of
    pVACtools processes.
 
-.. image:: images/pVACtools_main-figure_v4c.png
+.. image:: images/pVACtools_main-figure_v5a.png
     :align: center
     :alt: pVACtools immunotherapy workflow
 
@@ -52,10 +52,16 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The ``pvacbind run`` command would previously allow fasta input files with
-  duplicated headers. However, it would silently skip subsequent entries with
-  duplicated headers even if the fasta sequence was novel. With this release
-  pVACbind will now error out if a duplicate fasta header is encounterd.
+- The ``pvacseq run``, ``pvacfuse run``, and ``pvacbind run`` commands would
+  previously error out when running with both MHC class I and MHC class II
+  algorithms but one or the other would not produce an all_eptiopes.tsv file.
+  This version fixes this bug.
+- MHCflurry version 1.6.0 and higher changed the output file headers. This
+  would cause errors when trying to parse these output files. pVACtools now
+  supports both the old and the new headers.
+- AGFusion updated their output file naming convention in newer versions and
+  is now outputting .exons.csv files instead of .exons.txt files.
+  pVACfuse is now able to process either version.
 
 New in version |version|
 ------------------------
@@ -140,21 +146,28 @@ To stay up-to-date on the latest pVACtools releases please join our :ref:`mailin
 Citations
 ---------
 
-Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Christopher A Miller,
-Alexander T Wollam, Huiming Xia, Connor J Liu, Sidi Zhao, Yang-Yang Feng,
-Aaron P Graubert, Amber Z Wollam, Jonas Neichin, Megan Neveau, Jason Walker,
-William E Gillanders, Elaine R Mardis, Obi L Griffith, Malachi Griffith.
-`pVACtools: a computational toolkit to select and visualize cancer
-neoantigens <https://doi.org/10.1101/501817>`_.
-bioRxiv 501817; doi: https://doi.org/10.1101/501817
+Jasreet Hundal , Susanna Kiwala , Joshua McMichael, Chris Miller, Huiming Xia, 
+Alex Wollam, Conner Liu, Sidi Zhao, Yang-Yang Feng, Aaron Graubert, Amber Wollam, 
+Jonas Neichin, Megan Neveau, Jason Walker, William Gillanders,
+Elaine Mardis, Obi Griffith, Malachi Griffith. pVACtools: A Computational Toolkit to
+Identify and Visualize Cancer Neoantigens. Cancer Immunology Research. 
+2020 Mar;8(3):409-420. doi: 10.1158/2326-6066.CIR-19-0401. 
+PMID: `31907209 <https://www.ncbi.nlm.nih.gov/pubmed/31907209>`_.
 
-Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman, Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. `Accounting for proximal variants improves neoantigen prediction <https://www.nature.com/articles/s41588-018-0283-9>`_. Nature Genetics. 2018, DOI: 10.1038/s41588-018-0283-9. PMID: `30510237 <https://www.ncbi.nlm.nih.gov/pubmed/30510237>`_.
+Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman, 
+Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. 
+`Accounting for proximal variants improves neoantigen prediction <https://www.nature.com/articles/s41588-018-0283-9>`_. 
+Nature Genetics. 2018, DOI: 10.1038/s41588-018-0283-9. PMID: `30510237 <https://www.ncbi.nlm.nih.gov/pubmed/30510237>`_.
 
 Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi
 L. Griffith, Elaine R. Mardis, and Malachi Griffith. `pVACseq: A genome-guided
 in silico approach to identifying tumor neoantigens <http://www.genomemedicine.com/content/8/1/11>`_. Genome Medicine. 2016,
 8:11, DOI: 10.1186/s13073-016-0264-5. PMID: `26825632
 <http://www.ncbi.nlm.nih.gov/pubmed/26825632>`_.
+
+Source code
+-------
+The pVACtools source code is available in `GitHub <https://github.com/griffithlab/pVACtools>`_.
 
 License
 -------

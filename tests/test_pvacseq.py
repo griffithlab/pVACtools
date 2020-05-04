@@ -286,8 +286,10 @@ class PvacseqTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name_21.fa.split_1-48',
-                'sample.name_21.fa.split_1-48.key',
+                'sample.name.9.fa.split_1-48',
+                'sample.name.9.fa.split_1-48.key',
+                'sample.name.10.fa.split_1-48',
+                'sample.name.10.fa.split_1-48.key',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'tmp', file_name.replace('sample.name', 'Test'))
@@ -315,7 +317,7 @@ class PvacseqTests(unittest.TestCase):
                 for allele in methods[method].keys():
                     for length in methods[method][allele]:
                         mock_request.assert_has_calls([
-                            generate_class_i_call(method, allele, length, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "sample.name_21.fa.split_1-48"))
+                            generate_class_i_call(method, allele, length, os.path.join(output_dir.name, "MHC_Class_I", "tmp", "sample.name.{}.fa.split_1-48".format(length)))
                         ])
                         output_file   = os.path.join(output_dir.name, "MHC_Class_I", "tmp", 'sample.name.%s.%s.%s.tsv_1-48' % (method, allele, length))
                         expected_file = os.path.join(self.test_data_directory, "MHC_Class_I", "tmp", 'Test.%s.%s.%s.tsv_1-48' % (method, allele, length))
@@ -341,8 +343,8 @@ class PvacseqTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name_31.fa.split_1-48',
-                'sample.name_31.fa.split_1-48.key',
+                'sample.name.15.fa.split_1-48',
+                'sample.name.15.fa.split_1-48.key',
                 'sample.name.nn_align.DRB1*11:01.15.tsv_1-48',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
@@ -363,7 +365,7 @@ class PvacseqTests(unittest.TestCase):
                 self.assertTrue(os.path.exists(output_file))
 
             mock_request.assert_has_calls([
-                generate_class_ii_call('nn_align', 'DRB1*11:01', 15, os.path.join(output_dir.name, "MHC_Class_II", "tmp", "sample.name_31.fa.split_1-48"))
+                generate_class_ii_call('nn_align', 'DRB1*11:01', 15, os.path.join(output_dir.name, "MHC_Class_II", "tmp", "sample.name.15.fa.split_1-48"))
             ])
 
             with self.assertRaises(SystemExit) as cm:
@@ -435,11 +437,11 @@ class PvacseqTests(unittest.TestCase):
         ]
         run.main(params)
 
-        for file_name in ['Test_21.fa.split_1-818', 'Test_21.fa.split_1-818.key']:
+        for file_name in ['Test.8.fa.split_1-818', 'Test.8.fa.split_1-818.key']:
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', 'tmp', file_name)
             self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
-        for file_name in ['Test.all_epitopes.tsv']:
+        for file_name in ['Test.all_epitopes.tsv', 'Test.fasta']:
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
             self.assertTrue(compare(output_file, expected_file))

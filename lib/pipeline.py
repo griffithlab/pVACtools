@@ -36,7 +36,6 @@ class Pipeline(metaclass=ABCMeta):
         self.alleles                     = kwargs['alleles']
         self.prediction_algorithms       = kwargs['prediction_algorithms']
         self.output_dir                  = kwargs['output_dir']
-        self.peptide_sequence_length     = kwargs.pop('peptide_sequence_length', 21)
         self.epitope_lengths             = kwargs['epitope_lengths']
         self.iedb_executable             = kwargs.pop('iedb_executable', None)
         self.phased_proximal_variants_vcf = kwargs.pop('phased_proximal_variants_vcf', None)
@@ -156,12 +155,14 @@ class Pipeline(metaclass=ABCMeta):
     def generate_combined_fasta(self):
         params = [
             self.input_file,
-            str(self.peptide_sequence_length),
+            str(max(self.epitope_lengths) - 1),
             self.fasta_file_path(),
         ]
         if self.input_file_type == 'vcf':
             import tools.pvacseq.generate_protein_fasta as generate_combined_fasta
             params.extend(["--sample-name", self.sample_name])
+            if self.phased_proximal_variants_vcf is not None:
+                params.extend(["--phased-proximal-variants-vcf", self.phased_proximal_variants_vcf])
         elif self.input_file_type == 'bedpe':
             import tools.pvacfuse.generate_protein_fasta as generate_combined_fasta
         if self.downstream_sequence_length is not None:
@@ -190,7 +191,7 @@ class Pipeline(metaclass=ABCMeta):
             proximal_variants_tsv = os.path.join(self.output_dir, self.sample_name + '.proximal_variants.tsv')
             convert_params['proximal_variants_tsv'] = proximal_variants_tsv
             self.proximal_variants_file = proximal_variants_tsv
-            convert_params['peptide_length'] = self.peptide_sequence_length
+            convert_params['flanking_bases'] = max(self.epitope_lengths) * 4
 
         converter = self.converter(convert_params)
         converter.execute()
@@ -261,32 +262,40 @@ class Pipeline(metaclass=ABCMeta):
             tsv_chunk = "%d-%d" % (split_start, split_end)
             fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
             generate_fasta_params = {
-                'peptide_sequence_length'   : self.peptide_sequence_length,
                 'downstream_sequence_length': self.downstream_sequence_length,
                 'proximal_variants_file'    : self.proximal_variants_file,
             }
-            split_fasta_file_path = "%s_%s" % (self.split_fasta_basename(), fasta_chunk)
-            if os.path.exists(split_fasta_file_path):
-                status_message("Split FASTA file for Entries %s already exists. Skipping." % (fasta_chunk))
-                continue
             if self.input_file_type == 'pvacvector_input_fasta':
+                split_fasta_file_path = "{}_{}".format(self.split_fasta_basename(None), fasta_chunk)
                 generate_fasta_params['input_file'] = self.tsv_file_path()
                 generate_fasta_params['output_file_prefix'] = split_fasta_file_path
                 generate_fasta_params['epitope_lengths'] = self.epitope_lengths
                 generate_fasta_params['spacers'] = self.spacers
+                status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
+                fasta_generator = self.fasta_generator(generate_fasta_params)
+                fasta_generator.execute()
             else:
-                split_fasta_key_file_path = split_fasta_file_path + '.key'
-                generate_fasta_params['input_file'] = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
-                generate_fasta_params['epitope_length'] = max(self.epitope_lengths)
-                generate_fasta_params['output_file'] = split_fasta_file_path
-                generate_fasta_params['output_key_file'] = split_fasta_key_file_path
-            status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
-            fasta_generator = self.fasta_generator(generate_fasta_params)
-            fasta_generator.execute()
+                for epitope_length in self.epitope_lengths:
+                    split_fasta_file_path = "{}_{}".format(self.split_fasta_basename(epitope_length), fasta_chunk)
+                    if os.path.exists(split_fasta_file_path):
+                        status_message("Split FASTA file for Epitope Length {} - Entries {} already exists. Skipping.".format(epitope_length, fasta_chunk))
+                        continue
+                    split_fasta_key_file_path = split_fasta_file_path + '.key'
+                    generate_fasta_params['input_file'] = "%s_%s" % (self.tsv_file_path(), tsv_chunk)
+                    generate_fasta_params['epitope_length'] = epitope_length
+                    generate_fasta_params['flanking_sequence_length'] = epitope_length - 1
+                    generate_fasta_params['output_file'] = split_fasta_file_path
+                    generate_fasta_params['output_key_file'] = split_fasta_key_file_path
+                    status_message("Generating Variant Peptide FASTA and Key Files - Epitope Length {} - Entries {}".format(epitope_length, fasta_chunk))
+                    fasta_generator = self.fasta_generator(generate_fasta_params)
+                    fasta_generator.execute()
         status_message("Completed")
 
-    def split_fasta_basename(self):
-        return os.path.join(self.tmp_dir, self.sample_name + "_" + str(self.peptide_sequence_length) + ".fa.split")
+    def split_fasta_basename(self, epitope_length):
+        if epitope_length is None:
+            return os.path.join(self.tmp_dir, "{}.fa.split".format(self.sample_name))
+        else:
+            return os.path.join(self.tmp_dir, "{}.{}.fa.split".format(self.sample_name, epitope_length))
 
     def call_iedb(self, chunks):
         alleles = self.alleles
@@ -303,9 +312,9 @@ class Pipeline(metaclass=ABCMeta):
             for a in alleles:
                 for epl in epitope_lengths:
                     if self.input_file_type == 'pvacvector_input_fasta':
-                        split_fasta_file_path = "{}_1-2.{}.tsv".format(self.split_fasta_basename(), epl)
+                        split_fasta_file_path = "{}_1-2.{}.tsv".format(self.split_fasta_basename(None), epl)
                     else:
-                        split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
+                        split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(epl), fasta_chunk)
                     if os.path.getsize(split_fasta_file_path) == 0:
                         msg = "Fasta file {} is empty. Skipping".format(split_fasta_file_path)
                         if msg not in warning_messages:
@@ -398,9 +407,9 @@ class Pipeline(metaclass=ABCMeta):
                         split_parsed_output_files.append(split_parsed_file_path)
                         continue
                     if self.input_file_type == 'pvacvector_input_fasta':
-                        split_fasta_file_path = "{}_1-2.{}.tsv".format(self.split_fasta_basename(), epl)
+                        split_fasta_file_path = "{}_1-2.{}.tsv".format(self.split_fasta_basename(None), epl)
                     else:
-                        split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(), fasta_chunk)
+                        split_fasta_file_path = "%s_%s"%(self.split_fasta_basename(epl), fasta_chunk)
                     split_fasta_key_file_path = split_fasta_file_path + '.key'
 
                     if len(split_iedb_output_files) > 0:
