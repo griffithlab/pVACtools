@@ -32,16 +32,16 @@ class BindingFilter:
                     column = 'Median MT Score'
                 elif self.top_score_metric == 'lowest':
                     column = 'Best MT Score'
-            filter_criteria.append({'column': column, 'operator': '<=', 'threshold': self.binding_threshold})
+            filter_criteria.append({'column': column, 'operator': '<=', 'threshold': self.binding_threshold, 'exclude_nas': self.exclude_nas})
 
             if self.minimum_fold_change is not None:
                 if self.top_score_metric == 'median':
                     column = 'Median Fold Change'
                 elif self.top_score_metric == 'lowest':
                     column = 'Corresponding Fold Change'
-                filter_criteria.append({'column': column, 'operator': '>=', 'threshold': self.minimum_fold_change})
+                filter_criteria.append({'column': column, 'operator': '>=', 'threshold': self.minimum_fold_change, 'exclude_nas': self.exclude_nas})
 
-            Filter(self.input_file, self.output_file, filter_criteria, self.exclude_nas).execute()
+            Filter(self.input_file, self.output_file, filter_criteria).execute()
 
     @classmethod
     def parser(cls, tool):
