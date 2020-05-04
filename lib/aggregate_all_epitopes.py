@@ -97,7 +97,7 @@ class AggregateAllEpitopes:
             best['aachange'] = best['Mutation']
         else:
             if best['Variant Type'] == 'FS':
-                best['aachange'] = 'Frameshift'
+                best['aachange'] = 'FS{}'.format(best['Protein Position'])
             else:
                 (wt_aa, mt_aa) = best["Mutation"].split("/")
                 best["aachange"] = "".join([wt_aa, best["Protein Position"], mt_aa])

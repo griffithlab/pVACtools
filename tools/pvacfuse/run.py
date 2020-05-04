@@ -17,6 +17,12 @@ def create_combined_reports(base_output_dir, args):
 
     file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
     file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
+    if not os.path.exists(file1):
+        print("File {} doesn't exist. Aborting.".format(file1))
+        return
+    if not os.path.exists(file2):
+        print("File {} doesn't exist. Aborting.".format(file2))
+        return
     combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
     combine_reports([file1, file2], combined_output_file)
     filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
@@ -95,7 +101,6 @@ def main(args_input = sys.argv[1:]):
 
         class_i_arguments = shared_arguments.copy()
         class_i_arguments['alleles']                 = class_i_alleles
-        class_i_arguments['peptide_sequence_length'] = args.peptide_sequence_length
         class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
         class_i_arguments['epitope_lengths']         = args.class_i_epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
@@ -124,7 +129,6 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments = shared_arguments.copy()
         class_ii_arguments['alleles']                 = class_ii_alleles
         class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
-        class_ii_arguments['peptide_sequence_length'] = 31
         class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
         class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
         class_ii_arguments['output_dir']              = output_dir
@@ -139,6 +143,8 @@ def main(args_input = sys.argv[1:]):
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
         create_combined_reports(base_output_dir, args)
+
+    change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
 if __name__ == '__main__':
     main()

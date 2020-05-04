@@ -297,7 +297,12 @@ class MHCflurry(MHCI):
                 df = pd.read_csv(tmp_output_file.name)
                 df['seq_num'] = seq_num
                 df['start'] = df.index+1
-                df.rename(columns={'mhcflurry_prediction': 'ic50', 'mhcflurry_prediction_percentile': 'percentile'}, inplace=True)
+                df.rename(columns={
+                    'mhcflurry_prediction': 'ic50',
+                    'mhcflurry_affinity': 'ic50',
+                    'mhcflurry_prediction_percentile': 'percentile',
+                    'mhcflurry_affinity_percentile': 'percentile'
+                }, inplace=True)
                 results = results.append(df)
         return (results, 'pandas')
 
