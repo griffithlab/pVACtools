@@ -11,10 +11,8 @@ class TopScoreFilter:
         self.file_type = file_type
 
     def parse_transcript_id(self, transcript):
-        if 'ENST' in transcript:
-            return re.compile(r'ENST(\d+)').match(transcript).group(1)
-        elif 'ENSMUST' in transcript:
-            return re.compile(r'ENMUST(\d+)').match(transcript).group(1)
+        if transcript.startswith('ENS'):
+            return re.compile(r'ENS(?:[A-Z]{3})?T(\d+)').match(transcript).group(1)
         else:
             return None
 
