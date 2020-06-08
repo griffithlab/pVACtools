@@ -190,3 +190,20 @@ This is a hotfix release. It fixes the following issues:
 - AGFusion updated their output file naming convention in newer versions and
   is now outputting .exons.csv files instead of .exons.txt files.
   pVACfuse is now able to process either version.
+
+1.5.9
+-----
+
+- Some variant consequences supported by pVACseq would not actually result in
+  a amino acid change (e.g.,
+  ``inframe_insertion&incomplete_terminal_codon_variant``). These types of
+  variants were not being filtered out correctly and would cause an error when
+  trying to create the peptide fasta sequences. This issue has been fixed and
+  these variants are now being filtered out upstream.
+- Running pVACseq on a non-human VCF would cause an error in the top score
+  filter since the transcript identifiers would not match the expected format.
+  This has been fixed and the top score filter now supports non-human
+  transcripts.
+- There was an error in setting up the standalone ``pvacfuse
+  generate_protein_fasta`` command which would result in an error when trying
+  to run this command. This has now been fixed.

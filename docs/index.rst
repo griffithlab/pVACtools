@@ -52,16 +52,19 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The ``pvacseq run``, ``pvacfuse run``, and ``pvacbind run`` commands would
-  previously error out when running with both MHC class I and MHC class II
-  algorithms but one or the other would not produce an all_eptiopes.tsv file.
-  This version fixes this bug.
-- MHCflurry version 1.6.0 and higher changed the output file headers. This
-  would cause errors when trying to parse these output files. pVACtools now
-  supports both the old and the new headers.
-- AGFusion updated their output file naming convention in newer versions and
-  is now outputting .exons.csv files instead of .exons.txt files.
-  pVACfuse is now able to process either version.
+- Some variant consequences supported by pVACseq would not actually result in
+  a amino acid change (e.g.,
+  ``inframe_insertion&incomplete_terminal_codon_variant``). These types of
+  variants were not being filtered out correctly and would cause an error when
+  trying to create the peptide fasta sequences. This issue has been fixed and
+  these variants are now being filtered out upstream.
+- Running pVACseq on a non-human VCF would cause an error in the top score
+  filter since the transcript identifiers would not match the expected format.
+  This has been fixed and the top score filter now supports non-human
+  transcripts.
+- There was an error in setting up the standalone ``pvacfuse
+  generate_protein_fasta`` command which would result in an error when trying
+  to run this command. This has now been fixed.
 
 New in version |version|
 ------------------------

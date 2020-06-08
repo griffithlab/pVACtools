@@ -139,6 +139,8 @@ class FastaGenerator(metaclass=ABCMeta):
                             .format(line['downstream_amino_acid_sequence'], position, line['wildtype_amino_acid_sequence'][position])
                         )
             elif variant_type == 'missense' or variant_type == 'inframe_ins':
+                if '/' not in line['amino_acid_change']:
+                    continue
                 wildtype_amino_acid, mutant_amino_acid = line['amino_acid_change'].split('/')
                 if '*' in wildtype_amino_acid:
                     wildtype_amino_acid = wildtype_amino_acid.split('*')[0]
