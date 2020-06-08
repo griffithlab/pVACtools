@@ -89,7 +89,7 @@ setup(
         'requests',
         'PyYAML>=5.1',
         'connexion==1.4.2',
-        'biopython',
+        'biopython==1.76',
         'networkx',
         'simanneal',
         'pandas',
