@@ -690,6 +690,26 @@ class FastaGeneratorTests(unittest.TestCase):
         self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
         self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
 
+    def test_inframe_insertion_with_no_aa_change(self):
+        peptide_sequence_length        = '21'
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_no_aa_change.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'peptide_sequence_length'   : self.peptide_sequence_length,
+            'epitope_length'            : self.epitope_length,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
+        self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
+
     def test_proximal_variant_on_same_codon_as_somatic_variant_results_in_novel_peptide(self):
         peptide_sequence_length        = '21'
         test_data_dir                  = os.path.join(self.test_data_dir, 'proximal_variant_on_same_codon_as_somatic_variant_results_in_novel_peptide')
