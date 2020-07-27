@@ -54,7 +54,7 @@ This is a hotfix release. It fixes the following issues:
 
 - A stray character at the end of one file was causing a syntax error in Python
   3.8. The character has been removed. pVACtools should now be 3.8 compatible
-  although some dependecies might not be compatible yet.
+  although some dependencies might not be compatible yet.
 
 New in version |version|
 ------------------------
