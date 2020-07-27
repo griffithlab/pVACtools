@@ -207,3 +207,12 @@ This is a hotfix release. It fixes the following issues:
 - There was an error in setting up the standalone ``pvacfuse
   generate_protein_fasta`` command which would result in an error when trying
   to run this command. This has now been fixed.
+
+1.5.10
+------
+
+This is a hotfix release. It fixes the following issues:
+
+- A stray character at the end of one file was causing a syntax error in Python
+  3.8. The character has been removed. pVACtools should now be 3.8 compatible
+  although some dependecies might not be compatible yet.
