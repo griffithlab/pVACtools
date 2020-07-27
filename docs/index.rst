@@ -52,19 +52,9 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- Some variant consequences supported by pVACseq would not actually result in
-  a amino acid change (e.g.,
-  ``inframe_insertion&incomplete_terminal_codon_variant``). These types of
-  variants were not being filtered out correctly and would cause an error when
-  trying to create the peptide fasta sequences. This issue has been fixed and
-  these variants are now being filtered out upstream.
-- Running pVACseq on a non-human VCF would cause an error in the top score
-  filter since the transcript identifiers would not match the expected format.
-  This has been fixed and the top score filter now supports non-human
-  transcripts.
-- There was an error in setting up the standalone ``pvacfuse
-  generate_protein_fasta`` command which would result in an error when trying
-  to run this command. This has now been fixed.
+- A stray character at the end of one file was causing a syntax error in Python
+  3.8. The character has been removed. pVACtools should now be 3.8 compatible
+  although some dependecies might not be compatible yet.
 
 New in version |version|
 ------------------------
