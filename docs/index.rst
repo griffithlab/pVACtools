@@ -52,16 +52,9 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The ``pvacseq run``, ``pvacfuse run``, and ``pvacbind run`` commands would
-  previously error out when running with both MHC class I and MHC class II
-  algorithms but one or the other would not produce an all_eptiopes.tsv file.
-  This version fixes this bug.
-- MHCflurry version 1.6.0 and higher changed the output file headers. This
-  would cause errors when trying to parse these output files. pVACtools now
-  supports both the old and the new headers.
-- AGFusion updated their output file naming convention in newer versions and
-  is now outputting .exons.csv files instead of .exons.txt files.
-  pVACfuse is now able to process either version.
+- A stray character at the end of one file was causing a syntax error in Python
+  3.8. The character has been removed. pVACtools should now be 3.8 compatible
+  although some dependencies might not be compatible yet.
 
 New in version |version|
 ------------------------

@@ -10,6 +10,23 @@ class TopScoreFilter:
         self.top_score_metric = top_score_metric
         self.file_type = file_type
 
+    def parse_transcript_id(self, transcript):
+        if transcript.startswith('ENS'):
+            return re.compile(r'ENS(?:[A-Z]{3})?T(\d+)').match(transcript).group(1)
+        else:
+            return None
+
+    def find_line_with_lowest_transcript_id(self, lines):
+        line_with_lowest_transcript_id = lines[0]
+        lowest_transcript_id = self.parse_transcript_id(line_with_lowest_transcript_id['Transcript'])
+        if lowest_transcript_id is not None:
+            for line in lines:
+                transcript_id = self.parse_transcript_id(line['Transcript'])
+                if transcript_id < lowest_transcript_id:
+                    lowest_transcript_id = transcript_id
+                    line_with_lowest_transcript_id = line
+        return line_with_lowest_transcript_id
+
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
             reader = csv.DictReader(input_fh, delimiter = "\t")
@@ -78,13 +95,7 @@ class TopScoreFilter:
                                     line_with_max_expression = line_with_transcript_expression
                             filtered_lines.append(line_with_max_expression)
                         else:
-                            line_with_lowest_transcript_id = lines[0]
-                            lowest_transcript_id = re.compile(r'ENST(\d+)').match(line_with_lowest_transcript_id['Transcript']).group(1)
-                            for line in lines:
-                                transcript_id = re.compile(r'ENST(\d+)').match(line['Transcript']).group(1)
-                                if transcript_id < lowest_transcript_id:
-                                    lowest_transcript_id = transcript_id
-                                    line_with_lowest_transcript_id = line
+                            line_with_lowest_transcript_id = self.find_line_with_lowest_transcript_id(lines)
                             filtered_lines.append(line_with_lowest_transcript_id)
 
             if self.file_type != 'pVACbind':

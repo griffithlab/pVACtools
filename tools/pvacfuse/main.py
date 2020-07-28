@@ -35,7 +35,7 @@ def define_parser():
         help="Generate an annotated fasta file from Integrate-Neo or AGFusion output",
         add_help=False,
     )
-    generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta_parser)
+    generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
 
     generate_aggregated_report_parser = subparsers.add_parser(
         "generate_aggregated_report",

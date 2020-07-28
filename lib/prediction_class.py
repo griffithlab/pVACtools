@@ -52,9 +52,10 @@ class IEDB(metaclass=ABCMeta):
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
         if iedb_executable_path is not None:
-            arguments = self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length)
+            arguments = [sys.executable]
+            arguments.extend(self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length))
             response_fh = tempfile.TemporaryFile()
-            response = run(['/bin/bash', '-l', '-c', 'conda activate pvactools_py27; python {}'.format(arguments)], stdout=response_fh, check=True)
+            response = run(arguments, stdout=response_fh, check=True)
             response_fh.seek(0)
             response_text = self.filter_response(response_fh.read())
             response_fh.close()
@@ -358,7 +359,7 @@ class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
             sys.exit("Length %s not valid for allele %s and method %s." % (length, allele, self.iedb_prediction_method))
 
     def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
-        return "{} {} {} {} {}".format(iedb_executable_path, method, allele, str(epitope_length), input_file)
+        return [iedb_executable_path, method, allele, str(epitope_length), input_file]
 
 class NetMHC(IEDBMHCI):
     @property
@@ -436,7 +437,7 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
 
     def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
         allele = allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
-        return "{} {} {} {} {}".format(iedb_executable_path, method, allele, input_file, epitope_length)
+        return [iedb_executable_path, method, allele, input_file, str(epitope_length)]
 
 class NetMHCIIpan(IEDBMHCII):
     @property
