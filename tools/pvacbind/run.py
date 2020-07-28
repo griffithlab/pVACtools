@@ -51,9 +51,6 @@ def main(args_input = sys.argv[1:]):
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
 
-    if args.iedb_install_directory:
-        lib.call_iedb.setup_iedb_conda_env()
-
     input_file_type = 'fasta'
     base_output_dir = os.path.abspath(args.output_dir)
 
@@ -66,6 +63,7 @@ def main(args_input = sys.argv[1:]):
         'sample_name'               : args.sample_name,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
+        'percentile_threshold'      : args.percentile_threshold,
         'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,

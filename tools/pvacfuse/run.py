@@ -58,9 +58,6 @@ def main(args_input = sys.argv[1:]):
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
-    if args.iedb_install_directory:
-        lib.call_iedb.setup_iedb_conda_env()
-
     input_file_type = 'bedpe'
     base_output_dir = os.path.abspath(args.output_dir)
 
@@ -73,6 +70,7 @@ def main(args_input = sys.argv[1:]):
         'sample_name'               : args.sample_name,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
+        'percentile_threshold'      : args.percentile_threshold,
         'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,

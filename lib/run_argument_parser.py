@@ -61,6 +61,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Report only epitopes where the mutant allele has ic50 binding scores below this value.",
         )
         parser.add_argument(
+            '--percentile-threshold', type=float,
+            help="Report only epitopes where the mutant allele "
+                 +"has a percentile rank below this value."
+        )
+        parser.add_argument(
             '--allele-specific-binding-thresholds',
             help="Use allele-specific binding thresholds. To print the allele-specific binding thresholds run `%s allele_specific_cutoffs`. " % tool_name
                  + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
