@@ -358,7 +358,7 @@ class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
             sys.exit("Length %s not valid for allele %s and method %s." % (length, allele, self.iedb_prediction_method))
 
     def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
-        return [iedb_executable_path, method, allele, str(epitope_length), input_file)]
+        return [iedb_executable_path, method, allele, str(epitope_length), input_file]
 
 class NetMHC(IEDBMHCI):
     @property
