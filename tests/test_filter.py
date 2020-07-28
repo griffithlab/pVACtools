@@ -27,8 +27,8 @@ class FilterTests(unittest.TestCase):
                 'column': "Median MT Score",
                 'operator': "<",
                 'threshold': "500",
+                'exclude_nas': False
             }],
-            False,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -48,8 +48,8 @@ class FilterTests(unittest.TestCase):
                 'column': "Median MT Score",
                 'operator': "<=",
                 'threshold': "500",
+                'exclude_nas': False
             }],
-            False,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -69,8 +69,8 @@ class FilterTests(unittest.TestCase):
                 'column': "Median MT Score",
                 'operator': "==",
                 'threshold': "500",
+                'exclude_nas': False
             }],
-            False,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -90,8 +90,8 @@ class FilterTests(unittest.TestCase):
                 'column': "Median MT Score",
                 'operator': ">=",
                 'threshold': "500",
+                'exclude_nas': False
             }],
-            False,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -111,8 +111,8 @@ class FilterTests(unittest.TestCase):
                 'column': "Median MT Score",
                 'operator': ">",
                 'threshold': "500",
+                'exclude_nas': False
             }],
-            False,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -132,8 +132,8 @@ class FilterTests(unittest.TestCase):
                 'column': "Tumor RNA Depth",
                 'operator': ">",
                 'threshold': "100",
+                'exclude_nas': False
             }],
-            False
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -153,8 +153,8 @@ class FilterTests(unittest.TestCase):
                 'column': "Tumor RNA Depth",
                 'operator': ">",
                 'threshold': "100",
+                'exclude_nas': True
             }],
-            True,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -174,8 +174,8 @@ class FilterTests(unittest.TestCase):
                 'column': "Corresponding Fold Change",
                 'operator': ">",
                 'threshold': "100",
+                'exclude_nas': True
             }],
-            True,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
