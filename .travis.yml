@@ -22,6 +22,7 @@ matrix:
             - pip install tensorflow==1.14.0
             - pip install keras==2.2.5
             - pip install Werkzeug==0.16.1
+            - pip install biopython==1.76
             - pip install coveralls
             - pip install -e .
             - mhcflurry-downloads fetch

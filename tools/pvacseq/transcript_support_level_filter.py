@@ -31,12 +31,11 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': args.maximum_transcript_support_level}]
+    filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': args.maximum_transcript_support_level, 'exclude_nas': args.exclude_NAs}]
     Filter(
         args.input_file,
         args.output_file,
         filter_criteria,
-        args.exclude_NAs,
         ['Transcript Support Level'],
     ).execute()
 
