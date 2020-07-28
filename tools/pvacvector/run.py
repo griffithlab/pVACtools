@@ -388,9 +388,6 @@ def main(args_input=sys.argv[1:]):
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
 
-    if args.iedb_install_directory:
-        lib.call_iedb.setup_iedb_conda_env()
-
     if (os.path.splitext(args.input_file))[1] == '.fa':
         input_file = args.input_file
         generate_input_fasta = False
