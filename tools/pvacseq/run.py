@@ -72,6 +72,7 @@ def main(args_input = sys.argv[1:]):
         'sample_name'               : args.sample_name,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
+        'percentile_threshold'      : args.percentile_threshold,
         'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
         'minimum_fold_change'       : args.minimum_fold_change,
         'net_chop_method'           : args.net_chop_method,
