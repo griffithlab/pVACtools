@@ -52,7 +52,8 @@ class IEDB(metaclass=ABCMeta):
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
         if iedb_executable_path is not None:
-            arguments = ['python'].extend(self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length))
+            arguments = [sys.executable]
+            arguments.extend(self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length))
             response_fh = tempfile.TemporaryFile()
             response = run(arguments, stdout=response_fh, check=True)
             response_fh.seek(0)
