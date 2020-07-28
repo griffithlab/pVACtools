@@ -60,9 +60,6 @@ def main(args_input = sys.argv[1:]):
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
-    if args.iedb_install_directory:
-        lib.call_iedb.setup_iedb_conda_env()
-
     input_file_type = 'vcf'
     base_output_dir = os.path.abspath(args.output_dir)
 
