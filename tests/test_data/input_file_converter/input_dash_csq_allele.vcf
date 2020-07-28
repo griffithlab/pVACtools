@@ -1,4 +1,5 @@
 ##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|REFSEQ_MATCH|SOURCE|GIVEN_REF|USED_REF|DownstreamProtein|ProteinLengthChange|WildtypeProtein">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##DownstreamProtein=Predicted downstream translation for frameshift mutations
 ##ProteinLengthChange=Predicted change in protein product length
 ##WildtypeProtein=The normal, non-mutated protein sequence

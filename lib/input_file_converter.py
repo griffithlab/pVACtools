@@ -90,9 +90,11 @@ class VcfConverter(InputFileConverter):
             if self.normal_sample_name is not None and self.normal_sample_name not in self.vcf_reader.samples:
                 sys.exit("normal_sample_name {} not a sample ID in the #CHROM header of VCF {}".format(self.normal_sample_name, self.input_file))
         elif len(self.vcf_reader.samples) ==  0:
-            sys.exit("VCF doesn't contain any sample genotype information.")
+            sys.exit("VCF doesn't contain any sample genotype information. Add a dummy sample using the vcf-genotype-annotator tool available as part of the vatools package.")
         else:
             self.sample_name = self.vcf_reader.samples[0]
+        if 'GT' not in self.vcf_reader.formats:
+            sys.exit("VCF doesn't contain any sample genotype information. Add a dummy sample using the vcf-genotype-annotator tool available as part of the vatools package.")
         self.writer = open(self.output_file, 'w')
         self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         self.tsv_writer.writeheader()
