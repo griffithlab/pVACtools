@@ -241,4 +241,4 @@ class VectorVisualization:
         #option 2: 6 color scheme
         scheme = [(31,120,180),(51,160,44),(227,26,28),(255,127,0),(106,61,154),(177,89,40)]
         count =  count % len(scheme)
-        return scheme[count]\
+        return scheme[count]
