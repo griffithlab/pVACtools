@@ -2,12 +2,14 @@ import pandas as pd
 import numpy as np
 from collections import defaultdict, Counter
 import json
+from Bio import SeqIO
 
 class AggregateAllEpitopes:
-    def __init__(self, input_file, output_file, file_type='pVACseq'):
+    def __init__(self, input_file, output_file, file_type='pVACseq', fasta_file=None):
         self.input_file = input_file
         self.output_file = output_file
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
+        self.fasta_file = fasta_file
         self.file_type = file_type
 
     #assign mutations to a "Classification" based on their favorability
@@ -216,7 +218,14 @@ class AggregateAllEpitopes:
 
         return df
 
+    def parse_fasta_file(self):
+        seq_dict = {}
+        for record in SeqIO.parse(self.fasta_file, "fasta"):
+            seq_dict[record.id] = str(record.seq)
+        return seq_dict
+
     def execute(self):
+        peptide_fastas = self.parse_fasta_file()
         df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False)
         df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
         df.fillna(value="NA", inplace=True)
@@ -264,6 +273,19 @@ class AggregateAllEpitopes:
                 'DNA VAF': float(best_mut_line['DNA_VAF']),
                 'RNA VAF': float(best_mut_line['RNA_VAF']),
             }
+            if self.fasta_file is not None:
+                if self.file_type == 'pVACbind':
+                    metrics[key]['peptide'] = peptides[line['Index']]
+                else:
+                    if line['Variant Type'] == 'FS':
+                        index = '%s.%s.%s.%s%s/%s' % (line['Gene Name'], line['Transcript'], line['Variant Type'], line['Protein Position'], line['Reference'], line['Variant'])
+                    else:
+                        index = '%s.%s.%s.%s%s' % (line['Gene Name'], line['Transcript'], line['Variant Type'], line['Protein Position'], line['Mutation'])
+                    wt_matches = [i for i in peptide_fastas.keys() if i.endswith(index) and i.startswith('WT')]
+                    mt_matches = [i for i in peptide_fastas.keys() if i.endswith(index) and i.startswith('MT')]
+                    if len(wt_matches) == 1 and len(mt_matches) == 1:
+                        metrics[key]['mt_peptide'] = peptide_fastas[mt_matches[0]]
+                        metrics[key]['wt_peptide'] = peptide_fastas[wt_matches[0]]
         peptide_table = self.sort_table(peptide_table)
 
         peptide_table.to_csv(self.output_file, sep='\t', na_rep='NA', index=False)
