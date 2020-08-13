@@ -331,7 +331,10 @@ class VectorFastaGenerator():
             seq_dict[record.id] = data
         seq_keys = sorted(seq_dict)
 
-        seq_tuples = list(itertools.permutations(seq_keys, 2))
+        if contains_problematic_peptides:
+            seq_tuples = self.combine_problematic_peptides(seq_dict)
+        else:
+            seq_tuples = list(itertools.permutations(seq_keys, 2))
 
         for length in self.epitope_lengths:
             epitopes = dict()
@@ -372,3 +375,16 @@ class VectorFastaGenerator():
 
             writer.close()
             key_writer.close()
+
+    def combine_problematic_peptides(self, seq_dict):
+        seq_tuples = []
+        for (seq_id, data) in seq_dict.items():
+            other_seq_ids = list(seq_dict.keys())
+            other_seq_ids.remove(seq_id)
+            if data['problematic_start']:
+                for other_seq_id in other_seq_ids:
+                    seq_tuples.append((other_seq_id, seq_id))
+            if data['problematic_end']:
+                for other_seq_id in other_seq_ids:
+                    seq_tuples.append((seq_id, other_seq_id))
+        return list(set(seq_tuples))
