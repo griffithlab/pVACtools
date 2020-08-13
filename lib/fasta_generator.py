@@ -1,4 +1,5 @@
 import csv
+import json
 import re
 import sys
 from collections import OrderedDict, defaultdict
@@ -321,7 +322,13 @@ class VectorFastaGenerator():
     def execute(self):
         seq_dict = dict()
         for record in SeqIO.parse(self.input_file, "fasta"):
-            seq_dict[record.id] = str(record.seq)
+            data = {'seq': str(record.seq)}
+            if record.id != record.description:
+                data.update(json.loads(record.description.split(' ', 1)[1]))
+                contains_problematic_peptides = True
+            else:
+                contains_problematic_peptides = False
+            seq_dict[record.id] = data
         seq_keys = sorted(seq_dict)
 
         seq_tuples = list(itertools.permutations(seq_keys, 2))
@@ -333,8 +340,10 @@ class VectorFastaGenerator():
             for comb in seq_tuples:
                 seq1 = comb[0]
                 seq2 = comb[1]
-                trunc_seq1 = seq_dict[seq1][(len(seq_dict[seq1]) - wingspan_length):len(seq_dict[seq1])]
-                trunc_seq2 = seq_dict[seq2][0:wingspan_length]
+                seq1_seq = seq_dict[seq1]['seq']
+                seq2_seq = seq_dict[seq2]['seq']
+                trunc_seq1 = seq1_seq[(len(seq1_seq) - wingspan_length):len(seq1_seq)]
+                trunc_seq2 = seq2_seq[0:wingspan_length]
 
                 for this_spacer in self.spacers:
                     if this_spacer != 'None':
