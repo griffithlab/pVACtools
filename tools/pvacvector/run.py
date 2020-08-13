@@ -316,13 +316,31 @@ def shorten_problematic_peptides(input_file, problematic_start, problematic_end,
     records = []
     for record in SeqIO.parse(input_file, "fasta"):
         if record.id in problematic_start and record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)[1:-1], IUPAC.protein), id=record.id, description=record.description)
+            record_new = SeqRecord(Seq(str(record.seq)[1:-1], IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': True}))
         elif record.id in problematic_start:
-            record_new = SeqRecord(Seq(str(record.seq)[1:], IUPAC.protein), id=record.id, description=record.description)
+            record_new = SeqRecord(Seq(str(record.seq)[1:], IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': False}))
         elif record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)[:-1], IUPAC.protein), id=record.id, description=record.description)
+            record_new = SeqRecord(Seq(str(record.seq)[:-1], IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': True}))
         else:
-            record_new = record
+            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': False}))
+        records.append(record_new)
+    os.makedirs(output_dir, exist_ok=True)
+    new_input_file = os.path.join(output_dir, "vector_input.fa")
+    SeqIO.write(records, new_input_file, "fasta")
+    return new_input_file
+
+def mark_problematic_peptides_in_fasta(input_file, problematic_start, problematic_end, output_dir):
+    print("Marking problematic peptides in fasta")
+    records = []
+    for record in SeqIO.parse(input_file, "fasta"):
+        if record.id in problematic_start and record.id in problematic_end:
+            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': True}))
+        elif record.id in problematic_start:
+            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': False}))
+        elif record.id in problematic_end:
+            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': True}))
+        else:
+            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': False}))
         records.append(record_new)
     os.makedirs(output_dir, exist_ok=True)
     new_input_file = os.path.join(output_dir, "vector_input.fa")
@@ -444,6 +462,10 @@ def main(args_input=sys.argv[1:]):
             print("Processing spacer {}".format(spacer))
             processed_spacers.append(spacer)
             current_output_dir = os.path.join(base_output_dir, str(tries), spacer)
+            try:
+                input_file = mark_problematic_peptides_in_fasta(input_file, problematic_start, problematic_end, current_output_dir)
+            except:
+                pass
             parsed_output_files = run_pipelines(input_file, current_output_dir, args, spacer, class_i_prediction_algorithms, class_ii_prediction_algorithms, class_i_alleles, class_ii_alleles)
             all_parsed_output_files.extend(parsed_output_files)
             min_scores = find_min_scores(all_parsed_output_files, current_output_dir, args)
