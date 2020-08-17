@@ -542,7 +542,7 @@ class FusionInputConverter(InputFileConverter):
                     'protein_position'           : fusion_position,
                     'fusion_amino_acid_sequence' : fusion_amino_acid_sequence,
                     'transcript_name'            : record_info['transcripts'],
-                    'index'                      : '%s.%s.%s.%s' % (count, record_info['genes'], variant_type, fusion_position),
+                    'index'                      : '%s.%s.%s.%s.%s' % (count, record_info['genes'], record_info['transcripts'], variant_type, fusion_position),
                 }
                 output_rows.append(output_row)
                 count += 1
