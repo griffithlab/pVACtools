@@ -65,13 +65,17 @@ class OutputParser(metaclass=ABCMeta):
 
     def get_percentile(self, line):
         if 'percentile' in line:
-            return float(line['percentile'])
+            percentile = line['percentile']
         elif 'percentile_rank' in line:
-            return float(line['percentile_rank'])
+            percentile = line['percentile_rank']
         elif 'rank' in line:
-            return float(line['rank'])
+            percentile = line['rank']
         else:
             return 'NA'
+        if percentile == 'None':
+            return 'NA'
+        else:
+            return float(percentile)
 
     def match_wildtype_and_mutant_entry_for_missense(self, result, mt_position, wt_results, previous_result):
         #The WT epitope at the same position is the match
