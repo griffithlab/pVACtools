@@ -269,10 +269,9 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
     results_file = os.path.join(base_output_dir, args.sample_name + '_results.fa')
     with open(results_file, 'w') as f:
         name = list()
-        if Paths.has_edge(state[0], state[1]):
-            min_score = Paths[state[0]][state[1]]['weight']
-        else:
-            return (None, "No valid junction between peptides {} and {}".format(state[0], state[1]))
+        problematic_ends = []
+        problematic_starts = []
+        problematic_junctions = []
         cumulative_weight = 0
         all_scores = list()
 
@@ -280,14 +279,21 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
             name.append(state[i])
             if Paths.has_edge(state[i], state[i + 1]):
                 edge = Paths[state[i]][state[i + 1]]
-                min_score = min(min_score, edge['weight'])
+                try:
+                    min_score = min(min_score, edge['weight'])
+                except:
+                    min_score = edge['weight']
                 cumulative_weight += edge['weight']
                 all_scores.append(str(edge['weight']))
                 spacer = edge['spacer']
                 if spacer != 'None':
                     name.append(spacer)
             else:
-                return (None, "No valid junction between peptides {} and {}".format(state[i], state[i+1]))
+                problematic_ends.append(state[i])
+                problematic_starts.append(state[i+1])
+                problematic_junctions.append("{} - {}".format(state[i], state[i+1]))
+        if len(problematic_junctions) > 0:
+            return (None, "No valid junction between peptides: {}".format(", ".join(problematic_junctions)), problematic_starts, problematic_ends)
         name.append(state[-1])
         median_score = str(cumulative_weight/len(all_scores))
         peptide_id_list = ','.join(name)
@@ -309,7 +315,7 @@ def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_di
                 output.append(id)
             output.append("\n")
         f.write(''.join(output))
-    return (results_file, None)
+    return (results_file, None, None, None)
 
 def shorten_problematic_peptides(input_file, problematic_start, problematic_end, output_dir):
     print("Shortening problematic peptides")
@@ -454,11 +460,10 @@ def main(args_input=sys.argv[1:]):
                 print("No valid path found. {}".format(error))
                 continue
             distance_matrix = create_distance_matrix(Paths)
-            (results_file, error) = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
+            (results_file, error, problematic_start, problematic_end) = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
             if results_file is not None:
                 break
             else:
-                (problematic_start, problematic_end) = identify_problematic_peptides(Paths, seq_dict)
                 print("No valid path found. {}".format(error))
         tries += 1
 
