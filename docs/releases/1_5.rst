@@ -216,3 +216,17 @@ This is a hotfix release. It fixes the following issues:
 - A stray character at the end of one file was causing a syntax error in Python
   3.8. The character has been removed. pVACtools should now be 3.8 compatible
   although some dependencies might not be compatible yet.
+
+1.5.11
+------
+
+This is a hotfix release. It fixes the following issues:
+
+- The standalone ``pvacbind top_score_filter`` command woul throw an error
+  because it wasn't set up correctly. This has now been fixed.
+- The standalone ``pvacfuse generate_protein_fasta`` would fail when run with
+  the ``--input-tsv`` option because it wasn't able to associate TSV entries
+  with the fasta entries correctly. Using this option will now correctly limit
+  the output to only entries from the input TSV file.
+- In certain situation the trimming of problematic peptides in pVACvector
+  would not work correctly. This issue has now been addressed.
