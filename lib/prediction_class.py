@@ -190,24 +190,53 @@ class PredictionClass(metaclass=ABCMeta):
 
     @classmethod
     def species_for_allele(self, allele):
-        if allele.startswith('HLA'):
-            return 'human'
-        elif allele.startswith('Patr'):
-            return 'chimpanzee'
-        elif allele.startswith('Mamu'):
-            return 'macaque'
-        elif allele.startswith('BoLA'):
-            return 'cow'
-        elif allele.startswith('Eqca'):
-            return 'horse'
-        elif allele.startswith('H-2'):
-            return 'mouse'
-        elif allele.startswith('H2'):
-            return 'mouse'
-        elif allele.startswith('SLA'):
-            return 'pig'
+        allele_to_species = {
+            'HLA' : 'human',
+            'DP'  : 'human',
+            'DQ'  : 'human',
+            'DR'  : 'human',
+            'Atbe': 'white-fronted spider monkey',
+            'Atfu': 'black-headed spider monkey',
+            'BoLA': 'cow',
+            'Caja': 'common marmoset',
+            'Cemi': 'blue monkey',
+            'Chae': 'grivet',
+            'DLA' : 'dog',
+            'Eqca': 'horse',
+            'Gogo': 'gorilla',
+            'H-2' : 'mouse',
+            'H2'  : 'mouse',
+            'Hyla': 'lar gibbon',
+            'Lero': 'golden lion tamarin',
+            'Maar': 'stump-tailed macaque',
+            'Mafa': 'crab-eating macaque',
+            'Mamu': 'rhesus macaque',
+            'Mane': 'southern pig-tailed macaque',
+            'Onmy': 'rainbow trout',
+            'Ovar': 'sheep',
+            'Paan': 'olive baboon',
+            'Pacy': 'yellow baboon',
+            'Paha': 'hamadryas baboon',
+            'Papa': 'bonobo',
+            'Patr': 'chimpanzee',
+            'Pipi': 'white-faced saki',
+            'Popy': 'bornean orangutan',
+            'Safu': 'brown-mantled tamarin',
+            'Sage': "Geoffroy's tamarin",
+            'Samy': 'moustached tamarin',
+            'Saoe': 'cottontop tamarin',
+            'Sasa': 'atlantic salmon',
+            'Sasc': 'common squirrel monkey',
+            'SLA' : 'pig',
+        }
+
+        species = [v for k,v in allele_to_species.items() if allele.startswith(k)]
+        if len(species) == 1:
+            return species[0]
+        elif len(species) == 0:
+            raise Exception("Unable to determine species for allele {}".format(allele))
         else:
-            return 'human'
+            raise Exception("Multiple matching species found for allele {}".format(allele))
 
     @classmethod
     def parse_allele_cutoff_file(cls):
