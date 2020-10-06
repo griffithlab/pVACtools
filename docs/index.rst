@@ -44,6 +44,7 @@ tools:
    frequently_asked_questions
    releases
    citation
+   contribute
    contact
    mailing_list
 
