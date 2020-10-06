@@ -138,18 +138,20 @@ def write_min_scores(min_scores_rows, directory, args):
         writer.writeheader()
         writer.writerows(sorted_best_spacers_min_scores_rows)
 
-def find_min_scores(parsed_output_files, current_output_dir, args):
-    min_scores = {}
+def find_min_scores(parsed_output_files, current_output_dir, args, old_min_scores):
     min_scores_rows = {}
     indexes_with_good_binders = []
     #find indexes that contain a good binder so that they can be excluded from further processing
     #we don't want any peptide-spacer-peptide combination (aka index) that contains a good binder
     #Find min score of all the epitopes of each of the remaining peptide-spacer-peptide combinations 
+    reprocessed_indexes = []
+    reprocessed_min_scores = {}
     for parsed_output_file in parsed_output_files:
         with open(parsed_output_file, 'r') as parsed:
             reader = csv.DictReader(parsed, delimiter="\t")
             for row in reader:
                 index = row['Mutation']
+                reprocessed_indexes.append(index)
 
                 if args.top_score_metric == 'lowest':
                     score = float(row['Best Score'])
@@ -164,19 +166,21 @@ def find_min_scores(parsed_output_files, current_output_dir, args):
                 if score < threshold:
                     indexes_with_good_binders.append(index)
 
-                if index in min_scores and score >= min_scores[index]:
+                if index in reprocessed_min_scores and score >= reprocessed_min_scores[index]:
                     continue
                 else:
-                    min_scores[index] = score
+                    reprocessed_min_scores[index] = score
                     min_scores_rows[index] = row
+    for index, data in reprocessed_min_scores.items():
+        old_min_scores[index] = data
 
     write_min_scores(min_scores_rows.values(), current_output_dir, args)
 
     for index in indexes_with_good_binders:
-        if index in min_scores:
-            del min_scores[index]
+        if index in old_min_scores:
+            del old_min_scores[index]
 
-    return min_scores
+    return old_min_scores
 
 def create_graph(iedb_results, seq_tuples, spacers):
     Paths = nx.DiGraph()
@@ -322,13 +326,31 @@ def shorten_problematic_peptides(input_file, problematic_start, problematic_end,
     records = []
     for record in SeqIO.parse(input_file, "fasta"):
         if record.id in problematic_start and record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)[1:-1], IUPAC.protein), id=record.id, description=record.description)
+            record_new = SeqRecord(Seq(str(record.seq)[1:-1], IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': True}))
         elif record.id in problematic_start:
-            record_new = SeqRecord(Seq(str(record.seq)[1:], IUPAC.protein), id=record.id, description=record.description)
+            record_new = SeqRecord(Seq(str(record.seq)[1:], IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': False}))
         elif record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)[:-1], IUPAC.protein), id=record.id, description=record.description)
+            record_new = SeqRecord(Seq(str(record.seq)[:-1], IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': True}))
         else:
-            record_new = record
+            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': False}))
+        records.append(record_new)
+    os.makedirs(output_dir, exist_ok=True)
+    new_input_file = os.path.join(output_dir, "vector_input.fa")
+    SeqIO.write(records, new_input_file, "fasta")
+    return new_input_file
+
+def mark_problematic_peptides_in_fasta(input_file, problematic_start, problematic_end, output_dir):
+    print("Marking problematic peptides in fasta")
+    records = []
+    for record in SeqIO.parse(input_file, "fasta"):
+        if record.id in problematic_start and record.id in problematic_end:
+            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': True}))
+        elif record.id in problematic_start:
+            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': False}))
+        elif record.id in problematic_end:
+            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': True}))
+        else:
+            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': False}))
         records.append(record_new)
     os.makedirs(output_dir, exist_ok=True)
     new_input_file = os.path.join(output_dir, "vector_input.fa")
@@ -434,6 +456,7 @@ def main(args_input=sys.argv[1:]):
     results_file = None
     max_tries = args.max_clip_length + 1
     tries = 0
+    min_scores = {}
     while results_file is None and tries < max_tries:
         if tries > 0:
             input_file = shorten_problematic_peptides(input_file, problematic_start, problematic_end, os.path.join(base_output_dir, str(tries)))
@@ -443,16 +466,18 @@ def main(args_input=sys.argv[1:]):
         seq_keys = sorted(seq_dict)
         seq_tuples = list(itertools.permutations(seq_keys, 2))
 
-        all_parsed_output_files = []
         processed_spacers = []
         results_file = None
         for spacer in args.spacers:
             print("Processing spacer {}".format(spacer))
             processed_spacers.append(spacer)
             current_output_dir = os.path.join(base_output_dir, str(tries), spacer)
+            try:
+                input_file = mark_problematic_peptides_in_fasta(input_file, problematic_start, problematic_end, current_output_dir)
+            except:
+                pass
             parsed_output_files = run_pipelines(input_file, current_output_dir, args, spacer, class_i_prediction_algorithms, class_ii_prediction_algorithms, class_i_alleles, class_ii_alleles)
-            all_parsed_output_files.extend(parsed_output_files)
-            min_scores = find_min_scores(all_parsed_output_files, current_output_dir, args)
+            min_scores = find_min_scores(parsed_output_files, current_output_dir, args, min_scores)
             Paths = create_graph(min_scores, seq_tuples, processed_spacers)
             (valid, error) = check_graph_valid(Paths, seq_dict)
             if not valid:
