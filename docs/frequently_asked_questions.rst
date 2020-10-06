@@ -12,8 +12,8 @@ Frequently Asked Questions
 
 :large:`How is pVACtools licensed?`
 
-pVACtools is licensed under `NPOSL-3.0
-<http://opensource.org/licenses/NPOSL-3.0>`_.
+pVACtools is licensed under `BSD 3-Clause Clear License
+<https://spdx.org/licenses/BSD-3-Clause-Clear.html>`_.
 
 :large:`Where can I get help?`
 
