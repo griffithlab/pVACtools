@@ -92,6 +92,8 @@ class VcfConverter(InputFileConverter):
         elif len(self.vcf_reader.samples) ==  0:
             sys.exit("VCF doesn't contain any sample genotype information.")
         else:
+            if self.normal_sample_name is not None:
+                sys.exit("normal_sample_name {} provided but the input file is a single-sample (tumor only) VCF".format(self.normal_sample_name))
             self.sample_name = self.vcf_reader.samples[0]
         self.writer = open(self.output_file, 'w')
         self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
