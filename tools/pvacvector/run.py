@@ -493,24 +493,24 @@ def main(args_input=sys.argv[1:]):
         tries += 1
 
     if results_file is None:
-        raise Exception(
+        print(
             'Unable to find path. ' +
             'A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
             '1) increasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
             '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)'
         )
+    else:
+        if 'DISPLAY' in os.environ.keys():
+            VectorVisualization(results_file, base_output_dir, args.spacers).draw()
 
-    if 'DISPLAY' in os.environ.keys():
-        VectorVisualization(results_file, base_output_dir, args.spacers).draw()
+        dna_results_file = os.path.join(base_output_dir, args.sample_name + '_results.dna.fa')
+        create_dna_backtranslation(results_file, dna_results_file)
 
-    dna_results_file = os.path.join(base_output_dir, args.sample_name + '_results.dna.fa')
-    create_dna_backtranslation(results_file, dna_results_file)
-
-    if not args.keep_tmp_files:
-        for subdirectory in range(tries):
-            for spacer in processed_spacers:
-                shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
-                shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
+        if not args.keep_tmp_files:
+            for subdirectory in range(tries):
+                for spacer in processed_spacers:
+                    shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
+                    shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
 
     change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
