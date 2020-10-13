@@ -31,6 +31,20 @@ created):
      - The above file after applying all filters, with cleavage site and stability
        predictions added.
 
+Filters applied to the filtered.tsv file
+----------------------------------------
+
+The filtered.tsv file is the all_epitopes file with the following filters
+applied (in order):
+
+- Binding Filter
+- Top Score Filter
+
+Please see the :ref:`Standalone Filter Commands<pvacbind_filter_commands>`
+documentation for more information on each individual filter. The standalone
+filter commends may be useful to reproduce the filtering or to chose different
+filtering thresholds.
+
 all_epitopes.tsv and filtered.tsv Report Columns
 ------------------------------------------------
 
