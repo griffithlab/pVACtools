@@ -7,7 +7,7 @@ import re
 import os
 from time import sleep
 import collections
-import lib.utils
+import lib.run_utils
 
 cycle = ['|', '/', '-', '\\']
 methods = ['cterm', '20s']
@@ -53,7 +53,7 @@ def main(args_input = sys.argv[1:]):
     i=1
     print("Waiting for results from NetChop... |", end='')
     sys.stdout.flush()
-    for chunk in lib.utils.split_file(reader, 100):
+    for chunk in lib.run_utils.split_file(reader, 100):
         staging_file = tempfile.NamedTemporaryFile(mode='w+')
         current_buffer = {}
         for line in chunk:

@@ -5,9 +5,8 @@ import os
 from abc import ABCMeta
 from collections import OrderedDict
 from lib.csq_parser import CsqParser
-import lib.utils
+import lib.run_utils
 from lib.proximal_variant import ProximalVariant
-import lib.utils
 import binascii
 import re
 import glob
@@ -61,15 +60,15 @@ class VcfConverter(InputFileConverter):
         self.flanking_bases = kwargs.pop('flanking_bases', None)
         if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.flanking_bases):
             sys.exit("A proximal variants TSV output path and number of flanking bases need to be specified if a proximal variants input VCF is provided.")
-        if self.proximal_variants_vcf and not lib.utils.is_gz_file(self.input_file):
+        if self.proximal_variants_vcf and not lib.run_utils.is_gz_file(self.input_file):
             sys.exit("Input VCF {} needs to be bgzipped when running with a proximal variants VCF.".format(self.input_file))
-        if self.proximal_variants_vcf and not lib.utils.is_gz_file(self.proximal_variants_vcf):
+        if self.proximal_variants_vcf and not lib.run_utils.is_gz_file(self.proximal_variants_vcf):
             sys.exit("Proximal variants VCF {} needs to be bgzipped.".format(self.proximal_variants_vcf))
         if self.proximal_variants_vcf and not os.path.exists(self.proximal_variants_vcf + '.tbi'):
             sys.exit('No .tbi file found for proximal variants VCF {}. Proximal variants VCF needs to be tabix indexed.'.format(self.proximal_variants_vcf))
         if self.proximal_variants_vcf and not os.path.exists(self.input_file + '.tbi'):
             sys.exit('No .tbi file found for input VCF {}. Input VCF needs to be tabix indexed if processing with proximal variants.'.format(self.input_file))
-        if lib.utils.is_gz_file(self.input_file):
+        if lib.run_utils.is_gz_file(self.input_file):
             mode = 'rb'
         else:
             mode = 'r'
