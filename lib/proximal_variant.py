@@ -3,7 +3,7 @@ import sys
 import os
 from lib.csq_parser import CsqParser
 from Bio.Seq import translate
-import lib.utils
+import lib.run_utils
 
 class ProximalVariant:
     #flanking_bases is the number of bases (not amino acids!) to search on each side of a variant position
@@ -11,7 +11,7 @@ class ProximalVariant:
         if not os.path.exists(proximal_variants_vcf + '.tbi'):
             sys.exit('No .tbi file found for proximal variants VCF. Proximal variants VCF needs to be tabix indexed.')
 
-        if lib.utils.is_gz_file(proximal_variants_vcf):
+        if lib.run_utils.is_gz_file(proximal_variants_vcf):
             mode = 'rb'
         else:
             mode = 'r'
