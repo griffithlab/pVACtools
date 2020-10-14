@@ -78,8 +78,7 @@ def parse_input_tsv(input_tsv):
     with open(input_tsv, 'r') as fh:
         reader = csv.DictReader(fh, delimiter = "\t")
         for line in reader:
-            index = '{}.{}.{}.{}'.format(line['Gene Name'], line['Transcript'], line['Variant Type'], line['Protein Position'])
-            indexes.append(index)
+            indexes.append(line['index'])
     return indexes
 
 def parse_files(output_file, temp_dir, input_tsv):
@@ -98,8 +97,7 @@ def parse_files(output_file, temp_dir, input_tsv):
         ids = keys[int(record.id)]
         for record_id in ids:
             if tsv_indexes is not None:
-                count, index = record_id.split('.', 1)
-                if index not in tsv_indexes:
+                if record_id not in tsv_indexes:
                     continue
             new_record = SeqRecord(record.seq, id=record_id, description=record_id)
             output_records.append(new_record)
