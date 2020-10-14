@@ -85,3 +85,6 @@ def split_file(reader, lines):
     while piece:
         yield piece
         piece = list(islice(i, lines))
+
+def construct_index(count, gene, transcript, variant_type, position):
+    return '{}.{}.{}.{}.{}'.format(count, gene, transcript, variant_type, position)
