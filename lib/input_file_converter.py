@@ -316,7 +316,7 @@ class VcfConverter(InputFileConverter):
                         else:
                             amino_acid_change_position = protein_position + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
-                    index = '%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position)
+                    index = lib.run_utils.construct_index(count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
                         sys.exit("Warning: TSV index already exists: {}".format(index))
                     else:
@@ -461,7 +461,7 @@ class FusionInputConverter(InputFileConverter):
                 output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
                 transcripts                              = ';'.join(fusions)
                 output_row['transcript_name']            = transcripts
-                output_row['index']                      = '{}.{}.{}.{}.{}'.format(count, entry['name of fusion'], transcripts, variant_type, fusion_position)
+                output_row['index']                      = lib.run_utils.construct_index(count, entry['name of fusion'], transcripts, variant_type, fusion_position)
                 output_rows.append(output_row)
                 count += 1
 
@@ -543,7 +543,7 @@ class FusionInputConverter(InputFileConverter):
                     'protein_position'           : fusion_position,
                     'fusion_amino_acid_sequence' : fusion_amino_acid_sequence,
                     'transcript_name'            : record_info['transcripts'],
-                    'index'                      : '%s.%s.%s.%s.%s' % (count, record_info['genes'], record_info['transcripts'], variant_type, fusion_position),
+                    'index'                      : lib.run_utils.construct_index(count, record_info['genes'], record_info['transcripts'], variant_type, fusion_position)
                 }
                 output_rows.append(output_row)
                 count += 1
