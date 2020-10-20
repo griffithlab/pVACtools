@@ -48,7 +48,7 @@ applied (in order):
 
 Please see the :ref:`Standalone Filter Commands<filter_commands>`
 documentation for more information on each individual filter. The standalone
-filter commends may be useful to reproduce the filtering or to chose different
+filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
 
 all_epitopes.tsv and filtered.tsv Report Columns
