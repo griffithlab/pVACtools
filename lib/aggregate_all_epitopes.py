@@ -11,8 +11,11 @@ class AggregateAllEpitopes:
     def get_tier(self, mutation, vaf_clonal):
         anchor_residue_pass = True
         anchors = [1, 2, len(mutation["MT Epitope Seq"])-1, len(mutation["MT Epitope Seq"])]
-        if mutation["Mutation Position"] in anchors and mutation["Median WT Score"] < 1000:
-            anchor_residue_pass = False
+        if mutation["Median WT Score"] == "NA":
+              anchor_residue_pass = False
+        else:
+          if mutation["Mutation Position"] in anchors and mutation["Median WT Score"] < 1000:
+              anchor_residue_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
         if (mutation["Median MT Score"] < 500 and
@@ -42,15 +45,23 @@ class AggregateAllEpitopes:
            anchor_residue_pass):
             return "Subclonal"
 
-        #relax expression
+        #relax expression.  Include sites that have reasonable vaf but zero overall gene expression
+        lowexpr=False
+        if ((mutation["Tumor RNA VAF"]) * mutation["Gene Expression"] > 0 or
+           mutation["Gene Expression"] == 0 and
+           (mutation["Tumor RNA Depth"]) > 50 and
+           (mutation["Tumor RNA VAF"]) > 0.10):
+             lowexpr=True
+
+        #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
         if (mutation["Median MT Score"] < 1000 and
-           (mutation["Tumor RNA VAF"]) * mutation["Gene Expression"] > 0 and
-           mutation["Tumor DNA VAF"] > (vaf_clonal/2) and
-           anchor_residue_pass):
+            lowexpr==True and
+            mutation["Tumor DNA VAF"] > (vaf_clonal/2) and
+            anchor_residue_pass):
             return "LowExpr"
 
         #zero expression
-        if (mutation["Gene Expression"] == 0 or mutation["Tumor RNA VAF"] == 0):
+        if (mutation["Gene Expression"] == 0 or mutation["Tumor RNA VAF"] == 0) and lowexpr==False:
             return "NoExpr"
 
         #everything else
