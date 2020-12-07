@@ -52,14 +52,14 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- The standalone ``pvacbind top_score_filter`` command woul throw an error
-  because it wasn't set up correctly. This has now been fixed.
-- The standalone ``pvacfuse generate_protein_fasta`` would fail when run with
-  the ``--input-tsv`` option because it wasn't able to associate TSV entries
-  with the fasta entries correctly. Using this option will now correctly limit
-  the output to only entries from the input TSV file.
-- In certain situation the trimming of problematic peptides in pVACvector
-  would not work correctly. This issue has now been addressed.
+- Vaxrank was pinned to an older version because newer versions made
+  backwards-incompatible changes to some code that pVACseq was using. However
+  this was causing installation issues since this older version of the vaxrank
+  pacakge has an indirect dependency on an old version of pysam. We
+  updated the usage of this module so that we could use the latest version of
+  vaxrank and, thus, newer versions of pysam.
+- This version adds error handling for when a normal sample name is provided
+  to pVACseq but the input VCF is a single-sample VCF.
 
 New in version |version|
 ------------------------
