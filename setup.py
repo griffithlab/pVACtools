@@ -61,7 +61,7 @@ for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
 
 setup(
     name="pvactools",
-    version="1.5.11",
+    version="1.5.12",
     packages=[
         "tools",
         "tools.pvacbind",
@@ -108,7 +108,7 @@ setup(
         'swagger-spec-validator==2.1.0',
         'jsonschema==2.6.0',
         'mock',
-        'vaxrank',
+        'vaxrank>=1.1.0',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,
