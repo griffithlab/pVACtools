@@ -92,6 +92,8 @@ class VcfConverter(InputFileConverter):
         elif len(self.vcf_reader.samples) ==  0:
             sys.exit("VCF doesn't contain any sample genotype information. Add a dummy sample using the vcf-genotype-annotator tool available as part of the vatools package.")
         else:
+            if self.normal_sample_name is not None:
+                sys.exit("normal_sample_name {} provided but the input file is a single-sample (tumor only) VCF".format(self.normal_sample_name))
             self.sample_name = self.vcf_reader.samples[0]
         if 'GT' not in self.vcf_reader.formats:
             sys.exit("VCF doesn't contain any sample genotype information. Add a dummy sample using the vcf-genotype-annotator tool available as part of the vatools package.")
