@@ -115,11 +115,14 @@ The resulting ``phased.vcf.gz`` file can be used as the input to the
 
 .. _bgzip_input_vcf:
 
-bgzip and index the input VCF
-______________________________
+bgzip and index the pVACseq main input VCF
+__________________________________________
 
 In order to use the ``--phased-proximal-variants-vcf`` option you will also
-need to bgzip and index your main input VCF.
+need to bgzip and index the VCF you plan on using as the main input VCF to
+pVACseq. This step would be done after all the required and optional
+preprocessing steps (e.g. VEP annotation, adding readcount and expression
+data). 
 
 .. code-block:: none
 
