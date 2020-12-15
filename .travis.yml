@@ -23,6 +23,7 @@ matrix:
             - pip install keras==2.2.5
             - pip install Werkzeug==0.16.1
             - pip install biopython==1.76
+            - pip install watchdog==0.9.0
             - pip install coveralls
             - pip install -e .
             - mhcflurry-downloads fetch
