@@ -52,11 +52,11 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- MHCflurry would previously be called once per pepetide sequence. Because a
+- MHCflurry would previously be called once per peptide sequence. Because a
   large overhead for MHCflurry is the creation of the model and the model gets
   created every time MHCflurry is called, this would cause very long runtimes
-  when using this predicition algorithm. This version updates the processing
-  to pre-calculcate all the epitopes of an intermediate fasta file and make
+  when using this prediction algorithm. This version updates the processing
+  to pre-calculate all the epitopes of an intermediate fasta file and make
   only one call to MHCflurry for all of them.
 - This version was updated to set consistent file permissions for all of the
   output files created by pVACseq, pVACfuse, pVACbind, and pVACvector.
