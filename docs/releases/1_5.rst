@@ -244,3 +244,17 @@ This is a hotfix release. It fixes the following issues:
   vaxrank and, thus, newer versions of pysam.
 - This version adds error handling for when a normal sample name is provided
   to pVACseq but the input VCF is a single-sample VCF.
+
+1.5.13
+------
+
+This is a hotfix release. It fixes the following issues:
+
+- MHCflurry would previously be called once per pepetide sequence. Because a
+  large overhead for MHCflurry is the creation of the model and the model gets
+  created every time MHCflurry is called, this would cause very long runtimes
+  when using this predicition algorithm. This version updates the processing
+  to pre-calculcate all the epitopes of an intermediate fasta file and make
+  only one call to MHCflurry for all of them.
+- This version was updated to set consistent file permissions for all of the
+  output files created by pVACseq, pVACfuse, pVACbind, and pVACvector.
