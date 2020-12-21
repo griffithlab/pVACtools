@@ -1,0 +1,59 @@
+name: pVACtools tests
+
+on:
+  push:
+    branches: [ master, staging, hotfix ]
+  pull_request:
+    branches: [ master, staging, hotfix]
+
+jobs:
+  tests:
+    name: Tests
+
+    runs-on: ubuntu-16.04
+    strategy:
+      matrix:
+        python-version: [3.5, 3.6, 3.7]
+    services:
+      postgres:
+        image: postgres
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install system dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get install -y ghostscript
+          sudo apt-get install -y gcc
+      - name: Install Python dependencies
+        run: |
+          if ${{ matrix.python-version }} == 3.5; then pip install Cython; fi
+          pip install swagger-spec-validator==2.1.0
+          pip install connexion==1.4.2
+          pip install bokeh==0.13.0
+          pip install tornado==5.0.2
+          pip install jsonschema==2.6.0
+          pip install mhcnuggets==2.3.3
+          pip install mhcflurry==2.0.1
+          pip install tensorflow==2.2.1
+          pip install keras==2.3.1
+          if ${{ matrix.python-version }} == 3.6; then pip install pandas==0.25.2; fi
+          if ${{ matrix.python-version }} == 3.7; then pip install pandas==0.25.2; fi
+          pip install Werkzeug==0.16.1
+          if ${{ matrix.python-version }} == 3.5; then pip install biopython==1.76; fi
+          if ${{ matrix.python-version }} == 3.5; then pip install watchdog==0.9.0; fi
+          pip install coveralls
+          pip install -e .
+          mhcflurry-downloads fetch
+      - name: Run tests
+        env:
+          TEST_FLAG: 1
+        run: coverage run --source=lib,tools -m unittest discover -v
+      - name: Coveralls
+        run: coveralls
