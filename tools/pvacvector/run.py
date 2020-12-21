@@ -18,6 +18,7 @@ from lib.vector_visualization import *
 from lib.run_argument_parser import *
 from lib.pvacvector_input_fasta_generator import *
 from lib.pipeline import *
+from lib.run_utils import *
 import lib.call_iedb
 
 def define_parser():
@@ -461,6 +462,8 @@ def main(args_input=sys.argv[1:]):
     if not args.keep_tmp_files:
         shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_I'), ignore_errors=True)
         shutil.rmtree(os.path.join(base_output_dir, 'MHC_Class_II'), ignore_errors=True)
+
+    change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
 if __name__ == "__main__":
     main()
