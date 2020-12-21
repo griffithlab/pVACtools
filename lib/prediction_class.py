@@ -241,43 +241,54 @@ class MHCflurry(MHCI):
         return [8,9,10,11,12,13,14]
 
     def determine_neoepitopes(self, sequence, length):
-        epitopes = []
+        epitopes = {}
         for i in range(0, len(sequence)-length+1):
-            epitopes.append(sequence[i:i+length])
+            epitopes[i+1] = sequence[i:i+length]
         return epitopes
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
         results = pd.DataFrame()
+        all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
             seq_num = record.id
             peptide = str(record.seq)
             epitopes = self.determine_neoepitopes(peptide, epitope_length)
-            if len(epitopes) > 0:
-                tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
-                arguments = ["mhcflurry-predict", "--alleles", allele, "--out", tmp_output_file.name, "--peptides"]
-                arguments.extend(epitopes)
-                stderr_fh = tempfile.NamedTemporaryFile('w', delete=False)
-                try:
-                    response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-                except:
-                    stderr_fh.close()
-                    with open(stderr_fh.name, 'r') as fh:
-                        err = fh.read()
-                    os.unlink(stderr_fh.name)
-                    raise Exception("An error occurred while calling MHCflurry:\n{}".format(err))
+            all_epitopes.extend(epitopes.values())
+
+        all_epitopes = list(set(all_epitopes))
+        if len(all_epitopes) > 0:
+            tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+            arguments = ["mhcflurry-predict", "--alleles", allele, "--out", tmp_output_file.name, "--peptides"]
+            arguments.extend(all_epitopes)
+            stderr_fh = tempfile.NamedTemporaryFile('w', delete=False)
+            try:
+                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
+            except:
                 stderr_fh.close()
+                with open(stderr_fh.name, 'r') as fh:
+                    err = fh.read()
                 os.unlink(stderr_fh.name)
-                tmp_output_file.close()
-                df = pd.read_csv(tmp_output_file.name)
-                df['seq_num'] = seq_num
-                df['start'] = df.index+1
-                df.rename(columns={
-                    'mhcflurry_prediction': 'ic50',
-                    'mhcflurry_affinity': 'ic50',
-                    'mhcflurry_prediction_percentile': 'percentile',
-                    'mhcflurry_affinity_percentile': 'percentile'
-                }, inplace=True)
-                results = results.append(df)
+                raise Exception("An error occurred while calling MHCflurry:\n{}".format(err))
+            stderr_fh.close()
+            os.unlink(stderr_fh.name)
+            tmp_output_file.close()
+
+        df = pd.read_csv(tmp_output_file.name)
+        df.rename(columns={
+            'mhcflurry_prediction': 'ic50',
+            'mhcflurry_affinity': 'ic50',
+            'mhcflurry_prediction_percentile': 'percentile',
+            'mhcflurry_affinity_percentile': 'percentile'
+        }, inplace=True)
+        for record in SeqIO.parse(input_file, "fasta"):
+            seq_num = record.id
+            peptide = str(record.seq)
+            epitopes = self.determine_neoepitopes(peptide, epitope_length)
+            for start, epitope in epitopes.items():
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = start
+                results = results.append(epitope_df)
         return (results, 'pandas')
 
 class MHCnuggetsI(MHCI, MHCnuggets):

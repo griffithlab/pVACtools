@@ -52,14 +52,14 @@ New in release |release|
 
 This is a hotfix release. It fixes the following issues:
 
-- Vaxrank was pinned to an older version because newer versions made
-  backwards-incompatible changes to some code that pVACseq was using. However
-  this was causing installation issues since this older version of the vaxrank
-  pacakge has an indirect dependency on an old version of pysam. We
-  updated the usage of this module so that we could use the latest version of
-  vaxrank and, thus, newer versions of pysam.
-- This version adds error handling for when a normal sample name is provided
-  to pVACseq but the input VCF is a single-sample VCF.
+- MHCflurry would previously be called once per pepetide sequence. Because a
+  large overhead for MHCflurry is the creation of the model and the model gets
+  created every time MHCflurry is called, this would cause very long runtimes
+  when using this predicition algorithm. This version updates the processing
+  to pre-calculcate all the epitopes of an intermediate fasta file and make
+  only one call to MHCflurry for all of them.
+- This version was updated to set consistent file permissions for all of the
+  output files created by pVACseq, pVACfuse, pVACbind, and pVACvector.
 
 New in version |version|
 ------------------------
