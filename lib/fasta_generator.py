@@ -72,16 +72,20 @@ class FastaGenerator(metaclass=ABCMeta):
 
         return mutation_position, wildtype_subsequence
 
-    def get_frameshift_subsequences(self, position, full_wildtype_sequence):
+    def get_frameshift_subsequences(self, position, full_wildtype_sequence, full_mutant_sequence):
         if position < self.flanking_sequence_length:
             start_position = 0
         else:
             start_position = position - self.flanking_sequence_length
         wildtype_subsequence_stop_position = position + self.flanking_sequence_length
-        mutation_subsequence_stop_position = position
         wildtype_subsequence = full_wildtype_sequence[start_position:wildtype_subsequence_stop_position]
-        mutation_start_subsequence = full_wildtype_sequence[start_position:mutation_subsequence_stop_position]
-        return wildtype_subsequence, mutation_start_subsequence
+        if self.downstream_sequence_length:
+            mutant_subsequence_stop_position = position + self.downstream_sequence_length
+            mutant_subsequence = full_mutant_sequence[start_position:mutant_subsequence_stop_position]
+        else:
+            mutant_subsequence = full_mutant_sequence[start_position:]
+        left_flanking_sequence = full_mutant_sequence[start_position:position]
+        return wildtype_subsequence, mutant_subsequence, left_flanking_sequence
 
     def add_proximal_variants(self, somatic_variant_index, wildtype_subsequence, mutation_position, original_position, germline_variants_only):
         mutation_offset = original_position - mutation_position
@@ -132,13 +136,6 @@ class FastaGenerator(metaclass=ABCMeta):
             full_wildtype_sequence = line['wildtype_amino_acid_sequence']
             if variant_type == 'FS':
                 position = int(line['protein_position'].split('-', 1)[0]) - 1
-                if line['amino_acid_change'] is not None and line['amino_acid_change'].split('/')[0] == '-':
-                    if line['wildtype_amino_acid_sequence'][position] != line['downstream_amino_acid_sequence'][0]:
-                        raise Exception(
-                            "Leading amino acid of the Downstream protein sequence ({}) expected to match the wildtype amino acid at postion {} ({}). " \
-                            "You may need to reannotate your VCF with a newer version of VEP." \
-                            .format(line['downstream_amino_acid_sequence'], position, line['wildtype_amino_acid_sequence'][position])
-                        )
             elif variant_type == 'missense' or variant_type == 'inframe_ins':
                 if '/' not in line['amino_acid_change']:
                     continue
@@ -198,16 +195,14 @@ class FastaGenerator(metaclass=ABCMeta):
                 mutant_amino_acid_with_proximal_variants = mutant_amino_acid
 
             if variant_type == 'FS':
-                wildtype_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence)
-                downstream_sequence = line['downstream_amino_acid_sequence']
-                if self.downstream_sequence_length and len(downstream_sequence) > self.downstream_sequence_length:
-                    downstream_sequence = downstream_sequence[0:self.downstream_sequence_length]
+                full_mutant_sequence = line['frameshift_amino_acid_sequence']
+                wildtype_subsequence, mutant_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, full_mutant_sequence)
                 mutation_start_position = len(left_flanking_subsequence)
                 wildtype_subsequence = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, True)
                 left_flanking_subsequence_with_proximal_variants = self.add_proximal_variants(line['index'], left_flanking_subsequence, mutation_start_position, position, False)
                 #The caveat here is that if a nearby variant is in the downstream sequence, the protein sequence would be further altered, which we aren't taking into account.
                 #we would need to recalculate the downstream protein sequence taking all downstream variants into account.
-                mutant_subsequence = left_flanking_subsequence_with_proximal_variants + downstream_sequence
+                mutant_subsequence = re.sub('^%s' % left_flanking_subsequence, left_flanking_subsequence_with_proximal_variants, mutant_subsequence)
             else:
                 mutation_start_position, wildtype_subsequence = self.get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, line)
                 mutation_end_position = mutation_start_position + wildtype_amino_acid_length
