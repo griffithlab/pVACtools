@@ -15,6 +15,8 @@ def main(args_input = sys.argv[1:]):
     base_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
     wildtype_plugin_path = os.path.join(base_dir, 'VEP_plugins', 'Wildtype.pm')
     copyfile(wildtype_plugin_path, os.path.join(args.vep_plugins_path, 'Wildtype.pm'))
+    frameshift_plugin_path = os.path.join(base_dir, 'VEP_plugins', 'Frameshift.pm')
+    copyfile(frameshift_plugin_path, os.path.join(args.vep_plugins_path, 'Frameshift.pm'))
 
 if __name__ == '__main__':
     main()
