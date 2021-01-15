@@ -100,6 +100,20 @@ _____________________________________________
    -L combined_somatic_plus_germline.sorted.vcf \
    -o phased.vcf
 
+Annotate VCF with VEP
+_____________________
+
+.. code-block:: none
+
+   ./vep \
+   --input_file <phased.vcf> --output_file <phased.annotated.vcf> \
+   --format vcf --vcf --symbol --terms SO --tsl\
+   --hgvs --fasta <reference build FASTA file location> \
+   --offline --cache [--dir_cache <VEP cache directory>] \
+   --plugin Downstream --plugin Wildtype \
+   [--dir_plugins <VEP_plugins directory>] [--pick] [--transcript_version]
+
+
 .. _bgzip_phased_vcf:
 
 bgzip and index the phased VCF
@@ -107,8 +121,8 @@ ______________________________
 
 .. code-block:: none
 
-   bgzip -c phased.vcf > phased.vcf.gz
-   tabix -p vcf phased.vcf.gz
+   bgzip -c phased.annotated.vcf > phased.annotated.vcf.gz
+   tabix -p vcf phased.annotated.vcf.gz
 
 The resulting ``phased.vcf.gz`` file can be used as the input to the
 ``--phased-proximal-variants-vcf`` option.
