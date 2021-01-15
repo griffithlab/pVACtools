@@ -130,7 +130,7 @@ setup(
     author = "Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Yang-Yang Feng, Christopher A. Miller, Aaron Graubert, Amber Wollam, Connor Liu, Jonas Neichin, Megan Neveau, Jason Walker, Elaine R. Mardis, Obi L. Griffith, Malachi Griffith",
     author_email = "help@pvactools.org",
     description = "A cancer immunotherapy tools suite",
-    license = "NPOSL-3.0",
+    license = "BSD-3-Clause-Clear",
     keywords = "antigens neoantigens cancer sequencing variant variants fusion fusions",
     #This needs to be the url where the code is being hosted
     url = "https://github.com/griffithlab/pVACtools",

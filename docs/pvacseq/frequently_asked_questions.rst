@@ -159,9 +159,8 @@ and `Class II <http://tools.iedb.org/mhcii/help/#Method>`_ documentation.
 
 :large:`How is pVACseq licensed?`
 
-pVACseq is licensed under the open source license `NPOSL-3.0
-<http://opensource.org/licenses/NPOSL-3.0>`_. If you would like to discuss a license for
-commercial applications, please contact us.
+pVACseq is licensed under the open source license `NBSD 3-Clause Clear License
+<https://spdx.org/licenses/BSD-3-Clause-Clear.html>`_.
 
 :large:`How do I cite pVACseq?`
 
