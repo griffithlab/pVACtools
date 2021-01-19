@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACfuse logo
 
+.. _pvacfuse_filter_commands:
+
 Filtering Commands
 =============================
 

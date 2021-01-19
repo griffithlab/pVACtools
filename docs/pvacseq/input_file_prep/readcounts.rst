@@ -87,13 +87,13 @@ Follow the installation instructions on the
 Installing the vcf-readcount-annotator
 **************************************
 
-The ``vcf-readcount-annotator`` is part of the ``vcf-annotation-tools`` package. 
+The ``vcf-readcount-annotator`` is part of the ``vatools`` package. 
 Please visit `vatools.org <http://vatools.org>`_ for more details on this package.
 You can install this package by running:
 
 .. code-block:: none
 
-   pip install vcf-annotation-tools
+   pip install vatools
 
 Running vt decompose
 ********************
@@ -161,5 +161,5 @@ The data type ``DNA`` or ``RNA`` identifies whether you are annotating DNA or RN
 readcount. DNA readcount annotations will be written to the ``AD/DP/AF``
 format fields while RNA readcount annotations will be written to the
 ``RAD/RDP/RAF`` format fields. Please see the `VAtools documentation
-<https://vcf-annotation-tools.readthedocs.io/en/latest/vcf_readcount_annotator.html>`_
+<https://vatools.readthedocs.io/en/latest/vcf_readcount_annotator.html>`_
 for more information.
