@@ -21,6 +21,7 @@ these data and how to produce a VCF for proximal variant analysis.
    :maxdepth: 1
    :glob:
 
+   input_file_prep/gt
    input_file_prep/vep
    input_file_prep/readcounts
    input_file_prep/expression
