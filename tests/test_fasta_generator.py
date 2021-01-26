@@ -393,45 +393,6 @@ class FastaGeneratorTests(unittest.TestCase):
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_range.key')
         self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
 
-    def test_input_file_with_frameshift_variant_position_shift_without_leading_wt_aa_raises_exception(self):
-        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_frameshift_variant_position_shift_without_leading_wt_aa.tsv')
-        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
-        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
-
-        with self.assertRaises(Exception) as context:
-            generate_fasta_params = {
-                'input_file': generate_fasta_input_file,
-                'epitope_length': self.epitope_length,
-                'flanking_sequence_length'  : self.flanking_sequence_length,
-                'output_file': generate_fasta_output_file.name,
-                'output_key_file': generate_fasta_key_output_file.name,
-                'downstream_sequence_length': None,
-            }
-            generator = FastaGenerator(**generate_fasta_params)
-            self.assertFalse(generator.execute())
-        self.assertTrue('Leading amino acid of the Downstream protein sequence' in str(context.exception))
-
-    def test_input_file_with_frameshift_variant_position_shift_with_leading_wt_aa_generates_expected_file(self):
-        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_frameshift_variant_position_shift_with_leading_wt_aa.tsv')
-        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
-        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
-
-        generate_fasta_params = {
-            'input_file': generate_fasta_input_file,
-            'epitope_length': self.epitope_length,
-            'flanking_sequence_length' : self.flanking_sequence_length,
-            'output_file': generate_fasta_output_file.name,
-            'output_key_file': generate_fasta_key_output_file.name,
-            'downstream_sequence_length': None,
-        }
-        generator = FastaGenerator(**generate_fasta_params)
-
-        self.assertFalse(generator.execute())
-        expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_position_shift_with_leading_wt_aa.fasta')
-        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
-        expected_key_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_position_shift_with_leading_wt_aa.key')
-        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
-
     def test_input_file_with_sequence_containing_asterisk(self):
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_asterisk_sequence.tsv')
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()

@@ -105,7 +105,7 @@ def parse_input_tsv(input_tsv):
     with open(input_tsv, 'r') as fh:
         reader = csv.DictReader(fh, delimiter = "\t")
         for line in reader:
-            indexes.append(line['index'])
+            indexes.append(line['Index'])
     return indexes
 
 def parse_files(output_file, temp_dir, mutant_only, input_tsv):
