@@ -1,2 +1,0 @@
-Gene Name	Mutation	Protein Position	HGVSc	HGVSp	HLA Allele	Mutation Position	MT Epitope Seq	Median MT Score	Median WT Score	Median Fold Change	Best MT Score	Corresponding WT Score	Corresponding Fold Change	Tumor DNA Depth	Tumor DNA VAF	Tumor RNA Depth	Tumor RNA VAF	Gene Expression	Rank
-PANX2	S/F	147	ENST00000159647.5:c.440C>T	ENSP00000159647.5:p.Ser147Phe	HLA-A*02:01	9	ALGWEFLAFT	160.321	196.83700000000002	1.228	29.28	42.81	1.462	151	1.0	NA	NA	6.414	1
