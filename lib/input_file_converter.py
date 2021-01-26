@@ -33,7 +33,7 @@ class InputFileConverter(metaclass=ABCMeta):
             'hgvsc',
             'hgvsp',
             'wildtype_amino_acid_sequence',
-            'downstream_amino_acid_sequence',
+            'frameshift_amino_acid_sequence',
             'fusion_amino_acid_sequence',
             'variant_type',
             'protein_position',
@@ -100,10 +100,10 @@ class VcfConverter(InputFileConverter):
         self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         self.tsv_writer.writeheader()
         self.csq_parser = self.create_csq_parser()
-        if 'DownstreamProtein' not in self.csq_parser.csq_format:
-            sys.exit("VCF doesn't contain VEP DownstreamProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.")
+        if 'FrameshiftSequence' not in self.csq_parser.csq_format:
+            sys.exit("VCF doesn't contain VEP FrameshiftSequence annotations. Please re-annotate the VCF with VEP and the Wildtype and Frameshift plugins.")
         if 'WildtypeProtein' not in self.csq_parser.csq_format:
-            sys.exit("VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.")
+            sys.exit("VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Frameshift plugins.")
 
     def is_insertion(self, ref, alt):
         return len(alt) > len(ref)
@@ -306,8 +306,8 @@ class VcfConverter(InputFileConverter):
                     if consequence is None:
                         continue
                     elif consequence == 'FS':
-                        if transcript['DownstreamProtein'] == '':
-                            print("frameshift_variant transcript does not contain a DownstreamProtein sequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        if transcript['FrameshiftSequence'] == '':
+                            print("frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                             continue
                         else:
                             amino_acid_change_position = "%s%s/%s" % (protein_position, entry.REF, alt)
@@ -335,6 +335,19 @@ class VcfConverter(InputFileConverter):
                         tsl = transcript['TSL']
                     else:
                         tsl = 'NA'
+
+                    if transcript['FrameshiftSequence'] != '':
+                        wt_len = len(transcript['WildtypeProtein'])
+                        mt_len = len(transcript['FrameshiftSequence'])
+                        if mt_len > wt_len:
+                            protein_length_change = "+{}".format(mt_len - wt_len)
+                        elif mt_len < wt_len:
+                            protein_length_change = "-{}".format(wt_len - mt_len)
+                        else:
+                            protein_length_change = "0"
+                    else:
+                        protein_length_change = ""
+
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
                         'start'                          : entry.affected_start,
@@ -348,12 +361,12 @@ class VcfConverter(InputFileConverter):
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,
                         'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
-                        'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
+                        'frameshift_amino_acid_sequence' : transcript['FrameshiftSequence'],
                         'fusion_amino_acid_sequence'     : '',
                         'variant_type'                   : consequence,
                         'protein_position'               : protein_position,
                         'index'                          : index,
-                        'protein_length_change'          : transcript['ProteinLengthChange'],
+                        'protein_length_change'          : protein_length_change,
                     }
                     if transcript['Amino_acids']:
                         output_row['amino_acid_change'] = transcript['Amino_acids']
@@ -443,7 +456,7 @@ class FusionInputConverter(InputFileConverter):
                     'variant'                    : 'fusion',
                     'gene_name'                  : entry['name of fusion'],
                     'wildtype_amino_acid_sequence'   : '',
-                    'downstream_amino_acid_sequence' : '',
+                    'frameshift_amino_acid_sequence' : '',
                     'protein_length_change'      : '',
                     'amino_acid_change'          : 'NA',
                     'codon_change'               : 'NA',
@@ -527,7 +540,7 @@ class FusionInputConverter(InputFileConverter):
                     'variant'                    : 'fusion',
                     'gene_name'                  : record_info['genes'],
                     'wildtype_amino_acid_sequence'   : '',
-                    'downstream_amino_acid_sequence' : '',
+                    'frameshift_amino_acid_sequence' : '',
                     'protein_length_change'      : '',
                     'amino_acid_change'          : 'NA',
                     'codon_change'               : 'NA',
