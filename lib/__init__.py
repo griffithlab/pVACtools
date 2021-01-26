@@ -14,7 +14,7 @@ __all__ = [
     "netmhc_stab",
     "filter",
     "top_score_filter",
-    "utils",
+    "run_utils",
     "post_processor",
     "vector_visualization",
 ]

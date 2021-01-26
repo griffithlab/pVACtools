@@ -3,7 +3,7 @@ import sys
 import os
 from lib.csq_parser import CsqParser
 from Bio.Seq import translate
-import lib.utils
+import lib.run_utils
 
 class ProximalVariant:
     #flanking_bases is the number of bases (not amino acids!) to search on each side of a variant position
@@ -11,7 +11,7 @@ class ProximalVariant:
         if not os.path.exists(proximal_variants_vcf + '.tbi'):
             sys.exit('No .tbi file found for proximal variants VCF. Proximal variants VCF needs to be tabix indexed.')
 
-        if lib.utils.is_gz_file(proximal_variants_vcf):
+        if lib.run_utils.is_gz_file(proximal_variants_vcf):
             mode = 'rb'
         else:
             mode = 'r'
@@ -100,22 +100,20 @@ class ProximalVariant:
                         print("Warning: Proximal variant does not contain any VEP annotations for alternate allele and will be skipped: {}".format(entry))
                         continue
 
-                #We assume that there is only one CSQ entry because the PICK option was used but we should double check that
-                if len(csq_entries) > 1:
-                    print("Warning: There are multiple CSQ entries (consequences) for proximal variant {} and alternate allele {}. Using the first one.".format(entry, proximal_alt))
+                picked_csq_entry = None
+                for csq_entry in csq_entries:
+                    if csq_entry['Feature'] == transcript:
+                        picked_csq_entry = csq_entry
+                if picked_csq_entry is None:
+                    print("Warning: Proximal variant has no transcript annotation for somatic variant of interest transcript {} and will be skipped: {}".format(transcript, entry))
+                    continue
 
-                csq_entry = csq_entries[0]
-
-                consequences = {consequence.lower() for consequence in csq_entry['Consequence'].split('&')}
+                consequences = {consequence.lower() for consequence in picked_csq_entry['Consequence'].split('&')}
                 if 'missense_variant' not in consequences:
                     print("Warning: Proximal variant is not a missense mutation and will be skipped: {}".format(entry))
                     continue
 
-                if csq_entry['Feature'] != transcript:
-                    print("Warning: Proximal variant transcript is not the same as the somatic variant transcript. Proximal variant will be skipped: {}".format(entry))
-                    continue
-
-                potential_proximal_variants.append([entry, csq_entry])
+                potential_proximal_variants.append([entry, picked_csq_entry])
 
         return (phased_somatic_variant, potential_proximal_variants)
 

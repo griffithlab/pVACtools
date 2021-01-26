@@ -43,6 +43,7 @@ tools:
    tools
    frequently_asked_questions
    releases
+   license
    citation
    contact
    mailing_list
@@ -164,9 +165,9 @@ in silico approach to identifying tumor neoantigens <http://www.genomemedicine.c
 <http://www.ncbi.nlm.nih.gov/pubmed/26825632>`_.
 
 Source code
--------
+-----------
 The pVACtools source code is available in `GitHub <https://github.com/griffithlab/pVACtools>`_.
 
 License
 -------
-This project is licensed under `NPOSL-3.0 <http://opensource.org/licenses/NPOSL-3.0>`_.
+This project is licensed under `BSD 3-Clause Clear License <https://spdx.org/licenses/BSD-3-Clause-Clear.html>`_.

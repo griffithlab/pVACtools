@@ -1,6 +1,8 @@
 import sys
 import os
 import csv
+import binascii
+from itertools import islice
 from lib.prediction_class import *
 
 def split_algorithms(prediction_algorithms):
@@ -72,3 +74,17 @@ def change_permissions_recursive(path, dir_mode, file_mode):
             os.chmod(dir, dir_mode)
         for file in [os.path.join(root, f) for f in files]:
             os.chmod(file, file_mode)
+
+def is_gz_file(filepath):
+    with open(filepath, 'rb') as test_f:
+        return binascii.hexlify(test_f.read(2)) == b'1f8b'
+
+def split_file(reader, lines):
+    i = iter(reader)
+    piece = list(islice(i, lines))
+    while piece:
+        yield piece
+        piece = list(islice(i, lines))
+
+def construct_index(count, gene, transcript, variant_type, position):
+    return '{}.{}.{}.{}.{}'.format(count, gene, transcript, variant_type, position)
