@@ -102,14 +102,14 @@ doesn't contain a ``CSQ`` ``INFO`` header. This indicates that it has not been
 annotated. :ref:`The Input File Preparation section <vep>` of the
 documentation provides instructions on how to annotate your VCF with VEP.
 
-**VCF doesn't contain VEP DownstreamProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.**
+**VCF doesn't contain VEP FrameshiftSequence annotations. Please re-annotate the VCF with VEP and the Wildtype and Frameshift plugins.**
 
 Although the input VCF was annotated with VEP, it is missing the required
-annotations provided by the VEP Downstream plugin. The input VCF will need to
+annotations provided by the VEP Frameshift plugin. The input VCF will need to
 be reannotated using all of the required arguments as outlined in the :ref:`Input
 File Preparation section <vep>` of the documentation.
 
-**VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.**
+**VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Frameshift plugins.**
 
 Although the input VCF was annotated with VEP, it is missing the required
 annotations provided by the VEP Wildtype plugin. The input VCF will need to
@@ -161,7 +161,11 @@ _____
 
 **The TSV file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.**
 
-None of the variants in the VCF file are supported by pVACseq.
+None of the variants in the VCF file are supported by pVACseq. This could be
+either because none of the variants have the mentioned type of consequence or
+none of the variants are called in the sample (i.e. have a ``0/1`` or ``1/1``
+genotype). If you are using the ``--pass-only`` option it might also be the
+case that all supported variants are filtered.
 
 **Illegal instruction (core dumped)**
 
