@@ -3,7 +3,7 @@ License
 
 pVACtools is licensed under the `BSD 3-Clause Clear License <https://spdx.org/licenses/BSD-3-Clause-Clear.html>`_.
 
-Copyright (c) 2018-2020 Washington University in St. Louis
+Copyright (c) 2018-2021 Washington University in St. Louis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted (subject to the limitations in the disclaimer below) provided that the following conditions are met:

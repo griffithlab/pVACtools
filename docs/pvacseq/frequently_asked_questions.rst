@@ -125,7 +125,10 @@ meaningful. For example:
 By default we filter the neoepitopes on their binding score. If readcount
 and/or expression annotations are available in the VCF we also filter on the depth, VAF,
 and gene/trancript FPKM. In addition, candidates where the mutant epitope sequence is the
-same as the wildtype epitope sequence will also be filtered out.
+same as the wildtype epitope sequence will also be filtered out (i.e., they
+don't overlap the mutation). pVACseq also filters on the transcript support
+level, if the ``--tsl`` option was chosing during VEP annotation. Lastly, the
+top score filter will pick the best epitope for each variant.
 
 :large:`How can I see all of the candidate epitopes without any filters
 applied?`

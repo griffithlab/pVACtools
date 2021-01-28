@@ -27,7 +27,7 @@ Installing VEP
 
    git clone https://github.com/Ensembl/VEP_plugins.git
 
-4. :ref:`Copy the Wildtype plugin<install_vep_plugin_label>` provided with the
+4. :ref:`Copy the Wildtype and Frameshift plugins<install_vep_plugin_label>` provided with the
    pVACseq package to the folder with the other VEP plugins by running the following command:
 
 .. code-block:: none
@@ -46,7 +46,7 @@ Running VEP
    --format vcf --vcf --symbol --terms SO --tsl\
    --hgvs --fasta <reference build FASTA file location> \
    --offline --cache [--dir_cache <VEP cache directory>] \
-   --plugin Downstream --plugin Wildtype \
+   --plugin Frameshift --plugin Wildtype \
    [--dir_plugins <VEP_plugins directory>] [--pick] [--transcript_version]
 
 Required VEP Options
@@ -63,7 +63,7 @@ ____________________
    --fasta <reference build FASTA location>
    --offline
    --cache
-   --plugin Downstream
+   --plugin Frameshift
    --plugin Wildtype
 
 - The ``--format vcf`` option specifies that the input file is in VCF format.
@@ -81,8 +81,9 @@ ____________________
   and/or privacy.
 - The ``--cache`` option will result in the VEP cache being used for
   annotation.
-- The ``--plugin Downstream`` option will run the Downstream plugin which will
-  compute the downstream protein sequence after a frameshift.
+- The ``--plugin Frameshift`` option will run the Frameshift plugin which will
+  apply a frameshift mutation to a transcript sequence to compute the full mutated
+  protein sequence.
 - The ``--plugin Wildtype`` option will run the Wildtype plugin which will
   include the transcript protein sequence in the annotation.
 
