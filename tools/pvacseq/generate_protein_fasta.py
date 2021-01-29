@@ -17,7 +17,11 @@ from lib.input_file_converter import *
 from lib.calculate_manufacturability import *
 
 def define_parser():
-    parser = argparse.ArgumentParser("pvacseq generate_protein_fasta", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        "pvacseq generate_protein_fasta",
+        description="Generate an annotated fasta file from a VCF with protein sequences of mutations and matching wildtypes",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument(
         "input_vcf",

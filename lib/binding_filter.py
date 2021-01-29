@@ -52,7 +52,11 @@ class BindingFilter:
 
     @classmethod
     def parser(cls, tool):
-        parser = argparse.ArgumentParser('%s binding_filter' % tool, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser = argparse.ArgumentParser(
+            '%s binding_filter' % tool,
+            description="Filter variants processed by IEDB by binding score.",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
         parser.add_argument(
             'input_file',
             help="The final report .tsv file to filter."

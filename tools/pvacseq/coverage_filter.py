@@ -6,7 +6,11 @@ import csv
 from lib.filter import *
 
 def define_parser():
-    parser = argparse.ArgumentParser('pvacseq coverage_filter', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        'pvacseq coverage_filter',
+        description="Filter variants processed by IEDB by coverage, vaf, and gene expression",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
         'input_file',
         help="The final report .tsv file to filter"
