@@ -93,3 +93,33 @@ matrix:
             - TEST_FLAG=1 coverage run --source=lib,tools -m unittest discover -v
           after_success:
             - coveralls
+        - name: "Python 3.8"
+          language: python
+          sudo: required
+          dist: xenial
+          python: 3.8
+          before_install:
+            - sudo apt-get -qq update
+            - sudo apt-get install -y ghostscript
+            - sudo apt-get install -y gcc
+          install:
+            - pip install swagger-spec-validator==2.1.0
+            - pip install connexion==1.4.2
+            - pip install bokeh==0.13.0
+            - pip install tornado==5.0.2
+            - pip install jsonschema==2.6.0
+            - pip install mhcnuggets==2.3.3
+            - pip install mhcflurry==2.0.1
+            - pip install tensorflow==2.2.1
+            - pip install keras==2.3.1
+            - pip install pandas==0.25.2
+            - pip install Werkzeug==0.16.1
+            - pip install coveralls
+            - pip install -e .
+            - mhcflurry-downloads fetch
+          services:
+            - postgresql
+          script:
+            - TEST_FLAG=1 coverage run --source=lib,tools -m unittest discover -v
+          after_success:
+            - coveralls
