@@ -4,7 +4,11 @@ import tempfile
 from lib.aggregate_all_epitopes import *
 
 def define_parser():
-    parser = argparse.ArgumentParser("pvacfuse generate_aggregated_report", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        "pvacfuse generate_aggregated_report",
+        description="Generate an aggregated report from a pVACfuse .all_epitopes.tsv report file.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument(
         "input_file",

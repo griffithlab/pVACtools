@@ -106,7 +106,11 @@ class TopScoreFilter:
 
     @classmethod
     def parser(cls, tool):
-        parser = argparse.ArgumentParser('%s top_score_filter' % tool, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser = argparse.ArgumentParser(
+            '%s top_score_filter' % tool,
+            description="Pick the best neoepitope for each variant",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
         parser.add_argument(
             'input_file',
             help="The final report .tsv file to filter."

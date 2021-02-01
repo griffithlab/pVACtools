@@ -17,7 +17,11 @@ from lib.input_file_converter import *
 from lib.calculate_manufacturability import *
 
 def define_parser():
-    parser = argparse.ArgumentParser("pvacfuse generate_protein_fasta", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        "pvacfuse generate_protein_fasta",
+        description="Generate an annotated fasta file from Integrate-Neo or AGFusion output.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument(
         "input_file",

@@ -5,7 +5,11 @@ import lib
 
 class RunArgumentParser(metaclass=ABCMeta):
     def __init__(self, tool_name, input_file_help):
-        parser = argparse.ArgumentParser("%s run" % tool_name, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser = argparse.ArgumentParser(
+            "%s run" % tool_name,
+            description="Run the {} pipeline".format(tool_name.replace('vac', 'VAC')),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
 
         parser.add_argument(
             "input_file",
