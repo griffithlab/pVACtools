@@ -27,7 +27,7 @@ created):
      - The above file but split into smaller chunks for easier processing with IEDB.
    * - ``<sample_name>.fasta``
      - A fasta file with mutant and wildtype peptide subsequences for all
-       proccessable variant-transcript combinations.
+       processable variant-transcript combinations.
    * - ``<sample_name>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``.
@@ -231,7 +231,7 @@ option is chosen.
    * - ``Match Sequence``
      - The BLAST match sequence
    * - ``Match Start``
-     -  The match start position in the matched reference proteome sequence
+     - The match start position in the matched reference proteome sequence
    * - ``Match Stop``
      - The match stop position in the matched reference proteome sequence
 

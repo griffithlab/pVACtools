@@ -146,6 +146,6 @@ option is chosen.
    * - ``Match Sequence``
      - The BLAST match sequence
    * - ``Match Start``
-     -  The match start position in the matched reference proteome sequence
+     - The match start position in the matched reference proteome sequence
    * - ``Match Stop``
      - The match stop position in the matched reference proteome sequence
