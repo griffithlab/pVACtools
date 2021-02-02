@@ -17,6 +17,9 @@ ________________
   (``-e2``) for class I and class II epitope lengths, respectively. The
   defaults are ``[8, 9, 10, 11]`` and ``[12, 13, 14, 15, 16, 17, 18]``,
   respectively.
+- The ``--peptide-sequence-length`` option has been removed. The peptide
+  sequence length is now determined by the epitope length(s) to determine the
+  flanking sequence length before and after the mutation.
 - pVACtools no longer depends on conda. pVACtools remains compatible with
   Python 3.5 and above but users may chose any environment manager to set up
   an appropriate Python environment.
