@@ -59,7 +59,7 @@ workflows.
 Breaking changes
 ________________
 
-- pVACtools now supports variable epitope lengths. The previous option
+- pVACtools now supports variable epitope lengths for class II prediction algorithms. The previous option
   ``--epitope-length`` (``-e``) no longer exists. It has been replaced with
   ``--class-i-epitope-length`` (``-e1``) and ``--class-ii-epitope-length``
   (``-e2``) for class I and class II epitope lengths, respectively. The
@@ -117,7 +117,7 @@ _____________
   somatic variant of interest.
 - The ``pvacseq generate_protein_fasta`` command now allows users to provide a
   proximal variants VCF using the ``--phased-proximal-variants-vcf`` option.
-- The ``pvacseq generate_protein_fasta`` command now support multi-sample
+- The ``pvacseq generate_protein_fasta`` command now supports multi-sample
   VCFs. Users may use the ``--sample-name`` to provide the sample name of the
   sample they wish to process.
 - pVACseq and pVACfuse would previously error out if the intermediate TSV

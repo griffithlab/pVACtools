@@ -5,7 +5,7 @@ Installation
 
 pVACtools is written for Linux but some users have been able to run it successfully on Mac OS X. If you are using Windows you will need to set up a Linux environment, for example by setting up a virtual machine.
 
-pVACtools requires Python 3.5. or above. Before running any installation steps, check the Python version installed on your system:
+pVACtools requires Python 3.5 or above. Before running any installation steps, check the Python version installed on your system:
 
 .. code-block:: none
 
