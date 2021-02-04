@@ -301,33 +301,17 @@ To bin a variant in a tier, the best binding epitope is evaluated as follows:
 
    * - Tier
      - Citeria
-   * - ``Pass``
-     - Median MT Score < 500 and (Tumor RNA VAF * Gene Expression) > 3 and
-       Tumor DNA VAF > (clonal VAF / 2) and not an anchor residue
-   * - ``Relaxed``
-     - Median MT Score < 1000 and (Tumor RNA VAF * Gene Expression) > 1 and
-       Tumor DNA VAF > (clonal VAF / 2) and not an anchor residue
-   * - ``Anchor``
-     - Median MT Score < 1000 and (Tumor RNA VAF * Gene Expression) > 1 and
-       Tumor DNA VAF > (clonal VAF / 2) and an anchor residue
-   * - ``Subclonal``
-     - Median MT Score < 1000 and (Tumor RNA VAF * Gene Expression) > 1 and
-       Tumor DNA VAF < (clonal VAF / 2) and not an anchor residue
-   * - ``LowExpr``
-     - Median MT Score < 1000 and low expression and
-       Tumor DNA VAF > (clonal VAF / 2) and not an anchor residue
    * - ``NoExpr``
-     - Gene Expression == 0 and Tumor DNA VAF == 0 and expression is not low
+     - Mutant allele is not expressed
+   * - ``LowExpr``
+     - Mutant allele has low expression `(TPM * RNA_VAF < 1)`
+   * - ``Subclonal``
+     - Likely not in the founding clone of the tumor `(DNA_VAF > max(DNA_VAF)/2)`
+   * - ``Anchor``
+     - Mutation is at an anchor residue in the shown peptide, and the WT allele has good binding `(WT ic50 <1000)`
    * - ``Poor``
-     - Variant did not match any of the above criteria
-
-.. list-table::
-   :header-rows: 0
-
-   * - anchor residue
-     - Anchor residue positions are definied as the first, second, second-to-last, and
-       last position in the epitope. The mutation in an epitope is an anchor residue if the mutation position is at one
-       of those positions and the median wildtype binding affinity is < 1000.
-   * - low expression
-     - (Tumor RNA VAF * Gene Expression) > 0 or (Gene Expression == 0 and Tumor
-       RNA Depth < 50 and Tumor RNA VAF > .10)
+     - Fails two or more of the above criteria
+   * - ``Relaxed``
+     - Passes the above criteria, has decent MT binding `(ic50 < 1000)`
+   * - ``Pass``
+     - Passes the above criteria, has strong MT binding `(ic50 < 1000)` and strong expression `(TPM * RNA_VAF > 3)`
