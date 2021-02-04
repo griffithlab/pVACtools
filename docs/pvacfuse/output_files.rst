@@ -116,7 +116,7 @@ pVACfuse.
    * - ``Best MT Percentile Method``
      - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
    * - ``Best MT Percentile``
-     - Lowest percentile rank of this epitope's ic50 binding affinity of all prediction algorithms used
+     - Lowest percentile rank of this epitope's ic50 binding affinity of all prediction algorithms used (those that provide percentile output)
    * - ``Corresponding WT Percentile``
      - ``NA``
    * - ``Tumor DNA Depth``
@@ -142,7 +142,7 @@ pVACfuse.
    * - ``Median Fold Change``
      - ``NA``
    * - ``Median MT Percentile``
-     - Median binding affinity percentile rank of the mutant epitope across all prediction algorithms used with valid percentile output
+     - Median binding affinity percentile rank of the mutant epitope across all prediction algorithms used (those that provide percentile output)
    * - ``Median WT Percentile``
      - ``NA``
    * - ``Individual Prediction Algorithm WT and MT Scores and Percentiles`` (multiple)

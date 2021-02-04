@@ -118,7 +118,7 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Best MT Percentile Method``
      - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
    * - ``Best MT Percentile``
-     - Lowest percentile rank of this epitope's ic50 binding affinity of all prediction algorithms used
+     - Lowest percentile rank of this epitope's ic50 binding affinity of all prediction algorithms used (those that provide percentile output)
    * - ``Corresponding WT Percentile``
      - binding affinity percentile rank of the wildtype epitope. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Tumor DNA Depth``
@@ -150,9 +150,9 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Median Fold Change``
      - ``Median WT Score`` / ``Median MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Median MT Percentile``
-     - Median binding affinity percentile rank of the mutant epitope across all prediction algorithms used with valid percentile output
+     - Median binding affinity percentile rank of the mutant epitope across all prediction algorithms (those that provide percentile output)
    * - ``Median WT Percentile``
-     - Median binding affinity percentile rank of the wildtype epitope across all prediction algorithms used with valid percentile output
+     - Median binding affinity percentile rank of the wildtype epitope across all prediction algorithms used (those that provide percentile output)
        ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Individual Prediction Algorithm WT and MT Scores and Percentiles`` (multiple)
      - ic50 binding affintity and percentile ranks for the ``MT Epitope Seq`` and ``WT Eptiope Seq`` for the individual prediction algorithms used
@@ -277,9 +277,9 @@ that offer suggestions as to the suitability of variants for use in vaccines.
    * - ``ic50_WT``
      - Median ic50 binding affinity of the corresponding wildtype epitope across all prediction algorithms used.
    * - ``percentile_MT``
-     - Median binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used
+     - Median binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used (those that provide percentile output)
    * - ``percentile_WT``
-     - Median binding affinity percentile rank of the corresponding wildtype epitope across all prediction algorithms used.
+     - Median binding affinity percentile rank of the corresponding wildtype epitope across all prediction algorithms used (those that provide percentile output)
    * - ``RNA_expr``
      - Gene expression value for the annotated gene containing the variant.
    * - ``RNA_VAF``
