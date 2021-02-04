@@ -83,7 +83,7 @@ ________________
   for more information.
 - The filtered.condensed.tsv report has been removed and replaced with the
   all_epitopes.aggregated.tsv report. We believe that this new report will
-  provide a more comprehensive and easier to understand summary of your
+  provide a more useful summary of your
   results. Please see the Output Files sections of each tool for more
   information on this new report.
 
@@ -121,13 +121,13 @@ _____________
   VCFs. Users may use the ``--sample-name`` to provide the sample name of the
   sample they wish to process.
 - pVACseq and pVACfuse would previously error out if the intermediate TSV
-  while parsed from the input would be empty. In 2.0 the tool will no longer
+   parsed from the input was empty. In 2.0 the tool will no longer
   error out but exit with an appropriate message.
 - pVACvector would previously error out when no valid path was found. In 2.0
   pVACvector will not longer error out but exit with an appropriate message.
 - We now set consistent file permissions on all output files.
 - We've updated our license to BSD 3-Cause Clear. Please note that the
-  individual licenses of our dependend tools remain in place. These can be
+  individual licenses of our dependent tools remain in place. These can be
   viewed by on the :ref:`tools` page.
 
 Past release notes can be found on our :ref:`releases` page.
