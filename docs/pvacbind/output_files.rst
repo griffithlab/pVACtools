@@ -69,9 +69,9 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Best Score Method``
      - Prediction algorithm with the lowest ic50 binding affinity for this epitope
    * - ``Median Percentile``
-     - Median binding affinity percentile rank of the epitope of all prediction algorithms used with valid percentile output
+     - Median binding affinity percentile rank of the epitope of all prediction algorithms used (those that provide percentile output)
    * - ``Best Percentile``
-     - Lowest binding affinity percentile rank of all prediction algorithms used
+     - Lowest binding affinity percentile rank of all prediction algorithms used (those that provide percentile output)
    * - ``Best Percentile Method``
      - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
    * - ``Individual Prediction Algorithm Scores and Percentiles`` (multiple)
