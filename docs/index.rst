@@ -90,7 +90,7 @@ ________________
 New features
 ____________
 
-- pVACtools now provides ic50 binding affinity percentile rank information, in
+- pVACtools now provides binding affinity percentile rank information, in
   addition to the raw ic50 binding affinity values. Users may filter on the
   percentile rank by using the new ``--percentile-threshold`` argument.
 - Users now have the option of calculating the reference proteome similarity
