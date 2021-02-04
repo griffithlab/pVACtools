@@ -116,11 +116,11 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Corresponding Fold Change``
      - ``Corresponding WT Score`` / ``Best MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Best MT Percentile Method``
-     - Prediction algorithm with the lowest ic50 binding affinity percentile rank for this epitope
+     - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
    * - ``Best MT Percentile``
      - Lowest percentile rank of this epitope's ic50 binding affinity of all prediction algorithms used
    * - ``Corresponding WT Percentile``
-     - ic50 binding affinity percentile rank of the wildtype epitope. ``NA`` if there is no ``WT Epitope Seq``.
+     - binding affinity percentile rank of the wildtype epitope. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Tumor DNA Depth``
      - Tumor DNA depth at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
    * - ``Tumor DNA VAF``
@@ -150,9 +150,9 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Median Fold Change``
      - ``Median WT Score`` / ``Median MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Median MT Percentile``
-     - Median ic50 binding affinity percentile rank of the mutant epitope across all prediction algorithms used
+     - Median binding affinity percentile rank of the mutant epitope across all prediction algorithms used with valid percentile output
    * - ``Median WT Percentile``
-     - Median ic50 binding affinity percentile rank of the wildtype epitope across all prediction algorithms used.
+     - Median binding affinity percentile rank of the wildtype epitope across all prediction algorithms used with valid percentile output
        ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Individual Prediction Algorithm WT and MT Scores and Percentiles`` (multiple)
      - ic50 binding affintity and percentile ranks for the ``MT Epitope Seq`` and ``WT Eptiope Seq`` for the individual prediction algorithms used
@@ -277,9 +277,9 @@ that offer suggestions as to the suitability of variants for use in vaccines.
    * - ``ic50_WT``
      - Median ic50 binding affinity of the corresponding wildtype epitope across all prediction algorithms used.
    * - ``percentile_MT``
-     - Median ic50 binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used
+     - Median binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used
    * - ``percentile_WT``
-     - Median ic50 binding affinity percentile rank of the corresponding wildtype epitope across all prediction algorithms used.
+     - Median binding affinity percentile rank of the corresponding wildtype epitope across all prediction algorithms used.
    * - ``RNA_expr``
      - Gene expression value for the annotated gene containing the variant.
    * - ``RNA_VAF``
@@ -289,7 +289,7 @@ that offer suggestions as to the suitability of variants for use in vaccines.
    * - ``DNA_VAF``
      - Tumor DNA variant allele frequency (VAF) at this position.
    * - ``tier``
-     - A tier corresponding to the suitability of variants for use in vaccines.
+     - A tier suggesting the suitability of variants for use in vaccines.
 
 The pVACseq Aggregate Report Tiers
 __________________________________
