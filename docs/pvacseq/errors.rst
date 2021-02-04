@@ -162,7 +162,7 @@ _____
 **The TSV file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.**
 
 None of the variants in the VCF file are supported by pVACseq. This could be
-either because none of the variants have the mentioned type of consequence or
+either because none of the variants have a protein-altering consequence or
 none of the variants are called in the sample (i.e. have a ``0/1`` or ``1/1``
 genotype). If you are using the ``--pass-only`` option it might also be the
 case that all supported variants are filtered.

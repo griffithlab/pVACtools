@@ -255,21 +255,21 @@ that offer suggestions as to the suitability of variants for use in vaccines.
    * - Column Name
      - Description
    * - ``HLA Alleles`` (multiple) (T/F)
-     - For each HLA allele in the run, did the mutation result in an epitope that binded well
-       to the HLA allele (median mutant binding affinity < 1000).
+     - For each HLA allele in the run, did the mutation result in an epitope that bound well
+       to the HLA allele? (with median mutant binding affinity < 1000).
    * - ``Gene``
      - The Ensembl gene name of the affected gene
    * - ``AA_change``
      - The amino acid change for the mutation
    * - ``Num_Transcript``
-     - The Number of transcripts for this mutation that resulted in at least
+     - The number of transcripts for this mutation that resulted in at least
        one well-binding peptide (median mutant binding affinity < 1000).
    * - ``Peptide``
      - The best-binding mutant epitope sequence (lowest median mutant binding
        affinity)
    * - ``Pos``
      - The one-based position of the start of the mutation within the epitope sequence. ``0`` if the
-       start of the mutation is before the epitope
+       start of the mutation is before the epitope (as can occur downstream of frameshift mutations)
    * - ``Num_Peptides``
      - The number of unique well-binding peptides for this mutation.
    * - ``ic50_MT``

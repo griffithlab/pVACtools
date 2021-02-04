@@ -69,11 +69,11 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Best Score Method``
      - Prediction algorithm with the lowest ic50 binding affinity for this epitope
    * - ``Median Percentile``
-     - Median ic50 binding affinity percentile rank of the epitope of all prediction algorithms used
+     - Median binding affinity percentile rank of the epitope of all prediction algorithms used
    * - ``Best Percentile``
-     - Lowest ic50 binding affinity percentile rank of all prediction algorithms used
+     - Lowest binding affinity percentile rank of all prediction algorithms used
    * - ``Best Percentile Method``
-     - Prediction algorithm with the lowest ic50 binding affinity percentile rank for this epitope
+     - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
    * - ``Individual Prediction Algorithm Scores and Percentiles`` (multiple)
      - ic50 binding affinity scores and percentiles for the ``Epitope Seq`` for the individual prediction algorithms used
    * - ``cterm_7mer_gravy_score``
