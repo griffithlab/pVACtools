@@ -26,13 +26,34 @@ class BindingFilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            500,
+            5000,
             0,
             'median',
             False,
+            None,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_path, "Test.filtered.binding.tsv"),
+            False
+        ))
+
+    def test_binding_filter_with_percentile_runs_and_produces_expected_output(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(AlleleSpecificBindingFilter(
+            os.path.join(
+                self.test_data_path,
+                'Test.combined.parsed.tsv'
+            ),
+            output_file.name,
+            10000,
+            0,
+            'median',
+            False,
+            1,
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_path, "Test.filtered.binding.percentile.tsv"),
             False
         ))

@@ -46,7 +46,7 @@ class TestPvacvector(unittest.TestCase):
         cls.input_file = os.path.join(cls.test_data_dir, 'Test.vector.results.input.fa')
         cls.method = 'NetMHC'
         cls.keep_tmp = 'True'
-        cls.allele = 'H-2-Kb'
+        cls.allele = 'HLA-A*02:01'
         cls.epitope_length = '8'
         cls.input_n_mer = '25'
 
@@ -161,7 +161,7 @@ class TestPvacvector(unittest.TestCase):
                 self.allele,
                 self.method,
                 output_dir.name,
-                '-e', self.epitope_length,
+                '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
                 '-k'
             ])
@@ -170,6 +170,10 @@ class TestPvacvector(unittest.TestCase):
             self.assertTrue(cmp(
                 os.path.join(output_dir.name, self.test_run_name + '_results.fa'),
                 os.path.join(self.test_data_dir, "Test.vector.results.output.fa")
+            ))
+            self.assertTrue(cmp(
+                os.path.join(output_dir.name, self.test_run_name + '_results.dna.fa'),
+                os.path.join(self.test_data_dir, "Test.vector.results.output.dna.fa")
             ))
             self.assertTrue(compare(
                 os.path.join(output_dir.name, '0', 'None', 'junction_scores.tsv'),
@@ -199,7 +203,7 @@ class TestPvacvector(unittest.TestCase):
                 self.method,
                 output_dir.name,
                 '-v', self.input_vcf,
-                '-e', self.epitope_length,
+                '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
                 '-k',
             ])
@@ -234,7 +238,7 @@ class TestPvacvector(unittest.TestCase):
                 self.method,
                 output_dir.name,
                 '-v', os.path.join(self.test_data_dir, "input_negative_start.vcf.gz"),
-                '-e', self.epitope_length,
+                '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
                 '-k',
             ])
@@ -256,7 +260,7 @@ class TestPvacvector(unittest.TestCase):
                 self.method,
                 output_dir.name,
                 '-v', self.input_vcf,
-                '-e', self.epitope_length,
+                '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
                 '-k',
                 '-b', '50000',

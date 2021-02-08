@@ -17,15 +17,19 @@ from lib.input_file_converter import *
 from lib.calculate_manufacturability import *
 
 def define_parser():
-    parser = argparse.ArgumentParser("pvacfuse generate_protein_fasta", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        "pvacfuse generate_protein_fasta",
+        description="Generate an annotated fasta file from Integrate-Neo or AGFusion output.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument(
         "input_file",
         help="An INTEGRATE-Neo annotated bedpe file with fusions or a AGfusion output directory."
     )
     parser.add_argument(
-        "peptide_sequence_length", type=int,
-        help="Length of the peptide sequence to use when creating the FASTA.",
+        "flanking_sequence_length", type=int,
+        help="Number of amino acids to add on each side of the mutation when creating the FASTA.",
     )
     parser.add_argument(
         "output_file",
@@ -54,14 +58,14 @@ def convert_fusion_input(input_file, temp_dir):
     converter.execute()
     print("Completed")
 
-def generate_fasta(peptide_sequence_length, downstream_sequence_length, temp_dir):
+def generate_fasta(flanking_sequence_length, downstream_sequence_length, temp_dir):
     print("Generating Variant Peptide FASTA and Key File")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     fasta_file = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file = os.path.join(temp_dir, 'tmp.fasta.key')
     generate_fasta_params = {
         'input_file'                : tsv_file,
-        'peptide_sequence_length'   : peptide_sequence_length,
+        'flanking_sequence_length'  : flanking_sequence_length,
         'epitope_length'            : 0,
         'output_file'               : fasta_file,
         'output_key_file'           : fasta_key_file,
@@ -78,8 +82,7 @@ def parse_input_tsv(input_tsv):
     with open(input_tsv, 'r') as fh:
         reader = csv.DictReader(fh, delimiter = "\t")
         for line in reader:
-            index = '{}.{}.{}.{}'.format(line['Gene Name'], line['Transcript'], line['Variant Type'], line['Protein Position'])
-            indexes.append(index)
+            indexes.append(line['Index'])
     return indexes
 
 def parse_files(output_file, temp_dir, input_tsv):
@@ -98,8 +101,7 @@ def parse_files(output_file, temp_dir, input_tsv):
         ids = keys[int(record.id)]
         for record_id in ids:
             if tsv_indexes is not None:
-                count, index = record_id.split('.', 1)
-                if index not in tsv_indexes:
+                if record_id not in tsv_indexes:
                     continue
             new_record = SeqRecord(record.seq, id=record_id, description=record_id)
             output_records.append(new_record)
@@ -120,7 +122,7 @@ def main(args_input = sys.argv[1:]):
 
     temp_dir = tempfile.mkdtemp()
     convert_fusion_input(args.input_file, temp_dir)
-    generate_fasta(args.peptide_sequence_length, downstream_sequence_length, temp_dir)
+    generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir)
     parse_files(args.output_file, temp_dir, args.input_tsv)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")

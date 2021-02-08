@@ -1,9 +1,9 @@
 __all__ = [
+    "aggregate_all_epitopes",
     "binding_filter",
     "calculate_manufacturability",
     "call_iedb",
     "combine_parsed_outputs",
-    "condense_final_report",
     "csq_parser",
     "input_file_converter",
     "download_example_data",
@@ -14,8 +14,7 @@ __all__ = [
     "netmhc_stab",
     "filter",
     "top_score_filter",
-    "rank_epitopes",
-    "utils",
+    "run_utils",
     "post_processor",
     "vector_visualization",
 ]

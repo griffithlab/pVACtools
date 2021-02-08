@@ -12,3 +12,4 @@ Release Notes
    releases/1_3
    releases/1_4
    releases/1_5
+   releases/2_0

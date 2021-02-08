@@ -15,7 +15,7 @@ class PvacvectorInputFastaGenerator():
         self.n_mer = int(n_mer)
         self.sample_name = sample_name
 
-    def parse_choosen_epitopes(self):
+    def parse_chosen_epitopes(self):
         epitopes = {}
         with open(self.input_tsv, 'r') as input_f:
             reader = csv.DictReader(input_f, delimiter = "\t")
@@ -44,7 +44,7 @@ class PvacvectorInputFastaGenerator():
         key_file = tempfile.NamedTemporaryFile()
         FastaGenerator(**{
             'input_file': tsv_file.name,
-            'peptide_sequence_length': self.n_mer + 2 * 8,
+            'flanking_sequence_length': int(self.n_mer/2) + 8,
             'epitope_length': 8,
             'output_file': fasta_file.name,
             'output_key_file': key_file.name,
@@ -76,7 +76,7 @@ class PvacvectorInputFastaGenerator():
         print("FASTA file written")
 
     def execute(self):
-        epitopes = self.parse_choosen_epitopes()
+        epitopes = self.parse_chosen_epitopes()
         transcripts_dict = self.parse_original_vcf()
         extracted_peptides = self.extract_peptide_sequences(transcripts_dict, epitopes)
         self.write_output_fasta(extracted_peptides)
@@ -97,7 +97,7 @@ class PvacvectorInputFastaGenerator():
             #epitope occurs multiple times
             else:
                 #find the occurence that is closest to the original positon and use that
-                new_position = min(occurences, key=lambda x:abs(original_position-1-x))
+                new_position = min(occurrences, key=lambda x:abs(original_position-1-x))
 
             length = int(length)
             n_mer = int(self.n_mer)

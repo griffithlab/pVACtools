@@ -5,6 +5,7 @@ __all__ = [
     'allele_specific_cutoffs',
     'download_example_data',
     'top_score_filter',
+    'generate_aggregated_report',
 ]
 
 from . import *

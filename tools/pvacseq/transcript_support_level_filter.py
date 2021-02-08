@@ -3,7 +3,11 @@ import sys
 from lib.filter import *
 
 def define_parser():
-    parser = argparse.ArgumentParser('pvacseq transcript_support_level_filter', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        'pvacseq transcript_support_level_filter',
+        description="Filter variants processed by IEDB by transcript support level",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
         'input_file',
         help="The all_epitopes.tsv or filtered.tsv pVACseq report file to filter."
@@ -31,12 +35,11 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': args.maximum_transcript_support_level}]
+    filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': args.maximum_transcript_support_level, 'exclude_nas': args.exclude_NAs}]
     Filter(
         args.input_file,
         args.output_file,
         filter_criteria,
-        args.exclude_NAs,
         ['Transcript Support Level'],
     ).execute()
 

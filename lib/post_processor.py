@@ -1,11 +1,11 @@
 import tempfile
 import shutil
+from lib.aggregate_all_epitopes import *
 from lib.binding_filter import *
 from lib.filter import *
 from lib.top_score_filter import *
-from lib.condense_final_report import *
-from lib.rank_epitopes import *
 from lib.calculate_manufacturability import *
+from lib.calculate_reference_proteome_similarity import *
 import lib.net_chop
 import lib.netmhc_stab
 
@@ -13,6 +13,7 @@ class PostProcessor:
     def __init__(self, **kwargs):
         for (k,v) in kwargs.items():
            setattr(self, k, v)
+        self.aggregate_report = self.input_file.replace('.tsv', '.aggregated.tsv')
         self.binding_filter_fh = tempfile.NamedTemporaryFile()
         self.coverage_filter_fh = tempfile.NamedTemporaryFile()
         self.transcript_support_level_filter_fh = tempfile.NamedTemporaryFile()
@@ -20,12 +21,12 @@ class PostProcessor:
         self.net_chop_fh = tempfile.NamedTemporaryFile()
         self.netmhc_stab_fh = tempfile.NamedTemporaryFile()
         self.manufacturability_fh = tempfile.NamedTemporaryFile()
+        self.reference_similarity_fh = tempfile.NamedTemporaryFile()
         self.file_type = kwargs.pop('file_type', None)
-        if self.run_condense_report:
-            self.condensed_report_fh = tempfile.NamedTemporaryFile()
-            self.ranked_epitopes_fh = tempfile.NamedTemporaryFile()
+        self.fasta = kwargs.pop('fasta', None)
 
     def execute(self):
+        self.aggregate_all_epitopes()
         self.calculate_manufacturability()
         self.execute_binding_filter()
         self.execute_coverage_filter()
@@ -33,16 +34,15 @@ class PostProcessor:
         self.execute_top_score_filter()
         self.call_net_chop()
         self.call_netmhc_stab()
-        self.condense_report()
-        self.rank_epitopes()
-        shutil.copy(self.netmhc_stab_fh.name, self.filtered_report_file)
-        if self.run_condense_report:
-            shutil.copy(self.ranked_epitopes_fh.name, self.condensed_report_file)
+        self.calculate_reference_proteome_similarity()
+        shutil.copy(self.reference_similarity_fh.name, self.filtered_report_file)
         self.close_filehandles()
-        if self.run_condense_report:
-            print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.condensed_report_file))
-        else:
-            print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
+        print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
+
+    def aggregate_all_epitopes(self):
+        print("Creating aggregated report")
+        AggregateAllEpitopes(self.input_file, self.aggregate_report, self.file_type).execute()
+        print("Completed")
 
     def calculate_manufacturability(self):
         if self.run_manufacturability_metrics:
@@ -61,6 +61,7 @@ class PostProcessor:
             self.top_score_metric,
             self.exclude_NAs,
             self.allele_specific_binding_thresholds,
+            self.percentile_threshold,
             self.file_type,
         ).execute()
         print("Completed")
@@ -69,15 +70,15 @@ class PostProcessor:
         if self.run_coverage_filter:
             print("Running Coverage Filters")
             filter_criteria = []
-            filter_criteria.append({'column': "Normal_Depth", 'operator': '>=', 'threshold': self.normal_cov})
-            filter_criteria.append({'column': "Normal_VAF", 'operator': '<=', 'threshold': self.normal_vaf})
-            filter_criteria.append({'column': "Tumor_DNA_Depth", 'operator': '>=', 'threshold': self.tdna_cov})
-            filter_criteria.append({'column': "Tumor_DNA_VAF", 'operator': '>=', 'threshold': self.tdna_vaf})
-            filter_criteria.append({'column': "Tumor_RNA_Depth", 'operator': '>=', 'threshold': self.trna_cov})
-            filter_criteria.append({'column': "Tumor_RNA_VAF", 'operator': '>=', 'threshold': self.trna_vaf})
-            filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': self.expn_val})
-            filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': self.expn_val})
-            Filter(self.binding_filter_fh.name, self.coverage_filter_fh.name, filter_criteria, self.exclude_NAs).execute()
+            filter_criteria.append({'column': "Normal_Depth", 'operator': '>=', 'threshold': self.normal_cov, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Normal_VAF", 'operator': '<=', 'threshold': self.normal_vaf, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Tumor_DNA_Depth", 'operator': '>=', 'threshold': self.tdna_cov, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Tumor_DNA_VAF", 'operator': '>=', 'threshold': self.tdna_vaf, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Tumor_RNA_Depth", 'operator': '>=', 'threshold': self.trna_cov, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Tumor_RNA_VAF", 'operator': '>=', 'threshold': self.trna_vaf, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': self.expn_val, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': self.expn_val, 'exclude_nas': self.exclude_NAs})
+            Filter(self.binding_filter_fh.name, self.coverage_filter_fh.name, filter_criteria).execute()
             print("Completed")
         else:
             shutil.copy(self.binding_filter_fh.name, self.coverage_filter_fh.name)
@@ -85,12 +86,11 @@ class PostProcessor:
     def execute_transcript_support_level_filter(self):
         if self.run_transcript_support_level_filter:
             print("Running Transcript Support Level Filter")
-            filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': self.maximum_transcript_support_level}]
+            filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': self.maximum_transcript_support_level, 'exclude_nas': self.exclude_NAs}]
             Filter(
                 self.coverage_filter_fh.name,
                 self.transcript_support_level_filter_fh.name,
                 filter_criteria,
-                self.exclude_NAs,
                 ['Transcript Support Level'],
             ).execute()
             print("Complete")
@@ -128,17 +128,19 @@ class PostProcessor:
         else:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
 
-    def condense_report(self):
-        if self.run_condense_report:
-            print("Creating Condensed Report")
-            CondenseFinalReport(self.netmhc_stab_fh.name, self.condensed_report_fh.name).execute()
+    def calculate_reference_proteome_similarity(self):
+        if self.run_reference_proteome_similarity:
+            print("Calculating Reference Proteome Similarity")
+            CalculateReferenceProteomeSimilarity(
+                self.netmhc_stab_fh.name,
+                self.fasta,
+                self.reference_similarity_fh.name,
+                species=self.species,
+                file_type=self.file_type
+            ).execute()
             print("Completed")
-
-    def rank_epitopes(self):
-        if self.run_condense_report:
-            print("Ranking neoepitopes")
-            RankEpitopes(self.condensed_report_fh.name, self.ranked_epitopes_fh.name, self.top_score_metric).execute()
-            print("Completed")
+        else:
+            shutil.copy(self.netmhc_stab_fh.name, self.reference_similarity_fh.name)
 
     def close_filehandles(self):
         self.binding_filter_fh.close()
@@ -147,6 +149,5 @@ class PostProcessor:
         self.top_score_filter_fh.close()
         self.net_chop_fh.close()
         self.netmhc_stab_fh.close()
-        if self.run_condense_report:
-            self.condensed_report_fh.close()
-            self.ranked_epitopes_fh.close()
+        self.manufacturability_fh.close()
+        self.reference_similarity_fh.close()

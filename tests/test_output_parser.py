@@ -28,7 +28,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_peptide_sequence_length_21',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -51,7 +51,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -70,7 +70,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'pat27_4',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -89,7 +89,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'pat126',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -108,7 +108,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_frameshift_variant_feature_elongation',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -127,7 +127,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_frameshift_variant_feature_truncation',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -146,7 +146,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_frameshift_variant_feature_truncation2',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -166,7 +166,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_frameshift_variant_position_1',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -185,7 +185,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_inframe_deletion_aa_deletion',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -204,7 +204,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_inframe_deletion_aa_replacement',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -223,7 +223,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_inframe_insertion_aa_insertion',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -242,7 +242,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_inframe_insertion_aa_replacement',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -261,7 +261,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -280,7 +280,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_multiple_transcripts_per_alt',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -299,7 +299,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_mnp',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -318,7 +318,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_mnp2',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
@@ -337,7 +337,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_iedb_dna_warning',
         }
         parser = DefaultOutputParser(**parse_output_params)
         self.assertFalse(parser.execute())
@@ -353,7 +353,7 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : parse_output_input_tsv_file,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_fusions',
         }
         parser = FusionOutputParser(**parse_output_params)
 
@@ -371,10 +371,28 @@ class OutputParserTests(unittest.TestCase):
             'input_tsv_file'         : None,
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
-            'sample_name'            : None,
+            'sample_name'            : 'input_pvacvector',
         }
         parser = UnmatchedSequencesOutputParser(**parse_output_params)
 
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output_pvacvector.iedb.parsed.tsv")
+        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+
+    def test_parse_output_runs_and_produces_expected_output_for_none_percentile(self):
+        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_percentile_none.netmhcpan.HLA-C*03:03.9.tsv_1-2")]
+        parse_output_key_file = os.path.join(self.test_data_dir, "input_pvacvector.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'input_iedb_files'       : parse_output_input_iedb_file,
+            'input_tsv_file'         : None,
+            'key_file'               : parse_output_key_file,
+            'output_file'            : parse_output_output_file.name,
+            'sample_name'            : 'input_percentile_none',
+        }
+        parser = UnmatchedSequencesOutputParser(**parse_output_params)
+
+        self.assertFalse(parser.execute())
+        expected_output_file  = os.path.join(self.test_data_dir, "output_percentile_none.iedb.parsed.tsv")
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))

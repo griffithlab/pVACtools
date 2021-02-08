@@ -18,6 +18,7 @@ The example data output can be reproduced by running the following command:
    HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
    MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
    <output_dir> \
-   -e 8,9,10
+   -e1 8,9,10 \
+   -e2 15
 
 A detailed description of all command options can be found on the :ref:`Usage <pvacbind_run>` page.

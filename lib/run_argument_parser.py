@@ -5,7 +5,11 @@ import lib
 
 class RunArgumentParser(metaclass=ABCMeta):
     def __init__(self, tool_name, input_file_help):
-        parser = argparse.ArgumentParser("%s run" % tool_name, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser = argparse.ArgumentParser(
+            "%s run" % tool_name,
+            description="Run the {} pipeline".format(tool_name.replace('vac', 'VAC')),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
 
         parser.add_argument(
             "input_file",
@@ -27,7 +31,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         )
         parser.add_argument(
             "prediction_algorithms",
-            choices=PredictionClass.prediction_methods(),
+            choices=PredictionClass.prediction_methods_with_all(),
             nargs="+",
             help="The epitope prediction algorithms to use. Multiple prediction algorithms can be specified, separated by spaces.",
         )
@@ -36,11 +40,20 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="The directory for writing all result files."
         )
         parser.add_argument(
-            "-e", "--epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
-            help="Length of subpeptides (neoepitopes) to predict. "
+            "-e1", "--class-i-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+            default=[8,9,10,11],
+            help="Length of MHC Class I subpeptides (neoepitopes) to predict. "
                  + "Multiple epitope lengths can be specified using a comma-separated list. "
-                 + "Typical epitope lengths vary between 8-11. "
+                 + "Typical epitope lengths vary between 8-15. "
                  + "Required for Class I prediction algorithms.",
+        )
+        parser.add_argument(
+                "-e2", "--class-ii-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+            default=[12,13,14,15,16,17,18],
+            help="Length of MHC Class II subpeptides (neoepitopes) to predict. "
+                 + "Multiple epitope lengths can be specified using a comma-separated list. "
+                 + "Typical epitope lengths vary between 11-30. "
+                 + "Required for Class II prediction algorithms.",
         )
         parser.add_argument(
             "--iedb-install-directory",
@@ -50,6 +63,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             "-b","--binding-threshold", type=int,
             default=500,
             help="Report only epitopes where the mutant allele has ic50 binding scores below this value.",
+        )
+        parser.add_argument(
+            '--percentile-threshold', type=float,
+            help="Report only epitopes where the mutant allele "
+                 +"has a percentile rank below this value."
         )
         parser.add_argument(
             '--allele-specific-binding-thresholds',
@@ -86,7 +104,6 @@ class RunArgumentParser(metaclass=ABCMeta):
 class PredictionRunArgumentParser(RunArgumentParser):
     def __init__(self, tool_name, input_file_help):
         RunArgumentParser.__init__(self, tool_name, input_file_help)
-        #do we need a class-i-peptide-sequence-length and a class-ii-peptide-sequence-length?
         self.parser.add_argument(
             '--net-chop-method',
             choices=lib.net_chop.methods,
@@ -102,6 +119,11 @@ class PredictionRunArgumentParser(RunArgumentParser):
             '--net-chop-threshold', type=float,
             default=0.5,
             help="NetChop prediction threshold (increasing the threshold results in better specificity, but worse sensitivity).",
+        )
+        self.parser.add_argument(
+            '--run-reference-proteome-similarity',
+            action='store_true',
+            help="Blast peptides against the reference proteome."
         )
         self.parser.add_argument(
             '-a', '--additional-report-columns',
@@ -131,12 +153,6 @@ class PvacbindRunArgumentParser(PredictionRunArgumentParser):
 class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser):
     def __init__(self, tool_name, input_file_help):
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
-        #do we need a class-i-peptide-sequence-length and a class-ii-peptide-sequence-length?
-        self.parser.add_argument(
-            "-l", "--peptide-sequence-length", type=int,
-            default=21,
-            help="Length of the peptide sequence to use when creating the FASTA.",
-        )
         self.parser.add_argument(
             "-d", "--downstream-sequence-length",
             default='1000',
