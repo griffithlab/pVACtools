@@ -121,7 +121,7 @@ _____________
   VCFs. Users may use the ``--sample-name`` to provide the sample name of the
   sample they wish to process.
 - pVACseq and pVACfuse would previously error out if the intermediate TSV
-   parsed from the input was empty. In 2.0 the tool will no longer
+  parsed from the input was empty. In 2.0 the tool will no longer
   error out but exit with an appropriate message.
 - pVACvector would previously error out when no valid path was found. In 2.0
   pVACvector will not longer error out but exit with an appropriate message.
