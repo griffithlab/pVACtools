@@ -11,52 +11,52 @@ class AggregateAllEpitopes:
     def get_tier(self, mutation, vaf_clonal):
         anchor_residue_pass = True
         anchors = [1, 2, len(mutation["MT Epitope Seq"])-1, len(mutation["MT Epitope Seq"])]
-        if mutation["Median WT Score"] == "NA":
-              anchor_residue_pass = False
-        else:
-          if mutation["Mutation Position"] in anchors and mutation["Median WT Score"] < 1000:
-              anchor_residue_pass = False
+        if mutation["Mutation Position"] in anchors:
+            if mutation["Median WT Score"] == "NA":
+                  anchor_residue_pass = False
+            elif mutation["Median WT Score"] < 1000:
+                  anchor_residue_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
         if (mutation["Median MT Score"] < 500 and
-           (mutation["Tumor RNA VAF"]) * mutation["Gene Expression"] > 3 and
-           mutation["Tumor DNA VAF"] > (vaf_clonal/2) and
+           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 3 and
+           mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            anchor_residue_pass):
             return "Pass"
 
         #relax mt and expr
         if (mutation["Median MT Score"] < 1000 and
-           (mutation["Tumor RNA VAF"]) * mutation["Gene Expression"] > 1 and
-           mutation["Tumor DNA VAF"] > (vaf_clonal/2) and
+           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
+           mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            anchor_residue_pass):
             return "Relaxed"
 
         #anchor residues
         if (mutation["Median MT Score"] < 1000 and
-           (mutation["Tumor RNA VAF"]) * mutation["Gene Expression"] > 1 and
-           mutation["Tumor DNA VAF"] > (vaf_clonal/2) and
+           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
+           mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            not anchor_residue_pass):
             return "Anchor"
 
         #not in founding clone
         if (mutation["Median MT Score"] < 1000 and
-           (mutation["Tumor RNA VAF"]) * mutation["Gene Expression"] > 1 and
+           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
            mutation["Tumor DNA VAF"] < (vaf_clonal/2) and
            anchor_residue_pass):
             return "Subclonal"
 
         #relax expression.  Include sites that have reasonable vaf but zero overall gene expression
         lowexpr=False
-        if ((mutation["Tumor RNA VAF"]) * mutation["Gene Expression"] > 0 or
-           mutation["Gene Expression"] == 0 and
-           (mutation["Tumor RNA Depth"]) > 50 and
-           (mutation["Tumor RNA VAF"]) > 0.10):
+        if ((mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 0) or 
+           (mutation["Gene Expression"] == 0 and
+           mutation["Tumor RNA Depth"] > 50 and
+           mutation["Tumor RNA VAF"] > 0.10)):
              lowexpr=True
 
         #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
         if (mutation["Median MT Score"] < 1000 and
             lowexpr==True and
-            mutation["Tumor DNA VAF"] > (vaf_clonal/2) and
+            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
             anchor_residue_pass):
             return "LowExpr"
 
