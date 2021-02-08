@@ -15,6 +15,10 @@ class DownloadExampleData:
 
     @classmethod
     def parser(cls, tool):
-        parser = argparse.ArgumentParser('%s download_example_data' % tool, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser = argparse.ArgumentParser(
+            '%s download_example_data' % tool,
+            description="Download example input and output files",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
         parser.add_argument('destination_directory', help='Directory for downloading example data',)
         return parser

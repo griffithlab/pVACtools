@@ -11,14 +11,14 @@ def define_parser():
     #add subcommands
     run_main_program_parser = subparsers.add_parser(
         "run",
-        help="Runs the pVACfuse pipeline",
+        help="Run the pVACfuse pipeline",
         add_help=False
     )
     run_main_program_parser.set_defaults(func=run)
 
     binding_filter_parser = subparsers.add_parser(
         "binding_filter",
-        help="Filters variants processed by IEDB by binding score",
+        help="Filter variants processed by IEDB by binding score",
         add_help=False
     )
     binding_filter_parser.set_defaults(func=binding_filter)
@@ -37,9 +37,16 @@ def define_parser():
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
 
+    generate_aggregated_report_parser = subparsers.add_parser(
+        "generate_aggregated_report",
+        help="Generate an aggregated report from a pVACfuse .all_epitopes.tsv report file.",
+        add_help=False
+    )
+    generate_aggregated_report_parser.set_defaults(func=generate_aggregated_report)
+
     valid_alleles_parser = subparsers.add_parser(
         "valid_alleles",
-        help="Shows a list of valid allele names",
+        help="Show a list of valid allele names",
         add_help=False
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
@@ -53,7 +60,7 @@ def define_parser():
 
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
-        help="Downloads example input and output files",
+        help="Download example input and output files",
         add_help=False
     )
     download_example_data_parser.set_defaults(func=download_example_data)

@@ -10,17 +10,11 @@ import py_compile
 import lib.call_iedb
 from lib.prediction_class import PredictionClass, IEDB
 import pandas as pd
+from mock import patch
+from .test_utils import *
 
-def make_response(method, path):
-    reader = open(os.path.join(
-        path,
-        'response_%s.tsv' %method
-    ), mode='r')
-    response_obj = lambda :None
-    response_obj.status_code = 200
-    response_obj.text = reader.read()
-    reader.close()
-    return response_obj
+def test_data_directory():
+    return os.path.join(pvac_directory(), 'tests', 'test_data', 'call_iedb')
 
 class CallIEDBTests(unittest.TestCase):
     @classmethod
@@ -29,7 +23,7 @@ class CallIEDBTests(unittest.TestCase):
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
         cls.executable_dir = os.path.join(base_dir, 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'call_iedb.py')
-        cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'call_iedb')
+        cls.test_data_dir  = test_data_directory()
         cls.additional_setup()
 
     @classmethod
@@ -60,35 +54,32 @@ class CallIEDBClassITests(CallIEDBTests):
         cls.allele         = 'HLA-A*02:01'
         cls.epitope_length = 9
         cls.methods = ['ann', 'smmpmbec', 'smm']
-        cls.request_mock = unittest.mock.Mock(side_effect = (
-            make_response(method, cls.test_data_dir) for method in cls.methods
-        ))
-        lib.call_iedb.requests.post = cls.request_mock
 
     def test_iedb_methods_generate_expected_files(self):
-        #netmhcpan, netmhccons, and pickpocket are slow so we won't run them in the tests
-        for method in self.methods:
-            call_iedb_output_file = tempfile.NamedTemporaryFile()
-            class_name = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            test_data_directory()
+        ))) as mock_request:
+            #netmhcpan, netmhccons, and pickpocket are slow so we won't run them in the tests
+            for method in self.methods:
+                call_iedb_output_file = tempfile.NamedTemporaryFile()
+                class_name = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
 
-            lib.call_iedb.main([
-                self.input_file,
-                call_iedb_output_file.name,
-                class_name,
-                self.allele,
-                '-l', str(self.epitope_length)
-            ])
-            reader = open(self.input_file, mode='r')
-            self.request_mock.assert_called_with('http://tools-cluster-interface.iedb.org/tools_api/mhci/', data={
-                'sequence_text':reader.read(),
-                'method': method,
-                'allele': self.allele,
-                'length': self.epitope_length,
-                'user_tool': 'pVac-seq',
-            })
-            reader.close()
-            expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
-            self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+                lib.call_iedb.main([
+                    self.input_file,
+                    call_iedb_output_file.name,
+                    class_name,
+                    self.allele,
+                    '-l', str(self.epitope_length)
+                ])
+                mock_request.assert_has_calls([
+                    generate_class_i_call(method, self.allele, self.epitope_length, self.input_file)
+                ])
+                reader = open(self.input_file, mode='r')
+                reader.close()
+                expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
+                self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
 
     #the output from MHCflurry varies between operating systems and the version of tensorflow installed
     #these outputs where created on tensorflow 1.8.0
@@ -135,26 +126,27 @@ class CallIEDBClassIITests(CallIEDBTests):
         lib.call_iedb.requests.post = cls.request_mock
 
     def test_iedb_methods_generate_expected_files(self):
-        for method in self.methods:
-            call_iedb_output_file = tempfile.NamedTemporaryFile()
-            class_name = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            test_data_directory()
+        ))) as mock_request:
+            for method in self.methods:
+                call_iedb_output_file = tempfile.NamedTemporaryFile()
+                class_name = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
 
-            lib.call_iedb.main([
-                self.input_file,
-                call_iedb_output_file.name,
-                class_name,
-                self.allele,
-            ])
-            reader = open(self.input_file, mode='r')
-            self.request_mock.assert_called_with('http://tools-cluster-interface.iedb.org/tools_api/mhcii/', data={
-                'sequence_text':reader.read(),
-                'method': method,
-                'allele': self.allele,
-                'user_tool': 'pVac-seq',
-            })
-            reader.close()
-            expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
-            self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
+                lib.call_iedb.main([
+                    self.input_file,
+                    call_iedb_output_file.name,
+                    class_name,
+                    self.allele,
+                    '-l', '15',
+                ])
+                mock_request.assert_has_calls([
+                    generate_class_ii_call(method, self.allele, 15, self.input_file)
+                ])
+                expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
+                self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
 
     def test_mhcnuggets_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()

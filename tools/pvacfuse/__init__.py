@@ -6,6 +6,7 @@ __all__ = [
     'download_example_data',
     'top_score_filter',
     'generate_protein_fasta',
+    "generate_aggregated_report",
 ]
 
 from . import *

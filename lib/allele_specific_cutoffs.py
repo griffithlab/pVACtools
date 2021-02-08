@@ -14,7 +14,11 @@ class AlleleSpecificCutoffs:
 
     @classmethod
     def parser(cls, tool):
-        parser = argparse.ArgumentParser("%s allele_specific_cutoffs" % tool, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser = argparse.ArgumentParser(
+            "%s allele_specific_cutoffs" % tool,
+            description="Show the allele specific cutoffs",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
         parser.add_argument(
             "-a", "--allele",
             help="The allele to use",

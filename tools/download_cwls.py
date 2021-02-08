@@ -4,7 +4,11 @@ import os
 import sys
 
 def define_parser():
-    parser = argparse.ArgumentParser("pvactools download_cwls", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        "pvactools download_cwls",
+        description="Download pVACtools CWLs for each tool's main pipeline",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument('destination_directory', help='Directory for downloading CWLs')
     return parser
 

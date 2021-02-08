@@ -10,7 +10,7 @@ which prediction algorithms were chosen:
 
 - ``MHC_Class_I``: for MHC class I prediction algorithms
 - ``MHC_Class_II``: for MHC class II prediction algorithms
-- ``combined``: If both MHC class I and MHC class II prediction algorithms were run, this folder combines the neoeptiope predictions from both
+- ``combined``: If both MHC class I and MHC class II prediction algorithms were run, this folder combines the neoepitope predictions from both
 
 Each folder will contain the same list of output files (listed in the order
 created):
@@ -20,16 +20,31 @@ created):
 
    * - File Name
      - Description
-   * - ``<sample_name>.tsv``
-     - An intermediate file with variant information parsed from the input files.
-   * - ``<sample_name>.tsv_<chunks>`` (multiple)
-     - The above file but split into smaller chunks for easier processing with IEDB.
    * - ``<sample_name>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``.
    * - ``<sample_name>.filtered.tsv``
      - The above file after applying all filters, with cleavage site and stability
        predictions added.
+   * - ``<sample_name>.filtered.tsv.reference_matches`` (optional)
+     - A file outlining details of reference proteome matches
+   * - ``<sample_name>.all_epitopes.aggregated.tsv``
+     - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
+       the best epitope for each mutation in an easy-to-read format.
+
+Filters applied to the filtered.tsv file
+----------------------------------------
+
+The filtered.tsv file is the all_epitopes file with the following filters
+applied (in order):
+
+- Binding Filter
+- Top Score Filter
+
+Please see the :ref:`Standalone Filter Commands<pvacbind_filter_commands>`
+documentation for more information on each individual filter. The standalone
+filter commands may be useful to reproduce the filtering or to chose different
+filtering thresholds.
 
 all_epitopes.tsv and filtered.tsv Report Columns
 ------------------------------------------------
@@ -53,8 +68,14 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - Lowest ic50 binding affinity of all prediction algorithms used
    * - ``Best Score Method``
      - Prediction algorithm with the lowest ic50 binding affinity for this epitope
-   * - ``Individual Prediction Algorithm Scores`` (multiple)
-     - ic50 scores for the ``Epitope Seq`` for the individual prediction algorithms used
+   * - ``Median Percentile``
+     - Median binding affinity percentile rank of the epitope of all prediction algorithms used (those that provide percentile output)
+   * - ``Best Percentile``
+     - Lowest binding affinity percentile rank of all prediction algorithms used (those that provide percentile output)
+   * - ``Best Percentile Method``
+     - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
+   * - ``Individual Prediction Algorithm Scores and Percentiles`` (multiple)
+     - ic50 binding affinity scores and percentiles for the ``Epitope Seq`` for the individual prediction algorithms used
    * - ``cterm_7mer_gravy_score``
      - Mean hydropathy of last 7 residues on the C-terminus of the peptide
    * - ``max_7mer_gravy_score``
@@ -87,3 +108,44 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - The % rank stability of the pMHC-I complex
    * - ``NetMHCstab allele`` (optional)
      - Nearest neighbor to the ``HLA Allele``. Used for NetMHCstab prediction
+   * - ``Reference Match`` (T/F) (optional)
+     - Was there a BLAST match of the mutated peptide sequence to the
+       reference proteome?
+
+filtered.tsv.reference_matches Report Columns
+---------------------------------------------
+
+This file is only generated when the ``--run-reference-proteome-similarity``
+option is chosen.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Column Name
+     - Description
+   * - ``Chromosome``
+     - The chromosome of this variant
+   * - ``Start``
+     - The start position of this variant in the zero-based, half-open coordinate system
+   * - ``Stop``
+     - The stop position of this variant in the zero-based, half-open coordinate system
+   * - ``Reference``
+     - The reference allele
+   * - ``Variant``
+     - The alt allele
+   * - ``Transcript``
+     - The Ensembl ID of the affected transcript
+   * - ``Peptide``
+     - The peptide sequence submitted to BLAST
+   * - ``Hit ID``
+     - The BLAST alignment hit ID (reference proteome sequence ID)
+   * - ``Hit Definition``
+     - The BLAST alignment hit definition (reference proteome sequence name)
+   * - ``Query Sequence``
+     - The BLAST query sequence
+   * - ``Match Sequence``
+     - The BLAST match sequence
+   * - ``Match Start``
+     - The match start position in the matched reference proteome sequence
+   * - ``Match Stop``
+     - The match stop position in the matched reference proteome sequence

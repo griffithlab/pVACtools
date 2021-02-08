@@ -10,7 +10,7 @@ def define_parser():
     #add subcommands
     download_cwls_parser = subparsers.add_parser(
         "download_cwls",
-        help="Run pVACtools CWLs",
+        help="Download pVACtools CWLs for each tool's main pipeline",
         add_help=False
     )
     download_cwls_parser.set_defaults(func=download_cwls)

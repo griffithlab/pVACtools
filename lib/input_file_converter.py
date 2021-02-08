@@ -5,9 +5,8 @@ import os
 from abc import ABCMeta
 from collections import OrderedDict
 from lib.csq_parser import CsqParser
-import lib.utils
+import lib.run_utils
 from lib.proximal_variant import ProximalVariant
-import lib.utils
 import binascii
 import re
 import glob
@@ -34,7 +33,7 @@ class InputFileConverter(metaclass=ABCMeta):
             'hgvsc',
             'hgvsp',
             'wildtype_amino_acid_sequence',
-            'downstream_amino_acid_sequence',
+            'frameshift_amino_acid_sequence',
             'fusion_amino_acid_sequence',
             'variant_type',
             'protein_position',
@@ -58,18 +57,18 @@ class VcfConverter(InputFileConverter):
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
         self.proximal_variants_vcf = kwargs.pop('proximal_variants_vcf', None)
         self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
-        self.peptide_length = kwargs.pop('peptide_length', None)
-        if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.peptide_length):
-            sys.exit("A proximal variants TSV output path and peptide length need to be specified if a proximal variants input VCF is provided.")
-        if self.proximal_variants_vcf and not lib.utils.is_gz_file(self.input_file):
+        self.flanking_bases = kwargs.pop('flanking_bases', None)
+        if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.flanking_bases):
+            sys.exit("A proximal variants TSV output path and number of flanking bases need to be specified if a proximal variants input VCF is provided.")
+        if self.proximal_variants_vcf and not lib.run_utils.is_gz_file(self.input_file):
             sys.exit("Input VCF {} needs to be bgzipped when running with a proximal variants VCF.".format(self.input_file))
-        if self.proximal_variants_vcf and not lib.utils.is_gz_file(self.proximal_variants_vcf):
+        if self.proximal_variants_vcf and not lib.run_utils.is_gz_file(self.proximal_variants_vcf):
             sys.exit("Proximal variants VCF {} needs to be bgzipped.".format(self.proximal_variants_vcf))
         if self.proximal_variants_vcf and not os.path.exists(self.proximal_variants_vcf + '.tbi'):
             sys.exit('No .tbi file found for proximal variants VCF {}. Proximal variants VCF needs to be tabix indexed.'.format(self.proximal_variants_vcf))
         if self.proximal_variants_vcf and not os.path.exists(self.input_file + '.tbi'):
             sys.exit('No .tbi file found for input VCF {}. Input VCF needs to be tabix indexed if processing with proximal variants.'.format(self.input_file))
-        if lib.utils.is_gz_file(self.input_file):
+        if lib.run_utils.is_gz_file(self.input_file):
             mode = 'rb'
         else:
             mode = 'r'
@@ -77,7 +76,7 @@ class VcfConverter(InputFileConverter):
             self.proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
             self.proximal_variants_writer = csv.DictWriter(self.proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'codon_change', 'protein_position', 'type', 'main_somatic_variant'])
             self.proximal_variants_writer.writeheader()
-            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf, self.pass_only)
+            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf, self.pass_only, self.flanking_bases)
             self.somatic_vcf_fh = open(self.input_file, mode)
             self.somatic_vcf_reader = vcf.Reader(self.somatic_vcf_fh)
         self.reader = open(self.input_file, mode)
@@ -90,19 +89,21 @@ class VcfConverter(InputFileConverter):
             if self.normal_sample_name is not None and self.normal_sample_name not in self.vcf_reader.samples:
                 sys.exit("normal_sample_name {} not a sample ID in the #CHROM header of VCF {}".format(self.normal_sample_name, self.input_file))
         elif len(self.vcf_reader.samples) ==  0:
-            sys.exit("VCF doesn't contain any sample genotype information.")
+            sys.exit("VCF doesn't contain any sample genotype information. Add a dummy sample using the vcf-genotype-annotator tool available as part of the vatools package.")
         else:
             if self.normal_sample_name is not None:
                 sys.exit("normal_sample_name {} provided but the input file is a single-sample (tumor only) VCF".format(self.normal_sample_name))
             self.sample_name = self.vcf_reader.samples[0]
+        if 'GT' not in self.vcf_reader.formats:
+            sys.exit("VCF doesn't contain any sample genotype information. Add a dummy sample using the vcf-genotype-annotator tool available as part of the vatools package.")
         self.writer = open(self.output_file, 'w')
         self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         self.tsv_writer.writeheader()
         self.csq_parser = self.create_csq_parser()
-        if 'DownstreamProtein' not in self.csq_parser.csq_format:
-            sys.exit("VCF doesn't contain VEP DownstreamProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.")
+        if 'FrameshiftSequence' not in self.csq_parser.csq_format:
+            sys.exit("VCF doesn't contain VEP FrameshiftSequence annotations. Please re-annotate the VCF with VEP and the Wildtype and Frameshift plugins.")
         if 'WildtypeProtein' not in self.csq_parser.csq_format:
-            sys.exit("VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Downstream plugins.")
+            sys.exit("VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Frameshift plugins.")
 
     def is_insertion(self, ref, alt):
         return len(alt) > len(ref)
@@ -212,7 +213,7 @@ class VcfConverter(InputFileConverter):
         return coverage_for_entry
 
     def write_proximal_variant_entries(self, entry, alt, transcript_name, index):
-        proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name, self.peptide_length)
+        proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name)
         for (proximal_variant, csq_entry) in proximal_variants:
             if len(list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
                 proximal_variant_type = 'somatic'
@@ -305,8 +306,8 @@ class VcfConverter(InputFileConverter):
                     if consequence is None:
                         continue
                     elif consequence == 'FS':
-                        if transcript['DownstreamProtein'] == '':
-                            print("frameshift_variant transcript does not contain a DownstreamProtein sequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        if transcript['FrameshiftSequence'] == '':
+                            print("frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                             continue
                         else:
                             amino_acid_change_position = "%s%s/%s" % (protein_position, entry.REF, alt)
@@ -317,7 +318,7 @@ class VcfConverter(InputFileConverter):
                         else:
                             amino_acid_change_position = protein_position + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
-                    index = '%s.%s.%s.%s.%s' % (count, gene_name, transcript_name, consequence, amino_acid_change_position)
+                    index = lib.run_utils.construct_index(count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
                         sys.exit("Warning: TSV index already exists: {}".format(index))
                     else:
@@ -334,6 +335,19 @@ class VcfConverter(InputFileConverter):
                         tsl = transcript['TSL']
                     else:
                         tsl = 'NA'
+
+                    if transcript['FrameshiftSequence'] != '':
+                        wt_len = len(transcript['WildtypeProtein'])
+                        mt_len = len(transcript['FrameshiftSequence'])
+                        if mt_len > wt_len:
+                            protein_length_change = "+{}".format(mt_len - wt_len)
+                        elif mt_len < wt_len:
+                            protein_length_change = "-{}".format(wt_len - mt_len)
+                        else:
+                            protein_length_change = "0"
+                    else:
+                        protein_length_change = ""
+
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
                         'start'                          : entry.affected_start,
@@ -347,12 +361,12 @@ class VcfConverter(InputFileConverter):
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,
                         'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
-                        'downstream_amino_acid_sequence' : transcript['DownstreamProtein'],
+                        'frameshift_amino_acid_sequence' : transcript['FrameshiftSequence'],
                         'fusion_amino_acid_sequence'     : '',
                         'variant_type'                   : consequence,
                         'protein_position'               : protein_position,
                         'index'                          : index,
-                        'protein_length_change'          : transcript['ProteinLengthChange'],
+                        'protein_length_change'          : protein_length_change,
                     }
                     if transcript['Amino_acids']:
                         output_row['amino_acid_change'] = transcript['Amino_acids']
@@ -442,7 +456,7 @@ class FusionInputConverter(InputFileConverter):
                     'variant'                    : 'fusion',
                     'gene_name'                  : entry['name of fusion'],
                     'wildtype_amino_acid_sequence'   : '',
-                    'downstream_amino_acid_sequence' : '',
+                    'frameshift_amino_acid_sequence' : '',
                     'protein_length_change'      : '',
                     'amino_acid_change'          : 'NA',
                     'codon_change'               : 'NA',
@@ -462,7 +476,7 @@ class FusionInputConverter(InputFileConverter):
                 output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
                 transcripts                              = ';'.join(fusions)
                 output_row['transcript_name']            = transcripts
-                output_row['index']                      = '{}.{}.{}.{}.{}'.format(count, entry['name of fusion'], transcripts, variant_type, fusion_position)
+                output_row['index']                      = lib.run_utils.construct_index(count, entry['name of fusion'], transcripts, variant_type, fusion_position)
                 output_rows.append(output_row)
                 count += 1
 
@@ -526,7 +540,7 @@ class FusionInputConverter(InputFileConverter):
                     'variant'                    : 'fusion',
                     'gene_name'                  : record_info['genes'],
                     'wildtype_amino_acid_sequence'   : '',
-                    'downstream_amino_acid_sequence' : '',
+                    'frameshift_amino_acid_sequence' : '',
                     'protein_length_change'      : '',
                     'amino_acid_change'          : 'NA',
                     'codon_change'               : 'NA',
@@ -544,7 +558,7 @@ class FusionInputConverter(InputFileConverter):
                     'protein_position'           : fusion_position,
                     'fusion_amino_acid_sequence' : fusion_amino_acid_sequence,
                     'transcript_name'            : record_info['transcripts'],
-                    'index'                      : '%s.%s.%s.%s.%s' % (count, record_info['genes'], record_info['transcripts'], variant_type, fusion_position),
+                    'index'                      : lib.run_utils.construct_index(count, record_info['genes'], record_info['transcripts'], variant_type, fusion_position)
                 }
                 output_rows.append(output_row)
                 count += 1

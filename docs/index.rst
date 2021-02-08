@@ -43,99 +43,92 @@ tools:
    tools
    frequently_asked_questions
    releases
+   license
    citation
+   contribute
    contact
    mailing_list
-
-New in release |release|
-------------------------
-
-This is a hotfix release. It fixes the following issues:
-
-- MHCflurry would previously be called once per pepetide sequence. Because a
-  large overhead for MHCflurry is the creation of the model and the model gets
-  created every time MHCflurry is called, this would cause very long runtimes
-  when using this predicition algorithm. This version updates the processing
-  to pre-calculcate all the epitopes of an intermediate fasta file and make
-  only one call to MHCflurry for all of them.
-- This version was updated to set consistent file permissions for all of the
-  output files created by pVACseq, pVACfuse, pVACbind, and pVACvector.
 
 New in version |version|
 ------------------------
 
-This version adds the following features:
+This version adds the following features, outlined below. Please note that
+pVACtools 2.0 is not backwards-compatible and certain changes will break old
+workflows.
 
-- This version introduces a new tool, ``pVACbind``, which can be used
-  to run our immunotherapy pipeline with a peptides
-  FASTA file as input. This new tool is similar to pVACseq but certain
-  options and filters are removed:
+Breaking changes
+________________
 
-  - All input sequences are interpreted in isolation so corresponding
-    wildtype sequence and score information are not assigned. As a consequence,
-    the filter threshold option on fold change is removed.
-  - Because the input format doesn't allow for association of readcount,
-    expression or transcript support level data, pVACbind doesn't run the coverage
-    filter or transcript support level filter.
-  - No condensed report is generated.
+- pVACtools now supports variable epitope lengths for class II prediction algorithms. The previous option
+  ``--epitope-length`` (``-e``) no longer exists. It has been replaced with
+  ``--class-i-epitope-length`` (``-e1``) and ``--class-ii-epitope-length``
+  (``-e2``) for class I and class II epitope lengths, respectively. The
+  defaults are ``[8, 9, 10, 11]`` and ``[12, 13, 14, 15, 16, 17, 18]``,
+  respectively.
+- The ``--peptide-sequence-length`` option has been removed. The peptide
+  sequence length is now determined by the epitope length(s) to determine the
+  flanking sequence length before and after the mutation.
+- pVACtools no longer depends on conda. pVACtools remains compatible with
+  Python 3.5 and above but users may chose any environment manager to set up
+  an appropriate Python environment.
+- When using standalone IEDB, pVACtools is now only compatible with IEDB 3.1
+  and above. Please see :ref:`install` for instructions on installing the
+  latest IEDB version.
+- pVACseq is no longer dependent on annotations with the VEP Downstream
+  plugin. This dependency has been replaced with the VEP Frameshift plugin.
+  This requires changes to your existing VEP installation in order to install
+  the Frameshift plugin. Existing VCFs that were previously annotated to work
+  with pVACtools 1.5 and below will no longer work with version 2.0 and above
+  and will need to be reannotated. Please see our documentation on :ref:`vep`
+  for more information.
+- The filtered.condensed.tsv report has been removed and replaced with the
+  all_epitopes.aggregated.tsv report. We believe that this new report will
+  provide a more useful summary of your
+  results. Please see the Output Files sections of each tool for more
+  information on this new report.
 
-  Please see the :ref:`pvacbind` documentation for more information.
+New features
+____________
 
-- pVACfuse now support annotated fusion files from `AGFusion <https://github.com/murphycj/AGFusion>`_ as input. The
-  :ref:`pvacfuse` documentation has been updated with instructions on how to
-  run AGFusion in the Prerequisites section.
-- The top score filter has been updated to take into account alternative known
-  transcripts that might result in non-indentical peptide sequences/epitopes.
-  The top score filter now picks the best epitope for every available transcript of a
-  variant. If the resulting list of epitopes for one variant is not identical,
-  the filter will output all eptiopes. If the resulting list of epitopes for one
-  variant are identical, the filter only outputs the epitope for the transcript with the highest
-  transcript expression value. If no expression data is available, or if
-  multiple transcripts remain, the filter outputs the epitope for the
-  transcripts with the lowest transcript Ensembl ID.
-- This version adds a few new options to the ``pvacseq
-  generate_protein_fasta`` command:
+- pVACtools now provides binding affinity percentile rank information, in
+  addition to the raw ic50 binding affinity values. Users may filter on the
+  percentile rank by using the new ``--percentile-threshold`` argument.
+- Users now have the option of calculating the reference proteome similarity
+  of their filtered epitopes. For this, the peptide sequence for the
+  remaining variants is mapped to the reference proteome using BLAST. Variants
+  where this yields a hit to a reference proteome are marked accordingly and a
+  ``.reference_matches`` file provides more information about the matches.
+  This option can be enabled using the ``--run-reference-proteome-similarity``
+  option.
+- Users may now use the options ``all``, ``all_class_i``, or ``all_class_ii``
+  instead of specific prediction algorithms in order to run all prediction
+  algorithms, all class I prediction algorithms, or all class II prediction
+  algorithms, respectively.
+- For successful pVACvector runs, we now output a ``_results.dna.fa`` file
+  with the most likely nucleic acid sequence for the predicted vector.
 
-  - The ``--mutant-only`` option can be used to only output mutant peptide
-    sequences instead of mutant and wildtype sequences.
-  - This command now has an option to provide a pVACseq all_eptiopes or
-    filtered TSV file as an input (``--input-tsv``). This will limit the
-    output fasta to only sequences that originated from the variants in that file.
+Minor Updates
+_____________
 
-- This release adds a ``pvacfuse generate_protein_fasta`` command that works
-  similarly to the ``pvacseq generate_protein_fasta`` command but works with
-  Integrate-NEO or AGFusion input files.
-- We removed the sorting of the all_epitopes result file in order to reduce
-  memory usage. Only the filtered files will be sorted. This version also updates the sorting algorithm of the
-  filtered files as follows:
-
-  - If the ``--top-score-metric`` is set to ``median`` the results are first
-    sorted by the ``Median MT Score``. If multiple epitopes have the same
-    ``Median MT Score`` they are then sorted by the ``Corresponding Fold
-    Change``. The last sorting criteria is the ``Best MT Score``.
-  - If the ``--top-score-metric`` is set to ``lowest`` the results are first
-    sorted by the ``Best MT Score``. If multiple epitopes have the same
-    ``Best MT Score`` they are then sorted by the ``Corresponding Fold
-    Change``. The last sorting criteria is the ``Median MT Score``.
-
-- pVACseq, pVACfuse, and pVACbind now calculate manufacturability metrics
-  for the predicted epitopes. Manufacturability metrics are also
-  calculated for all protein sequences when running the ``pvacseq generate_protein_fasta``
-  and ``pvacfuse generate_protein_fasta`` commands. They are saved in the ``.manufacturability.tsv``
-  along to the result fasta.
-- The pVACseq score that gets calculated for epitopes in the condensed report
-  is now converted into a rank. This will hopefully remove any confusion about
-  whether the previous score could be treated as an absolute measure of
-  immunogencity, which it was not intended for. Converting this score to a
-  rank ensures that it gets treated in isolation for only the epitopes in the
-  condensed file.
-- The condensed report now also outputs the mutation position as well as the
-  full set of lowest and median wildtype and mutant scores.
-- This version adds a clear cache function to pVACapi that can be called by
-  running ``pvacapi clear_cache``. Sometimes pVACapi can get into a state
-  where the cache file contains conflicting data compared to the actual
-  process outputs which results in errors. Clearing the cache using the ``pvacapi clear_cache``
-  function can be used in that situation to resolve these errors.
+- When running pVACseq with a proximal variants VCF we would previously assume
+  that your ran VEP with the ``--pick`` option and only process the first transcript
+  annotation for a variant. With this update we will now associate the correct
+  transcript for a proximal variant with the matching transcript of the main
+  somatic variant of interest.
+- The ``pvacseq generate_protein_fasta`` command now allows users to provide a
+  proximal variants VCF using the ``--phased-proximal-variants-vcf`` option.
+- The ``pvacseq generate_protein_fasta`` command now supports multi-sample
+  VCFs. Users may use the ``--sample-name`` to provide the sample name of the
+  sample they wish to process.
+- pVACseq and pVACfuse would previously error out if the intermediate TSV
+   parsed from the input was empty. In 2.0 the tool will no longer
+  error out but exit with an appropriate message.
+- pVACvector would previously error out when no valid path was found. In 2.0
+  pVACvector will not longer error out but exit with an appropriate message.
+- We now set consistent file permissions on all output files.
+- We've updated our license to BSD 3-Cause Clear. Please note that the
+  individual licenses of our dependent tools remain in place. These can be
+  viewed by on the :ref:`tools` page.
 
 Past release notes can be found on our :ref:`releases` page.
 
@@ -164,9 +157,9 @@ in silico approach to identifying tumor neoantigens <http://www.genomemedicine.c
 <http://www.ncbi.nlm.nih.gov/pubmed/26825632>`_.
 
 Source code
--------
+-----------
 The pVACtools source code is available in `GitHub <https://github.com/griffithlab/pVACtools>`_.
 
 License
 -------
-This project is licensed under `NPOSL-3.0 <http://opensource.org/licenses/NPOSL-3.0>`_.
+This project is licensed under `BSD 3-Clause Clear License <https://spdx.org/licenses/BSD-3-Clause-Clear.html>`_.

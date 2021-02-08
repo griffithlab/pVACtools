@@ -1,0 +1,3 @@
+HLA-A*02:01	HLA-B*35:01	Gene	AA_change	Num_Transcript	Peptide	Pos	Num_Peptides	ic50_MT	ic50_WT	percentile_MT	percentile_WT	RNA_expr	RNA_VAF	RNA_Depth	DNA_VAF	tier
+		MPDU1>>GLP2R	17 / 17 | -1 / 9760739 | 7490589 / -1	0	FTSIQKTPL	NA	0	2272.278	NA	9.4	NA	0.0	0.0	0.0	0.0	NoExpr
+		EIF3K>>CYP39A1	19 / 6 | -1 / -1 | 39123136 / 46607405	0	KSSIPKNVFL	NA	0	6808.9	NA	21.0	NA	0.0	0.0	0.0	0.0	NoExpr

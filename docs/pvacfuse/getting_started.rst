@@ -23,7 +23,8 @@ INTEGRATE-neo bedpe file and will regenerate the
    HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
    MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
    <output_dir> \
-   -e 8,9,10
+   -e1 8,9,10 \
+   -e2 15
 
 The ``results_from_agfusion`` example data can be regenerated like so:
 
@@ -35,6 +36,7 @@ The ``results_from_agfusion`` example data can be regenerated like so:
    HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
    MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
    <output_dir> \
-   -e 8,9,10
+   -e1 8,9,10 \
+   -e2 15
 
 A detailed description of all command options can be found on the :ref:`Usage <pvacfuse_run>` page.

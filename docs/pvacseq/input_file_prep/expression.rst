@@ -56,12 +56,12 @@ tab-delimited file.
 Installing the vcf-expression-annotator
 ***************************************
 
-The ``vcf-expression-annotator`` is part of the ``vcf-annotation-tools`` package (`vatools.org <http://vatools.org>`_).
+The ``vcf-expression-annotator`` is part of the ``vatools`` package (`vatools.org <http://vatools.org>`_).
 You can install this package by running:
 
 .. code-block:: none
 
-   pip install vcf-annotation-tools
+   pip install vatools
 
 Running the vcf-expression-annotator
 ************************************
@@ -77,5 +77,5 @@ The data type ``gene`` or ``transcript`` identifies whether you are annotating
 transcript or gene expression data. Transcript expression annotations will be
 written to the ``TX`` format field while gene expression annotations will be
 written to the ``GX`` format field. Please see the `VAtools documentation
-<https://vcf-annotation-tools.readthedocs.io/en/latest/vcf_readcount_annotator.html>`_
+<https://vatool.readthedocs.io/en/latest/vcf_readcount_annotator.html>`_
 for more information.

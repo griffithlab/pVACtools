@@ -14,19 +14,6 @@ import yaml
 def define_parser():
     return PvacbindRunArgumentParser().parser
 
-def combine_reports(input_files, output_file):
-    write_headers = True
-    with open(output_file, 'w') as fout:
-        writer = csv.writer(fout)
-        for filename in input_files:
-            with open(filename) as fin:
-                reader = csv.reader(fin)
-                headers = next(reader)
-                if write_headers:
-                    write_headers = False  # Only write headers once.
-                    writer.writerow(headers)
-                writer.writerows(reader)  # Write all remaining rows.
-
 def create_combined_reports(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
@@ -52,8 +39,8 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = False
-    post_processing_params['run_condense_report'] = False
     post_processing_params['run_manufacturability_metrics'] = False
+    post_processing_params['run_reference_proteome_similarity'] = False
 
     PostProcessor(**post_processing_params).execute()
 
@@ -61,40 +48,14 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    if "." in args.sample_name:
-        sys.exit("Sample name cannot contain '.'")
-
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
-
-    if args.iedb_install_directory:
-        lib.call_iedb.setup_iedb_conda_env()
 
     input_file_type = 'fasta'
     base_output_dir = os.path.abspath(args.output_dir)
 
-    class_i_prediction_algorithms = []
-    class_ii_prediction_algorithms = []
-    for prediction_algorithm in sorted(args.prediction_algorithms):
-        prediction_class = globals()[prediction_algorithm]
-        prediction_class_object = prediction_class()
-        if isinstance(prediction_class_object, MHCI):
-            class_i_prediction_algorithms.append(prediction_algorithm)
-        elif isinstance(prediction_class_object, MHCII):
-            class_ii_prediction_algorithms.append(prediction_algorithm)
-
-    class_i_alleles = []
-    class_ii_alleles = []
-    for allele in sorted(set(args.allele)):
-        valid = 0
-        if allele in MHCI.all_valid_allele_names():
-            class_i_alleles.append(allele)
-            valid = 1
-        if allele in MHCII.all_valid_allele_names():
-            class_ii_alleles.append(allele)
-            valid = 1
-        if not valid:
-            print("Allele %s not valid. Skipping." % allele)
+    (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
+    (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
 
     shared_arguments = {
         'input_file'                : args.input_file,
@@ -102,6 +63,7 @@ def main(args_input = sys.argv[1:]):
         'sample_name'               : args.sample_name,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
+        'percentile_threshold'      : args.percentile_threshold,
         'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
@@ -110,12 +72,11 @@ def main(args_input = sys.argv[1:]):
         'iedb_retries'              : args.iedb_retries,
         'keep_tmp_files'            : args.keep_tmp_files,
         'n_threads'                 : args.n_threads,
+        'species'                   : species,
+        'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
-        if args.epitope_length is None:
-            sys.exit("Epitope length is required for class I binding predictions")
-
         if args.iedb_install_directory:
             iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
             if not os.path.exists(iedb_mhc_i_executable):
@@ -131,7 +92,7 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments = shared_arguments.copy()
         class_i_arguments['alleles']                 = class_i_alleles
         class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
-        class_i_arguments['epitope_lengths']         = args.epitope_length
+        class_i_arguments['epitope_lengths']         = args.class_i_epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
@@ -159,7 +120,7 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments['alleles']                 = class_ii_alleles
         class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
         class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
-        class_ii_arguments['epitope_lengths']         = [15]
+        class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
         class_ii_arguments['output_dir']              = output_dir
         class_ii_arguments['netmhc_stab']             = False
         pipeline = PvacbindPipeline(**class_ii_arguments)

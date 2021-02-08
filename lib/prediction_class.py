@@ -52,9 +52,10 @@ class IEDB(metaclass=ABCMeta):
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
         if iedb_executable_path is not None:
-            arguments = self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length)
+            arguments = [sys.executable]
+            arguments.extend(self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length))
             response_fh = tempfile.TemporaryFile()
-            response = run(['/bin/bash', '-l', '-c', 'conda activate pvactools_py27; python {}'.format(arguments)], stdout=response_fh, check=True)
+            response = run(arguments, stdout=response_fh, check=True)
             response_fh.seek(0)
             response_text = self.filter_response(response_fh.read())
             response_fh.close()
@@ -65,10 +66,9 @@ class IEDB(metaclass=ABCMeta):
                     'sequence_text': input_fh.read(),
                     'method':        self.iedb_prediction_method,
                     'allele':        allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
+                    'length':        epitope_length,
                     'user_tool':     'pVac-seq',
                 }
-            if epitope_length is not None:
-                data['length'] = epitope_length
 
             response = requests.post(self.url, data=data)
             retries = 0
@@ -133,6 +133,12 @@ class PredictionClass(metaclass=ABCMeta):
         return sorted([prediction_class.__name__ for prediction_class in cls.prediction_classes()])
 
     @classmethod
+    def prediction_methods_with_all(cls):
+        methods = cls.prediction_methods()
+        methods.extend(['all', 'all_class_i', 'all_class_ii'])
+        return methods
+
+    @classmethod
     def prediction_class_for_iedb_prediction_method(cls, method):
         prediction_classes = cls.prediction_classes()
         for prediction_class in prediction_classes:
@@ -181,6 +187,56 @@ class PredictionClass(metaclass=ABCMeta):
         for allele in alleles:
             if allele not in valid_alleles:
                 sys.exit("Allele %s not valid. Run `pvacseq valid_alleles` for a list of valid allele names." % allele)
+
+    @classmethod
+    def species_for_allele(self, allele):
+        allele_to_species = {
+            'HLA' : 'human',
+            'DP'  : 'human',
+            'DQ'  : 'human',
+            'DR'  : 'human',
+            'Atbe': 'white-fronted spider monkey',
+            'Atfu': 'black-headed spider monkey',
+            'BoLA': 'cow',
+            'Caja': 'common marmoset',
+            'Cemi': 'blue monkey',
+            'Chae': 'grivet',
+            'DLA' : 'dog',
+            'Eqca': 'horse',
+            'Gogo': 'gorilla',
+            'H-2' : 'mouse',
+            'H2'  : 'mouse',
+            'Hyla': 'lar gibbon',
+            'Lero': 'golden lion tamarin',
+            'Maar': 'stump-tailed macaque',
+            'Mafa': 'crab-eating macaque',
+            'Mamu': 'rhesus macaque',
+            'Mane': 'southern pig-tailed macaque',
+            'Onmy': 'rainbow trout',
+            'Ovar': 'sheep',
+            'Paan': 'olive baboon',
+            'Pacy': 'yellow baboon',
+            'Paha': 'hamadryas baboon',
+            'Papa': 'bonobo',
+            'Patr': 'chimpanzee',
+            'Pipi': 'white-faced saki',
+            'Popy': 'bornean orangutan',
+            'Safu': 'brown-mantled tamarin',
+            'Sage': "Geoffroy's tamarin",
+            'Samy': 'moustached tamarin',
+            'Saoe': 'cottontop tamarin',
+            'Sasa': 'atlantic salmon',
+            'Sasc': 'common squirrel monkey',
+            'SLA' : 'pig',
+        }
+
+        species = [v for k,v in allele_to_species.items() if allele.startswith(k)]
+        if len(species) == 1:
+            return species[0]
+        elif len(species) == 0:
+            raise Exception("Unable to determine species for allele {}".format(allele))
+        else:
+            raise Exception("Multiple matching species found for allele {}".format(allele))
 
     @classmethod
     def parse_allele_cutoff_file(cls):
@@ -238,7 +294,7 @@ class MHCflurry(MHCI):
         return True
 
     def valid_lengths_for_allele(self, allele):
-        return [8,9,10,11,12,13,14]
+        return [8,9,10,11,12,13,14,15]
 
     def determine_neoepitopes(self, sequence, length):
         epitopes = {}
@@ -296,7 +352,7 @@ class MHCnuggetsI(MHCI, MHCnuggets):
         return self.valid_allele_names_for_class('class_i')
 
     def valid_lengths_for_allele(self, allele):
-        return [8,9,10,11,12,13,14]
+        return [8,9,10,11,12,13,14,15]
 
     def mhcnuggets_allele(self, allele):
         return allele.replace('*', '')
@@ -343,7 +399,7 @@ class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
             sys.exit("Length %s not valid for allele %s and method %s." % (length, allele, self.iedb_prediction_method))
 
     def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
-        return "{} {} {} {} {}".format(iedb_executable_path, method, allele, str(epitope_length), input_file)
+        return [iedb_executable_path, method, allele, str(epitope_length), input_file]
 
 class NetMHC(IEDBMHCI):
     @property
@@ -385,7 +441,7 @@ class MHCnuggetsII(MHCII, MHCnuggets):
         return self.valid_allele_names_for_class('class_ii')
 
     def valid_lengths_for_allele(self, allele):
-        return [15]
+        return [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
 
     def mhcnuggets_allele(self,allele):
         return "HLA-{}".format(allele).replace('*', '')
@@ -411,7 +467,7 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
         return alleles
 
     def valid_lengths_for_allele(self, allele):
-        return [15]
+        return [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
 
     def valid_allele_names(self):
         method = self.iedb_prediction_method
@@ -421,7 +477,7 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
 
     def iedb_executable_params(self, iedb_executable_path, method, allele, input_file, epitope_length):
         allele = allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
-        return "{} {} {} {}".format(iedb_executable_path, method, allele, input_file)
+        return [iedb_executable_path, method, allele, input_file, str(epitope_length)]
 
 class NetMHCIIpan(IEDBMHCII):
     @property
