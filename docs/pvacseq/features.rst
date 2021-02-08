@@ -53,7 +53,7 @@ for `MHCflurry <http://www.biorxiv.org/content/early/2017/08/09/174243>`_ and
 ================================= =======
 MHC Class I Prediction Algorithm  Version
 ================================= =======
-NetMHCpan                         4.0
+NetMHCpan                         4.1
 NetMHC                            4.0
 NetMHCcons                        1.1
 PickPocket                        1.1
@@ -66,7 +66,7 @@ MHCnuggets
 ================================= =======
 MHC Class II Prediction Algorithm Version
 ================================= =======
-NetMHCIIpan                       3.2
+NetMHCIIpan                       4.0
 SMMalign                          1.1
 NNalign                           2.3
 MHCnuggets
@@ -96,12 +96,6 @@ transcripts of level 1. This filter can also be run :ref:`standalone
 As a last filtering step, pVACseq applies the top score filter to only keep the top scoring epitope
 for each variant. As with all previous filters, this filter can also be run
 :ref:`standalone <filter_commands>`.
-
-**Ranking of candidate neoepitopes**
-
-Filtered neoepitopes are :ref:`ranked <rank>` based on the binding affinity,
-fold change between mutant and wildtype binding affinity (agretopicity), gene expression, RNA
-and DNA VAF.
 
 **Incorporation of proximal germline and somatic variants**
 

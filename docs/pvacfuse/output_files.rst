@@ -10,7 +10,7 @@ which prediction algorithms were chosen:
 
 - ``MHC_Class_I``: for MHC class I prediction algorithms
 - ``MHC_Class_II``: for MHC class II prediction algorithms
-- ``combined``: If both MHC class I and MHC class II prediction algorithms were run, this folder combines the neoeptiope predictions from both
+- ``combined``: If both MHC class I and MHC class II prediction algorithms were run, this folder combines the neoepitope predictions from both
 
 Each folder will contain the same list of output files (listed in the order
 created):
@@ -24,15 +24,20 @@ created):
      - An intermediate file with variant and transcript information parsed from the input file(s).
    * - ``<sample_name>.tsv_<chunks>`` (multiple)
      - The above file but split into smaller chunks for easier processing with IEDB.
+   * - ``<sample_name>.fasta``
+     - A fasta file with mutant peptide subsequences for all
+       processable fusion combinations.
    * - ``<sample_name>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``.
    * - ``<sample_name>.filtered.tsv``
      - The above file after applying all filters, with cleavage site and stability
        predictions added.
-   * - ``<sample_name>.filtered.condensed.ranked.tsv``
-     - A condensed version of the filtered TSV with only the most important columns
-       remaining, with a priority score for each neoepitope candidate added.
+   * - ``<sample_name>.filtered.tsv.reference_matches`` (optional)
+     - A file outlining details of reference proteome matches
+   * - ``<sample_name>.all_epitopes.aggregated.tsv``
+     - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
+       the best epitope for each mutation in an easy-to-read format.
 
 Filters applied to the filtered.tsv file
 ----------------------------------------
@@ -108,6 +113,12 @@ pVACfuse.
      - ``NA``
    * - ``Corresponding Fold Change``
      - ``NA``
+   * - ``Best MT Percentile Method``
+     - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
+   * - ``Best MT Percentile``
+     - Lowest percentile rank of this epitope's ic50 binding affinity of all prediction algorithms used (those that provide percentile output)
+   * - ``Corresponding WT Percentile``
+     - ``NA``
    * - ``Tumor DNA Depth``
      - ``NA``
    * - ``Tumor DNA VAF``
@@ -130,8 +141,12 @@ pVACfuse.
      - ``NA``
    * - ``Median Fold Change``
      - ``NA``
-   * - ``Individual Prediction Algorithm WT and MT Scores`` (multiple)
-     - ic50 scores for the ``MT Epitope Seq`` and ``WT Epitope Seq`` for the individual prediction algorithms used
+   * - ``Median MT Percentile``
+     - Median binding affinity percentile rank of the mutant epitope across all prediction algorithms used (those that provide percentile output)
+   * - ``Median WT Percentile``
+     - ``NA``
+   * - ``Individual Prediction Algorithm WT and MT Scores and Percentiles`` (multiple)
+     - ic50 binding affintity and percentile ranks for the ``MT Epitope Seq`` for the individual prediction algorithms used
    * - ``cterm_7mer_gravy_score``
      - Mean hydropathy of last 7 residues on the C-terminus of the peptide
    * - ``max_7mer_gravy_score``
@@ -164,63 +179,44 @@ pVACfuse.
      - The % rank stability of the pMHC-I complex
    * - ``NetMHCstab allele`` (optional)
      - Nearest neighbor to the ``HLA Allele``. Used for NetMHCstab prediction
+   * - ``Reference Match`` (T/F) (optional)
+     - Was there a BLAST match of the mutated peptide sequence to the
+       reference proteome?
 
-filtered.condensed.ranked.tsv Report Columns
---------------------------------------------
+filtered.tsv.reference_matches Report Columns
+---------------------------------------------
+
+This file is only generated when the ``--run-reference-proteome-similarity``
+option is chosen.
 
 .. list-table::
    :header-rows: 1
 
    * - Column Name
      - Description
-   * - ``Gene Name``
-     - The Ensembl gene names of the affected genes
-   * - ``Mutation``
-     - ``NA``
-   * - ``Protein Position``
-     - The position of the fusion in the fusion protein sequence
-   * - ``HGVSc``
-     - ``NA``
-   * - ``HGVSp``
-     - ``NA``
-   * - ``HLA Allele``
-     - The HLA allele for this prediction.
-   * - ``Mutation Position``
-     - ``NA``
-   * - ``MT Epitope Seq``
-     - Mutant epitope sequence.
-   * - ``Median MT Score``
-     - Median ic50 binding affinity of the mutant epitope across all prediction algorithms used
-   * - ``Median WT Score``
-     - ``NA``
-   * - ``Median Fold Change``
-     - ``NA``
-   * - ``Best MT Score``
-     - Lowest ic50 binding affinity of all prediction algorithms used
-   * - ``Corresponding WT Score``
-     - ``NA``
-   * - ``Corresponding Fold Change``
-     - ``NA``
-   * - ``Tumor DNA Depth``
-     - ``NA``
-   * - ``Tumor DNA VAF``
-     - ``NA``
-   * - ``Tumor RNA Depth``
-     - ``NA``
-   * - ``Tumor RNA VAF``
-     - ``NA``
-   * - ``Gene Expression``
-     - ``NA``
-   * - ``Rank``
-     - A priority rank for the neoepitope (best = 1).
-
-
-The pVACfuse Neoeptiope Priority Rank
-_____________________________________
-
-The underlying formula for calculating the pVACfuse rank is the same as it is
-for :ref:`rank`. However, since only the binding affinity is available for
-fusion predictions, the pVACfuse simply ranks the neoeptiopes according to
-their binding affinity, with the lowest being the best. If the ``--top-score-metric``
-is set to ``median`` (default) the ``Median MT Score`` is used. If it
-is set to ``lowest`` the ``Best MT Score`` is used.
+   * - ``Chromosome``
+     - The chromosome of this variant
+   * - ``Start``
+     - The start position of this variant in the zero-based, half-open coordinate system
+   * - ``Stop``
+     - The stop position of this variant in the zero-based, half-open coordinate system
+   * - ``Reference``
+     - The reference allele
+   * - ``Variant``
+     - The alt allele
+   * - ``Transcript``
+     - The Ensembl ID of the affected transcript
+   * - ``Peptide``
+     - The peptide sequence submitted to BLAST
+   * - ``Hit ID``
+     - The BLAST alignment hit ID (reference proteome sequence ID)
+   * - ``Hit Definition``
+     - The BLAST alignment hit definition (reference proteome sequence name)
+   * - ``Query Sequence``
+     - The BLAST query sequence
+   * - ``Match Sequence``
+     - The BLAST match sequence
+   * - ``Match Start``
+     - The match start position in the matched reference proteome sequence
+   * - ``Match Stop``
+     - The match stop position in the matched reference proteome sequence

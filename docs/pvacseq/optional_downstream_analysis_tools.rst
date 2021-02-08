@@ -28,12 +28,16 @@ be as close to center as possible while returning the desired protein sequence l
 causes a frameshift, the full downstream protein sequence will be returned unless the user specifies otherwise 
 as described above. 
 
-Generate Condensed, Ranked Report
----------------------------------
+Generate Aggregated Report
+--------------------------
 
-.. program-output:: pvacseq generate_condensed_ranked_report -h
+.. program-output:: pvacseq generate_aggregated_report -h
 
-This tool will produce a condensed version of the filtered TSV with only the most important columns remaining, 
-with a score for each neoepitope candidate added. Refer to the Output Files section for more details on the 
-format of this report.
-
+This tool produces an aggregated version of the all_epitopes TSV. It finds the best-scoring (lowest binding affinity)
+epitope for each variant, and outputs additional binding affinity, expression, and
+coverage information for that epitope. It also gives information about the
+total number of well-scoring epitopes for each variant, the number of
+transcripts covered by those epitopes, as well as the HLA alleles that those
+epitopes are well-binding to. Lastly, the report will bin variants into tiers
+that offer suggestions as to the suitability of variants for use in vaccines.
+For a full definition of these tiers, see the pVACseq :ref:`output file documentation <aggregated>`.

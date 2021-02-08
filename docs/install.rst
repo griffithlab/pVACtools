@@ -5,15 +5,15 @@ Installation
 
 pVACtools is written for Linux but some users have been able to run it successfully on Mac OS X. If you are using Windows you will need to set up a Linux environment, for example by setting up a virtual machine.
 
-pVACtools requires Python 3.5., 3.6, or 3.7. Before running any installation steps, check the Python version installed on your system:
+pVACtools requires Python 3.5 or above. Before running any installation steps, check the Python version installed on your system:
 
 .. code-block:: none
 
    python -V
 
-If you don't have Python 3.7 installed, we recommend using `Conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ to emulate a Python 3.7 environment. We've encountered problems with users that already have Python 2.x installed when they also try to install Python 3.7. The defaults will not be set correctly in that case. If you already have Python 2.x installed we **strongly** recommmend using Conda instead of installing Python 3.7 locally.
+If you don't have Python 3 installed, we recommend using `Conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ to emulate a Python 3 environment. We've encountered problems with users that already have Python 2.x installed when they also try to install Python 3. The defaults will not be set correctly in that case. If you already have Python 2.x installed we **strongly** recommmend using Conda instead of installing Python 3 locally.
 
-Once you have set up your Python 3.7 environment correctly you can use ``pip`` to install pVACtools. Make sure you have ``pip`` installed. ``pip`` is generally included in python distributions, but may need to be upgraded before use. See the `instructions <https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel>`_ for installing or upgrading ``pip``.
+Once you have set up your Python 3 environment correctly you can use ``pip`` to install pVACtools. Make sure you have ``pip`` installed. ``pip`` is generally included in python distributions, but may need to be upgraded before use. See the `instructions <https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel>`_ for installing or upgrading ``pip``.
 
 After you have pip installed, type the following command on your Terminal:
 
@@ -21,11 +21,11 @@ After you have pip installed, type the following command on your Terminal:
 
    pip install pvactools
 
-You can check that ``pvactools`` has been installed under the default environment by listing all installed packages:
+You can check that ``pvactools`` has been installed under the default environment like so:
 
 .. code-block:: none
 
-   pip list
+   pip show pvactools
 
 ``pip`` will fetch and install pVACtools and its dependencies for you. After installing, each tool of the pVACtools suite is available in its own command line tree directly from the Terminal.
 
@@ -48,7 +48,9 @@ Installing IEDB binding prediction tools (strongly recommended)
 .. warning::
    The IEDB binding prediction tools are only compatible with Linux.
 
-You may create a local install of the IEDB binding prediction tools by first downloading the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ from the IEDB website. If using both the Class I and the Class II tools, they both need to be installed into the same parent directory. Note that we have tested pVACtools with the versions of IEDB class I and II listed below. Using a different version may cause problems.
+You may create a local install of the IEDB binding prediction tools by first downloading the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_ from the IEDB website. If using both the Class I and the Class II tools, they both need to be installed into the same parent directory.
+
+pVACtools is only compatible with IEDB 3.1 and above. We have tested pVACtools with the versions of IEDB class I and II listed below. Using a different version may cause errors.
 
 .. important::
    By using the IEDB software, you are consenting to be bound by and become a
@@ -67,15 +69,6 @@ You may create a local install of the IEDB binding prediction tools by first dow
    Resource Analysis tools should include citations to the relevant reference(s),
    found `here <http://tools.iedb.org/mhci/reference/>`_.
 
-.. note::
-
-   Using a local IEDB install with pVACtools requires conda.
-
-   pVACtools is written in python 3 and IEDB is only compatible with python
-   2.7. Because of this version mismatch, the pVACtools modules will create a
-   custom python 2.7 environment and execute IEDB inside of it. This requires
-   conda.
-
 MHC Class I
 ___________
 
@@ -84,14 +77,10 @@ Download the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and 
 .. code-block:: none
 
    apt-get update && apt-get install -y tcsh gawk
-   wget https://downloads.iedb.org/tools/mhci/2.19.2/IEDB_MHC_I-2.19.2.tar.gz
-   tar -zxvf IEDB_MHC_I-2.19.2.tar.gz
+   wget https://downloads.iedb.org/tools/mhci/3.1.1/IEDB_MHC_I-3.1.1.tar.gz
+   tar -zxvf IEDB_MHC_I-3.1.1.tar.gz
    cd mhc_i
    ./configure
-
-.. note::
-
-   Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.
 
 MHC Class II
 ____________
@@ -101,27 +90,17 @@ Download the archives for `class II <http://tools.iedb.org/mhcii/download/>`_ an
 .. code-block:: none
 
    apt-get update && apt-get install -y tcsh gawk
-   wget https://downloads.iedb.org/tools/mhcii/2.17.6/IEDB_MHC_II-2.17.6.tar.gz
-   tar -zxvf IEDB_MHC_II-2.17.6.tar.gz
+   wget https://downloads.iedb.org/tools/mhcii/3.1.2/IEDB_MHC_II-3.1.2.tar.gz
+   tar -zxvf IEDB_MHC_II-3.1.2.tar.gz
    cd mhc_ii
    ./configure.py
 
-On older versions of the IEDB software, you might need to update some paths in the configure scripts to use relative paths. Open the ``configure.py`` file and update the lines that set the ``smm`` and ``nn`` variables to use relative paths like so:
-
-.. code-block:: none
-
-   smm = re.compile(curDir + "/netMHCII-1.1")
-   nn = re.compile(curDir + "/netMHCII-2.2")
 
 Then run the configure script.
 
 .. code-block:: none
 
    ./configure.py
-
-.. note::
-
-   Running the ``configure`` script requires a Python 2 environment. If you are currently emulating a Python 3 environment with Conda you will need to run ``source deactivate`` before executing the ``configure`` script.
 
 
 Installing MHCflurry
