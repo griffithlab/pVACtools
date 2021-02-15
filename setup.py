@@ -109,6 +109,9 @@ setup(
         'jsonschema==2.6.0',
         'mock',
         'vaxrank>=1.1.0',
+        'tensorflow==2.2.2',
+        'mhcnuggets==2.3.3',
+        'mhcflurry==2.0.1',
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,

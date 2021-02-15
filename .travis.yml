@@ -17,9 +17,6 @@ matrix:
             - pip install bokeh==0.13.0
             - pip install tornado==5.0.2
             - pip install jsonschema==2.6.0
-            - pip install mhcnuggets==2.3.3
-            - pip install mhcflurry==2.0.1
-            - pip install tensorflow==2.2.1
             - pip install keras==2.3.1
             - pip install Werkzeug==0.16.1
             - pip install biopython==1.76
@@ -48,9 +45,6 @@ matrix:
             - pip install bokeh==0.13.0
             - pip install tornado==5.0.2
             - pip install jsonschema==2.6.0
-            - pip install mhcnuggets==2.3.3
-            - pip install mhcflurry==2.0.1
-            - pip install tensorflow==2.2.1
             - pip install keras==2.3.1
             - pip install pandas==0.25.2
             - pip install Werkzeug==0.16.1
@@ -78,9 +72,6 @@ matrix:
             - pip install bokeh==0.13.0
             - pip install tornado==5.0.2
             - pip install jsonschema==2.6.0
-            - pip install mhcnuggets==2.3.3
-            - pip install mhcflurry==2.0.1
-            - pip install tensorflow==2.2.1
             - pip install keras==2.3.1
             - pip install pandas==0.25.2
             - pip install Werkzeug==0.16.1
@@ -108,9 +99,6 @@ matrix:
             - pip install bokeh==0.13.0
             - pip install tornado==5.0.2
             - pip install jsonschema==2.6.0
-            - pip install mhcnuggets==2.3.3
-            - pip install mhcflurry==2.0.1
-            - pip install tensorflow==2.2.1
             - pip install keras==2.3.1
             - pip install pandas==0.25.2
             - pip install Werkzeug==0.16.1
