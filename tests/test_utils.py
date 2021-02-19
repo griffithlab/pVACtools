@@ -43,10 +43,10 @@ def make_response(data, files, path):
         reader.close()
         return response_obj
     else:
-        basefile = os.path.basename(data['configfile'])
+        configfile = data['configfile']
         reader = open(os.path.join(
             path,
-            'net_chop.html' if basefile == 'NetChop.cf' else 'Netmhcstab.html'
+            'net_chop.html' if 'NetChop-3.1' in configfile else 'Netmhcstab.html'
         ), mode='rb')
         response_obj = lambda :None
         response_obj.status_code = 200
