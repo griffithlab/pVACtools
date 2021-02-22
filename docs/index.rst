@@ -49,6 +49,16 @@ tools:
    contact
    mailing_list
 
+New in release |release|
+------------------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- NetMHCstabpan and NetCons have moved to a new server resulting in no results
+  being returned from the old server URL. This results in empty filtered.tsv
+  report files when either the ``--netmhc-stab`` or ``--net-chop-method`` were
+  enabled. This release fixes our usage of these tools to use the new server URL.
+
 New in version |version|
 ------------------------
 
