@@ -81,3 +81,13 @@ _____________
 - We've updated our license to BSD 3-Cause Clear. Please note that the
   individual licenses of our dependent tools remain in place. These can be
   viewed by on the :ref:`tools` page.
+
+Version 2.0.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- NetMHCstabpan and NetCons have moved to a new server resulting in no results
+  being returned from the old server URL. This results in empty filtered.tsv
+  report files when either the ``--netmhc-stab`` or ``--net-chop-method`` were
+  enabled. This release fixes our usage of these tools to use the new server URL.
