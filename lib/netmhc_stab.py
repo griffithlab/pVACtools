@@ -61,10 +61,10 @@ def main(args_input = sys.argv[1:]):
         allele_list = [allele.replace('*', '') for allele in alleles_in_chunk]
         allele_list.sort()
         response = requests.post(
-            "http://www.cbs.dtu.dk/cgi-bin/webface2.fcgi",
+            "https://services.healthtech.dtu.dk/cgi-bin/webface2.cgi",
             files={'SEQSUB':(staging_file.name, staging_file, 'text/plain')},
             data = {
-                'configfile':'/usr/opt/www/pub/CBS/services/NetMHCstabpan-1.0/NetMHCstabpan.cf',
+                'configfile':'/var/www/html/services/NetMHCstabpan-1.0/webface.cf',
                 'inp':'0',
                 'len': ','.join(peptide_lengths),
                 'master':'1',
