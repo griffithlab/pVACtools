@@ -67,10 +67,10 @@ def main(args_input = sys.argv[1:]):
             x+=1
         staging_file.seek(0)
         response = requests.post(
-            "http://www.cbs.dtu.dk/cgi-bin/webface2.fcgi",
+            "https://services.healthtech.dtu.dk/cgi-bin/webface2.cgi",
             files={'SEQSUB':(staging_file.name, staging_file, 'text/plain')},
             data = {
-                'configfile':'/usr/opt/www/pub/CBS/services/NetChop-3.1/NetChop.cf',
+                'configfile':'/var/www/html/services/NetChop-3.1/webface.cf',
                 'SEQPASTE':'',
                 'method':chosen_method,
                 'thresh':'%0f'%args.threshold
