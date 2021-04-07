@@ -150,6 +150,8 @@ class AggregateAllEpitopes:
                 (wt_aa, mt_aa) = best["Mutation"].split("/")
                 best["aachange"] = "".join([wt_aa, best["Protein Position"], mt_aa])
 
+        vaf_expr = self.calculate_vaf_expr(best)
+
         #assemble the line
         out_dict = { k.replace('HLA-', ''):v for k,v in hla.items() }
         if self.file_type == 'pVACbind':
@@ -197,6 +199,14 @@ class AggregateAllEpitopes:
 
         df_out = pd.DataFrame.from_dict(out_dict)
         return (df_out, peptides)
+
+    def calculate_vaf_expr(self, line):
+        if self.file_type == 'pVACbind':
+            return 'NA'
+        elif line['Gene Expression'] == 'NA' or line['Tumor RNA VAF'] == 'NA':
+            return 'NA'
+        else:
+            return float(line['Gene Expression']) * float(line['Tumor RNA VAF'])
 
     #sort the table in our preferred manner
     def sort_table(self, df):
