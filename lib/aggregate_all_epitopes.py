@@ -150,43 +150,47 @@ class AggregateAllEpitopes:
                 best["aachange"] = "".join([wt_aa, best["Protein Position"], mt_aa])
 
         #assemble the line
-        out_dict = hla
+        out_dict = { k.replace('HLA-', ''):v for k,v in hla.items() }
         if self.file_type == 'pVACbind':
             out_dict.update({
                 'Gene': ["NA"],
-                'AA_change': [best["aachange"]],
-                'Num_Transcript': [anno_count],
+                'AA Change': [best["aachange"]],
+                'Num Transcripts': [anno_count],
                 'Peptide': [best["Epitope Seq"]],
                 'Pos': ["NA"],
-                'Num_Peptides': [peptide_count],
-                'ic50_MT': [best["Median Score"]],
-                'ic50_WT': ["NA"],
-                'percentile_MT': [best["Median Percentile"]],
-                'percentile_WT': ["NA"],
-                'RNA_expr': ["NA"],
-                'RNA_VAF': ["NA"],
-                'RNA_Depth': ["NA"],
-                'DNA_VAF': ["NA"],
-                'tier': [tier],
+                'Num Peptides': [peptide_count],
+                'IC50 MT': [best["Median Score"]],
+                'IC50 WT': ["NA"],
+                '%tile MT': [best["Median Percentile"]],
+                '%tile WT': ["NA"],
+                'RNA Expr': ["NA"],
+                'RNA VAF': ["NA"],
+                'RNA VAF * Gene Expr': vaf_expr,
+                'RNA Depth': ["NA"],
+                'DNA VAF': ["NA"],
+                'Tier': [tier],
+                'Evaluation': 'Pending',
                 'ID':[best['key']],
             })
         else:
             out_dict.update({
                 'Gene': [best["Gene Name"]],
-                'AA_change': [best["aachange"]],
-                'Num_Transcript': [anno_count],
+                'AA Change': [best["aachange"]],
+                'Num Transcripts': [anno_count],
                 'Peptide': [best["MT Epitope Seq"]],
                 'Pos': [best["Mutation Position"]],
-                'Num_Peptides': [peptide_count],
-                'ic50_MT': [best["Median MT Score"]],
-                'ic50_WT': [best["Median WT Score"]],
-                'percentile_MT': [best["Median MT Percentile"]],
-                'percentile_WT': [best["Median WT Percentile"]],
-                'RNA_expr': [best["Gene Expression"]],
-                'RNA_VAF': [best["Tumor RNA VAF"]],
-                'RNA_Depth': [best["Tumor RNA Depth"]],
-                'DNA_VAF': [best["Tumor DNA VAF"]],
-                'tier': [tier],
+                'Num Peptides': [peptide_count],
+                'IC50 MT': [best["Median MT Score"]],
+                'IC50 WT': [best["Median WT Score"]],
+                '%tile MT': [best["Median MT Percentile"]],
+                '%tile WT': [best["Median WT Percentile"]],
+                'RNA Expr': [best["Gene Expression"]],
+                'RNA VAF': [best["Tumor RNA VAF"]],
+                'RNA VAF * Gene Expr': vaf_expr,
+                'RNA Depth': [best["Tumor RNA Depth"]],
+                'DNA VAF': [best["Tumor DNA VAF"]],
+                'Tier': [tier],
+                'Evaluation': 'Pending',
                 'ID':[best['key']],
             })
 
@@ -196,19 +200,19 @@ class AggregateAllEpitopes:
     #sort the table in our preferred manner
     def sort_table(self, df):
         if self.file_type == 'pVACbind':
-            df.sort_values(by=["ic50_MT"], inplace=True, ascending=True)
+            df.sort_values(by=["IC50 MT"], inplace=True, ascending=True)
         else:
             #make sure the tiers sort in the expected order
             tier_sorter = ["Pass", "Relaxed", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr"]
             sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
-            df["rank_tier"] = df['tier'].map(sorter_index)
+            df["rank_tier"] = df['Tier'].map(sorter_index)
 
-            df["rank_ic50"] = df["ic50_MT"].rank(ascending=True, method='dense')
-            df["expr"] = df["RNA_expr"] * df["RNA_VAF"]
+            df["rank_ic50"] = df["IC50 MT"].rank(ascending=True, method='dense')
+            df["expr"] = df["RNA Expr"] * df["RNA VAF"]
             df["rank_expr"] = df["expr"].rank(ascending=False, method='dense')
             df["rank"] = df["rank_ic50"] + df["rank_expr"]
 
-            df.sort_values(by=["rank_tier", "rank", "Gene", "AA_change"], inplace=True, ascending=True)
+            df.sort_values(by=["rank_tier", "rank", "Gene", "AA Change"], inplace=True, ascending=True)
 
             df.drop('rank_tier', 1, inplace=True)
             df.drop('rank_ic50', 1, inplace=True)
@@ -253,8 +257,8 @@ class AggregateAllEpitopes:
         keys = df["key"].unique()
 
         columns = ['ID']
-        columns.extend(sorted(hla_types.tolist()))
-        columns.extend(['Gene', 'AA_change', 'Num_Transcript', 'Peptide', 'Pos', 'Num_Peptides', 'ic50_MT', 'ic50_WT', 'percentile_MT', 'percentile_WT', 'RNA_expr', 'RNA_VAF', 'RNA_Depth', 'DNA_VAF', 'tier'])
+        columns.extend(sorted([x.replace('HLA-', '') for x in hla_types]))
+        columns.extend(['Gene', 'AA Change', 'Num Transcripts', 'Peptide', 'Pos', 'Num Peptides', 'IC50 MT', 'IC50 WT', '%tile MT', '%tile WT', 'RNA Expr', 'RNA VAF', 'RNA VAF * Gene Expr', 'RNA Depth', 'DNA VAF', 'Tier', 'Evaluation'])
         peptide_table = pd.DataFrame(columns=columns)
         metrics = {}
         for key in keys:
