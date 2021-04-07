@@ -298,6 +298,7 @@ class AggregateAllEpitopes:
                 'transcript_expr': [df_subset[df_subset["annotation"] == x]['Transcript Expression'].iloc[0] for x in transcripts],
                 'DNA VAF': float(best_mut_line['DNA VAF']),
                 'RNA VAF': float(best_mut_line['RNA VAF']),
+                'gene_expr': float(best_mut_line['RNA Expr']),
             }
             if self.fasta_file is not None:
                 if self.file_type == 'pVACbind':
