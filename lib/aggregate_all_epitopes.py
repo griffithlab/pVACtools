@@ -129,8 +129,18 @@ class AggregateAllEpitopes:
                         peptides[line['annotation']][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
                     peptides[line['annotation']][peptide]['hla_types'] = sorted(hla_types)
                     peptides[line['annotation']][peptide]['mutation_position'] = str(good_binders_peptide.iloc[0]['Mutation Position'])
-                    peptides[line['annotation']][peptide]['wt_peptide'] = good_binders_peptide.iloc[0]['WT Epitope Seq']
                     peptides[line['annotation']]['Transcript Expr'] = good_binders.iloc[0]['Transcript Expression']
+                    peptides[line['annotation']][peptide]['individual_calls'] = individual_calls
+                    wt_peptide = good_binders_peptide.iloc[0]['WT Epitope Seq']
+                    if wt_peptide == 'NA':
+                        variant_type = good_binders_peptide.iloc[0]['Variant Type']
+                        if variant_type == 'FS':
+                            wt_peptide = 'FS-NA'
+                        elif variant_type == 'inframe_ins':
+                            wt_peptide = 'INS-NA'
+                        elif variant_type == 'inframe_deletion':
+                            wt_peptide = 'DEL-NA'
+                    peptides[line['annotation']][peptide]['wt_peptide'] = wt_peptide
                 anno_count = len(peptides.keys())
                 peptide_count = len(good_binders["MT Epitope Seq"].unique())
         else:
