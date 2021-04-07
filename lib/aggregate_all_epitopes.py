@@ -129,7 +129,6 @@ class AggregateAllEpitopes:
                         peptides[line['annotation']][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
                     peptides[line['annotation']][peptide]['hla_types'] = sorted(hla_types)
                     peptides[line['annotation']][peptide]['mutation_position'] = str(good_binders_peptide.iloc[0]['Mutation Position'])
-                    peptides[line['annotation']]['Transcript Expr'] = good_binders.iloc[0]['Transcript Expression']
                     peptides[line['annotation']][peptide]['individual_calls'] = individual_calls
                     wt_peptide = good_binders_peptide.iloc[0]['WT Epitope Seq']
                     if wt_peptide == 'NA':
@@ -292,11 +291,13 @@ class AggregateAllEpitopes:
                     all_peptides[line['annotation']][line['Epitope Seq']].append(line)
                 else:
                     all_peptides[line['annotation']][line['MT Epitope Seq']].append(line)
+            transcripts = list(peptides.keys())
             metrics[key] = {
                 'good_binders': peptides,
-                'good_binders_transcripts': list(peptides.keys()),
-                'DNA VAF': float(best_mut_line['DNA_VAF']),
-                'RNA VAF': float(best_mut_line['RNA_VAF']),
+                'good_binders_transcripts': transcripts,
+                'transcript_expr': [df_subset[df_subset["annotation"] == x]['Transcript Expression'].iloc[0] for x in transcripts],
+                'DNA VAF': float(best_mut_line['DNA VAF']),
+                'RNA VAF': float(best_mut_line['RNA VAF']),
             }
             if self.fasta_file is not None:
                 if self.file_type == 'pVACbind':
