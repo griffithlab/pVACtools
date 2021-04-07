@@ -3,6 +3,7 @@ import numpy as np
 from collections import defaultdict, Counter
 import json
 from Bio import SeqIO
+from .prediction_class import *
 
 class AggregateAllEpitopes:
     def __init__(self, input_file, output_file, file_type='pVACseq', fasta_file=None):
@@ -72,7 +73,7 @@ class AggregateAllEpitopes:
         #everything else
         return "Poor"
 
-    def get_best_mut_line(self, df, hla_types, vaf_clonal, max_ic50=1000):
+    def get_best_mut_line(self, df, hla_types, prediction_algorithms, vaf_clonal, max_ic50=1000):
         #order by best median score and get best ic50 peptide
         if self.file_type == 'pVACbind':
             df.sort_values(by=["Median Score"], inplace=True, ascending=True)
@@ -108,12 +109,15 @@ class AggregateAllEpitopes:
                 peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
                 for peptide in good_binders["MT Epitope Seq"].unique():
                     good_binders_peptide = good_binders[good_binders['MT Epitope Seq'] == peptide]
+                    individual_calls = { 'algorithms': prediction_algorithms }
                     for peptide_type in ['MT', 'WT']:
                         ic50s = {}
                         percentiles = {}
+                        calls = {}
                         for index, line in good_binders_peptide.to_dict(orient='index').items():
                             ic50s[line['HLA Allele']] = line['Median {} Score'.format(peptide_type)]
                             percentiles[line['HLA Allele']] = line['Median {} Percentile'.format(peptide_type)]
+                            calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
                         sorted_ic50s = []
                         sorted_percentiles = []
                         for hla_type in sorted(hla_types):
@@ -127,6 +131,7 @@ class AggregateAllEpitopes:
                                 sorted_percentiles.append('X')
                         peptides[line['annotation']][peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
                         peptides[line['annotation']][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
+                        individual_calls[peptide_type] = calls
                     peptides[line['annotation']][peptide]['hla_types'] = sorted(hla_types)
                     peptides[line['annotation']][peptide]['mutation_position'] = str(good_binders_peptide.iloc[0]['Mutation Position'])
                     peptides[line['annotation']][peptide]['individual_calls'] = individual_calls
@@ -254,6 +259,15 @@ class AggregateAllEpitopes:
         df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
         df.fillna(value="NA", inplace=True)
 
+        ## get a list of all prediction algorithms
+        potential_algorithms = PredictionClass.prediction_methods()
+        header_string = "\t".join(list(df.columns))
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if algorithm in header_string:
+                prediction_algorithms.append(algorithm)
+
+
         ## get a list of all represented hla types
         hla_types = df['HLA Allele'].unique()
 
@@ -283,7 +297,7 @@ class AggregateAllEpitopes:
         metrics = {}
         for key in keys:
             df_subset = df[df["key"] == key]
-            (best_mut_line, peptides) = self.get_best_mut_line(df_subset, hla_types, vaf_clonal, 1000)
+            (best_mut_line, peptides) = self.get_best_mut_line(df_subset, hla_types, prediction_algorithms, vaf_clonal, 1000)
             peptide_table = peptide_table.append(best_mut_line, sort=False)
             all_peptides = defaultdict(lambda: defaultdict(list))
             for index, line in df_subset.to_dict(orient='index').items():
