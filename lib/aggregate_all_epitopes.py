@@ -92,7 +92,8 @@ class AggregateAllEpitopes:
         else:
             good_binders = df[df["Median MT Score"] < max_ic50]
         if len(good_binders) > 0:
-            good_binders_hla = Counter(good_binders["HLA Allele"])
+            good_binders_uniq = pd.DataFrame(good_binders.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
+            good_binders_hla = Counter(good_binders_uniq["HLA Allele"])
             hla = dict(map(lambda x : (x, good_binders_hla[x]) if x in good_binders_hla else (x, ""), hla_types))
             #get a list of all unique gene/transcript/aa_change combinations
             #store a count of all unique peptides that passed
