@@ -67,6 +67,7 @@ class Pipeline(metaclass=ABCMeta):
         self.spacers                     = kwargs.pop('spacers', None)
         self.species                     = kwargs.pop('species', 'human')
         self.run_reference_proteome_similarity = kwargs.pop('run_reference_proteome_similarity', False)
+        self.run_post_processor          = kwargs.pop('run_post_processor', True)
         self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
@@ -484,6 +485,7 @@ class Pipeline(metaclass=ABCMeta):
         post_processing_params['fasta'] = self.fasta_file_path()
         post_processing_params['run_manufacturability_metrics'] = True
         if self.input_file_type == 'vcf':
+            post_processing_params['file_type'] = 'pVACseq'
             post_processing_params['run_coverage_filter'] = True
             post_processing_params['run_transcript_support_level_filter'] = True
         else:
@@ -745,6 +747,9 @@ class PvacbindPipeline(Pipeline):
             return
 
         self.combined_parsed_outputs(split_parsed_output_files)
+
+        if not self.run_post_processor:
+            return
 
         post_processing_params = copy.copy(vars(self))
         post_processing_params['input_file'] = self.combined_parsed_path()

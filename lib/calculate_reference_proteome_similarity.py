@@ -8,7 +8,7 @@ import os
 from collections import defaultdict
 
 class CalculateReferenceProteomeSimilarity:
-    def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='vcf'):
+    def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='pVACseq'):
         self.input_file = input_file
         self.input_fasta = input_fasta
         self.output_file = output_file
@@ -59,14 +59,14 @@ class CalculateReferenceProteomeSimilarity:
 
     def get_mt_peptides(self):
         records = list(SeqIO.parse(self.input_fasta, "fasta"))
-        if self.file_type == 'vcf':
+        if self.file_type == 'pVACseq':
             records_dict = {x.id.replace('MT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
         else:
             records_dict = {x.id: str(x.seq) for x in records}
         return records_dict
 
     def get_wt_peptides(self):
-        if self.file_type == 'vcf':
+        if self.file_type == 'pVACseq':
             records = list(SeqIO.parse(self.input_fasta, "fasta"))
             records_dict = {x.id.replace('WT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('WT.'), records)}
         else:
@@ -119,12 +119,12 @@ class CalculateReferenceProteomeSimilarity:
             writer.writeheader()
             metric_writer.writeheader()
             for line in reader:
-                if self.file_type == 'pVACbind':
+                if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                     epitope = line['Epitope Seq']
                     peptide = mt_records_dict[line['Mutation']]
                 else:
                     epitope = line['MT Epitope Seq']
-                    if self.file_type == 'vcf':
+                    if self.file_type == 'pVACseq':
                         if line['Variant Type'] == 'FS':
                             peptide = self.extract_n_mer_from_fs(mt_records_dict[line['Index']], wt_records_dict[line['Index']], epitope, int(line['Sub-peptide Position']))
                         else:

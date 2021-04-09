@@ -69,20 +69,20 @@ class AggregateAllEpitopes:
 
     def get_best_mut_line(self, df, hla_types, vaf_clonal, max_ic50=1000):
         #order by best median score and get best ic50 peptide
-        if self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             df.sort_values(by=["Median Score"], inplace=True, ascending=True)
         else:
             df.sort_values(by=["Median MT Score", "Median WT Score"], inplace=True, ascending=[True, False])
         best = df.iloc[0]
 
-        if self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             tier = "NA"
         else:
             tier = self.get_tier(best, vaf_clonal)
 
         #these counts should represent only the "good binders" with ic50 < max
         #for all sites other than tier4 slop
-        if self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             good_binders = df[df["Median Score"] < max_ic50]
         else:
             good_binders = df[df["Median MT Score"] < max_ic50]
@@ -91,7 +91,7 @@ class AggregateAllEpitopes:
             hla = dict(map(lambda x : (x, 'X') if x in good_binders_hla else (x, ""), hla_types))
             #get a list of all unique gene/transcript/aa_change combinations
             #store a count of all unique peptides that passed
-            if self.file_type == 'pVACbind':
+            if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                 anno_count = "NA"
                 peptide_count = len(good_binders["Epitope Seq"].unique())
             else:
@@ -102,9 +102,7 @@ class AggregateAllEpitopes:
             anno_count = 0
             peptide_count = 0
 
-        if self.file_type == 'bedpe':
-            best['aachange'] = best['key']
-        elif self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             best['aachange'] = best['Mutation']
         else:
             if best['Variant Type'] == 'FS':
@@ -115,9 +113,13 @@ class AggregateAllEpitopes:
 
         #assemble the line
         out_dict = hla
-        if self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
+            if self.file_type == 'pVACfuse':
+                gene = best["Gene Name"]
+            else:
+                gene = "NA"
             out_dict.update({
-                'Gene': ["NA"],
+                'Gene': [gene],
                 'AA_change': [best["aachange"]],
                 'Num_Transcript': [anno_count],
                 'Peptide': [best["Epitope Seq"]],
@@ -157,7 +159,7 @@ class AggregateAllEpitopes:
 
     #sort the table in our preferred manner
     def sort_table(self, df):
-        if self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             df.sort_values(by=["ic50_MT"], inplace=True, ascending=True)
         else:
             #make sure the tiers sort in the expected order
@@ -188,7 +190,7 @@ class AggregateAllEpitopes:
         hla_types = df['HLA Allele'].unique()
 
         ## get a list of unique mutations
-        if self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             df["key"] = df["Mutation"]
             vaf_clonal = None
         else:
