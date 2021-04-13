@@ -411,20 +411,6 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_total_length.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
-    def test_integrate_input_generates_expected_tsv(self):
-        convert_input_file  = os.path.join(self.test_data_dir, 'fusions_annotated.bedpe')
-        convert_output_file = tempfile.NamedTemporaryFile()
-
-        convert_vcf_params = {
-            'input_file'                 : convert_input_file,
-            'output_file'                : convert_output_file.name,
-        }
-        converter = FusionInputConverter(**convert_vcf_params)
-
-        self.assertFalse(converter.execute())
-        expected_output_file = os.path.join(self.test_data_dir, 'output_integrate.tsv')
-        self.assertTrue(cmp(convert_output_file.name, expected_output_file))
-
     def test_agfusion_input_generates_expected_tsv(self):
         convert_input_file  = os.path.join(self.test_data_dir, 'agfusion')
         convert_output_file = tempfile.NamedTemporaryFile()
