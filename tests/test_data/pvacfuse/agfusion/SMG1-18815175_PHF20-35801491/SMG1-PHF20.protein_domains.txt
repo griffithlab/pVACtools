@@ -1,0 +1,3 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+SMG1	PHF20	ENST00000446231	ENST00000374012	PF15785	SMG1	Serine/threonine-protein kinase smg-1	631	1241
+SMG1	PHF20	ENST00000446231	ENST00000374012	PF00454	PI3_PI4_kinase	Phosphatidylinositol 3- and 4-kinase	2150	2426
