@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+RP11-120D5.1	MID1	ENST00000608176	ENST00000317552	lincRNA	protein_coding	intron-5UTR	NA	NA

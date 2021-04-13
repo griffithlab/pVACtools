@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+MAX	TMEM260	ENST00000358664	ENST00000261556	PF00010	HLH	Helix-loop-helix DNA-binding domain	24	57
