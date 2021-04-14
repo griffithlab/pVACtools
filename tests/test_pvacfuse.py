@@ -218,7 +218,7 @@ class PvacfuseTests(unittest.TestCase):
                     os.symlink(os.path.join(test_data_dir, item), os.path.join(path, item))
 
             run.main([
-                os.path.join(self.test_data_directory, "fusions_annotated.bedpe"),
+                os.path.join(self.test_data_directory, "agfusion"),
                 'Test',
                 'HLA-A*29:02,DRB1*11:01',
                 'NetMHC', 'NNalign',
@@ -234,6 +234,7 @@ class PvacfuseTests(unittest.TestCase):
             for file_name in (
                 'Test.all_epitopes.tsv',
                 'Test.filtered.tsv',
+                'Test.all_epitopes.aggregated.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
