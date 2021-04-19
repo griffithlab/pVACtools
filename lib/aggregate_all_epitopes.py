@@ -164,7 +164,7 @@ class AggregateAllEpitopes:
                 (wt_aa, mt_aa) = best["Mutation"].split("/")
                 best["aachange"] = "".join([wt_aa, best["Protein Position"], mt_aa])
 
-        vaf_expr = self.calculate_vaf_expr(best)
+        allele_expr = self.calculate_allele_expr(best)
 
         #assemble the line
         out_dict = { k.replace('HLA-', ''):v for k,v in hla.items() }
@@ -178,11 +178,11 @@ class AggregateAllEpitopes:
                 'Num Peptides': [peptide_count],
                 'IC50 MT': [best["Median Score"]],
                 'IC50 WT': ["NA"],
-                '%tile MT': [best["Median Percentile"]],
-                '%tile WT': ["NA"],
+                '%ile MT': [best["Median Percentile"]],
+                '%ile WT': ["NA"],
                 'RNA Expr': ["NA"],
                 'RNA VAF': ["NA"],
-                'RNA VAF * Gene Expr': vaf_expr,
+                'Allele Expr': allele_expr,
                 'RNA Depth': ["NA"],
                 'DNA VAF': ["NA"],
                 'Tier': [tier],
@@ -199,11 +199,11 @@ class AggregateAllEpitopes:
                 'Num Peptides': [peptide_count],
                 'IC50 MT': [best["Median MT Score"]],
                 'IC50 WT': [best["Median WT Score"]],
-                '%tile MT': [best["Median MT Percentile"]],
-                '%tile WT': [best["Median WT Percentile"]],
+                '%ile MT': [best["Median MT Percentile"]],
+                '%ile WT': [best["Median WT Percentile"]],
                 'RNA Expr': [best["Gene Expression"]],
                 'RNA VAF': [best["Tumor RNA VAF"]],
-                'RNA VAF * Gene Expr': vaf_expr,
+                'Allele Expr': allele_expr,
                 'RNA Depth': [best["Tumor RNA Depth"]],
                 'DNA VAF': [best["Tumor DNA VAF"]],
                 'Tier': [tier],
@@ -214,7 +214,7 @@ class AggregateAllEpitopes:
         df_out = pd.DataFrame.from_dict(out_dict)
         return (df_out, peptides)
 
-    def calculate_vaf_expr(self, line):
+    def calculate_allele_expr(self, line):
         if self.file_type == 'pVACbind':
             return 'NA'
         elif line['Gene Expression'] == 'NA' or line['Tumor RNA VAF'] == 'NA':
@@ -292,7 +292,7 @@ class AggregateAllEpitopes:
 
         columns = ['ID']
         columns.extend(sorted([x.replace('HLA-', '') for x in hla_types]))
-        columns.extend(['Gene', 'AA Change', 'Num Transcripts', 'Peptide', 'Pos', 'Num Peptides', 'IC50 MT', 'IC50 WT', '%tile MT', '%tile WT', 'RNA Expr', 'RNA VAF', 'RNA VAF * Gene Expr', 'RNA Depth', 'DNA VAF', 'Tier', 'Evaluation'])
+        columns.extend(['Gene', 'AA Change', 'Num Transcripts', 'Peptide', 'Pos', 'Num Peptides', 'IC50 MT', 'IC50 WT', '%ile MT', '%ile WT', 'RNA Expr', 'RNA VAF', 'Allele Expr', 'RNA Depth', 'DNA VAF', 'Tier', 'Evaluation'])
         peptide_table = pd.DataFrame(columns=columns)
         metrics = {}
         for key in keys:
