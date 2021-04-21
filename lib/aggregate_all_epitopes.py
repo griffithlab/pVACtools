@@ -220,7 +220,7 @@ class AggregateAllEpitopes:
         elif line['Gene Expression'] == 'NA' or line['Tumor RNA VAF'] == 'NA':
             return 'NA'
         else:
-            return float(line['Gene Expression']) * float(line['Tumor RNA VAF'])
+            return round(float(line['Gene Expression']) * float(line['Tumor RNA VAF']), 3)
 
     #sort the table in our preferred manner
     def sort_table(self, df):
