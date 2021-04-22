@@ -172,10 +172,10 @@ class AggregateAllEpitopes:
             out_dict.update({
                 'Gene': ["NA"],
                 'AA Change': [best["aachange"]],
-                'Num Transcripts': [anno_count],
-                'Peptide': [best["Epitope Seq"]],
+                'Num Passing Transcripts': [anno_count],
+                'Best Peptide': [best["Epitope Seq"]],
                 'Pos': ["NA"],
-                'Num Peptides': [peptide_count],
+                'Num Passing Peptides': [peptide_count],
                 'IC50 MT': [best["Median Score"]],
                 'IC50 WT': ["NA"],
                 '%ile MT': [best["Median Percentile"]],
@@ -193,10 +193,10 @@ class AggregateAllEpitopes:
             out_dict.update({
                 'Gene': [best["Gene Name"]],
                 'AA Change': [best["aachange"]],
-                'Num Transcripts': [anno_count],
-                'Peptide': [best["MT Epitope Seq"]],
+                'Num Passing Transcripts': [anno_count],
+                'Best Peptide': [best["MT Epitope Seq"]],
                 'Pos': [best["Mutation Position"]],
-                'Num Peptides': [peptide_count],
+                'Num Passing Peptides': [peptide_count],
                 'IC50 MT': [best["Median MT Score"]],
                 'IC50 WT': [best["Median WT Score"]],
                 '%ile MT': [best["Median MT Percentile"]],
@@ -292,7 +292,7 @@ class AggregateAllEpitopes:
 
         columns = ['ID']
         columns.extend(sorted([x.replace('HLA-', '') for x in hla_types]))
-        columns.extend(['Gene', 'AA Change', 'Num Transcripts', 'Peptide', 'Pos', 'Num Peptides', 'IC50 MT', 'IC50 WT', '%ile MT', '%ile WT', 'RNA Expr', 'RNA VAF', 'Allele Expr', 'RNA Depth', 'DNA VAF', 'Tier', 'Evaluation'])
+        columns.extend(['Gene', 'AA Change', 'Num Passing Transcripts', 'Best Peptide', 'Pos', 'Num Passing Peptides', 'IC50 MT', 'IC50 WT', '%ile MT', '%ile WT', 'RNA Expr', 'RNA VAF', 'Allele Expr', 'RNA Depth', 'DNA VAF', 'Tier', 'Evaluation'])
         peptide_table = pd.DataFrame(columns=columns)
         metrics = {}
         for key in keys:
