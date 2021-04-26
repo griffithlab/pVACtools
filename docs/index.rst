@@ -54,10 +54,12 @@ New in release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- NetMHCstabpan and NetCons have moved to a new server resulting in no results
-  being returned from the old server URL. This results in empty filtered.tsv
-  report files when either the ``--netmhc-stab`` or ``--net-chop-method`` were
-  enabled. This release fixes our usage of these tools to use the new server URL.
+- There was a bug in the aggregate report creation. When parsing the
+  all_epitopes file as input to the report creation any ``N/A`` amino acid
+  changes would be parsed as null values. This release fixes this issue so
+  that these amino acid change values are correctly parsed as string values.
+- This release removes support for Python 3.5 since that Python version has
+  reached end of life and is no longer supported.
 
 New in version |version|
 ------------------------
