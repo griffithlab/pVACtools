@@ -109,7 +109,7 @@ setup(
         'jsonschema==2.6.0',
         'mock',
         'vaxrank>=1.1.0',
-        'tensorflow==2.2.2',
+        'tensorflow==2.4.0',
         'mhcnuggets==2.3.3',
         'mhcflurry==2.0.1',
     ],
