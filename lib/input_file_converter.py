@@ -399,90 +399,6 @@ class VcfConverter(InputFileConverter):
         self.close_filehandles()
 
 class FusionInputConverter(InputFileConverter):
-    def input_fieldnames(self):
-        return [
-            'chr 5p',
-            'start 5p',
-            'end 5p',
-            'chr 3p',
-            'start 3p',
-            'end 3p',
-            'name of fusion',
-            'tier of fusion',
-            'strand 5p',
-            'strand 3p',
-            'quantitation',
-            'is canonical boundary',
-            'can be in-frame',
-            'peptides',
-            'fusion positions',
-            'number of nucleotides in the break',
-            'transcripts',
-            'is canonical intron dinucleotide',
-        ]
-
-    def fusions_for_three_p_transcripts(self, five_p_transcript, three_p_transcripts):
-        fusions = []
-        if len(three_p_transcripts):
-            for three_p_transcript in three_p_transcripts.split('|'):
-                fusions.append("%s-%s"% (five_p_transcript, three_p_transcript))
-        return fusions
-
-    def parse_integrate_neo_file(self):
-        reader = open(self.input_file, 'r')
-        csv_reader = csv.DictReader(reader, delimiter='\t', fieldnames=self.input_fieldnames())
-        count = 1
-        output_rows = []
-        for entry in csv_reader:
-            if entry['fusion positions'] == 'NA' or entry['transcripts'] == 'NA' or entry['peptides'] == 'NA':
-                continue
-            for (fusion_position, transcript_set, fusion_amino_acid_sequence) in zip(entry['fusion positions'].split(','), entry['transcripts'].split(','), entry['peptides'].split(',')):
-                (five_p_transcripts, three_p_inframe_transcripts, three_p_frameshift_transcripts) = transcript_set.split(';')
-                fusions    = []
-                for five_p_transcript in five_p_transcripts.split('|'):
-                    fusions.extend(self.fusions_for_three_p_transcripts(five_p_transcript, three_p_inframe_transcripts))
-                    fusions.extend(self.fusions_for_three_p_transcripts(five_p_transcript, three_p_frameshift_transcripts))
-
-                if entry['can be in-frame']:
-                    variant_type = 'inframe_fusion'
-                else:
-                    variant_type = 'frameshift_fusion'
-
-                output_row = {
-                    'chromosome_name'            : "%s / %s" % (entry['chr 5p'], entry['chr 3p']),
-                    'start'                      : "%s / %s" % (entry['start 5p'], entry['start 3p']),
-                    'stop'                       : "%s / %s" % (entry['end 5p'], entry['end 3p']),
-                    'reference'                  : 'fusion',
-                    'variant'                    : 'fusion',
-                    'gene_name'                  : entry['name of fusion'],
-                    'wildtype_amino_acid_sequence'   : '',
-                    'frameshift_amino_acid_sequence' : '',
-                    'protein_length_change'      : '',
-                    'amino_acid_change'          : 'NA',
-                    'codon_change'               : 'NA',
-                    'ensembl_gene_id'            : 'NA',
-                    'amino_acid_change'          : 'NA',
-                    'transcript_expression'      : 'NA',
-                    'gene_expression'            : 'NA',
-                    'normal_depth'               : 'NA',
-                    'normal_vaf'                 : 'NA',
-                    'tdna_depth'                 : 'NA',
-                    'tdna_vaf'                   : 'NA',
-                    'trna_depth'                 : 'NA',
-                    'trna_vaf'                   : 'NA',
-                }
-                output_row['variant_type']               = variant_type
-                output_row['protein_position']           = fusion_position
-                output_row['fusion_amino_acid_sequence'] = fusion_amino_acid_sequence
-                transcripts                              = ';'.join(fusions)
-                output_row['transcript_name']            = transcripts
-                output_row['index']                      = lib.run_utils.construct_index(count, entry['name of fusion'], transcripts, variant_type, fusion_position)
-                output_rows.append(output_row)
-                count += 1
-
-        reader.close()
-        return output_rows
-
     def determine_fusion_sequence(self, full_sequence, variant_type):
         if '*' not in full_sequence:
             sys.exit("Fusion position marker '*' not found in fusion sequence. Please rerun AGFusion using the `--middlestar` option.")
@@ -568,9 +484,6 @@ class FusionInputConverter(InputFileConverter):
         writer = open(self.output_file, 'w')
         tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         tsv_writer.writeheader()
-        if os.path.isfile(self.input_file):
-            output_rows = self.parse_integrate_neo_file()
-        elif os.path.isdir(self.input_file):
-            output_rows = self.parse_agfusion_files()
+        output_rows = self.parse_agfusion_files()
         tsv_writer.writerows(output_rows)
         writer.close()
