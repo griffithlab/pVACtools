@@ -117,89 +117,73 @@ def main(args_input = sys.argv[1:]):
         'run_post_processor'        : False
     }
 
-    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
-        if args.iedb_install_directory:
-            iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
-            if not os.path.exists(iedb_mhc_i_executable):
-                sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
-        else:
-            iedb_mhc_i_executable = None
+    if args.iedb_install_directory:
+        iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
+        if not os.path.exists(iedb_mhc_i_executable):
+            sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
+        iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
+        if not os.path.exists(iedb_mhc_ii_executable):
+            sys.exit("IEDB MHC II executable path doesn't exist %s" % iedb_mhc_ii_executable)
+    else:
+        iedb_mhc_i_executable = None
+        iedb_mhc_ii_executable = None
 
-        print("Executing MHC Class I predictions")
+    all_params = {
+        'I': {
+            'iedb_executable': iedb_mhc_i_executable,
+            'prediction_algorithms': class_i_prediction_algorithms,
+            'alleles': class_i_alleles,
+            'epitope_lengths': args.class_i_epitope_length,
+            'netmhc_stab': args.netmhc_stab
+        },
+        'II': {
+            'iedb_executable': iedb_mhc_ii_executable,
+            'prediction_algorithms': class_ii_prediction_algorithms,
+            'alleles': class_ii_alleles,
+            'epitope_lengths': args.class_ii_epitope_length,
+            'netmhc_stab': False
+        }
+    }
 
-        output_dir = os.path.join(base_output_dir, 'MHC_Class_I')
-        os.makedirs(output_dir, exist_ok=True)
+    for (mhc_class, params) in all_params.items():
+        prediction_algorithms = params['prediction_algorithms']
+        alleles = params['alleles']
+        epitope_lengths = params['epitope_lengths']
 
-        output_files = []
-        for epitope_length in args.class_i_epitope_length:
-            (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, epitope_length)
+        if len(prediction_algorithms) > 0 and len(alleles) > 0:
+            print("Executing MHC Class {} predictions".format(mhc_class))
 
-            class_i_arguments = shared_arguments.copy()
-            class_i_arguments['input_file']              = input_file
-            class_i_arguments['alleles']                 = class_i_alleles
-            class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
-            class_i_arguments['epitope_lengths']         = [epitope_length]
-            class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
-            class_i_arguments['output_dir']              = per_epitope_output_dir
-            class_i_arguments['netmhc_stab']             = args.netmhc_stab
-            pipeline = PvacbindPipeline(**class_i_arguments)
-            pipeline.execute()
-            intermediate_output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
-            output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.final.tsv".format(args.sample_name))
-            append_columns(intermediate_output_file, "{}.tsv".format(input_file), output_file)
-            output_files.append(output_file)
-            if epitope_length == max(args.class_i_epitope_length):
-                fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
-                shutil.copy(input_file, fasta_file)
-        all_epitopes_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
-        filtered_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
-        create_combined_reports(output_files, all_epitopes_file, filtered_file, True, args)
-    elif len(class_i_prediction_algorithms) == 0:
-        print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
-    elif len(class_i_alleles) == 0:
-        print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
+            output_dir = os.path.join(base_output_dir, 'MHC_Class_{}'.format(mhc_class))
+            os.makedirs(output_dir, exist_ok=True)
 
-    if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
-        if args.iedb_install_directory:
-            iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
-            if not os.path.exists(iedb_mhc_ii_executable):
-                sys.exit("IEDB MHC II executable path doesn't exist %s" % iedb_mhc_ii_executable)
-        else:
-            iedb_mhc_ii_executable = None
+            output_files = []
+            for epitope_length in epitope_lengths:
+                (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, epitope_length)
 
-        print("Executing MHC Class II predictions")
-
-        output_dir = os.path.join(base_output_dir, 'MHC_Class_II')
-        os.makedirs(output_dir, exist_ok=True)
-
-        output_files = []
-        for epitope_length in args.class_ii_epitope_length:
-            (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, epitope_length)
-
-            class_ii_arguments = shared_arguments.copy()
-            class_ii_arguments['input_file']              = input_file
-            class_ii_arguments['alleles']                 = class_ii_alleles
-            class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
-            class_ii_arguments['epitope_lengths']         = [epitope_length]
-            class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
-            class_ii_arguments['output_dir']              = per_epitope_output_dir
-            class_ii_arguments['netmhc_stab']             = False
-            pipeline = PvacbindPipeline(**class_ii_arguments)
-            pipeline.execute()
-            intermediate_output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
-            output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.final.tsv".format(args.sample_name))
-            append_columns(intermediate_output_file, "{}.tsv".format(input_file), output_file)
-            output_files.append(output_file)
-            if epitope_length == max(args.class_ii_epitope_length):
-                fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
-                shutil.copy(input_file, fasta_file)
-        all_epitopes_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
-        filtered_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
-        create_combined_reports(output_files, all_epitopes_file, filtered_file, True, args)
-    elif len(class_ii_prediction_algorithms) == 0:
-        print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
-    elif len(class_ii_alleles) == 0:
-        print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
+                class_i_arguments = shared_arguments.copy()
+                class_i_arguments['input_file']              = input_file
+                class_i_arguments['alleles']                 = alleles
+                class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
+                class_i_arguments['epitope_lengths']         = [epitope_length]
+                class_i_arguments['prediction_algorithms']   = prediction_algorithms
+                class_i_arguments['output_dir']              = per_epitope_output_dir
+                class_i_arguments['netmhc_stab']             = params['netmhc_stab']
+                pipeline = PvacbindPipeline(**class_i_arguments)
+                pipeline.execute()
+                intermediate_output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+                output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.final.tsv".format(args.sample_name))
+                append_columns(intermediate_output_file, "{}.tsv".format(input_file), output_file)
+                output_files.append(output_file)
+                if epitope_length == max(epitope_lengths):
+                    fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
+                    shutil.copy(input_file, fasta_file)
+            all_epitopes_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+            filtered_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+            create_combined_reports(output_files, all_epitopes_file, filtered_file, True, args)
+        elif len(prediction_algorithms) == 0:
+            print("No MHC class {} prediction algorithms chosen. Skipping MHC class I predictions.".format(mhc_class))
+        elif len(alleles) == 0:
+            print("No MHC class{} alleles chosen. Skipping MHC class I predictions.".format(mhc_class))
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
