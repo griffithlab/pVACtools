@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+CBFA2T2	CHMP4B	ENST00000346541	ENST00000217402	protein_coding	protein_coding	5UTR-exon	NA	NA

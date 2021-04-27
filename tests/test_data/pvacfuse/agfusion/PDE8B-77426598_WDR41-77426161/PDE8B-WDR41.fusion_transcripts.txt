@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+PDE8B	WDR41	ENST00000264917	ENST00000296679	protein_coding	protein_coding	Outside transcript boundry	NA	NA
