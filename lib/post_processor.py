@@ -136,7 +136,9 @@ class PostProcessor:
                 self.fasta,
                 self.reference_similarity_fh.name,
                 species=self.species,
-                file_type=self.file_type
+                file_type=self.file_type,
+                blastp_path=self.blastp_path,
+                blastp_db=self.blastp_db,
             ).execute()
             print("Completed")
         else:
