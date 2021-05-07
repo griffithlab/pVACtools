@@ -261,10 +261,10 @@ class AggregateAllEpitopes:
 
         ## get a list of all prediction algorithms
         potential_algorithms = PredictionClass.prediction_methods()
-        header_string = "\t".join(list(df.columns))
+        headers = list(df.columns)
         prediction_algorithms = []
         for algorithm in potential_algorithms:
-            if algorithm in header_string:
+            if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
 
 
