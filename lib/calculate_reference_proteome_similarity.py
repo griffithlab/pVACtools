@@ -114,7 +114,7 @@ class CalculateReferenceProteomeSimilarity:
         return full_peptide[start:end]
 
     def metric_headers(self):
-        return ['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Peptide', 'Hit ID', 'Hit Definition', 'Query Sequence', 'Match Sequence', 'Match Start', 'Match Stop']
+        return ['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', 'Peptide', 'Hit ID', 'Hit Definition', 'Query Sequence', 'Query Window', 'Match Sequence', 'Match Start', 'Match Stop']
 
     def execute(self):
         if self.species not in self.species_to_organism:
@@ -131,17 +131,18 @@ class CalculateReferenceProteomeSimilarity:
             metric_writer = csv.DictWriter(metric_fh, delimiter="\t", fieldnames=self.metric_headers(), extrasaction='ignore')
             writer.writeheader()
             metric_writer.writeheader()
-            processed_peptides = []
-            reference_match_dict = defaultdict(list)
+            processed_peptides = {}
             for line in reader:
                 if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                     epitope = line['Epitope Seq']
                     peptide = mt_records_dict[line['Mutation']]
+                    full_peptide = peptide
                 else:
                     epitope = line['MT Epitope Seq']
+                    full_peptide = mt_records_dict[line['Index']]
                     if self.file_type == 'pVACseq':
                         if line['Variant Type'] == 'FS':
-                            peptide = self.extract_n_mer_from_fs(mt_records_dict[line['Index']], wt_records_dict[line['Index']], epitope, int(line['Sub-peptide Position']))
+                            peptide = self.extract_n_mer_from_fs(full_peptide, wt_records_dict[line['Index']], epitope, int(line['Sub-peptide Position']))
                         else:
                             mt_amino_acids = line['Mutation'].split('/')[1]
                             if mt_amino_acids == '-':
@@ -150,10 +151,9 @@ class CalculateReferenceProteomeSimilarity:
                     else:
                         peptide = mt_records_dict[line['Index']]
 
-                if peptide not in processed_peptides:
-                    processed_peptides.append(peptide)
+                if full_peptide not in processed_peptides:
                     if self.blastp_path is not None:
-                        record = SeqRecord(Seq(peptide, IUPAC.protein), id="1", description="")
+                        record = SeqRecord(Seq(full_peptide, IUPAC.protein), id="1", description="")
                         tmp_peptide_fh = tempfile.NamedTemporaryFile('w', delete=False)
                         SeqIO.write([record], tmp_peptide_fh.name, "fasta")
                         arguments = [self.blastp_path, '-query', tmp_peptide_fh.name, '-db', self.blastp_db, '-outfmt', '16', '-word_size', str(min(self.match_length, 7)), '-gapopen', '32767', '-gapextend', '32767']
@@ -164,31 +164,40 @@ class CalculateReferenceProteomeSimilarity:
                     else:
                         result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
                         sleep(10)
-                    for blast_record in NCBIXML.parse(result_handle):
+                    blast_records = [x for x in NCBIXML.parse(result_handle)]
+                    processed_peptides[full_peptide] = blast_records
+                    result_handle.close()
+
+                if full_peptide in processed_peptides:
+                    reference_match_dict = defaultdict(list)
+                    for blast_record in processed_peptides[full_peptide]:
                         if len(blast_record.alignments) > 0:
                             for alignment in blast_record.alignments:
                                 if alignment.title.endswith(" [{}]".format(self.species_to_organism[self.species])):
                                     for hsp in alignment.hsps:
                                         matches = re.split('\+| ', hsp.match)
                                         for match in matches:
-                                            if len(match) >= self.match_length:
-                                                reference_match_dict[peptide].append({
-                                                    'Hit ID': alignment.hit_id,
-                                                    'Hit Definition': alignment.hit_def,
-                                                    'Query Sequence': hsp.query,
-                                                    'Match Sequence': hsp.match,
-                                                    'Match Start': hsp.sbjct_start,
-                                                    'Match Stop': hsp.sbjct_end,
-                                                })
-                    result_handle.close()
-
-                if peptide in reference_match_dict:
-                    line['Reference Match'] = True
-                    metric_line = line.copy()
-                    metric_line['Peptide'] = peptide
-                    for alignment in reference_match_dict[peptide]:
-                        metric_line.update(alignment)
-                        metric_writer.writerow(metric_line)
+                                            windows = [match[i:i+self.match_length] for i in range(len(match)-(self.match_length-1))]
+                                            for window in windows:
+                                                if window in peptide:
+                                                    reference_match_dict[peptide].append({
+                                                        'Hit ID': alignment.hit_id,
+                                                        'Hit Definition': alignment.hit_def,
+                                                        'Query Sequence': hsp.query,
+                                                        'Query Window'  : window,
+                                                        'Match Sequence': hsp.match,
+                                                        'Match Start': hsp.sbjct_start,
+                                                        'Match Stop': hsp.sbjct_end,
+                                                    })
+                    if peptide in reference_match_dict:
+                        line['Reference Match'] = True
+                        metric_line = line.copy()
+                        metric_line['Peptide'] = peptide
+                        for alignment in reference_match_dict[peptide]:
+                            metric_line.update(alignment)
+                            metric_writer.writerow(metric_line)
+                    else:
+                        line['Reference Match'] = False
                 else:
                     line['Reference Match'] = False
                 writer.writerow(line)
