@@ -122,6 +122,8 @@ class CalculateReferenceProteomeSimilarity:
             metric_writer = csv.DictWriter(metric_fh, delimiter="\t", fieldnames=self.metric_headers(), extrasaction='ignore')
             writer.writeheader()
             metric_writer.writeheader()
+            processed_peptides = []
+            reference_match_dict = defaultdict(list)
             for line in reader:
                 if self.file_type == 'pVACbind':
                     epitope = line['Epitope Seq']
@@ -138,8 +140,8 @@ class CalculateReferenceProteomeSimilarity:
                             peptide = self.extract_n_mer(mt_records_dict[line['Index']], int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
                     else:
                         peptide = mt_records_dict[line['Index']]
-                reference_match_dict = defaultdict(list)
-                if peptide not in reference_match_dict:
+                if peptide not in processed_peptides:
+                    processed_peptides.append(peptide)
                     result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
                     for blast_record in NCBIXML.parse(result_handle):
                         if len(blast_record.alignments) > 0:
@@ -156,7 +158,6 @@ class CalculateReferenceProteomeSimilarity:
                                                 'Match Start': hsp.sbjct_start,
                                                 'Match Stop': hsp.sbjct_end,
                                             })
-                                            break
                     sleep(10)
                 if peptide in reference_match_dict:
                     line['Reference Match'] = True
