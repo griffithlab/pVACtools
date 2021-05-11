@@ -14,7 +14,7 @@ def pvac_directory():
     return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 mock_fhs = []
-def mock_ncbiwww_qblast(algorithm, reference, peptide, entrez_query):
+def mock_ncbiwww_qblast(algorithm, reference, peptide, entrez_query, word_size, gapcosts):
     base_dir      = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     test_data_dir = os.path.join(base_dir, "tests", "test_data", "blast_responses")
     fh = open(os.path.join(test_data_dir, 'response_{}.xml'.format(peptide[0:100])), 'r')
