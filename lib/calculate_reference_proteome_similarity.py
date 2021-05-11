@@ -140,7 +140,7 @@ class CalculateReferenceProteomeSimilarity:
                         peptide = mt_records_dict[line['Index']]
                 reference_match_dict = defaultdict(list)
                 if peptide not in reference_match_dict:
-                    result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]))
+                    result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
                     for blast_record in NCBIXML.parse(result_handle):
                         if len(blast_record.alignments) > 0:
                             for alignment in blast_record.alignments:
