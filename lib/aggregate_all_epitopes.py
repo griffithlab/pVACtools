@@ -109,15 +109,18 @@ class AggregateAllEpitopes:
                 peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
                 for peptide in good_binders["MT Epitope Seq"].unique():
                     good_binders_peptide = good_binders[good_binders['MT Epitope Seq'] == peptide]
-                    individual_calls = { 'algorithms': prediction_algorithms }
+                    individual_ic50_calls = { 'algorithms': prediction_algorithms }
+                    individual_percentile_calls = { 'algorithms': prediction_algorithms }
                     for peptide_type in ['MT', 'WT']:
                         ic50s = {}
                         percentiles = {}
-                        calls = {}
+                        ic50_calls = {}
+                        percentile_calls = {}
                         for index, line in good_binders_peptide.to_dict(orient='index').items():
                             ic50s[line['HLA Allele']] = line['Median {} Score'.format(peptide_type)]
                             percentiles[line['HLA Allele']] = line['Median {} Percentile'.format(peptide_type)]
-                            calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
+                            ic50_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
+                            percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
                         sorted_ic50s = []
                         sorted_percentiles = []
                         for hla_type in sorted(hla_types):
@@ -131,10 +134,12 @@ class AggregateAllEpitopes:
                                 sorted_percentiles.append('X')
                         peptides[line['annotation']][peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
                         peptides[line['annotation']][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
-                        individual_calls[peptide_type] = calls
+                        individual_ic50_calls[peptide_type] = ic50_calls
+                        individual_percentile_calls[peptide_type] = percentile_calls
                     peptides[line['annotation']][peptide]['hla_types'] = sorted(hla_types)
                     peptides[line['annotation']][peptide]['mutation_position'] = str(good_binders_peptide.iloc[0]['Mutation Position'])
-                    peptides[line['annotation']][peptide]['individual_calls'] = individual_calls
+                    peptides[line['annotation']][peptide]['individual_ic50_calls'] = individual_ic50_calls
+                    peptides[line['annotation']][peptide]['individual_percentile_calls'] = individual_percentile_calls
                     wt_peptide = good_binders_peptide.iloc[0]['WT Epitope Seq']
                     if wt_peptide == 'NA':
                         variant_type = good_binders_peptide.iloc[0]['Variant Type']
