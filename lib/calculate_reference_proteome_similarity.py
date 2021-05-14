@@ -159,19 +159,20 @@ class CalculateReferenceProteomeSimilarity:
                     for blast_record in NCBIXML.parse(result_handle):
                         if len(blast_record.alignments) > 0:
                             for alignment in blast_record.alignments:
-                                for hsp in alignment.hsps:
-                                    matches = re.split('\+| ', hsp.match)
-                                    for match in matches:
-                                        if len(match) >= self.match_length:
-                                            reference_match_dict[peptide].append({
-                                                'Hit ID': alignment.hit_id,
-                                                'Hit Definition': alignment.hit_def,
-                                                'Query Sequence': hsp.query,
-                                                'Match Sequence': hsp.match,
-                                                'Match Start': hsp.sbjct_start,
-                                                'Match Stop': hsp.sbjct_end,
-                                            })
-                                            break
+                                if alignment.title.endswith(" [{}]".format(self.species_to_organism[self.species])):
+                                    for hsp in alignment.hsps:
+                                        matches = re.split('\+| ', hsp.match)
+                                        for match in matches:
+                                            if len(match) >= self.match_length:
+                                                reference_match_dict[peptide].append({
+                                                    'Hit ID': alignment.hit_id,
+                                                    'Hit Definition': alignment.hit_def,
+                                                    'Query Sequence': hsp.query,
+                                                    'Match Sequence': hsp.match,
+                                                    'Match Start': hsp.sbjct_start,
+                                                    'Match Stop': hsp.sbjct_end,
+                                                })
+                                                break
                     result_handle.close()
                 if peptide in reference_match_dict:
                     line['Reference Match'] = True
