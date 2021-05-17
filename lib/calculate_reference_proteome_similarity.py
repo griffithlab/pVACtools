@@ -6,6 +6,7 @@ import shutil
 import re
 import os
 from collections import defaultdict
+from time import sleep
 
 class CalculateReferenceProteomeSimilarity:
     def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='vcf'):
@@ -153,6 +154,7 @@ class CalculateReferenceProteomeSimilarity:
                                                 'Match Stop': hsp.sbjct_end,
                                             })
                                             break
+                    sleep(10)
                 if peptide in reference_match_dict:
                     line['Reference Match'] = True
                     metric_line = line.copy()
