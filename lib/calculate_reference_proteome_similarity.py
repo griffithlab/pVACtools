@@ -94,7 +94,10 @@ class CalculateReferenceProteomeSimilarity:
             start = 0
         #This catches cases where the start position would cause too many leading wildtype amino acids, which would result
         #in false-positive reference matches
-        diff_position = [i for i in range(len(wt_peptide)) if wt_peptide[i] != full_peptide[i]][0]
+        if len(full_peptide) > len(wt_peptide):
+            diff_position = [i for i in range(len(wt_peptide)) if wt_peptide[i] != full_peptide[i]][0]
+        else:
+            diff_position = [i for i in range(len(full_peptide)) if wt_peptide[i] != full_peptide[i]][0]
         min_start = diff_position - self.match_length + 1 
         if min_start > start:
             start = min_start
@@ -119,6 +122,8 @@ class CalculateReferenceProteomeSimilarity:
             metric_writer = csv.DictWriter(metric_fh, delimiter="\t", fieldnames=self.metric_headers(), extrasaction='ignore')
             writer.writeheader()
             metric_writer.writeheader()
+            processed_peptides = []
+            reference_match_dict = defaultdict(list)
             for line in reader:
                 if self.file_type == 'pVACbind':
                     epitope = line['Epitope Seq']
@@ -135,9 +140,9 @@ class CalculateReferenceProteomeSimilarity:
                             peptide = self.extract_n_mer(mt_records_dict[line['Index']], int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
                     else:
                         peptide = mt_records_dict[line['Index']]
-                reference_match_dict = defaultdict(list)
-                if peptide not in reference_match_dict:
-                    result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]))
+                if peptide not in processed_peptides:
+                    processed_peptides.append(peptide)
+                    result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
                     for blast_record in NCBIXML.parse(result_handle):
                         if len(blast_record.alignments) > 0:
                             for alignment in blast_record.alignments:
@@ -153,7 +158,6 @@ class CalculateReferenceProteomeSimilarity:
                                                 'Match Start': hsp.sbjct_start,
                                                 'Match Stop': hsp.sbjct_end,
                                             })
-                                            break
                     sleep(10)
                 if peptide in reference_match_dict:
                     line['Reference Match'] = True
