@@ -260,7 +260,28 @@ class AggregateAllEpitopes:
 
     def execute(self):
         peptide_fastas = self.parse_fasta_file()
-        df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False)
+
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+
+        potential_algorithms = PredictionClass.prediction_methods()
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+
+        used_columns = [
+            "Chromosome", "Start", "Stop", "Reference", "Variant",
+            "Transcript", "Variant Type", "Mutation",
+            "Protein Position", "Gene Name", "HLA Allele",
+            "Mutation Position", "MT Epitope Seq", "WT Epitope Seq",
+            "Tumor DNA VAF", "Tumor RNA Depth",
+            "Tumor RNA VAF", "Gene Expression", "Transcript Expression",
+            "Median MT Score", "Median WT Score", "Median MT Percentile", "Median WT Percentile",
+        ]
+        for algorithm in prediction_algorithms:
+            used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm), "{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
+
+        df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, usecols= used_columns)
         df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
         df.fillna(value="NA", inplace=True)
 
