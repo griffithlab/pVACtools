@@ -1,4 +1,3 @@
-import inspect
 import re
 import os
 import unittest
@@ -16,12 +15,8 @@ def pvac_directory():
 
 mock_fhs = []
 def mock_ncbiwww_qblast(algorithm, reference, peptide, entrez_query):
-    for stack in inspect.stack():
-        if '/tests/' in stack.filename and not 'test_utils.py' in stack.filename:
-            tool = re.compile('.+/test_(.+).py').match(stack.filename).group(1)
-            break
     base_dir      = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    test_data_dir = os.path.join(base_dir, "tests", "test_data", tool)
+    test_data_dir = os.path.join(base_dir, "tests", "test_data", "blast_responses")
     fh = open(os.path.join(test_data_dir, 'response_{}.xml'.format(peptide[0:100])), 'r')
     mock_fhs.append(fh)
     return fh
