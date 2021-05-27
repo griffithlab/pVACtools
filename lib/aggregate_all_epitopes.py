@@ -281,8 +281,23 @@ class AggregateAllEpitopes:
         for algorithm in prediction_algorithms:
             used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm), "{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
 
-        df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, usecols= used_columns)
+        dtypes = {
+            "Start": "int32",
+            "Stop": "int32",
+            "Variant Type": "category",
+            "Mutation Position": "int8",
+            "Median MT Score": "float32",
+            "Median MT Percentile": "float16",
+        }
+        for algorithm in prediction_algorithms:
+            if algorithm == 'SMM' or algorithm == 'SMMPMBEC':
+                continue
+            dtypes["{} MT Score".format(algorithm)] = "float32"
+            dtypes["{} MT Percentile".format(algorithm)] = "float16"
+
+        df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, usecols= used_columns, dtype=dtypes)
         df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
+        df['Variant Type'] = df['Variant Type'].cat.add_categories('NA')
         df.fillna(value="NA", inplace=True)
 
         ## get a list of all prediction algorithms
