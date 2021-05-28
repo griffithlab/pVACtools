@@ -40,6 +40,7 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['run_netmhc_stab'] = False
     post_processing_params['run_manufacturability_metrics'] = False
     post_processing_params['run_reference_proteome_similarity'] = False
+    post_processing_params['file_type'] = 'pVACseq'
 
     PostProcessor(**post_processing_params).execute()
 
