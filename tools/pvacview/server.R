@@ -1,0 +1,512 @@
+# load libraries
+library(shiny)
+library(ggplot2)
+library(DT)
+library(gghighlight)
+library(jsonlite)
+library(reshape2)
+library(tibble)
+library(dplyr)
+library(tidyr)
+
+source("anchor.R")
+source("helper.R")
+source("styling.R")
+
+options(shiny.maxRequestSize=300*1024^2)
+
+shinyServer(function(input, output) {
+  
+  shinyInput = function(data, FUN, len, id, ...) { 
+    inputs = character(len) 
+    for (i in seq_len(len)) { 
+      inputs[i] = as.character(FUN(paste0(id, i), label = NULL, ...,selected=data[i,'Evaluation']))
+    } 
+    inputs
+  } 
+  
+  shinyInputSelect = function(FUN, len, id, ...) {
+    inputs = character(len)
+    for (i in seq_len(len)) {
+      inputs[i] <- as.character(FUN(paste0(id, i), ...))
+    }
+    inputs
+  }
+  
+  shinyValue = function(id, len, data) { 
+    unlist(lapply(seq_len(len), function(i) { 
+      value = input[[paste0(id, i)]] 
+      if (is.null(value)) {
+        data[i,'Evaluation']
+      }
+      else { 
+        value
+      }
+    })) 
+  } 
+  
+
+  ##############################DATA UPLOAD TAB -> Will be removed in final version and be hardcoded in output by pvactools pipeline instead
+  mainData <- reactive({
+   req(input$mainDataInput)
+   mainData <- read.table(input$mainDataInput$datapath, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+   colnames(mainData) <- mainData[1,]
+   mainData <- mainData[-1,]
+   row.names(mainData) <- NULL
+   mainData$`Eval` <- shinyInput(mainData, selectInput,nrow(mainData),"selecter_",
+                                 choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
+   mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_" , label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
+   mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
+   mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
+   mainData
+  })
+
+  metricsData <- reactive({
+   req(input$metricsDataInput)
+   fromJSON(input$metricsDataInput$datapath)
+  })
+
+  additionalData <- reactive({
+    req(input$additionalDataInput)
+    addData <- read.table(input$additionalDataInput$datapath, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+    colnames(addData) <- addData[1,]
+    addData <- addData[-1,]
+    row.names(addData) <- NULL
+    addData
+  })
+
+
+  
+
+  df <- reactiveValues(
+    data = reactive({mainData()[, !(colnames(mainData()) == "ID") & !(colnames(mainData()) == "Evaluation")] }),
+    selectedRow = 1
+  )
+  
+  hla_count <- reactive({
+    which( colnames(mainData())=="Gene" )-1
+  })
+  
+  type <- reactive({
+    switch(input$hla_class,
+           class_i = 1,
+           class_ii = 2)
+  })
+  
+  output$type_text <- renderText({
+    if (type() == 1){
+      return("Class II")
+    } else {
+      return('Class I')
+    }
+  })
+  
+  observeEvent(input$help, {
+    showModal(modalDialog(
+      title = "Aggregate Report of Best Candidates by Mutation",
+      h5("* Hover over individual column names to see further description of specific columns. (HLA allele columns excluded)"),
+      h4(" HLA specific columns:", style="font-weight: bold"),
+      h5(" Number of good binding peptides for each specific HLA-allele.", br(),
+         " The same peptide could be counted in multiple columns if it was predicted to be a good binder for multiple HLA alleles."),
+      h4(" Color scale for IC50 MT column:", style="font-weight: bold"),
+      h5(" lightgreen to darkgreen (0nM to 500nM); ", br(),"yellow to orange (500nM to 1000nM);", br()," red (> 1000nM) "),
+      h4(" Color scale for %ile MT column:", style="font-weight: bold"),
+      h5(" lightgreen to darkgreen (0-0.5%);", br()," yellow to orange (0.5% to 2 %);", br()," red (> 2%) "),
+      h4(" Bar backgrounds:", style="font-weight: bold"), 
+      h5(" RNA VAF and DNA VAF: Bar graphs range from 0 to 1", br(),
+         " RNA Expr, Allele Expr, RNA Depth: Bar graphs range from 0 to maximum value of specific column"),
+      h4(" Tier Types:", style="font-weight: bold"),
+      h5(" NoExpr: Mutant allele is not expressed ", br(),
+         " LowExpr: Mutant allele has low expression (Allele Expr < 1)", br(),
+         " Subclonal: Likely not in the founding clone of the tumor (DNA VAF > max(DNA VAF)/2)", br(),
+         " Anchor: Mutation is at an anchor residue in the shown peptide, and the WT allele has good binding (WT IC50 <1000)", br(),
+         " Poor: Fails two or more of the above criteria", br(),
+         " Relaxed: Passes the above criteria, has decent MT binding (IC50 < 1000)", br(),
+         " Pass: Passes the above criteria, has strong MT binding (IC50 < 1000) and strong expression (Allele Expr > 3)"
+      )
+    ))
+  })
+  
+
+  
+  ##############################PEPTIDE EXPLORATION TAB -> Main View
+  
+  
+  output$mainTable = DT::renderDataTable(
+      datatable(df$data()
+                , escape = FALSE, callback = JS(callBack(hla_count())),
+      options=list(lengthChange = FALSE, dom = 'Bfrtip', 
+                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1))),
+                   buttons = list(I('colvis')), 
+                   initComplete = htmlwidgets::JS(
+                     "function(settings, json) {",
+                     paste("$(this.api().table().header()).css({'font-size': '", '10pt', "'});"), 
+                     "}"),
+                   rowCallback = JS(rowCallback(hla_count())),
+                   preDrawCallback = JS('function() { 
+                                        Shiny.unbindAll(this.api().table().node()); }'), 
+                   drawCallback = JS('function() { 
+                                     Shiny.bindAll(this.api().table().node()); } ')
+                   ),
+      selection = 'none',
+      extensions = c("Buttons"))
+    %>% formatStyle( 'IC50 MT', backgroundColor = styleInterval(c(50,100,200,300,400,500,600, 700, 800, 900, 1000), 
+                                                                c("#00FF00", "#00EE00","#00D500","#00BC00","#00A300", "#008B00", "#FFFF00", "#FFEB00", "#FFD800","#FFC500","#FFB100", "#FF9999")))
+    %>% formatStyle( '%ile MT', backgroundColor = styleInterval(c(0.1,0.2,0.3,0.4,0.5,0.75,1,1.5,2),
+                                                                c("#00EE00","#00D500","#00BC00","#00A300", "#008B00", "#FFFF00", "#FFEB00", "#FFD800","#FFC500", "#FF9999")) )
+    %>% formatStyle( 'Tier', color = styleEqual(c('Pass', 'Relaxed', 'Poor','Anchor','Subclonal','LowExpr', 'NoExpr'), c('green','lightgreen', 'orange', 'yellow', '#D4AC0D', 'salmon', 'red')) )
+    %>% formatStyle(c('RNA VAF'),background = styleColorBar(range(0,1), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
+    %>% formatStyle(c('DNA VAF'),background = styleColorBar(range(0,1), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
+    %>% formatStyle(c('RNA Expr'),background = styleColorBar(range(0,max(as.numeric(as.character(unlist(mainData()['RNA Expr']))))), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
+    %>% formatStyle(c('RNA Depth'),background = styleColorBar(range(0,max(as.numeric(as.character(unlist(mainData()['RNA Depth']))))), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
+    %>% formatStyle(c('Allele Expr'),background = styleColorBar(range(0,max(as.numeric(as.character(unlist(mainData()['Allele Expr']))))), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
+    , server=FALSE)
+  
+  observeEvent(input$select_button, {
+    df$selectedRow <- as.numeric(strsplit(input$select_button, "_")[[1]][2])
+  })
+  
+  output$selected <- renderText({
+    df$selectedRow
+  })
+
+  selectedID <- reactive({
+    if (is.null(df$selectedRow)) {
+      mainData()$ID[1]
+    }
+    else{
+      mainData()$ID[df$selectedRow]
+    }
+  })
+  
+  output$metricsTextGenomicCoord = renderText({
+    selectedID()
+  })
+  
+  output$metricsTextRNA = renderText({
+    metricsData()[[selectedID()]]$`RNA VAF`
+  })
+  
+  output$metricsTextDNA = renderText({
+    metricsData()[[selectedID()]]$`DNA VAF`
+  })
+  
+  output$addData_IC50 = renderText({
+    additionalData()[additionalData()$ID == selectedID(),]$`IC50 MT`
+  })
+  
+  output$addData_percentile = renderText({
+    additionalData()[additionalData()$ID == selectedID(),]$`%ile MT`
+  })
+  
+  output$transcriptsTable = renderDT(
+    {
+      withProgress(message = 'Loading Transcripts Table', value = 0, {
+      GB_transcripts <- data.frame()
+      if (length(metricsData()[[selectedID()]]$good_binders_transcript) != 0){
+        GB_transcripts <- data.frame("Transcripts" = metricsData()[[selectedID()]]$good_binders_transcript,"Expression" = metricsData()[[selectedID()]]$transcript_expr)
+      }
+      else{
+        GB_transcripts <- data.frame("Transcripts" = character(), "Expression" = character())
+      }
+      incProgress(0.5)
+      names(GB_transcripts) <- c("Transcripts producing good binding peptides", "Transcript Expression")
+      incProgress(0.5)
+      GB_transcripts 
+      })
+    },
+    selection = list(mode='single', selected = '1')
+  )
+  
+  selectedTranscript <- reactive({
+    selection <- input$transcriptsTable_rows_selected
+    if (is.null(selection)){
+      selection <- 1
+    }
+    metricsData()[[selectedID()]]$good_binders_transcripts[selection]
+  })
+  
+  output$metricsTextTranscript = renderText({
+    if (length(metricsData()[[selectedID()]]$good_binders_transcript) != 0){
+      metricsData()[[selectedID()]]$good_binders[[selectedTranscript()]]$`transcript_expr`
+    }
+    else {
+      "N/A"
+    }
+  })
+  
+  output$metricsTextGene = renderText({
+    #req(input$metricsDataInput)
+    if (length(metricsData()[[selectedID()]]$good_binders_transcript) != 0){
+      metricsData()[[selectedID()]]$`gene_expr`
+    }
+    else {
+      "N/A"
+    }
+  })
+  
+  output$peptideTable = renderDT({
+      withProgress(message = 'Loading Peptide Table', value = 0, {
+        if (length(metricsData()[[selectedID()]]$good_binders_transcript) != 0){
+          peptide_data <- metricsData()[[selectedID()]]$good_binders[[selectedTranscript()]]
+          peptide_names <- names(peptide_data)
+          for(i in 1:length(peptide_names)){
+            peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
+            peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
+          }
+          incProgress(0.5)
+          peptide_data <- as.data.frame(peptide_data)
+          incProgress(0.5)
+          datatable(do.call("rbind",lapply(peptide_names, table_formatting, peptide_data)), options =list(
+            pageLength = 10,
+            lengthMenu = c(10),
+            rowCallback = JS('function(row, data, index, rowId) {',
+                             'console.log(rowId)','if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {',
+                             'row.style.backgroundColor = "#E0E0E0";','}','}')
+          ), selection = list(mode='single', selected = '1')) %>% formatStyle('Type', fontWeight = styleEqual('MT','bold'), color = styleEqual('MT', '#E74C3C'))
+          
+        }
+        else {
+          incProgress(1)
+          datatable(data.frame("Peptide Datatable"=character()), selection = list(mode='single', selected = '1'))
+        }
+      })
+    }
+    
+  )
+
+  
+  selectedPeptideData <- reactive({
+    selection <- input$peptideTable_rows_selected
+    if (is.null(selection)){
+      selection <- 1
+    }
+    peptide_names <- names(metricsData()[[selectedID()]]$good_binders[[selectedTranscript()]])
+    index <- floor((as.numeric(selection)+1)/2)
+    metricsData()[[selectedID()]]$good_binders[[selectedTranscript()]][[peptide_names[index]]]
+  })
+  
+  ##Add legend for anchor heatmap 
+  output$peptideFigureLegend<- renderPlot({
+    colors <- colorRampPalette(c("lightblue", "blue"))(99)[seq(1,99,7)]
+    color_pos = data.frame(d=as.character(seq(1,99,7)), x1=seq(0.1,1.5,0.1), x2=seq(0.2,1.6,0.1), y1=rep(1,15), y2=rep(1.1,15), colors=colors)
+    color_label = data.frame(x=c(0.1,0.8,1.6), y=rep(0.95,3), score=c(0,0.5,1))
+    p1 <- ggplot() + 
+      scale_y_continuous(limits=c(0.90, 1.2), name="y") + scale_x_continuous(limits=c(0,1.7), name="x") +
+      geom_rect(data=color_pos, aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2, fill=colors), color="black", alpha=1) +
+      scale_fill_identity()
+    p1 <- p1 + geom_text(data=color_label, aes(x=x, y=y, label=score), size=4, fontface =2) +
+      annotate(geom="text", x = 0.5, y= 1.18, label="Normalized Anchor Score", size=4, fontface =2) +
+      coord_fixed() +
+      theme_void() + theme(legend.position = "none", panel.border = element_blank(), plot.margin=margin(0, 0, 0, 0, "cm"))
+    print(p1)
+  })
+  
+  ##Anchor Heatmap overlayed on selected peptide sequences 
+  output$anchorPlot <- renderPlot({
+    withProgress(message = 'Loading Anchor Heatmap', value = 0, {
+      if (type() == 2){
+        p1 <- ggplot() + annotate(geom="text", x = 10, y = 20, label = "No data available for Class II HLA alleles", size=6) +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        incProgress(1)
+        print(p1)
+      }
+      else if (length(metricsData()[[selectedID()]]$good_binders_transcript) != 0) {
+        peptide_data <- metricsData()[[selectedID()]]$good_binders[[selectedTranscript()]]
+        peptide_names <- names(peptide_data)
+        for(i in 1:length(peptide_names)){
+          peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
+        }
+        peptide_data <- as.data.frame(peptide_data)
+        #p1 <- ggplot() + scale_y_continuous(limits=c(-20, 1)) + scale_x_continuous(limits=c(0,80))
+        p1 <- ggplot() + scale_x_continuous(limits=c(0,80)) + scale_y_continuous(limits=c(-31, 1)) 
+        all_peptides <- list()
+        incProgress(0.1)
+        for(i in 1:length(peptide_names)){
+          mutation_pos <- as.numeric(metricsData()[[selectedID()]]$good_binders[[selectedTranscript()]][[peptide_names[i]]]$`mutation_position`)
+          wt_peptide <- as.character(metricsData()[[selectedID()]]$good_binders[[selectedTranscript()]][[peptide_names[i]]]$`wt_peptide`)
+          df_mt_peptide <- data.frame("aa"=unlist(strsplit(peptide_names[i],"", fixed = TRUE)), "x_pos" = c(1:nchar(peptide_names[i])))
+          df_mt_peptide$mutation <- 'not_mutated'
+          df_mt_peptide$type <- 'mt'
+          df_mt_peptide$y_pos <- (i*2-1)*-1
+          df_mt_peptide$length <- nchar(peptide_names[i])
+          df_mt_peptide[mutation_pos, 'mutation'] <- 'mutated'
+          df_wt_peptide <- data.frame("aa"=unlist(strsplit(wt_peptide,"", fixed = TRUE)), "x_pos" = c(1:nchar(wt_peptide)))
+          df_wt_peptide$mutation <- 'not_mutated'
+          df_wt_peptide$type <- 'wt'
+          df_wt_peptide$y_pos <- (i*2)*-1
+          df_wt_peptide$length <- nchar(wt_peptide)
+          all_peptides[[i]] <- rbind(df_mt_peptide, df_wt_peptide)
+        }
+        incProgress(0.4)
+        all_peptides <- do.call(rbind, all_peptides)
+        
+        peptide_table <- do.call("rbind",lapply(peptide_names, table_formatting, peptide_data))
+        peptide_table_filtered <- Filter(function(x) length(unique(x))!=1, peptide_table)
+        peptide_table_names <- names(peptide_table_filtered)
+        hla_list <- peptide_table_names[grepl("^HLA-*", peptide_table_names)]
+        
+        hla_data <- data.frame(hla = hla_list)
+        hla_sep <- max(nchar(peptide_table$`Peptide Sequence`))
+        hla_data$y_pos <- 1
+        hla_data$x_pos <- hla_sep/2
+        pad <- 3
+        all_peptides_multiple_hla <- list()
+        incProgress(0.1)
+        for(i in 1:length(hla_list)){
+          hla_data$x_pos[i] <- hla_data$x_pos[i]+(hla_sep+pad)*(i-1)
+          all_peptides_multiple_hla[[i]] <- all_peptides
+          all_peptides_multiple_hla[[i]]$color_value <- apply(all_peptides_multiple_hla[[i]], 1, function(x) peptide_coloring(hla_list[[i]],x))
+          all_peptides_multiple_hla[[i]]$x_pos <-  all_peptides_multiple_hla[[i]]$x_pos+(hla_sep+pad)*(i-1)
+        }
+        incProgress(0.2)
+        all_peptides_multiple_hla <- do.call(rbind, all_peptides_multiple_hla)
+        
+        h_line_pos <- data.frame(y_pos = seq(min(all_peptides_multiple_hla['y_pos'])-0.5,max(all_peptides_multiple_hla['y_pos'])-1.5, 2), x_pos=c(min(all_peptides_multiple_hla['x_pos'])-1))
+        h_line_pos <- rbind(h_line_pos,data.frame(x_pos = max(all_peptides_multiple_hla['x_pos'])+1, y_pos = seq(min(all_peptides_multiple_hla['y_pos'])-0.5,max(all_peptides_multiple_hla['y_pos'])-1.5, 2)))
+        incProgress(0.2)
+        p1 <- p1 + 
+          geom_rect(data=all_peptides_multiple_hla, aes(xmin=x_pos-0.5, xmax=1+x_pos-0.5, ymin=.5+y_pos, ymax=-.5+y_pos), fill=all_peptides_multiple_hla$color_value) +
+          geom_text(data=all_peptides_multiple_hla, aes(x=x_pos, y=y_pos, label = aa, color=mutation), size=5) +
+          geom_text(data=hla_data, aes(x=x_pos, y=y_pos, label=hla), size=5, fontface="bold") +
+          geom_line(data = h_line_pos, (aes(x=x_pos, y=y_pos, group=y_pos)), linetype = "dashed")
+        
+        p1 <- p1 + scale_color_manual("mutation", values=c("not_mutated" = "#000000", "mutated" = "#e74c3c"))
+        p1 <- p1 + theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        print(p1)
+      }
+      else {
+        p1 <- ggplot() + annotate(geom="text", x = 10, y = 20, label = "No data available", size=6) +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        incProgress(1)
+        print(p1)
+      }
+    })
+  }, height = 500, width = 1000)
+  
+  bindingScoreDataIC50 <- reactive({
+    if (length(metricsData()[[selectedID()]]$good_binders_transcript) != 0){
+      algorithm_names <- data.frame(algorithms=selectedPeptideData()$individual_ic50_calls$algorithms)
+      wt_data <- as.data.frame(selectedPeptideData()$individual_ic50_calls$WT, check.names=FALSE)
+      colnames(wt_data) <- paste(colnames(wt_data),"_WT_Score", sep="")
+      mt_data <- as.data.frame(selectedPeptideData()$individual_ic50_calls$MT, check.names=FALSE)
+      colnames(mt_data) <- paste(colnames(mt_data),"_MT_Score", sep="")
+      full_data <- cbind(algorithm_names,mt_data,wt_data) %>%
+        gather('col', 'val', colnames(mt_data)[1]:tail(colnames(wt_data), n=1)) %>%
+        separate(col, c('HLA_allele','Mutant','Score'), sep='\\_') %>%
+        spread('Score', val)
+      full_data
+    }
+    else{
+      return()
+    }
+  })
+  
+  output$bindingData_IC50 <- renderPlot({
+    withProgress(message = 'Loading Binding Score Plot (IC50)', value = 0, {
+      if (length(metricsData()[[selectedID()]]$good_binders_transcript) != 0){
+        line.data <- data.frame(yintercept = c(500,1000), Cutoffs = c("500nM", "1000nM"), color=c("#28B463","#EC7063"))
+        hla_allele_count <- length(unique(bindingScoreDataIC50()$HLA_allele))
+        incProgress(0.5)
+        p <- ggplot(data=bindingScoreDataIC50() , aes(x=Mutant, y=Score, color=Mutant), trim=FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans="log10") + #coord_trans(y = "log10") +
+          stat_summary(fun.y = mean, fun.ymin = mean, fun.ymax = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) + 
+          geom_jitter(data=bindingScoreDataIC50(), aes(shape=algorithms), size=5, stroke = 1, position=position_jitter(0.3)) + 
+          scale_shape_manual(values = 0:8) +
+          geom_hline(aes(yintercept = yintercept, linetype = Cutoffs), line.data, color=rep(line.data$color, hla_allele_count)) + 
+          scale_color_manual(values = rep(c("MT"="#D2B4DE", "WT"="#F7DC6F"),hla_allele_count)) + 
+          theme(strip.text = element_text(size=15), axis.text = element_text(size=10), axis.title = element_text(size=15), axis.ticks = element_line(size=3), legend.text = element_text(size=15), legend.title = element_text(size=15))
+        incProgress(0.5)
+        print(p)}
+      else{
+        p <- ggplot() + annotate(geom="text", x = 10, y = 20, label = "No data available", size=6) +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        incProgress(1)
+        print(p)
+      }
+    })
+  })
+  
+  bindingScoreDataPercentile <- reactive({
+    if (length(metricsData()[[selectedID()]]$good_binders_transcript) != 0){
+      algorithm_names <- data.frame(algorithms=selectedPeptideData()$individual_percentile_calls$algorithms)
+      wt_data <- as.data.frame(selectedPeptideData()$individual_percentile_calls$WT, check.names=FALSE)
+      colnames(wt_data) <- paste(colnames(wt_data),"_WT_Score", sep="")
+      mt_data <- as.data.frame(selectedPeptideData()$individual_percentile_calls$MT, check.names=FALSE)
+      colnames(mt_data) <- paste(colnames(mt_data),"_MT_Score", sep="")
+      full_data <- cbind(algorithm_names,mt_data,wt_data) %>%
+        gather('col', 'val', colnames(mt_data)[1]:tail(colnames(wt_data), n=1)) %>%
+        separate(col, c('HLA_allele','Mutant','Score'), sep='\\_') %>%
+        spread('Score', val)
+      full_data
+    }
+    else{
+      return()
+    }
+  })
+  
+  output$bindingData_percentile <- renderPlot({
+    withProgress(message = 'Loading Binding Score Plot (Percentile)', value = 0, {
+      if (length(metricsData()[[selectedID()]]$good_binders_transcript) != 0){
+        line.data <- data.frame(yintercept = c(0.5,2), Cutoffs = c("0.5%", "2%"), color=c("#28B463","#EC7063"))
+        hla_allele_count <- length(unique(bindingScoreDataPercentile()$HLA_allele))
+        incProgress(0.5)
+        p <- ggplot(data=bindingScoreDataPercentile() , aes(x=Mutant, y=Score, color=Mutant), trim=FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans="log10") + #coord_trans(y = "log10") +
+          stat_summary(fun.y = mean, fun.ymin = mean, fun.ymax = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) + 
+          geom_jitter(data=bindingScoreDataPercentile(), aes(shape=algorithms), size=5, stroke = 1, position=position_jitter(0.3)) + 
+          scale_shape_manual(values = 0:8) +
+          geom_hline(aes(yintercept = yintercept, linetype = Cutoffs), line.data, color=rep(line.data$color, hla_allele_count)) + 
+          scale_color_manual(values = rep(c("MT"="#D2B4DE", "WT"="#F7DC6F"),hla_allele_count)) + 
+          theme(strip.text = element_text(size=15), axis.text = element_text(size=10), axis.title = element_text(size=15), axis.ticks = element_line(size=3), legend.text = element_text(size=15), legend.title = element_text(size=15))
+        incProgress(0.5)
+        print(p)}
+      else{
+        p <- ggplot() + annotate(geom="text", x = 10, y = 20, label = "No data available", size=6) +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        incProgress(1)
+        print(p)
+      }
+    })
+  })
+
+  
+  ##############################EXPORT TAB
+  
+  output$checked <- renderTable({
+    Evaluation <- data.frame(selected=shinyValue("selecter_",nrow(mainData()), mainData()))
+    data <- as.data.frame(table(Evaluation))
+    data$Count <- data$Freq
+    data$Freq <- NULL
+    data
+  })
+  
+  
+  output$ExportTable = renderDataTable({
+    data <- mainData()[, !(colnames(mainData()) == "Evaluation") & !(colnames(mainData()) == "Eval")& !(colnames(mainData()) == "Select")]
+    col_names <- colnames(data)
+    data <- data.frame(data, Evaluation=shinyValue("selecter_",nrow(mainData()), mainData()))
+    colnames(data) <- c(col_names,"Evaluation")
+    data}, escape = FALSE, server = FALSE, rownames = FALSE,
+    options=list(dom = 'Bfrtip', 
+                 buttons = list(I('colvis'), list(
+                   extend = 'csvHtml5', 
+                   filename = input$exportFileName,
+                   fieldSeparator = '\t',
+                   text = 'Download as TSV',
+                   extension = '.tsv'), list(
+                     extend = 'excel', 
+                     filename = input$exportFileName,
+                     text = 'Download as excel'
+                   )
+                 ),
+                 initComplete = htmlwidgets::JS(
+                   "function(settings, json) {",
+                   paste0("$(this.api().table().header()).css({'font-size': '", '8pt', "'});"), 
+                   "}")
+    ),
+    selection = 'none',
+    extensions = c("Buttons"))
+  
+  
+  
+  })
