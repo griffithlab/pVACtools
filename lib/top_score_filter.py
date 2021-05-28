@@ -34,7 +34,7 @@ class TopScoreFilter:
             writer.writeheader()
             top_per_variant_transcript = {}
             for line in reader:
-                if self.file_type != 'pVACbind':
+                if self.file_type == 'pVACseq':
                     chromosome = line['Chromosome']
                     start = line['Start']
                     stop = line['Stop']
@@ -62,7 +62,7 @@ class TopScoreFilter:
 
             top_per_variant = {}
             for (index, line) in top_per_variant_transcript.items():
-                if self.file_type != 'pVACbind':
+                if self.file_type == 'pVACseq':
                     chromosome = line['Chromosome']
                     start = line['Start']
                     stop = line['Stop']
@@ -98,7 +98,7 @@ class TopScoreFilter:
                             line_with_lowest_transcript_id = self.find_line_with_lowest_transcript_id(lines)
                             filtered_lines.append(line_with_lowest_transcript_id)
 
-            if self.file_type != 'pVACbind':
+            if self.file_type == 'pVACseq':
                 sorted_rows = lib.sort.default_sort(filtered_lines, self.top_score_metric)
             else:
                 sorted_rows = lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric)

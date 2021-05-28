@@ -23,7 +23,7 @@ class BindingFilter:
         if self.allele_specific_cutoffs:
             AlleleSpecificBindingFilter(self.input_file, self.output_file, self.binding_threshold, self.minimum_fold_change, self.top_score_metric, self.exclude_nas, self.percentile_threshold, self.file_type).execute()
         else:
-            if self.file_type == 'pVACbind':
+            if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                 if self.top_score_metric == 'median':
                     ic50_column = 'Median Score'
                     percentile_column = 'Median Percentile'
