@@ -189,8 +189,8 @@ class PredictionClass(metaclass=ABCMeta):
                 sys.exit("Allele %s not valid. Run `pvacseq valid_alleles` for a list of valid allele names." % allele)
 
     @classmethod
-    def species_for_allele(self, allele):
-        allele_to_species = {
+    def allele_to_species_map(self):
+        return {
             'HLA' : 'human',
             'DP'  : 'human',
             'DQ'  : 'human',
@@ -230,7 +230,9 @@ class PredictionClass(metaclass=ABCMeta):
             'SLA' : 'pig',
         }
 
-        species = [v for k,v in allele_to_species.items() if allele.startswith(k)]
+    @classmethod
+    def species_for_allele(self, allele):
+        species = [v for k,v in PredictionClass.allele_to_species_map().items() if allele.startswith(k)]
         if len(species) == 1:
             return species[0]
         elif len(species) == 0:
