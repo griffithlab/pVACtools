@@ -36,28 +36,6 @@ for dirpath, dirnames, filenames in os.walk("tools/pvacseq/iedb_alleles"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
-server_data = []
-for dirpath, dirnames, filenames in os.walk("utils/pvacapi"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            server_data.append(os.path.join(
-                os.path.relpath(
-                    dirpath,
-                    'utils/pvacapi'
-                ),
-                filename
-            ))
-client_data = []
-for dirpath, dirnames, filenames in os.walk("utils/pvacviz/client"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            client_data.append(os.path.join(
-                os.path.relpath(
-                    dirpath,
-                    'utils/pvacapi'
-                ),
-                filename
-            ))
 
 setup(
     name="pvactools",
@@ -69,9 +47,6 @@ setup(
         "tools.pvacvector",
         "tools.pvacseq",
         "lib",
-        "utils.pvacapi",
-        "utils.pvacapi.controllers",
-        "utils.pvacviz"
     ],
     entry_points={
         "console_scripts":[
@@ -80,8 +55,6 @@ setup(
             "pvacbind = tools.pvacbind.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
-            "pvacapi = utils.pvacapi.main:main",
-            "pvacviz = utils.pvacviz.app:main"
         ]
     },
     install_requires=[
@@ -118,8 +91,6 @@ setup(
         'tools.pvacfuse': pvacfuse_data_files,
         'tools.pvacvector': pvacvector_data_files,
         'tools.pvacbind': pvacbind_data_files,
-        'utils.pvacapi': server_data,
-        'utils.pvacviz': client_data,
     },
     classifiers=[
         'Development Status :: 4 - Beta',
