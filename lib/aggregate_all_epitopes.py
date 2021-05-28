@@ -195,10 +195,6 @@ class AggregateAllEpitopes:
                 'ID':[best['key']],
             })
         else:
-            if best['Median WT Score'] != 'NA':
-                best['Median WT Score'] = round(best['Median WT Score'], 3)
-            if best['Median WT Percentile'] != 'NA':
-                best['Median WT Percentile'] = round(best['Median WT Percentile'], 3)
             out_dict.update({
                 'Gene': [best["Gene Name"]],
                 'AA Change': [best["aachange"]],
@@ -263,6 +259,8 @@ class AggregateAllEpitopes:
         return seq_dict
 
     def execute(self):
+        pd.set_option('precision', 3)
+
         peptide_fastas = self.parse_fasta_file()
 
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
@@ -377,7 +375,7 @@ class AggregateAllEpitopes:
                         metrics[key_str]['wt_peptide'] = peptide_fastas[wt_matches[0]]
         peptide_table = self.sort_table(peptide_table)
 
-        peptide_table.to_csv(self.output_file, sep='\t', na_rep='NA', index=False)
+        peptide_table.to_csv(self.output_file, sep='\t', na_rep='NA', index=False, float_format='%.3f')
 
         with open(self.metrics_file, 'w') as fh:
             json.dump(metrics, fh, indent=2, separators=(',', ': '))
