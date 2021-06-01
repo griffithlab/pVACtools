@@ -126,6 +126,16 @@ class PredictionRunArgumentParser(RunArgumentParser):
             help="Blast peptides against the reference proteome."
         )
         self.parser.add_argument(
+            '--blastp-path',
+            help="Blastp installation path.",
+        )
+        self.parser.add_argument(
+            '--blastp-db',
+            choices=['refseq_select_prot', 'refseq_protein'],
+            default='refseq_select_prot',
+            help="The blastp database to use.",
+        )
+        self.parser.add_argument(
             '-a', '--additional-report-columns',
             choices=['sample_name'],
             help="Additional columns to output in the final report. If sample_name is chosen, this will add a column with the sample name in every row of the output. This can be useful if you later want to concatenate results from multiple individuals into a single file."
