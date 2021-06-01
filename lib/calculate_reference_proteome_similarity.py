@@ -1,15 +1,20 @@
 import csv
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
-from Bio import SeqIO
+from Bio import SeqIO, SearchIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import IUPAC
 import shutil
 import re
 import os
 from collections import defaultdict
+from subprocess import run, DEVNULL, STDOUT
+import tempfile
 from time import sleep
 
 class CalculateReferenceProteomeSimilarity:
-    def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='pVACseq'):
+    def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='pVACseq', blastp_path = None, blastp_db = 'refseq_select_prot'):
         self.input_file = input_file
         self.input_fasta = input_fasta
         self.output_file = output_file
@@ -17,6 +22,10 @@ class CalculateReferenceProteomeSimilarity:
         self.match_length = match_length
         self.species = species
         self.file_type = file_type
+        self.blastp_path = blastp_path
+        self.blastp_db = blastp_db
+        if self.blastp_db == 'refseq_select_prot' and self.species != 'human' and self.species != 'mouse':
+            raise Exception("refseq_select_prot blastp database is only compatible with human and mouse species.")
         self.species_to_organism = {
             'human': 'Homo sapiens',
             'atlantic salmon': 'Salmo salar',
@@ -140,25 +149,39 @@ class CalculateReferenceProteomeSimilarity:
                             peptide = self.extract_n_mer(mt_records_dict[line['Index']], int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
                     else:
                         peptide = mt_records_dict[line['Index']]
+
                 if peptide not in processed_peptides:
                     processed_peptides.append(peptide)
-                    result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
+                    if self.blastp_path is not None:
+                        record = SeqRecord(Seq(peptide, IUPAC.protein), id="1", description="")
+                        tmp_peptide_fh = tempfile.NamedTemporaryFile('w', delete=False)
+                        SeqIO.write([record], tmp_peptide_fh.name, "fasta")
+                        arguments = [self.blastp_path, '-query', tmp_peptide_fh.name, '-db', self.blastp_db, '-outfmt', '16', '-word_size', str(min(self.match_length, 7)), '-gapopen', '32767', '-gapextend', '32767']
+                        result_handle = tempfile.NamedTemporaryFile(delete=False)
+                        response = run(arguments, stdout=result_handle, check=True)
+                        result_handle.seek(0)
+                        tmp_peptide_fh.close()
+                    else:
+                        result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
+                        sleep(10)
                     for blast_record in NCBIXML.parse(result_handle):
                         if len(blast_record.alignments) > 0:
                             for alignment in blast_record.alignments:
-                                for hsp in alignment.hsps:
-                                    matches = re.split('\+| ', hsp.match)
-                                    for match in matches:
-                                        if len(match) >= self.match_length:
-                                            reference_match_dict[peptide].append({
-                                                'Hit ID': alignment.hit_id,
-                                                'Hit Definition': alignment.hit_def,
-                                                'Query Sequence': hsp.query,
-                                                'Match Sequence': hsp.match,
-                                                'Match Start': hsp.sbjct_start,
-                                                'Match Stop': hsp.sbjct_end,
-                                            })
-                    sleep(10)
+                                if alignment.title.endswith(" [{}]".format(self.species_to_organism[self.species])):
+                                    for hsp in alignment.hsps:
+                                        matches = re.split('\+| ', hsp.match)
+                                        for match in matches:
+                                            if len(match) >= self.match_length:
+                                                reference_match_dict[peptide].append({
+                                                    'Hit ID': alignment.hit_id,
+                                                    'Hit Definition': alignment.hit_def,
+                                                    'Query Sequence': hsp.query,
+                                                    'Match Sequence': hsp.match,
+                                                    'Match Start': hsp.sbjct_start,
+                                                    'Match Stop': hsp.sbjct_end,
+                                                })
+                    result_handle.close()
+
                 if peptide in reference_match_dict:
                     line['Reference Match'] = True
                     metric_line = line.copy()

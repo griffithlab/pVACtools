@@ -36,3 +36,11 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
                 os.path.join(self.test_data_dir, "output.tsv.reference_matches"),
             ))
             close_mock_fhs()
+
+    def test_blastp_db_incompatible_with_species(self):
+        with self.assertRaises(Exception) as context:
+            input_file = os.path.join(self.test_data_dir, 'input.tsv')
+            input_fasta = os.path.join(self.test_data_dir, 'input.fasta')
+            output_file = tempfile.NamedTemporaryFile()
+            CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, blastp_db='refseq_select_prot', species='bonobo').execute()
+            self.assertTrue("refseq_select_prot blastp database is only compatible with human and mouse species." in str(context.exception))
