@@ -1,6 +1,0 @@
-{
-  "processes":"~/.pvacseq/processes.json",
-  "visualize":"~/.pvacseq/visualize.json",
-  "input":"~/.pvacseq/input.json",
-  "data-dir":"~/pVAC-Seq"
-}
