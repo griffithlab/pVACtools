@@ -1,4 +1,0 @@
-gene_expn_file: /Users/agrauber/Documents/pVAC-Seq/tests/test_data/api/genes.fpkm_tracking
-transcript_expn_file: /Users/agrauber/Documents/pVAC-Seq/tests/test_data/api/isoforms.fpkm_tracking
-tdna_snvs_coverage_file: /Users/agrauber/Documents/pVAC-Seq/tests/test_data/api/snvs.bam_readcount
-tdna_indels_coverage_file: /Users/agrauber/Documents/pVAC-Seq/tests/test_data/api/indels.bam_readcount
