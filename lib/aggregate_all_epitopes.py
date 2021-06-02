@@ -225,7 +225,7 @@ class AggregateAllEpitopes:
             })
 
         df_out = pd.DataFrame.from_dict(out_dict)
-        return (df_out, peptides)
+        return (df_out, best['MT Epitope Seq'], best['WT Epitope Seq'], best['HLA Allele'], peptides)
 
     def calculate_allele_expr(self, line):
         if self.file_type == 'pVACbind':
@@ -349,7 +349,7 @@ class AggregateAllEpitopes:
             df.fillna(value="NA", inplace=True)
             df['annotation'] = df[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1)
             df['key'] = key_str
-            (best_mut_line, peptides) = self.get_best_mut_line(df, hla_types, prediction_algorithms, vaf_clonal, 1000)
+            (best_mut_line, best_peptide_mt, best_peptide_wt, best_hla_allele, peptides) = self.get_best_mut_line(df, hla_types, prediction_algorithms, vaf_clonal, 1000)
             peptide_table = peptide_table.append(best_mut_line, sort=False)
             all_peptides = defaultdict(lambda: defaultdict(list))
             for index, line in df.to_dict(orient='index').items():
@@ -365,6 +365,9 @@ class AggregateAllEpitopes:
                 'DNA VAF': float(best_mut_line['DNA VAF']),
                 'RNA VAF': float(best_mut_line['RNA VAF']),
                 'gene_expr': float(best_mut_line['RNA Expr']),
+                'best_peptide_mt': best_peptide_mt,
+                'best_peptide_wt': best_peptide_wt,
+                'best_hla_allele': best_hla_allele,
             }
             if self.fasta_file is not None:
                 if self.file_type == 'pVACbind':
