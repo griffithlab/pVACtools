@@ -137,6 +137,7 @@ class PostProcessor:
                 self.reference_similarity_fh.name,
                 species=self.species,
                 file_type=self.file_type,
+                n_threads=self.n_threads,
                 blastp_path=self.blastp_path,
                 blastp_db=self.blastp_db,
             ).execute()
