@@ -174,8 +174,8 @@ class CalculateReferenceProteomeSimilarity:
                             with p.lock: # stagger calls to qblast
                                 sleep(10)
                             result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
-                            with p.lock: # stagger calls to parse
-                                sleep(10)
+                        with p.lock: # stagger calls to parse
+                            sleep(10)
                         blast_records = [x for x in NCBIXML.parse(result_handle)]
                         with p.lock:
                             processed_peptides[full_peptide] = blast_records
