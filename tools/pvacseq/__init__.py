@@ -9,6 +9,9 @@ __all__ = [
     "generate_aggregated_report",
     'install_vep_plugin',
     'top_score_filter',
+    'net_chop',
+    'netmhc_stab',
+    'calculate_reference_proteome_similarity',
     'transcript_support_level_filter',
 ]
 
