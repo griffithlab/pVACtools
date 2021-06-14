@@ -32,6 +32,27 @@ def main():
     )
     top_score_filter_parser.set_defaults(func=top_score_filter)
 
+    net_chop_parser = subparsers.add_parser(
+        "net_chop",
+        help="Run NetChop on existing pVACbind output .tsv to predict cleavage sites on the neoepitopes.",
+        add_help=False,
+    )
+    net_chop_parser.set_defaults(func=net_chop)
+
+    netmhc_stab_parser = subparsers.add_parser(
+        "netmhc_stab",
+        help="Run NetMHCStabPan on existing pVACbind output .tsv to add stability predictions to the neoepitopes.",
+        add_help=False,
+    )
+    netmhc_stab_parser.set_defaults(func=netmhc_stab)
+
+    calculate_reference_proteome_similarity_parser = subparsers.add_parser(
+        "calculate_reference_proteome_similarity",
+        help="Blast peptides against the reference proteome on existing pVACbind output .tsv.",
+        add_help=False
+    )
+    calculate_reference_proteome_similarity_parser.set_defaults(func=calculate_reference_proteome_similarity)
+
     generate_aggregated_report_parser = subparsers.add_parser(
         "generate_aggregated_report",
         help="Generate an aggregated report from a pVACbind .all_epitopes.tsv report file.",

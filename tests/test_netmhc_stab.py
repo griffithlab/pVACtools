@@ -47,10 +47,10 @@ class NetChopTest(unittest.TestCase):
 
     def test_netmhc_stab_runs(self):
         output_file = tempfile.NamedTemporaryFile()
-        lib.netmhc_stab.main([
+        lib.netmhc_stab.NetMHCStab(
             os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
             output_file.name
-        ])
+        ).execute()
         self.assertTrue(cmp(
             os.path.join(self.test_data_directory, 'Test_filtered.stab.tsv'),
             output_file.name

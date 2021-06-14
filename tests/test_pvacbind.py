@@ -62,6 +62,9 @@ class PvacbindTests(unittest.TestCase):
             'valid_alleles',
             'allele_specific_cutoffs',
             'download_example_data',
+            "net_chop",
+            "netmhc_stab",
+            "calculate_reference_proteome_similarity",
             'top_score_filter',
             'generate_aggregated_report',
             ]:
