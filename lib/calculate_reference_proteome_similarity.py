@@ -41,7 +41,7 @@ class CalculateReferenceProteomeSimilarity:
             "pVACseq", "pVACbind" or "pVACfuse" 
 
     blastp_path : str
-        A path to local install of the blast tool
+        A path to local install of the blastp tool
 
     blastp_db : str
         The name of the database to perform blast with
