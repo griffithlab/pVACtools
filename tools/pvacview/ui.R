@@ -8,9 +8,17 @@ library(shinycssloaders)
 
 source("styling.R")
 
-dashboardPage(
-  
-  header = dashboardHeader(title = "pVACview"),
+ui <- dashboardPage(
+  #skin = "black",
+  #, div(class= "logo-lg", tags$img(src='pVACview_logo.png'))
+  #tags$a(href='http://pvactools.org',
+  header = dashboardHeader(
+    title=tagList(tags$a(href='http://pvactools.org', class="logo",
+                         span(class= "logo-mini", tags$img(src='pVACview_logo_mini.png')),
+                         span(class= "logo-lg", tags$img(src='pVACview_logo.png')),
+                         
+                  ))
+    ),
   sidebar = dashboardSidebar(
     sidebarMenu(
       menuItem("Upload", tabName = "upload", icon = icon("upload")),
@@ -26,7 +34,17 @@ dashboardPage(
       tags$style(HTML('table.dataTable tr.selected td, table.dataTable td.hover {background-color: #EAF2F8 !important;}')),
       tags$style(HTML('table.dataTable { border-collapse: collapse;}')),
       tags$style(HTML("table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
-                              background-color: #92c8f0 !important; } "))
+                              background-color: #92c8f0 !important; } ")),
+      tags$style(HTML(".skin-blue .main-header .logo {background-color: #dff5ee;}")),
+      tags$style(HTML(".skin-blue .main-header .navbar { background-color: #739187;}")),
+      tags$style(HTML("element.style {}.skin-blue .wrapper, .skin-blue .main-sidebar, .skin-blue .left-side {background-color: #739187;}")),
+      tags$style(HTML(".main-header .sidebar-toggle {background-color: #b6d1c8}")),
+      tags$style(HTML(".box-header.with-border {border-bottom: 1px solid #f4f4f4;}")),
+      tags$style(HTML(".skin-blue .main-header .navbar .sidebar-toggle {color: #4e635c;}")),
+      tags$style(HTML(".content-wrapper {background-color: #ecf0f5;}")),
+      tags$style(HTML(".main-header .logo {padding-right : 5px; padding-left : 5px;}")),
+      tags$style(HTML(".box.box-solid.box-primary {border-radius: 12px}")),
+      tags$style(HTML(".box-header.with-border {border-radius: 10px}"))
     ),
 
     tabItems(
@@ -41,8 +59,6 @@ dashboardPage(
             fileInput(inputId="mainDataInput", label="Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
                                                                                                                          "text/tab-separated-values,text/plain",
                                                                                                                          ".tsv")),
-            radioButtons("hla_class", "Does this file correspond to Class I or Class II HLA allele prediction results?",  
-                         c("Class I data (e.g. HLA-A*02:01) " = "class_i", "Class II data (e.g. DPA1*01:03)" = "class_ii")),
             hr(style="border-color: white"),
             h5("Please upload the corresponding metrics file for the main file that you have chosen."),
             fileInput(inputId="metricsDataInput", label="Neoantigen Candidate Metrics file (json required)", accept = c("application/json",
@@ -51,7 +67,16 @@ dashboardPage(
             h5("If you would like, you can upload an additional aggregate report file generated with either Class I or Class II results to supplement your main table. (E.g. if you uploaded Class I data as the main table, you can upload your Class II report here as supplemental data)"),
             fileInput(inputId="additionalDataInput", label="Additional Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
                                                                                                                                "text/tab-separated-values,text/plain",
-                                                                                                                               ".tsv"))
+                                                                                                                               ".tsv")),
+            radioButtons("hla_class", "Does this additional file correspond to Class I or Class II HLA allele prediction results?",  
+                         c("Class I data (e.g. HLA-A*02:01) " = "class_i", "Class II data (e.g. DPA1*01:03)" = "class_ii"))
+          ),
+        
+          box(
+            title="Load Default Data", collapsible = TRUE, collapsed = TRUE,
+            actionButton('loadDefaultmain', "Load default Main data"),br(),
+            actionButton('loadDefaultmetrics', "Load default Metrics data"), br(),
+            actionButton('loadDefaultadd', "Load default Additional data")
           )
         )
       ),
@@ -63,7 +88,22 @@ dashboardPage(
             type = 'text/css',
             '.modal-dialog { width: fit-content !important; }'
           ),
+          tags$script(HTML("Shiny.addCustomMessageHandler('unbind-DT', function(id) {
+          Shiny.unbindAll($('#'+id).find('table').DataTable().table().node());
+                           })")),
           
+          box(width= 6, 
+              title="Regenerate Tiering with different parameters",
+              status='primary', solidHeader = TRUE, collapsible = TRUE,
+              "*Please note that the metircs file is required in order to regenerate tiering information with different parameters", br(),
+              sliderInput("anchor_contribution", "Contribution cutoff for determining anchor locations", 0.5, 0.9, 0.8, step = 0.1, width = 400),
+              numericInput("dna_cutoff", "DNA VAF clonal VAF (Anything lower than 1/2 of chosen VAF level will be considered subclonal)", 0.5, min = 0, max = 1, step = 0.01, width = 500),
+              #numericInput("rna_cutoff", "RNA low gene expression cutoff (Anything lower than chosen expression level will be considered low expression)", 1, min = 0, max = 100, step = 1, width = 500),
+              actionButton('submit','Recalculate Tiering with new parameters'),
+              style = "overflow-x: scroll;font-size:100%")
+        ),
+        
+        fluidRow(
           box(width= 12, 
                   title="Aggregate Report of Best Candidates by Mutation", 
                   status='primary', solidHeader = TRUE, collapsible = TRUE,
@@ -143,8 +183,6 @@ dashboardPage(
     )
   )
 )
-
-
 
 
 

@@ -22,6 +22,11 @@ tools:
    users in launching, managing, reviewing, and visualizing the results of
    pVACtools processes.
 
+**pVACview**
+   An application based on R Shiny that assists
+   users in reviewing, exploring and prioritizing neoantigens from the results of
+   pVACtools processes for personalized cancer vaccine design.
+
 .. image:: images/pVACtools_main-figure_v5a.png
     :align: center
     :alt: pVACtools immunotherapy workflow
@@ -35,6 +40,7 @@ tools:
    pvacfuse
    pvacvector
    pvacviz
+   pvacview
 
 .. toctree::
    :maxdepth: 1
@@ -147,17 +153,17 @@ To stay up-to-date on the latest pVACtools releases please join our :ref:`mailin
 Citations
 ---------
 
-Jasreet Hundal , Susanna Kiwala , Joshua McMichael, Chris Miller, Huiming Xia, 
-Alex Wollam, Conner Liu, Sidi Zhao, Yang-Yang Feng, Aaron Graubert, Amber Wollam, 
+Jasreet Hundal , Susanna Kiwala , Joshua McMichael, Chris Miller, Huiming Xia,
+Alex Wollam, Conner Liu, Sidi Zhao, Yang-Yang Feng, Aaron Graubert, Amber Wollam,
 Jonas Neichin, Megan Neveau, Jason Walker, William Gillanders,
 Elaine Mardis, Obi Griffith, Malachi Griffith. pVACtools: A Computational Toolkit to
-Identify and Visualize Cancer Neoantigens. Cancer Immunology Research. 
-2020 Mar;8(3):409-420. doi: 10.1158/2326-6066.CIR-19-0401. 
+Identify and Visualize Cancer Neoantigens. Cancer Immunology Research.
+2020 Mar;8(3):409-420. doi: 10.1158/2326-6066.CIR-19-0401.
 PMID: `31907209 <https://www.ncbi.nlm.nih.gov/pubmed/31907209>`_.
 
-Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman, 
-Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. 
-`Accounting for proximal variants improves neoantigen prediction <https://www.nature.com/articles/s41588-018-0283-9>`_. 
+Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman,
+Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith.
+`Accounting for proximal variants improves neoantigen prediction <https://www.nature.com/articles/s41588-018-0283-9>`_.
 Nature Genetics. 2018, DOI: 10.1038/s41588-018-0283-9. PMID: `30510237 <https://www.ncbi.nlm.nih.gov/pubmed/30510237>`_.
 
 Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi

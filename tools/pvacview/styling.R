@@ -1,13 +1,17 @@
 
 ##### SERVER 
-rowCallback <- function(hla_count) {
+rowCallback <- function(hla_count, row_num) {
   gsub("15", hla_count+8,
   gsub("13", hla_count+6,
   c(
   "function(row, data, displayNum, displayIndex){", 
   "  var x = data[13];", 
   "  var y = data[15];",
-  "  if(x <= 50){",
+  gsub("0", row_num,"  if (displayIndex == 0){"),
+  "  $('td',row).css('border-top','3px solid #0390fc');",
+  "  $('td',row).css('border-bottom','3px solid #0390fc');",
+  "  }",
+  "  if (x > 0 & x<= 50){",
   "    $('td:eq(13)', row).addClass('zero');",
   "  } else if(x > 50 & x <= 100){",
   "    $('td:eq(13)', row).addClass('fifty');",
@@ -32,7 +36,7 @@ rowCallback <- function(hla_count) {
   "  } else if(x > 1000){",
   "    $('td:eq(13)', row).addClass('ten');",
   "  }",
-  "  if(y <= 0.1){",
+  "  if (y > 0 & y <= 0.1){",
   "    $('td:eq(15)', row).addClass('fifty');",
   "  } else if(y > 0.1 & y <= 0.2){",
   "    $('td:eq(15)', row).addClass('one');",
@@ -76,7 +80,6 @@ callBack <- function(hla_count) {
   "        'DNA VAF - Tumor DNA variant allele frequency (VAF) at this position.',",
   "        'Tier - A tier suggesting the suitability of variants for use in vaccines.',",
   "        'Eval - User-selected evaluation of neoantigen candidate. Options include: Accept, Reject, Review. (Default: Pending)'],",
-  #paste0("var index = ",hla_count, ";"),
   "header = table.columns().header();",
   gsub("7", hla_count,"for (var i = 7; i-7 < tips.length; i++) {"),
   gsub("7", hla_count,"$(header[i]).attr('title', tips[i-7]);"),
@@ -105,17 +108,15 @@ table.dataTable tbody tr td.ten {background-color: #FF9999 !important}
 # Create the theme
 mytheme <- create_theme(
   adminlte_color(
-    light_blue = "#434C5E"
-  ),
-  adminlte_sidebar(
-    width = "400px",
-    dark_bg = "#D8DEE9",
-    dark_hover_bg = "#81A1C1",
-    dark_color = "#2E3440"
-  ),
-  adminlte_global(
-    content_bg = "#FFF",
-    box_bg = "#D8DEE9", 
-    info_box_bg = "#D8DEE9"
+    light_blue = "#4e635c"
   )
+  #adminlte_sidebar(
+  #  width = "300px",
+  #  dark_bg = "#D8DEE9",
+  #  #dark_hover_bg = "#81A1C1",
+  #  dark_color = "#2E3440"
+  #),
+  #adminlte_global(
+  #  content_bg = "#d8ede2"
+  #)
 )
