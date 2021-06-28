@@ -33,6 +33,7 @@ class GenerateFastaTests(unittest.TestCase):
             '-d', 'full',
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output_agfusion.fasta')
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
     def test_input_tsv(self):
@@ -50,4 +51,5 @@ class GenerateFastaTests(unittest.TestCase):
             '--input-tsv', generate_protein_fasta_input_tsv,
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output_with_tsv.fasta')
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
