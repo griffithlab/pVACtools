@@ -24,7 +24,7 @@ class CalculateReferenceProteomeSimilarity:
     input_file : str
         The path to <sample_name>.all_epitopes.tsv. It is the output of the MHC class I and II predictions. 
 
-    input_fasta : sstr
+    input_fasta : str
         The path to a fasta file that contains the peptide sequences.
 
     output_file : str
@@ -87,6 +87,9 @@ class CalculateReferenceProteomeSimilarity:
     _write_outputs(input_fh, processed_peptides, mt_records_dict, wt_records_dict)
         Uses the blast records in processed_peptides to add results to information in the input_file and
         writes the new data to files.
+
+    _get_unique_peptides(self, mt_records_dict, wt_records_dict)
+        Creates a list of unique peptides from the input file 
 
     execute()
         Peforms the calculation of reference proteome similarity. The only method that should be 
@@ -229,7 +232,7 @@ class CalculateReferenceProteomeSimilarity:
         return peptide, full_peptide
 
 
-    def _call_blast(self, full_peptide, peptide, p):
+    def _call_blast(self, full_peptide, p):
         if self.blastp_path is not None: # if blastp installed locally, perform BLAST with it
                     
             # create a SeqRecord of full_peptide and write it to a tmp file
@@ -248,13 +251,9 @@ class CalculateReferenceProteomeSimilarity:
             if self.n_threads > 1:
                 with p.lock: # stagger calls to qblast
                     sleep(10)
-            result_handle = NCBIWWW.qblast("blastp", "refseq_protein", peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
+            result_handle = NCBIWWW.qblast("blastp", "refseq_protein", full_peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
 
         return result_handle
-
-
-    def _needs_processing(self, full_peptide, processed_peptides):
-        return True if full_peptide not in processed_peptides else False
 
 
     def _generate_reference_match_dict(self, blast_records, peptide):
@@ -285,10 +284,10 @@ class CalculateReferenceProteomeSimilarity:
         return reference_match_dict
 
 
-    def _write_outputs(self, input_fh, processed_peptides, mt_records_dict, wt_records_dict):
-        input_fh.seek(0) # input_fh is at EOF because of the main for loop in self.execute()
-        reader = csv.DictReader(input_fh, delimiter="\t")
-        with open(self.output_file, 'w') as output_fh, open(self.metric_file, 'w') as metric_fh:
+    def _write_outputs(self, processed_peptides, mt_records_dict, wt_records_dict):
+
+        with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh, open(self.metric_file, 'w') as metric_fh:
+            reader = csv.DictReader(input_fh, delimiter="\t")
             writer = csv.DictWriter(output_fh, delimiter="\t", fieldnames=reader.fieldnames + self.reference_match_headers(), extrasaction='ignore')
             metric_writer = csv.DictWriter(metric_fh, delimiter="\t", fieldnames=self.metric_headers(), extrasaction='ignore')
             writer.writeheader()
@@ -314,44 +313,43 @@ class CalculateReferenceProteomeSimilarity:
                 writer.writerow(line)
 
 
+    def _get_unique_peptides(self, mt_records_dict, wt_records_dict):
+        unique_peptides = []
+        
+        with open(self.input_file) as input_fh:
+            reader = csv.DictReader(input_fh, delimiter='\t')
+            for line in reader:
+                _, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
+                if full_peptide not in unique_peptides:
+                    unique_peptides.append(full_peptide)
+
+        return unique_peptides
+
+
     def execute(self):
-        # Check that the species is supported
+
         if self.species not in self.species_to_organism:
             print("Species {} not supported for Reference Proteome Similarity search. Skipping.".format(self.species))
             shutil.copy(self.input_file, self.output_file)
             return
 
-        # Get the mutant and wild type records from self.input_fasta as dictionaries
-        mt_records_dict = pymp.shared.dict(self.get_mt_peptides())
-        wt_records_dict = pymp.shared.dict(self.get_wt_peptides())
+        mt_records_dict = self.get_mt_peptides()
+        wt_records_dict = self.get_wt_peptides()
 
-        with open(self.input_file) as input_fh:
-            ## Initalize the reader
-            reader = csv.DictReader(input_fh, delimiter="\t")
+        unique_peptides = pymp.shared.list(self._get_unique_peptides(mt_records_dict, wt_records_dict))
+        processed_peptides = pymp.shared.dict()
 
-            processed_peptides = pymp.shared.dict() # peptides that have been blasted and their blast records
+        with pymp.Parallel(self.n_threads) as p:
+            for i in p.range(len(unique_peptides)):
 
-            with pymp.Parallel(self.n_threads) as p:
-                for line in p.iterate(reader):
-
-                    # peptide is an n-mer of full_peptide
-                    peptide, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
-
-                    # check if processed
-                    with p.lock:
-                        if self._needs_processing(full_peptide, processed_peptides):
-                            processed_peptides[full_peptide] = None
-                        else:
-                            continue
+                full_peptide = unique_peptides[i]
                    
-                    # file handle that blast results are written in
-                    result_handle = self._call_blast(full_peptide, peptide, p)
+                result_handle = self._call_blast(full_peptide, p)
 
-                    # get a list of blast records from result handle
-                    blast_records = [x for x in NCBIXML.parse(result_handle)] # turn NCBIXML.parse() generator into a list
+                blast_records = [x for x in NCBIXML.parse(result_handle)]
 
-                    with p.lock: # update full_peptide in processed_peptides
-                        processed_peptides[full_peptide] = blast_records
-                    result_handle.close()
+                with p.lock:
+                    processed_peptides[full_peptide] = blast_records
+                result_handle.close()
 
-            self._write_outputs(input_fh, processed_peptides, mt_records_dict, wt_records_dict)
+        self._write_outputs(processed_peptides, mt_records_dict, wt_records_dict)
