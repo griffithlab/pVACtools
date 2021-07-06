@@ -314,16 +314,15 @@ class CalculateReferenceProteomeSimilarity:
 
 
     def _get_unique_peptides(self, mt_records_dict, wt_records_dict):
-        unique_peptides = []
+        unique_peptides = set()
         
         with open(self.input_file) as input_fh:
             reader = csv.DictReader(input_fh, delimiter='\t')
             for line in reader:
                 _, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
-                if full_peptide not in unique_peptides:
-                    unique_peptides.append(full_peptide)
+                unique_peptides.add(full_peptide)
 
-        return unique_peptides
+        return list(unique_peptides)
 
 
     def execute(self):
