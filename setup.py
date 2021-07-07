@@ -68,6 +68,7 @@ setup(
         "tools.pvacfuse",
         "tools.pvacvector",
         "tools.pvacseq",
+        "tools.pvacview",
         "lib",
         "utils.pvacapi",
         "utils.pvacapi.controllers",
@@ -80,6 +81,7 @@ setup(
             "pvacbind = tools.pvacbind.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
+            "pvacview = tools.pvacview.main:main",
             "pvacapi = utils.pvacapi.main:main",
             "pvacviz = utils.pvacviz.app:main"
         ]

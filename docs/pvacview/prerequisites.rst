@@ -25,13 +25,17 @@ Additionally, there are a number of packages you will need to install in your R/
 
 .. code-block:: none
 
-  install.packages("shiny")
-  install.packages("ggplot2")
-  install.packages("DT")
-  install.packages("reshape2")
-  install.packages("jsonlite")
-  install.packages("tibble")
-  install.packages("tidyr")
+  install.packages("shiny", dependencies=TRUE)
+  install.packages("ggplot2", dependencies=TRUE)
+  install.packages("DT", dependencies=TRUE)
+  install.packages("reshape2", dependencies=TRUE)
+  install.packages("jsonlite", dependencies=TRUE)
+  install.packages("tibble", dependencies=TRUE)
+  install.packages("tidyr", dependencies=TRUE)
+  install.packages("shinydashboard", dependencies=TRUE)
+  install.packages("shinydashboardPlus", dependencies=TRUE)
+  install.packages("fresh", dependencies=TRUE)
+  install.packages("shinycssloaders", dependencies=TRUE)
 
 Note that certain R packages may have further dependencies that require additional installation. If you are using R studio, these should be automatically installed for you during the respective package
 installation process. However, if you are using conda-based R, you may need to install them manually (usually by running ``install.packages(<package name>)``).
@@ -47,7 +51,7 @@ Once you have R packages and their respective dependencies successfully installe
 
 :large:`Option 1:`
 
-If using R from the command line, you will first need to locate the path to the shiny app e.g.``~/pVACtools_output/MHC_Class_I/``. Then you can run the following command from your
+If using R from the command line, you will first need to locate the path to the shiny app e.g. ``~/pVACtools_output/MHC_Class_I/``. Then you can run the following command from your
 terminal or console window once you replace ``~/pVACtools_output/MHC_Class_I/`` with the appropriate path:
 
 .. code-block:: none
