@@ -99,7 +99,7 @@ class AggregateAllEpitopes:
                 peptide_count = len(good_binders["MT Epitope Seq"].unique())
         else:
             hla = dict(map(lambda x : (x, ""), hla_types))
-            anno_count = 0
+            anno_count = "NA" if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse' else 0
             peptide_count = 0
 
         if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
