@@ -110,7 +110,7 @@ class NetMHCStab:
     @classmethod
     def parser(cls, tool):
         parser = argparse.ArgumentParser(
-            "%s net_chop" % tool,
+            "%s netmhc_stab" % tool,
             description="Add stability predictions to predicted neoepitopes.",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
