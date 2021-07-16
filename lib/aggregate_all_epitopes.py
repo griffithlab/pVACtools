@@ -293,7 +293,7 @@ class AggregateAllEpitopes:
             "Start": "int32",
             "Stop": "int32",
             "Variant Type": "category",
-            "Mutation Position": "int8",
+            "Mutation Position": "category",
             "Median MT Score": "float32",
             "Median MT Percentile": "float16",
         }
@@ -346,6 +346,7 @@ class AggregateAllEpitopes:
                     [lambda x: (x['Chromosome'] == key[0]) & (x['Start'] == key[1]) & (x['Stop'] == key[2]) & (x['Reference'] == key[3]) & (x['Variant'] == key[4])])
             df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
             df['Variant Type'] = df['Variant Type'].cat.add_categories('NA')
+            df['Mutation Position'] = df['Mutation Position'].cat.add_categories('NA')
             df.fillna(value="NA", inplace=True)
             df['annotation'] = df[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1)
             df['key'] = key_str
