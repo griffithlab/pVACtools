@@ -296,6 +296,7 @@ class AggregateAllEpitopes:
             "Mutation Position": "category",
             "Median MT Score": "float32",
             "Median MT Percentile": "float16",
+            "Protein Position": "str",
         }
         for algorithm in prediction_algorithms:
             if algorithm == 'SMM' or algorithm == 'SMMPMBEC':
