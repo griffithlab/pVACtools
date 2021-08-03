@@ -54,12 +54,18 @@ New in release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- There was a bug in the aggregate report creation. When parsing the
-  all_epitopes file as input to the report creation any ``N/A`` amino acid
-  changes would be parsed as null values. This release fixes this issue so
-  that these amino acid change values are correctly parsed as string values.
-- This release removes support for Python 3.5 since that Python version has
-  reached end of life and is no longer supported.
+- A bug in the reference proteome similarity step would cause this step to
+  fail if the full wildtype peptide sequence of the frameshift was longer
+  than its full mutant peptide sequence. This release fixes this issue.
+- A bug in the top score filter would cause this step to fail if it
+  encountered transcripts that do not start with ``ENS``. Support for
+  transcripts that start with ``NM_`` has been added in this release and a
+  more descriptive error message will now be raised if an unsupported
+  transcript name is encountered.
+- This release adds some minor improvements to the reference proteome
+  similarity step. A wait of 10 seconds was added after calling the BLAST API
+  to comply with their usage guidelines. Word size and gapcost parameters were
+  also added to these calls to improve result specificity.
 
 New in version |version|
 ------------------------
