@@ -1,4 +1,5 @@
 import csv
+import argparse
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from Bio import SeqIO, SearchIO
@@ -201,3 +202,45 @@ class CalculateReferenceProteomeSimilarity:
                 else:
                     line['Reference Match'] = False
                 writer.writerow(line)
+
+    @classmethod
+    def parser(cls, tool):
+        parser = argparse.ArgumentParser(
+            '%s calculate_reference_proteome_similarity' % tool,
+            description="Blast peptides against the reference proteome.",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
+        parser.add_argument(
+            'input_file',
+            help="Input filtered file with predicted epitopes."
+        )
+        parser.add_argument(
+            'input_fasta',
+            help="The required fasta file."
+        )
+        parser.add_argument(
+            'output_file',
+            help="Output TSV filename for putative neoepitopes."
+        )
+        parser.add_argument(
+            '--match-length',
+            default=8,
+            help="The desired matching epitope length."
+        )
+        parser.add_argument(
+            '--species',
+            default='human',
+            help="The species of the input file."
+        )
+        parser.add_argument(
+            '--blastp-path',
+            default=None,
+            help="Blastp installation path.",
+        )
+        parser.add_argument(
+            '--blastp-db',
+            choices=['refseq_select_prot', 'refseq_protein'],
+            default='refseq_select_prot',
+            help="The blastp database to use.",
+        )
+        return parser

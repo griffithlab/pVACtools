@@ -18,3 +18,4 @@ This component of the pVACtools is used to predict neoantigens for the peptides 
    pvacbind/output_files
    pvacbind/filter_commands
    pvacbind/additional_commands
+   pvacbind/optional_downstream_analysis_tools

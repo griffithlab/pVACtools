@@ -61,12 +61,11 @@ class NetChopTest(unittest.TestCase):
         lib.net_chop.requests.post = self.request_mock
         for method in self.methods:
             output_file = tempfile.NamedTemporaryFile()
-            lib.net_chop.main([
+            lib.net_chop.NetChop(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 output_file.name,
-                '--method',
                 method
-            ])
+            ).execute()
             self.assertTrue(cmp(
                 os.path.join(self.test_data_directory, 'output_%s.tsv'%method),
                 output_file.name
@@ -80,12 +79,11 @@ class NetChopTest(unittest.TestCase):
         ))
         lib.net_chop.requests.post = self.request_mock
         output_file = tempfile.NamedTemporaryFile()
-        lib.net_chop.main([
+        lib.net_chop.NetChop(
             os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
             output_file.name,
-            '--method',
-            '20s',
-        ])
+            '20s'
+        ).execute()
         self.assertTrue(cmp(
             os.path.join(self.test_data_directory, 'output_no_cleavage_score.tsv'),
             output_file.name

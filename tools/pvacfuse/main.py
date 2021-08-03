@@ -30,6 +30,27 @@ def define_parser():
     )
     top_score_filter_parser.set_defaults(func=top_score_filter)
 
+    net_chop_parser = subparsers.add_parser(
+        "net_chop",
+        help="Run NetChop on existing pVACfuse output .tsv to predict cleavage sites on the neoepitopes.",
+        add_help=False,
+    )
+    net_chop_parser.set_defaults(func=net_chop)
+
+    netmhc_stab_parser = subparsers.add_parser(
+        "netmhc_stab",
+        help="Run NetMHCStabPan on existing pVACfuse output .tsv to add stability predictions to the neoepitopes.",
+        add_help=False,
+    )
+    netmhc_stab_parser.set_defaults(func=netmhc_stab)
+
+    calculate_reference_proteome_similarity_parser = subparsers.add_parser(
+        "calculate_reference_proteome_similarity",
+        help="Blast peptides against the reference proteome on existing pVACfuse output .tsv.",
+        add_help=False
+    )
+    calculate_reference_proteome_similarity_parser.set_defaults(func=calculate_reference_proteome_similarity)
+
     generate_protein_fasta_parser = subparsers.add_parser(
         "generate_protein_fasta",
         help="Generate an annotated fasta file from Integrate-Neo or AGFusion output",

@@ -6,8 +6,8 @@ from lib.filter import *
 from lib.top_score_filter import *
 from lib.calculate_manufacturability import *
 from lib.calculate_reference_proteome_similarity import *
-import lib.net_chop
-import lib.netmhc_stab
+from lib.net_chop import *
+from lib.netmhc_stab import *
 
 class PostProcessor:
     def __init__(self, **kwargs):
@@ -105,14 +105,7 @@ class PostProcessor:
     def call_net_chop(self):
         if self.run_net_chop:
             print("Submitting remaining epitopes to NetChop")
-            lib.net_chop.main([
-                self.top_score_filter_fh.name,
-                self.net_chop_fh.name,
-                '--method',
-                self.net_chop_method,
-                '--threshold',
-                str(self.net_chop_threshold)
-            ])
+            NetChop(self.top_score_filter_fh.name, self.net_chop_fh.name, self.net_chop_method, str(self.net_chop_threshold)).execute()
             print("Completed")
         else:
             shutil.copy(self.top_score_filter_fh.name, self.net_chop_fh.name)
@@ -120,10 +113,7 @@ class PostProcessor:
     def call_netmhc_stab(self):
         if self.run_netmhc_stab:
             print("Running NetMHCStabPan")
-            lib.netmhc_stab.main([
-                self.net_chop_fh.name,
-                self.netmhc_stab_fh.name,
-            ])
+            NetMHCStab(self.net_chop_fh.name, self.netmhc_stab_fh.name).execute()
             print("Completed")
         else:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
@@ -140,6 +130,7 @@ class PostProcessor:
                 blastp_path=self.blastp_path,
                 blastp_db=self.blastp_db,
             ).execute()
+            shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.filtered_report_file))
             print("Completed")
         else:
             shutil.copy(self.netmhc_stab_fh.name, self.reference_similarity_fh.name)
