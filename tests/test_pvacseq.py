@@ -71,6 +71,9 @@ class PvacseqTests(unittest.TestCase):
             "generate_protein_fasta",
             "install_vep_plugin",
             "run",
+            "net_chop",
+            "netmhc_stab",
+            "calculate_reference_proteome_similarity",
             "top_score_filter",
             "transcript_support_level_filter",
             "valid_alleles",
@@ -173,6 +176,7 @@ class PvacseqTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_directory, 'input.vcf')
         output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta.main([input_file, "25", output_file.name])
+        os.unlink("{}.manufacturability.tsv".format(output_file.name))
 
     def test_install_vep_pugin_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(

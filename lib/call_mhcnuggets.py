@@ -57,8 +57,10 @@ def main(args_input = sys.argv[1:]):
 
     tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
     predict(args.class_type, tmp_file.name, mhcnuggets_allele(args.allele, args.class_type), output=tmp_output_file.name)
+    os.unlink(tmp_file.name)
     tmp_output_file.close()
     df = pd.read_csv(tmp_output_file.name)
+    os.unlink(tmp_output_file.name)
     processed_df = pd.DataFrame()
     for index, row in df.iterrows():
         seq_nums = epitope_seq_nums[row['peptide']]

@@ -5,6 +5,7 @@ sys.path.append(root)
 import argparse
 import tempfile
 import os
+import shutil
 import yaml
 import csv
 from collections import OrderedDict
@@ -75,7 +76,6 @@ def generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file):
     fasta_generator.execute()
     print("Completed")
     if save_tsv_file:
-        import shutil
         shutil.copy(tsv_file, "{}.tsv".format(args.output_file))
 
 def parse_input_tsv(input_tsv):
@@ -127,6 +127,7 @@ def main(args_input = sys.argv[1:], save_tsv_file=False):
     convert_fusion_input(args.input_file, temp_dir)
     generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file)
     parse_files(args.output_file, temp_dir, args.input_tsv)
+    shutil.rmtree(temp_dir)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")
     CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()

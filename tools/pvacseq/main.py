@@ -12,42 +12,63 @@ def define_parser():
     #add subcommands
     run_main_program_parser = subparsers.add_parser(
         "run",
-        help="Run the pVACseq pipeline",
+        help="Run the pVACseq pipeline.",
         add_help=False
     )
     run_main_program_parser.set_defaults(func=run)
 
     binding_filter_parser = subparsers.add_parser(
         "binding_filter",
-        help="Filter variants processed by IEDB by binding score",
+        help="Filter variants processed by IEDB by binding score.",
         add_help=False
     )
     binding_filter_parser.set_defaults(func=binding_filter)
 
     coverage_filter_parser = subparsers.add_parser(
         "coverage_filter",
-        help="Filter variants processed by IEDB by coverage, vaf, and gene expression",
+        help="Filter variants processed by IEDB by coverage, vaf, and gene expression.",
         add_help=False
     )
     coverage_filter_parser.set_defaults(func=coverage_filter)
 
     transcript_support_level_filter_parser = subparsers.add_parser(
         "transcript_support_level_filter",
-        help="Filter variants processed by IEDB by transcript support level",
+        help="Filter variants processed by IEDB by transcript support level.",
         add_help=False
     )
     transcript_support_level_filter_parser.set_defaults(func=transcript_support_level_filter)
 
     top_score_filter_parser = subparsers.add_parser(
         "top_score_filter",
-        help="Pick the best neoepitope for each variant",
+        help="Pick the best neoepitope for each variant.",
         add_help=False,
     )
     top_score_filter_parser.set_defaults(func=top_score_filter)
 
+    net_chop_parser = subparsers.add_parser(
+        "net_chop",
+        help="Run NetChop on existing pVACseq output .tsv to predict cleavage sites on the neoepitopes.",
+        add_help=False,
+    )
+    net_chop_parser.set_defaults(func=net_chop)
+
+    netmhc_stab_parser = subparsers.add_parser(
+        "netmhc_stab",
+        help="Run NetMHCStabPan on existing pVACseq output .tsv to add stability predictions to the neoepitopes.",
+        add_help=False,
+    )
+    netmhc_stab_parser.set_defaults(func=netmhc_stab)
+
+    calculate_reference_proteome_similarity_parser = subparsers.add_parser(
+        "calculate_reference_proteome_similarity",
+        help="Blast peptides against the reference proteome on existing pVACseq output .tsv.",
+        add_help=False
+    )
+    calculate_reference_proteome_similarity_parser.set_defaults(func=calculate_reference_proteome_similarity)
+
     generate_protein_fasta_parser = subparsers.add_parser(
         "generate_protein_fasta",
-        help="Generate an annotated fasta file from a VCF with protein sequences of mutations and matching wildtypes",
+        help="Generate an annotated fasta file from a VCF with protein sequences of mutations and matching wildtypes.",
         add_help=False
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
@@ -61,28 +82,28 @@ def define_parser():
 
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
-        help="Download example input and output files",
+        help="Download example input and output files.",
         add_help=False
     )
     download_example_data_parser.set_defaults(func=download_example_data)
 
     install_vep_plugin_parser = subparsers.add_parser(
         "install_vep_plugin",
-        help="Install the Wildtype and Frameshift VEP plugins into your VEP_plugins directory",
+        help="Install the Wildtype and Frameshift VEP plugins into your VEP_plugins directory.",
         add_help=False
     )
     install_vep_plugin_parser.set_defaults(func=install_vep_plugin)
 
     valid_alleles_parser = subparsers.add_parser(
         "valid_alleles",
-        help="Show a list of valid allele names",
+        help="Show a list of valid allele names.",
         add_help=False
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
 
     allele_specific_cutoffs_parser = subparsers.add_parser(
         "allele_specific_cutoffs",
-        help="Show the allele specific cutoffs",
+        help="Show the allele specific cutoffs.",
         add_help=False,
     )
     allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
