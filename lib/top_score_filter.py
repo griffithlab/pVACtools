@@ -13,7 +13,10 @@ class TopScoreFilter:
     def parse_transcript_id(self, transcript):
         if transcript.startswith('ENS'):
             return re.compile(r'ENS(?:[A-Z]{3})?T(\d+)').match(transcript).group(1)
+        elif transcript.startswith('NM_'):
+            return re.compile(r'NM_(\d+)').match(transcript).group(0)
         else:
+            raise Exception("Error parsing transcript {}. Transcript name doesn't start with ENS or NM".format(transcript))
             return None
 
     def find_line_with_lowest_transcript_id(self, lines):
