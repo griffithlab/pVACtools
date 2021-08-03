@@ -14,7 +14,7 @@ This tool produces an aggregated version of the all_epitopes TSV. It finds the b
 (lowest binding affinity) epitope for each variant, and outputs additional binding affinity for that epitope.
 It also gives information about the total number of well-scoring epitopes for each variant,
 as well as the HLA alleles that those epitopes are well-binding to.
-For a full overview of the output, see the pVACfuse :ref:`output file documentation <pvacbind_aggregated>`.
+For a full overview of the output, see the pVACbind :ref:`output file documentation <pvacbind_aggregated>`.
 
 Calculate Reference Proteome Similarity
 ---------------------------------------
