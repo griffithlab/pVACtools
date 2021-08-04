@@ -39,7 +39,7 @@ for dirpath, dirnames, filenames in os.walk("tools/pvacseq/iedb_alleles"):
 
 setup(
     name="pvactools",
-    version="2.0.2",
+    version="2.0.3",
     packages=[
         "tools",
         "tools.pvacbind",
