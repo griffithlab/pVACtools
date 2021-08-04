@@ -822,8 +822,10 @@ class FastaGeneratorTests(unittest.TestCase):
         self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_pvacvector.fasta')
         self.assertTrue(cmp("{}.{}.tsv".format(generate_fasta_output_file.name, epitope_length), expected_output_file))
+        os.unlink("{}.{}.tsv".format(generate_fasta_output_file.name, epitope_length))
         expected_key_output_file = os.path.join(self.test_data_dir, 'output_pvacvector.key')
         self.assertTrue(cmp("{}.{}.tsv.key".format(generate_fasta_output_file.name, epitope_length), expected_key_output_file))
+        os.unlink("{}.{}.tsv.key".format(generate_fasta_output_file.name, epitope_length))
 
     def test_input_file_with_protein_altering_variant_insertion_generates_expected_file(self):
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_protein_altering_variant_insertion.tsv')
