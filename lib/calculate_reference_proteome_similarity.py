@@ -305,7 +305,7 @@ class CalculateReferenceProteomeSimilarity:
                     metric_line['Peptide'] = peptide
                     for alignment in reference_match_dict[peptide]:
                         metric_line.update(alignment)
-                    metric_writer.writerow(metric_line)
+                        metric_writer.writerow(metric_line)
 
                 else:
                     line['Reference Match'] = False
@@ -314,7 +314,7 @@ class CalculateReferenceProteomeSimilarity:
 
     def _get_unique_peptides(self, mt_records_dict, wt_records_dict):
         unique_peptides = set()
-        
+
         with open(self.input_file) as input_fh:
             reader = csv.DictReader(input_fh, delimiter='\t')
             for line in reader:
