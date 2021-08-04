@@ -249,9 +249,8 @@ class CalculateReferenceProteomeSimilarity:
             tmp_peptide_fh.close()
 
         else: # else perform BLAST with api
-            if self.n_threads > 1:
-                with p.lock: # stagger calls to qblast
-                    sleep(10)
+            with p.lock: # stagger calls to qblast
+                sleep(10)
             result_handle = NCBIWWW.qblast("blastp", "refseq_protein", full_peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
 
         return result_handle
