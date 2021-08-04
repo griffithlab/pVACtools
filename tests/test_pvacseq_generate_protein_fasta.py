@@ -37,6 +37,7 @@ class GenerateFastaTests(unittest.TestCase):
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
         expected_tsv_file = os.path.join(self.test_data_dir, 'output.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+        os.unlink(generate_protein_fasta_output_tsv)
 
     def test_input_vcf_multi_sample_generates_expected_file(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input_multi_sample.vcf')
@@ -56,6 +57,7 @@ class GenerateFastaTests(unittest.TestCase):
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
         expected_tsv_file = os.path.join(self.test_data_dir, 'output.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+        os.unlink(generate_protein_fasta_output_tsv)
 
     def test_mutant_only(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
@@ -71,6 +73,7 @@ class GenerateFastaTests(unittest.TestCase):
             '--mutant-only',
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutant_only.fasta')
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
     def test_input_tsv(self):
@@ -88,6 +91,7 @@ class GenerateFastaTests(unittest.TestCase):
             '--input-tsv', generate_protein_fasta_input_tsv,
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output_with_tsv.fasta')
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
     def test_phase_proximal_variants_vcf(self):
@@ -105,6 +109,7 @@ class GenerateFastaTests(unittest.TestCase):
             '--phased-proximal-variants-vcf', generate_protein_fasta_phased_proximal_variants_vcf,
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output_with_phased_vcf.fasta')
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
     def test_output_peptide_sequence_length_longer_that_wildtype(self):
@@ -120,3 +125,4 @@ class GenerateFastaTests(unittest.TestCase):
             generate_protein_fasta_output_file.name,
             '-d', 'full',
         ], shell=False))
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))

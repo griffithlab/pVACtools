@@ -1,4 +1,5 @@
 import csv
+import argparse
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from Bio import SeqIO, SearchIO
@@ -220,7 +221,7 @@ class CalculateReferenceProteomeSimilarity:
         else:
             epitope = line['MT Epitope Seq']
             full_peptide = mt_records_dict[line['Index']]
-            
+
             # get peptide
             if line['Variant Type'] == 'FS':
                 peptide = self.extract_n_mer_from_fs(full_peptide, wt_records_dict[line['Index']], epitope, int(line['Sub-peptide Position']))
@@ -234,12 +235,12 @@ class CalculateReferenceProteomeSimilarity:
 
     def _call_blast(self, full_peptide, p):
         if self.blastp_path is not None: # if blastp installed locally, perform BLAST with it
-                    
+
             # create a SeqRecord of full_peptide and write it to a tmp file
             record = SeqRecord(Seq(full_peptide, IUPAC.protein), id="1", description="")
             tmp_peptide_fh = tempfile.NamedTemporaryFile('w', delete=False)
             SeqIO.write([record], tmp_peptide_fh.name, "fasta")
-                    
+
             # configure args for local blastp, run it and put results in new tmp file
             arguments = [self.blastp_path, '-query', tmp_peptide_fh.name, '-db', self.blastp_db, '-outfmt', '16', '-word_size', str(min(self.match_length, 7)), '-gapopen', '32767', '-gapextend', '32767']
             result_handle = tempfile.NamedTemporaryFile(delete=False)
@@ -271,7 +272,6 @@ class CalculateReferenceProteomeSimilarity:
                                 windows = [match[i:i+self.match_length] for i in range(len(match)-(self.match_length-1))]
                                 for window in windows: 
                                     if window in peptide:
-                                        
                                         reference_match_dict[peptide].append({
                                             'Hit ID': alignment.hit_id,
                                             'Hit Definition': alignment.hit_def,
@@ -312,7 +312,6 @@ class CalculateReferenceProteomeSimilarity:
 
                 writer.writerow(line)
 
-
     def _get_unique_peptides(self, mt_records_dict, wt_records_dict):
         unique_peptides = set()
         
@@ -342,7 +341,7 @@ class CalculateReferenceProteomeSimilarity:
             for i in p.range(len(unique_peptides)):
 
                 full_peptide = unique_peptides[i]
-                   
+
                 result_handle = self._call_blast(full_peptide, p)
 
                 blast_records = [x for x in NCBIXML.parse(result_handle)]
@@ -352,3 +351,45 @@ class CalculateReferenceProteomeSimilarity:
                 result_handle.close()
 
         self._write_outputs(processed_peptides, mt_records_dict, wt_records_dict)
+
+    @classmethod
+    def parser(cls, tool):
+        parser = argparse.ArgumentParser(
+            '%s calculate_reference_proteome_similarity' % tool,
+            description="Blast peptides against the reference proteome.",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
+        parser.add_argument(
+            'input_file',
+            help="Input filtered file with predicted epitopes."
+        )
+        parser.add_argument(
+            'input_fasta',
+            help="The required fasta file."
+        )
+        parser.add_argument(
+            'output_file',
+            help="Output TSV filename for putative neoepitopes."
+        )
+        parser.add_argument(
+            '--match-length',
+            default=8,
+            help="The desired matching epitope length."
+        )
+        parser.add_argument(
+            '--species',
+            default='human',
+            help="The species of the input file."
+        )
+        parser.add_argument(
+            '--blastp-path',
+            default=None,
+            help="Blastp installation path.",
+        )
+        parser.add_argument(
+            '--blastp-db',
+            choices=['refseq_select_prot', 'refseq_protein'],
+            default='refseq_select_prot',
+            help="The blastp database to use.",
+        )
+        return parser

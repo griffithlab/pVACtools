@@ -56,6 +56,8 @@ documentation for more information on each individual filter. The standalone
 filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
 
+.. _all_ep_and_filtered:
+
 all_epitopes.tsv and filtered.tsv Report Columns
 ------------------------------------------------
 
@@ -196,6 +198,8 @@ all_epitopes.tsv and filtered.tsv Report Columns
 
 .. image:: ../images/output_file_columns.png
     :alt: pVACseq ouput file columns illustration
+
+.. _reference_matches:
 
 filtered.tsv.reference_matches Report Columns
 ---------------------------------------------
