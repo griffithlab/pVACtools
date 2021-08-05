@@ -1,9 +1,16 @@
+library(RCurl)
+
+anchor_8 <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/ae938113ddbbe6c6eeecebf94459d449facd2c2f/tools/pvacview/data/Normalized_anchor_predictions_8_mer.tsv")
+anchor_9 <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/ae938113ddbbe6c6eeecebf94459d449facd2c2f/tools/pvacview/data/Normalized_anchor_predictions_9_mer.tsv")
+anchor_10 <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/ae938113ddbbe6c6eeecebf94459d449facd2c2f/tools/pvacview/data/Normalized_anchor_predictions_10_mer.tsv")
+anchor_11 <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/ae938113ddbbe6c6eeecebf94459d449facd2c2f/tools/pvacview/data/Normalized_anchor_predictions_11_mer.tsv")
+
 ## Load Anchor data
 anchor_data = list()
-anchor_data[[8]] <- read.table("~/Desktop/Griffith_Lab/R_shiny_visualization/neoantigen_visualization/data/Anchor_scores/Normalized_anchor_predictions_8_mer.tsv", sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-anchor_data[[9]] <- read.table("~/Desktop/Griffith_Lab/R_shiny_visualization/neoantigen_visualization/data/Anchor_scores/Normalized_anchor_predictions_9_mer.tsv", sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-anchor_data[[10]] <- read.table("~/Desktop/Griffith_Lab/R_shiny_visualization/neoantigen_visualization/data/Anchor_scores/Normalized_anchor_predictions_10_mer.tsv", sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-anchor_data[[11]] <- read.table("~/Desktop/Griffith_Lab/R_shiny_visualization/neoantigen_visualization/data/Anchor_scores/Normalized_anchor_predictions_11_mer.tsv", sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+anchor_data[[8]] <- read.table(text = anchor_8, sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+anchor_data[[9]] <- read.table(text = anchor_9, sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+anchor_data[[10]] <- read.table(text = anchor_10, sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+anchor_data[[11]] <- read.table(text = anchor_11, sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 
 #reformat table for display
 table_formatting = function(x,y){
@@ -73,24 +80,23 @@ calculate_mutation_info <- function(metrics_data_row){
 
 ##Generate Tiering for given variant with specific cutoffs
 tier <- function(variant_info, anchor_contribution, dna_cutoff, mutation_pos_list, hla_allele){
-  mt_binding <- variant_info['IC50 MT']
-  wt_binding <- variant_info['IC50 WT']
-  gene_expr <- variant_info['RNA Expr']
-  dna_vaf <- variant_info['DNA VAF']
-  rna_vaf <- variant_info['RNA VAF']
-  rna_depth <- variant_info['RNA Depth']
-  allele_expr <- variant_info['Allele Expr']
+  mt_binding <- as.numeric(variant_info['IC50 MT'])
+  wt_binding <- as.numeric(variant_info['IC50 WT'])
+  gene_expr <- as.numeric(variant_info['RNA Expr'])
+  dna_vaf <- as.numeric(variant_info['DNA VAF'])
+  rna_vaf <- as.numeric(variant_info['RNA VAF'])
+  rna_depth <- as.numeric(variant_info['RNA Depth'])
+  allele_expr <- as.numeric(variant_info['Allele Expr'])
   anchor_list <- unlist(calculate_anchor(hla_allele, length(unlist(strsplit(variant_info['Best Peptide'][[1]], split = ""))), anchor_contribution))
   anchor_residue_pass <- TRUE
-  if (all(mutation_pos_list %in% anchor_list)){
-    if (wt_binding < 1000) {
+  if (all(as.numeric(mutation_pos_list) %in% anchor_list)){
+    if (is.na(wt_binding)){
       anchor_residue_pass <- FALSE
     }
-    else if (wt_binding == 'NA'){
+    else if (wt_binding < 1000) {
       anchor_residue_pass <- FALSE
     }
   }
-  
   if ((mt_binding < 500) & (allele_expr > 3) & (dna_vaf >= dna_cutoff/2) & anchor_residue_pass){
     return ("Pass")
   }
@@ -115,6 +121,93 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, mutation_pos_lis
   }
   
   return ("Poor")
+}
+
+
+tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, mutation_pos_list, hla_allele = NULL, anchor_mode = "allele-specific"){
+  #browser()
+  mt_binding <- as.numeric(variant_info['IC50 MT'])
+  wt_binding <- as.numeric(variant_info['IC50 WT'])
+  gene_expr <- as.numeric(variant_info['RNA Expr'])
+  dna_vaf <- as.numeric(variant_info['DNA VAF'])
+  rna_vaf <- as.numeric(variant_info['RNA VAF'])
+  rna_depth <- as.numeric(variant_info['RNA Depth'])
+  allele_expr <- as.numeric(variant_info['Allele Expr'])
+  count = 11
+  if (anchor_mode == "default"){
+    anchor_list <- c(1,2,nchar(variant_info['Best Peptide']), nchar(variant_info['Best Peptide'])-1)
+  }
+  else{
+    anchor_list <- unlist(calculate_anchor(hla_allele, length(unlist(strsplit(variant_info['Best Peptide'][[1]], split = ""))), anchor_contribution))
+  }
+  anchor_residue_pass <- TRUE
+  if (all(as.numeric(mutation_pos_list) %in% anchor_list)){
+    if (is.na(wt_binding)){
+      anchor_residue_pass <- FALSE
+    }
+    else if (wt_binding < 1000) {
+      anchor_residue_pass <- FALSE
+    }
+  }
+  ## Pass
+  if ((mt_binding < 500) & (allele_expr > 3) & (dna_vaf >= dna_cutoff/2) & anchor_residue_pass){
+    return (1)
+  }
+  ## Relaxed
+  if ((mt_binding < 1000) & (allele_expr > 1) & (dna_vaf >= dna_cutoff/2) & anchor_residue_pass){
+    if ((mt_binding < 500) & (allele_expr < 3)){
+      return (2) 
+    }
+    else if ((mt_binding < 1000) & (allele_expr < 3)){
+      return (3)
+    }
+    else{
+      return(4)
+    }
+  }
+  ## Anchor
+  if ((mt_binding < 1000) & (allele_expr > 1) & (dna_vaf >= dna_cutoff/2) & !anchor_residue_pass){
+    return (5)
+  }
+  if ((mt_binding < 1000) & (allele_expr > 1) & (dna_vaf < dna_cutoff/2) & anchor_residue_pass){
+    return (6)
+  }
+  lowexpr <- FALSE
+  if ((allele_expr > 0) | ((gene_expr == 0) & (rna_depth > 50) & (rna_vaf > 0.10))) {
+    lowexpr <- TRUE
+  }
+  if ((mt_binding < 1000) & (lowexpr) & (dna_vaf >= dna_cutoff/2) & anchor_residue_pass){
+    if (allele_expr > 0){
+      return (7)
+    }
+    else if ((gene_expr == 0) & (rna_depth > 50) & (rna_vaf > 0.10)){
+      return (8)
+    }
+  }
+  if (((gene_expr == 0) | (rna_vaf == 0)) & !lowexpr){
+    if ((gene_expr == 0) & (rna_vaf != 0)){
+      return (9)
+    }
+    else if ((gene_expr != 0) & (rna_vaf == 0)){
+      return (10)
+    }
+    else{
+      return (11)
+    }
+  }
+  if (!anchor_residue_pass){
+    count = count + 1
+  }
+  if (dna_vaf < dna_cutoff/2){
+    count = count + 2
+  }
+  if ((gene_expr == 0) & (rna_depth > 50) & (rna_vaf > 0.10)){
+    count = count + 4
+  }
+  if (allele_expr > 0){
+    count = count + 8
+  }
+  return (count)
 }
 
 
