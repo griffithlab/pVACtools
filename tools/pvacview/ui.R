@@ -15,8 +15,7 @@ ui <- dashboardPage(
   header = dashboardHeader(
     title=tagList(tags$a(href='http://pvactools.org', class="logo",
                          span(class= "logo-mini", tags$img(src='pVACview_logo_mini.png')),
-                         span(class= "logo-lg", tags$img(src='pVACview_logo.png')),
-                         
+                         span(class= "logo-lg", tags$img(src='pVACview_logo.png'))
                   ))
     ),
   sidebar = dashboardSidebar(
@@ -59,6 +58,9 @@ ui <- dashboardPage(
             fileInput(inputId="mainDataInput", label="Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
                                                                                                                          "text/tab-separated-values,text/plain",
                                                                                                                          ".tsv")),
+            radioButtons("hla_class", "Does this aggregate report file correspond to Class I or Class II prediction data?",  
+                         c("Class I data (e.g. HLA-A*02:01) " = "class_i", "Class II data (e.g. DPA1*01:03)" = "class_ii")),
+            
             hr(style="border-color: white"),
             h5("Please upload the corresponding metrics file for the main file that you have chosen."),
             fileInput(inputId="metricsDataInput", label="Neoantigen Candidate Metrics file (json required)", accept = c("application/json",
@@ -68,12 +70,12 @@ ui <- dashboardPage(
             fileInput(inputId="additionalDataInput", label="Additional Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
                                                                                                                                "text/tab-separated-values,text/plain",
                                                                                                                                ".tsv")),
-            radioButtons("hla_class", "Does this additional file correspond to Class I or Class II HLA allele prediction results?",  
-                         c("Class I data (e.g. HLA-A*02:01) " = "class_i", "Class II data (e.g. DPA1*01:03)" = "class_ii"))
+            textInput("add_file_label", "Please provide a label for the additional file uploaded (e.g. Class I data or Class II data)")
           ),
         
           box(
             title="Load Default Data", collapsible = TRUE, collapsed = TRUE,
+            textInput("sample_label", "Please provide the sample name of the files you would like to load (default: TUMOR).", value = "TUMOR"),
             actionButton('loadDefaultmain', "Load default Main data"),br(),
             actionButton('loadDefaultmetrics', "Load default Metrics data"), br(),
             actionButton('loadDefaultadd', "Load default Additional data")
@@ -95,7 +97,7 @@ ui <- dashboardPage(
           box(width= 6, 
               title="Regenerate Tiering with different parameters",
               status='primary', solidHeader = TRUE, collapsible = TRUE,
-              "*Please note that the metircs file is required in order to regenerate tiering information with different parameters", br(),
+              "*Please note that the metrics file is required in order to regenerate tiering information with different parameters", br(),
               sliderInput("anchor_contribution", "Contribution cutoff for determining anchor locations", 0.5, 0.9, 0.8, step = 0.1, width = 400),
               numericInput("dna_cutoff", "DNA VAF clonal VAF (Anything lower than 1/2 of chosen VAF level will be considered subclonal)", 0.5, min = 0, max = 1, step = 0.01, width = 500),
               #numericInput("rna_cutoff", "RNA low gene expression cutoff (Anything lower than chosen expression level will be considered low expression)", 1, min = 0, max = 100, step = 1, width = 500),

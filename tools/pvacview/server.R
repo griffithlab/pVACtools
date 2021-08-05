@@ -6,8 +6,6 @@ library(reshape2)
 library(jsonlite)
 library(tibble)
 library(tidyr)
-#library(gghighlight)
-#library(dplyr)
 
 source("anchor_and_helper_functions.R")
 source("styling.R")
@@ -48,6 +46,15 @@ server <- shinyServer(function(input, output, session) {
   } 
 
   ##############################DATA UPLOAD TAB################################### 
+  
+  #reactive values defined for row selection, main table, metrics data, additional data, and dna cutoff 
+  df <- reactiveValues(
+    selectedRow = 1,
+    mainTable = NULL,
+    dna_cutoff = 0.5,
+    metricsData = NULL,
+    additionalData = NULL
+  )
  
   #Option 1: User uploaded main aggregate report file
   observeEvent(input$mainDataInput$datapath,{
@@ -59,7 +66,11 @@ server <- shinyServer(function(input, output, session) {
     mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_" , label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
+    mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
     df$mainTable <- mainData
+    dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
+    df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, unlist(x["Pos"]), anchor_mode="default"))
   })
   
   #Option 1: User uploaded metrics file
@@ -78,7 +89,7 @@ server <- shinyServer(function(input, output, session) {
 
   #Option 2: Load from default (relative) file path for aggregate report file 
    observeEvent(input$loadDefaultmain,{
-     mainData <- read.table("../MHC_Class_I/H_MT-8124-011-011-TumorDNA-B6FFC.class_I.all_epitopes.aggregated.tsv", sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     mainData <- read.table(paste("./",input$sample_label,".class_I.all_epitopes.aggregated.tsv", sep=""), sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(mainData) <- mainData[1,]
      mainData <- mainData[-1,]
      row.names(mainData) <- NULL
@@ -86,31 +97,26 @@ server <- shinyServer(function(input, output, session) {
      mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_" , label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
      mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
      mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
+     mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
      df$mainTable <- mainData
+     dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
+     df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
+     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, unlist(x["Pos"]), anchor_mode="default"))
    })
 
   #Option 2: Load from default (relative) file path for metrics file 
   observeEvent(input$loadDefaultmetrics,{
-    df$metricsData <- fromJSON("../MHC_Class_I/H_MT-8124-011-011-TumorDNA-B6FFC.class_I.all_epitopes.aggregated.metrics.json")
+    df$metricsData <- fromJSON(paste("./",input$sample_label,".class_I.all_epitopes.aggregated.metrics.json", sep=""))
   })
   
-  #Option 2: Load from default (relative) file path for additional data file (will go away in actual version)
+  #Option 2: Load from default (relative) file path for additional data file
   observeEvent(input$loadDefaultadd,{
-    addData <- read.table("../MHC_Class_II/H_MT-8124-011-011-TumorDNA-B6FFC.class_II.all_epitopes.aggregated.tsv", sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+    addData <- read.table(paste("../MHC_Class_II/",input$sample_label,".class_II.all_epitopes.aggregated.tsv", sep=""), sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
     colnames(addData) <- addData[1,]
     addData <- addData[-1,]
     row.names(addData) <- NULL
     df$additionalData <- addData
   })
-
-  #reactive values defined for row selection, main table, metrics data, additional data, and dna cutoff 
-  df <- reactiveValues(
-    selectedRow = 1,
-    mainTable = NULL,
-    dna_cutoff = 0.5,
-    metricsData = NULL,
-    additionalData = NULL
-  )
   
   #reactions for once "regenerate table" button is clicked
   observeEvent(input$submit,{
@@ -121,6 +127,7 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$`Mutated Positions` <- apply(df$mainTable, 1, function(x) calculate_mutation_info(df$metricsData[[x[["ID"]]]]))
       df$mainTable$`Best HLA allele` <- apply(df$mainTable, 1, function(x) df$metricsData[[x[["ID"]]]]$best_hla_allele)
       df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, input$anchor_contribution, input$dna_cutoff, unlist(x$`Mutated Positions`), x$`Best HLA allele`))
+      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, input$dna_cutoff, unlist(x["Pos"]), hla_allele = x$`Best HLA allele`))
   })
   
   #determine hla allele count in order to generate column tooltip locations correctly 
@@ -136,11 +143,7 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$type_text <- renderText({
-    if (type() == 1){
-      return("Class I")
-    } else {
-      return('Class II')
-    }
+    input$add_file_label
   })
   
 
@@ -154,9 +157,9 @@ server <- shinyServer(function(input, output, session) {
     }
     else{
       datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Best HLA allele")]
-    , escape = FALSE, callback = JS(callBack(hla_count())),
+    , escape = FALSE, callback = JS(callBack(hla_count())), class = 'stripe',
           options=list(lengthChange = FALSE, dom = 'Bfrtip', 
-                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1))),
+                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(25))),
                    buttons = list(I('colvis')), 
                    initComplete = htmlwidgets::JS(
                      "function(settings, json) {",
@@ -168,20 +171,39 @@ server <- shinyServer(function(input, output, session) {
                    drawCallback = JS('function() { 
                                      Shiny.bindAll(this.api().table().node()); } ')
                    ),
-      selection = 'none',
+      selection = 'none', 
       extensions = c("Buttons"))}
-    %>% formatStyle( 'IC50 MT', backgroundColor = styleInterval(c(50,100,200,300,400,500,600, 700, 800, 900, 1000), 
-                                                                c("#00FF00", "#00EE00","#00D500","#00BC00","#00A300", "#008B00", "#FFFF00", "#FFEB00", "#FFD800","#FFC500","#FFB100", "#FF9999")),
-                     fontWeight = styleInterval(c(500,1000), c('normal','bold', 'bold')), border= styleInterval(c(500,1000), c('normal','2px solid red', '2px solid red')))
-    %>% formatStyle( '%ile MT', backgroundColor = styleInterval(c(0.1,0.2,0.3,0.4,0.5,0.75,1,1.5,2),
-                                                                c("#00EE00","#00D500","#00BC00","#00A300", "#008B00", "#FFFF00", "#FFEB00", "#FFD800","#FFC500", "#FF9999")) )
+    %>% formatStyle('IC50 MT', backgroundColor = styleInterval(c(50,100,200,300,400,500,600, 700, 800, 900, 1000), 
+                                                                c("#00FF00", "#00EE00","#00D500","#00BC00","#00A300", "#008B00", "#FFFF00", "#FFEB00", "#FFD800","#FFC500","#FFB100", "#FF9999"))
+                     ,fontWeight = styleInterval(c(1000), c('normal', 'bold')), border= styleInterval(c(1000), c('normal','2px solid red')))
+    %>% formatStyle('%ile MT', backgroundColor = styleInterval(c(0.1,0.2,0.3,0.4,0.5,0.75,1,1.5,2),
+                                                                c("#00EE00","#00D500","#00BC00","#00A300", "#008B00", "#FFFF00", "#FFEB00", "#FFD800","#FFC500", "#FF9999")))
     %>% formatStyle( 'Tier', color = styleEqual(c('Pass', 'Relaxed', 'Poor','Anchor','Subclonal','LowExpr', 'NoExpr'), c('green','lightgreen', 'orange', '#b0b002', '#D4AC0D', 'salmon', 'red')) )
-    %>% formatStyle( c('IC50 WT','Pos'),'Tier', fontWeight = styleEqual(c('Anchor'), c('bold')), border= styleEqual(c('Anchor'), c('2px solid red')))
     %>% formatStyle(c('RNA VAF'),background = styleColorBar(range(0,1), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
-    %>% formatStyle(c('DNA VAF'),background = styleColorBar(range(0,1), 'lightblue'), fontWeight = styleInterval(df$dna_cutoff/2,c('bold', 'normal')), border= styleInterval(df$dna_cutoff/2,c('2px solid red', 'normal')), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
+    %>% formatStyle(c('DNA VAF'),background = styleColorBar(range(0,1), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right') #fontWeight = styleInterval((df$dna_cutoff/2)-0.0001,c('bold', 'normal')), border= styleInterval((df$dna_cutoff/2)-0.0001,c('2px solid red', 'normal')),
     %>% formatStyle(c('RNA Expr'),background = styleColorBar(range(0,50), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
-    %>% formatStyle(c('RNA Depth'),background = styleColorBar(range(0,max(as.numeric(as.character(unlist(df$mainTable['RNA Depth']))))), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
-    %>% formatStyle(c('Allele Expr'),background = styleColorBar(range(0,(max(as.numeric(as.character(unlist(df$mainTable['RNA VAF'])))*50))), 'lightblue'),  fontWeight = styleInterval(c(1,3), c('bold', 'bold','normal')), border= styleInterval(c(1,3), c('2px solid red', '2px solid red','normal')), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
+    %>% formatStyle(c('RNA Depth'),background = styleColorBar(range(0,200), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
+    %>% formatStyle(c('Allele Expr'),background = styleColorBar(range(0,(max(as.numeric(as.character(unlist(df$mainTable['RNA VAF'])))*50))), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
+    %>% formatStyle(c('Allele Expr'),'Tier Count', fontWeight = styleEqual(c('2'), c('bold')), border= styleEqual(c('2'), c('2px solid red')))
+    %>% formatStyle(c('IC50 MT','Allele Expr'),'Tier Count', fontWeight = styleEqual(c('3'), c('bold')), border= styleEqual(c('3'), c('2px solid red')))
+    %>% formatStyle(c('IC50 MT'),'Tier Count', fontWeight = styleEqual(c('4'), c('bold')), border= styleEqual(c('4'), c('2px solid red')))
+    %>% formatStyle(c('IC50 WT','Pos'),'Tier Count', fontWeight = styleEqual(c('5'), c('bold')), border= styleEqual(c('5'), c('2px solid red')))
+    %>% formatStyle(c('DNA VAF'),'Tier Count', fontWeight = styleEqual(c('6'), c('bold')), border= styleEqual(c('6'), c('2px solid red')))
+    %>% formatStyle(c('Allele Expr'),'Tier Count', fontWeight = styleEqual(c('7'), c('bold')), border= styleEqual(c('7'), c('2px solid red')))
+    %>% formatStyle(c('Gene Expression'),'Tier Count', fontWeight = styleEqual(c('8'), c('bold')), border= styleEqual(c('8'), c('2px solid red')))
+    %>% formatStyle(c('RNA VAF','RNA Depth'),'Tier Count', fontWeight = styleEqual(c('8'), c('bold')), border= styleEqual(c('8'), c('2px solid green')))
+    %>% formatStyle(c('RNA Expr'),'Tier Count', fontWeight = styleEqual(c('9'), c('bold')), border= styleEqual(c('9'), c('2px solid red')))
+    %>% formatStyle(c('RNA VAF'),'Tier Count', fontWeight = styleEqual(c('9'), c('bold')), border= styleEqual(c('9'), c('2px solid green')))
+    %>% formatStyle(c('RNA Expr'),'Tier Count', fontWeight = styleEqual(c('10'), c('bold')), border= styleEqual(c('10'), c('2px solid green')))
+    %>% formatStyle(c('RNA VAF'),'Tier Count', fontWeight = styleEqual(c('10'), c('bold')), border= styleEqual(c('10'), c('2px solid red')))
+    %>% formatStyle(c('RNA VAF','RNA Expr'),'Tier Count', fontWeight = styleEqual(c('11'), c('bold')), border= styleEqual(c('11'), c('2px solid red')))
+    %>% formatStyle(c('IC50 WT','Pos'),'Tier Count', fontWeight = styleEqual(c('13'), c('bold')), border= styleEqual(c('13'), c('2px solid red')))
+    %>% formatStyle(c('DNA VAF'),'Tier Count', fontWeight = styleEqual(c('14'), c('bold')), border= styleEqual(c('14'), c('2px solid red')))
+    %>% formatStyle(c('DNA VAF','IC50 WT','Pos'),'Tier Count', fontWeight = styleEqual(c('15'), c('bold')), border= styleEqual(c('15'), c('2px solid red')))
+    %>% formatStyle(c('IC50 WT','Pos', 'DNA VAF', 'Allele Expr'),'Tier Count', fontWeight = styleEqual(c('23'), c('bold')), border= styleEqual(c('23'), c('2px solid red')))
+    %>% formatStyle(c('DNA VAF', 'Allele Expr'),'Tier Count', fontWeight = styleEqual(c('22'), c('bold')), border= styleEqual(c('22'), c('2px solid red')))
+    %>% formatStyle(c('IC50 WT','Pos', 'Allele Expr'),'Tier Count', fontWeight = styleEqual(c('21'), c('bold')), border= styleEqual(c('21'), c('2px solid red')))
+    %>% formatStyle(c('Allele Expr'),'Tier Count', fontWeight = styleEqual(c('20'), c('bold')), border= styleEqual(c('20'), c('2px solid red')))
     , server=FALSE)
   
   #help menu for main table
@@ -208,7 +230,7 @@ server <- shinyServer(function(input, output, session) {
          " Anchor: Mutation is at an anchor residue in the shown peptide, and the WT allele has good binding (WT IC50 <1000)", br(),
          " Poor: Fails two or more of the above criteria", br(),
          " Relaxed: Passes the above criteria, has decent MT binding (IC50 < 1000)", br(),
-         " Pass: Passes the above criteria, has strong MT binding (IC50 < 1000) and strong expression (Allele Expr > 3)"
+         " Pass: Passes the above criteria, has strong MT binding (IC50 < 500) and strong expression (Allele Expr > 3)"
       )
     ))
   })
@@ -572,7 +594,7 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)){
       return ()
     }
-    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval")& !(colnames(df$mainTable) == "Select")]
+    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval")& !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Tier Count")]
     col_names <- colnames(data)
     data <- data.frame(data, Evaluation=shinyValue("selecter_",nrow(df$mainTable), df$mainTable))
     colnames(data) <- c(col_names,"Evaluation")
