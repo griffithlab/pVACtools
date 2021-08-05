@@ -28,6 +28,11 @@ for dirpath, dirnames, filenames in os.walk("tools/pvacbind/example_data"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             pvacbind_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
+pvacview_data_files = []
+for dirpath, dirnames, filenames in os.walk("tools/pvacview"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            pvacview_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
 for dirpath, dirnames, filenames in os.walk("tools/pvacseq/VEP_plugins"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
@@ -117,6 +122,7 @@ setup(
         'tools.pvacfuse': pvacfuse_data_files,
         'tools.pvacvector': pvacvector_data_files,
         'tools.pvacbind': pvacbind_data_files,
+        'tools.pvacview': pvacview_data_files,
         'utils.pvacapi': server_data,
         'utils.pvacviz': client_data,
     },
