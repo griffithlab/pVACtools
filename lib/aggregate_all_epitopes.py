@@ -4,6 +4,8 @@ from collections import defaultdict, Counter
 import json
 from Bio import SeqIO
 from .prediction_class import *
+import os
+import shutil
 
 class AggregateAllEpitopes:
     def __init__(self, input_file, output_file, file_type='pVACseq', fasta_file=None):
@@ -12,6 +14,12 @@ class AggregateAllEpitopes:
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         self.fasta_file = fasta_file
         self.file_type = file_type
+
+    def copy_pvacview_r_files(self):
+        destination = os.path.dirname(__file__)
+        r_folder = os.abs.path(os.path.join(destination,"..","tools","pvacview"))
+        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+            shutil.copy(os.path.join(r_folder, i), destination)
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
@@ -53,7 +61,7 @@ class AggregateAllEpitopes:
 
         #relax expression.  Include sites that have reasonable vaf but zero overall gene expression
         lowexpr=False
-        if ((mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 0) or 
+        if ((mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 0) or
            (mutation["Gene Expression"] == 0 and
            mutation["Tumor RNA Depth"] > 50 and
            mutation["Tumor RNA VAF"] > 0.10)):
@@ -377,3 +385,5 @@ class AggregateAllEpitopes:
 
         with open(self.metrics_file, 'w') as fh:
             json.dump(metrics, fh, indent=2, separators=(',', ': '))
+
+        self.copy_pvacview_r_files()

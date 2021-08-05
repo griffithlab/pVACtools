@@ -22,6 +22,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
         self.assertFalse(AggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'), output_file.name).execute())
+        import pdb; pdb.set_trace()
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "output.tsv"),
