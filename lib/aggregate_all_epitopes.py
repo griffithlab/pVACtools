@@ -281,8 +281,11 @@ class AggregateAllEpitopes:
             used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm), "{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
 
         dtypes = {
+            'Chromosome': str,
             "Start": "int32",
             "Stop": "int32",
+            'Reference': str,
+            'Variant': str,
             "Variant Type": "category",
             "Mutation Position": "category",
             "Median MT Score": "float32",
