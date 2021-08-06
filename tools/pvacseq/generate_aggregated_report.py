@@ -18,10 +18,6 @@ def define_parser():
         "output_file",
         help="The file path to write the aggregated report tsv to"
     )
-    parser.add_argument(
-        "--fasta-file",
-        help="A pVACseq intermeditate fasta file used to add variant peptide sequences to the metrics file."
-    )
 
     return parser
 
@@ -32,7 +28,7 @@ def main(args_input = sys.argv[1:]):
     tmp_fh = tempfile.NamedTemporaryFile()
 
     print("Creating Aggreggated Report")
-    AggregateAllEpitopes(args.input_file, args.output_file, 'pVACseq', args.fasta_file).execute()
+    PvacseqAggregateAllEpitopes(args.input_file, args.output_file).execute()
     print("Completed")
 
 if __name__ == '__main__':
