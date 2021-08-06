@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+SCYL3	C1orf112	ENST00000367772	ENST00000286031	PF00069	Pkinase	Protein kinase domain	44	203

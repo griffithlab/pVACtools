@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+AC000095.12	GNAS	ENST00000424407	ENST00000371100	processed_transcript	protein_coding	exon-exon	NA	NA

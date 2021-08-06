@@ -113,6 +113,7 @@ class MHCnuggets(metaclass=ABCMeta):
         os.unlink(stderr_fh.name)
         tmp_output_file.close()
         df = pd.read_csv(tmp_output_file.name)
+        os.unlink(tmp_output_file.name)
         return (df, 'pandas')
 
 class PredictionClass(metaclass=ABCMeta):
@@ -189,8 +190,8 @@ class PredictionClass(metaclass=ABCMeta):
                 sys.exit("Allele %s not valid. Run `pvacseq valid_alleles` for a list of valid allele names." % allele)
 
     @classmethod
-    def species_for_allele(self, allele):
-        allele_to_species = {
+    def allele_to_species_map(self):
+        return {
             'HLA' : 'human',
             'DP'  : 'human',
             'DQ'  : 'human',
@@ -230,7 +231,9 @@ class PredictionClass(metaclass=ABCMeta):
             'SLA' : 'pig',
         }
 
-        species = [v for k,v in allele_to_species.items() if allele.startswith(k)]
+    @classmethod
+    def species_for_allele(self, allele):
+        species = [v for k,v in PredictionClass.allele_to_species_map().items() if allele.startswith(k)]
         if len(species) == 1:
             return species[0]
         elif len(species) == 0:
@@ -328,23 +331,23 @@ class MHCflurry(MHCI):
             stderr_fh.close()
             os.unlink(stderr_fh.name)
             tmp_output_file.close()
-
-        df = pd.read_csv(tmp_output_file.name)
-        df.rename(columns={
-            'mhcflurry_prediction': 'ic50',
-            'mhcflurry_affinity': 'ic50',
-            'mhcflurry_prediction_percentile': 'percentile',
-            'mhcflurry_affinity_percentile': 'percentile'
-        }, inplace=True)
-        for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = self.determine_neoepitopes(peptide, epitope_length)
-            for start, epitope in epitopes.items():
-                epitope_df = df[df['peptide'] == epitope]
-                epitope_df['seq_num'] = seq_num
-                epitope_df['start'] = start
-                results = results.append(epitope_df)
+            df = pd.read_csv(tmp_output_file.name)
+            os.unlink(tmp_output_file.name)
+            df.rename(columns={
+                'mhcflurry_prediction': 'ic50',
+                'mhcflurry_affinity': 'ic50',
+                'mhcflurry_prediction_percentile': 'percentile',
+                'mhcflurry_affinity_percentile': 'percentile'
+            }, inplace=True)
+            for record in SeqIO.parse(input_file, "fasta"):
+                seq_num = record.id
+                peptide = str(record.seq)
+                epitopes = self.determine_neoepitopes(peptide, epitope_length)
+                for start, epitope in epitopes.items():
+                    epitope_df = df[df['peptide'] == epitope]
+                    epitope_df['seq_num'] = seq_num
+                    epitope_df['start'] = start
+                    results = results.append(epitope_df)
         return (results, 'pandas')
 
 class MHCnuggetsI(MHCI, MHCnuggets):

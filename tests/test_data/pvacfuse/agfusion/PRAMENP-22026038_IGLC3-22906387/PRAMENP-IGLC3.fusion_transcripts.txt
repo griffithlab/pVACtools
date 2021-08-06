@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+PRAMENP	IGLC3	ENST00000337471	ENST00000390325	processed_transcript	IG_C_gene	exon-exon	NA	NA

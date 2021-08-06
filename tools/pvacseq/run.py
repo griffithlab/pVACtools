@@ -40,6 +40,7 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['run_netmhc_stab'] = False
     post_processing_params['run_manufacturability_metrics'] = False
     post_processing_params['run_reference_proteome_similarity'] = False
+    post_processing_params['file_type'] = 'pVACseq'
 
     PostProcessor(**post_processing_params).execute()
 
@@ -96,6 +97,8 @@ def main(args_input = sys.argv[1:]):
         'maximum_transcript_support_level': args.maximum_transcript_support_level,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
+        'blastp_path'               : args.blastp_path,
+        'blastp_db'                 : args.blastp_db,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:

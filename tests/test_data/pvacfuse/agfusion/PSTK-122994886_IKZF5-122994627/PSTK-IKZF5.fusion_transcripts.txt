@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+PSTK	IKZF5	ENST00000368887	ENST00000368886	protein_coding	protein_coding	Outside transcript boundry	NA	NA

@@ -27,7 +27,7 @@ class RunArgumentParser(metaclass=ABCMeta):
             "allele", type=lambda s:[a for a in s.split(',')],
             help="Name of the allele to use for epitope prediction. "
                  + "Multiple alleles can be specified using a comma-separated list. "
-                 + "For a list of available alleles, use: `pvacseq valid_alleles`.",
+                 + "For a list of available alleles, use: `{} valid_alleles`.".format(tool_name),
         )
         parser.add_argument(
             "prediction_algorithms",
@@ -124,6 +124,16 @@ class PredictionRunArgumentParser(RunArgumentParser):
             '--run-reference-proteome-similarity',
             action='store_true',
             help="Blast peptides against the reference proteome."
+        )
+        self.parser.add_argument(
+            '--blastp-path',
+            help="Blastp installation path.",
+        )
+        self.parser.add_argument(
+            '--blastp-db',
+            choices=['refseq_select_prot', 'refseq_protein'],
+            default='refseq_select_prot',
+            help="The blastp database to use.",
         )
         self.parser.add_argument(
             '-a', '--additional-report-columns',

@@ -82,20 +82,20 @@ class AggregateAllEpitopes:
 
     def get_best_mut_line(self, df, hla_types, prediction_algorithms, vaf_clonal, max_ic50=1000):
         #order by best median score and get best ic50 peptide
-        if self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             df.sort_values(by=["Median Score"], inplace=True, ascending=True)
         else:
             df.sort_values(by=["Median MT Score", "Median WT Score"], inplace=True, ascending=[True, False])
         best = df.iloc[0]
 
-        if self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             tier = "NA"
         else:
             tier = self.get_tier(best, vaf_clonal)
 
         #these counts should represent only the "good binders" with ic50 < max
         #for all sites other than tier4 slop
-        if self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             good_binders = df[df["Median Score"] < max_ic50]
         else:
             good_binders = df[df["Median MT Score"] < max_ic50]
@@ -105,7 +105,7 @@ class AggregateAllEpitopes:
             hla = dict(map(lambda x : (x, good_binders_hla[x]) if x in good_binders_hla else (x, ""), hla_types))
             #get a list of all unique gene/transcript/aa_change combinations
             #store a count of all unique peptides that passed
-            if self.file_type == 'pVACbind':
+            if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                 anno_count = "NA"
                 peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict)))
                 for index, line in good_binders.to_dict(orient='index').items():
@@ -162,12 +162,10 @@ class AggregateAllEpitopes:
         else:
             hla = dict(map(lambda x : (x, ""), hla_types))
             peptides = {}
-            anno_count = 0
+            anno_count = "NA" if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse' else 0
             peptide_count = 0
 
-        if self.file_type == 'bedpe':
-            best['aachange'] = best['key']
-        elif self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             best['aachange'] = best['Mutation']
         else:
             if best['Variant Type'] == 'FS':
@@ -180,10 +178,14 @@ class AggregateAllEpitopes:
 
         #assemble the line
         out_dict = { k.replace('HLA-', ''):v for k,v in hla.items() }
-        if self.file_type == 'pVACbind':
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
+            if self.file_type == 'pVACfuse':
+                gene = best["Gene Name"]
+            else:
+                gene = "NA"
             out_dict.update({
-                'Gene': ["NA"],
-                'AA Change': [best["aachange"]],
+                'Gene': [gene],
+                'AA_change': [best["aachange"]],
                 'Num Passing Transcripts': [anno_count],
                 'Best Peptide': [best["Epitope Seq"]],
                 'Pos': ["NA"],
@@ -236,8 +238,8 @@ class AggregateAllEpitopes:
 
     #sort the table in our preferred manner
     def sort_table(self, df):
-        if self.file_type == 'pVACbind':
-            df.sort_values(by=["IC50 MT"], inplace=True, ascending=True)
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
+            df.sort_values(by=["ic50_MT"], inplace=True, ascending=True)
         else:
             #make sure the tiers sort in the expected order
             tier_sorter = ["Pass", "Relaxed", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr"]
@@ -310,8 +312,11 @@ class AggregateAllEpitopes:
             'Variant': str
         }
         key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=key_columns.keys(), dtype=key_columns)
-        keys = key_df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].values.tolist()
-        keys = [list(i) for i in set(tuple(i) for i in keys)]
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
+            keys = key_df["Mutation"].values.tolist()
+        else:
+            keys = key_df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].values.tolist()
+            keys = [list(i) for i in set(tuple(i) for i in keys)]
         #if self.file_type == 'pVACbind':
         #    df["key"] = df["Mutation"]
         #    df['annotation'] = df['Mutation']
@@ -326,8 +331,11 @@ class AggregateAllEpitopes:
         #    df['annotation'] = df[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1)
 
         ##do a crude estimate of clonal vaf/purity
-        vafs = np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["Tumor DNA VAF"])['Tumor DNA VAF'].unique())[::-1]
-        vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
+        if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
+            vafs = np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["Tumor DNA VAF"])['Tumor DNA VAF'].unique())[::-1]
+            vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
+        else:
+            vaf_clonal = None
 
 
         columns = ['ID']
@@ -336,15 +344,19 @@ class AggregateAllEpitopes:
         peptide_table = pd.DataFrame(columns=columns)
         metrics = {}
         for key in keys:
-            key_str = "{}-{}-{}-{}-{}".format(key[0], key[1], key[2], key[3], key[4])
-            df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, usecols=used_columns, dtype=dtypes)
-                    [lambda x: (x['Chromosome'] == key[0]) & (x['Start'] == key[1]) & (x['Stop'] == key[2]) & (x['Reference'] == key[3]) & (x['Variant'] == key[4])])
-            df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
-            df['Variant Type'] = df['Variant Type'].cat.add_categories('NA')
-            df['Mutation Position'] = df['Mutation Position'].cat.add_categories('NA')
-            df.fillna(value="NA", inplace=True)
-            df['annotation'] = df[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1)
-            df['key'] = key_str
+            if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
+                df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False)
+                        [lambda x: (x['Mutation'] == key)])
+            else:
+                key_str = "{}-{}-{}-{}-{}".format(key[0], key[1], key[2], key[3], key[4])
+                df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, usecols=used_columns, dtype=dtypes)
+                        [lambda x: (x['Chromosome'] == key[0]) & (x['Start'] == key[1]) & (x['Stop'] == key[2]) & (x['Reference'] == key[3]) & (x['Variant'] == key[4])])
+                df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
+                df['Variant Type'] = df['Variant Type'].cat.add_categories('NA')
+                df['Mutation Position'] = df['Mutation Position'].cat.add_categories('NA')
+                df.fillna(value="NA", inplace=True)
+                df['annotation'] = df[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1)
+                df['key'] = key_str
             (best_mut_line, best_peptide_mt, best_peptide_wt, best_hla_allele, peptides) = self.get_best_mut_line(df, hla_types, prediction_algorithms, vaf_clonal, 1000)
             peptide_table = peptide_table.append(best_mut_line, sort=False)
             all_peptides = defaultdict(lambda: defaultdict(list))
