@@ -8,11 +8,10 @@ import os
 import shutil
 
 class AggregateAllEpitopes:
-    def __init__(self, input_file, output_file, file_type='pVACseq', fasta_file=None):
+    def __init__(self, input_file, output_file, file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
-        self.fasta_file = fasta_file
         self.file_type = file_type
 
     def copy_pvacview_r_files(self):
@@ -258,16 +257,8 @@ class AggregateAllEpitopes:
 
         return df
 
-    def parse_fasta_file(self):
-        seq_dict = {}
-        for record in SeqIO.parse(self.fasta_file, "fasta"):
-            seq_dict[record.id] = str(record.seq)
-        return seq_dict
-
     def execute(self):
         pd.set_option('precision', 3)
-
-        peptide_fastas = self.parse_fasta_file()
 
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
 
@@ -371,19 +362,6 @@ class AggregateAllEpitopes:
                 'best_peptide_wt': best_peptide_wt,
                 'best_hla_allele': best_hla_allele,
             }
-            if self.fasta_file is not None:
-                if self.file_type == 'pVACbind':
-                    metrics[key_str]['peptide'] = peptides[line['Index']]
-                else:
-                    if line['Variant Type'] == 'FS':
-                        index = '%s.%s.%s.%s%s/%s' % (line['Gene Name'], line['Transcript'], line['Variant Type'], line['Protein Position'], line['Reference'], line['Variant'])
-                    else:
-                        index = '%s.%s.%s.%s%s' % (line['Gene Name'], line['Transcript'], line['Variant Type'], line['Protein Position'], line['Mutation'])
-                    wt_matches = [i for i in peptide_fastas.keys() if i.endswith(index) and i.startswith('WT')]
-                    mt_matches = [i for i in peptide_fastas.keys() if i.endswith(index) and i.startswith('MT')]
-                    if len(wt_matches) == 1 and len(mt_matches) == 1:
-                        metrics[key_str]['mt_peptide'] = peptide_fastas[mt_matches[0]]
-                        metrics[key_str]['wt_peptide'] = peptide_fastas[wt_matches[0]]
         peptide_table = self.sort_table(peptide_table)
 
         peptide_table.to_csv(self.output_file, sep='\t', na_rep='NA', index=False, float_format='%.3f')
