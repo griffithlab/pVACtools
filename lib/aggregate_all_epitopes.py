@@ -16,7 +16,7 @@ class AggregateAllEpitopes:
 
     def copy_pvacview_r_files(self):
         destination = os.path.dirname(__file__)
-        r_folder = os.abs.path(os.path.join(destination,"..","tools","pvacview"))
+        r_folder = os.path.abspath(os.path.join(destination,"..","tools","pvacview"))
         for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
             shutil.copy(os.path.join(r_folder, i), destination)
 
