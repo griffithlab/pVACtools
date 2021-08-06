@@ -5,6 +5,7 @@ sys.path.append(root)
 import argparse
 import tempfile
 import os
+import shutil
 import yaml
 import csv
 from collections import OrderedDict
@@ -154,6 +155,7 @@ def main(args_input = sys.argv[1:]):
     proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length)
     generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir, proximal_variants_tsv)
     parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv)
+    shutil.rmtree(temp_dir)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")
     CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()

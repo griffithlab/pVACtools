@@ -5,6 +5,7 @@ sys.path.append(root)
 import argparse
 import tempfile
 import os
+import shutil
 import yaml
 import csv
 from collections import OrderedDict
@@ -58,14 +59,14 @@ def convert_fusion_input(input_file, temp_dir):
     converter.execute()
     print("Completed")
 
-def generate_fasta(flanking_sequence_length, downstream_sequence_length, temp_dir):
+def generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file):
     print("Generating Variant Peptide FASTA and Key File")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     fasta_file = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file = os.path.join(temp_dir, 'tmp.fasta.key')
     generate_fasta_params = {
         'input_file'                : tsv_file,
-        'flanking_sequence_length'  : flanking_sequence_length,
+        'flanking_sequence_length'  : args.flanking_sequence_length,
         'epitope_length'            : 0,
         'output_file'               : fasta_file,
         'output_key_file'           : fasta_key_file,
@@ -74,6 +75,8 @@ def generate_fasta(flanking_sequence_length, downstream_sequence_length, temp_di
     fasta_generator = FusionFastaGenerator(**generate_fasta_params)
     fasta_generator.execute()
     print("Completed")
+    if save_tsv_file:
+        shutil.copy(tsv_file, "{}.tsv".format(args.output_file))
 
 def parse_input_tsv(input_tsv):
     if input_tsv is None:
@@ -109,7 +112,7 @@ def parse_files(output_file, temp_dir, input_tsv):
     SeqIO.write(output_records, output_file, "fasta")
     print("Completed")
 
-def main(args_input = sys.argv[1:]):
+def main(args_input = sys.argv[1:], save_tsv_file=False):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
@@ -122,8 +125,9 @@ def main(args_input = sys.argv[1:]):
 
     temp_dir = tempfile.mkdtemp()
     convert_fusion_input(args.input_file, temp_dir)
-    generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir)
+    generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file)
     parse_files(args.output_file, temp_dir, args.input_tsv)
+    shutil.rmtree(temp_dir)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")
     CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()

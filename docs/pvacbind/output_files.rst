@@ -46,6 +46,8 @@ documentation for more information on each individual filter. The standalone
 filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
 
+.. _pvacbind_all_ep_and_filtered:
+
 all_epitopes.tsv and filtered.tsv Report Columns
 ------------------------------------------------
 
@@ -112,6 +114,8 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - Was there a BLAST match of the mutated peptide sequence to the
        reference proteome?
 
+.. _pvacbind_reference_matches:
+
 filtered.tsv.reference_matches Report Columns
 ---------------------------------------------
 
@@ -149,3 +153,57 @@ option is chosen.
      - The match start position in the matched reference proteome sequence
    * - ``Match Stop``
      - The match stop position in the matched reference proteome sequence
+
+.. _pvacbind_aggregated:
+
+all_epitopes.aggregated.tsv Report Columns
+--------------------------------------------
+
+The ``all_epitopes.aggregated.tsv`` file is an aggregated version of the all_epitopes TSV.
+Like the all_epitopes.tsv and filtered.tsv reports, in order to keep the outputs consistent,
+pVACbind uses the same output columns as pVACseq for this file but some of the values will
+be ``NA`` if a column doesn't apply to pVACbind.
+This report presents the best-scoring (lowest binding affinity)
+epitope for each variant and outputs additional binding affinity for that epitope.
+It also gives information about the total number of well-scoring epitopes for each variant,
+as well as the HLA alleles that those epitopes are well-binding to.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Column Name
+     - Description
+   * - ``HLA Alleles`` (multiple) (T/F)
+     - For each HLA allele in the run, did the mutation result in an epitope that bound well
+       to the HLA allele? (with median mutant binding affinity < 1000).
+   * - ``Gene``
+     - ``NA``
+   * - ``AA_change``
+     - The amino acid change for the mutation
+   * - ``Num_Transcript``
+     - ``NA``
+   * - ``Peptide``
+     - The best-binding mutant epitope sequence (lowest median mutant binding
+       affinity)
+   * - ``Pos``
+     - ``NA``
+   * - ``Num_Peptides``
+     - The number of unique well-binding peptides for this mutation.
+   * - ``ic50_MT``
+     - Median ic50 binding affinity of the best-binding mutant epitope across all prediction algorithms used
+   * - ``ic50_WT``
+     - ``NA``
+   * - ``percentile_MT``
+     - Median binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used (those that provide percentile output)
+   * - ``percentile_WT``
+     - ``NA``
+   * - ``RNA_expr``
+     - ``NA``
+   * - ``RNA_VAF``
+     - ``NA``
+   * - ``RNA_Depth``
+     - ``NA``
+   * - ``DNA_VAF``
+     - ``NA``
+   * - ``tier``
+     - ``NA``

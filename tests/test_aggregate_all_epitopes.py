@@ -5,6 +5,7 @@ from filecmp import cmp
 import sys
 import py_compile
 from lib.aggregate_all_epitopes import *
+from .test_utils import *
 
 class AggregateAllEptiopesTests(unittest.TestCase):
     @classmethod
@@ -31,8 +32,8 @@ class AggregateAllEptiopesTests(unittest.TestCase):
     def test_aggregate_all_epitopes_pvacfuse_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile()
-        self.assertFalse(AggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacfuse.tsv'), output_file.name, 'bedpe').execute())
-        self.assertTrue(cmp(
+        self.assertFalse(AggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacfuse.tsv'), output_file.name, 'pVACfuse').execute())
+        self.assertTrue(compare(
             output_file.name,
             os.path.join(self.test_data_dir, "output.pvacfuse.tsv"),
         ))

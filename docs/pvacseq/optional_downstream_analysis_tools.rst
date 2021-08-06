@@ -22,7 +22,7 @@ input VCF file. One use case for this tool is to help select long peptides that 
 candidates. For example, if pvacseq was run to predict nonamers (9-mers) that are good binders and
 the user wishes to select long peptide (e.g. 24-mer) sequences that contain the nonamer for synthesis
 or encoding in a DNA vector. The protein sequence extracted will correspond to the transcript sequence 
-used in the annotated VCF. The alteration in the VCF (e.g. a somtic missense SNV) will be centered in the 
+used in the annotated VCF. The alteration in the VCF (e.g. a somatic missense SNV) will be centered in the 
 protein sequence returned (if possible). If the variant is near the beginning or end of the CDS, it will
 be as close to center as possible while returning the desired protein sequence length. If the variant
 causes a frameshift, the full downstream protein sequence will be returned unless the user specifies otherwise 
@@ -41,3 +41,44 @@ transcripts covered by those epitopes, as well as the HLA alleles that those
 epitopes are well-binding to. Lastly, the report will bin variants into tiers
 that offer suggestions as to the suitability of variants for use in vaccines.
 For a full definition of these tiers, see the pVACseq :ref:`output file documentation <aggregated>`.
+
+Calculate Reference Proteome Similarity
+---------------------------------------
+
+.. program-output:: pvacseq calculate_reference_proteome_similarity -h
+
+This tool will Blast peptides against the relative reference proteome and return the results in an output
+TSV & reference_match file pair, given a pVACseq run's fasta and filtered/all_epitopes TSV.  Typically, this
+can be done as part of the pVACseq run pipeline for the filtered output TSV if specified.  This tool,
+however, provides a standalone way to run this on pVACseq's generated filtered/all_epitopes TSV files.  For
+instance, this may be desired if pvacseq was originally run without this specified and one wished to perform
+this additional step after the fact for the filtered TSV—or perhaps instead the results of this were desired
+for the all_epitopes TSV which does not have this step performed.
+For a closer look at the generated reference_match file,
+see the pVACseq :ref:`output file documentation <reference_matches>`.
+
+NetChop Predict Cleavage Sites
+------------------------------
+
+.. program-output:: pvacseq net_chop -h
+
+This tool uses NetChop to predict cleavage sites for neoepitopes from a pVACseq run's filtered/all_epitopes
+TSV.  In its output, it adds to the TSV 3 columns: Best Cleavage Position, Best Cleavage Score, and a
+Cleavage Sites list.  Typically this step is done in the pVACseq run pipeline for the filtered output TSV
+when specified.  This tool provides a way to manually run this on pVACseq's generated filtered/all_epitopes
+TSV files so that you can add this information when not present if desired.
+You can view more about these columns for pVACseq in
+the :ref:`output file documentation <all_ep_and_filtered>`.
+
+NetMHCStab Predict Stability
+----------------------------
+
+.. program-output:: pvacseq netmhc_stab -h
+
+This tool uses NetMHCstabpan to add stability predictions for neoepitopes from a pVACseq run's
+filtered/all_epitopes TSV.  In its output, it adds to the TSV 4 columns: Predicted Stability, Half Life,
+Stability Rank, and NetMHCStab Allele.  Typically this step is done in the pVACseq run pipeline for the
+filtered output TSV when specified.  This tool provides a way to manually run this on pVACseq's generated
+filtered/all_epitopes TSV files so that you can add this information when not present if desired.
+You can view more about these columns for pVACseq in
+the :ref:`output file documentation <all_ep_and_filtered>`.
