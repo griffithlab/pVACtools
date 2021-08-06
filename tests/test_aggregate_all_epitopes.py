@@ -22,8 +22,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
     def test_aggregate_all_epitopes_pvacseq_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
-        self.assertFalse(AggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'), output_file.name).execute())
-        import pdb; pdb.set_trace()
+        self.assertFalse(PvacseqAggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'), output_file.name).execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "output.tsv"),
@@ -32,7 +31,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
     def test_aggregate_all_epitopes_pvacfuse_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile()
-        self.assertFalse(AggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacfuse.tsv'), output_file.name, 'pVACfuse').execute())
+        self.assertFalse(UnmatchedSequenceAggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacfuse.tsv'), output_file.name).execute())
         self.assertTrue(compare(
             output_file.name,
             os.path.join(self.test_data_dir, "output.pvacfuse.tsv"),
@@ -41,7 +40,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
     def test_aggregate_all_epitopes_pvacbind_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile()
-        self.assertFalse(AggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacbind.tsv'), output_file.name, 'pVACbind').execute())
+        self.assertFalse(UnmatchedSequenceAggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacbind.tsv'), output_file.name).execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "output.pvacbind.tsv"),
