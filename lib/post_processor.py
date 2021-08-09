@@ -138,6 +138,7 @@ class PostProcessor:
                 species=self.species,
                 file_type=self.file_type
             ).execute()
+            shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.filtered_report_file))
             print("Completed")
         else:
             shutil.copy(self.netmhc_stab_fh.name, self.reference_similarity_fh.name)
