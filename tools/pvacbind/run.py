@@ -65,6 +65,7 @@ def main(args_input = sys.argv[1:]):
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
         'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
+        'net_chop_fasta'            : args.input_file,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
         'additional_report_columns' : args.additional_report_columns,

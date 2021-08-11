@@ -24,6 +24,7 @@ class PostProcessor:
         self.reference_similarity_fh = tempfile.NamedTemporaryFile()
         self.file_type = kwargs.pop('file_type', None)
         self.fasta = kwargs.pop('fasta', None)
+        self.net_chop_fasta = kwargs.pop('net_chop_fasta', None)
 
     def execute(self):
         self.aggregate_all_epitopes()
@@ -105,7 +106,7 @@ class PostProcessor:
     def call_net_chop(self):
         if self.run_net_chop:
             print("Submitting remaining epitopes to NetChop")
-            NetChop(self.top_score_filter_fh.name, self.net_chop_fh.name, self.net_chop_method, str(self.net_chop_threshold)).execute()
+            NetChop(self.top_score_filter_fh.name, self.net_chop_fasta, self.net_chop_fh.name, self.net_chop_method, str(self.net_chop_threshold), self.file_type).execute()
             print("Completed")
         else:
             shutil.copy(self.top_score_filter_fh.name, self.net_chop_fh.name)

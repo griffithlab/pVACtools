@@ -46,6 +46,7 @@ class NetChopTest(unittest.TestCase):
             'test_data',
             'net_chop'
         )
+        cls.test_fasta = os.path.join(cls.test_data_directory, 'Test_net_chop.fasta')
 
     def test_net_chop_compiles(self):
         compiled_script_path = py_compile.compile(self.script_path)
@@ -63,6 +64,7 @@ class NetChopTest(unittest.TestCase):
             output_file = tempfile.NamedTemporaryFile()
             lib.net_chop.NetChop(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
+                self.test_fasta,
                 output_file.name,
                 method
             ).execute()
@@ -81,6 +83,7 @@ class NetChopTest(unittest.TestCase):
         output_file = tempfile.NamedTemporaryFile()
         lib.net_chop.NetChop(
             os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
+            self.test_fasta,
             output_file.name,
             '20s'
         ).execute()

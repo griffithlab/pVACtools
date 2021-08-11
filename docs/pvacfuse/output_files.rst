@@ -27,6 +27,8 @@ created):
    * - ``<sample_name>.fasta``
      - A fasta file with mutant peptide subsequences for all
        processable fusion combinations.
+   * - ``<sample_name>.net_chop.fa``
+     - A fasta file with mutant peptide subsequences specific for use in running the net_chop tool.
    * - ``<sample_name>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``.
