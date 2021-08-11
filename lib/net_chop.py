@@ -6,6 +6,7 @@ import tempfile
 import re
 import os
 from time import sleep
+from Bio import SeqIO
 import collections
 import lib.run_utils
 
@@ -13,22 +14,46 @@ cycle = ['|', '/', '-', '\\']
 methods = ['cterm', '20s']
 
 class NetChop:
-    def __init__(self, input_file, output_file, method='cterm', threshold=0.5):
+    def __init__(self, input_file, input_fasta, output_file, method='cterm', threshold=0.5, file_type='pVACseq'):
         self.input_file = input_file
+        self.input_fasta = input_fasta
         self.output_file = output_file
         self.method = method
         self.threshold = float(threshold)
+        self.file_type = file_type
+
+    def get_mt_peptides(self):
+        records = list(SeqIO.parse(self.input_fasta, "fasta"))
+        if self.file_type == 'pVACseq':
+            records_dict = {x.id.replace('MT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
+        else:
+            records_dict = {x.id: str(x.seq) for x in records}
+        return records_dict
+
+    def extract_flanked_epitope(self, full_peptide, epitope):
+        flanking_sequence_length = 9
+        ep_start = full_peptide.index(epitope)
+        start = ep_start - flanking_sequence_length
+        if start < 0:
+            start = 0
+        start_diff = ep_start - start
+        end = ep_start + len(epitope) + flanking_sequence_length
+        return full_peptide[start:end], start_diff
 
     def execute(self):
         chosen_method = str(methods.index(self.method))
         jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
         result_delimiter = re.compile(r'-{20,}')
         fail_searcher = re.compile(r'(Failed run|Problematic input:)')
+
+        mt_records_dict = self.get_mt_peptides()
+
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
             reader = csv.DictReader(input_fh, delimiter='\t')
+            cleavage_cols = ['Best Cleavage Position', 'Best Cleavage Score', 'Cleavage Sites']
             writer = csv.DictWriter(
                 output_fh,
-                reader.fieldnames+['Best Cleavage Position', 'Best Cleavage Score', 'Cleavage Sites'],
+                reader.fieldnames if all(col in reader.fieldnames for col in cleavage_cols) else reader.fieldnames+cleavage_cols,
                 delimiter='\t',
                 lineterminator='\n'
             )
@@ -40,14 +65,20 @@ class NetChop:
             for chunk in lib.run_utils.split_file(reader, 100):
                 staging_file = tempfile.NamedTemporaryFile(mode='w+')
                 current_buffer = {}
+                seqs_start_diff = {}
                 for line in chunk:
                     sequence_id = ('%010x'%x)[-10:]
                     staging_file.write('>'+sequence_id+'\n')
-                    if 'Epitope Seq' in line:
-                        staging_file.write(line['Epitope Seq']+'\n')
+                    if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
+                        full_peptide = mt_records_dict[line['Mutation']]
+                        epitope = line['Epitope Seq']
                     else:
-                        staging_file.write(line['MT Epitope Seq']+'\n')
+                        full_peptide = mt_records_dict[line['Index']]
+                        epitope = line['MT Epitope Seq']
+                    peptide, start_diff = self.extract_flanked_epitope(full_peptide, epitope)
+                    staging_file.write(peptide+'\n')
                     current_buffer[sequence_id] = {k:line[k] for k in line}
+                    seqs_start_diff[sequence_id] = (start_diff, len(epitope))
                     x+=1
                 staging_file.seek(0)
                 response = requests.post(
@@ -79,11 +110,15 @@ class NetChop:
                     score = -1
                     pos = 0
                     sequence_name = False
+                    start_diff = False
+                    ep_len = False
                     cleavage_scores = {}
                     for line in results[i].split('\n'):
                         data = [word for word in line.strip().split(' ') if len(word)]
                         if not sequence_name:
                             sequence_name = data[4]
+                            start_diff = seqs_start_diff[sequence_name][0]
+                            ep_len = seqs_start_diff[sequence_name][1]
                         currentPosition = data[0]
                         isCleavage = data[2]
                         if isCleavage is not 'S':
@@ -95,10 +130,16 @@ class NetChop:
                         best_cleavage_score = 'NA'
                         cleavage_sites = 'NA'
                     else:
-                        max_cleavage_score = max(cleavage_scores.items(), key=lambda x: x[1])
+                        #filter out cleavage sites outside epitope and adjust positions in accordance
+                        epitope_cleavage_scores = [
+                            (x[0] - start_diff, x[1])
+                            for x in map(lambda x: (int(x[0]), x[1]), cleavage_scores.items())
+                            if x[0] >= start_diff and x[0] <= start_diff + ep_len
+                        ]
+                        max_cleavage_score = max(epitope_cleavage_scores, key=lambda x: x[1])
                         best_cleavage_position = max_cleavage_score[0]
                         best_cleavage_score = max_cleavage_score[1]
-                        sorted_cleavage_scores = collections.OrderedDict(sorted(cleavage_scores.items()))
+                        sorted_cleavage_scores = collections.OrderedDict(sorted(epitope_cleavage_scores))
                         cleavage_sites = ','.join(['%s:%s' % (key, value) for (key, value) in sorted_cleavage_scores.items()])
                     line = current_buffer[sequence_name]
                     line.update({
@@ -120,6 +161,10 @@ class NetChop:
         parser.add_argument(
             'input_file',
             help="Input filtered file with predicted epitopes."
+        )
+        parser.add_argument(
+            'input_fasta',
+            help="The required fasta file."
         )
         parser.add_argument(
             'output_file',
