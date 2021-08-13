@@ -106,7 +106,7 @@ class PostProcessor:
     def call_net_chop(self):
         if self.run_net_chop:
             print("Submitting remaining epitopes to NetChop")
-            NetChop(self.top_score_filter_fh.name, self.net_chop_fasta, self.net_chop_fh.name, self.net_chop_method, str(self.net_chop_threshold), self.file_type).execute()
+            NetChop(self.top_score_filter_fh.name, self.net_chop_fasta, self.net_chop_fh.name, self.net_chop_method, str(self.net_chop_threshold), self.file_type, self.n_threads).execute()
             print("Completed")
         else:
             shutil.copy(self.top_score_filter_fh.name, self.net_chop_fh.name)
