@@ -11,6 +11,7 @@ import binascii
 import re
 import glob
 from Bio import SeqIO
+import logging
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -336,8 +337,13 @@ class VcfConverter(InputFileConverter):
                     else:
                         tsl = 'NA'
 
+                    wildtype_amino_acid_sequence = transcript['WildtypeProtein']
+                    if '*' in wildtype_amino_acid_sequence:
+                        logging.warning("Transcript WildtypeProtein sequence contains internal stop codon. These can occur in Ensembl transcripts of the biotype polymorphic_pseudogene. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        continue
+
                     if transcript['FrameshiftSequence'] != '':
-                        wt_len = len(transcript['WildtypeProtein'])
+                        wt_len = len(wildtype_amino_acid_sequence)
                         mt_len = len(transcript['FrameshiftSequence'])
                         if mt_len > wt_len:
                             protein_length_change = "+{}".format(mt_len - wt_len)
@@ -360,7 +366,7 @@ class VcfConverter(InputFileConverter):
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,
-                        'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
+                        'wildtype_amino_acid_sequence'   : wildtype_amino_acid_sequence,
                         'frameshift_amino_acid_sequence' : transcript['FrameshiftSequence'],
                         'fusion_amino_acid_sequence'     : '',
                         'variant_type'                   : consequence,
