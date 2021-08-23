@@ -133,6 +133,8 @@ class VcfConverter(InputFileConverter):
 
         if 'start_lost' in consequences:
             consequence = None
+        elif 'stop_retained_variant' in consequences:
+            consequence = None
         elif 'frameshift_variant' in consequences:
             consequence = 'FS'
         elif 'missense_variant' in consequences:
