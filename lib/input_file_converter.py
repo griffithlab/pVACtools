@@ -302,8 +302,13 @@ class VcfConverter(InputFileConverter):
                 for transcript in transcripts:
                     if '/' in transcript['Protein_position']:
                         protein_position = transcript['Protein_position'].split('/')[0]
+                        if protein_position == '-':
+                            protein_position = transcript['Protein_position'].split('/')[1]
                     else:
                         protein_position = transcript['Protein_position']
+                    if protein_position == '-':
+                        print("Variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        continue
                     transcript_name = transcript['Feature']
                     consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
                     if consequence is None:
