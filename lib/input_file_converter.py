@@ -224,8 +224,13 @@ class VcfConverter(InputFileConverter):
                 proximal_variant_type = 'germline'
             if '/' in csq_entry['Protein_position']:
                 protein_position = csq_entry['Protein_position'].split('/')[0]
+                if protein_position == '-':
+                    protein_position = csq_entry['Protein_position'].split('/')[1]
             else:
                 protein_position = csq_entry['Protein_position']
+            if protein_position == '-':
+                print("Proximal variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, csq_entry['Feature']))
+                continue
             proximal_variant_entry = {
                 'chromosome_name': proximal_variant.CHROM,
                 'start': proximal_variant.affected_start,
