@@ -432,9 +432,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def copy_pvacview_r_files(self):
         module_dir = os.path.dirname(__file__)
         r_folder = os.path.abspath(os.path.join(module_dir,"..","tools","pvacview"))
-        destination = os.path.dirname(self.output_file)
+        destination = os.path.abspath(os.path.dirname(self.output_file))
         for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
-            shutil.copy(os.path.join(r_folder, i), destination)
+            shutil.copy(os.path.join(r_folder, i), os.path.join(destination, i))
 
 
 class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
