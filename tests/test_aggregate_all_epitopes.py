@@ -40,6 +40,11 @@ class AggregateAllEptiopesTests(unittest.TestCase):
             self.assertTrue(os.path.isfile(pvacview_file))
             os.remove(pvacview_file)
 
+        for i in ["anchor.png", "pVACview_logo.png", "pVACview_logo_mini.png"]:
+            pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
+            self.assertTrue(os.path.isfile(pvacview_file))
+            os.remove(pvacview_file)
+
     def test_aggregate_all_epitopes_pvacfuse_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
@@ -56,6 +61,10 @@ class AggregateAllEptiopesTests(unittest.TestCase):
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
             self.assertFalse(os.path.isfile(pvacview_file))
 
+        for i in ["anchor.png", "pVACview_logo.png", "pVACview_logo_mini.png"]:
+            pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
+            self.assertFalse(os.path.isfile(pvacview_file))
+
     def test_aggregate_all_epitopes_pvacbind_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
@@ -70,4 +79,8 @@ class AggregateAllEptiopesTests(unittest.TestCase):
 
         for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
+            self.assertFalse(os.path.isfile(pvacview_file))
+
+        for i in ["anchor.png", "pVACview_logo.png", "pVACview_logo_mini.png"]:
+            pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
             self.assertFalse(os.path.isfile(pvacview_file))
