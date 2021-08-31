@@ -4,6 +4,8 @@ import sys
 import tempfile
 from filecmp import cmp
 import py_compile
+import logging
+from testfixtures import LogCapture, StringComparison as S
 from .test_utils import *
 from lib.input_file_converter import *
 
@@ -43,6 +45,24 @@ class InputFileConverterTests(unittest.TestCase):
             converter = VcfConverter(**convert_vcf_params)
             converter.execute()
             self.assertTrue('VCF is truncated at the end of the file' in str(context.exception))
+
+    def test_wildtype_protein_sequence_with_stop(self):
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_wildtype_sequence_with_stop.vcf')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+        logging.disable(logging.NOTSET)
+
+        with LogCapture() as l:
+            convert_vcf_params = {
+                'input_file'        : convert_vcf_input_file,
+                'output_file'       : convert_vcf_output_file.name,
+            }
+            converter = VcfConverter(**convert_vcf_params)
+            converter.execute()
+            warn_message = "Transcript WildtypeProtein sequence contains internal stop codon. These can occur in Ensembl transcripts of the biotype polymorphic_pseudogene. Skipping."
+            logged_str = "".join(l.actual()[0])
+            self.assertTrue(warn_message in logged_str)
+            expected_output_file = os.path.join(self.test_data_dir, 'output_wildtype_sequence_with_stop.tsv')
+            self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
     def test_input_vcf_generates_expected_tsv(self):
         convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
