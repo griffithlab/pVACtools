@@ -39,7 +39,7 @@ for dirpath, dirnames, filenames in os.walk("tools/pvacseq/iedb_alleles"):
 
 setup(
     name="pvactools",
-    version="2.0.3",
+    version="2.0.4",
     packages=[
         "tools",
         "tools.pvacbind",
@@ -71,6 +71,7 @@ setup(
         'pymp-pypi',
         'mock',
         'vaxrank>=1.1.0',
+        'keras==2.4.3',
         'tensorflow==2.2.2',
         'mhcnuggets==2.3.3',
         'mhcflurry==2.0.1',
