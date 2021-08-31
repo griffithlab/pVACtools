@@ -11,6 +11,7 @@ import binascii
 import re
 import glob
 from Bio import SeqIO
+import logging
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -132,6 +133,8 @@ class VcfConverter(InputFileConverter):
 
         if 'start_lost' in consequences:
             consequence = None
+        elif 'stop_retained_variant' in consequences:
+            consequence = None
         elif 'frameshift_variant' in consequences:
             consequence = 'FS'
         elif 'missense_variant' in consequences:
@@ -221,8 +224,13 @@ class VcfConverter(InputFileConverter):
                 proximal_variant_type = 'germline'
             if '/' in csq_entry['Protein_position']:
                 protein_position = csq_entry['Protein_position'].split('/')[0]
+                if protein_position == '-':
+                    protein_position = csq_entry['Protein_position'].split('/')[1]
             else:
                 protein_position = csq_entry['Protein_position']
+            if protein_position == '-':
+                print("Proximal variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, csq_entry['Feature']))
+                continue
             proximal_variant_entry = {
                 'chromosome_name': proximal_variant.CHROM,
                 'start': proximal_variant.affected_start,
@@ -299,8 +307,13 @@ class VcfConverter(InputFileConverter):
                 for transcript in transcripts:
                     if '/' in transcript['Protein_position']:
                         protein_position = transcript['Protein_position'].split('/')[0]
+                        if protein_position == '-':
+                            protein_position = transcript['Protein_position'].split('/')[1]
                     else:
                         protein_position = transcript['Protein_position']
+                    if protein_position == '-':
+                        print("Variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        continue
                     transcript_name = transcript['Feature']
                     consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
                     if consequence is None:
@@ -336,8 +349,13 @@ class VcfConverter(InputFileConverter):
                     else:
                         tsl = 'NA'
 
+                    wildtype_amino_acid_sequence = transcript['WildtypeProtein']
+                    if '*' in wildtype_amino_acid_sequence:
+                        logging.warning("Transcript WildtypeProtein sequence contains internal stop codon. These can occur in Ensembl transcripts of the biotype polymorphic_pseudogene. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        continue
+
                     if transcript['FrameshiftSequence'] != '':
-                        wt_len = len(transcript['WildtypeProtein'])
+                        wt_len = len(wildtype_amino_acid_sequence)
                         mt_len = len(transcript['FrameshiftSequence'])
                         if mt_len > wt_len:
                             protein_length_change = "+{}".format(mt_len - wt_len)
@@ -360,7 +378,7 @@ class VcfConverter(InputFileConverter):
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,
-                        'wildtype_amino_acid_sequence'   : transcript['WildtypeProtein'],
+                        'wildtype_amino_acid_sequence'   : wildtype_amino_acid_sequence,
                         'frameshift_amino_acid_sequence' : transcript['FrameshiftSequence'],
                         'fusion_amino_acid_sequence'     : '',
                         'variant_type'                   : consequence,
