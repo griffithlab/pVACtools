@@ -75,6 +75,7 @@ setup(
         'tensorflow==2.2.2',
         'mhcnuggets==2.3.3',
         'mhcflurry==2.0.1',
+        'testfixtures'
     ],
     package_data={
         'tools.pvacseq': pvacseq_data_files,
