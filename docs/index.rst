@@ -60,18 +60,22 @@ New in release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- A bug in the reference proteome similarity step would cause this step to
-  fail if the full wildtype peptide sequence of the frameshift was longer
-  than its full mutant peptide sequence. This release fixes this issue.
-- A bug in the top score filter would cause this step to fail if it
-  encountered transcripts that do not start with ``ENS``. Support for
-  transcripts that start with ``NM_`` has been added in this release and a
-  more descriptive error message will now be raised if an unsupported
-  transcript name is encountered.
-- This release adds some minor improvements to the reference proteome
-  similarity step. A wait of 10 seconds was added after calling the BLAST API
-  to comply with their usage guidelines. Word size and gapcost parameters were
-  also added to these calls to improve result specificity.
+- Failed calls to the NetChop and NetMHCstab API were not being caught
+  correctly because failures would still result in a 200 return code. This
+  would ultimately result in empty filtered report files. This
+  release adds more error checking around the returned content
+  from these APIs and will fail if the content is not formatted as expected.
+- This release adds handling of some more VCF edge cases that were previously
+  unsupported. Variant transcripts that are annotated with * in the wildtype
+  protein sequence or that have a stop_retained_variant consequence are now
+  skipped. In addition, some variants may encode their postion as ``-/1234``,
+  which was previsouly not supported but has now been added.
+- When running pVACseq, pVACbind, or pVACfuse with the
+  ``--run-reference-proteome-similarity`` option enable this step would create
+  a reference matches file but the pipeline previously failed to copy this
+  file into the output directory. This release fixes that issue.
+- keras is now pinned to version 2.4.3 since newer versions might not be compatible
+  with the pinned tensorflow version.
 
 New in version |version|
 ------------------------
