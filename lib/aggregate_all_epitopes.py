@@ -436,7 +436,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         os.makedirs(os.path.join(destination, "www"), exist_ok=True)
         for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
             shutil.copy(os.path.join(r_folder, i), os.path.join(destination, i))
-        for i in ["anchor.png", "pVACview_logo.png", "pVACview_logo_mini.png"]:
+        for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
             shutil.copy(os.path.join(r_folder, "www", i), os.path.join(destination, "www", i))
 
 
