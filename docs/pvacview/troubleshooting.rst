@@ -81,3 +81,9 @@ Commonly Asked Questions
   a higher probability of being an anchor location. The mutation(s) is marked in red letters.
 
 - To the right of the additional information box, we provide a graphical guide regarding how one can take anchor information into account, more details on how to interpret this data can be found in `our paper <https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1>`_.
+
+5. :bold:`I'm getting an error for the anchor heatmap tab saying "Error:polygon edge not found", what do I do?`
+
+- Users have occasionally ran into the problem where their anchor heatmap does not display and instead shows an error saying "polygon edge not found". After investigation
+  we believe this may be related to your arial font file. This stackoverflow page describes the detailed steps to resolving this issue:
+  `https://stackoverflow.com/questions/10581440/error-in-grid-calll-textbounds-as-graphicsannotxlabel-xx-xy-polygon <https://stackoverflow.com/questions/10581440/error-in-grid-calll-textbounds-as-graphicsannotxlabel-xx-xy-polygon>`_ .
