@@ -40,7 +40,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
             self.assertTrue(os.path.isfile(pvacview_file))
             os.remove(pvacview_file)
 
-        for i in ["anchor.png", "pVACview_logo.png", "pVACview_logo_mini.png"]:
+        for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
             self.assertTrue(os.path.isfile(pvacview_file))
             os.remove(pvacview_file)
@@ -61,7 +61,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
             self.assertFalse(os.path.isfile(pvacview_file))
 
-        for i in ["anchor.png", "pVACview_logo.png", "pVACview_logo_mini.png"]:
+        for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
             self.assertFalse(os.path.isfile(pvacview_file))
 
@@ -81,6 +81,6 @@ class AggregateAllEptiopesTests(unittest.TestCase):
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
             self.assertFalse(os.path.isfile(pvacview_file))
 
-        for i in ["anchor.png", "pVACview_logo.png", "pVACview_logo_mini.png"]:
+        for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
             self.assertFalse(os.path.isfile(pvacview_file))
