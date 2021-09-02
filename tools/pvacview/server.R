@@ -111,6 +111,9 @@ server <- shinyServer(function(input, output, session) {
      updateTabItems(session, "tabs", "explore")
    })
 
+  observeEvent(input$visualize,{
+    updateTabItems(session, "tabs", "explore")
+  })
   
   #reactions for once "regenerate table" button is clicked
   observeEvent(input$submit,{

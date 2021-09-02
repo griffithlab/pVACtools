@@ -77,7 +77,8 @@ ui <- dashboardPage(
             fileInput(inputId="additionalDataInput", label="Additional Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
                                                                                                                                "text/tab-separated-values,text/plain",
                                                                                                                                ".tsv")),
-            textInput("add_file_label", "Please provide a label for the additional file uploaded (e.g. Class I data or Class II data)")
+            textInput("add_file_label", "Please provide a label for the additional file uploaded (e.g. Class I data or Class II data)"),
+            actionButton('visualize', "Visualize")
           ),
         )
       ),
