@@ -20,6 +20,7 @@ ui <- dashboardPage(
     ),
   sidebar = dashboardSidebar(
     sidebarMenu(
+      id="tabs",
       menuItem("Upload", tabName = "upload", icon = icon("upload")),
       menuItem("Visualize and Explore", tabName = "explore", icon = icon("digital-tachograph")),
       menuItem("Export", tabName = "export", icon = icon("file-export"))
@@ -53,6 +54,12 @@ ui <- dashboardPage(
         # infoBoxes
         fluidRow(
           box(
+            title="Load Default Data", status='primary', solidHeader = TRUE,
+            actionButton('loadDefaultmain', "Load Default Data", style="color: #fff; background-color: #c92424; border-color: #691111")
+          )
+        ),
+        fluidRow(
+          box(
             title="Upload Data Files", status='primary', solidHeader = TRUE,
             h5("Please upload the aggregate report file. Note that this will be the data displayed in the main table in the Explore tab."),
             fileInput(inputId="mainDataInput", label="Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
@@ -72,14 +79,6 @@ ui <- dashboardPage(
                                                                                                                                ".tsv")),
             textInput("add_file_label", "Please provide a label for the additional file uploaded (e.g. Class I data or Class II data)")
           ),
-        
-          box(
-            title="Load Default Data", collapsible = TRUE, collapsed = TRUE,
-            textInput("sample_label", "Please provide the sample name of the files you would like to load (default: TUMOR).", value = "TUMOR"),
-            actionButton('loadDefaultmain', "Load default Main data"),br(),
-            actionButton('loadDefaultmetrics', "Load default Metrics data"), br(),
-            actionButton('loadDefaultadd', "Load default Additional data")
-          )
         )
       ),
       
