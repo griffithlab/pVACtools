@@ -89,7 +89,7 @@ server <- shinyServer(function(input, output, session) {
 
   #Option 2: Load from default (relative) file path for aggregate report file 
    observeEvent(input$loadDefaultmain,{
-     mainData <- read.table(paste("./",input$sample_label,".class_I.all_epitopes.aggregated.tsv", sep=""), sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     mainData <- read.table("./TUMOR.class_I.all_epitopes.aggregated.tsv", sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(mainData) <- mainData[1,]
      mainData <- mainData[-1,]
      row.names(mainData) <- NULL
@@ -102,21 +102,15 @@ server <- shinyServer(function(input, output, session) {
      dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
      df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, unlist(x["Pos"]), anchor_mode="default"))
+     df$metricsData <- fromJSON("./TUMOR.class_I.all_epitopes.aggregated.metrics.json")
+     addData <- read.table("../MHC_Class_II/TUMOR.class_II.all_epitopes.aggregated.tsv", sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     colnames(addData) <- addData[1,]
+     addData <- addData[-1,]
+     row.names(addData) <- NULL
+     df$additionalData <- addData
+     updateTabItems(session, "tabs", "explore")
    })
 
-  #Option 2: Load from default (relative) file path for metrics file 
-  observeEvent(input$loadDefaultmetrics,{
-    df$metricsData <- fromJSON(paste("./",input$sample_label,".class_I.all_epitopes.aggregated.metrics.json", sep=""))
-  })
-  
-  #Option 2: Load from default (relative) file path for additional data file
-  observeEvent(input$loadDefaultadd,{
-    addData <- read.table(paste("../MHC_Class_II/",input$sample_label,".class_II.all_epitopes.aggregated.tsv", sep=""), sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
-    colnames(addData) <- addData[1,]
-    addData <- addData[-1,]
-    row.names(addData) <- NULL
-    df$additionalData <- addData
-  })
   
   #reactions for once "regenerate table" button is clicked
   observeEvent(input$submit,{
