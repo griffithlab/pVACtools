@@ -86,10 +86,12 @@ server <- shinyServer(function(input, output, session) {
     row.names(addData) <- NULL
     df$additionalData <- addData
   })
+  
 
   #Option 2: Load from default (relative) file path for aggregate report file 
    observeEvent(input$loadDefaultmain,{
-     mainData <- read.table("./TUMOR.class_I.all_epitopes.aggregated.tsv", sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_I.tsv")
+     mainData <- read.table(text=data, sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(mainData) <- mainData[1,]
      mainData <- mainData[-1,]
      row.names(mainData) <- NULL
@@ -102,8 +104,10 @@ server <- shinyServer(function(input, output, session) {
      dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
      df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, unlist(x["Pos"]), anchor_mode="default"))
-     df$metricsData <- fromJSON("./TUMOR.class_I.all_epitopes.aggregated.metrics.json")
-     addData <- read.table("../MHC_Class_II/TUMOR.class_II.all_epitopes.aggregated.tsv", sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_I_metrics.json")
+     df$metricsData <- fromJSON(txt = metricsdata)
+     additionalData <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_II.tsv")
+     addData <- read.table(text = additionalData, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(addData) <- addData[1,]
      addData <- addData[-1,]
      row.names(addData) <- NULL
