@@ -233,11 +233,13 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def get_tier(self, mutation, vaf_clonal):
         anchor_residue_pass = True
         anchors = [1, 2, len(mutation["MT Epitope Seq"])-1, len(mutation["MT Epitope Seq"])]
-        if mutation["Mutation Position"] in anchors:
-            if mutation["Median WT Score"] == "NA":
-                  anchor_residue_pass = False
-            elif mutation["Median WT Score"] < 1000:
-                  anchor_residue_pass = False
+        position = mutation["Mutation Position"]
+        if position != "NA":
+            if int(float(position)) in anchors:
+                if mutation["Median WT Score"] == "NA":
+                      anchor_residue_pass = False
+                elif mutation["Median WT Score"] < 1000:
+                      anchor_residue_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
         if (mutation["Median MT Score"] < 500 and
