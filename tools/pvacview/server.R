@@ -160,7 +160,7 @@ server <- shinyServer(function(input, output, session) {
       datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Best HLA allele")]
     , escape = FALSE, callback = JS(callBack(hla_count())), class = 'stripe',
           options=list(lengthChange = FALSE, dom = 'Bfrtip', 
-                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(6-hla_count()+24))),
+                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(25-(7-hla_count())))),
                    buttons = list(I('colvis')), 
                    initComplete = htmlwidgets::JS(
                      "function(settings, json) {",
