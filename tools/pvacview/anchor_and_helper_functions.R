@@ -67,7 +67,7 @@ calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution){
 #calculate the positions different between MT and WT peptide
 calculate_mutation_info <- function(metrics_data_row){
   wt_peptide <- metrics_data_row$best_peptide_wt
-  if (wt_peptide == "NA") {
+  if (is.na(wt_peptide)){
     return (0)
   }
   mt_peptide <- metrics_data_row$best_peptide_mt
