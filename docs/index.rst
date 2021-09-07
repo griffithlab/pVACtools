@@ -22,6 +22,11 @@ tools:
    users in launching, managing, reviewing, and visualizing the results of
    pVACtools processes.
 
+**pVACview**
+   An application based on R Shiny that assists
+   users in reviewing, exploring and prioritizing neoantigens from the results of
+   pVACtools processes for personalized cancer vaccine design.
+
 .. image:: images/pVACtools_main-figure_v5a.png
     :align: center
     :alt: pVACtools immunotherapy workflow
@@ -35,6 +40,7 @@ tools:
    pvacfuse
    pvacvector
    pvacviz
+   pvacview
 
 .. toctree::
    :maxdepth: 1
@@ -54,18 +60,22 @@ New in release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- A bug in the reference proteome similarity step would cause this step to
-  fail if the full wildtype peptide sequence of the frameshift was longer
-  than its full mutant peptide sequence. This release fixes this issue.
-- A bug in the top score filter would cause this step to fail if it
-  encountered transcripts that do not start with ``ENS``. Support for
-  transcripts that start with ``NM_`` has been added in this release and a
-  more descriptive error message will now be raised if an unsupported
-  transcript name is encountered.
-- This release adds some minor improvements to the reference proteome
-  similarity step. A wait of 10 seconds was added after calling the BLAST API
-  to comply with their usage guidelines. Word size and gapcost parameters were
-  also added to these calls to improve result specificity.
+- Failed calls to the NetChop and NetMHCstab API were not being caught
+  correctly because failures would still result in a 200 return code. This
+  would ultimately result in empty filtered report files. This
+  release adds more error checking around the returned content
+  from these APIs and will fail if the content is not formatted as expected.
+- This release adds handling of some more VCF edge cases that were previously
+  unsupported. Variant transcripts that are annotated with * in the wildtype
+  protein sequence or that have a stop_retained_variant consequence are now
+  skipped. In addition, some variants may encode their postion as ``-/1234``,
+  which was previsouly not supported but has now been added.
+- When running pVACseq, pVACbind, or pVACfuse with the
+  ``--run-reference-proteome-similarity`` option enable this step would create
+  a reference matches file but the pipeline previously failed to copy this
+  file into the output directory. This release fixes that issue.
+- keras is now pinned to version 2.4.3 since newer versions might not be compatible
+  with the pinned tensorflow version.
 
 New in version |version|
 ------------------------
@@ -155,17 +165,17 @@ To stay up-to-date on the latest pVACtools releases please join our :ref:`mailin
 Citations
 ---------
 
-Jasreet Hundal , Susanna Kiwala , Joshua McMichael, Chris Miller, Huiming Xia, 
-Alex Wollam, Conner Liu, Sidi Zhao, Yang-Yang Feng, Aaron Graubert, Amber Wollam, 
+Jasreet Hundal , Susanna Kiwala , Joshua McMichael, Chris Miller, Huiming Xia,
+Alex Wollam, Conner Liu, Sidi Zhao, Yang-Yang Feng, Aaron Graubert, Amber Wollam,
 Jonas Neichin, Megan Neveau, Jason Walker, William Gillanders,
 Elaine Mardis, Obi Griffith, Malachi Griffith. pVACtools: A Computational Toolkit to
-Identify and Visualize Cancer Neoantigens. Cancer Immunology Research. 
-2020 Mar;8(3):409-420. doi: 10.1158/2326-6066.CIR-19-0401. 
+Identify and Visualize Cancer Neoantigens. Cancer Immunology Research.
+2020 Mar;8(3):409-420. doi: 10.1158/2326-6066.CIR-19-0401.
 PMID: `31907209 <https://www.ncbi.nlm.nih.gov/pubmed/31907209>`_.
 
-Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman, 
-Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith. 
-`Accounting for proximal variants improves neoantigen prediction <https://www.nature.com/articles/s41588-018-0283-9>`_. 
+Jasreet Hundal, Susanna Kiwala, Yang-Yang Feng, Connor J. Liu, Ramaswamy Govindan, William C. Chapman,
+Ravindra Uppaluri, S. Joshua Swamidass, Obi L. Griffith, Elaine R. Mardis, and Malachi Griffith.
+`Accounting for proximal variants improves neoantigen prediction <https://www.nature.com/articles/s41588-018-0283-9>`_.
 Nature Genetics. 2018, DOI: 10.1038/s41588-018-0283-9. PMID: `30510237 <https://www.ncbi.nlm.nih.gov/pubmed/30510237>`_.
 
 Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi
