@@ -28,7 +28,7 @@ def main(args_input = sys.argv[1:]):
     tmp_fh = tempfile.NamedTemporaryFile()
 
     print("Creating Aggreggated Report")
-    AggregateAllEpitopes(args.input_file, args.output_file, 'pVACfuse').execute()
+    UnmatchedSequenceAggregateAllEpitopes(args.input_file, args.output_file).execute()
     print("Completed")
 
 if __name__ == '__main__':

@@ -28,6 +28,11 @@ for dirpath, dirnames, filenames in os.walk("tools/pvacbind/example_data"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             pvacbind_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
+pvacview_data_files = []
+for dirpath, dirnames, filenames in os.walk("tools/pvacview"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            pvacview_data_files.append(os.path.join(os.path.relpath(dirpath, 'tools/pvacseq'), filename))
 for dirpath, dirnames, filenames in os.walk("tools/pvacseq/VEP_plugins"):
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
@@ -46,6 +51,7 @@ setup(
         "tools.pvacfuse",
         "tools.pvacvector",
         "tools.pvacseq",
+        "tools.pvacview",
         "lib",
     ],
     entry_points={
@@ -55,6 +61,7 @@ setup(
             "pvacbind = tools.pvacbind.main:main",
             "pvacfuse = tools.pvacfuse.main:main",
             "pvacvector = tools.pvacvector.main:main",
+            "pvacview = tools.pvacview.main:main",
         ]
     },
     install_requires=[
@@ -82,6 +89,7 @@ setup(
         'tools.pvacfuse': pvacfuse_data_files,
         'tools.pvacvector': pvacvector_data_files,
         'tools.pvacbind': pvacbind_data_files,
+        'tools.pvacview': pvacview_data_files,
     },
     classifiers=[
         'Development Status :: 4 - Beta',
