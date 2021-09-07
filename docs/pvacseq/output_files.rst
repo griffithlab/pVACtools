@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACseq logo
 
+.. _pvacseq_output_files:
+
 Output Files
 ============
 
@@ -294,6 +296,8 @@ that offer suggestions as to the suitability of variants for use in vaccines.
      - Tumor DNA variant allele frequency (VAF) at this position.
    * - ``tier``
      - A tier suggesting the suitability of variants for use in vaccines.
+
+.. _pvacseq_aggregate_report_tiers_label:
 
 The pVACseq Aggregate Report Tiers
 __________________________________
