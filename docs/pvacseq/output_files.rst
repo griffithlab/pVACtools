@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACseq logo
 
+.. _pvacseq_output_files:
+
 Output Files
 ============
 
@@ -28,6 +30,8 @@ created):
    * - ``<sample_name>.fasta``
      - A fasta file with mutant and wildtype peptide subsequences for all
        processable variant-transcript combinations.
+   * - ``<sample_name>.net_chop.fa``
+     - A fasta file with mutant and wildtype peptide subsequences specific for use in running the net_chop tool.
    * - ``<sample_name>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``.
@@ -294,6 +298,8 @@ that offer suggestions as to the suitability of variants for use in vaccines.
      - Tumor DNA variant allele frequency (VAF) at this position.
    * - ``tier``
      - A tier suggesting the suitability of variants for use in vaccines.
+
+.. _pvacseq_aggregate_report_tiers_label:
 
 The pVACseq Aggregate Report Tiers
 __________________________________

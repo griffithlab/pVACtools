@@ -39,6 +39,7 @@ class Pipeline(metaclass=ABCMeta):
         self.epitope_lengths             = kwargs['epitope_lengths']
         self.iedb_executable             = kwargs.pop('iedb_executable', None)
         self.phased_proximal_variants_vcf = kwargs.pop('phased_proximal_variants_vcf', None)
+        self.net_chop_fasta              = kwargs.pop('net_chop_fasta', None)
         self.net_chop_method             = kwargs.pop('net_chop_method', None)
         self.net_chop_threshold          = kwargs.pop('net_chop_threshold', 0.5)
         self.netmhc_stab                 = kwargs.pop('netmhc_stab', False)
@@ -126,6 +127,10 @@ class Pipeline(metaclass=ABCMeta):
         fasta_file = self.sample_name + '.fasta'
         return os.path.join(self.output_dir, fasta_file)
 
+    def net_chop_fasta_file_path(self):
+        net_chop_fasta_file = self.sample_name + '.net_chop.fa'
+        return os.path.join(self.output_dir, net_chop_fasta_file)
+
     def converter(self, params):
         converter_types = {
             'vcf'  : 'VcfConverter',
@@ -156,11 +161,11 @@ class Pipeline(metaclass=ABCMeta):
         parser = getattr(sys.modules[__name__], parser_type)
         return parser(**params)
 
-    def generate_combined_fasta(self):
+    def generate_combined_fasta(self, fasta_path, epitope_flank_length=0):
         params = [
             self.input_file,
-            str(max(self.epitope_lengths) - 1),
-            self.fasta_file_path(),
+            str(epitope_flank_length + max(self.epitope_lengths) - 1),
+            fasta_path,
         ]
         if self.input_file_type == 'vcf':
             import tools.pvacseq.generate_protein_fasta as generate_combined_fasta
@@ -174,7 +179,7 @@ class Pipeline(metaclass=ABCMeta):
         else:
             params.extend(["-d", 'full'])
         generate_combined_fasta.main(params)
-        os.unlink("{}.manufacturability.tsv".format(self.fasta_file_path()))
+        os.unlink("{}.manufacturability.tsv".format(fasta_path))
 
     def convert_vcf(self):
         status_message("Converting .%s to TSV" % self.input_file_type)
@@ -458,7 +463,7 @@ class Pipeline(metaclass=ABCMeta):
         self.print_log()
         self.convert_vcf()
         if self.input_file_type != 'pvacvector_input_fasta':
-            self.generate_combined_fasta()
+            self.generate_combined_fasta(self.fasta_file_path())
 
         total_row_count = self.tsv_entry_count()
         if total_row_count == 0:
@@ -494,6 +499,9 @@ class Pipeline(metaclass=ABCMeta):
             post_processing_params['run_coverage_filter'] = False
             post_processing_params['run_transcript_support_level_filter'] = False
         if self.net_chop_method:
+            net_chop_epitope_flank_length = 9
+            self.generate_combined_fasta(self.net_chop_fasta_file_path(), net_chop_epitope_flank_length)
+            post_processing_params['net_chop_fasta'] = self.net_chop_fasta_file_path()
             post_processing_params['run_net_chop'] = True
         else:
             post_processing_params['run_net_chop'] = False
@@ -763,6 +771,7 @@ class PvacbindPipeline(Pipeline):
         post_processing_params['run_manufacturability_metrics'] = True
         post_processing_params['fasta'] = self.input_file
         if self.net_chop_method:
+            post_processing_params['net_chop_fasta'] = self.net_chop_fasta
             post_processing_params['run_net_chop'] = True
         else:
             post_processing_params['run_net_chop'] = False

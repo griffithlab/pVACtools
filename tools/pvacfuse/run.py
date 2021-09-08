@@ -13,6 +13,33 @@ import lib.call_iedb
 def define_parser():
     return PvacfuseRunArgumentParser().parser
 
+def create_net_class_report(files, all_epitopes_output_file, filtered_report_file, args, class_i_arguments):
+    for file_name in files:
+        if not os.path.exists(file_name):
+            print("File {} doesn't exist. Aborting.".format(file_name))
+            return
+
+    combine_reports(files, all_epitopes_output_file)
+
+    post_processing_params = vars(args).copy()
+    post_processing_params['input_file'] = all_epitopes_output_file
+    post_processing_params['filtered_report_file'] = filtered_report_file
+    post_processing_params['minimum_fold_change'] = None
+    post_processing_params['run_coverage_filter'] = False
+    post_processing_params['run_transcript_support_level_filter'] = False
+    post_processing_params['run_manufacturability_metrics'] = True
+    if class_i_arguments['net_chop_method']:
+        post_processing_params['run_net_chop'] = True
+        post_processing_params['net_chop_fasta'] = class_i_arguments['net_chop_fasta']
+    else:
+        post_processing_params['run_net_chop'] = False
+    post_processing_params['run_netmhc_stab'] = True if class_i_arguments['netmhc_stab'] else False
+    post_processing_params['fasta'] = class_i_arguments['fasta']
+    post_processing_params['species'] = class_i_arguments['species']
+    post_processing_params['file_type'] = 'pVACfuse'
+
+    PostProcessor(**post_processing_params).execute()
+
 def create_combined_reports(files, all_epitopes_output_file, filtered_report_file, run_manufacturability_metrics, args):
     for file_name in files:
         if not os.path.exists(file_name):
@@ -35,13 +62,17 @@ def create_combined_reports(files, all_epitopes_output_file, filtered_report_fil
 
     PostProcessor(**post_processing_params).execute()
 
-def generate_fasta(args, output_dir, epitope_length):
-    per_epitope_output_dir = os.path.join(output_dir, str(epitope_length))
-    os.makedirs(per_epitope_output_dir, exist_ok=True)
-    output_file = os.path.join(per_epitope_output_dir, "{}.fa".format(args.sample_name))
+def generate_fasta(args, output_dir, epitope_length, epitope_flank_length=0, net_chop_fasta=False):
+    if net_chop_fasta:
+        per_epitope_output_dir = None
+        output_file = os.path.join(output_dir, "{}.net_chop.fa".format(args.sample_name))
+    else:
+        per_epitope_output_dir = os.path.join(output_dir, str(epitope_length))
+        os.makedirs(per_epitope_output_dir, exist_ok=True)
+        output_file = os.path.join(per_epitope_output_dir, "{}.fa".format(args.sample_name))
     params = [
         args.input_file,
-        str(epitope_length - 1),
+        str(epitope_flank_length + epitope_length - 1),
         output_file,
     ]
     if args.downstream_sequence_length is not None:
@@ -177,11 +208,20 @@ def main(args_input = sys.argv[1:]):
                 append_columns(intermediate_output_file, "{}.tsv".format(input_file), output_file)
                 output_files.append(output_file)
                 if epitope_length == max(epitope_lengths):
+                    # copy fasta to output dir
                     fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
                     shutil.copy(input_file, fasta_file)
+                    class_i_arguments['fasta'] = fasta_file
+                    # generate and copy net_chop fasta to output dir if specified  
+                    if args.net_chop_method:
+                        epitope_flank_length = 9
+                        (net_chop_fasta, _) = generate_fasta(args, output_dir, epitope_length, epitope_flank_length, net_chop_fasta=True)
+                        class_i_arguments['net_chop_fasta'] = net_chop_fasta
             all_epitopes_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
             filtered_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
-            create_combined_reports(output_files, all_epitopes_file, filtered_file, True, args)
+            #!!! make below call to create_net_class_report
+            #create_combined_reports(output_files, all_epitopes_file, filtered_file, True, args)
+            create_net_class_report(output_files, all_epitopes_file, filtered_file, args, class_i_arguments)
         elif len(prediction_algorithms) == 0:
             print("No MHC class {} prediction algorithms chosen. Skipping MHC class I predictions.".format(mhc_class))
         elif len(alleles) == 0:

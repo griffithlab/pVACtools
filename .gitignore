@@ -20,3 +20,5 @@ nytprof.out
 *.bs
 /_eumm/
 __pycache__
+build/
+dist/
