@@ -10,7 +10,7 @@ jobs:
   tests:
     name: Tests
 
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
@@ -28,15 +28,8 @@ jobs:
           sudo apt-get install -y gcc
       - name: Install Python dependencies
         run: |
-          pip install mhcnuggets==2.3.3
-          pip install mhcflurry==2.0.1
-          pip install tensorflow==2.2.2
-          pip install pandas==0.25.2
-          pip install coveralls
+          pip install -r requirements.txt
           pip install -e .
-          pip uninstall -y keras-nightly
-          pip uninstall -y keras
-          pip install keras==2.3.1
           mhcflurry-downloads fetch
       - name: List installed packages
         run: |
