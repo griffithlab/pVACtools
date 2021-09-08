@@ -32,6 +32,7 @@ jobs:
           pip install mhcflurry==2.0.1
           pip install tensorflow==2.2.2
           pip install pandas==0.25.2
+          pip install pyensembl==1.9.1
           pip install coveralls
           pip install -e .
           pip uninstall -y keras-nightly
