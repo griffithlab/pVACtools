@@ -99,6 +99,8 @@ class CalculateReferenceProteomeSimilarity:
     def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='pVACseq', blastp_path=None, blastp_db='refseq_select_prot', n_threads=1):
         self.input_file = input_file
         self.input_fasta = input_fasta
+        output_dir = os.path.dirname(output_file)
+        os.makedirs(os.path.abspath(output_dir), exist_ok=True)
         self.output_file = output_file
         self.metric_file = "{}.reference_matches".format(output_file)
         self.match_length = match_length
