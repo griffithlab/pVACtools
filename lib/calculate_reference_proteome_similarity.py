@@ -391,4 +391,9 @@ class CalculateReferenceProteomeSimilarity:
             default='refseq_select_prot',
             help="The blastp database to use.",
         )
+        parser.add_argument(
+            "-t", "--n-threads",type=int,
+            default=1,
+            help="Number of threads to use for parallelizing BLAST calls.",
+        )
         return parser
