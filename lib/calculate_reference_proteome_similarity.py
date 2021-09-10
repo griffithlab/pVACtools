@@ -9,6 +9,7 @@ from Bio.Alphabet import IUPAC
 import shutil
 import re
 import os
+import sys
 from collections import defaultdict
 from subprocess import run, DEVNULL, STDOUT
 import tempfile
@@ -105,7 +106,7 @@ class CalculateReferenceProteomeSimilarity:
         self.metric_file = "{}.reference_matches".format(output_file)
         self.match_length = match_length
         self.species = species
-        self.n_threads = n_threads
+        self.n_threads = 1 if sys.platform == "darwin" else n_threads #pymp and requests not compatible on macOS 10.13+ for n_threads > 1
         self.file_type = file_type
         self.blastp_path = blastp_path
         self.blastp_db = blastp_db
