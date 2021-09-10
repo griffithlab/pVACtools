@@ -9,15 +9,16 @@ def main(args_input = sys.argv[1:]):
     args = parser.parse_args(args_input)
 
     CalculateReferenceProteomeSimilarity(
-    	args.input_file,
-    	args.input_fasta,
-    	args.output_file,
-    	args.match_length,
-    	args.species,
-    	'pVACbind',
-    	args.blastp_path,
-    	args.blastp_db
-	).execute()
+        args.input_file,
+        args.input_fasta,
+        args.output_file,
+        args.match_length,
+        args.species,
+        'pVACbind',
+        args.blastp_path,
+        args.blastp_db,
+        args.n_threads
+    ).execute()
 
 if __name__ == "__main__":
     main()
