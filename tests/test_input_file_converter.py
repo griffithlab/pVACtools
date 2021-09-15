@@ -6,16 +6,16 @@ from filecmp import cmp
 import py_compile
 import logging
 from testfixtures import LogCapture, StringComparison as S
+
+from pvactools.lib.input_file_converter import VcfConverter, FusionInputConverter
 from .test_utils import *
-from lib.input_file_converter import *
 
 class InputFileConverterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'lib')
+        cls.executable_dir = os.path.join(pvactools_directory(), 'pvactools', 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'input_file_converter.py')
-        cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'input_file_converter')
+        cls.test_data_dir  = os.path.join(pvactools_directory(), 'tests', 'test_data', 'input_file_converter')
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
