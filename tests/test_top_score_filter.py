@@ -3,17 +3,18 @@ import sys
 import os
 import py_compile
 import tempfile
-from lib.top_score_filter import *
 from filecmp import cmp
+
+from pvactools.lib.top_score_filter import TopScoreFilter
+from .test_utils import *
 
 class TopScoreFilterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.python = sys.executable
-        base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'lib')
+        cls.executable_dir = os.path.join(pvactools_directory(), 'pvactools', 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'top_score_filter.py')
-        cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'top_score_filter')
+        cls.test_data_dir  = os.path.join(pvactools_directory(), 'tests', 'test_data', 'top_score_filter')
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))

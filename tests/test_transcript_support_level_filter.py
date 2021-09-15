@@ -6,15 +6,16 @@ from subprocess import call
 import sys
 import py_compile
 
+from .test_utils import *
+
 #python -m unittest tests/test_coverage_filter.py
 class CoverageFilterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         #locate the bin and test_data directories
         cls.python        = sys.executable
-        cls.base_dir      = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        cls.executable    = os.path.join(cls.base_dir, "tools", "pvacseq", "transcript_support_level_filter.py")
-        cls.test_data_dir = os.path.join(cls.base_dir, "tests", "test_data", "transcript_support_level_filter")
+        cls.executable    = os.path.join(pvactools_directory(), "pvactools", "tools", "pvacseq", "transcript_support_level_filter.py")
+        cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "transcript_support_level_filter")
 
     def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))

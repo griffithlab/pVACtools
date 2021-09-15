@@ -10,7 +10,7 @@ def compare(path1, path2):
     r2.close()
     return result
 
-def pvac_directory():
+def pvactools_directory():
     return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 mock_fhs = []

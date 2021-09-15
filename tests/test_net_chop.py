@@ -9,7 +9,9 @@ import sys
 import tempfile
 import py_compile
 from filecmp import cmp
-import lib
+
+from .test_utils import *
+from pvactools.lib.net_chop import NetChop
 
 def make_response(data, files, path, test_file):
     reader = open(os.path.join(
@@ -43,14 +45,14 @@ def make_rejected_response(data, files, path, self):
 class NetChopTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         cls.script_path = os.path.join(
-            pvac_dir,
+            pvactools_directory(),
+            'pvactools',
             'lib',
             'net_chop.py'
         )
         cls.test_data_directory = os.path.join(
-            pvac_dir,
+            pvactools_directory(),
             'tests',
             'test_data',
             'net_chop'
@@ -64,14 +66,14 @@ class NetChopTest(unittest.TestCase):
 
     def test_net_chop_cterm_runs(self):
         for method in ['cterm', '20s']:
-            with patch('lib.net_chop.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            with patch('pvactools.lib.net_chop.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
                 data,
                 files,
                 self.test_data_directory,
                 'net_chop.{}.html'.format(method)
                 ))):
                 output_file = tempfile.NamedTemporaryFile()
-                lib.net_chop.NetChop(
+                NetChop(
                     os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                     self.test_fasta,
                     output_file.name,
@@ -83,14 +85,14 @@ class NetChopTest(unittest.TestCase):
                 ))
 
     def test_net_chop_without_cleavage_scores(self):
-        with patch('lib.net_chop.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.net_chop.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             self.test_data_directory,
             'net_chop.no_cleavage.html'
             ))):
             output_file = tempfile.NamedTemporaryFile()
-            lib.net_chop.NetChop(
+            NetChop(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 self.test_fasta,
                 output_file.name,
@@ -102,14 +104,14 @@ class NetChopTest(unittest.TestCase):
             ))
 
     def test_net_chop_fail(self):
-        with patch('lib.net_chop.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.net_chop.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             self.test_data_directory,
             'net_chop.fail.html'
            ))), self.assertRaises(Exception) as context:
             output_file = tempfile.NamedTemporaryFile()
-            lib.net_chop.NetChop(
+            NetChop(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 self.test_fasta,
                 output_file.name,
@@ -119,14 +121,14 @@ class NetChopTest(unittest.TestCase):
 
     #This is to ensure that we catch error cases that are not explicitly handled
     def test_net_chop_other_error(self):
-        with patch('lib.net_chop.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.net_chop.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             self.test_data_directory,
             'net_chop.other_error.html'
            ))), self.assertRaises(Exception) as context:
             output_file = tempfile.NamedTemporaryFile()
-            lib.net_chop.NetChop(
+            NetChop(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 self.test_fasta,
                 output_file.name,
@@ -135,14 +137,14 @@ class NetChopTest(unittest.TestCase):
 
     def test_net_chop_rejected(self):
         logging.disable(logging.NOTSET)
-        with patch('lib.net_chop.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_rejected_response(
+        with patch('pvactools.lib.net_chop.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_rejected_response(
             data,
            files,
            self.test_data_directory,
            self
            ))), LogCapture() as l:
             output_file = tempfile.NamedTemporaryFile()
-            lib.net_chop.NetChop(
+            NetChop(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 self.test_fasta,
                 output_file.name,

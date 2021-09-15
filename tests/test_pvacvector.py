@@ -8,12 +8,13 @@ import sys
 import re
 from subprocess import PIPE
 from subprocess import run as subprocess_run
-from tools.pvacvector import *
 import unittest.mock
 from mock import patch
-from .test_utils import *
-import tools.pvacvector.main as pvacvector_main
 import argparse
+
+from pvactools.tools.pvacvector import *
+import pvactools.tools.pvacvector.main as pvacvector_main
+from .test_utils import *
 
 def make_response(data, path, test_name):
     filename = 'response_%s_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'], test_name)
@@ -28,16 +29,16 @@ def make_response(data, path, test_name):
     return response_obj
 
 def test_data_directory():
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+    base_dir = pvactools_directory()
     return os.path.join(base_dir, 'tests', 'test_data', 'pvacvector')
 
 #python -m unittest tests/test_pvacvector.py
 class TestPvacvector(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        cls.base_dir = pvactools_directory()
         cls.python = sys.executable
-        cls.executable = os.path.join(cls.base_dir, 'tools', 'pvacvector', 'run.py')
+        cls.executable = os.path.join(cls.base_dir, 'pvactools', 'tools', 'pvacvector', 'run.py')
         cls.test_run_name = 'test_pvacvector_produces_expected_output'
         cls.test_data_dir = test_data_directory()
         cls.test_data_temp_dir = os.path.join(cls.test_data_dir, 'tmp')
@@ -56,6 +57,7 @@ class TestPvacvector(unittest.TestCase):
     def test_pvacvector_compiles(self):
         compiled_path = py_compile.compile(os.path.join(
             self.base_dir,
+            'pvactools',
             'tools',
             'pvacvector',
             'main.py'
@@ -69,6 +71,7 @@ class TestPvacvector(unittest.TestCase):
     def test_pvacvector_commands(self):
         pvac_script_path = os.path.join(
             self.base_dir,
+            'pvactools',
             'tools',
             'pvacvector',
             'main.py'
@@ -93,6 +96,7 @@ class TestPvacvector(unittest.TestCase):
     def test_visualize_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.base_dir,
+            'pvactools',
             "tools",
             "pvacvector",
             "visualize.py"
@@ -113,6 +117,7 @@ class TestPvacvector(unittest.TestCase):
     def test_allele_specific_cutoffs_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.base_dir,
+            'pvactools',
             "tools",
             "pvacvector",
             "allele_specific_cutoffs.py"
@@ -125,6 +130,7 @@ class TestPvacvector(unittest.TestCase):
     def test_download_example_data_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.base_dir,
+            'pvactools',
             "tools",
             "pvacvector",
             "download_example_data.py"
@@ -138,6 +144,7 @@ class TestPvacvector(unittest.TestCase):
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.base_dir,
+            'pvactools',
             "tools",
             "pvacvector",
             "valid_alleles.py"

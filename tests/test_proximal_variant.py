@@ -3,15 +3,16 @@ import os
 import unittest
 import py_compile
 import vcf
-from lib.proximal_variant import *
+
+from pvactools.lib.proximal_variant import ProximalVariant
+from .test_utils import *
 
 class ProximalVariantTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'lib')
+        cls.executable_dir = os.path.join(pvactools_directory(), 'pvactools', 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'proximal_variant.py')
-        cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'proximal_variant')
+        cls.test_data_dir  = os.path.join(pvactools_directory(), 'tests', 'test_data', 'proximal_variant')
         proximal_variant_vcf_path = os.path.join(cls.test_data_dir, 'input.vcf.gz')
         cls.klass = ProximalVariant(proximal_variant_vcf_path, False, 30)
         somatic_vcf_path = os.path.join(cls.test_data_dir, 'somatic.vcf.gz')

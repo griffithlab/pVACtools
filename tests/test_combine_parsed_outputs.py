@@ -4,16 +4,16 @@ import os
 import tempfile
 import py_compile
 from subprocess import call
+
 from .test_utils import *
 
 class CombineParsedOutputsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.python         = sys.executable
-        base_dir           = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'lib')
+        cls.executable_dir = os.path.join(pvactools_directory(), 'pvactools', 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'combine_parsed_outputs.py')
-        cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'combine_parsed_outputs')
+        cls.test_data_dir  = os.path.join(pvactools_directory(), 'tests', 'test_data', 'combine_parsed_outputs')
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))

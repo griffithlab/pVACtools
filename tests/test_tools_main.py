@@ -1,9 +1,10 @@
 import unittest
-import tools.main as tools_main
-import tools.download_cwls as download_cwls
 import argparse
 import tempfile
 import os
+
+import pvactools.tools.main as tools_main
+import pvactools.tools.download_cwls as download_cwls
 
 class ToolsMainTests(unittest.TestCase):
     def test_parser(self):

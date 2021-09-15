@@ -9,16 +9,16 @@ from subprocess import PIPE
 from subprocess import run as subprocess_run
 from filecmp import cmp
 import yaml
-import lib
-from lib.pipeline import *
 import datetime
-from tools.pvacbind import *
 from mock import patch
+
+from pvactools.lib.pipeline import PvacbindPipeline
+from pvactools.tools.pvacbind import *
 from .test_utils import *
 
 def test_data_directory():
     return os.path.join(
-        pvac_directory(),
+        pvactools_directory(),
         'tests',
         'test_data',
         'pvacbind'
@@ -27,7 +27,7 @@ def test_data_directory():
 class PvacbindTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.pVac_directory = pvac_directory()
+        cls.pvactools_directory = pvactools_directory()
         cls.test_data_directory = test_data_directory()
         cls.methods = {
             'ann': {
@@ -41,7 +41,8 @@ class PvacbindTests(unittest.TestCase):
 
     def test_pvacbind_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             'tools',
             'pvacbind',
             "main.py"
@@ -50,7 +51,8 @@ class PvacbindTests(unittest.TestCase):
 
     def test_pvacbind_commands(self):
         pvac_script_path = os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             'tools',
             'pvacbind',
             "main.py"
@@ -79,7 +81,8 @@ class PvacbindTests(unittest.TestCase):
 
     def test_run_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             "tools",
             "pvacbind",
             "run.py"
@@ -88,7 +91,8 @@ class PvacbindTests(unittest.TestCase):
 
     def test_generate_aggregated_report_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             "tools",
             "pvacbind",
             "generate_aggregated_report.py"
