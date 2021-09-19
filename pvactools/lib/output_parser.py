@@ -20,6 +20,7 @@ class OutputParser(metaclass=ABCMeta):
         self.output_file             = kwargs['output_file']
         self.sample_name             = kwargs['sample_name']
         self.add_sample_name         = kwargs.get('add_sample_name_column')
+        self.flurry_state            = kwargs.get('flurry_state')
 
     def parse_input_tsv_file(self):
         with open(self.input_tsv_file, 'r') as reader:
@@ -575,9 +576,19 @@ class DefaultOutputParser(OutputParser):
                         position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
                     else:
                         position   = line['start']
+                    # need to add `mhcflurry_presentation_percentile` for mcflurry el
+                    ## nuance:
+                    # mchflurry results are also going to have percentile and ic50 headers
+                    # 
+                    # percentiles = [('percentile', 30), ('mhcflurry_presentation_percentile', 4)]
                     percentile     = self.get_percentile(line)
                     epitope        = line['peptide']
-                    score          = line['ic50']
+                    # need to get way to grab:
+                    # - `score` for netmhcpan_el
+                    # - `mhcflurry_processing_score` for mhcflurryel
+                    # - `mhcflurry_presentation_score` for mhcflurryel
+                    # scores = [('ic50', 1), ('mhcflurry_processing_score', 2), ('mhcflurry_presentation_score', 3)]
+                    score          = line['ic50'] 
                     allele         = line['allele']
                     peptide_length = len(epitope)
 
@@ -601,6 +612,12 @@ class DefaultOutputParser(OutputParser):
                                 iedb_results[key]['tsv_index']         = tsv_index
                                 iedb_results[key]['allele']            = allele
                                 iedb_results[key]['peptide_length']    = peptide_length
+                            ## when handling this:
+                            # put score and percentile into a list
+                            # iterate over them to update
+
+                            # this wont quite work, but its on the right track.
+                            # maybe make it equal to a list and flatten it later?
                             iedb_results[key]['mt_scores'][method] = float(score)
                             iedb_results[key]['mt_percentiles'][method] = percentile
                         else:
@@ -611,6 +628,8 @@ class DefaultOutputParser(OutputParser):
                                 wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores'] = {}
                                 wt_iedb_results[tsv_index][position][protein_type.lower() + '_percentiles'] = {}
                             wt_iedb_results[tsv_index][position][protein_type.lower() + '_epitope_seq'] = epitope
+
+                            # do the same thing as above here
                             wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores'][method] = float(score)
                             wt_iedb_results[tsv_index][position][protein_type.lower() + '_percentiles'][method] = percentile
 

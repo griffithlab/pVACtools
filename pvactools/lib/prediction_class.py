@@ -350,6 +350,9 @@ class MHCflurry(MHCI):
                     results = results.append(epitope_df)
         return (results, 'pandas')
 
+class MHCflurryEL(MHCflurry):
+    pass
+
 class MHCnuggetsI(MHCI, MHCnuggets):
     def valid_allele_names(self):
         return self.valid_allele_names_for_class('class_i')
@@ -413,6 +416,11 @@ class NetMHCpan(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'netmhcpan'
+
+class NetMHCpanEL(IEDBMHCI):
+    @property
+    def iedb_prediction_method(self):
+        return 'netmhcpan_el'
 
 class SMMPMBEC(IEDBMHCI):
     @property
