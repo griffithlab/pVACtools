@@ -70,6 +70,7 @@ class Pipeline(metaclass=ABCMeta):
         self.blastp_path                 = kwargs.pop('blastp_path', None)
         self.blastp_db                   = kwargs.pop('blastp_db', 'refseq_select_prot')
         self.run_post_processor          = kwargs.pop('run_post_processor', True)
+        self.flurry_state                = self.get_flurry_state()
         self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
@@ -114,6 +115,19 @@ class Pipeline(metaclass=ABCMeta):
                 inputs = self.__dict__
                 inputs['pvactools_version'] = pkg_resources.get_distribution("pvactools").version
                 yaml.dump(inputs, log_fh, default_flow_style=False)
+
+    def get_flurry_state(self):
+        if 'MHCflurry' in self.prediction_algorithms and 'MHCflurryEL' in self.prediction_algorithms:
+            self.prediction_algorithms.remove('MHCflurryEL')
+            return 'both'
+        elif 'MHCflurry' in self.prediction_algorithms:
+            return 'BA_only'
+        elif 'MHCflurryEL' in self.prediction_algorithms:
+            pred_idx = self.prediction_algorithms.index('MHCflurryEL')
+            self.prediction_algorithms[pred_idx] = 'MHCflurry'
+            return 'EL_only'
+        else:
+            return None
 
     def tsv_file_path(self):
         if self.input_file_type == 'pvacvector_input_fasta':
@@ -430,6 +444,7 @@ class Pipeline(metaclass=ABCMeta):
                             'output_file'            : split_parsed_file_path,
                         }
                         params['sample_name'] = self.sample_name
+                        params['flurry_state'] = self.flurry_state
                         if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                             params['add_sample_name_column'] = True 
                         parser = self.output_parser(params)
