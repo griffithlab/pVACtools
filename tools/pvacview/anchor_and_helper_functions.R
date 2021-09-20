@@ -48,7 +48,11 @@ peptide_coloring <- function(hla_allele, peptide_row){
 }
 #calculate anchor list for specific peptide length and HLA allele combo given contribution cutoff
 calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution){
+  #browser()
   anchor_raw_data <- as.numeric(anchor_data[[peptide_length]][anchor_data[[peptide_length]]['HLA'] == hla_allele][2:(peptide_length+1)])
+  if (any(is.na(anchor_raw_data))) {
+    return("NA")
+  }
   names(anchor_raw_data) <- as.character(1:length(anchor_raw_data))
   anchor_raw_data <- anchor_raw_data[order(unlist(anchor_raw_data), decreasing = TRUE)]
   count <- 0
@@ -66,13 +70,14 @@ calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution){
 
 #calculate the positions different between MT and WT peptide
 calculate_mutation_info <- function(metrics_data_row){
+  #browser()
   wt_peptide <- metrics_data_row$best_peptide_wt
-  if (is.na(wt_peptide)){
+  if (is.na(wt_peptide) | (wt_peptide == "NA")){
     return (0)
   }
-  mt_peptide <- metrics_data_row$best_peptide_mt
   #hla_allele <- metrics_data_row$best_hla_allele
   #peptide_length <- length(unlist(strsplit(mt_peptide,  split = "")))
+  mt_peptide <- metrics_data_row$best_peptide_mt
   split_positions <- strsplit(c(wt_peptide, mt_peptide), split = "")
   diff_positions <- which(split_positions[[1]] != split_positions[[2]])
   return (diff_positions)
@@ -80,6 +85,7 @@ calculate_mutation_info <- function(metrics_data_row){
 
 ##Generate Tiering for given variant with specific cutoffs
 tier <- function(variant_info, anchor_contribution, dna_cutoff, mutation_pos_list, hla_allele){
+  #browser()
   mt_binding <- as.numeric(variant_info['IC50 MT'])
   wt_binding <- as.numeric(variant_info['IC50 WT'])
   gene_expr <- as.numeric(variant_info['RNA Expr'])
@@ -88,9 +94,12 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, mutation_pos_lis
   rna_depth <- as.numeric(variant_info['RNA Depth'])
   allele_expr <- as.numeric(variant_info['Allele Expr'])
   anchor_list <- unlist(calculate_anchor(hla_allele, length(unlist(strsplit(variant_info['Best Peptide'][[1]], split = ""))), anchor_contribution))
+  if (anchor_list[[1]] == 'NA'){
+    anchor_list <- c(1,2,nchar(variant_info['Best Peptide']), nchar(variant_info['Best Peptide'])-1)
+  }
   anchor_residue_pass <- TRUE
   if (all(as.numeric(mutation_pos_list) %in% anchor_list)){
-    if (is.na(wt_binding)){
+    if (is.na(wt_binding) | (wt_binding == "NA")){
       anchor_residue_pass <- FALSE
     }
     else if (wt_binding < 1000) {
@@ -139,10 +148,13 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, mutation
   }
   else{
     anchor_list <- unlist(calculate_anchor(hla_allele, length(unlist(strsplit(variant_info['Best Peptide'][[1]], split = ""))), anchor_contribution))
+    if (anchor_list[[1]] == 'NA'){
+      anchor_list <- c(1,2,nchar(variant_info['Best Peptide']), nchar(variant_info['Best Peptide'])-1)
+    }
   }
   anchor_residue_pass <- TRUE
   if (all(as.numeric(mutation_pos_list) %in% anchor_list)){
-    if (is.na(wt_binding)){
+    if (is.na(wt_binding) | (wt_binding == "NA")){
       anchor_residue_pass <- FALSE
     }
     else if (wt_binding < 1000) {
