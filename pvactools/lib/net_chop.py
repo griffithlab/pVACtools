@@ -10,6 +10,8 @@ from Bio import SeqIO
 import collections
 import logging
 import random
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 import pvactools.lib.run_utils
 
@@ -66,6 +68,7 @@ class NetChop:
             writer.writeheader()
             x = 0
             i=1
+            http = self.setup_adapter()
             for chunk in pvactools.lib.run_utils.split_file(reader, 100):
                 staging_file = tempfile.NamedTemporaryFile(mode='w+')
                 current_buffer = {}
@@ -87,7 +90,7 @@ class NetChop:
                     seqs_start_diff[sequence_id] = (start_diff, len(epitope))
                     x+=1
                 staging_file.seek(0)
-                response = self.query_netchop_server(staging_file, chosen_method, self.threshold, jobid_searcher)
+                response = self.query_netchop_server(http, staging_file, chosen_method, self.threshold, jobid_searcher)
 
                 if fail_searcher.search(response.content.decode()):
                     raise Exception("NetChop encountered an error during processing.\n{}".format(response.content.decode()))
@@ -96,7 +99,7 @@ class NetChop:
                     logging.warning("Too many jobs submitted to NetChop server. Waiting to retry.")
                     sleep(random.randint(5, 10))
                     staging_file.seek(0)
-                    response = self.query_netchop_server(staging_file, chosen_method, self.threshold, jobid_searcher)
+                    response = self.query_netchop_server(http, staging_file, chosen_method, self.threshold, jobid_searcher)
 
                 if success_searcher.search(response.content.decode()):
                     results = [item.strip() for item in result_delimiter.split(response.content.decode())]
@@ -150,8 +153,37 @@ class NetChop:
                 else:
                     raise Exception("Unexpected return value from NetChop server. Unable to parse response.\n{}".format(response.content.decode()))
 
-    def query_netchop_server(self, staging_file, chosen_method, threshold, jobid_searcher):
-        response = requests.post(
+    def setup_adapter(self):
+        retry_strategy = Retry(
+            total=3,
+            status_forcelist=[408, 429, 500, 502, 503, 504],
+            method_whitelist=["POST", "GET"]
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        http = requests.Session()
+        http.mount("https://", adapter)
+        http.mount("http://", adapter)
+        return http
+
+    def query_netchop_server(self, http, staging_file, chosen_method, threshold, jobid_searcher):
+        try:
+            response = self.post_query(http, staging_file, chosen_method, threshold)
+        except requests.exceptions.ReadTimeout:
+            response = self.post_query(http, staging_file, chosen_method, threshold)
+        if response.status_code != 200:
+            raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
+        while jobid_searcher.search(response.content.decode()):
+            sleep(10)
+            try:
+                response = http.get(response.url, timeout=10)
+            except requests.exceptions.ReadTimeout:
+                response = http.get(response.url, timeout=10)
+            if response.status_code != 200:
+                raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
+        return response
+
+    def post_query(self, http, staging_file, chosen_method, threshold):
+        response = http.post(
             "https://services.healthtech.dtu.dk/cgi-bin/webface2.cgi",
             files={'SEQSUB':(staging_file.name, staging_file, 'text/plain')},
             data = {
@@ -159,15 +191,9 @@ class NetChop:
                 'SEQPASTE':'',
                 'method':chosen_method,
                 'thresh':'%0f'%threshold
-            }
+            },
+            timeout=10
         )
-        if response.status_code != 200:
-            raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
-        while jobid_searcher.search(response.content.decode()):
-            sleep(10)
-            response = requests.get(response.url)
-            if response.status_code != 200:
-                raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
         return response
 
     @classmethod
