@@ -130,11 +130,16 @@ class NetChop:
                                 for x in map(lambda x: (int(x[0]), x[1]), cleavage_scores.items())
                                 if x[0] >= start_diff and x[0] <= start_diff + ep_len
                             ]
-                            max_cleavage_score = max(epitope_cleavage_scores, key=lambda x: x[1])
-                            best_cleavage_position = max_cleavage_score[0]
-                            best_cleavage_score = max_cleavage_score[1]
-                            sorted_cleavage_scores = collections.OrderedDict(sorted(epitope_cleavage_scores))
-                            cleavage_sites = ','.join(['%s:%s' % (key, value) for (key, value) in sorted_cleavage_scores.items()])
+                            if len(epitope_cleavage_scores) == 0:
+                                best_cleavage_position = 'NA'
+                                best_cleavage_score = 'NA'
+                                cleavage_sites = 'NA'
+                            else:
+                                max_cleavage_score = max(epitope_cleavage_scores, key=lambda x: x[1])
+                                best_cleavage_position = max_cleavage_score[0]
+                                best_cleavage_score = max_cleavage_score[1]
+                                sorted_cleavage_scores = collections.OrderedDict(sorted(epitope_cleavage_scores))
+                                cleavage_sites = ','.join(['%s:%s' % (key, value) for (key, value) in sorted_cleavage_scores.items()])
                         line = current_buffer[sequence_name]
                         line.update({
                             'Best Cleavage Position': best_cleavage_position,
