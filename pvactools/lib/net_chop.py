@@ -78,12 +78,13 @@ class NetChop:
                     staging_file.write('>'+sequence_id+'\n')
                     if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                         index = line['Mutation']
-                        full_peptide = mt_records_dict[index]
                         epitope = line['Epitope Seq']
                     else:
                         index = line['Index']
-                        full_peptide = mt_records_dict[index]
                         epitope = line['MT Epitope Seq']
+                    if index not in mt_records_dict:
+                        raise Exception("FASTA entry for index {} not found. Please check that the FASTA file matches the input TSV.".format(seq_id))
+                    full_peptide = mt_records_dict[index]
                     peptide, start_diff = self.extract_flanked_epitope(full_peptide, epitope, index)
                     staging_file.write(peptide+'\n')
                     current_buffer[sequence_id] = {k:line[k] for k in line}
