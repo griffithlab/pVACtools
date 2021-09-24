@@ -9,7 +9,7 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    NetMHCStab(args.input_file, args.output_file).execute()
+    NetMHCStab(args.input_file, args.output_file, file_type='pVACseq').execute()
 
 if __name__ == "__main__":
     main()

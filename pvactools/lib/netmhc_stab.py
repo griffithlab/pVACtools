@@ -8,115 +8,153 @@ import os
 from time import sleep
 import random
 import logging
+import pandas as pd
+import numpy as np
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import IUPAC
 
 import pvactools.lib.run_utils
+from pvactools.lib.prediction_class import MHCI
 
 class NetMHCStab:
-    def __init__(self, input_file, output_file):
+    def __init__(self, input_file, output_file, file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
+        if file_type == 'pVACseq':
+            self.epitope_seq_column_name = 'MT Epitope Seq'
+        else:
+            self.epitope_seq_column_name = 'Epitope Seq'
 
     def execute(self):
+        valid_alleles = MHCI.all_valid_allele_names()
+        observed_alleles = self.observed_alleles()
+        alleles = list(set(observed_alleles).intersection(set(valid_alleles)))
+        invalid_alleles = list(set(observed_alleles) - set(alleles))
+        lengths = self.observed_epitope_lengths()
+
         jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
         result_delimiter = re.compile(r'-{20,}')
         fail_searcher = re.compile(r'(Failed run|Problematic input:|Configuration error)')
         rejected_searcher = re.compile(r'status: rejected')
         success_searcher = re.compile(r'# NetMHCstabpan version 1.0')
         allele_searcher = re.compile(r'^(.*?) : Distance to trai?ning data .*? nearest neighbor (.*?)\)$', re.MULTILINE)
-        with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
-            reader = csv.DictReader(input_fh, delimiter='\t')
+        with open(self.output_file, 'w') as output_fh:
+            headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
             writer = csv.DictWriter(
                 output_fh,
-                reader.fieldnames+['Predicted Stability', 'Half Life', 'Stability Rank', 'NetMHCstab allele'],
+                headers+['Predicted Stability', 'Half Life', 'Stability Rank', 'NetMHCstab allele'],
                 delimiter='\t',
                 lineterminator='\n'
             )
             writer.writeheader()
-            x = 0
-            for chunk in pvactools.lib.run_utils.split_file(reader, 100):
-                peptide_lengths = set()
-                staging_file = tempfile.NamedTemporaryFile(mode='w+')
-                current_buffer = {}
-                alleles_in_chunk = set()
-                for line in chunk:
-                    sequence_id = ('%010x'%x)[-10:]
-                    staging_file.write('>'+sequence_id+'\n')
-                    if 'Epitope Seq' in line:
-                        staging_file.write(line['Epitope Seq']+'\n')
-                        peptide_lengths.add(str(len(line['Epitope Seq'])))
-                    else:
-                        staging_file.write(line['MT Epitope Seq']+'\n')
-                        peptide_lengths.add(str(len(line['MT Epitope Seq'])))
-                    alleles_in_chunk.add(line['HLA Allele'])
-                    current_buffer[sequence_id] = {k:line[k] for k in line}
-                    x+=1
-                staging_file.seek(0)
-                allele_list = [allele.replace('*', '') for allele in alleles_in_chunk]
-                allele_list.sort()
-                response = self.query_netmhcstabpan_server(staging_file, peptide_lengths, allele_list, jobid_searcher)
 
-                if fail_searcher.search(response.content.decode()):
-                    raise Exception("NetMHCstabpan encountered an error during processing.\n{}".format(response.content.decode()))
+            output_lines = []
+            for allele in valid_alleles:
+                for length in lengths:
+                    df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False)
+                            [lambda x: (x['HLA Allele'] == allele) & (x[self.epitope_seq_column_name].str.len() == length) ])
+                    if len(df) == 0:
+                        continue
 
-                while rejected_searcher.search(response.content.decode()):
-                    logging.warning("Too many jobs submitted to NetMHCstabpan server. Waiting to retry.")
-                    sleep(random.randint(5, 10))
-                    staging_file.seek(0)
-                    response = self.query_netmhcstabpan_server(staging_file, peptide_lengths, allele_list, jobid_searcher)
+                    netmhcstabpan_allele = allele.replace('*', '')
+                    x = 0
+                    chunk_count = int(len(df)/100)
+                    if chunk_count == 0:
+                        chunk_count = 1
+                    for chunk in np.array_split(df, chunk_count):
+                        staging_file = tempfile.NamedTemporaryFile(mode='w+')
+                        current_buffer = {}
+                        records = []
+                        for index, line in chunk.iterrows():
+                            sequence_id = ('%010x'%x)[-10:]
+                            record_new = SeqRecord(Seq(line[self.epitope_seq_column_name], IUPAC.protein), id=sequence_id, description=sequence_id)
+                            records.append(record_new)
+                            current_buffer[sequence_id] = line.to_dict()
+                            x+=1
+                        SeqIO.write(records, staging_file.name, "fasta")
+                        staging_file.seek(0)
+                        response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele, jobid_searcher)
 
-                if success_searcher.search(response.content.decode()):
-                    pending = []
-                    allele_map = {item[0]:item[1] for item in allele_searcher.findall(response.content.decode())}
-                    results = [item.strip() for item in result_delimiter.split(response.content.decode())]
-                    for i in range(2, len(results), 4): #examine only the parts we want, skipping all else
-                        for line in results[i].split('\n'):
-                            data = [word for word in line.strip().split(' ') if len(word)]
-                            line = current_buffer[data[3]]
-                            if 'Epitope Seq' in line:
-                                length = len(line['Epitope Seq'])
-                            else:
-                                length = len(line['MT Epitope Seq'])
-                            if data[1] == line['HLA Allele'] and len(data[2]) == length:
+                        if fail_searcher.search(response.content.decode()):
+                            raise Exception("NetMHCstabpan encountered an error during processing.\n{}".format(response.content.decode()))
+
+                        while rejected_searcher.search(response.content.decode()):
+                            logging.warning("Too many jobs submitted to NetMHCstabpan server. Waiting to retry.")
+                            sleep(random.randint(5, 10))
+                            staging_file.seek(0)
+                            response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele, jobid_searcher)
+
+                        if success_searcher.search(response.content.decode()):
+                            allele_map = {item[0]:item[1] for item in allele_searcher.findall(response.content.decode())}
+                            results = [item.strip() for item in result_delimiter.split(response.content.decode())]
+                            if len(results) == 0:
+                                raise Exception("Unexpected return value from NetMHCstabpan server. Unable to parse response.\n{}".format(response.content.decode()))
+                            data_for_sequence_id = {}
+                            for i in range(2, len(results), 4): #examine only the parts we want, skipping all else
+                                for result_line in results[i].split('\n'):
+                                    data = [word for word in result_line.strip().split(' ') if len(word)]
+                                    data_for_sequence_id[data[3]] = data
+
+                            for sequence_id, line in current_buffer.items():
+                                data = data_for_sequence_id[sequence_id]
                                 line.update({
                                     'Predicted Stability':data[4],
                                     'Half Life':data[5],
                                     'Stability Rank':data[6],
-                                    'NetMHCstab allele':allele_map[line['HLA Allele'].replace('*', '', 1)]
+                                    'NetMHCstab allele':allele_map[netmhcstabpan_allele]
                                 })
-                                pending.append([int(data[3], 16), {k:line[k] for k in line}])
-                    if len(pending) == 0:
-                        raise Exception("Unexpected return value from NetMHCstabpan server. Unable to parse response.\n{}".format(response.content.decode()))
-                    writer.writerows([{k:entry[1][k] for k in entry[1]} for entry in sorted(pending, key=lambda x:x[0])])
-                else:
-                    raise Exception("Unexpected return value from NetMHCstabpan server. Unable to parse response.\n{}".format(response.content.decode()))
+                                output_lines.append(line)
 
-    def query_netmhcstabpan_server(self, staging_file, peptide_lengths, allele_list, jobid_searcher):
+                        else:
+                            raise Exception("Unexpected return value from NetMHCstabpan server. Unable to parse response.\n{}".format(response.content.decode()))
+
+            for allele in invalid_alleles:
+                df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False)
+                        [lambda x: (x['HLA Allele'] == allele) ])
+                df['Predicted Stability'] = 'NA'
+                df['Half Life'] = 'NA'
+                df['Stability Rank'] = 'NA'
+                df['NetMHCstab allele'] = 'NA'
+                output_lines.extend(df.to_dict('records'))
+            writer.writerows(output_lines)
+
+    def query_netmhcstabpan_server(self, staging_file, peptide_length, allele, jobid_searcher):
         response = requests.post(
             "https://services.healthtech.dtu.dk/cgi-bin/webface2.cgi",
             files={'SEQSUB':(staging_file.name, staging_file, 'text/plain')},
             data = {
                 'configfile':'/var/www/html/services/NetMHCstabpan-1.0/webface.cf',
                 'inp':'0',
-                'len': ','.join(peptide_lengths),
+                'len': peptide_length,
                 'master':'1',
-                'slave0':allele_list[-1],
-                'allele':','.join(allele_list),
+                'slave0':allele,
+                'allele':allele,
                 'thrs':'0.5',
                 'thrw': '2',
                 'incaff': '0',
                 'sort1':'-1',
                 'waff':'0.8',
                 'sort2':'-1',
-            }
+            },
+            timeout=10
         )
         if response.status_code != 200:
             raise Exception("Error posting request to NetMHCstabpan server.\n{}".format(response.content.decode()))
         while jobid_searcher.search(response.content.decode()):
             sleep(10)
-            response = requests.get(response.url)
+            response = requests.get(response.url, timeout=10)
             if response.status_code != 200:
                 raise Exception("Error posting request to NetMHCstabpan server.\n{}".format(response.content.decode()))
         return response
+
+    def observed_alleles(self):
+        return np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique())[::-1]
+
+    def observed_epitope_lengths(self):
+        epitopes = pd.read_csv(self.input_file, delimiter="\t", usecols=[self.epitope_seq_column_name])[self.epitope_seq_column_name].unique()
+        return list(set([len(e) for e in epitopes]))
 
     @classmethod
     def parser(cls, tool):
@@ -134,6 +172,3 @@ class NetMHCStab:
             help="Output TSV filename for putative neoepitopes."
         )
         return parser
-
-# if __name__ == '__main__':
-#     main()
