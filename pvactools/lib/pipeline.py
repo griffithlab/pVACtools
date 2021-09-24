@@ -10,6 +10,7 @@ import yaml
 import pkg_resources
 import pymp
 from threading import Lock
+from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC

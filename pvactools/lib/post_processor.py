@@ -118,7 +118,7 @@ class PostProcessor:
     def call_netmhc_stab(self):
         if self.run_netmhc_stab:
             print("Running NetMHCStabPan")
-            NetMHCStab(self.net_chop_fh.name, self.netmhc_stab_fh.name).execute()
+            NetMHCStab(self.net_chop_fh.name, self.netmhc_stab_fh.name, self.file_type).execute()
             print("Completed")
         else:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
