@@ -13,6 +13,17 @@ from filecmp import cmp
 from pvactools.lib.netmhc_stab import NetMHCStab
 from .test_utils import *
 
+def make_success_response(data, files, path):
+    reader = open(os.path.join(
+        path,
+        "Netmhcstab.{}.html".format(data['allele'])
+    ), mode='rb')
+    response_obj = lambda :None
+    response_obj.status_code = 200
+    response_obj.content = reader.read()
+    reader.close()
+    return response_obj
+
 def make_response(data, files, path, test_file):
     reader = open(os.path.join(
         path,
@@ -34,7 +45,7 @@ def make_rejected_response(data, files, path, self):
     else:
         reader = open(os.path.join(
             path,
-            'Netmhcstab.html'
+            "Netmhcstab.{}.html".format(data['allele'])
         ), mode='rb')
     response_obj = lambda :None
     response_obj.status_code = 200
@@ -64,11 +75,10 @@ class NetChopTest(unittest.TestCase):
         self.assertTrue(compiled_script_path)
 
     def test_netmhc_stab_runs(self):
-        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_success_response(
             data,
             files,
-            self.test_data_directory,
-            'Netmhcstab.html'
+            self.test_data_directory
            ))):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(

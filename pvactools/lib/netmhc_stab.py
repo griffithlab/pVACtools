@@ -17,15 +17,18 @@ from Bio.Alphabet import IUPAC
 
 import pvactools.lib.run_utils
 from pvactools.lib.prediction_class import MHCI
+import pvactools.lib.sort
 
 class NetMHCStab:
-    def __init__(self, input_file, output_file, file_type='pVACseq'):
+    def __init__(self, input_file, output_file, file_type='pVACseq', top_score_metric='median'):
         self.input_file = input_file
         self.output_file = output_file
         if file_type == 'pVACseq':
             self.epitope_seq_column_name = 'MT Epitope Seq'
         else:
             self.epitope_seq_column_name = 'Epitope Seq'
+        self.file_type = file_type
+        self.top_score_metric = top_score_metric
 
     def execute(self):
         valid_alleles = MHCI.all_valid_allele_names()
@@ -55,6 +58,7 @@ class NetMHCStab:
                 for length in lengths:
                     df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False)
                             [lambda x: (x['HLA Allele'] == allele) & (x[self.epitope_seq_column_name].str.len() == length) ])
+                    df = df.fillna('NA')
                     if len(df) == 0:
                         continue
 
@@ -118,7 +122,12 @@ class NetMHCStab:
                 df['Stability Rank'] = 'NA'
                 df['NetMHCstab allele'] = 'NA'
                 output_lines.extend(df.to_dict('records'))
-            writer.writerows(output_lines)
+
+            if self.file_type == 'pVACseq':
+                sorted_lines = pvactools.lib.sort.default_sort_from_pd_dict(output_lines, self.top_score_metric)
+            else:
+                sorted_lines = pvactools.lib.sort.pvacbind_sort(output_lines, self.top_score_metric)
+            writer.writerows(sorted_lines)
 
     def query_netmhcstabpan_server(self, staging_file, peptide_length, allele, jobid_searcher):
         response = requests.post(
@@ -170,5 +179,13 @@ class NetMHCStab:
         parser.add_argument(
             'output_file',
             help="Output TSV filename for putative neoepitopes."
+        )
+        parser.add_argument(
+            '-m', '--top-score-metric',
+            choices=['lowest', 'median'],
+            default='median',
+            help="The ic50 scoring metric to use when sorting epitopes. "
+                 + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
+                 + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
         )
         return parser
