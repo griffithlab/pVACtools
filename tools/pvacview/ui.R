@@ -92,10 +92,22 @@ ui <- dashboardPage(
               title="Regenerate Tiering with different parameters",
               status='primary', solidHeader = TRUE, collapsible = TRUE,
               "*Please note that the metrics file is required in order to regenerate tiering information with different parameters", br(),
+              "Current version of pVACseq results defaults to positions 1, 2, n-1 and n (for a n-mer peptide) when determining anchor positions.
+              If you would like to use our allele specific anchor results and regenerate the tiering results for your variants,
+              please specify your contribution cutoff and submit for recalculation. ", tags$a(href="https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1", "More details can be found here."), br(),
               sliderInput("anchor_contribution", "Contribution cutoff for determining anchor locations", 0.5, 0.9, 0.8, step = 0.1, width = 400),
               numericInput("dna_cutoff", "DNA VAF clonal VAF (Anything lower than 1/2 of chosen VAF level will be considered subclonal)", 0.5, min = 0, max = 1, step = 0.01, width = 500),
               #numericInput("rna_cutoff", "RNA low gene expression cutoff (Anything lower than chosen expression level will be considered low expression)", 1, min = 0, max = 100, step = 1, width = 500),
+              h5("For your reference, the max DNA VAF under 0.6 in the current main table is: "), verbatimTextOutput("max_dna"), br(),
               actionButton('submit','Recalculate Tiering with new parameters'),
+              style = "overflow-x: scroll;font-size:100%"),
+          
+          box(width= 6, 
+              title="Add Comments for selected variant",
+              status='primary', solidHeader = TRUE, collapsible = TRUE,
+              textAreaInput("comments", "Please add/update your comments for the variant you are currently examining", value=""),
+              actionButton('comment','Update Comment Section'),
+              h5("Comment:"), verbatimTextOutput("comment_text"),
               style = "overflow-x: scroll;font-size:100%")
         ),
         
