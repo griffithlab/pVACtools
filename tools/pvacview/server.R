@@ -6,6 +6,7 @@ library(reshape2)
 library(jsonlite)
 library(tibble)
 library(tidyr)
+library(dplyr)
 
 source("anchor_and_helper_functions.R")
 source("styling.R")
@@ -71,6 +72,14 @@ server <- shinyServer(function(input, output, session) {
     dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
     df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, unlist(x["Pos"]), anchor_mode="default"))
+    if("Comments" %in% colnames(df$mainTable))
+    {
+      df$comments <- data.frame(data = df$mainTable$`Comments`,nrow=nrow(df$mainTable),ncol=1)
+    }
+    else{
+      df$comments <- data.frame(matrix("No comments",nrow=nrow(df$mainTable)),ncol=1)
+    }
+    rownames(df$comments) <- df$mainTable$ID
   })
   
   #Option 1: User uploaded metrics file
@@ -90,7 +99,8 @@ server <- shinyServer(function(input, output, session) {
 
   #Option 2: Load from default (relative) file path for aggregate report file 
    observeEvent(input$loadDefaultmain,{
-     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_I.tsv")
+     #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_I.tsv")
+     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/835a7e4ae8b660a362c0c0b54140e26830d72bf2/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.tsv")
      mainData <- read.table(text=data, sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(mainData) <- mainData[1,]
      mainData <- mainData[-1,]
@@ -104,14 +114,24 @@ server <- shinyServer(function(input, output, session) {
      dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
      df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, unlist(x["Pos"]), anchor_mode="default"))
-     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_I_metrics.json")
+     if("Comments" %in% colnames(df$mainTable))
+     {
+       df$comments <- data.frame(data = df$mainTable$`Comments`,nrow=nrow(df$mainTable),ncol=1)
+     }
+     else{
+       df$comments <- data.frame(matrix("No comments",nrow=nrow(df$mainTable)),ncol=1)
+     }
+     rownames(df$comments) <- df$mainTable$ID
+     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/6423b8b65f2e3f5cc2979f33b86c4650a6aa4570/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.metrics.json")
+     #metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_I_metrics.json")
      df$metricsData <- fromJSON(txt = metricsdata)
-     additionalData <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_II.tsv")
-     addData <- read.table(text = additionalData, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
-     colnames(addData) <- addData[1,]
-     addData <- addData[-1,]
-     row.names(addData) <- NULL
-     df$additionalData <- addData
+     #additionalData <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_II.tsv")
+     #addData <- read.table(text = additionalData, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     #colnames(addData) <- addData[1,]
+     #addData <- addData[-1,]
+     #row.names(addData) <- NULL
+     #df$additionalData <- addData
+     
      updateTabItems(session, "tabs", "explore")
    })
 
@@ -129,6 +149,18 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$`Best HLA allele` <- apply(df$mainTable, 1, function(x) df$metricsData[[x[["ID"]]]]$best_hla_allele)
       df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, input$anchor_contribution, input$dna_cutoff, unlist(x$`Mutated Positions`), x$`Best HLA allele`))
       df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, input$dna_cutoff, unlist(x["Pos"]), hla_allele = x$`Best HLA allele`))
+      tier_sorter <- c("Pass", "Relaxed", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr")
+      df$mainTable$`Rank_ic50` <- NA
+      df$mainTable$`Rank_expr` <- NA
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+      df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
+      df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
+      df$mainTable <- df$mainTable %>%
+        arrange(factor(Tier, levels = tier_sorter), Rank)
+      df$mainTable$`Rank` <- NULL
+      df$mainTable$`Rank_ic50` <- NULL
+      df$mainTable$`Rank_expr` <- NULL
+      df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_" , label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
   })
   
   #determine hla allele count in order to generate column tooltip locations correctly 
@@ -147,7 +179,22 @@ server <- shinyServer(function(input, output, session) {
     input$add_file_label
   })
   
-
+  output$max_dna <- renderText({
+    if (is.null(df$mainTable)){
+      return ("N/A")
+    }
+    dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
+    dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
+    dna_cutoff 
+  })
+  
+  output$comment_text <- renderText({
+    #browser()
+    if (is.null(df$mainTable)){
+      return ("N/A")
+    }
+    df$comments[selectedID(),1]
+  })
   
   ##############################PEPTIDE EXPLORATION TAB###########################################                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
   
@@ -157,10 +204,11 @@ server <- shinyServer(function(input, output, session) {
       return ()
     }
     else{
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Best HLA allele")]
+      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Best HLA allele") & !(colnames(df$mainTable) == "Comments")]
     , escape = FALSE, callback = JS(callBack(hla_count())), class = 'stripe',
           options=list(lengthChange = FALSE, dom = 'Bfrtip', 
-                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(25-(7-hla_count())))),
+                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(25-(7-hla_count()))),
+                                     list(orderable=TRUE, targets=0)),
                    buttons = list(I('colvis')), 
                    initComplete = htmlwidgets::JS(
                      "function(settings, json) {",
@@ -225,6 +273,9 @@ server <- shinyServer(function(input, output, session) {
          " RNA Expr: Bar graph ranging from 0 to 50 (this is meant to highlight variants with lower expression values for closer inspection)", br(),
          " Allele Expr: Bar graph ranging from 0 to (50 * maximum value of RNA VAF values across variants) "),
       h4(" Tier Types:", style="font-weight: bold"),
+      h5(" Variants are ordered by their Tiers in the following way: Pass, Relaxed, LowExpr, Anchor, Subclonal, Poor, NoExpr.
+           Within the same tier, variants are ordered by the sum of their ranking in binding affinity and allele expression (i.e. lower binding 
+           affinity and higher allele expression is prioritized.)"),
       h5(" NoExpr: Mutant allele is not expressed ", br(),
          " LowExpr: Mutant allele has low expression (Allele Expr < 1)", br(),
          " Subclonal: Likely not in the founding clone of the tumor (DNA VAF > max(DNA VAF)/2)", br(),
@@ -245,6 +296,8 @@ server <- shinyServer(function(input, output, session) {
     session$sendCustomMessage('unbind-DT', 'mainTable')
     df$mainTable$`Evaluation` <- shinyValue("selecter_",nrow(df$mainTable), df$mainTable)
     df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput,nrow(df$mainTable),"selecter_", choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
+    dataTableProxy("mainTable") %>% 
+      selectPage((which(input$mainTable_rows_all == df$selectedRow)-1) %/% 10 + 1)
   })
   
   ##selected row text box
@@ -263,6 +316,15 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$ID[df$selectedRow]
     }
   })
+  
+  ## Update comments section based on selected row
+  observeEvent(input$comment, {
+    if (is.null(df$mainTable)){
+      return ()
+    }
+    df$comments[selectedID(), 1] <- input$comments
+  })
+  
   ##display of genomic information 
   output$metricsTextGenomicCoord = renderText({
     if (is.null(df$metricsData)){
@@ -595,10 +657,13 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)){
       return ()
     }
-    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval")& !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Tier Count")]
+    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval")& !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Tier Count") & !(colnames(df$mainTable) == "Comments")]
     col_names <- colnames(data)
     data <- data.frame(data, Evaluation=shinyValue("selecter_",nrow(df$mainTable), df$mainTable))
     colnames(data) <- c(col_names,"Evaluation")
+    col_names <- colnames(data)
+    data <- data.frame(data, df$comments[,1])
+    colnames(data) <- c(col_names,"Comments")
     data}, escape = FALSE, server = FALSE, rownames = FALSE,
     options=list(dom = 'Bfrtip', 
                  buttons = list(I('colvis'), list(
