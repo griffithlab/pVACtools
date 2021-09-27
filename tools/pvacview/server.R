@@ -297,7 +297,7 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Evaluation` <- shinyValue("selecter_",nrow(df$mainTable), df$mainTable)
     df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput,nrow(df$mainTable),"selecter_", choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
     dataTableProxy("mainTable") %>% 
-      selectPage(which(input$mainTable_rows_all == df$selectedRow) %/% 11 + 1)
+      selectPage((which(input$mainTable_rows_all == df$selectedRow)-1) %/% 10 + 1)
   })
   
   ##selected row text box
