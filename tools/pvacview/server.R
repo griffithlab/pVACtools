@@ -6,6 +6,7 @@ library(reshape2)
 library(jsonlite)
 library(tibble)
 library(tidyr)
+library(dplyr)
 
 source("anchor_and_helper_functions.R")
 source("styling.R")
