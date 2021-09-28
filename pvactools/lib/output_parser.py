@@ -90,7 +90,6 @@ class OutputParser(metaclass=ABCMeta):
         return [(t, float(r)) if r != 'None' else (t, 'NA') for t, r in percentiles]
 
     def get_scores(self, line, method):
-        # I should may just return 'NA' for percentiles and scores if they are not provided
         if method.lower() == 'mhcflurry':
             if self.flurry_state == 'both':
                 return [
@@ -425,7 +424,7 @@ class OutputParser(metaclass=ABCMeta):
 
     def process_input_iedb_file(self, tsv_entries):
         iedb_results = self.parse_iedb_file(tsv_entries)
-        iedb_results_with_metrics = self.add_summary_metrics(iedb_results) # this is where im at
+        iedb_results_with_metrics = self.add_summary_metrics(iedb_results)
         flattened_iedb_results = self.flatten_iedb_results(iedb_results_with_metrics)
 
         return flattened_iedb_results
@@ -661,9 +660,9 @@ class DefaultOutputParser(OutputParser):
                         position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
                     else:
                         position   = line['start']
-                    percentiles    = self.get_percentiles(line, method) # was percentile
+                    percentiles    = self.get_percentiles(line, method)
                     epitope        = line['peptide']
-                    scores         = self.get_scores(line, method) # was score
+                    scores         = self.get_scores(line, method)
                     allele         = line['allele']
                     peptide_length = len(epitope)
 
@@ -710,8 +709,7 @@ class DefaultOutputParser(OutputParser):
                                 wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores'][method] = {}
                                 wt_iedb_results[tsv_index][position][protein_type.lower() + '_percentiles'][method] = {}
 
-                            # t = score type, r = result
-                            # these need special handling and/or flattening etc, in many places most likely
+                            # t = score type, r = resuls
                             for t, r in scores:
                                 wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores'][method][t] = r
                             for t, r in percentiles:
@@ -909,7 +907,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
         tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
 
-        iedb_results = self.process_input_iedb_file() # something is bad in here
+        iedb_results = self.process_input_iedb_file()
         for (
             position,
             mt_scores,
