@@ -117,7 +117,6 @@ class Pipeline(metaclass=ABCMeta):
                 yaml.dump(inputs, log_fh, default_flow_style=False)
 
     def get_flurry_state(self):
-        # need to make sure that im doing the name on this one right
         if 'MHCflurry' in self.prediction_algorithms and 'MHCflurryEL' in self.prediction_algorithms:
             self.prediction_algorithms.remove('MHCflurryEL')
             return 'both'
@@ -165,7 +164,6 @@ class Pipeline(metaclass=ABCMeta):
         return generator(**params)
 
     def output_parser(self, params):
-        # remove bedpe from this
         parser_types = {
             'vcf'  : 'DefaultOutputParser',
             'bedpe': 'FusionOutputParser',
@@ -752,7 +750,7 @@ class PvacbindPipeline(Pipeline):
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['add_sample_name_column'] = True 
                     parser = self.output_parser(params)
-                    parser.execute() # something is getting jacked up in here
+                    parser.execute() 
                     status_message("Parsing prediction file for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, length, fasta_chunk))
 
                     split_parsed_output_files.append(split_parsed_file_path)
