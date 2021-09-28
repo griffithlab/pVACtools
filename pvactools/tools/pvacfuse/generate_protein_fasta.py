@@ -24,7 +24,7 @@ def define_parser():
 
     parser.add_argument(
         "input_file",
-        help="An INTEGRATE-Neo annotated bedpe file with fusions or a AGfusion output directory."
+        help="An INTEGRATE-Neo annotated bedpe file with fusions or an AGfusion output directory."
     )
     parser.add_argument(
         "flanking_sequence_length", type=int,
