@@ -616,59 +616,6 @@ class DefaultOutputParser(OutputParser):
 
         return self.match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
 
-class FusionOutputParser(OutputParser):
-    def parse_iedb_file(self, tsv_entries):
-        with open(self.key_file, 'r') as key_file_reader:
-            tsv_indices_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
-        iedb_results = {}
-        for input_iedb_file in self.input_iedb_files:
-            with open(input_iedb_file, 'r') as reader:
-                iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
-                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
-                for line in iedb_tsv_reader:
-                    if "Warning: Potential DNA sequence(s)" in line['allele']:
-                        continue
-                    protein_label  = int(line['seq_num'])
-                    if 'core_peptide' in line:
-                        position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
-                    else:
-                        position   = line['start']
-                    epitope        = line['peptide']
-                    score          = line['ic50']
-                    allele         = line['allele']
-                    peptide_length = len(epitope)
-                    percentile     = self.get_percentile(line)
-
-                    if tsv_indices_from_label[protein_label] is not None:
-                        tsv_indices = tsv_indices_from_label[protein_label]
-
-                    for tsv_index in tsv_indices:
-                        tsv_entry = tsv_entries[tsv_index]
-                        key = "%s|%s" % (tsv_index, position)
-                        if key not in iedb_results:
-                            iedb_results[key]                      = {}
-                            iedb_results[key]['mt_scores']         = {}
-                            iedb_results[key]['mt_percentiles']    = {}
-                            iedb_results[key]['wt_scores']         = {}
-                            iedb_results[key]['wt_percentiles']    = {}
-                            iedb_results[key]['mt_epitope_seq']    = epitope
-                            iedb_results[key]['wt_epitope_seq']    = 'NA'
-                            iedb_results[key]['gene_name']         = tsv_entry['gene_name']
-                            iedb_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
-                            iedb_results[key]['variant_type']      = tsv_entry['variant_type']
-                            iedb_results[key]['position']          = position
-                            iedb_results[key]['tsv_index']         = tsv_index
-                            iedb_results[key]['allele']            = allele
-                            iedb_results[key]['peptide_length']    = peptide_length
-                            iedb_results[key]['mutation_position'] = 'NA'
-                        iedb_results[key]['mt_scores'][method] = float(score)
-                        iedb_results[key]['mt_percentiles'][method] = percentile
-                        iedb_results[key]['wt_scores'][method] = 'NA'
-                        iedb_results[key]['wt_percentiles'][method] = 'NA'
-
-        return iedb_results
-
 class UnmatchedSequencesOutputParser(OutputParser):
     def parse_iedb_file(self):
         with open(self.key_file, 'r') as key_file_reader:
