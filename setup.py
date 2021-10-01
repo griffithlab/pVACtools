@@ -65,7 +65,7 @@ setup(
         ]
     },
     install_requires=[
-        'PyVCF',
+        'vcfpy',
         'requests',
         'PyYAML>=5.1',
         'biopython==1.76',

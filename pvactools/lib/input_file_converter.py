@@ -1,4 +1,5 @@
 import vcf
+import vcfpy
 import csv
 import sys
 import os
@@ -69,33 +70,28 @@ class VcfConverter(InputFileConverter):
             sys.exit('No .tbi file found for proximal variants VCF {}. Proximal variants VCF needs to be tabix indexed.'.format(self.proximal_variants_vcf))
         if self.proximal_variants_vcf and not os.path.exists(self.input_file + '.tbi'):
             sys.exit('No .tbi file found for input VCF {}. Input VCF needs to be tabix indexed if processing with proximal variants.'.format(self.input_file))
-        if pvactools.lib.run_utils.is_gz_file(self.input_file):
-            mode = 'rb'
-        else:
-            mode = 'r'
         if self.proximal_variants_vcf:
             self.proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
             self.proximal_variants_writer = csv.DictWriter(self.proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'codon_change', 'protein_position', 'type', 'main_somatic_variant'])
             self.proximal_variants_writer.writeheader()
             self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf, self.pass_only, self.flanking_bases)
-            self.somatic_vcf_fh = open(self.input_file, mode)
-            self.somatic_vcf_reader = vcf.Reader(self.somatic_vcf_fh)
-        self.reader = open(self.input_file, mode)
-        self.vcf_reader = vcf.Reader(self.reader)
-        if len(self.vcf_reader.samples) > 1:
+            self.somatic_vcf_reader = vcfpy.Reader.from_path(self.input_file)
+        self.vcf_reader = vcfpy.Reader.from_path(self.input_file)
+        sample_names = self.vcf_reader.header.samples.names
+        if len(sample_names) > 1:
             if not self.sample_name:
                 sys.exit("VCF contains more than one sample but sample_name is not set.")
-            elif self.sample_name not in self.vcf_reader.samples:
+            elif self.sample_name not in sample_names:
                 sys.exit("sample_name {} not a sample ID in the #CHROM header of VCF {}".format(self.sample_name, self.input_file))
-            if self.normal_sample_name is not None and self.normal_sample_name not in self.vcf_reader.samples:
+            if self.normal_sample_name is not None and self.normal_sample_name not in sample_names:
                 sys.exit("normal_sample_name {} not a sample ID in the #CHROM header of VCF {}".format(self.normal_sample_name, self.input_file))
-        elif len(self.vcf_reader.samples) ==  0:
+        elif len(sample_names) ==  0:
             sys.exit("VCF doesn't contain any sample genotype information. Add a dummy sample using the vcf-genotype-annotator tool available as part of the vatools package.")
         else:
             if self.normal_sample_name is not None:
                 sys.exit("normal_sample_name {} provided but the input file is a single-sample (tumor only) VCF".format(self.normal_sample_name))
-            self.sample_name = self.vcf_reader.samples[0]
-        if 'GT' not in self.vcf_reader.formats:
+            self.sample_name = sample_names[0]
+        if 'GT' not in self.vcf_reader.header.format_ids():
             sys.exit("VCF doesn't contain any sample genotype information. Add a dummy sample using the vcf-genotype-annotator tool available as part of the vatools package.")
         self.writer = open(self.output_file, 'w')
         self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
@@ -113,15 +109,15 @@ class VcfConverter(InputFileConverter):
         return len(alt) < len(ref)
 
     def create_csq_parser(self):
-        info_fields = self.vcf_reader.infos
-
-        if 'CSQ' not in info_fields:
+        if 'CSQ' in self.vcf_reader.header.info_ids():
+            csq_header = self.vcf_reader.header.get_info_field_info('CSQ')
+        else:
             sys.exit('Input VCF does not contain a CSQ header. Please annotate the VCF with VEP before running it.')
-        if info_fields['CSQ'] is None:
+
+        if csq_header is None:
             sys.exit('Failed to extract format string from info description for tag (CSQ)')
         else:
-            csq_header = info_fields['CSQ']
-            return CsqParser(csq_header.desc)
+            return CsqParser(csq_header.description)
 
     def resolve_consequence(self, consequence_string, ref, alt):
         if '&' in consequence_string:
@@ -161,26 +157,26 @@ class VcfConverter(InputFileConverter):
             return (var_count / depth)
 
     def get_depth_from_vcf_genotype(self, genotype, tag):
-        try:
-            depth = genotype[tag]
+        if tag in genotype.data:
+            depth = genotype.data[tag]
             if depth is None or depth == "":
                 depth = 'NA'
-        except AttributeError:
+        else:
             depth = 'NA'
         return depth
 
     def get_vaf_from_vcf_genotype(self, genotype, alts, alt, af_tag, ad_tag, dp_tag):
-        try:
-            allele_frequencies = genotype[af_tag]
+        if af_tag in genotype.data:
+            allele_frequencies = genotype.data[af_tag]
             if isinstance(allele_frequencies, list):
                 vaf = allele_frequencies[alts.index(alt)]
             else:
                 vaf = allele_frequencies
             if vaf > 1:
                 print("Warning: VAF is expected to be a fraction, but is larger than 1. If VAFs are encoded as percentages, please adjust the coverage cutoffs accordingly.")
-        except (AttributeError, TypeError):
-            try:
-                allele_depths = genotype[ad_tag]
+        else:
+            if ad_tag in genotype.data and dp_tag in genotype.data:
+                allele_depths = genotype.data[ad_tag]
                 if isinstance(allele_depths, list):
                     #sometimes AF is type R, sometimes it's A
                     if len(allele_depths) == len(alts):
@@ -194,30 +190,30 @@ class VcfConverter(InputFileConverter):
                     var_count = allele_depths
                 if var_count is None or var_count == "":
                     return 'NA'
-                depth = genotype[dp_tag]
+                depth = genotype.data[dp_tag]
                 if depth is None or depth == "":
                     return 'NA'
                 vaf = self.calculate_vaf(int(var_count), int(depth))
-            except AttributeError:
+            else:
                 vaf = 'NA'
         return vaf
 
-    def calculate_coverage_for_entry(self, entry, reference, alt, start, chromosome, genotype):
+    def calculate_coverage_for_entry(self, entry, reference, alt, genotype):
         coverage_for_entry = {}
         coverage_for_entry['tdna_depth'] = self.get_depth_from_vcf_genotype(genotype, 'DP')
         coverage_for_entry['trna_depth'] = self.get_depth_from_vcf_genotype(genotype, 'RDP')
-        alts = list(map(lambda x: str(x) , entry.ALT))
+        alts = list(map(lambda x: x.value , entry.ALT))
         coverage_for_entry['tdna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, alts, alt, 'AF', 'AD', 'DP')
         coverage_for_entry['trna_vaf'] = self.get_vaf_from_vcf_genotype(genotype, alts, alt, 'RAF', 'RAD', 'RDP')
         if self.normal_sample_name is not None:
-            normal_genotype = entry.genotype(self.normal_sample_name)
+            normal_genotype = entry.call_for_sample[self.normal_sample_name]
             coverage_for_entry['normal_depth'] = self.get_depth_from_vcf_genotype(normal_genotype, 'DP')
             coverage_for_entry['normal_vaf'] = self.get_vaf_from_vcf_genotype(normal_genotype, alts, alt, 'AF', 'AD', 'DP')
         return coverage_for_entry
 
     def write_proximal_variant_entries(self, entry, alt, transcript_name, index):
         proximal_variants = self.proximal_variant_parser.extract(entry, alt, transcript_name)
-        for (proximal_variant, csq_entry) in proximal_variants:
+        for (proximal_variant, csq_entry, proximal_alt) in proximal_variants:
             if len(list(self.somatic_vcf_reader.fetch(proximal_variant.CHROM, proximal_variant.POS - 1 , proximal_variant.POS))) > 0:
                 proximal_variant_type = 'somatic'
             else:
@@ -229,14 +225,18 @@ class VcfConverter(InputFileConverter):
             else:
                 protein_position = csq_entry['Protein_position']
             if protein_position == '-':
-                print("Proximal variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, csq_entry['Feature']))
+                print("Proximal variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, proximal_alt, csq_entry['Feature']))
                 continue
+            if len(proximal_variant.REF) > len(proximal_alt):
+                start = proximal_variant.affected_start + 1
+            else:
+                start = proximal_variant.affected_start
             proximal_variant_entry = {
                 'chromosome_name': proximal_variant.CHROM,
-                'start': proximal_variant.affected_start,
+                'start': start,
                 'stop': proximal_variant.affected_end,
                 'reference': proximal_variant.REF,
-                'variant': proximal_variant.ALT[0],
+                'variant': proximal_alt,
                 'amino_acid_change': csq_entry['Amino_acids'],
                 'codon_change': csq_entry['Codons'],
                 'protein_position': protein_position,
@@ -247,11 +247,11 @@ class VcfConverter(InputFileConverter):
 
     def close_filehandles(self):
         self.writer.close()
-        self.reader.close()
+        self.vcf_reader.close()
         if self.proximal_variants_vcf:
-            self.proximal_variant_parser.fh.close()
             self.proximal_variants_tsv_fh.close()
-            self.somatic_vcf_fh.close()
+            self.proximal_variant_parser.proximal_variants_vcf.close()
+            self.somatic_vcf_reader.close
 
     def decode_hex(self, string):
         hex_string = string.group(0).replace('%', '')
@@ -277,8 +277,8 @@ class VcfConverter(InputFileConverter):
             reference  = entry.REF
             alts       = entry.ALT
 
-            genotype = entry.genotype(self.sample_name)
-            if genotype.gt_type is None or genotype.gt_type == 0:
+            genotype = entry.call_for_sample[self.sample_name]
+            if not genotype.called:
                 #The genotype is uncalled or hom_ref
                 continue
 
@@ -291,11 +291,11 @@ class VcfConverter(InputFileConverter):
 
             alleles_dict = self.csq_parser.resolve_alleles(entry)
             for alt in alts:
-                alt = str(alt)
-                if genotype.gt_bases and alt not in genotype.gt_bases.split('/'):
+                alt = alt.value
+                if genotype.gt_bases and alt not in genotype.gt_bases:
                     continue
 
-                coverage_for_entry = self.calculate_coverage_for_entry(entry, reference, alt, start, chromosome, genotype)
+                coverage_for_entry = self.calculate_coverage_for_entry(entry, reference, alt, genotype)
 
                 transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)
                 if len(transcripts) == 0:
@@ -366,9 +366,13 @@ class VcfConverter(InputFileConverter):
                     else:
                         protein_length_change = ""
 
+                    if len(entry.REF) > len(alt):
+                        start = entry.affected_start + 1
+                    else:
+                        start = entry.affected_start
                     output_row = {
                         'chromosome_name'                : entry.CHROM,
-                        'start'                          : entry.affected_start,
+                        'start'                          : start,
                         'stop'                           : entry.affected_end,
                         'reference'                      : entry.REF,
                         'variant'                        : alt,
@@ -395,9 +399,9 @@ class VcfConverter(InputFileConverter):
                         output_row['codon_change'] = 'NA'
 
                     for (tag, key, comparison_fields) in zip(['TX', 'GX'], ['transcript_expression', 'gene_expression'], [[transcript_name], [ensembl_gene_id, gene_name]]):
-                        if tag in self.vcf_reader.formats:
-                            if tag in genotype.data._asdict():
-                                expressions = genotype[tag]
+                        if tag in self.vcf_reader.header.format_ids():
+                            if tag in genotype.data:
+                                expressions = genotype.data[tag]
                                 if isinstance(expressions, list):
                                     for expression in expressions:
                                         (item, value) = expression.split('|')
