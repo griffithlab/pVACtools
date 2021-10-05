@@ -7,21 +7,22 @@ import tempfile
 from subprocess import call
 from filecmp import cmp
 import py_compile
-import lib.call_iedb
-from lib.prediction_class import PredictionClass, IEDB
 import pandas as pd
 from mock import patch
+
+import pvactools.lib.call_iedb
+from pvactools.lib.prediction_class import PredictionClass, IEDB
+
 from .test_utils import *
 
 def test_data_directory():
-    return os.path.join(pvac_directory(), 'tests', 'test_data', 'call_iedb')
+    return os.path.join(pvactools_directory(), 'tests', 'test_data', 'call_iedb')
 
 class CallIEDBTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.python = sys.executable
-        base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'lib')
+        cls.executable_dir = os.path.join(pvactools_directory(), 'pvactools', 'lib')
         cls.executable     = os.path.join(cls.executable_dir, 'call_iedb.py')
         cls.test_data_dir  = test_data_directory()
         cls.additional_setup()
@@ -66,7 +67,7 @@ class CallIEDBClassITests(CallIEDBTests):
                 call_iedb_output_file = tempfile.NamedTemporaryFile()
                 class_name = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
 
-                lib.call_iedb.main([
+                pvactools.lib.call_iedb.main([
                     self.input_file,
                     call_iedb_output_file.name,
                     class_name,
@@ -86,7 +87,7 @@ class CallIEDBClassITests(CallIEDBTests):
     def test_mhcflurry_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
-        lib.call_iedb.main([
+        pvactools.lib.call_iedb.main([
             self.input_file,
             call_iedb_output_file.name,
             'MHCflurry',
@@ -102,7 +103,7 @@ class CallIEDBClassITests(CallIEDBTests):
     def test_mhcnuggets_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
-        lib.call_iedb.main([
+        pvactools.lib.call_iedb.main([
             self.input_file,
             call_iedb_output_file.name,
             'MHCnuggetsI',
@@ -123,7 +124,7 @@ class CallIEDBClassIITests(CallIEDBTests):
         cls.request_mock = unittest.mock.Mock(side_effect = (
             make_response(method, cls.test_data_dir) for method in cls.methods
         ))
-        lib.call_iedb.requests.post = cls.request_mock
+        pvactools.lib.call_iedb.requests.post = cls.request_mock
 
     def test_iedb_methods_generate_expected_files(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
@@ -135,7 +136,7 @@ class CallIEDBClassIITests(CallIEDBTests):
                 call_iedb_output_file = tempfile.NamedTemporaryFile()
                 class_name = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
 
-                lib.call_iedb.main([
+                pvactools.lib.call_iedb.main([
                     self.input_file,
                     call_iedb_output_file.name,
                     class_name,
@@ -151,7 +152,7 @@ class CallIEDBClassIITests(CallIEDBTests):
     def test_mhcnuggets_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
-        lib.call_iedb.main([
+        pvactools.lib.call_iedb.main([
             self.input_file,
             call_iedb_output_file.name,
             'MHCnuggetsII',

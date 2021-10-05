@@ -5,16 +5,17 @@ import tempfile
 from subprocess import call
 from filecmp import cmp
 import py_compile
-from tools.pvacfuse import generate_protein_fasta
+
+from pvactools.tools.pvacfuse import generate_protein_fasta
+from .test_utils import *
 
 class GenerateFastaTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.python = sys.executable
-        base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        cls.executable_dir = os.path.join(base_dir, 'tools', 'pvacfuse')
+        cls.executable_dir = os.path.join(pvactools_directory(), 'pvactools', 'tools', 'pvacfuse')
         cls.executable     = os.path.join(cls.executable_dir, 'generate_protein_fasta.py')
-        cls.test_data_dir  = os.path.join(base_dir, 'tests', 'test_data', 'pvacfuse_generate_protein_fasta')
+        cls.test_data_dir  = os.path.join(pvactools_directory(), 'tests', 'test_data', 'pvacfuse_generate_protein_fasta')
         cls.flanking_sequence_length = '10'
 
     def test_source_compiles(self):

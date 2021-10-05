@@ -3,14 +3,15 @@ import os
 import tempfile
 from filecmp import cmp
 import py_compile
-from lib.filter import *
+
+from pvactools.lib.filter import Filter
+from .test_utils import *
 
 class FilterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.directory = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-        cls.filter_path = os.path.join(cls.directory, "lib", "filter.py")
-        cls.test_data_path= os.path.join(cls.directory, "tests", "test_data", "filter")
+        cls.filter_path = os.path.join(pvactools_directory(), "pvactools", "lib", "filter.py")
+        cls.test_data_path= os.path.join(pvactools_directory(), "tests", "test_data", "filter")
 
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.filter_path))

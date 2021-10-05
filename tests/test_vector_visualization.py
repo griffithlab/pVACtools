@@ -3,7 +3,8 @@ import os
 import tempfile
 from filecmp import cmp
 import py_compile
-from lib.vector_visualization import *
+
+from pvactools.lib.vector_visualization import VectorVisualization
 
 class FilterTests(unittest.TestCase):
     @classmethod

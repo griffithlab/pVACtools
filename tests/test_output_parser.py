@@ -3,16 +3,16 @@ import os
 import sys
 import tempfile
 import py_compile
-from lib.output_parser import *
+
+from pvactools.lib.output_parser import DefaultOutputParser, FusionOutputParser, UnmatchedSequencesOutputParser
 from .test_utils import *
 
 class OutputParserTests(unittest.TestCase):
     @classmethod
     def setUp(cls):
-        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        executable_dir    = os.path.join(base_dir, 'lib')
+        executable_dir    = os.path.join(pvactools_directory(), 'pvactools', 'lib')
         cls.executable    = os.path.join(executable_dir, 'output_parser.py')
-        cls.test_data_dir = os.path.join(base_dir, 'tests', 'test_data', 'output_parser')
+        cls.test_data_dir = os.path.join(pvactools_directory(), 'tests', 'test_data', 'output_parser')
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
