@@ -4,6 +4,7 @@ on:
   push:
     branches: [ master, staging, hotfix ]
   pull_request:
+    types: [opened, synchronize, edited, reopened]
     branches: [ master, staging, hotfix]
 
 jobs:
