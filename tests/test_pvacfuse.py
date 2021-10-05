@@ -9,17 +9,17 @@ from subprocess import PIPE
 from subprocess import run as subprocess_run
 from filecmp import cmp
 import yaml
-import lib
 import datetime
-from tools.pvacfuse import *
 from mock import patch
-from .test_utils import *
-import tools.pvacfuse.main as pvacfuse_main
 import argparse
+
+from pvactools.tools.pvacfuse import *
+import pvactools.tools.pvacfuse.main as pvacfuse_main
+from .test_utils import *
 
 def test_data_directory():
     return os.path.join(
-        pvac_directory(),
+        pvactools_directory(),
         'tests',
         'test_data',
         'pvacfuse'
@@ -28,12 +28,13 @@ def test_data_directory():
 class PvacfuseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.pVac_directory = pvac_directory()
+        cls.pvactools_directory = pvactools_directory()
         cls.test_data_directory = test_data_directory()
 
     def test_pvacfuse_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             'tools',
             'pvacfuse',
             'main.py'
@@ -46,7 +47,8 @@ class PvacfuseTests(unittest.TestCase):
 
     def test_pvacfuse_commands(self):
         pvac_script_path = os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             'tools',
             'pvacfuse',
             'main.py'
@@ -75,7 +77,8 @@ class PvacfuseTests(unittest.TestCase):
 
     def test_run_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             "tools",
             "pvacfuse",
             "run.py"
@@ -84,7 +87,8 @@ class PvacfuseTests(unittest.TestCase):
 
     def test_allele_specific_cutoffs_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             "tools",
             "pvacfuse",
             "allele_specific_cutoffs.py"
@@ -96,7 +100,8 @@ class PvacfuseTests(unittest.TestCase):
 
     def test_binding_filter_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             "tools",
             "pvacfuse",
             "binding_filter.py"
@@ -110,7 +115,8 @@ class PvacfuseTests(unittest.TestCase):
 
     def test_download_example_data_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             "tools",
             "pvacfuse",
             "download_example_data.py"
@@ -123,7 +129,8 @@ class PvacfuseTests(unittest.TestCase):
 
     def test_top_score_filter_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             "tools",
             "pvacfuse",
             "top_score_filter.py"
@@ -137,7 +144,8 @@ class PvacfuseTests(unittest.TestCase):
 
     def test_generate_aggregated_report_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             "tools",
             "pvacfuse",
             "generate_aggregated_report.py"
@@ -151,7 +159,8 @@ class PvacfuseTests(unittest.TestCase):
 
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
-            self.pVac_directory,
+            self.pvactools_directory,
+            "pvactools",
             "tools",
             "pvacfuse",
             "valid_alleles.py"

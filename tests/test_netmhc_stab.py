@@ -9,7 +9,9 @@ import sys
 import tempfile
 import py_compile
 from filecmp import cmp
-import lib
+
+from pvactools.lib.netmhc_stab import NetMHCStab
+from .test_utils import *
 
 def make_response(data, files, path, test_file):
     reader = open(os.path.join(
@@ -43,14 +45,14 @@ def make_rejected_response(data, files, path, self):
 class NetChopTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        pvac_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
         cls.script_path = os.path.join(
-            pvac_dir,
+            pvactools_directory(),
+            'pvactools',
             'lib',
             'netmhc_stab.py'
         )
         cls.test_data_directory = os.path.join(
-            pvac_dir,
+            pvactools_directory(),
             'tests',
             'test_data',
             'netmhc_stab'
@@ -62,14 +64,14 @@ class NetChopTest(unittest.TestCase):
         self.assertTrue(compiled_script_path)
 
     def test_netmhc_stab_runs(self):
-        with patch('lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             self.test_data_directory,
             'Netmhcstab.html'
            ))):
             output_file = tempfile.NamedTemporaryFile()
-            lib.netmhc_stab.NetMHCStab(
+            NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 output_file.name
             ).execute()
@@ -79,14 +81,14 @@ class NetChopTest(unittest.TestCase):
             ))
 
     def test_netmhc_stab_fail(self):
-        with patch('lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             self.test_data_directory,
             'Netmhcstab.fail.html'
            ))), self.assertRaises(Exception) as context:
             output_file = tempfile.NamedTemporaryFile()
-            lib.netmhc_stab.NetMHCStab(
+            NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 output_file.name
             ).execute()
@@ -94,14 +96,14 @@ class NetChopTest(unittest.TestCase):
 
     def test_netmhc_stab_rejected(self):
         logging.disable(logging.NOTSET)
-        with patch('lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_rejected_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_rejected_response(
             data,
            files,
            self.test_data_directory,
            self
            ))), LogCapture() as l:
             output_file = tempfile.NamedTemporaryFile()
-            lib.netmhc_stab.NetMHCStab(
+            NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 output_file.name
             ).execute()
@@ -113,14 +115,14 @@ class NetChopTest(unittest.TestCase):
 
     #This is to ensure that we catch error cases that are not explicitly handled
     def test_netmhc_stab_other_error(self):
-        with patch('lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             self.test_data_directory,
             'Netmhcstab.other_error.html'
            ))), self.assertRaises(Exception) as context:
             output_file = tempfile.NamedTemporaryFile()
-            lib.netmhc_stab.NetMHCStab(
+            NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 output_file.name
             ).execute()
