@@ -2,7 +2,7 @@ import sys
 import os
 import unittest
 import py_compile
-import vcf
+import vcfpy
 
 from pvactools.lib.proximal_variant import ProximalVariant
 from .test_utils import *
@@ -16,13 +16,12 @@ class ProximalVariantTests(unittest.TestCase):
         proximal_variant_vcf_path = os.path.join(cls.test_data_dir, 'input.vcf.gz')
         cls.klass = ProximalVariant(proximal_variant_vcf_path, False, 30)
         somatic_vcf_path = os.path.join(cls.test_data_dir, 'somatic.vcf.gz')
-        cls.somatic_vcf_fh = open(somatic_vcf_path, 'rb')
-        cls.somatic_vcf_reader = vcf.Reader(cls.somatic_vcf_fh)
+        cls.somatic_vcf_reader = vcfpy.Reader.from_path(somatic_vcf_path)
 
     @classmethod
     def tearDownClass(cls):
-        cls.klass.fh.close()
-        cls.somatic_vcf_fh.close()
+        cls.klass.proximal_variants_vcf.close()
+        cls.somatic_vcf_reader.close()
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
