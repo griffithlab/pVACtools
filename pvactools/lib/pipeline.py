@@ -16,9 +16,9 @@ from Bio.Alphabet import IUPAC
 from collections import OrderedDict
 
 from pvactools.lib.prediction_class import *
-from pvactools.lib.input_file_converter import VcfConverter, FusionInputConverter
-from pvactools.lib.fasta_generator import FastaGenerator, FusionFastaGenerator, VectorFastaGenerator
-from pvactools.lib.output_parser import DefaultOutputParser, FusionOutputParser, UnmatchedSequencesOutputParser
+from pvactools.lib.input_file_converter import VcfConverter
+from pvactools.lib.fasta_generator import FastaGenerator, VectorFastaGenerator
+from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser
 from pvactools.lib.post_processor import PostProcessor
 import pvactools.lib.call_iedb
 import pvactools.lib.combine_parsed_outputs
@@ -133,7 +133,6 @@ class Pipeline(metaclass=ABCMeta):
     def converter(self, params):
         converter_types = {
             'vcf'  : 'VcfConverter',
-            'bedpe': 'FusionInputConverter',
         }
         converter_type = converter_types[self.input_file_type]
         converter = getattr(sys.modules[__name__], converter_type)
@@ -142,7 +141,6 @@ class Pipeline(metaclass=ABCMeta):
     def fasta_generator(self, params):
         generator_types = {
             'vcf'                   : 'FastaGenerator',
-            'bedpe'                 : 'FusionFastaGenerator',
             'pvacvector_input_fasta': 'VectorFastaGenerator',
         }
         generator_type = generator_types[self.input_file_type]
@@ -152,7 +150,6 @@ class Pipeline(metaclass=ABCMeta):
     def output_parser(self, params):
         parser_types = {
             'vcf'  : 'DefaultOutputParser',
-            'bedpe': 'FusionOutputParser',
             'pvacvector_input_fasta': 'UnmatchedSequencesOutputParser',
             'fasta': 'UnmatchedSequencesOutputParser',
         }
@@ -166,13 +163,10 @@ class Pipeline(metaclass=ABCMeta):
             str(epitope_flank_length + max(self.epitope_lengths) - 1),
             fasta_path,
         ]
-        if self.input_file_type == 'vcf':
-            import pvactools.tools.pvacseq.generate_protein_fasta as generate_combined_fasta
-            params.extend(["--sample-name", self.sample_name])
-            if self.phased_proximal_variants_vcf is not None:
-                params.extend(["--phased-proximal-variants-vcf", self.phased_proximal_variants_vcf])
-        elif self.input_file_type == 'bedpe':
-            import pvactools.tools.pvacfuse.generate_protein_fasta as generate_combined_fasta
+        import pvactools.tools.pvacseq.generate_protein_fasta as generate_combined_fasta
+        params.extend(["--sample-name", self.sample_name])
+        if self.phased_proximal_variants_vcf is not None:
+            params.extend(["--phased-proximal-variants-vcf", self.phased_proximal_variants_vcf])
         if self.downstream_sequence_length is not None:
             params.extend(["-d", str(self.downstream_sequence_length)])
         else:
@@ -466,12 +460,8 @@ class Pipeline(metaclass=ABCMeta):
 
         total_row_count = self.tsv_entry_count()
         if total_row_count == 0:
-            if self.input_file_type == 'vcf':
-                print("The TSV file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
-                return
-            elif self.input_file_type == 'bedpe':
-                print("The TSV file is empty. Please check that the input AGfusion directory contains fusion entries with `*_protein.fa` files. Fusion entries without this file cannot be processed by pVACfuse.")
-                return
+            print("The TSV file is empty. Please check that the input VCF contains missense, inframe indel, or frameshift mutations.")
+            return
         chunks = self.split_tsv_file(total_row_count)
 
         self.generate_fasta(chunks)
