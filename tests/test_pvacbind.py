@@ -123,7 +123,7 @@ class PvacbindTests(unittest.TestCase):
         output_dir.cleanup()
 
     def test_pvacbind_pipeline(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, timeout=None, files=None: make_response(
             data,
             files,
             test_data_directory()
