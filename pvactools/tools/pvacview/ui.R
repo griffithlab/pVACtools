@@ -9,9 +9,6 @@ library(shinycssloaders)
 source("styling.R")
 
 ui <- dashboardPage(
-  #skin = "black",
-  #, div(class= "logo-lg", tags$img(src='pVACview_logo.png'))
-  #tags$a(href='http://pvactools.org',
   header = dashboardHeader(
     title=tagList(tags$a(href='http://pvactools.org', class="logo",
                          span(class= "logo-mini", tags$img(src='pVACview_logo_mini.png')),
@@ -54,9 +51,15 @@ ui <- dashboardPage(
         # infoBoxes
         fluidRow(
           box(
+            title="Load Default Data", status='primary', solidHeader = TRUE,
+            actionButton('loadDefaultmain', "Load Default Data", style="color: #fff; background-color: #c92424; border-color: #691111")
+          )
+        ),
+        fluidRow(
+          box(
             title="Upload Data Files", status='primary', solidHeader = TRUE,
             h5("Please upload the aggregate report file. Note that this will be the data displayed in the main table in the Explore tab."),
-            fileInput(inputId="mainDataInput", label="Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
+            fileInput(inputId="mainDataInput", label="1. Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
                                                                                                                          "text/tab-separated-values,text/plain",
                                                                                                                          ".tsv")),
             radioButtons("hla_class", "Does this aggregate report file correspond to Class I or Class II prediction data?",  
@@ -64,14 +67,17 @@ ui <- dashboardPage(
             
             hr(style="border-color: white"),
             h5("Please upload the corresponding metrics file for the main file that you have chosen."),
-            fileInput(inputId="metricsDataInput", label="Neoantigen Candidate Metrics file (json required)", accept = c("application/json",
+            fileInput(inputId="metricsDataInput", label="2. Neoantigen Candidate Metrics file (json required)", accept = c("application/json",
                                                                                                                         ".json")),
             hr(style="border-color: white"),
             h5("If you would like, you can upload an additional aggregate report file generated with either Class I or Class II results to supplement your main table. (E.g. if you uploaded Class I data as the main table, you can upload your Class II report here as supplemental data)"),
-            fileInput(inputId="additionalDataInput", label="Additional Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
+            fileInput(inputId="additionalDataInput", label="3. Additional Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
                                                                                                                                "text/tab-separated-values,text/plain",
                                                                                                                                ".tsv")),
             textInput("add_file_label", "Please provide a label for the additional file uploaded (e.g. Class I data or Class II data)"),
+            hr(style="border-color: white"),
+            h5("Additionally, you can upload a gene-of-interest list in a tsv format, where each row is a single gene name. These genes (if in your aggregate report) will be highlighted in the Gene Name column."),
+            fileInput(inputId="gene_list", label="4. Gene-of-interest List (tsv required)", accept =  c("text/tsv","text/tab-separated-values,text/plain",".tsv")),
             actionButton('visualize', "Visualize")
           ),
         )
@@ -95,10 +101,13 @@ ui <- dashboardPage(
               "Current version of pVACseq results defaults to positions 1, 2, n-1 and n (for a n-mer peptide) when determining anchor positions.
               If you would like to use our allele specific anchor results and regenerate the tiering results for your variants,
               please specify your contribution cutoff and submit for recalculation. ", tags$a(href="https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1", "More details can be found here."), br(),
+              checkboxInput("use_anchor", "If you do want to use allele-specific anchor calculations, please check this box. Otherwise anchors will be calculated as 1,2 and n-1,n for n-mer peptides.", value = FALSE, width = NULL),
               sliderInput("anchor_contribution", "Contribution cutoff for determining anchor locations", 0.5, 0.9, 0.8, step = 0.1, width = 400),
               numericInput("dna_cutoff", "DNA VAF clonal VAF (Anything lower than 1/2 of chosen VAF level will be considered subclonal)", 0.5, min = 0, max = 1, step = 0.01, width = 500),
               #numericInput("rna_cutoff", "RNA low gene expression cutoff (Anything lower than chosen expression level will be considered low expression)", 1, min = 0, max = 100, step = 1, width = 500),
               h5("For your reference, the max DNA VAF under 0.6 in the current main table is: "), verbatimTextOutput("max_dna"), br(),
+              numericInput("allele_expr_high", "Allele Expression cutoff to be considered a Pass variant (default: 3)", 3, min = 0, max = 100, step = 0.1, width = 500),
+              numericInput("allele_expr_low", "Allele Expression cutoff to be considered a Relaxed variant (default: 1). Note that this criteria is also used in determining Anchor and Subclonal variants.", 1, min = 0, max = 100, step = 0.1, width = 500),
               actionButton('submit','Recalculate Tiering with new parameters'),
               style = "overflow-x: scroll;font-size:100%"),
           
@@ -135,7 +144,9 @@ ui <- dashboardPage(
                  span("DNA VAF", verbatimTextOutput('metricsTextDNA')),
                  span("RNA VAF", verbatimTextOutput('metricsTextRNA')),
                  span("Gene Expression", verbatimTextOutput('metricsTextGene')),
-                 span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput('metricsTextGenomicCoord')), style = "overflow-x: scroll;font-size:100%"),
+                 span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput('metricsTextGenomicCoord')),
+                 h5("Here's a link to OpenCRAVAT's variant report:"),
+                 uiOutput("url"),style = "overflow-x: scroll;font-size:100%"),
           box(width = 2, solidHeader = TRUE, title="Peptide Evalutation Overview",
                  tableOutput("checked"), style = "overflow-x: scroll;font-size:100%")
         ),
@@ -153,6 +164,9 @@ ui <- dashboardPage(
             ),
             tabPanel("MHC Binding Prediction Scores (%ile)", 
                      plotOutput(outputId = "bindingData_percentile")%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;"
+            ),
+            tabPanel("MHC Binding Predictions Table", 
+                     DTOutput(outputId = "bindingDatatable"), style = "overflow-x: scroll;"
             ),
             tabPanel("Allele Specific Anchor Prediction Heatmap",
                      plotOutput(

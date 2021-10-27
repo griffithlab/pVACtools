@@ -6,6 +6,7 @@ library(reshape2)
 library(jsonlite)
 library(tibble)
 library(tidyr)
+library(plyr)
 library(dplyr)
 
 source("anchor_and_helper_functions.R")
@@ -54,11 +55,16 @@ server <- shinyServer(function(input, output, session) {
     mainTable = NULL,
     dna_cutoff = 0.5,
     metricsData = NULL,
-    additionalData = NULL
+    additionalData = NULL,
+    gene_list = NULL,
+    allele_expr_high = 3,
+    allele_expr_low = 1,
+    comments = data.frame("N/A")
   )
  
   #Option 1: User uploaded main aggregate report file
   observeEvent(input$mainDataInput$datapath,{
+    #browser()
     mainData <- read.table(input$mainDataInput$datapath, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
     colnames(mainData) <- mainData[1,]
     mainData <- mainData[-1,]
@@ -71,7 +77,8 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable <- mainData
     dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
     df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
-    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, unlist(x["Pos"]), anchor_mode="default"))
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, df$allele_expr_high, df$allele_expr_low, unlist(x["Pos"]), anchor_mode="default"))
+    df$mainTable$`Gene of Interest` <- apply(df$mainTable,1, function(x) {any(x['Gene'] == df$gene_list)})
     if("Comments" %in% colnames(df$mainTable))
     {
       df$comments <- data.frame(data = df$mainTable$`Comments`,nrow=nrow(df$mainTable),ncol=1)
@@ -96,10 +103,16 @@ server <- shinyServer(function(input, output, session) {
     df$additionalData <- addData
   })
   
+  #Option 1: User uploaded additional gene list 
+  observeEvent(input$gene_list,{
+    gene_list <- read.table(input$gene_list$datapath, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+    df$gene_list <- gene_list
+    df$mainTable$`Gene of Interest` <- apply(df$mainTable,1, function(x) {any(x['Gene'] == df$gene_list)})
+  })
+  
 
   #Option 2: Load from default (relative) file path for aggregate report file 
    observeEvent(input$loadDefaultmain,{
-     #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_I.tsv")
      data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/835a7e4ae8b660a362c0c0b54140e26830d72bf2/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.tsv")
      mainData <- read.table(text=data, sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(mainData) <- mainData[1,]
@@ -113,7 +126,8 @@ server <- shinyServer(function(input, output, session) {
      df$mainTable <- mainData
      dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
      df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
-     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, unlist(x["Pos"]), anchor_mode="default"))
+     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, df$allele_expr_high, df$allele_expr_low, unlist(x["Pos"]), anchor_mode="default"))
+     df$mainTable$`Gene of Interest` <- apply(df$mainTable,1, function(x) {any(x['Gene'] == df$gene_list)})
      if("Comments" %in% colnames(df$mainTable))
      {
        df$comments <- data.frame(data = df$mainTable$`Comments`,nrow=nrow(df$mainTable),ncol=1)
@@ -123,15 +137,7 @@ server <- shinyServer(function(input, output, session) {
      }
      rownames(df$comments) <- df$mainTable$ID
      metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/6423b8b65f2e3f5cc2979f33b86c4650a6aa4570/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.metrics.json")
-     #metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_I_metrics.json")
      df$metricsData <- fromJSON(txt = metricsdata)
-     #additionalData <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/550302970ec6ceca9e68f345930da7c42b124ead/tools/pvacview/data/test_data_class_II.tsv")
-     #addData <- read.table(text = additionalData, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
-     #colnames(addData) <- addData[1,]
-     #addData <- addData[-1,]
-     #row.names(addData) <- NULL
-     #df$additionalData <- addData
-     
      updateTabItems(session, "tabs", "explore")
    })
 
@@ -147,8 +153,14 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput,nrow(df$mainTable),"selecter_", choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
       df$mainTable$`Mutated Positions` <- apply(df$mainTable, 1, function(x) calculate_mutation_info(df$metricsData[[x[["ID"]]]]))
       df$mainTable$`Best HLA allele` <- apply(df$mainTable, 1, function(x) df$metricsData[[x[["ID"]]]]$best_hla_allele)
-      df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, input$anchor_contribution, input$dna_cutoff, unlist(x$`Mutated Positions`), x$`Best HLA allele`))
-      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, input$dna_cutoff, unlist(x["Pos"]), hla_allele = x$`Best HLA allele`))
+      if (input$use_anchor){
+        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, input$anchor_contribution, input$dna_cutoff, input$allele_expr_high, input$allele_expr_low, unlist(x["Mutated Positions"]), x["Best HLA allele"]))
+        df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, input$dna_cutoff, input$allele_expr_high, input$allele_expr_low, unlist(x["Pos"]), hla_allele = x["Best HLA allele"]))
+      }else{
+        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, input$anchor_contribution, input$dna_cutoff, input$allele_expr_high, input$allele_expr_low, unlist(x["Mutated Positions"]), x["Best HLA allele"], anchor_mode="default"))
+        df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, input$dna_cutoff, input$allele_expr_high, input$allele_expr_low, unlist(x["Pos"]), hla_allele = x["Best HLA allele"], anchor_mode="default"))
+      }
+      df$mainTable$`Gene of Interest` <- apply(df$mainTable,1, function(x) {any(x['Gene'] == df$gene_list)})
       tier_sorter <- c("Pass", "Relaxed", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr")
       df$mainTable$`Rank_ic50` <- NA
       df$mainTable$`Rank_expr` <- NA
@@ -207,7 +219,7 @@ server <- shinyServer(function(input, output, session) {
       datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Best HLA allele") & !(colnames(df$mainTable) == "Comments")]
     , escape = FALSE, callback = JS(callBack(hla_count())), class = 'stripe',
           options=list(lengthChange = FALSE, dom = 'Bfrtip', 
-                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(25-(7-hla_count()))),
+                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(25-(7-hla_count()),26-(7-hla_count()))),
                                      list(orderable=TRUE, targets=0)),
                    buttons = list(I('colvis')), 
                    initComplete = htmlwidgets::JS(
@@ -242,8 +254,6 @@ server <- shinyServer(function(input, output, session) {
     %>% formatStyle(c('Gene Expression'),'Tier Count', fontWeight = styleEqual(c('8'), c('bold')), border= styleEqual(c('8'), c('2px solid red')))
     %>% formatStyle(c('RNA VAF','RNA Depth'),'Tier Count', fontWeight = styleEqual(c('8'), c('bold')), border= styleEqual(c('8'), c('2px solid green')))
     %>% formatStyle(c('RNA Expr'),'Tier Count', fontWeight = styleEqual(c('9'), c('bold')), border= styleEqual(c('9'), c('2px solid red')))
-    %>% formatStyle(c('RNA VAF'),'Tier Count', fontWeight = styleEqual(c('9'), c('bold')), border= styleEqual(c('9'), c('2px solid green')))
-    %>% formatStyle(c('RNA Expr'),'Tier Count', fontWeight = styleEqual(c('10'), c('bold')), border= styleEqual(c('10'), c('2px solid green')))
     %>% formatStyle(c('RNA VAF'),'Tier Count', fontWeight = styleEqual(c('10'), c('bold')), border= styleEqual(c('10'), c('2px solid red')))
     %>% formatStyle(c('RNA VAF','RNA Expr'),'Tier Count', fontWeight = styleEqual(c('11'), c('bold')), border= styleEqual(c('11'), c('2px solid red')))
     %>% formatStyle(c('IC50 WT','Pos'),'Tier Count', fontWeight = styleEqual(c('13'), c('bold')), border= styleEqual(c('13'), c('2px solid red')))
@@ -253,6 +263,7 @@ server <- shinyServer(function(input, output, session) {
     %>% formatStyle(c('DNA VAF', 'Allele Expr'),'Tier Count', fontWeight = styleEqual(c('22'), c('bold')), border= styleEqual(c('22'), c('2px solid red')))
     %>% formatStyle(c('IC50 WT','Pos', 'Allele Expr'),'Tier Count', fontWeight = styleEqual(c('21'), c('bold')), border= styleEqual(c('21'), c('2px solid red')))
     %>% formatStyle(c('Allele Expr'),'Tier Count', fontWeight = styleEqual(c('20'), c('bold')), border= styleEqual(c('20'), c('2px solid red')))
+    %>% formatStyle(c('Gene'),'Gene of Interest', fontWeight = styleEqual(c(TRUE), c('bold')), border= styleEqual(c(TRUE), c('2px solid green')))
     , server=FALSE)
   
   #help menu for main table
@@ -281,7 +292,7 @@ server <- shinyServer(function(input, output, session) {
          " Subclonal: Likely not in the founding clone of the tumor (DNA VAF > max(DNA VAF)/2)", br(),
          " Anchor: Mutation is at an anchor residue in the shown peptide, and the WT allele has good binding (WT IC50 <1000)", br(),
          " Poor: Fails two or more of the above criteria", br(),
-         " Relaxed: Passes the above criteria, has decent MT binding (IC50 < 1000)", br(),
+         " Relaxed: Passes the above criteria (1 < Allele Expr < 3), has decent MT binding (IC50 < 1000)", br(),
          " Pass: Passes the above criteria, has strong MT binding (IC50 < 500) and strong expression (Allele Expr > 3)"
       )
     ))
@@ -331,6 +342,20 @@ server <- shinyServer(function(input, output, session) {
       return ()
     }
     selectedID()
+  })
+  ##display of openCRAVAT link for variant
+  output$url <- renderUI({
+    if (is.null(df$mainTable)){
+      return ()
+    }
+    id <- strsplit(selectedID(), "-")
+    chromosome <- id[[1]][1]
+    start <- id[[1]][2]
+    stop <- id[[1]][3]
+    ref <- id[[1]][4]
+    alt <- id[[1]][5]
+    url <- a("OpenCRAVAT variant report", href=paste("https://run.opencravat.org/webapps/variantreport/index.html?chrom=",chromosome,"&pos=",stop,"&ref_base=",ref,"&alt_base=",alt, sep=""), target="_blank")
+    HTML(paste(url))
   })
   ##display of RNA VAF
   output$metricsTextRNA = renderText({
@@ -405,7 +430,6 @@ server <- shinyServer(function(input, output, session) {
   ##display peptide table with coloring 
   output$peptideTable = renderDT({
       withProgress(message = 'Loading Peptide Table', value = 0, {
-        #browser()
         if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0 & !is.null(df$metricsData)){
           peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscript()]]
           peptide_names <- names(peptide_data)
@@ -416,14 +440,18 @@ server <- shinyServer(function(input, output, session) {
           incProgress(0.5)
           peptide_data <- as.data.frame(peptide_data)
           incProgress(0.5)
-          datatable(do.call("rbind",lapply(peptide_names, table_formatting, peptide_data)), options =list(
+          dtable <- datatable(do.call("rbind",lapply(peptide_names, table_formatting, peptide_data)), options =list(
             pageLength = 10,
             lengthMenu = c(10),
+            columnDefs = list(list(defaultContent="X",
+              targets = c(2:hla_count()+1)),
+              list(orderable=TRUE, targets=0)),
             rowCallback = JS('function(row, data, index, rowId) {',
                              'console.log(rowId)','if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {',
                              'row.style.backgroundColor = "#E0E0E0";','}','}')
           ), selection = list(mode='single', selected = '1')) %>% formatStyle('Type', fontWeight = styleEqual('MT','bold'), color = styleEqual('MT', '#E74C3C'))
-          
+          dtable$x$data[[1]] <- as.numeric(dtable$x$data[[1]])
+          dtable
         }
         else {
           incProgress(1)
@@ -504,7 +532,6 @@ server <- shinyServer(function(input, output, session) {
         }
         incProgress(0.4)
         all_peptides <- do.call(rbind, all_peptides)
-        
         peptide_table <- do.call("rbind",lapply(peptide_names, table_formatting, peptide_data))
         peptide_table_filtered <- Filter(function(x) length(unique(x))!=1, peptide_table)
         peptide_table_names <- names(peptide_table_filtered)
@@ -636,6 +663,36 @@ server <- shinyServer(function(input, output, session) {
       }
     })
   })
+  
+  ##plotting binding data table with IC50 and percentile values
+  output$bindingDatatable <- renderDT({
+    withProgress(message = 'Loading binding datatable', value = 0, {
+      if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
+      binding_data <- bindingScoreDataIC50()
+      names(binding_data)[names(binding_data) == 'Score'] <- 'IC50 Score'
+      binding_data['% Score'] <- bindingScoreDataPercentile()['Score']
+      binding_data['Score'] <- paste(round(as.numeric(binding_data$`IC50 Score`),2)," (%: ",round(as.numeric(binding_data$`% Score`),2),")", sep="")
+      binding_data['IC50 Score'] <- NULL
+      binding_data['% Score'] <- NULL
+      binding_reformat <- dcast(binding_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+      incProgress(1)
+      dtable <- datatable(binding_reformat, options =list(
+          pageLength = 10,
+          lengthMenu = c(10),
+          rowCallback = JS('function(row, data, index, rowId) {',
+                           'console.log(rowId)','if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {',
+                           'row.style.backgroundColor = "#E0E0E0";','}','}')
+        )) %>% formatStyle('Mutant', fontWeight = styleEqual('MT','bold'), color = styleEqual('MT', '#E74C3C'))
+        dtable
+      }
+      else {
+        incProgress(1)
+        datatable(data.frame("Binding Predictions Datatable"=character()))
+      }
+    })
+  }
+  
+  )
 
   
   ##############################EXPORT TAB##############################################
@@ -657,14 +714,14 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)){
       return ()
     }
-    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval")& !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Tier Count") & !(colnames(df$mainTable) == "Comments")]
+    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval")& !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Tier Count") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Gene of Interest")]
     col_names <- colnames(data)
     data <- data.frame(data, Evaluation=shinyValue("selecter_",nrow(df$mainTable), df$mainTable))
     colnames(data) <- c(col_names,"Evaluation")
-    col_names <- colnames(data)
-    data <- data.frame(data, df$comments[,1])
-    colnames(data) <- c(col_names,"Comments")
-    data}, escape = FALSE, server = FALSE, rownames = FALSE,
+    comments <- data.frame("ID" = row.names(df$comments), comment = df$comments[,1])
+    data <- join(data, comments)
+    data
+    }, escape = FALSE, server = FALSE, rownames = FALSE,
     options=list(dom = 'Bfrtip', 
                  buttons = list(I('colvis'), list(
                    extend = 'csvHtml5', 
