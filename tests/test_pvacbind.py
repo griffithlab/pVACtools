@@ -15,6 +15,8 @@ import datetime
 from tools.pvacbind import *
 from mock import patch
 from .test_utils import *
+import logging
+from testfixtures import LogCapture, StringComparison as S
 
 def test_data_directory():
     return os.path.join(
@@ -268,6 +270,20 @@ class PvacbindTests(unittest.TestCase):
             "Duplicate fasta header 1. Please ensure that the input FASTA uses unique headers."
         )
         output_dir.cleanup()
+
+    def test_unsupported_amino_acid(self):
+        logging.disable(logging.NOTSET)
+        with LogCapture() as l:
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+            run.main([
+                os.path.join(self.test_data_directory, "input.unsupported_amino_acid.fasta"),
+                'Test',
+                'HLA-A*02:01',
+                'NetMHC',
+                output_dir.name,
+                '-e1', '8'
+            ])
+            l.check_present(('root', 'WARNING', S("Record 1 contains unsupported amino acids. Skipping.")))
 
     def test_pvacbind_combine_and_condense_steps(self):
         with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
