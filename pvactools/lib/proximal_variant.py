@@ -79,7 +79,7 @@ class ProximalVariant:
         for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.begin - self.flanking_bases, somatic_variant.affected_end + self.flanking_bases):
             if self.pass_only:
                 filt = entry.FILTER
-                if not (filt is None or len(filt) == 0):
+                if not (filt is None or len(filt) == 0 or filt == ['PASS']):
                     continue
 
             for proximal_alt in entry.ALT:
