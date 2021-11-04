@@ -283,7 +283,7 @@ class VcfConverter(InputFileConverter):
                 continue
 
             filt = entry.FILTER
-            if self.pass_only and not (filt is None or len(filt) == 0):
+            if self.pass_only and not (filt is None or len(filt) == 0 or filt == ['PASS']):
                 continue
 
             if 'CSQ' not in entry.INFO:
