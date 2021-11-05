@@ -18,7 +18,7 @@ Features
 When visualizing and exploring your neoantigen candidates, pVACview starts by providing an overview of all variants used to predict neoantigen candidates. You can then investigate each variant in
 greater detail by breaking them down to the different transcripts that generate good-binding peptides. These transcripts then often each produce a different set of peptides that are predicted
 to bind well to certain HLA alleles. The individual MT/WT peptides can be further explored in terms of the distribution of binding algorithm predictions as well as anchor locations. Here below, we walk through
-the various different sections of the pVACview explore page in detail.
+the different sections of the pVACview explore page in detail.
 
 
 
@@ -47,13 +47,14 @@ As shown, different cells of the report table are highlighted in various ways:
     - RNA expression ranges from 0 to 50. This is done in order to highlight expression values that are in the lower range, based on the reasoning that, for neoantigen candidates, when the RNA expression reaches a certain level it is considered expressed without the need to specify how high the exact RNA expression value is.
     - Allele Expression ranges from 0 to max of RNA VAF column multiplied by 50 (which is the max for the RNA expression bar graph range).
 
-- The ``Tier`` column is colored based on the specific cell value and red boxes across the row are used to highlight values that did not pass filters and resulted in the tier given. For more details on what each column represent, you can hover over the column names and/or click the tool icon on the top right where ``Help`` documentation is located.
+- The ``Tier`` column is colored based on the specific cell value and red boxes across the row are used to highlight values that did not pass filters and resulted in the tier given.
+
+For more details on what each column represent, you can hover over the column names and/or click the tool icon on the top right where ``Help`` documentation is located.
 
 .. figure:: ../images/screenshots/pvacview-main_table.png
     :width: 1000px
     :height: 300px
     :align: right
-    :alt: pVACview Upload
     :figclass: align-left
 
 
@@ -77,7 +78,10 @@ There are three separate boxes in this section as shown, from left to right you 
 
 - :bold:`Mutation & Gene information`
 
-  This box displays the DNA VAF, RNA VAF, and gene expression values for the variant you have selected for investigation. The genomic information is provided in the format showing the chromosomal location of the variant for further variant analysis such as manual review.
+  This box displays the DNA VAF, RNA VAF, and gene expression values for the variant you have selected for investigation.
+  The genomic information is provided in the format showing the chromosomal location of the variant for further variant analysis such as manual review.
+  We also provide a link out to the variant report provided by `OpenCRAVAT <https://opencravat.org/>`_. This report will allow users to explore the variant with information regarding:
+  variant annotation, cancer, population allele frequencies, clinical relevance, gene annotation, pathogenicity prediction etc.
 
 - :bold:`Peptide Evaluation Overview`
 
@@ -85,7 +89,7 @@ There are three separate boxes in this section as shown, from left to right you 
 
 .. figure:: ../images/screenshots/pvacview-middle_section.png
     :width: 1000px
-    :height: 100px
+    :height: 150px
     :align: right
     :alt: pVACview Upload
     :figclass: align-left
@@ -139,6 +143,18 @@ There's three different tabs in this section of the app, providing peptide-level
           :align: left
           :figclass: align-left
 
+- :bold:`Binding Affinity Table with IC50 and percentile values:`
+
+  Here, we provide the specific IC50 and percentile binding affinity predictions generated from each individual algorithm.
+  This data is specific to the MT/WT peptide pair selected in the peptide table.
+
+|
+
+  .. figure:: ../images/screenshots/pvacview-additional_info_3.png
+              :width: 1000px
+              :height: 250px
+              :align: left
+              :figclass: align-left
 
 - :bold:`Allele-specific anchor prediction heatmap:`
 
@@ -150,7 +166,7 @@ There's three different tabs in this section of the app, providing peptide-level
 
 |
 
-  .. figure:: ../images/screenshots/pvacview-additional_info_3.png
+  .. figure:: ../images/screenshots/pvacview-additional_info_4.png
               :width: 1000px
               :height: 350px
               :align: left
