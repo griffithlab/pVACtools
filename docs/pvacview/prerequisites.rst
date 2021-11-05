@@ -32,11 +32,15 @@ Additionally, there are a number of packages you will need to install in your R/
   install.packages("jsonlite", dependencies=TRUE)
   install.packages("tibble", dependencies=TRUE)
   install.packages("tidyr", dependencies=TRUE)
+  install.packages("plyr", dependencies=TRUE)
+  install.packages("dplyr", dependencies=TRUE)
   install.packages("shinydashboard", dependencies=TRUE)
   install.packages("shinydashboardPlus", dependencies=TRUE)
   install.packages("fresh", dependencies=TRUE)
   install.packages("shinycssloaders", dependencies=TRUE)
   install.packages("RCurl", dependencies=TRUE)
+  install.packages("curl", dependencies=TRUE)
+
 
 Note that certain R packages may have further dependencies that require additional installation. If you are using R studio, these should be automatically installed for you during the respective package
 installation process. However, if you are using conda-based R, you may need to install them manually (usually by running ``install.packages(<package name>)``).
