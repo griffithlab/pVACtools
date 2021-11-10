@@ -718,7 +718,7 @@ server <- shinyServer(function(input, output, session) {
     col_names <- colnames(data)
     data <- data.frame(data, Evaluation=shinyValue("selecter_",nrow(df$mainTable), df$mainTable))
     colnames(data) <- c(col_names,"Evaluation")
-    comments <- data.frame("ID" = row.names(df$comments), comment = df$comments[,1])
+    comments <- data.frame("ID" = row.names(df$comments), Comments = df$comments[,1])
     data <- join(data, comments)
     data
     }, escape = FALSE, server = FALSE, rownames = FALSE,
