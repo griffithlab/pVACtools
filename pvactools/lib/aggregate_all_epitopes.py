@@ -178,7 +178,7 @@ class AggregateAllEpitopes:
         vaf_clonal = self.calculate_clonal_vaf()
 
         columns = ['ID']
-        columns.extend(sorted([x.replace('HLA-', '') for x in hla_types]))
+        columns.extend(sorted(list(set([x.replace('HLA-', '') for x in hla_types]))))
         columns.extend(['Gene', 'AA Change', 'Num Passing Transcripts', 'Best Peptide', 'Pos', 'Num Passing Peptides', 'IC50 MT', 'IC50 WT', '%ile MT', '%ile WT', 'RNA Expr', 'RNA VAF', 'Allele Expr', 'RNA Depth', 'DNA VAF', 'Tier', 'Evaluation'])
         peptide_table = pd.DataFrame(columns=columns)
         metrics = {}
