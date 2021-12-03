@@ -150,7 +150,6 @@ server <- shinyServer(function(input, output, session) {
       session$sendCustomMessage('unbind-DT', 'mainTable')
       df$dna_cutoff <- input$dna_cutoff
       df$mainTable$`Evaluation` <- shinyValue("selecter_",nrow(df$mainTable), df$mainTable)
-      df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput,nrow(df$mainTable),"selecter_", choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
       df$mainTable$`Mutated Positions` <- apply(df$mainTable, 1, function(x) calculate_mutation_info(df$metricsData[[x[["ID"]]]]))
       df$mainTable$`Best HLA allele` <- apply(df$mainTable, 1, function(x) df$metricsData[[x[["ID"]]]]$best_hla_allele)
       if (input$use_anchor){
@@ -173,6 +172,7 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$`Rank_ic50` <- NULL
       df$mainTable$`Rank_expr` <- NULL
       df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_" , label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
+      df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput,nrow(df$mainTable),"selecter_", choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
   })
   
   #determine hla allele count in order to generate column tooltip locations correctly 
