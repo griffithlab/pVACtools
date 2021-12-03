@@ -228,7 +228,7 @@ class VcfConverter(InputFileConverter):
                     protein_position = csq_entry['Protein_position'].split('/')[1]
             else:
                 protein_position = csq_entry['Protein_position']
-            if protein_position == '-':
+            if protein_position == '-' or protein_position == '':
                 print("Proximal variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, csq_entry['Feature']))
                 continue
             proximal_variant_entry = {
@@ -311,7 +311,7 @@ class VcfConverter(InputFileConverter):
                             protein_position = transcript['Protein_position'].split('/')[1]
                     else:
                         protein_position = transcript['Protein_position']
-                    if protein_position == '-':
+                    if protein_position == '-' or protein_position == '':
                         print("Variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                         continue
                     transcript_name = transcript['Feature']
