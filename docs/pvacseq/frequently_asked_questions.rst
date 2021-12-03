@@ -22,8 +22,9 @@ inframe ``protein_altering_variant``, or
 ``frameshift_variant`` by VEP as long as the transcript was not also annotated
 as ``start_lost``. In addition, pVACseq only includes variants that were
 called as homozygous or heterozygous variant. Variants that were not called
-in the sample specified are skipped (determined by examining the ``GT`` genotype 
-field in the VCF).
+in the sample specified are skipped (determined by examining the ``GT`` genotype
+field in the VCF). In addition, some variants might be skipped in cases where
+the VEP annotation does not contain protein position information.
 
 :large:`My pVACseq command has been running for a long time. Why is
 that?`
