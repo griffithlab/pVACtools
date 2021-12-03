@@ -23,6 +23,7 @@ from threading import Lock
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
+import logging
 
 def status_message(msg):
     print(msg)
@@ -541,12 +542,16 @@ class PvacbindPipeline(Pipeline):
 
     def create_per_length_fasta_and_process_stops(self, length):
         stop_chars = set('X*')
+        supported_amino_acids = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
         records = []
         for record in SeqIO.parse(self.input_file, "fasta"):
             sequence = str(record.seq).upper()
             x_index = sequence.index('X') if 'X' in sequence else len(sequence)
             star_index = sequence.index('*') if '*' in sequence else len(sequence)
             sequence = sequence[0:min(x_index, star_index)]
+            if not all([c in supported_amino_acids for c in sequence]):
+                logging.warning("Record {} contains unsupported amino acids. Skipping.".format(record.id))
+                continue
             if len(sequence) >= length:
                 record.seq = Seq(sequence, IUPAC.protein)
                 records.append(record)
