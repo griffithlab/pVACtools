@@ -111,6 +111,20 @@ class NetChopTest(unittest.TestCase):
             ))
             l.check_present(('root', 'WARNING', S("Too many jobs submitted to NetMHCstabpan server. Waiting to retry.")))
 
+    def test_netmhc_stab_cannot_open_file_error_retry(self):
+        with patch('lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            self.test_data_directory,
+            'Netmhcstab.cannot_open_file_error.html'
+           ))), self.assertRaises(Exception) as context:
+            output_file = tempfile.NamedTemporaryFile()
+            lib.netmhc_stab.main([
+                os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
+                output_file.name
+            ])
+        self.assertTrue('NetMHCstabpan server was unable to read the submitted fasta file.' in str(context.exception))
+
     #This is to ensure that we catch error cases that are not explicitly handled
     def test_netmhc_stab_other_error(self):
         with patch('lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
