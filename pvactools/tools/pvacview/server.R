@@ -308,7 +308,8 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Evaluation` <- shinyValue("selecter_",nrow(df$mainTable), df$mainTable)
     df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput,nrow(df$mainTable),"selecter_", choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
     dataTableProxy("mainTable") %>% 
-      selectPage((which(input$mainTable_rows_all == df$selectedRow)-1) %/% 10 + 1)
+      #selectPage((which(input$mainTable_rows_all == df$selectedRow)-1) %/% 10 + 1)
+      selectPage((df$selectedRow-1) %/% 10 + 1)
   })
   
   ##selected row text box
@@ -531,6 +532,7 @@ server <- shinyServer(function(input, output, session) {
           all_peptides[[i]] <- rbind(df_mt_peptide, df_wt_peptide)
         }
         incProgress(0.4)
+        #browser()
         all_peptides <- do.call(rbind, all_peptides)
         peptide_table <- do.call("rbind",lapply(peptide_names, table_formatting, peptide_data))
         peptide_table_filtered <- Filter(function(x) length(unique(x))!=1, peptide_table)
@@ -546,7 +548,8 @@ server <- shinyServer(function(input, output, session) {
         incProgress(0.1)
         for(i in 1:length(hla_list)){
           hla_data$x_pos[i] <- hla_data$x_pos[i]+(hla_sep+pad)*(i-1)
-          all_peptides_multiple_hla[[i]] <- all_peptides
+          omit_rows <- which(is.na(peptide_table_filtered[names(peptide_table_filtered) == hla_list[[i]]]))*-1
+          all_peptides_multiple_hla[[i]] <- all_peptides[!(all_peptides$y_pos %in% omit_rows),]
           all_peptides_multiple_hla[[i]]$color_value <- apply(all_peptides_multiple_hla[[i]], 1, function(x) peptide_coloring(hla_list[[i]],x))
           all_peptides_multiple_hla[[i]]$x_pos <-  all_peptides_multiple_hla[[i]]$x_pos+(hla_sep+pad)*(i-1)
         }
@@ -714,11 +717,11 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)){
       return ()
     }
-    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval")& !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Tier Count") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Gene of Interest")]
+    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval") & !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Tier Count") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Gene of Interest")  & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Best HLA allele")]
     col_names <- colnames(data)
     data <- data.frame(data, Evaluation=shinyValue("selecter_",nrow(df$mainTable), df$mainTable))
     colnames(data) <- c(col_names,"Evaluation")
-    comments <- data.frame("ID" = row.names(df$comments), comment = df$comments[,1])
+    comments <- data.frame("ID" = row.names(df$comments), Comments = df$comments[,1])
     data <- join(data, comments)
     data
     }, escape = FALSE, server = FALSE, rownames = FALSE,
