@@ -51,12 +51,6 @@ ui <- dashboardPage(
         # infoBoxes
         fluidRow(
           box(
-            title="Load Default Data", status='primary', solidHeader = TRUE,
-            actionButton('loadDefaultmain', "Load Default Data", style="color: #fff; background-color: #c92424; border-color: #691111")
-          )
-        ),
-        fluidRow(
-          box(
             title="Upload Data Files", status='primary', solidHeader = TRUE,
             h5("Please upload the aggregate report file. Note that this will be the data displayed in the main table in the Explore tab."),
             fileInput(inputId="mainDataInput", label="1. Neoantigen Candidate Aggregate Report (tsv required)", accept =  c("text/tsv",
