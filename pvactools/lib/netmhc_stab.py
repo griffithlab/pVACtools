@@ -41,7 +41,8 @@ class NetMHCStab:
         result_delimiter = re.compile(r'-{20,}')
         fail_searcher = re.compile(r'(Failed run|Problematic input:|Configuration error)')
         rejected_searcher = re.compile(r'status: rejected')
-        success_searcher = re.compile(r'# NetMHCstabpan version 1.0')
+        success_searcher = re.compile(r'Rank Threshold for Strong binding peptides')
+        cannot_open_file_searcher = re.compile(r'Cannot open file')
         allele_searcher = re.compile(r'^(.*?) : Distance to trai?ning data .*? nearest neighbor (.*?)\)$', re.MULTILINE)
         with open(self.output_file, 'w') as output_fh:
             headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
@@ -89,6 +90,17 @@ class NetMHCStab:
                             sleep(random.randint(5, 10))
                             staging_file.seek(0)
                             response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele, jobid_searcher)
+
+                        if cannot_open_file_searcher.search(response.content.decode()):
+                            sleep(random.randint(5, 10))
+                            staging_file.seek(0)
+                            response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele, jobid_searcher)
+                            while rejected_searcher.search(response.content.decode()):
+                                sleep(random.randint(5, 10))
+                                staging_file.seek(0)
+                                response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele, jobid_searcher)
+                            if cannot_open_file_searcher.search(response.content.decode()):
+                                raise Exception("NetMHCstabpan server was unable to read the submitted fasta file:\n{}.".format(staging_file.read()))
 
                         if success_searcher.search(response.content.decode()):
                             allele_map = {item[0]:item[1] for item in allele_searcher.findall(response.content.decode())}

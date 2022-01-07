@@ -60,22 +60,16 @@ New in release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- Failed calls to the NetChop and NetMHCstab API were not being caught
-  correctly because failures would still result in a 200 return code. This
-  would ultimately result in empty filtered report files. This
-  release adds more error checking around the returned content
-  from these APIs and will fail if the content is not formatted as expected.
-- This release adds handling of some more VCF edge cases that were previously
-  unsupported. Variant transcripts that are annotated with * in the wildtype
-  protein sequence or that have a stop_retained_variant consequence are now
-  skipped. In addition, some variants may encode their postion as ``-/1234``,
-  which was previsouly not supported but has now been added.
-- When running pVACseq, pVACbind, or pVACfuse with the
-  ``--run-reference-proteome-similarity`` option enable this step would create
-  a reference matches file but the pipeline previously failed to copy this
-  file into the output directory. This release fixes that issue.
-- keras is now pinned to version 2.4.3 since newer versions might not be compatible
-  with the pinned tensorflow version.
+- Some users have reported "Cannot open file" errors when running
+  NetMHCstabpan. This release adds a retry when this error in encountered.
+- This release adds stricter checking to pVACbind for unsupported amino acids.
+  Sequences containing an unsupported amino acid will be skipped. The
+  following amino acids are supported: ``A``, ``R``, ``N``, ``D``, ``C``, ``E``,
+  ``Q``, ``G``, ``H``, ``I``, ``L``, ``K``, ``M``, ``F``, ``P``, ``S``, ``T``,
+  ``W``, ``Y``, ``V``.
+- Some VEP predictions for supported variant types might not contain any
+  protein position information, rendering pVACseq unable to parse such
+  annotations. Annotations without protein position information will now be skipped.
 
 New in version |version|
 ------------------------
