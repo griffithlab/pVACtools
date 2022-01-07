@@ -456,6 +456,11 @@ class FusionInputConverter(InputFileConverter):
         return (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end)
 
     def parse_agfusion_files(self):
+        if not os.path.exists(self.input_file):
+            raise Exception("Input directory {} doesn't exist. Please provide a valid AGFusion result directory path. Aborting.".format(self.input_file))
+        if not os.path.isdir(self.input_file):
+            raise Exception("Input directory path {} is not a directory. Please provide a valid AGFusion result directory path. Aborting.".format(self.input_file))
+
         output_rows = []
         count = 1
         for input_file in sorted(glob.glob(os.path.join(self.input_file, '*', '*_protein.fa'))):
