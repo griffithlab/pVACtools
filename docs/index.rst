@@ -17,11 +17,6 @@ tools:
    A tool designed to aid specifically in the construction of DNA-based
    cancer vaccines.
 
-**pVACviz**
-   A browser-based user interface that assists
-   users in launching, managing, reviewing, and visualizing the results of
-   pVACtools processes.
-
 **pVACview**
    An application based on R Shiny that assists
    users in reviewing, exploring and prioritizing neoantigens from the results of
@@ -39,7 +34,6 @@ tools:
    pvacbind
    pvacfuse
    pvacvector
-   pvacviz
    pvacview
 
 .. toctree::
