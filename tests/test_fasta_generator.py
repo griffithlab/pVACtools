@@ -746,6 +746,52 @@ class FastaGeneratorTests(unittest.TestCase):
         self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
         self.assertEqual(os.path.getsize(generate_fasta_key_output_file.name), 0)
 
+    def test_proximal_dnp(self):
+        test_data_dir                  = os.path.join(self.test_data_dir, 'proximal_dnp')
+        generate_fasta_input_file      = os.path.join(test_data_dir, 'input.tsv')
+        generate_fasta_proximal_variants_file = os.path.join(test_data_dir, 'proximal_variants.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'epitope_length'            : 10,
+            'flanking_sequence_length'  : 9,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(test_data_dir, 'output.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(test_data_dir, 'output.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+
+    def test_proximal_dnp_cut_off(self):
+        test_data_dir                  = os.path.join(self.test_data_dir, 'proximal_dnp')
+        generate_fasta_input_file      = os.path.join(test_data_dir, 'input.tsv')
+        generate_fasta_proximal_variants_file = os.path.join(test_data_dir, 'proximal_variants.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+        generate_fasta_key_output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'epitope_length'            : 8,
+            'flanking_sequence_length'  : 7,
+            'output_file'               : generate_fasta_output_file.name,
+            'output_key_file'           : generate_fasta_key_output_file.name,
+            'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+        }
+        generator = FastaGenerator(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(test_data_dir, 'output.cut_off.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+        expected_key_output_file = os.path.join(test_data_dir, 'output.cut_off.key')
+        self.assertTrue(cmp(generate_fasta_key_output_file.name, expected_key_output_file))
+
     def test_distance_from_start_works_as_expected(self):
         generate_fasta_input_file      = tempfile.NamedTemporaryFile()
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
