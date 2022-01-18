@@ -160,3 +160,11 @@ This is a bugfix release. It fixes the following problem(s):
   protein position information, rendering pVACseq unable to parse such
   annotations. Annotations without protein position information will now be skipped.
 
+Version 2.0.6
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- When running pVAcseq with a proximal variants VCF, proximal DNPs affecting
+  multiple amino acids were not handled correctly and would result in an error.
+  This issue has now been fixed.
