@@ -54,16 +54,9 @@ New in release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- Some users have reported "Cannot open file" errors when running
-  NetMHCstabpan. This release adds a retry when this error in encountered.
-- This release adds stricter checking to pVACbind for unsupported amino acids.
-  Sequences containing an unsupported amino acid will be skipped. The
-  following amino acids are supported: ``A``, ``R``, ``N``, ``D``, ``C``, ``E``,
-  ``Q``, ``G``, ``H``, ``I``, ``L``, ``K``, ``M``, ``F``, ``P``, ``S``, ``T``,
-  ``W``, ``Y``, ``V``.
-- Some VEP predictions for supported variant types might not contain any
-  protein position information, rendering pVACseq unable to parse such
-  annotations. Annotations without protein position information will now be skipped.
+- When running pVAcseq with a proximal variants VCF, proximal DNPs affecting
+  multiple amino acids were not handled correctly and would result in an error.
+  This issue has now been fixed.
 
 New in version |version|
 ------------------------
