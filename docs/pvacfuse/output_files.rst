@@ -246,37 +246,42 @@ as well as the HLA alleles that those epitopes are well-binding to.
 
    * - Column Name
      - Description
-   * - ``HLA Alleles`` (multiple) (T/F)
-     - For each HLA allele in the run, did the mutation result in an epitope that bound well
-       to the HLA allele? (with median mutant binding affinity < 1000).
+   * - ``ID``
+     - A unique identifier for the fusion
+   * - ``HLA Alleles`` (multiple)
+     - For each HLA allele in the run, the number of this fusion's epitopes that bound well
+       to the HLA allele (with median binding affinity < 1000)
    * - ``Gene``
-     - The Ensembl gene name of the affected gene
-   * - ``AA_change``
-     - The amino acid change for the mutation
-   * - ``Num_Transcript``
+     - The Ensembl gene names of the affected genes
+   * - ``AA Change``
      - ``NA``
-   * - ``Peptide``
-     - The best-binding mutant epitope sequence (lowest median mutant binding
-       affinity)
+   * - ``Num Passing Transcripts``
+     - ``NA``
+   * - ``Best Peptide``
+     - The best-binding epitope sequence (lowest median binding affinity)
    * - ``Pos``
      - ``NA``
-   * - ``Num_Peptides``
-     - The number of unique well-binding peptides for this mutation.
-   * - ``ic50_MT``
-     - Median ic50 binding affinity of the best-binding mutant epitope across all prediction algorithms used
-   * - ``ic50_WT``
+   * - ``Num Passing Peptides``
+     - The number of unique well-binding peptides for this fusion
+   * - ``IC50 MT``
+     - Median IC50 binding affinity of the best-binding epitope across all prediction algorithms used
+   * - ``IC50 WT``
      - ``NA``
-   * - ``percentile_MT``
-     - Median binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used (those that provide percentile output)
-   * - ``percentile_WT``
+   * - ``%ile MT``
+     - Median binding affinity percentile rank of the best-binding epitope across all prediction algorithms used (those that provide percentile output)
+   * - ``%ile WT``
      - ``NA``
-   * - ``RNA_expr``
+   * - ``RNA Expr``
      - ``NA``
-   * - ``RNA_VAF``
+   * - ``RNA VAF``
      - ``NA``
-   * - ``RNA_Depth``
+   * - ``Allele Expr``
      - ``NA``
-   * - ``DNA_VAF``
+   * - ``RNA Depth``
      - ``NA``
-   * - ``tier``
+   * - ``DNA VAF``
      - ``NA``
+   * - ``Tier``
+     - ``NA``
+   * - ``Evaluation``
+     - Column to store the evaluation of each fusion. Either ``Accept``, ``Reject``, or ``Review``.
