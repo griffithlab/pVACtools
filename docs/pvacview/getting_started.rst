@@ -23,7 +23,7 @@ Once you've successfully launched pVACview by completing the :ref:`prerequisites
 your local directories to load in the aggregate report and metrics files, usually located in the same directory as your ``app.R`` file.
 You will need to select the type of your files uploaded (Class I or Class II).
 
-The two required inputs are ``SAMPLE_NAME.class_name.all_epitopes.aggregated.tsv`` and ``SAMPLE_NAME.class_name.all_epitopes.aggregated.metrics.json``(these names may vary depending on your specific commands).
+The two required inputs are ``SAMPLE_NAME.class_name.all_epitopes.aggregated.tsv`` and ``SAMPLE_NAME.class_name.all_epitopes.aggregated.metrics.json`` (these names may vary depending on your specific commands).
 Both of which are output files from the pVACseq pipeline. The aggregated tsv file is a list of all predicted epitopes and their binding affinity scores,
 with additional variant information and the metrics json file contains additional transcript and peptide level information that is needed for certain features
 of the pVACview application. You can find further details on them :ref:`here <pvacseq_output_files>`.
