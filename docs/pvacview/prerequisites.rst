@@ -6,7 +6,11 @@
 
 .. raw:: html
 
-   <style> .large {font-size: 110%; font-weight: bold} </style>
+  <style> .large {font-size: 90%; font-weight: bold} </style>
+  <style> .bold {font-size: 100%; font-weight: bold} </style>
+
+.. role:: large
+.. role:: bold
 
 Prerequisites
 ---------------
@@ -14,6 +18,8 @@ Prerequisites
 In order to launch the pVACview R shiny application, you will need to have R/ R studio and a list of R packages correctly installed.
 Once launched, pVACview will require you to upload your corresponding input files for analysis. Alternatively, there is also a demo dataset that can be loaded to explore basic features of the app.
 An online version of pVACview is also available at `pvacview.org <https://www.pvacview.org>`_.
+
+:bold:`Please note that you will need internet connection for pVACview, as it needs to download necessary datasets including both the demo data and anchor calculations.`
 
 Installing R/ R studio
 ____________________________
