@@ -12,8 +12,8 @@ Prerequisites
 ---------------
 
 In order to launch the pVACview R shiny application, you will need to have R/ R studio and a list of R packages correctly installed.
-Once launched, pVACview will require you to upload your corresponding input files for analysis. If you are using our online version
-at `pvacview.org <https://www.pvacview.org>`_, then there will also be a demo dataset that can be loaded to explore basic features of the app.
+Once launched, pVACview will require you to upload your corresponding input files for analysis. Alternatively, there is also a demo dataset that can be loaded to explore basic features of the app.
+An online version of pVACview is also available at `pvacview.org <https://www.pvacview.org>`_.
 
 Installing R/ R studio
 ____________________________
