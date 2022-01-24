@@ -161,6 +161,42 @@ class PvacbindRunArgumentParser(PredictionRunArgumentParser):
         input_file_help = "A FASTA file"
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
+class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
+    def __init__(self):
+        tool_name = "pvacsplice"
+        input_file_help = "A RegTools output tsv file"
+        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.parser.add_argument(
+            "ref_fasta",
+            help="A reference FASTA file to identify transcript sequences from Ensembl coordinates."
+        )
+        self.parser.add_argument(
+            "annotated_vcf",
+            help="A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
+            +"Wildtype protein sequence, and Downstream protein sequence information."
+            +"The VCF may be gzipped (requires tabix index)."
+            +"The VCF is an input to RegTools and subsequently used here. Another option is to use the -v option " 
+            +"of RegTools to extract only putative regulatory splicing variants from the original VCF file."
+        )
+        self.parser.add_argument(
+            "-tsl", "--maximum-transcript-support-level", type=int,
+            help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
+            +"Keep all epitopes with a transcript support level <= to this cutoff.",
+            default=1,
+            choices=[1,2,3,4,5]
+        )
+        self.parser.add_argument(
+            "-j", "--junction_score", type=int,
+            help="Junction Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
+            default=10
+        )
+        self.parser.add_argument(
+            "-v", "--variant_distance", type=int,
+            help="Regulatory variants can lie inside or outside of splicing junction."
+            +"Maximum distance window (upstream and downstream) for a variant outside the junction.",
+            default=100
+        )
+
 class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser):
     def __init__(self, tool_name, input_file_help):
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
