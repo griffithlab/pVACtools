@@ -64,7 +64,6 @@ server <- shinyServer(function(input, output, session) {
  
   #Option 1: User uploaded main aggregate report file
   observeEvent(input$mainDataInput$datapath,{
-    #browser()
     mainData <- read.table(input$mainDataInput$datapath, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
     colnames(mainData) <- mainData[1,]
     mainData <- mainData[-1,]
@@ -145,7 +144,7 @@ server <- shinyServer(function(input, output, session) {
     updateTabItems(session, "tabs", "explore")
   })
   
-  #reactions for once "regenerate table" button is clicked
+  #reactions for once "regenerate table" command is submitted
   observeEvent(input$submit,{
       session$sendCustomMessage('unbind-DT', 'mainTable')
       df$dna_cutoff <- input$dna_cutoff
@@ -201,7 +200,6 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$comment_text <- renderText({
-    #browser()
     if (is.null(df$mainTable)){
       return ("N/A")
     }
@@ -241,7 +239,7 @@ server <- shinyServer(function(input, output, session) {
                                                                 c("#00EE00","#00D500","#00BC00","#00A300", "#008B00", "#FFFF00", "#FFEB00", "#FFD800","#FFC500", "#FF9999")))
     %>% formatStyle( 'Tier', color = styleEqual(c('Pass', 'Relaxed', 'Poor','Anchor','Subclonal','LowExpr', 'NoExpr'), c('green','lightgreen', 'orange', '#b0b002', '#D4AC0D', 'salmon', 'red')) )
     %>% formatStyle(c('RNA VAF'),background = styleColorBar(range(0,1), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
-    %>% formatStyle(c('DNA VAF'),background = styleColorBar(range(0,1), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right') #fontWeight = styleInterval((df$dna_cutoff/2)-0.0001,c('bold', 'normal')), border= styleInterval((df$dna_cutoff/2)-0.0001,c('2px solid red', 'normal')),
+    %>% formatStyle(c('DNA VAF'),background = styleColorBar(range(0,1), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right') 
     %>% formatStyle(c('RNA Expr'),background = styleColorBar(range(0,50), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
     %>% formatStyle(c('RNA Depth'),background = styleColorBar(range(0,200), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
     %>% formatStyle(c('Allele Expr'),background = styleColorBar(range(0,(max(as.numeric(as.character(unlist(df$mainTable['RNA VAF'])))*50))), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
@@ -294,7 +292,7 @@ server <- shinyServer(function(input, output, session) {
          " Poor: Fails two or more of the above criteria", br(),
          " Relaxed: Passes the above criteria (1 < Allele Expr < 3), has decent MT binding (IC50 < 1000)", br(),
          " Pass: Passes the above criteria, has strong MT binding (IC50 < 500) and strong expression (Allele Expr > 3)"
-      )
+      ),
     ))
   })
   
@@ -308,7 +306,6 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Evaluation` <- shinyValue("selecter_",nrow(df$mainTable), df$mainTable)
     df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput,nrow(df$mainTable),"selecter_", choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
     dataTableProxy("mainTable") %>% 
-      #selectPage((which(input$mainTable_rows_all == df$selectedRow)-1) %/% 10 + 1)
       selectPage((df$selectedRow-1) %/% 10 + 1)
   })
   
@@ -319,6 +316,7 @@ server <- shinyServer(function(input, output, session) {
     }
     df$selectedRow
   })
+  
   ##selected id update 
   selectedID <- reactive({
     if (is.null(df$selectedRow)) {
@@ -344,6 +342,7 @@ server <- shinyServer(function(input, output, session) {
     }
     selectedID()
   })
+  
   ##display of openCRAVAT link for variant
   output$url <- renderUI({
     if (is.null(df$mainTable)){
@@ -358,6 +357,7 @@ server <- shinyServer(function(input, output, session) {
     url <- a("OpenCRAVAT variant report", href=paste("https://run.opencravat.org/webapps/variantreport/index.html?chrom=",chromosome,"&pos=",stop,"&ref_base=",ref,"&alt_base=",alt, sep=""), target="_blank")
     HTML(paste(url))
   })
+  
   ##display of RNA VAF
   output$metricsTextRNA = renderText({
     if (is.null(df$metricsData)){
@@ -365,6 +365,7 @@ server <- shinyServer(function(input, output, session) {
     }
     df$metricsData[[selectedID()]]$`RNA VAF`
   })
+  
   ##display of DNA VAF
   output$metricsTextDNA = renderText({
     if (is.null(df$metricsData)){
@@ -372,6 +373,7 @@ server <- shinyServer(function(input, output, session) {
     }
     df$metricsData[[selectedID()]]$`DNA VAF`
   })
+  
   ##display of MT IC50 from additional data file
   output$addData_IC50 = renderText({
     if (is.null(df$additionalData)){
@@ -379,10 +381,12 @@ server <- shinyServer(function(input, output, session) {
     }
     df$additionalData[df$additionalData$ID == selectedID(),]$`IC50 MT`
   })
+  
   ##display of MT percentile from additional data file 
   output$addData_percentile = renderText({
     df$additionalData[df$additionalData$ID == selectedID(),]$`%ile MT`
   })
+  
   ##transcripts table displaying transcript id and transcript expression values 
   output$transcriptsTable = renderDT(
     {
@@ -402,6 +406,7 @@ server <- shinyServer(function(input, output, session) {
     },
     selection = list(mode='single', selected = '1')
   )
+  
   ##update selected transcript id
   selectedTranscript <- reactive({
     selection <- input$transcriptsTable_rows_selected
@@ -410,6 +415,7 @@ server <- shinyServer(function(input, output, session) {
     }
     df$metricsData[[selectedID()]]$good_binders_transcripts[selection]
   })
+  
   ##display transcript expression 
   output$metricsTextTranscript = renderText({
     if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
@@ -419,6 +425,7 @@ server <- shinyServer(function(input, output, session) {
       "N/A"
     }
   })
+  
   ##display gene expression 
   output$metricsTextGene = renderText({
     if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
@@ -428,6 +435,7 @@ server <- shinyServer(function(input, output, session) {
       "N/A"
     }
   })
+  
   ##display peptide table with coloring 
   output$peptideTable = renderDT({
       withProgress(message = 'Loading Peptide Table', value = 0, {
@@ -443,7 +451,6 @@ server <- shinyServer(function(input, output, session) {
           incProgress(0.5)
           dtable <- datatable(do.call("rbind",lapply(peptide_names, table_formatting, peptide_data)), options =list(
             pageLength = 10,
-            lengthMenu = c(10),
             columnDefs = list(list(defaultContent="X",
               targets = c(2:hla_count()+1)),
               list(orderable=TRUE, targets=0)),
@@ -460,12 +467,10 @@ server <- shinyServer(function(input, output, session) {
         }
       })
     }
-    
   )
 
   ##update selected peptide data 
   selectedPeptideData <- reactive({
-    #req(input$metricsDataInput)
     selection <- input$peptideTable_rows_selected
     if (is.null(selection)){
       selection <- 1
@@ -511,7 +516,6 @@ server <- shinyServer(function(input, output, session) {
           peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
         }
         peptide_data <- as.data.frame(peptide_data)
-        #p1 <- ggplot() + scale_y_continuous(limits=c(-20, 1)) + scale_x_continuous(limits=c(0,80))
         p1 <- ggplot() + scale_x_continuous(limits=c(0,80)) + scale_y_continuous(limits=c(-31, 1)) 
         all_peptides <- list()
         incProgress(0.1)
@@ -532,7 +536,6 @@ server <- shinyServer(function(input, output, session) {
           all_peptides[[i]] <- rbind(df_mt_peptide, df_wt_peptide)
         }
         incProgress(0.4)
-        #browser()
         all_peptides <- do.call(rbind, all_peptides)
         peptide_table <- do.call("rbind",lapply(peptide_names, table_formatting, peptide_data))
         peptide_table_filtered <- Filter(function(x) length(unique(x))!=1, peptide_table)
@@ -599,6 +602,7 @@ server <- shinyServer(function(input, output, session) {
       return()
     }
   })
+  
   ##plotting IC5 binding score violin plot 
   output$bindingData_IC50 <- renderPlot({
     withProgress(message = 'Loading Binding Score Plot (IC50)', value = 0, {
@@ -623,6 +627,7 @@ server <- shinyServer(function(input, output, session) {
       }
     })
   })
+  
   ##updating percentile binding score for selected peptide pair 
   bindingScoreDataPercentile <- reactive({
     if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
@@ -693,9 +698,7 @@ server <- shinyServer(function(input, output, session) {
         datatable(data.frame("Binding Predictions Datatable"=character()))
       }
     })
-  }
-  
-  )
+  })
 
   
   ##############################EXPORT TAB##############################################
@@ -726,7 +729,7 @@ server <- shinyServer(function(input, output, session) {
     data
     }, escape = FALSE, server = FALSE, rownames = FALSE,
     options=list(dom = 'Bfrtip', 
-                 buttons = list(I('colvis'), list(
+                 buttons = list(list(
                    extend = 'csvHtml5', 
                    filename = input$exportFileName,
                    fieldSeparator = '\t',
@@ -744,7 +747,4 @@ server <- shinyServer(function(input, output, session) {
     ),
     selection = 'none',
     extensions = c("Buttons"))
-  
-  
-  
   })
