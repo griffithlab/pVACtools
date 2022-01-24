@@ -185,6 +185,22 @@ tensorflow manually to version 1.5.0 should solve this problem:
 
    pip install tensorflow==1.5.0
 
+BLAST
+-----
+
+To run the reference proteome similarity step, standalone BLAST may be used.
+To install BLAST please see `the official documentation
+<https://www.ncbi.nlm.nih.gov/books/NBK52640/>`_. The BLAST tool needed is Protein BLAST
+(blastp). Please make note of the installation path of blastp (retrievable by
+calling ``which blastp``), as that path is needed for the ``--blastp-path`` argument in
+the various pVACtools commands.
+
+You will also need to install either the ``refseq_select_prot`` or the
+``refseq_protein`` BLAST reference proteome databases. You can do so by running the
+``update_blastdb.pl`` script provided with your BLAST installation (located in
+the ``bin`` subdirectory). You will need to set the ``BLASTDB`` to point to the
+installation directory of your BLAST reference proteome databases.
+
 Docker and CWL
 --------------
 
