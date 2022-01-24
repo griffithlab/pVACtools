@@ -43,6 +43,10 @@ created):
    * - ``<sample_name>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format.
+   * - ``ui.R``, ``app.R``, ``server.R``, ``styling.R``, ``anchor_and_helper_functions.R``
+     - pVACview R Shiny application files
+   * - ``www`` (directory)
+     - Directory containing image files for pVACview
 
 Filters applied to the filtered.tsv file
 ----------------------------------------
