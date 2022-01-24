@@ -185,17 +185,6 @@ tensorflow manually to version 1.5.0 should solve this problem:
 
    pip install tensorflow==1.5.0
 
-PostgreSQL
-----------
-
-pVACviz and pVACapi require a Postgres database. To install Postgres follow
-the `installation instructions <http://postgresguide.com/setup/install.html>`_.
-
-.. note::
-
-   On Debian-based Linux distributions version Postgres V9.6 or lower is
-   required.
-
 Docker and CWL
 --------------
 
