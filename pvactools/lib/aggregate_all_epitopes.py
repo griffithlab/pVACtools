@@ -484,7 +484,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return "NA"
 
     def get_best_aa_change(self, best):
-        return best['Mutation']
+        return 'NA'
 
     def calculate_allele_expr(self, line):
         return 'NA'
