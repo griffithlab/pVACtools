@@ -62,13 +62,4 @@ mytheme <- create_theme(
   adminlte_color(
     light_blue = "#4e635c"
   )
-  #adminlte_sidebar(
-  #  width = "300px",
-  #  dark_bg = "#D8DEE9",
-  #  #dark_hover_bg = "#81A1C1",
-  #  dark_color = "#2E3440"
-  #),
-  #adminlte_global(
-  #  content_bg = "#d8ede2"
-  #)
 )
