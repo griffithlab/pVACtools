@@ -37,7 +37,7 @@ highlighted using bold font and a green box around the cell.
 
 .. figure:: ../images/screenshots/pvacview-upload.png
     :width: 1000px
-    :height: 500px
+    :height: 350px
     :align: right
     :alt: pVACview Upload
     :figclass: align-left
@@ -104,7 +104,7 @@ Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers
   then the variant is labeled as ANCHOR. Otherwise if the variant has an allele expression greater than 1, but fails the subclonal criteria (DNA VAF < 1/2 of the clonal VAF), then it is labeled as SUBCLONAL.
   More details can be found in the tooltip Help button on the top right of the aggreate report table.
 
-  Here we provide users with the option of changing the high and low allele expression cutoffs to customize Tiering for their individual samples.
+  Here we provide users with the option of changing the high and low allele expression cutoffs to customize tiering for their individual samples.
 
 
 .. figure:: ../images/screenshots/pvacview-regenerate_tier.png

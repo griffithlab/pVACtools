@@ -255,7 +255,7 @@ class CalculateReferenceProteomeSimilarity:
             with p.lock: # stagger calls to qblast
                 if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0': # we don't need to sleep during testing since this is mocked and not actually calling the API
                     sleep(10)
-            result_handle = NCBIWWW.qblast("blastp", "refseq_protein", full_peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
+            result_handle = NCBIWWW.qblast("blastp", self.blastp_db, full_peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
 
         return result_handle
 
