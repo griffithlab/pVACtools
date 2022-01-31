@@ -70,85 +70,37 @@ pVACfuse.
    * - Column Name
      - Description
    * - ``Chromosome``
-     - The chromosome of the 5p and 3p portion of the fusion, separated by " / "
+     - The chromosomes of the 5p and 3p portion of the fusion, separated by " / "
    * - ``Start``
-     - The start position of the 5p and 3p portion of the fusion, separated by " / "
+     - The start positions of the 5p and 3p portion of the fusion, separated by " / "
    * - ``Stop``
-     - The stop position of the 5p and 3p portion of the fusion, separated by " / "
-   * - ``Reference``
-     - ``fusion``
-   * - ``Variant``
-     - ``fusion``
+     - The stop positions of the 5p and 3p portion of the fusion, separated by " / "
    * - ``Transcript``
      - The Ensembl IDs of the affected transcripts
-   * - ``Transcript Support Level``
-     - ``NA``
-   * - ``Ensembl Gene ID``
-     - ``NA``
+   * - ``Gene Name``
+     - The Ensembl gene names of the affected genes
    * - ``Variant Type``
      - The type of fusion. ``inframe_fusion`` for inframe fusions, ``frameshift_fusion`` for frameshift fusions
    * - ``Mutation``
-     - ``NA``
-   * - ``Protein Position``
-     - The position of the fusion in the fusion protein sequence
-   * - ``Gene Name``
-     - The Ensembl gene names of the affected genes
-   * - ``HGVSc``
-     - ``NA``
-   * - ``HGVSp``
-     - ``NA``
+     - A unique identifier for the fusion
    * - ``HLA Allele``
      - The HLA allele for this prediction
-   * - ``Peptide Length``
-     - The peptide length of the epitope
    * - ``Sub-peptide Position``
      - The one-based position of the epitope in the protein sequence used to make the prediction
-   * - ``Mutation Position``
-     - ``NA``
-   * - ``MT Epitope Seq``
-     - Mutant epitope sequence
-   * - ``WT Epitope Seq``
-     - ``NA``
-   * - ``Best MT Score Method``
-     - Prediction algorithm with the lowest mutant ic50 binding affinity for this epitope
-   * - ``Best MT Score``
+   * - ``Epitope Seq``
+     - Epitope sequence
+   * - ``Median Score``
+     - Median ic50 binding affinity of the epitope of all prediction algorithms used
+   * - ``Best Score``
      - Lowest ic50 binding affinity of all prediction algorithms used
-   * - ``Corresponding WT Score``
-     - ``NA``
-   * - ``Corresponding Fold Change``
-     - ``NA``
-   * - ``Best MT Percentile Method``
-     - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
-   * - ``Best MT Percentile``
+   * - ``Best Score Method``
+     - Prediction algorithm with the lowest ic50 binding affinity for this epitope
+   * - ``Median Percentile``
+     - Median binding affinity percentile rank of the epitope across all prediction algorithms used (those that provide percentile output)
+   * - ``Best Percentile``
      - Lowest percentile rank of this epitope's ic50 binding affinity of all prediction algorithms used (those that provide percentile output)
-   * - ``Corresponding WT Percentile``
-     - ``NA``
-   * - ``Tumor DNA Depth``
-     - ``NA``
-   * - ``Tumor DNA VAF``
-     - ``NA``
-   * - ``Tumor RNA Depth``
-     - ``NA``
-   * - ``Tumor RNA VAF``
-     - ``NA``
-   * - ``Normal Depth``
-     - ``NA``
-   * - ``Normal VAF``
-     - ``NA``
-   * - ``Gene Expression``
-     - ``NA``
-   * - ``Transcript Expression``
-     - ``NA``
-   * - ``Median MT Score``
-     - Median ic50 binding affinity of the mutant epitope of all prediction algorithms used
-   * - ``Median WT Score``
-     - ``NA``
-   * - ``Median Fold Change``
-     - ``NA``
-   * - ``Median MT Percentile``
-     - Median binding affinity percentile rank of the mutant epitope across all prediction algorithms used (those that provide percentile output)
-   * - ``Median WT Percentile``
-     - ``NA``
+   * - ``Best Percentile Method``
+     - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
    * - ``Individual Prediction Algorithm WT and MT Scores and Percentiles`` (multiple)
      - ic50 binding affintity and percentile ranks for the ``MT Epitope Seq`` for the individual prediction algorithms used
    * - ``cterm_7mer_gravy_score``
