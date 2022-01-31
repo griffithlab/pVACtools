@@ -1,0 +1,5097 @@
+{
+  "2-217498305-217498305-T-TGCTGCC": {
+    "good_binders": {
+      "ENST00000233809.4-IGFBP2-L/LLP-20": {
+        "LLPLLLLLGASGGGG": {
+          "ic50s_MT": [
+            109.0
+          ],
+          "percentiles_MT": [
+            22.796875
+          ],
+          "ic50s_WT": [
+            105.0
+          ],
+          "percentiles_WT": [
+            25.7
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "3",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                103.4800033569336,
+                1340.0999755859375,
+                109.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                104.49,
+                1891.9,
+                105.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                40.0,
+                5.6015625
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                46.0,
+                5.4
+              ]
+            }
+          },
+          "wt_peptide": "LPLLLLLLGASGGGG"
+        },
+        "PLLPLLLLLGASGGG": {
+          "ic50s_MT": [
+            133.77999877929688
+          ],
+          "percentiles_MT": [
+            21.296875
+          ],
+          "ic50s_WT": [
+            159.33
+          ],
+          "percentiles_WT": [
+            28.25
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "4",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                133.77999877929688,
+                1142.5,
+                110.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                159.33,
+                2324.5,
+                107.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                37.0,
+                5.6015625
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                51.0,
+                5.5
+              ]
+            }
+          },
+          "wt_peptide": "LLPLLLLLLGASGGG"
+        },
+        "LPLLLLLGASGGGGG": {
+          "ic50s_MT": [
+            201.30999755859375
+          ],
+          "percentiles_MT": [
+            22.953125
+          ],
+          "ic50s_WT": [
+            157.28
+          ],
+          "percentiles_WT": [
+            24.95
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "2",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                201.30999755859375,
+                1335.800048828125,
+                115.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                157.28,
+                1663.7,
+                115.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                40.0,
+                5.8984375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                44.0,
+                5.9
+              ]
+            }
+          },
+          "wt_peptide": "PLLLLLLGASGGGGG"
+        },
+        "LPLLPLLLLLGASGG": {
+          "ic50s_MT": [
+            312.4599914550781
+          ],
+          "percentiles_MT": [
+            21.34375
+          ],
+          "ic50s_WT": [
+            225.15
+          ],
+          "percentiles_WT": [
+            29.3
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "5",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                312.4599914550781,
+                1135.5,
+                112.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                225.15,
+                2570.9,
+                109.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                37.0,
+                5.69921875
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                53.0,
+                5.6
+              ]
+            }
+          },
+          "wt_peptide": "PLLPLLLLLLGASGG"
+        },
+        "LLPLLPLLLLLGASG": {
+          "ic50s_MT": [
+            697.3599853515625
+          ],
+          "percentiles_MT": [
+            23.953125
+          ],
+          "ic50s_WT": [
+            310.89
+          ],
+          "percentiles_WT": [
+            30.3
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "6",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                697.3599853515625,
+                1479.199951171875,
+                116.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                310.89,
+                2850.1,
+                111.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                42.0,
+                5.8984375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                55.0,
+                5.6
+              ]
+            }
+          },
+          "wt_peptide": "PPLLPLLLLLLGASG"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000233809.4-IGFBP2-L/LLP-20"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.891,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "LLPLLLLLGASGGGG",
+    "best_peptide_wt": "LPLLLLLLGASGGGG",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-18020271-18020272-G-A": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 0.071,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "GGSHVWTHSRDPEGS",
+    "best_peptide_wt": "GGSHVWTRSRDPEGS",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-18644672-18644673-C-T": {
+    "good_binders": {
+      "ENST00000215794.7-USP18-A/V-124": {
+        "LELVYCLQKCNVPLF": {
+          "ic50s_MT": [
+            350.0
+          ],
+          "percentiles_MT": [
+            21.5
+          ],
+          "ic50s_WT": [
+            724.9
+          ],
+          "percentiles_WT": [
+            30.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "4",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                247.64999389648438,
+                530.7000122070312,
+                350.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                277.87,
+                724.9,
+                743.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                25.0,
+                18.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                30.0,
+                31.0
+              ]
+            }
+          },
+          "wt_peptide": "LELAYCLQKCNVPLF"
+        },
+        "PLELVYCLQKCNVPL": {
+          "ic50s_MT": [
+            358.0
+          ],
+          "percentiles_MT": [
+            23.5
+          ],
+          "ic50s_WT": [
+            778.0
+          ],
+          "percentiles_WT": [
+            32.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "5",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                207.24000549316406,
+                670.0,
+                358.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                308.42,
+                880.2,
+                778.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                29.0,
+                18.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                33.0,
+                32.0
+              ]
+            }
+          },
+          "wt_peptide": "PLELAYCLQKCNVPL"
+        },
+        "ELVYCLQKCNVPLFV": {
+          "ic50s_MT": [
+            488.79998779296875
+          ],
+          "percentiles_MT": [
+            27.0
+          ],
+          "ic50s_WT": [
+            855.7
+          ],
+          "percentiles_WT": [
+            39.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "3",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                415.25,
+                488.79998779296875,
+                672.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                453.31,
+                855.7,
+                1456.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                25.0,
+                29.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                32.0,
+                46.0
+              ]
+            }
+          },
+          "wt_peptide": "ELAYCLQKCNVPLFV"
+        },
+        "LVYCLQKCNVPLFVQ": {
+          "ic50s_MT": [
+            615.9000244140625
+          ],
+          "percentiles_MT": [
+            32.0
+          ],
+          "ic50s_WT": [
+            829.4
+          ],
+          "percentiles_WT": [
+            40.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "2",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                424.44000244140625,
+                615.9000244140625,
+                969.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                462.23,
+                829.4,
+                1627.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                27.0,
+                37.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                32.0,
+                48.0
+              ]
+            }
+          },
+          "wt_peptide": "LAYCLQKCNVPLFVQ"
+        },
+        "RPLELVYCLQKCNVP": {
+          "ic50s_MT": [
+            777.7999877929688
+          ],
+          "percentiles_MT": [
+            25.0
+          ],
+          "ic50s_WT": [
+            943.7
+          ],
+          "percentiles_WT": [
+            33.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "6",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                3952.639892578125,
+                777.7999877929688,
+                372.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                5364.32,
+                943.7,
+                790.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                31.0,
+                19.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                34.0,
+                32.0
+              ]
+            }
+          },
+          "wt_peptide": "RPLELAYCLQKCNVP"
+        },
+        "VYCLQKCNVPLFVQH": {
+          "ic50s_MT": [
+            971.7999877929688
+          ],
+          "percentiles_MT": [
+            43.5
+          ],
+          "ic50s_WT": [
+            1187.7
+          ],
+          "percentiles_WT": [
+            50.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "1",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                124.56999969482422,
+                971.7999877929688,
+                2038.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                98.16,
+                1187.7,
+                3039.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                34.0,
+                53.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                38.0,
+                62.0
+              ]
+            }
+          },
+          "wt_peptide": "AYCLQKCNVPLFVQH"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000215794.7-USP18-A/V-124"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.053,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "LELVYCLQKCNVPLF",
+    "best_peptide_wt": "LELAYCLQKCNVPLF",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-19175521-19175522-G-T": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 0.1,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "KSVNEALNNLLTEEE",
+    "best_peptide_wt": "KSVNEALNHLLTEEE",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-20709231-20709232-G-C": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 0.5,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "EDAVQGIANQDAAQG",
+    "best_peptide_wt": "EDAVQGIANEDAAQG",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-22550449-22550450-C-G": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 1.0,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "GKTVTISCTGSSGSI",
+    "best_peptide_wt": "GKTVTISCTRSSGSI",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-22550509-22550510-T-G": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 0.571,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "YVQWYQQRPGSAPTT",
+    "best_peptide_wt": "YVQWYQQRPGSSPTT",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-26936775-26936776-G-T": {
+    "good_binders": {
+      "ENST00000338754.4-TPST2-P/H-274": {
+        "KHGGVSLSKIERSTD": {
+          "ic50s_MT": [
+            472.45001220703125
+          ],
+          "percentiles_MT": [
+            21.0
+          ],
+          "ic50s_WT": [
+            546.0
+          ],
+          "percentiles_WT": [
+            22.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "2",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                472.45001220703125,
+                243.8000030517578,
+                540.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                845.24,
+                292.1,
+                546.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                17.0,
+                25.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                19.0,
+                25.0
+              ]
+            }
+          },
+          "wt_peptide": "KPGGVSLSKIERSTD"
+        },
+        "HGGVSLSKIERSTDQ": {
+          "ic50s_MT": [
+            543.0
+          ],
+          "percentiles_MT": [
+            20.0
+          ],
+          "ic50s_WT": [
+            548.0
+          ],
+          "percentiles_WT": [
+            20.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "1",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                992.489990234375,
+                203.3000030517578,
+                543.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1509.42,
+                232.4,
+                548.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                15.0,
+                25.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                16.0,
+                25.0
+              ]
+            }
+          },
+          "wt_peptide": "PGGVSLSKIERSTDQ"
+        },
+        "GKHGGVSLSKIERST": {
+          "ic50s_MT": [
+            585.3400268554688
+          ],
+          "percentiles_MT": [
+            26.0
+          ],
+          "ic50s_WT": [
+            849.0
+          ],
+          "percentiles_WT": [
+            27.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "3",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                585.3400268554688,
+                282.5,
+                841.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                994.34,
+                349.6,
+                849.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                18.0,
+                34.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                20.0,
+                34.0
+              ]
+            }
+          },
+          "wt_peptide": "GKPGGVSLSKIERST"
+        },
+        "IGKHGGVSLSKIERS": {
+          "ic50s_MT": [
+            699.7999877929688
+          ],
+          "percentiles_MT": [
+            31.5
+          ],
+          "ic50s_WT": [
+            924.5
+          ],
+          "percentiles_WT": [
+            34.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "4",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                658.9199829101562,
+                699.7999877929688,
+                851.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1189.94,
+                924.5,
+                859.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                29.0,
+                34.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                34.0,
+                34.0
+              ]
+            }
+          },
+          "wt_peptide": "IGKPGGVSLSKIERS"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000338754.4-TPST2-P/H-274"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.179,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "KHGGVSLSKIERSTD",
+    "best_peptide_wt": "KPGGVSLSKIERSTD",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-29886116-29886117-C-A": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 0.038,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "KTQEVKVKEPPKKAE",
+    "best_peptide_wt": "KPQEVKVKEPPKKAE",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-37771017-37771018-G-A": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 0.135,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "ASLMVCELAGNLFNC",
+    "best_peptide_wt": "ASLMVCELAGNPFNC",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-37966274-37966275-C-G": {
+    "good_binders": {
+      "ENST00000215886.4-LGALS2-E/Q-132": {
+        "SVRGGFNMSSFKLKQ": {
+          "ic50s_MT": [
+            491.0
+          ],
+          "percentiles_MT": [
+            17.0
+          ],
+          "ic50s_WT": [
+            561.0
+          ],
+          "percentiles_WT": [
+            21.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "15",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                518.3200073242188,
+                123.19999694824219,
+                491.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1307.6,
+                223.9,
+                561.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                11.0,
+                23.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                16.0,
+                26.0
+              ]
+            }
+          },
+          "wt_peptide": "SVRGGFNMSSFKLKE"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000215886.4-LGALS2-E/Q-132"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.496,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "SVRGGFNMSSFKLKQ",
+    "best_peptide_wt": "SVRGGFNMSSFKLKE",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-38027027-38027028-C-G": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 0.486,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "TSLLHTVSPEPARPP",
+    "best_peptide_wt": "TSLLHTVSPEPPRPP",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-38119219-38119220-GA-G": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 0.768,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "GGGGRSAGSTGQGSG",
+    "best_peptide_wt": "GGGGRSAGQHWARLR",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-39994238-39994239-G-A": {
+    "good_binders": {
+      "ENST00000402142.3-CACNA1I-C/Y-107": {
+        "DMDYLSDRCKILQVF": {
+          "ic50s_MT": [
+            641.5999755859375
+          ],
+          "percentiles_MT": [
+            33.5
+          ],
+          "ic50s_WT": [
+            2789.73
+          ],
+          "percentiles_WT": [
+            58.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "4",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                126.88999938964844,
+                641.5999755859375,
+                1102.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                2789.73,
+                2951.7,
+                2781.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                28.0,
+                39.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                56.0,
+                60.0
+              ]
+            }
+          },
+          "wt_peptide": "DMDCLSDRCKILQVF"
+        },
+        "DDMDYLSDRCKILQV": {
+          "ic50s_MT": [
+            775.0
+          ],
+          "percentiles_MT": [
+            32.5
+          ],
+          "ic50s_WT": [
+            4408.6
+          ],
+          "percentiles_WT": [
+            59.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "5",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                489.80999755859375,
+                900.7000122070312,
+                775.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                5486.58,
+                4408.6,
+                2033.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                33.0,
+                32.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                65.0,
+                53.0
+              ]
+            }
+          },
+          "wt_peptide": "DDMDCLSDRCKILQV"
+        },
+        "MDYLSDRCKILQVFD": {
+          "ic50s_MT": [
+            940.8099975585938
+          ],
+          "percentiles_MT": [
+            33.5
+          ],
+          "ic50s_WT": [
+            2679.7
+          ],
+          "percentiles_WT": [
+            56.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "3",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                940.8099975585938,
+                586.5,
+                1130.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                2652.41,
+                2679.7,
+                2819.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                27.0,
+                40.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                53.0,
+                60.0
+              ]
+            }
+          },
+          "wt_peptide": "MDCLSDRCKILQVFD"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000402142.3-CACNA1I-C/Y-107"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.043,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "DMDYLSDRCKILQVF",
+    "best_peptide_wt": "DMDCLSDRCKILQVF",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-41895790-41895791-C-A": {
+    "good_binders": {
+      "ENST00000216254.4-ACO2-A/E-33": {
+        "QYHVASVLCQRAKVE": {
+          "ic50s_MT": [
+            202.1999969482422
+          ],
+          "percentiles_MT": [
+            18.0
+          ],
+          "ic50s_WT": [
+            297.49
+          ],
+          "percentiles_WT": [
+            16.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "15",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                166.97999572753906,
+                202.1999969482422,
+                434.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                297.49,
+                164.8,
+                390.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                15.0,
+                21.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                13.0,
+                19.0
+              ]
+            }
+          },
+          "wt_peptide": "QYHVASVLCQRAKVA"
+        },
+        "YHVASVLCQRAKVEM": {
+          "ic50s_MT": [
+            422.0
+          ],
+          "percentiles_MT": [
+            22.5
+          ],
+          "ic50s_WT": [
+            309.9
+          ],
+          "percentiles_WT": [
+            19.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "14",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                55.279998779296875,
+                466.70001220703125,
+                422.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                83.06,
+                309.9,
+                377.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                24.0,
+                21.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                19.0,
+                19.0
+              ]
+            }
+          },
+          "wt_peptide": "YHVASVLCQRAKVAM"
+        },
+        "HVASVLCQRAKVEMS": {
+          "ic50s_MT": [
+            451.0
+          ],
+          "percentiles_MT": [
+            26.5
+          ],
+          "ic50s_WT": [
+            370.4
+          ],
+          "percentiles_WT": [
+            20.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "13",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                232.10000610351562,
+                770.7000122070312,
+                451.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                56.59,
+                370.4,
+                397.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                31.0,
+                22.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                21.0,
+                20.0
+              ]
+            }
+          },
+          "wt_peptide": "HVASVLCQRAKVAMS"
+        },
+        "VASVLCQRAKVEMSH": {
+          "ic50s_MT": [
+            528.0
+          ],
+          "percentiles_MT": [
+            29.0
+          ],
+          "ic50s_WT": [
+            380.8
+          ],
+          "percentiles_WT": [
+            21.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "12",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                131.33999633789062,
+                956.2000122070312,
+                528.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                16.65,
+                380.8,
+                447.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                34.0,
+                24.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                21.0,
+                22.0
+              ]
+            }
+          },
+          "wt_peptide": "VASVLCQRAKVAMSH"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000216254.4-ACO2-A/E-33"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.044,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "QYHVASVLCQRAKVE",
+    "best_peptide_wt": "QYHVASVLCQRAKVA",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-41920894-41920895-G-C": {
+    "good_binders": {
+      "ENST00000216254.4-ACO2-E/Q-510": {
+        "VTALAIAGTLKFNPQ": {
+          "ic50s_MT": [
+            693.0
+          ],
+          "percentiles_MT": [
+            28.0
+          ],
+          "ic50s_WT": [
+            654.2
+          ],
+          "percentiles_WT": [
+            29.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "15",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                751.3300170898438,
+                535.2999877929688,
+                693.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                569.1,
+                654.2,
+                700.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                26.0,
+                30.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                28.0,
+                30.0
+              ]
+            }
+          },
+          "wt_peptide": "VTALAIAGTLKFNPE"
+        },
+        "TALAIAGTLKFNPQT": {
+          "ic50s_MT": [
+            725.0
+          ],
+          "percentiles_MT": [
+            27.0
+          ],
+          "ic50s_WT": [
+            733.0
+          ],
+          "percentiles_WT": [
+            28.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "14",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                1816.550048828125,
+                429.6000061035156,
+                725.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1743.08,
+                547.5,
+                733.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                23.0,
+                31.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                26.0,
+                31.0
+              ]
+            }
+          },
+          "wt_peptide": "TALAIAGTLKFNPET"
+        },
+        "ALAIAGTLKFNPQTD": {
+          "ic50s_MT": [
+            858.530029296875
+          ],
+          "percentiles_MT": [
+            36.0
+          ],
+          "ic50s_WT": [
+            1052.56
+          ],
+          "percentiles_WT": [
+            37.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "13",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                858.530029296875,
+                489.0,
+                1532.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1052.56,
+                655.4,
+                1569.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                25.0,
+                47.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                28.0,
+                47.0
+              ]
+            }
+          },
+          "wt_peptide": "ALAIAGTLKFNPETD"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000216254.4-ACO2-E/Q-510"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.25,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "VTALAIAGTLKFNPQ",
+    "best_peptide_wt": "VTALAIAGTLKFNPE",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-46653595-46653596-G-A": {
+    "good_binders": {
+      "ENST00000253255.5-PKDREJ-T/I-1875": {
+        "LYYSYGLLHIYGSGG": {
+          "ic50s_MT": [
+            223.0
+          ],
+          "percentiles_MT": [
+            14.0
+          ],
+          "ic50s_WT": [
+            154.0
+          ],
+          "percentiles_WT": [
+            13.4
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "10",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                272.29998779296875,
+                223.0,
+                219.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                137.61,
+                300.9,
+                154.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                16.0,
+                12.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                19.0,
+                7.8
+              ]
+            }
+          },
+          "wt_peptide": "LYYSYGLLHTYGSGG"
+        },
+        "YYSYGLLHIYGSGGY": {
+          "ic50s_MT": [
+            260.79998779296875
+          ],
+          "percentiles_MT": [
+            14.5
+          ],
+          "ic50s_WT": [
+            158.0
+          ],
+          "percentiles_WT": [
+            14.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "9",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                477.6000061035156,
+                260.79998779296875,
+                225.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                139.5,
+                363.6,
+                158.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                17.0,
+                12.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                21.0,
+                8.0
+              ]
+            }
+          },
+          "wt_peptide": "YYSYGLLHTYGSGGY"
+        },
+        "QWLYYSYGLLHIYGS": {
+          "ic50s_MT": [
+            263.20001220703125
+          ],
+          "percentiles_MT": [
+            15.0
+          ],
+          "ic50s_WT": [
+            335.9
+          ],
+          "percentiles_WT": [
+            13.85
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "12",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                474.7799987792969,
+                263.20001220703125,
+                237.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                636.8,
+                335.9,
+                152.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                17.0,
+                13.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                20.0,
+                7.7
+              ]
+            }
+          },
+          "wt_peptide": "QWLYYSYGLLHTYGS"
+        },
+        "YSYGLLHIYGSGGYA": {
+          "ic50s_MT": [
+            268.25
+          ],
+          "percentiles_MT": [
+            17.5
+          ],
+          "ic50s_WT": [
+            172.14
+          ],
+          "percentiles_WT": [
+            17.55
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "8",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                268.25,
+                432.70001220703125,
+                229.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                172.14,
+                607.8,
+                161.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                23.0,
+                12.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                27.0,
+                8.1
+              ]
+            }
+          },
+          "wt_peptide": "YSYGLLHTYGSGGYA"
+        },
+        "WLYYSYGLLHIYGSG": {
+          "ic50s_MT": [
+            281.0
+          ],
+          "percentiles_MT": [
+            15.5
+          ],
+          "ic50s_WT": [
+            195.47
+          ],
+          "percentiles_WT": [
+            13.55
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "11",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                364.1700134277344,
+                223.1999969482422,
+                281.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                195.47,
+                298.7,
+                160.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                16.0,
+                15.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                19.0,
+                8.1
+              ]
+            }
+          },
+          "wt_peptide": "WLYYSYGLLHTYGSG"
+        },
+        "TQWLYYSYGLLHIYG": {
+          "ic50s_MT": [
+            456.0
+          ],
+          "percentiles_MT": [
+            23.5
+          ],
+          "ic50s_WT": [
+            504.0
+          ],
+          "percentiles_WT": [
+            25.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "13",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                304.54998779296875,
+                456.0,
+                471.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                270.2,
+                539.0,
+                504.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                24.0,
+                23.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                26.0,
+                24.0
+              ]
+            }
+          },
+          "wt_peptide": "TQWLYYSYGLLHTYG"
+        },
+        "GTQWLYYSYGLLHIY": {
+          "ic50s_MT": [
+            696.1900024414062
+          ],
+          "percentiles_MT": [
+            29.0
+          ],
+          "ic50s_WT": [
+            550.0
+          ],
+          "percentiles_WT": [
+            29.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "14",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                696.1900024414062,
+                807.2999877929688,
+                576.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                315.03,
+                862.8,
+                550.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                32.0,
+                26.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                33.0,
+                25.0
+              ]
+            }
+          },
+          "wt_peptide": "GTQWLYYSYGLLHTY"
+        },
+        "YGLLHIYGSGGYALY": {
+          "ic50s_MT": [
+            749.6500244140625
+          ],
+          "percentiles_MT": [
+            33.5
+          ],
+          "ic50s_WT": [
+            1296.07
+          ],
+          "percentiles_WT": [
+            36.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "6",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                749.6500244140625,
+                1932.4000244140625,
+                404.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1296.07,
+                2501.6,
+                437.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                47.0,
+                20.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                52.0,
+                21.0
+              ]
+            }
+          },
+          "wt_peptide": "YGLLHTYGSGGYALY"
+        },
+        "QGTQWLYYSYGLLHI": {
+          "ic50s_MT": [
+            766.6599731445312
+          ],
+          "percentiles_MT": [
+            33.5
+          ],
+          "ic50s_WT": [
+            587.95
+          ],
+          "percentiles_WT": [
+            33.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "15",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                766.6599731445312,
+                1401.699951171875,
+                578.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                587.95,
+                1410.6,
+                554.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                41.0,
+                26.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                41.0,
+                25.0
+              ]
+            }
+          },
+          "wt_peptide": "QGTQWLYYSYGLLHT"
+        },
+        "SYGLLHIYGSGGYAL": {
+          "ic50s_MT": [
+            796.9000244140625
+          ],
+          "percentiles_MT": [
+            25.0
+          ],
+          "ic50s_WT": [
+            936.37
+          ],
+          "percentiles_WT": [
+            29.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "7",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                831.5499877929688,
+                796.9000244140625,
+                391.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                936.37,
+                1177.2,
+                427.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                31.0,
+                19.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                38.0,
+                21.0
+              ]
+            }
+          },
+          "wt_peptide": "SYGLLHTYGSGGYAL"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000253255.5-PKDREJ-T/I-1875"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.233,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "LYYSYGLLHIYGSGG",
+    "best_peptide_wt": "LYYSYGLLHTYGSGG",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-50555769-50555770-G-A": {
+    "good_binders": {
+      "ENST00000262794.5-MOV10L1-A/T-482": {
+        "KTTVVVTTQKRNSRR": {
+          "ic50s_MT": [
+            43.33000183105469
+          ],
+          "percentiles_MT": [
+            3.099609375
+          ],
+          "ic50s_WT": [
+            85.0
+          ],
+          "percentiles_WT": [
+            2.9
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "8",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                43.33000183105469,
+                20.799999237060547,
+                84.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                85.24,
+                16.7,
+                85.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                2.099609375,
+                4.1015625
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                1.6,
+                4.2
+              ]
+            }
+          },
+          "wt_peptide": "KTTVVVTAQKRNSRR"
+        },
+        "TVVVTTQKRNSRRQL": {
+          "ic50s_MT": [
+            72.0
+          ],
+          "percentiles_MT": [
+            2.69921875
+          ],
+          "ic50s_WT": [
+            74.0
+          ],
+          "percentiles_WT": [
+            2.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "6",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                190.82000732421875,
+                19.200000762939453,
+                72.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                241.45,
+                14.7,
+                74.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                1.900390625,
+                3.5
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                1.4,
+                3.6
+              ]
+            }
+          },
+          "wt_peptide": "TVVVTAQKRNSRRQL"
+        },
+        "AKTTVVVTTQKRNSR": {
+          "ic50s_MT": [
+            72.47000122070312
+          ],
+          "percentiles_MT": [
+            4.30078125
+          ],
+          "ic50s_WT": [
+            85.83
+          ],
+          "percentiles_WT": [
+            3.85
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "9",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                72.47000122070312,
+                40.29999923706055,
+                87.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                85.83,
+                32.4,
+                88.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                4.19921875,
+                4.3984375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                3.3,
+                4.4
+              ]
+            }
+          },
+          "wt_peptide": "AKTTVVVTAQKRNSR"
+        },
+        "TTVVVTTQKRNSRRQ": {
+          "ic50s_MT": [
+            83.0
+          ],
+          "percentiles_MT": [
+            2.94921875
+          ],
+          "ic50s_WT": [
+            84.0
+          ],
+          "percentiles_WT": [
+            2.75
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "7",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                411.8800048828125,
+                18.200000762939453,
+                83.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                540.23,
+                15.0,
+                84.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                1.7998046875,
+                4.1015625
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                1.4,
+                4.1
+              ]
+            }
+          },
+          "wt_peptide": "TTVVVTAQKRNSRRQ"
+        },
+        "VVVTTQKRNSRRQLP": {
+          "ic50s_MT": [
+            142.0
+          ],
+          "percentiles_MT": [
+            5.69921875
+          ],
+          "ic50s_WT": [
+            148.0
+          ],
+          "percentiles_WT": [
+            5.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "5",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                5808.75,
+                39.400001525878906,
+                142.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                5475.32,
+                34.9,
+                148.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                4.1015625,
+                7.30078125
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                3.5,
+                7.5
+              ]
+            }
+          },
+          "wt_peptide": "VVVTAQKRNSRRQLP"
+        },
+        "SAKTTVVVTTQKRNS": {
+          "ic50s_MT": [
+            142.10000610351562
+          ],
+          "percentiles_MT": [
+            8.3515625
+          ],
+          "ic50s_WT": [
+            111.5
+          ],
+          "percentiles_WT": [
+            7.15
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "10",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                670.3800048828125,
+                142.10000610351562,
+                92.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                416.58,
+                111.5,
+                93.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                12.0,
+                4.69921875
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                9.6,
+                4.7
+              ]
+            }
+          },
+          "wt_peptide": "SAKTTVVVTAQKRNS"
+        },
+        "VVTTQKRNSRRQLPS": {
+          "ic50s_MT": [
+            171.89999389648438
+          ],
+          "percentiles_MT": [
+            10.6484375
+          ],
+          "ic50s_WT": [
+            154.3
+          ],
+          "percentiles_WT": [
+            10.35
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "4",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                3226.610107421875,
+                171.89999389648438,
+                143.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                2493.3,
+                154.3,
+                151.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                14.0,
+                7.30078125
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                13.0,
+                7.7
+              ]
+            }
+          },
+          "wt_peptide": "VVTAQKRNSRRQLPS"
+        },
+        "SQALTSAKTTVVVTT": {
+          "ic50s_MT": [
+            889.0
+          ],
+          "percentiles_MT": [
+            48.0
+          ],
+          "ic50s_WT": [
+            3618.5
+          ],
+          "percentiles_WT": [
+            47.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "15",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                824.9500122070312,
+                3718.699951171875,
+                889.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                4388.77,
+                3618.5,
+                872.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                61.0,
+                35.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                60.0,
+                34.0
+              ]
+            }
+          },
+          "wt_peptide": "SQALTSAKTTVVVTA"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000262794.5-MOV10L1-A/T-482"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.042,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "KTTVVVTTQKRNSRR",
+    "best_peptide_wt": "KTTVVVTAQKRNSRR",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-50615580-50615581-C-T": {
+    "good_binders": {
+      "ENST00000395842.2-PANX2-S/F-147": {
+        "LGWEFLAFTRLTSEL": {
+          "ic50s_MT": [
+            18.600000381469727
+          ],
+          "percentiles_MT": [
+            1.3203125
+          ],
+          "ic50s_WT": [
+            16.6
+          ],
+          "percentiles_WT": [
+            1.4
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "8",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                8.039999961853027,
+                18.600000381469727,
+                22.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                14.64,
+                16.6,
+                27.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                1.7998046875,
+                0.83984375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                1.6,
+                1.2
+              ]
+            }
+          },
+          "wt_peptide": "LGWEFLASTRLTSEL"
+        },
+        "GWEFLAFTRLTSELN": {
+          "ic50s_MT": [
+            22.0
+          ],
+          "percentiles_MT": [
+            1.2197265625
+          ],
+          "ic50s_WT": [
+            28.0
+          ],
+          "percentiles_WT": [
+            1.35
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "7",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                86.12999725341797,
+                16.200000762939453,
+                22.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                143.47,
+                15.4,
+                28.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                1.599609375,
+                0.83984375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                1.4,
+                1.3
+              ]
+            }
+          },
+          "wt_peptide": "GWEFLASTRLTSELN"
+        },
+        "ALGWEFLAFTRLTSE": {
+          "ic50s_MT": [
+            22.600000381469727
+          ],
+          "percentiles_MT": [
+            1.60546875
+          ],
+          "ic50s_WT": [
+            29.0
+          ],
+          "percentiles_WT": [
+            1.65
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "9",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                15.029999732971191,
+                22.600000381469727,
+                23.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                53.73,
+                20.3,
+                29.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                2.30078125,
+                0.91015625
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                2.0,
+                1.3
+              ]
+            }
+          },
+          "wt_peptide": "ALGWEFLASTRLTSE"
+        },
+        "WEFLAFTRLTSELNF": {
+          "ic50s_MT": [
+            23.0
+          ],
+          "percentiles_MT": [
+            1.3046875
+          ],
+          "ic50s_WT": [
+            29.0
+          ],
+          "percentiles_WT": [
+            1.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "6",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                30.350000381469727,
+                17.5,
+                23.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                74.24,
+                17.2,
+                29.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                1.7001953125,
+                0.91015625
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                1.7,
+                1.3
+              ]
+            }
+          },
+          "wt_peptide": "WEFLASTRLTSELNF"
+        },
+        "PALGWEFLAFTRLTS": {
+          "ic50s_MT": [
+            36.099998474121094
+          ],
+          "percentiles_MT": [
+            2.3046875
+          ],
+          "ic50s_WT": [
+            33.2
+          ],
+          "percentiles_WT": [
+            2.35
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "10",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                73.05000305175781,
+                36.099998474121094,
+                23.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                289.67,
+                33.2,
+                29.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                3.69921875,
+                0.91015625
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                3.4,
+                1.3
+              ]
+            }
+          },
+          "wt_peptide": "PALGWEFLASTRLTS"
+        },
+        "EFLAFTRLTSELNFL": {
+          "ic50s_MT": [
+            53.25
+          ],
+          "percentiles_MT": [
+            2.650390625
+          ],
+          "ic50s_WT": [
+            84.0
+          ],
+          "percentiles_WT": [
+            4.1
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "5",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                53.25,
+                27.0,
+                56.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                114.15,
+                39.5,
+                84.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                2.69921875,
+                2.599609375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                4.1,
+                4.1
+              ]
+            }
+          },
+          "wt_peptide": "EFLASTRLTSELNFL"
+        },
+        "FLAFTRLTSELNFLL": {
+          "ic50s_MT": [
+            55.0
+          ],
+          "percentiles_MT": [
+            3.69921875
+          ],
+          "ic50s_WT": [
+            159.1
+          ],
+          "percentiles_WT": [
+            8.55
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "4",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                68.19999694824219,
+                47.79999923706055,
+                55.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                234.77,
+                159.1,
+                84.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                4.80078125,
+                2.599609375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                13.0,
+                4.1
+              ]
+            }
+          },
+          "wt_peptide": "FLASTRLTSELNFLL"
+        },
+        "LAFTRLTSELNFLLQ": {
+          "ic50s_MT": [
+            203.3000030517578
+          ],
+          "percentiles_MT": [
+            11.1484375
+          ],
+          "ic50s_WT": [
+            4620.7
+          ],
+          "percentiles_WT": [
+            63.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "3",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                837.75,
+                203.3000030517578,
+                143.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                4620.7,
+                6175.2,
+                2151.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                15.0,
+                7.30078125
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                72.0,
+                54.0
+              ]
+            }
+          },
+          "wt_peptide": "LASTRLTSELNFLLQ"
+        },
+        "AFTRLTSELNFLLQE": {
+          "ic50s_MT": [
+            558.2000122070312
+          ],
+          "percentiles_MT": [
+            23.5
+          ],
+          "ic50s_WT": [
+            4376.29
+          ],
+          "percentiles_WT": [
+            63.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "2",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                5606.41015625,
+                558.2000122070312,
+                437.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                4376.29,
+                5108.7,
+                2707.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                26.0,
+                21.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                68.0,
+                59.0
+              ]
+            }
+          },
+          "wt_peptide": "ASTRLTSELNFLLQE"
+        },
+        "AIMYVPALGWEFLAF": {
+          "ic50s_MT": [
+            806.1900024414062
+          ],
+          "percentiles_MT": [
+            29.5
+          ],
+          "ic50s_WT": [
+            870.2
+          ],
+          "percentiles_WT": [
+            29.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "15",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                806.1900024414062,
+                898.2999877929688,
+                586.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1683.1,
+                870.2,
+                586.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                33.0,
+                26.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                33.0,
+                26.0
+              ]
+            }
+          },
+          "wt_peptide": "AIMYVPALGWEFLAS"
+        },
+        "VPALGWEFLAFTRLT": {
+          "ic50s_MT": [
+            828.25
+          ],
+          "percentiles_MT": [
+            31.5
+          ],
+          "ic50s_WT": [
+            392.1
+          ],
+          "percentiles_WT": [
+            19.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "11",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                828.25,
+                350.5,
+                1322.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1217.0,
+                392.1,
+                333.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                20.0,
+                43.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                22.0,
+                17.0
+              ]
+            }
+          },
+          "wt_peptide": "VPALGWEFLASTRLT"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000395842.2-PANX2-S/F-147"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.959,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "LGWEFLAFTRLTSEL",
+    "best_peptide_wt": "LGWEFLASTRLTSEL",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-50682229-50682230-T-C": {
+    "good_binders": {
+      "ENST00000248846.5-TUBGCP6-H/R-220": {
+        "VSLFGALVRSRTYDM": {
+          "ic50s_MT": [
+            32.0
+          ],
+          "percentiles_MT": [
+            2.69921875
+          ],
+          "ic50s_WT": [
+            159.8
+          ],
+          "percentiles_WT": [
+            12.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "9",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                18.700000762939453,
+                32.0,
+                44.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                42.69,
+                159.8,
+                213.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                3.30078125,
+                2.099609375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                13.0,
+                11.0
+              ]
+            }
+          },
+          "wt_peptide": "VSLFGALVHSRTYDM"
+        },
+        "TRVSLFGALVRSRTY": {
+          "ic50s_MT": [
+            37.400001525878906
+          ],
+          "percentiles_MT": [
+            2.94921875
+          ],
+          "ic50s_WT": [
+            166.1
+          ],
+          "percentiles_WT": [
+            13.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "11",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                16.020000457763672,
+                37.400001525878906,
+                44.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                25.99,
+                166.1,
+                249.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                3.80078125,
+                2.099609375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                13.0,
+                13.0
+              ]
+            }
+          },
+          "wt_peptide": "TRVSLFGALVHSRTY"
+        },
+        "RVSLFGALVRSRTYD": {
+          "ic50s_MT": [
+            45.0
+          ],
+          "percentiles_MT": [
+            2.849609375
+          ],
+          "ic50s_WT": [
+            162.9
+          ],
+          "percentiles_WT": [
+            13.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "10",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                51.810001373291016,
+                35.5,
+                45.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                78.14,
+                162.9,
+                255.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                3.599609375,
+                2.099609375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                13.0,
+                13.0
+              ]
+            }
+          },
+          "wt_peptide": "RVSLFGALVHSRTYD"
+        },
+        "SLFGALVRSRTYDMD": {
+          "ic50s_MT": [
+            46.0
+          ],
+          "percentiles_MT": [
+            2.650390625
+          ],
+          "ic50s_WT": [
+            219.0
+          ],
+          "percentiles_WT": [
+            13.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "8",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                209.88999938964844,
+                31.0,
+                46.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                376.52,
+                168.6,
+                219.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                3.19921875,
+                2.099609375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                14.0,
+                12.0
+              ]
+            }
+          },
+          "wt_peptide": "SLFGALVHSRTYDMD"
+        },
+        "DTRVSLFGALVRSRT": {
+          "ic50s_MT": [
+            60.52000045776367
+          ],
+          "percentiles_MT": [
+            4.75
+          ],
+          "ic50s_WT": [
+            236.0
+          ],
+          "percentiles_WT": [
+            15.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "12",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                60.52000045776367,
+                78.69999694824219,
+                45.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                147.47,
+                317.5,
+                236.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                7.3984375,
+                2.099609375
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                19.0,
+                12.0
+              ]
+            }
+          },
+          "wt_peptide": "DTRVSLFGALVHSRT"
+        },
+        "LFGALVRSRTYDMDV": {
+          "ic50s_MT": [
+            121.0
+          ],
+          "percentiles_MT": [
+            5.80078125
+          ],
+          "ic50s_WT": [
+            441.0
+          ],
+          "percentiles_WT": [
+            20.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "7",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                499.2200012207031,
+                55.5,
+                121.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                982.35,
+                318.2,
+                441.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                5.3984375,
+                6.19921875
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                19.0,
+                21.0
+              ]
+            }
+          },
+          "wt_peptide": "LFGALVHSRTYDMDV"
+        },
+        "FGALVRSRTYDMDVR": {
+          "ic50s_MT": [
+            128.0
+          ],
+          "percentiles_MT": [
+            8.796875
+          ],
+          "ic50s_WT": [
+            662.4
+          ],
+          "percentiles_WT": [
+            26.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "6",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                3723.739990234375,
+                125.80000305175781,
+                128.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                5694.21,
+                662.4,
+                479.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                11.0,
+                6.6015625
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                29.0,
+                23.0
+              ]
+            }
+          },
+          "wt_peptide": "FGALVHSRTYDMDVR"
+        },
+        "RDTRVSLFGALVRSR": {
+          "ic50s_MT": [
+            344.6000061035156
+          ],
+          "percentiles_MT": [
+            24.5
+          ],
+          "ic50s_WT": [
+            902.4
+          ],
+          "percentiles_WT": [
+            37.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "13",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                142.94000244140625,
+                344.6000061035156,
+                683.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                267.4,
+                902.4,
+                1218.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                20.0,
+                29.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                33.0,
+                42.0
+              ]
+            }
+          },
+          "wt_peptide": "RDTRVSLFGALVHSR"
+        },
+        "RSRTYDMDVRLGLPP": {
+          "ic50s_MT": [
+            648.9000244140625
+          ],
+          "percentiles_MT": [
+            19.5
+          ],
+          "ic50s_WT": [
+            676.2
+          ],
+          "percentiles_WT": [
+            20.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "1",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                690.3800048828125,
+                648.9000244140625,
+                205.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                676.2,
+                716.6,
+                205.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                28.0,
+                11.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                30.0,
+                11.0
+              ]
+            }
+          },
+          "wt_peptide": "HSRTYDMDVRLGLPP"
+        },
+        "FERDTRVSLFGALVR": {
+          "ic50s_MT": [
+            665.0
+          ],
+          "percentiles_MT": [
+            36.0
+          ],
+          "ic50s_WT": [
+            1574.27
+          ],
+          "percentiles_WT": [
+            38.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "15",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                525.8400268554688,
+                1558.0,
+                665.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1574.27,
+                2036.3,
+                686.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                43.0,
+                29.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                48.0,
+                29.0
+              ]
+            }
+          },
+          "wt_peptide": "FERDTRVSLFGALVH"
+        },
+        "VRSRTYDMDVRLGLP": {
+          "ic50s_MT": [
+            794.0999755859375
+          ],
+          "percentiles_MT": [
+            21.0
+          ],
+          "ic50s_WT": [
+            879.5
+          ],
+          "percentiles_WT": [
+            22.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "2",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                1521.6600341796875,
+                794.0999755859375,
+                202.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1984.32,
+                879.5,
+                202.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                31.0,
+                11.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                33.0,
+                11.0
+              ]
+            }
+          },
+          "wt_peptide": "VHSRTYDMDVRLGLP"
+        },
+        "LVRSRTYDMDVRLGL": {
+          "ic50s_MT": [
+            931.9000244140625
+          ],
+          "percentiles_MT": [
+            21.84375
+          ],
+          "ic50s_WT": [
+            1008.4
+          ],
+          "percentiles_WT": [
+            22.35
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "3",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                953.760009765625,
+                931.9000244140625,
+                192.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                2112.63,
+                1008.4,
+                192.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                34.0,
+                9.703125
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                35.0,
+                9.7
+              ]
+            }
+          },
+          "wt_peptide": "LVHSRTYDMDVRLGL"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000248846.5-TUBGCP6-H/R-220"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.686,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "VSLFGALVRSRTYDM",
+    "best_peptide_wt": "VSLFGALVHSRTYDM",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "22-50869713-50869714-C-A": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 0.043,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "LSHAAREERTEASGY",
+    "best_peptide_wt": "LSHAAREERTEASGS",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "4-40434704-40434725-AGCGGCTGCGGCGGCTGCGGCC-A": {
+    "good_binders": {},
+    "good_binders_transcripts": [],
+    "transcript_expr": [],
+    "DNA VAF": 0.977,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "SAAAAAAAVIPTVST",
+    "best_peptide_wt": "AAAAAAAAVIPTVST",
+    "best_hla_allele": "DRB1*11:01"
+  },
+  "6-41754573-41754573-C-CCTT": {
+    "good_binders": {
+      "ENST00000458694.1-PRICKLE4--/L-287-288": {
+        "VNSATLSRTLLLAAA": {
+          "ic50s_MT": [
+            368.010009765625
+          ],
+          "percentiles_MT": [
+            23.0
+          ],
+          "ic50s_WT": [
+            382.0
+          ],
+          "percentiles_WT": [
+            24.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "12",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                368.010009765625,
+                790.7000122070312,
+                292.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                108.41,
+                681.6,
+                382.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                31.0,
+                15.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                29.0,
+                19.0
+              ]
+            }
+          },
+          "wt_peptide": "VNSATLSRTLLAAAG"
+        },
+        "SATLSRTLLLAAAGG": {
+          "ic50s_MT": [
+            423.0
+          ],
+          "percentiles_MT": [
+            25.0
+          ],
+          "ic50s_WT": [
+            648.0
+          ],
+          "percentiles_WT": [
+            29.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "10",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                112.22000122070312,
+                680.7000122070312,
+                423.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                67.74,
+                752.4,
+                648.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                29.0,
+                21.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                30.0,
+                28.0
+              ]
+            }
+          },
+          "wt_peptide": "SATLSRTLLAAAGGS"
+        },
+        "NSATLSRTLLLAAAG": {
+          "ic50s_MT": [
+            424.0
+          ],
+          "percentiles_MT": [
+            24.5
+          ],
+          "ic50s_WT": [
+            552.0
+          ],
+          "percentiles_WT": [
+            26.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "11",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                76.61000061035156,
+                628.2000122070312,
+                424.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                127.36,
+                645.8,
+                552.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                28.0,
+                21.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                28.0,
+                25.0
+              ]
+            }
+          },
+          "wt_peptide": "NSATLSRTLLAAAGG"
+        },
+        "LSRTLLLAAAGGSSL": {
+          "ic50s_MT": [
+            428.29998779296875
+          ],
+          "percentiles_MT": [
+            25.5
+          ],
+          "ic50s_WT": [
+            681.6
+          ],
+          "percentiles_WT": [
+            33.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "7",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                240.36000061035156,
+                428.29998779296875,
+                654.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                231.87,
+                681.6,
+                964.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                23.0,
+                28.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                29.0,
+                37.0
+              ]
+            }
+          },
+          "wt_peptide": "TLSRTLLAAAGGSSL"
+        },
+        "ATLSRTLLLAAAGGS": {
+          "ic50s_MT": [
+            435.0
+          ],
+          "percentiles_MT": [
+            24.0
+          ],
+          "ic50s_WT": [
+            668.0
+          ],
+          "percentiles_WT": [
+            30.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "9",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                112.04000091552734,
+                603.4000244140625,
+                435.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                103.02,
+                791.7,
+                668.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                27.0,
+                21.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                31.0,
+                29.0
+              ]
+            }
+          },
+          "wt_peptide": "ATLSRTLLAAAGGSS"
+        },
+        "SVNSATLSRTLLLAA": {
+          "ic50s_MT": [
+            437.17999267578125
+          ],
+          "percentiles_MT": [
+            26.0
+          ],
+          "ic50s_WT": [
+            539.71
+          ],
+          "percentiles_WT": [
+            25.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "13",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                437.17999267578125,
+                1132.300048828125,
+                287.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                539.71,
+                818.6,
+                379.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                37.0,
+                15.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                32.0,
+                19.0
+              ]
+            }
+          },
+          "wt_peptide": "SVNSATLSRTLLAAA"
+        },
+        "SRTLLLAAAGGSSLQ": {
+          "ic50s_MT": [
+            459.20001220703125
+          ],
+          "percentiles_MT": [
+            30.5
+          ],
+          "ic50s_WT": [
+            1262.0
+          ],
+          "percentiles_WT": [
+            34.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "6",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                459.20001220703125,
+                451.20001220703125,
+                1058.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1466.94,
+                546.2,
+                1262.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                23.0,
+                38.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                26.0,
+                42.0
+              ]
+            }
+          },
+          "wt_peptide": "LSRTLLAAAGGSSLQ"
+        },
+        "TLSRTLLLAAAGGSS": {
+          "ic50s_MT": [
+            504.8999938964844
+          ],
+          "percentiles_MT": [
+            27.0
+          ],
+          "ic50s_WT": [
+            668.0
+          ],
+          "percentiles_WT": [
+            30.0
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "8",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                188.42999267578125,
+                504.8999938964844,
+                670.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                103.02,
+                791.7,
+                668.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                25.0,
+                29.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                31.0,
+                29.0
+              ]
+            }
+          },
+          "wt_peptide": "ATLSRTLLAAAGGSS"
+        },
+        "RTLLLAAAGGSSLQT": {
+          "ic50s_MT": [
+            573.6799926757812
+          ],
+          "percentiles_MT": [
+            34.0
+          ],
+          "ic50s_WT": [
+            872.95
+          ],
+          "percentiles_WT": [
+            40.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "5",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                573.6799926757812,
+                519.5999755859375,
+                1287.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                872.95,
+                690.3,
+                1908.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                25.0,
+                43.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                29.0,
+                52.0
+              ]
+            }
+          },
+          "wt_peptide": "SRTLLAAAGGSSLQT"
+        },
+        "QTSVNSATLSRTLLL": {
+          "ic50s_MT": [
+            883.6900024414062
+          ],
+          "percentiles_MT": [
+            40.5
+          ],
+          "ic50s_WT": [
+            1834.91
+          ],
+          "percentiles_WT": [
+            37.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "15",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                883.6900024414062,
+                3310.0,
+                475.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1834.91,
+                2692.0,
+                462.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                58.0,
+                23.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                53.0,
+                22.0
+              ]
+            }
+          },
+          "wt_peptide": "QTSVNSATLSRTLLA"
+        },
+        "TSVNSATLSRTLLLA": {
+          "ic50s_MT": [
+            969.5399780273438
+          ],
+          "percentiles_MT": [
+            34.5
+          ],
+          "ic50s_WT": [
+            1135.99
+          ],
+          "percentiles_WT": [
+            31.5
+          ],
+          "hla_types": [
+            "DRB1*11:01"
+          ],
+          "mutation_position": "14",
+          "individual_ic50_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                969.5399780273438,
+                1904.800048828125,
+                461.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                1135.99,
+                1385.3,
+                448.0
+              ]
+            }
+          },
+          "individual_percentile_calls": {
+            "algorithms": [
+              "MHCnuggetsII",
+              "NNalign",
+              "SMMalign"
+            ],
+            "MT": {
+              "DRB1*11:01": [
+                "NA",
+                47.0,
+                22.0
+              ]
+            },
+            "WT": {
+              "DRB1*11:01": [
+                "NA",
+                41.0,
+                22.0
+              ]
+            }
+          },
+          "wt_peptide": "TSVNSATLSRTLLAA"
+        }
+      }
+    },
+    "good_binders_transcripts": [
+      "ENST00000458694.1-PRICKLE4--/L-287-288"
+    ],
+    "transcript_expr": [
+      "NA"
+    ],
+    "DNA VAF": 0.158,
+    "RNA VAF": 0.0,
+    "gene_expr": 0.0,
+    "best_peptide_mt": "VNSATLSRTLLLAAA",
+    "best_peptide_wt": "VNSATLSRTLLAAAG",
+    "best_hla_allele": "DRB1*11:01"
+  }
+}
