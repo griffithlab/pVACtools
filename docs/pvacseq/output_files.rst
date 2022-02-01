@@ -34,7 +34,10 @@ created):
      - A fasta file with mutant and wildtype peptide subsequences specific for use in running the net_chop tool.
    * - ``<sample_name>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
-       additional variant information from the ``<sample_name>.tsv``.
+       additional variant information from the ``<sample_name>.tsv``. Only
+       epitopes resulting from supported variants (missense, inframe indels, and frameshifts)
+       are included. If the ``--pass-only`` flag is
+       set, variants that have a FILTER set in the VCF are excluded.
    * - ``<sample_name>.filtered.tsv``
      - The above file after applying all filters, with (optionally) cleavage site, stability
        predictions, and reference proteome similarity metrics added.
@@ -63,6 +66,30 @@ Please see the :ref:`Standalone Filter Commands<filter_commands>`
 documentation for more information on each individual filter. The standalone
 filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
+
+Prediction Algorithms Supporting Percentile Information
+_______________________________________________________
+
+pVACseq outputs binding affinity percentile rank information when provided by
+a chosen prediction algorithm. The following prediction algorithms calculate a
+percentile rank:
+
+MHCnuggets
+MHCnuggets
+- MHCflurry
+- NetMHC
+- NetMHCcons
+- NetMHCpan
+- NetMHCIIpan
+- NNalign
+- PickPocket
+- SMM
+- SMMPMBEC
+- SMMalign
+
+The following prediction algorithms do not provide a percentile rank:
+
+- MHCnuggets
 
 .. _all_ep_and_filtered:
 

@@ -57,6 +57,30 @@ filtering thresholds.
 
 .. _pvacfuse_all_ep_and_filtered:
 
+Prediction Algorithms Supporting Percentile Information
+_______________________________________________________
+
+pVACfuse outputs binding affinity percentile rank information when provided by
+a chosen prediction algorithm. The following prediction algorithms calculate a
+percentile rank:
+
+MHCnuggets
+MHCnuggets
+- MHCflurry
+- NetMHC
+- NetMHCcons
+- NetMHCpan
+- NetMHCIIpan
+- NNalign
+- PickPocket
+- SMM
+- SMMPMBEC
+- SMMalign
+
+The following prediction algorithms do not provide a percentile rank:
+
+- MHCnuggets
+
 all_epitopes.tsv and filtered.tsv Report Columns
 ------------------------------------------------
 

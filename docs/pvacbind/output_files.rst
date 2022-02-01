@@ -46,6 +46,30 @@ documentation for more information on each individual filter. The standalone
 filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
 
+Prediction Algorithms Supporting Percentile Information
+_______________________________________________________
+
+pVACbind outputs binding affinity percentile rank information when provided by
+a chosen prediction algorithm. The following prediction algorithms calculate a
+percentile rank:
+
+MHCnuggets
+MHCnuggets
+- MHCflurry
+- NetMHC
+- NetMHCcons
+- NetMHCpan
+- NetMHCIIpan
+- NNalign
+- PickPocket
+- SMM
+- SMMPMBEC
+- SMMalign
+
+The following prediction algorithms do not provide a percentile rank:
+
+- MHCnuggets
+
 .. _pvacbind_all_ep_and_filtered:
 
 all_epitopes.tsv and filtered.tsv Report Columns
