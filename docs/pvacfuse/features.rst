@@ -1,22 +1,17 @@
-.. image:: ../images/pVACseq_logo_trans-bg_sm_v4b.png
+.. image:: ../images/pVACfuse_logo_trans-bg_sm_v4b.png
     :align: right
-    :alt: pVACseq logo
+    :alt: pVACfuse logo
 
 Features
 ========
 
-**SNV and Indel support**
+**Fusion analysis**
 
-
-pVACseq offers epitope binding predictions for missense, in-frame insertion, in-frame deletion, protein-altering, and frameshift mutations.
-
-**VCF support**
-
-pVACseq uses a VCF file as its input. This VCF file must contain sample genotype information and be annotated with the Ensembl Variant Effect Predictor (VEP). See the :ref:`prerequisites_label` section for more information.
+pVACfuses proceses fusion variants annotated by AGFusion.
 
 **No local install of epitope prediction software needed**
 
-pVACseq utilizes the IEDB RESTful web interface. This means that none of the underlying prediction software, like NetMHC, needs to be installed locally.
+pVACbind utilizes the IEDB RESTful web interface. This means that none of the underlying prediction software, like NetMHC, needs to be installed locally.
 
 .. warning::
    We only recommend using the RESTful API for small requests. If you use the
@@ -29,7 +24,7 @@ pVACseq utilizes the IEDB RESTful web interface. This means that none of the und
 
 **Support for local installation of the IEDB Analysis Resources**
 
-pVACseq provides the option of using a local installation of the IEDB MHC
+pVACbind provides the option of using a local installation of the IEDB MHC
 `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_
 binding prediction tools.
 
@@ -76,34 +71,16 @@ MHCnuggets
 
 Automatic filtering on the binding affinity ic50 (nm) value narrows down the results to only include
 "good" candidate peptides. The binding filter threshold can be adjusted by the user for each
-pVACseq run. pVACseq also support the option of filtering on allele-specific binding thresholds
+pVACfuse run. pVACfuse also support the option of filtering on allele-specific binding thresholds
 as recommended by `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_.
 Additional filtering on the binding affitinity can be manually done by the user by running the
 :ref:`standalone binding filter <filter_commands>` on the filtered result file
 to narrow down the candidate epitopes even further or on the unfiltered
 all_epitopes file to apply different cutoffs.
 
-Readcount and expression data are extracted from an annotated VCF to automatically filter with
-adjustable thresholds on depth, VAF, and/or expression values. The user can also manually run
-the :ref:`standalone coverage filter <filter_commands>` to further narrow down their results
-from the filtered output file.
-
-If the input VCF is annotated with Ensembl transcript support levels (TSLs), pVACseq will
-filter on the transcript support level to only keep high-confidence
-transcripts of level 1. This filter can also be run :ref:`standalone
-<filter_commands>`.
-
-As a last filtering step, pVACseq applies the top score filter to only keep the top scoring epitope
-for each variant. As with all previous filters, this filter can also be run
+pVACfuse also runs a top score filter to only keep the top scoring epitope
+for each fusion. This filter can also be run
 :ref:`standalone <filter_commands>`.
-
-**Incorporation of proximal germline and somatic variants**
-
-To incorporate proximal variants into the neoepitope predictions, users can provide 
-a :ref:`phased VCF of proximal variants <phased_vcf>` as an input to their pVACseq runs. 
-This VCF is then used to incorporate amino acid changes of nearby variants that are in-phase 
-with a somatic variant of interest. This results in corrected mutant and wildtype 
-protein sequences that account for proximal variants when MHC binding predictions are performed.
 
 **NetChop and NetMHCstab integration**
 
