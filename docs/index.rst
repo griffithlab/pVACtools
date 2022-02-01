@@ -26,6 +26,8 @@ tools:
     :align: center
     :alt: pVACtools immunotherapy workflow
 
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
@@ -49,14 +51,14 @@ tools:
    contact
    mailing_list
 
-New in version |version|
+New in Version |version|
 ------------------------
 
 This version adds the following features, outlined below. Please note that
 pVACtools 3.0 is not backwards-compatible and certain changes will break old
 workflows.
 
-Breaking changes
+Breaking Changes
 ________________
 
 - The pVACapi and pVACviz tools have been removed. They have been replaced by
@@ -71,7 +73,7 @@ ________________
   will be supported going forward.
 - pVACfuse report format update
 
-New features
+New Features
 ____________
 
 - This release adds a new tool, :ref:`pvacview`. pVACview is an R Shiny application that

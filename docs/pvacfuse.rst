@@ -16,6 +16,7 @@ be used for binding prediction.
 .. toctree::
    :glob:
 
+   pvacfuse/features
    pvacfuse/prerequisites
    pvacfuse/getting_started
    pvacfuse/run
