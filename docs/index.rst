@@ -111,6 +111,9 @@ _____________
   predictions.
 - This release adds a ``--species`` option to the ``valid_alleles`` commands
   to filter alleles on a species of interest. TODO: link to command
+- This release adds a ``--pass-only`` flag to the ``pvacseq
+  generate_protein_fasta`` commands to only process VCF entries that do not
+  have a FILTER set.
 
 Past release notes can be found on our :ref:`releases` page.
 
