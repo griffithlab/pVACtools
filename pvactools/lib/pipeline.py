@@ -173,6 +173,8 @@ class Pipeline(metaclass=ABCMeta):
             params.extend(["-d", str(self.downstream_sequence_length)])
         else:
             params.extend(["-d", 'full'])
+        if self.pass_only:
+            params.extend(["--pass-only"])
         generate_combined_fasta.main(params)
         os.unlink("{}.manufacturability.tsv".format(fasta_path))
 
