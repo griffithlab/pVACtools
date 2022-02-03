@@ -18,13 +18,13 @@ from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 def define_parser():
     parser = argparse.ArgumentParser(
         "pvacfuse generate_protein_fasta",
-        description="Generate an annotated fasta file from Integrate-Neo or AGFusion output.",
+        description="Generate an annotated fasta file from AGFusion output.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
-        "input_file",
-        help="An INTEGRATE-Neo annotated bedpe file with fusions or a AGfusion output directory."
+        "input",
+        help="An AGfusion output directory."
     )
     parser.add_argument(
         "flanking_sequence_length", type=int,
@@ -122,7 +122,7 @@ def main(args_input = sys.argv[1:], save_tsv_file=False):
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
     temp_dir = tempfile.mkdtemp()
-    convert_fusion_input(args.input_file, temp_dir)
+    convert_fusion_input(args.input, temp_dir)
     generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file)
     parse_files(args.output_file, temp_dir, args.input_tsv)
     shutil.rmtree(temp_dir)
