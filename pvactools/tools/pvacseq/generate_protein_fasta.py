@@ -45,6 +45,12 @@ def define_parser():
         help="A VCF with phased proximal variant information to incorporate into the predicted fasta sequences. Must be gzipped and tabix indexed."
     )
     parser.add_argument(
+        '--pass-only',
+        help="Only process VCF entries with a PASS status.",
+        default=False,
+        action='store_true',
+    )
+    parser.add_argument(
         "--mutant-only",
         help="Only output mutant peptide sequences",
         default=False,
@@ -62,7 +68,7 @@ def define_parser():
     )
     return parser
 
-def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, flanking_sequence_length):
+def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, flanking_sequence_length, pass_only):
     print("Converting VCF to TSV")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     convert_params = {
@@ -78,6 +84,8 @@ def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, 
         convert_params['flanking_bases'] = flanking_sequence_length * 4
     else:
         proximal_variants_tsv = None
+    if pass_only:
+        convert_params['pass_only'] = pass_only
     converter = VcfConverter(**convert_params)
     converter.execute()
     print("Completed")
@@ -150,7 +158,7 @@ def main(args_input = sys.argv[1:]):
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
     temp_dir = tempfile.mkdtemp()
-    proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length)
+    proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only)
     generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir, proximal_variants_tsv)
     parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv)
     shutil.rmtree(temp_dir)

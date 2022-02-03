@@ -83,7 +83,7 @@ class NetChop:
                         index = line['Index']
                         epitope = line['MT Epitope Seq']
                     if index not in mt_records_dict:
-                        raise Exception("FASTA entry for index {} not found. Please check that the FASTA file matches the input TSV.".format(seq_id))
+                        raise Exception("FASTA entry for index {} not found. Please check that the FASTA file matches the input TSV.".format(index))
                     full_peptide = mt_records_dict[index]
                     peptide, start_diff = self.extract_flanked_epitope(full_peptide, epitope, index)
                     staging_file.write(peptide+'\n')
