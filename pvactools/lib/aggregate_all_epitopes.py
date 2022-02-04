@@ -220,6 +220,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if self.tumor_purity:
             return self.tumor_purity * 0.5
         else:
+        #if no tumor purity is provided, make a rough estimate by taking the list of VAFs < 0.6 (assumption is that these are CN-neutral) and return the largest as the marker of the founding clone
             vafs = np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["Tumor DNA VAF"])['Tumor DNA VAF'].unique())[::-1]
             vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
             return vaf_clonal
