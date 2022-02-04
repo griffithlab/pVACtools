@@ -245,6 +245,12 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
             default=False,
             action='store_true'
         )
+        self.parser.add_argument(
+            "--tumor-purity",
+            help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used during aggregate report creation for a simple estimation whether variants are subclonal or clonal based on VAF.",
+            type=float,
+        )
+
 
 class PvacfuseRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
     def __init__(self):

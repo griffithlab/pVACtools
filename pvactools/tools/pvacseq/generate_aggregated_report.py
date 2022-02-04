@@ -19,6 +19,11 @@ def define_parser():
         "output_file",
         help="The file path to write the aggregated report tsv to"
     )
+    parser.add_argument(
+        "--tumor-purity",
+        help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used for a simple estimation whether variants are subclonal or clonal based on VAF.",
+        type=float,
+    )
 
     return parser
 
@@ -26,10 +31,16 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
+    if args.tumor_purity is not None:
+        if args.tumor_purity > 1:
+            raise Exception("--tumor-purity must be a float between 0 and 1. Value too large: {}".format(args.tumor_purity))
+        elif args.tumor_purity < 0:
+            raise Exception("--tumor-purity must be a float between 0 and 1. Value too small: {}".format(args.tumor_purity))
+
     tmp_fh = tempfile.NamedTemporaryFile()
 
     print("Creating Aggreggated Report")
-    PvacseqAggregateAllEpitopes(args.input_file, args.output_file).execute()
+    PvacseqAggregateAllEpitopes(args.input_file, args.output_file, args.tumor_purity).execute()
     print("Completed")
 
 if __name__ == '__main__':
