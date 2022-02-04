@@ -114,6 +114,9 @@ _____________
 - This release adds a ``--pass-only`` flag to the ``pvacseq
   generate_protein_fasta`` commands to only process VCF entries that do not
   have a FILTER set.
+- This release adds a new parameter ``--tumor-purity``. This parameter indicates
+  the fraction of tumor cells in the tumor sample and is used during aggregate
+  report creation for a simple estimation whether variants are subclonal or clonal based on VAF.
 
 Past release notes can be found on our :ref:`releases` page.
 
