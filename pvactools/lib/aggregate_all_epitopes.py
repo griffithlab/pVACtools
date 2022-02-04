@@ -197,6 +197,12 @@ class AggregateAllEpitopes:
 
 
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
+    def __init__(self, input_file, output_file, tumor_purity=None):
+        self.input_file = input_file
+        self.output_file = output_file
+        self.tumor_purity = tumor_purity
+        self.metrics_file = output_file.replace('.tsv', '.metrics.json')
+
     def get_list_unique_mutation_keys(self):
         key_columns = {
             'Chromosome': str,
@@ -211,9 +217,12 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return sorted(keys)
 
     def calculate_clonal_vaf(self):
-        vafs = np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["Tumor DNA VAF"])['Tumor DNA VAF'].unique())[::-1]
-        vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
-        return vaf_clonal
+        if self.tumor_purity:
+            return self.tumor_purity * 0.5
+        else:
+            vafs = np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["Tumor DNA VAF"])['Tumor DNA VAF'].unique())[::-1]
+            vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
+            return vaf_clonal
 
     def read_input_file(self, key, used_columns, dtypes):
         key_str = "{}-{}-{}-{}-{}".format(key[0], key[1], key[2], key[3], key[4])
