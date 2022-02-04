@@ -69,45 +69,44 @@ class OutputParser(metaclass=ABCMeta):
     def get_percentiles(self, line, method):
         if method.lower() == 'mhcflurry':
             if self.flurry_state == 'both':
-                percentiles = [
-                    ('percentile', line['percentile']), 
-                    ('mhcflurry_presentation_percentile', line['mhcflurry_presentation_percentile'])
-                ]
+                percentiles = {
+                    'percentile': line['percentile'],
+                    'mhcflurry_presentation_percentile': line['mhcflurry_presentation_percentile'],
+                }
             elif self.flurry_state == 'EL_only':
-                percentiles = [('mhcflurry_presentation_percentile', line['mhcflurry_presentation_percentile'])]
+                percentiles = {'mhcflurry_presentation_percentile': line['mhcflurry_presentation_percentile']}
             else:
-                percentiles = [('percentile', line['percentile'])]
+                percentiles = {'percentile': line['percentile']}
         elif 'percentile' in line:
-            percentiles = [('percentile', line['percentile'])]
+            percentiles = {'percentile': line['percentile']}
         elif 'percentile_rank' in line:
-            percentiles = [('percentile', line['percentile_rank'])]
+            percentiles = {'percentile': line['percentile_rank']}
         elif 'rank' in line:
-            percentiles = [('percentile', line['rank'])]
+            percentiles = {'percentile': line['rank']}
         else:
-            return [('percentile', 'NA')]
-        
-        # t = type, r = result
-        return [(t, float(r)) if r != 'None' else (t, 'NA') for t, r in percentiles]
+            return {'percentile': 'NA'}
+
+        return dict((k, float(v)) if v != 'None' else (k, 'NA') for k, v in percentiles.items())
 
     def get_scores(self, line, method):
         if method.lower() == 'mhcflurry':
             if self.flurry_state == 'both':
-                return [
-                    ('ic50', float(line['ic50'])),
-                    ('mhcflurry_processing_score', float(line['mhcflurry_processing_score'])),
-                    ('mhcflurry_presentation_score', float(line['mhcflurry_presentation_score']))
-                ]
+                return {
+                    'ic50': float(line['ic50']),
+                    'mhcflurry_processing_score': float(line['mhcflurry_processing_score']),
+                    'mhcflurry_presentation_score': float(line['mhcflurry_presentation_score'])
+                }
             elif self.flurry_state == 'EL_only':
-                return [
-                    ('mhcflurry_processing_score', float(line['mhcflurry_processing_score'])),
-                    ('mhcflurry_presentation_score', float(line['mhcflurry_presentation_score']))
-                ]
+                return {
+                    'mhcflurry_processing_score': float(line['mhcflurry_processing_score']),
+                    'mhcflurry_presentation_score': float(line['mhcflurry_presentation_score'])
+                }
             else:
-                return [('ic50', float(line['ic50']))]
+                return {'ic50': float(line['ic50'])}
         elif method.lower() == 'netmhcpan_el':
-            return [('score', float(line['score']))]
+            return {'score': float(line['score'])}
         else:
-            return [('ic50', float(line['ic50']))]
+            return {'ic50': float(line['ic50'])}
 
     def format_match_na(self, result, metric):
         return {method: {field: 'NA' for field in fields.keys()} for method, fields in result[f'mt_{metric}s'].items()}
@@ -356,7 +355,7 @@ class OutputParser(metaclass=ABCMeta):
                                 best_mt_value        = value
                                 best_mt_value_method = method
                     result['best_mt_{}'.format(metric)]          = best_mt_value
-                    
+
                     if metric == 'score':
                         corresponding_wt = result['wt_{}s'.format(metric)][best_mt_value_method]['ic50']
                         calculated_median = median([score['ic50'] for score in mt_values.values()])
@@ -364,11 +363,11 @@ class OutputParser(metaclass=ABCMeta):
                         corresponding_wt = min(result['wt_{}s'.format(metric)][best_mt_value_method].values())
                         flattend_percentiles = [percentile for method_results in mt_values.values() for percentile in method_results.values()]
                         calculated_median = median(flattend_percentiles)
-                    
+
                     result['corresponding_wt_{}'.format(metric)] = corresponding_wt
                     result['best_mt_{}_method'.format(metric)]   = best_mt_value_method
                     result['median_mt_{}'.format(metric)]        = calculated_median
-                
+
                 # I can probably combine this with code above
                 wt_values = self.get_values_for_summary_metrics(result, metric, 'wt')
                 if not wt_values:
@@ -616,7 +615,7 @@ class OutputParser(metaclass=ABCMeta):
                 row['Corresponding WT Percentile'] = 'NA' if corresponding_wt_percentile == 'NA' else round(corresponding_wt_percentile, 3)
                 row['Median MT Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
                 row['Median WT Percentile'] = 'NA' if median_wt_percentile == 'NA' else round(median_wt_percentile, 3)
-                for method in self.prediction_methods(): 
+                for method in self.prediction_methods():
                     pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                     self.add_pretty_row(row, wt_scores, method, pretty_method, 'WT Score')
                     self.add_pretty_row(row, mt_scores, method, pretty_method, 'MT Score')
@@ -686,16 +685,8 @@ class DefaultOutputParser(OutputParser):
                                 iedb_results[key]['tsv_index']         = tsv_index
                                 iedb_results[key]['allele']            = allele
                                 iedb_results[key]['peptide_length']    = peptide_length
-                            
-                            if method not in iedb_results[key]['mt_scores']:
-                                iedb_results[key]['mt_scores'][method] = {}
-                                iedb_results[key]['mt_percentiles'][method] = {}
-                            
-                            # t = score type, r = result
-                            for t, r in scores:
-                                iedb_results[key]['mt_scores'][method][t] = r
-                            for t, r in percentiles:
-                                iedb_results[key]['mt_percentiles'][method][t] = r
+                            iedb_results[key]['mt_scores'][method] = scores
+                            iedb_results[key]['mt_percentiles'][method] = percentiles
                         else:
                             if tsv_index not in wt_iedb_results:
                                 wt_iedb_results[tsv_index] = {}
@@ -704,16 +695,8 @@ class DefaultOutputParser(OutputParser):
                                 wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores'] = {}
                                 wt_iedb_results[tsv_index][position][protein_type.lower() + '_percentiles'] = {}
                             wt_iedb_results[tsv_index][position][protein_type.lower() + '_epitope_seq'] = epitope
-
-                            if method not in wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores']:
-                                wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores'][method] = {}
-                                wt_iedb_results[tsv_index][position][protein_type.lower() + '_percentiles'][method] = {}
-
-                            # t = score type, r = resuls
-                            for t, r in scores:
-                                wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores'][method][t] = r
-                            for t, r in percentiles:
-                                wt_iedb_results[tsv_index][position][protein_type.lower() + '_percentiles'][method][t] = r 
+                            wt_iedb_results[tsv_index][position][protein_type.lower() + '_scores'][method] = scores
+                            wt_iedb_results[tsv_index][position][protein_type.lower() + '_percentiles'][method] = percentiles
 
         return self.match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
 
@@ -755,10 +738,8 @@ class UnmatchedSequencesOutputParser(OutputParser):
                             iedb_results[key]['position']          = position
                             iedb_results[key]['tsv_index']         = index
                             iedb_results[key]['allele']            = allele
-                        # t = score type, s = score
-                        iedb_results[key]['mt_scores'][method] = {t: s for t, s in scores}
-                        # t = percentile type, p = percentile
-                        iedb_results[key]['mt_percentiles'][method] = {t:p for t,p in percentiles}
+                        iedb_results[key]['mt_scores'][method] = scores
+                        iedb_results[key]['mt_percentiles'][method] = percentiles
         return iedb_results
 
     def add_summary_metrics(self, iedb_results):
