@@ -478,6 +478,23 @@ class InputFileConverterTests(unittest.TestCase):
         expected_proximal_variants_tsv = os.path.join(self.test_data_dir, 'output_proximal_variants.tsv')
         self.assertTrue(cmp(convert_output_proximal_variants_file.name, expected_proximal_variants_tsv))
 
+    def test_proximal_variants_missing_chromosome_input(self):
+        convert_input_file = os.path.join(self.test_data_dir, 'somatic.chr1-2.vcf.gz')
+        convert_input_proximal_variants_file = os.path.join(self.test_data_dir, 'phased.chr1.vcf.gz')
+        convert_output_file = tempfile.NamedTemporaryFile()
+        convert_output_proximal_variants_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file': convert_input_file,
+            'output_file': convert_output_file.name,
+            'proximal_variants_vcf': convert_input_proximal_variants_file,
+            'proximal_variants_tsv': convert_output_proximal_variants_file.name,
+            'flanking_bases': 90,
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+
     def test_protein_altering_variants(self):
         convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_protein_altering_variants.vcf')
         convert_vcf_output_file = tempfile.NamedTemporaryFile()
