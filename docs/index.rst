@@ -54,9 +54,8 @@ New in release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- When running pVAcseq with a proximal variants VCF, proximal DNPs affecting
-  multiple amino acids were not handled correctly and would result in an error.
-  This issue has now been fixed.
+- This releases fixes an edge case that would result in an error when the proximal
+  variant VCF didn't contain a region from the somatic VCF.
 
 New in version |version|
 ------------------------
