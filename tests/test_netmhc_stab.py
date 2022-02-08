@@ -123,7 +123,7 @@ class NetChopTest(unittest.TestCase):
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
                 output_file.name
             ])
-        self.assertTrue('NetMHCstabpan server was unable to read the submitted fasta file.' in str(context.exception))
+        self.assertTrue('NetMHCstabpan server was unable to read the submitted fasta file:' in str(context.exception))
 
     #This is to ensure that we catch error cases that are not explicitly handled
     def test_netmhc_stab_other_error(self):
