@@ -218,11 +218,14 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
     def calculate_clonal_vaf(self):
         if self.tumor_purity:
-            return self.tumor_purity * 0.5
+            vaf_clonal =  self.tumor_purity * 0.5
+            print("Tumor clonal VAF estimated as {} (calculated from user-provided tumor purity of {}). Assuming variants with VAF < {} are subclonal".format(round(vaf_clonal, 3), round(self.tumor_purity, 3), round(vaf_clonal/2, 3)))
+            return vaf_clonal
         else:
         #if no tumor purity is provided, make a rough estimate by taking the list of VAFs < 0.6 (assumption is that these are CN-neutral) and return the largest as the marker of the founding clone
             vafs = np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["Tumor DNA VAF"])['Tumor DNA VAF'].unique())[::-1]
             vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
+            print("Tumor clonal VAF estimated as {} (estimated from Tumor DNA VAF data). Assuming variants with VAF < {} are subclonal".format(round(vaf_clonal, 3), round(vaf_clonal/2, 3)))
             return vaf_clonal
 
     def read_input_file(self, key, used_columns, dtypes):
