@@ -185,8 +185,8 @@ tensorflow manually to version 1.5.0 should solve this problem:
 
    pip install tensorflow==1.5.0
 
-BLAST
------
+Installing BLAST
+----------------
 
 To run the reference proteome similarity step, standalone BLAST may be used.
 To install BLAST please see `the official documentation
@@ -208,6 +208,17 @@ A Docker container for pVACtools is available on DockerHub using the
 `griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo. This Docker
 container includes installations of the IEDB class I and class II tools
 at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
+
+The Docker container also includes
+installation of BLAST at ``/opt/ncbi-blast-2.12.0+`` (``--blastp-path
+/opt/ncbi-blast-2.12.0+/bin/blastp``) as well as the ``refseq_select_prot``
+database under the ``/opt/blastdb`` directory. The ``BLASTDB`` environment variable is already
+set to this path inside of the Docker container so this database can be used
+without any additional modifications. The ``refseq_protein``
+database is not installed inside of the Docker container due to size
+constraints. If usage of this database is desired, we recommend installing it outside
+of the Docker container and mounting the database path using the ``-v`` flag in your
+``docker run`` command (``-v <blastdb_path>:/opt/blastdb``).
 
 An example on how to run pVACseq using Docker can be found on the :ref:`Getting Started <pvacseq_docker>` page.
 
