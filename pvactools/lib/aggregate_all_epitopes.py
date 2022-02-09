@@ -181,7 +181,16 @@ class AggregateAllEpitopes:
         columns.extend(sorted(list(set([x.replace('HLA-', '') for x in hla_types]))))
         columns.extend(['Gene', 'AA Change', 'Num Passing Transcripts', 'Best Peptide', 'Pos', 'Num Passing Peptides', 'IC50 MT', 'IC50 WT', '%ile MT', '%ile WT', 'RNA Expr', 'RNA VAF', 'Allele Expr', 'RNA Depth', 'DNA VAF', 'Tier', 'Evaluation'])
         peptide_table = pd.DataFrame(columns=columns)
-        metrics = {}
+
+        if vaf_clonal is not None:
+            metrics = {
+                'tumor_purity': self.tumor_purity,
+                'vaf_clonal': round(vaf_clonal, 3),
+                'vaf_subclonal': round(vaf_clonal/2, 3)
+            }
+        else:
+            metrics = {}
+
         for key in keys:
             (df, key_str) = self.read_input_file(key, used_columns, dtypes)
             (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, hla_types, prediction_algorithms, vaf_clonal, 1000)
