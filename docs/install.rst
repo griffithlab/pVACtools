@@ -77,8 +77,8 @@ Download the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and 
 .. code-block:: none
 
    apt-get update && apt-get install -y tcsh gawk
-   wget https://downloads.iedb.org/tools/mhci/3.1.1/IEDB_MHC_I-3.1.1.tar.gz
-   tar -zxvf IEDB_MHC_I-3.1.1.tar.gz
+   wget https://downloads.iedb.org/tools/mhci/3.1.2/IEDB_MHC_I-3.1.2.tar.gz
+   tar -zxvf IEDB_MHC_I-3.1.2.tar.gz
    cd mhc_i
    ./configure
 
@@ -90,8 +90,8 @@ Download the archives for `class II <http://tools.iedb.org/mhcii/download/>`_ an
 .. code-block:: none
 
    apt-get update && apt-get install -y tcsh gawk
-   wget https://downloads.iedb.org/tools/mhcii/3.1.2/IEDB_MHC_II-3.1.2.tar.gz
-   tar -zxvf IEDB_MHC_II-3.1.2.tar.gz
+   wget https://downloads.iedb.org/tools/mhcii/3.1.6/IEDB_MHC_II-3.1.6.tar.gz
+   tar -zxvf IEDB_MHC_II-3.1.6.tar.gz
    cd mhc_ii
    ./configure.py
 
@@ -185,16 +185,21 @@ tensorflow manually to version 1.5.0 should solve this problem:
 
    pip install tensorflow==1.5.0
 
-PostgreSQL
-----------
+Installing BLAST
+----------------
 
-pVACviz and pVACapi require a Postgres database. To install Postgres follow
-the `installation instructions <http://postgresguide.com/setup/install.html>`_.
+To run the reference proteome similarity step, standalone BLAST may be used.
+To install BLAST please see `the official documentation
+<https://www.ncbi.nlm.nih.gov/books/NBK52640/>`_. The BLAST tool needed is Protein BLAST
+(blastp). Please make note of the installation path of blastp (retrievable by
+calling ``which blastp``), as that path is needed for the ``--blastp-path`` argument in
+the various pVACtools commands.
 
-.. note::
-
-   On Debian-based Linux distributions version Postgres V9.6 or lower is
-   required.
+You will also need to install either the ``refseq_select_prot`` or the
+``refseq_protein`` BLAST reference proteome databases. You can do so by running the
+``update_blastdb.pl`` script provided with your BLAST installation (located in
+the ``bin`` subdirectory). You will need to set the ``BLASTDB`` to point to the
+installation directory of your BLAST reference proteome databases.
 
 Docker and CWL
 --------------
@@ -203,6 +208,17 @@ A Docker container for pVACtools is available on DockerHub using the
 `griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo. This Docker
 container includes installations of the IEDB class I and class II tools
 at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
+
+The Docker container also includes
+installation of BLAST at ``/opt/ncbi-blast-2.12.0+`` (``--blastp-path
+/opt/ncbi-blast-2.12.0+/bin/blastp``) as well as the ``refseq_select_prot``
+database under the ``/opt/blastdb`` directory. The ``BLASTDB`` environment variable is already
+set to this path inside of the Docker container so this database can be used
+without any additional modifications. The ``refseq_protein``
+database is not installed inside of the Docker container due to size
+constraints. If usage of this database is desired, we recommend installing it outside
+of the Docker container and mounting the database path using the ``-v`` flag in your
+``docker run`` command (``-v <blastdb_path>:/opt/blastdb``).
 
 An example on how to run pVACseq using Docker can be found on the :ref:`Getting Started <pvacseq_docker>` page.
 

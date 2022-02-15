@@ -54,7 +54,7 @@ installation process. However, if you are using conda-based R, you may need to i
 .. _launching_pvacview_label:
 
 Launching pVACview R Shiny App
-____________________________
+______________________________
 
 Once you have R packages and their respective dependencies successfully installed, you may now launch the pVACview app.
 
