@@ -53,13 +53,14 @@ server <- shinyServer(function(input, output, session) {
   df <- reactiveValues(
     selectedRow = 1,
     mainTable = NULL,
-    dna_cutoff = 0.5,
+    dna_cutoff = NULL,
     metricsData = NULL,
     additionalData = NULL,
     gene_list = NULL,
     allele_expr_high = 3,
     allele_expr_low = 1,
-    comments = data.frame("N/A")
+    comments = data.frame("N/A"),
+    pageLength = 10
   )
  
   #Option 1: User uploaded main aggregate report file
@@ -86,11 +87,14 @@ server <- shinyServer(function(input, output, session) {
       df$comments <- data.frame(matrix("No comments",nrow=nrow(df$mainTable)),ncol=1)
     }
     rownames(df$comments) <- df$mainTable$ID
+    df$metricsData <- NULL
   })
   
   #Option 1: User uploaded metrics file
   observeEvent(input$metricsDataInput,{
     df$metricsData <- fromJSON(input$metricsDataInput$datapath)
+    df$dna_cutoff <- df$metricsData$vaf_clonal
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, df$allele_expr_high, df$allele_expr_low, unlist(x["Pos"]), anchor_mode="default"))
   })
   
   #Option 1: User uploaded additional data file 
@@ -110,7 +114,7 @@ server <- shinyServer(function(input, output, session) {
   })
   
 
-  #Option 2: Load from default (relative) file path for aggregate report file 
+  #Option 2: Load from HCC1395 demo data from github
    observeEvent(input$loadDefaultmain,{
      data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/835a7e4ae8b660a362c0c0b54140e26830d72bf2/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.tsv")
      mainData <- read.table(text=data, sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
@@ -123,6 +127,8 @@ server <- shinyServer(function(input, output, session) {
      mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
      mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
      df$mainTable <- mainData
+     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/6423b8b65f2e3f5cc2979f33b86c4650a6aa4570/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.metrics.json")
+     df$metricsData <- fromJSON(txt = metricsdata)
      dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
      df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, df$allele_expr_high, df$allele_expr_low, unlist(x["Pos"]), anchor_mode="default"))
@@ -135,11 +141,29 @@ server <- shinyServer(function(input, output, session) {
        df$comments <- data.frame(matrix("No comments",nrow=nrow(df$mainTable)),ncol=1)
      }
      rownames(df$comments) <- df$mainTable$ID
-     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/6423b8b65f2e3f5cc2979f33b86c4650a6aa4570/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.metrics.json")
-     df$metricsData <- fromJSON(txt = metricsdata)
      updateTabItems(session, "tabs", "explore")
    })
-
+   
+   ##Clear file inputs if demo data load button is clicked
+   output$aggregate_report_ui <- renderUI({
+     input$loadDefaultmain
+     fileInput(inputId="mainDataInput", label="1. Neoantigen Candidate Aggregate Report (tsv required)", 
+               accept =  c("text/tsv","text/tab-separated-values,text/plain", ".tsv"))
+   })
+   
+   output$metrics_ui <- renderUI({
+     input$loadDefaultmain
+     fileInput(inputId="metricsDataInput", label="2. Neoantigen Candidate Metrics file (json required)", 
+               accept = c("application/json",".json"))
+   })
+   
+   output$add_file_ui <- renderUI({
+     input$loadDefaultmain
+     fileInput(inputId="additionalDataInput", label="3. Additional Neoantigen Candidate Aggregate Report (tsv required)", 
+               accept =  c("text/tsv","text/tab-separated-values,text/plain",".tsv"))
+   })
+   
+  ##Visualize button
   observeEvent(input$visualize,{
     updateTabItems(session, "tabs", "explore")
   })
@@ -191,11 +215,11 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$max_dna <- renderText({
-    if (is.null(df$mainTable)){
+    if (is.null(df$mainTable) | is.null(df$metricsData)){
       return ("N/A")
     }
     dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
-    dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
+    dna_cutoff <- df$metricsData$vaf_clonal
     dna_cutoff 
   })
   
@@ -206,17 +230,28 @@ server <- shinyServer(function(input, output, session) {
     df$comments[selectedID(),1]
   })
   
+  observeEvent(input$page_length,{
+    df$pageLength <- as.numeric(input$page_length)
+  })
+  
+  output$filesUploaded <- reactive({
+    val <- !(is.null(df$mainTable) | is.null(df$metricsData))
+    print(val)
+  })
+  outputOptions(output, 'filesUploaded', suspendWhenHidden=FALSE)
+  
   ##############################PEPTIDE EXPLORATION TAB###########################################                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
   
   ##main table display with color/background/font/border configurations 
   output$mainTable = DT::renderDataTable(
-    if (is.null(df$mainTable)){
-      return ()
+    if (is.null(df$mainTable) | is.null(df$metricsData)){
+      return (datatable(data.frame("Aggregate Report"=character())))
     }
     else{
       datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Best HLA allele") & !(colnames(df$mainTable) == "Comments")]
     , escape = FALSE, callback = JS(callBack(hla_count())), class = 'stripe',
-          options=list(lengthChange = FALSE, dom = 'Bfrtip', 
+          options=list(lengthChange = FALSE, 
+                   dom = 'Bfrtip', pageLength = df$pageLength,
                    columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(25-(7-hla_count()),26-(7-hla_count()))),
                                      list(orderable=TRUE, targets=0)),
                    buttons = list(I('colvis')), 
@@ -306,7 +341,7 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Evaluation` <- shinyValue("selecter_",nrow(df$mainTable), df$mainTable)
     df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput,nrow(df$mainTable),"selecter_", choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
     dataTableProxy("mainTable") %>% 
-      selectPage((df$selectedRow-1) %/% 10 + 1)
+      selectPage((df$selectedRow-1) %/% df$pageLength + 1)
   })
   
   ##selected row text box

@@ -181,7 +181,16 @@ class AggregateAllEpitopes:
         columns.extend(sorted(list(set([x.replace('HLA-', '') for x in hla_types]))))
         columns.extend(['Gene', 'AA Change', 'Num Passing Transcripts', 'Best Peptide', 'Pos', 'Num Passing Peptides', 'IC50 MT', 'IC50 WT', '%ile MT', '%ile WT', 'RNA Expr', 'RNA VAF', 'Allele Expr', 'RNA Depth', 'DNA VAF', 'Tier', 'Evaluation'])
         peptide_table = pd.DataFrame(columns=columns)
-        metrics = {}
+
+        if vaf_clonal is not None:
+            metrics = {
+                'tumor_purity': self.tumor_purity,
+                'vaf_clonal': round(vaf_clonal, 3),
+                'vaf_subclonal': round(vaf_clonal/2, 3)
+            }
+        else:
+            metrics = {}
+
         for key in keys:
             (df, key_str) = self.read_input_file(key, used_columns, dtypes)
             (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, hla_types, prediction_algorithms, vaf_clonal, 1000)
@@ -218,11 +227,18 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
     def calculate_clonal_vaf(self):
         if self.tumor_purity:
-            return self.tumor_purity * 0.5
+            vaf_clonal =  self.tumor_purity * 0.5
+            print("Tumor clonal VAF estimated as {} (calculated from user-provided tumor purity of {}). Assuming variants with VAF < {} are subclonal".format(round(vaf_clonal, 3), round(self.tumor_purity, 3), round(vaf_clonal/2, 3)))
+            return vaf_clonal
         else:
         #if no tumor purity is provided, make a rough estimate by taking the list of VAFs < 0.6 (assumption is that these are CN-neutral) and return the largest as the marker of the founding clone
             vafs = np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["Tumor DNA VAF"])['Tumor DNA VAF'].unique())[::-1]
-            vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
+            vafs_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))
+            if len(vafs_clonal) == 0:
+                vaf_clonal = 0.6
+            else:
+                vaf_clonal = vafs_clonal[0]
+            print("Tumor clonal VAF estimated as {} (estimated from Tumor DNA VAF data). Assuming variants with VAF < {} are subclonal".format(round(vaf_clonal, 3), round(vaf_clonal/2, 3)))
             return vaf_clonal
 
     def read_input_file(self, key, used_columns, dtypes):
@@ -311,49 +327,54 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
     def get_good_binders_metrics(self, good_binders, prediction_algorithms, hla_types):
         peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
-        for peptide in good_binders["MT Epitope Seq"].unique():
-            good_binders_peptide = good_binders[good_binders['MT Epitope Seq'] == peptide]
-            individual_ic50_calls = { 'algorithms': prediction_algorithms }
-            individual_percentile_calls = { 'algorithms': prediction_algorithms }
-            for peptide_type in ['MT', 'WT']:
-                ic50s = {}
-                percentiles = {}
-                ic50_calls = {}
-                percentile_calls = {}
-                for index, line in good_binders_peptide.to_dict(orient='index').items():
-                    ic50s[line['HLA Allele']] = line['Median {} Score'.format(peptide_type)]
-                    percentiles[line['HLA Allele']] = line['Median {} Percentile'.format(peptide_type)]
-                    ic50_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
-                    percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
-                sorted_ic50s = []
-                sorted_percentiles = []
-                for hla_type in sorted(hla_types):
-                    if hla_type in ic50s:
-                        sorted_ic50s.append(ic50s[hla_type])
-                    else:
-                        sorted_ic50s.append('X')
-                    if hla_type in percentiles:
-                        sorted_percentiles.append(percentiles[hla_type])
-                    else:
-                        sorted_percentiles.append('X')
-                peptides[line['annotation']][peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
-                peptides[line['annotation']][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
-                individual_ic50_calls[peptide_type] = ic50_calls
-                individual_percentile_calls[peptide_type] = percentile_calls
-            peptides[line['annotation']][peptide]['hla_types'] = sorted(hla_types)
-            peptides[line['annotation']][peptide]['mutation_position'] = str(good_binders_peptide.iloc[0]['Mutation Position'])
-            peptides[line['annotation']][peptide]['individual_ic50_calls'] = individual_ic50_calls
-            peptides[line['annotation']][peptide]['individual_percentile_calls'] = individual_percentile_calls
-            wt_peptide = good_binders_peptide.iloc[0]['WT Epitope Seq']
-            if wt_peptide == 'NA':
-                variant_type = good_binders_peptide.iloc[0]['Variant Type']
-                if variant_type == 'FS':
-                    wt_peptide = 'FS-NA'
-                elif variant_type == 'inframe_ins':
-                    wt_peptide = 'INS-NA'
-                elif variant_type == 'inframe_deletion':
-                    wt_peptide = 'DEL-NA'
-            peptides[line['annotation']][peptide]['wt_peptide'] = wt_peptide
+        good_peptides = good_binders["MT Epitope Seq"].unique()
+        good_transcripts = good_binders['annotation'].unique()
+        for annotation in good_transcripts:
+            good_binders_annotation = good_binders[good_binders['annotation'] == annotation]
+            for peptide in good_peptides:
+                good_binders_peptide_annotation = good_binders_annotation[good_binders_annotation['MT Epitope Seq'] == peptide]
+                if len(good_binders_peptide_annotation) > 0:
+                    individual_ic50_calls = { 'algorithms': prediction_algorithms }
+                    individual_percentile_calls = { 'algorithms': prediction_algorithms }
+                    for peptide_type in ['MT', 'WT']:
+                        ic50s = {}
+                        percentiles = {}
+                        ic50_calls = {}
+                        percentile_calls = {}
+                        for index, line in good_binders_peptide_annotation.to_dict(orient='index').items():
+                            ic50s[line['HLA Allele']] = line['Median {} Score'.format(peptide_type)]
+                            percentiles[line['HLA Allele']] = line['Median {} Percentile'.format(peptide_type)]
+                            ic50_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
+                            percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
+                        sorted_ic50s = []
+                        sorted_percentiles = []
+                        for hla_type in sorted(hla_types):
+                            if hla_type in ic50s:
+                                sorted_ic50s.append(ic50s[hla_type])
+                            else:
+                                sorted_ic50s.append('X')
+                            if hla_type in percentiles:
+                                sorted_percentiles.append(percentiles[hla_type])
+                            else:
+                                sorted_percentiles.append('X')
+                        peptides[annotation][peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
+                        peptides[annotation][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
+                        individual_ic50_calls[peptide_type] = ic50_calls
+                        individual_percentile_calls[peptide_type] = percentile_calls
+                    peptides[annotation][peptide]['hla_types'] = sorted(hla_types)
+                    peptides[annotation][peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
+                    peptides[annotation][peptide]['individual_ic50_calls'] = individual_ic50_calls
+                    peptides[annotation][peptide]['individual_percentile_calls'] = individual_percentile_calls
+                    wt_peptide = good_binders_peptide_annotation.iloc[0]['WT Epitope Seq']
+                    if wt_peptide == 'NA':
+                        variant_type = good_binders_peptide_annotation.iloc[0]['Variant Type']
+                        if variant_type == 'FS':
+                            wt_peptide = 'FS-NA'
+                        elif variant_type == 'inframe_ins':
+                            wt_peptide = 'INS-NA'
+                        elif variant_type == 'inframe_deletion':
+                            wt_peptide = 'DEL-NA'
+                    peptides[annotation][peptide]['wt_peptide'] = wt_peptide
         return peptides
 
     def calculate_annotation_count(self, peptides):
