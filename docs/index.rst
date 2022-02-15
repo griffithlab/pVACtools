@@ -71,7 +71,9 @@ ________________
   RNA expression * RNA VAF. For more information see :ref:`aggregated`.
 - pVACfuse no longer supports inputs from Integrate NEO. Only AGFusion inputs
   will be supported going forward.
-- pVACfuse report format update
+- The format of the pVACfuse all_epitopes and filtered reports has been updated to
+  remove columns that aren't applicable for the tool. Please see the documentation
+  for the pVACfuse :ref:`pvacfuse_all_ep_and_filtered` for more information.
 
 New Features
 ____________
@@ -86,7 +88,7 @@ ____________
     Protein BLAST installation. To use a standalone BLASTp installation, provide the
     installation path using the ``--blastp-path`` parameter. The supported
     Protein BLAST databases are ``refseq_select_prot`` and ``refseq_protein``.
-    TODO: link to installation instructions
+    Please reference the :ref:`blast` documentation for further instructions.
   - When running the reference proteome similarity step using the NCBI Protein BLAST API,
     users can now pick between the ``refseq_select_prot`` and ``refseq_protein``
     databases.
@@ -97,8 +99,7 @@ ____________
 
 - This release adds standalone commands to run stability predictions, cleavage
   site predictions, and the reference proteome similarity step on the output
-  of the pVACseq, pVACfuse, and pVACbind pipelines. TODO: link to docs pages
-  for commands
+  of the :ref:`pVACseq<optional_downstream_analysis_tools_label>`, :ref:`pVACfuse<pvacfuse_tools>`, and :ref:`pVACbind<pvacbind_tools>` pipelines.
 
 Minor Updates
 _____________
@@ -110,7 +111,7 @@ _____________
   with 9 flanking amino acids around each epitope to generate stable
   predictions.
 - This release adds a ``--species`` option to the ``valid_alleles`` commands
-  to filter alleles on a species of interest. TODO: link to command
+  to filter alleles on a species of interest.
 - This release adds a ``--pass-only`` flag to the ``pvacseq
   generate_protein_fasta`` commands to only process VCF entries that do not
   have a FILTER set.
