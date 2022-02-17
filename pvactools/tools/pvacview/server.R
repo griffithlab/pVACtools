@@ -117,7 +117,7 @@ server <- shinyServer(function(input, output, session) {
   #Option 2: Load from HCC1395 demo data from github
    observeEvent(input$loadDefaultmain,{
      data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/835a7e4ae8b660a362c0c0b54140e26830d72bf2/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.tsv")
-     mainData <- read.table(text=data, sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     mainData <- read.table(text = data, sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(mainData) <- mainData[1,]
      mainData <- mainData[-1,]
      row.names(mainData) <- NULL
@@ -462,18 +462,20 @@ server <- shinyServer(function(input, output, session) {
       withProgress(message = 'Loading Transcripts Table', value = 0, {
         GB_transcripts <- data.frame()
         if (length(df$metricsData[[selectedID()]]$sets) != 0){
-          GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`)
+          GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`,
+                                       "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
+                                       "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`)
         }
         else {
-          GB_transcripts <- data.frame("Transcript" = character())
+          GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character())
         }
         incProgress(0.5)
-        names(GB_transcripts) <- c("Transcripts in Selected Set")
+        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level")
         incProgress(0.5)
-        GB_transcripts
-      })
-    }
-  )
+        datatable(GB_transcripts,options =list(columnDefs = list(list(defaultContent="N/A",targets = c(3)))))
+      }, 
+      )
+    })
 
   ##display transcript expression 
   output$metricsTextTranscript = renderText({
@@ -500,6 +502,12 @@ server <- shinyServer(function(input, output, session) {
       withProgress(message = 'Loading Peptide Table', value = 0, {
         if (length(df$metricsData[[selectedID()]]$sets) != 0 & !is.null(df$metricsData)){
           peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]
+          peptide_data$`transcripts` <- NULL
+          peptide_data$`transcript_expr` <- NULL
+          peptide_data$`tsl` <- NULL
+          peptide_data$`transcript_count` <- NULL
+          peptide_data$`peptide_count` <- NULL
+          peptide_data$`total_expr` <- NULL
           peptide_names <- names(peptide_data)
           for(i in 1:length(peptide_names)){
             peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
@@ -569,6 +577,12 @@ server <- shinyServer(function(input, output, session) {
       }
       else if (length(df$metricsData[[selectedID()]]$sets) != 0) {
         peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]
+        peptide_data$`transcripts` <- NULL
+        peptide_data$`transcript_expr` <- NULL
+        peptide_data$`tsl` <- NULL
+        peptide_data$`transcript_count` <- NULL
+        peptide_data$`peptide_count` <- NULL
+        peptide_data$`total_expr` <- NULL
         peptide_names <- names(peptide_data)
         for(i in 1:length(peptide_names)){
           peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
