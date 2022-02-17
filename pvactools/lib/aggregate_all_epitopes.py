@@ -389,8 +389,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             peptides[set_name]['transcript_count'] = len(annotations)
             peptides[set_name]['peptide_count'] = len(peptide_set)
             peptides[set_name]['total_expr'] = sum([0 if x == 'NA' else (float(x)) for x in peptides[set_name]['transcript_expr']])
+            set_number += 1
         anno_count = len(good_transcripts)
-        set_number += 1
 
         return (peptides, anno_count)
 
