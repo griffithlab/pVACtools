@@ -422,39 +422,59 @@ server <- shinyServer(function(input, output, session) {
     df$additionalData[df$additionalData$ID == selectedID(),]$`%ile MT`
   })
   
-  ##transcripts table displaying transcript id and transcript expression values 
-  output$transcriptsTable = renderDT(
+  ##transcripts sets table displaying sets of transcripts with the same consequence
+  output$transcriptSetsTable = renderDT(
     {
-      withProgress(message = 'Loading Transcripts Table', value = 0, {
+      withProgress(message = 'Loading Transcript Sets Table', value = 0, {
       GB_transcripts <- data.frame()
-      if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
-        GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders_transcript,"Expression" = df$metricsData[[selectedID()]]$transcript_expr)
+      if (length(df$metricsData[[selectedID()]]$sets) != 0){
+        GB_transcripts <- data.frame("Transcript Sets" = df$metricsData[[selectedID()]]$sets)
+        #GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders_transcript,"Expression" = df$metricsData[[selectedID()]]$transcript_expr, "TSL" = df$metricsData[[selectedID()]]$tsl)
       }
       else{
-        GB_transcripts <- data.frame("Transcripts" = character(), "Expression" = character())
+        GB_transcripts <- data.frame("Transcript Sets" = character())
       }
       incProgress(0.5)
-      names(GB_transcripts) <- c("Transcripts producing good binding peptides", "Transcript Expression")
+      names(GB_transcripts) <- c("Transcripts Sets")
       incProgress(0.5)
       GB_transcripts 
       })
     },
     selection = list(mode='single', selected = '1')
   )
-  
-  ##update selected transcript id
-  selectedTranscript <- reactive({
-    selection <- input$transcriptsTable_rows_selected
+
+  ##update selected transcript set id
+  selectedTranscriptSet <- reactive({
+    selection <- input$transcriptSetsTable_rows_selected
     if (is.null(selection)){
       selection <- 1
     }
-    df$metricsData[[selectedID()]]$good_binders_transcripts[selection]
+    df$metricsData[[selectedID()]]$sets[selection]
   })
-  
+
+  ##transcripts table displaying transcript id and transcript expression values 
+  output$transcriptsTable = renderDT(
+    {
+      withProgress(message = 'Loading Transcripts Table', value = 0, {
+        GB_transcripts <- data.frame()
+        if (length(df$metricsData[[selectedID()]]$sets) != 0){
+          GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`)
+        }
+        else {
+          GB_transcripts <- data.frame("Transcript" = character())
+        }
+        incProgress(0.5)
+        names(GB_transcripts) <- c("Transcripts in Selected Set")
+        incProgress(0.5)
+        GB_transcripts
+      })
+    }
+  )
+
   ##display transcript expression 
   output$metricsTextTranscript = renderText({
-    if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
-      df$metricsData[[selectedID()]]$good_binders[[selectedTranscript()]]$`transcript_expr`
+    if (length(df$metricsData[[selectedID()]]$sets) != 0){
+      df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`
     }
     else {
       "N/A"
@@ -463,7 +483,7 @@ server <- shinyServer(function(input, output, session) {
   
   ##display gene expression 
   output$metricsTextGene = renderText({
-    if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
+    if (length(df$metricsData[[selectedID()]]$sets) != 0){
       df$metricsData[[selectedID()]]$`gene_expr`
     }
     else {
@@ -474,8 +494,8 @@ server <- shinyServer(function(input, output, session) {
   ##display peptide table with coloring 
   output$peptideTable = renderDT({
       withProgress(message = 'Loading Peptide Table', value = 0, {
-        if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0 & !is.null(df$metricsData)){
-          peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscript()]]
+        if (length(df$metricsData[[selectedID()]]$sets) != 0 & !is.null(df$metricsData)){
+          peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]
           peptide_names <- names(peptide_data)
           for(i in 1:length(peptide_names)){
             peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
@@ -510,9 +530,9 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(selection)){
       selection <- 1
     }
-    peptide_names <- names(df$metricsData[[selectedID()]]$good_binders[[selectedTranscript()]])
+    peptide_names <- names(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]])
     index <- floor((as.numeric(selection)+1)/2)
-    df$metricsData[[selectedID()]]$good_binders[[selectedTranscript()]][[peptide_names[index]]]
+    df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]][[peptide_names[index]]]
   })
   
   ##Add legend for anchor heatmap 
@@ -543,8 +563,8 @@ server <- shinyServer(function(input, output, session) {
         incProgress(1)
         print(p1)
       }
-      else if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0) {
-        peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscript()]]
+      else if (length(df$metricsData[[selectedID()]]$sets) != 0) {
+        peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]
         peptide_names <- names(peptide_data)
         for(i in 1:length(peptide_names)){
           peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
@@ -555,8 +575,8 @@ server <- shinyServer(function(input, output, session) {
         all_peptides <- list()
         incProgress(0.1)
         for(i in 1:length(peptide_names)){
-          mutation_pos <- as.numeric(df$metricsData[[selectedID()]]$good_binders[[selectedTranscript()]][[peptide_names[i]]]$`mutation_position`)
-          wt_peptide <- as.character(df$metricsData[[selectedID()]]$good_binders[[selectedTranscript()]][[peptide_names[i]]]$`wt_peptide`)
+          mutation_pos <- as.numeric(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]][[peptide_names[i]]]$`mutation_position`)
+          wt_peptide <- as.character(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]][[peptide_names[i]]]$`wt_peptide`)
           df_mt_peptide <- data.frame("aa"=unlist(strsplit(peptide_names[i],"", fixed = TRUE)), "x_pos" = c(1:nchar(peptide_names[i])))
           df_mt_peptide$mutation <- 'not_mutated'
           df_mt_peptide$type <- 'mt'
@@ -621,7 +641,7 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$metricsData)){
       return ()
     }
-    if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
+    if (length(df$metricsData[[selectedID()]]$sets) != 0){
       algorithm_names <- data.frame(algorithms=selectedPeptideData()$individual_ic50_calls$algorithms)
       wt_data <- as.data.frame(selectedPeptideData()$individual_ic50_calls$WT, check.names=FALSE)
       colnames(wt_data) <- paste(colnames(wt_data),"_WT_Score", sep="")
@@ -641,7 +661,7 @@ server <- shinyServer(function(input, output, session) {
   ##plotting IC5 binding score violin plot 
   output$bindingData_IC50 <- renderPlot({
     withProgress(message = 'Loading Binding Score Plot (IC50)', value = 0, {
-      if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
+      if (length(df$metricsData[[selectedID()]]$sets) != 0){
         line.data <- data.frame(yintercept = c(500,1000), Cutoffs = c("500nM", "1000nM"), color=c("#28B463","#EC7063"))
         hla_allele_count <- length(unique(bindingScoreDataIC50()$HLA_allele))
         incProgress(0.5)
@@ -665,7 +685,7 @@ server <- shinyServer(function(input, output, session) {
   
   ##updating percentile binding score for selected peptide pair 
   bindingScoreDataPercentile <- reactive({
-    if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
+    if (length(df$metricsData[[selectedID()]]$sets) != 0){
       algorithm_names <- data.frame(algorithms=selectedPeptideData()$individual_percentile_calls$algorithms)
       wt_data <- as.data.frame(selectedPeptideData()$individual_percentile_calls$WT, check.names=FALSE)
       colnames(wt_data) <- paste(colnames(wt_data),"_WT_Score", sep="")
@@ -685,7 +705,7 @@ server <- shinyServer(function(input, output, session) {
   ##plotting percentile binding score violin plot 
   output$bindingData_percentile <- renderPlot({
     withProgress(message = 'Loading Binding Score Plot (Percentile)', value = 0, {
-      if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
+      if (length(df$metricsData[[selectedID()]]$sets) != 0){
         line.data <- data.frame(yintercept = c(0.5,2), Cutoffs = c("0.5%", "2%"), color=c("#28B463","#EC7063"))
         hla_allele_count <- length(unique(bindingScoreDataPercentile()$HLA_allele))
         incProgress(0.5)
@@ -710,7 +730,7 @@ server <- shinyServer(function(input, output, session) {
   ##plotting binding data table with IC50 and percentile values
   output$bindingDatatable <- renderDT({
     withProgress(message = 'Loading binding datatable', value = 0, {
-      if (length(df$metricsData[[selectedID()]]$good_binders_transcript) != 0){
+      if (length(df$metricsData[[selectedID()]]$sets) != 0){
       binding_data <- bindingScoreDataIC50()
       names(binding_data)[names(binding_data) == 'Score'] <- 'IC50 Score'
       binding_data['% Score'] <- bindingScoreDataPercentile()['Score']

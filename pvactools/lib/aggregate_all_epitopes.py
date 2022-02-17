@@ -49,10 +49,6 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def calculate_annotation_count(self, peptides):
-        raise Exception("Must implement method in child class")
-
-    @abstractmethod
     def calculate_unique_peptide_count(self, good_binders):
         raise Exception("Must implement method in child class")
 
@@ -102,8 +98,7 @@ class AggregateAllEpitopes:
             hla = dict(map(lambda x : (x, good_binders_hla[x]) if x in good_binders_hla else (x, ""), hla_types))
             #get a list of all unique gene/transcript/aa_change combinations
             #store a count of all unique peptides that passed
-            peptides = self.get_good_binders_metrics(good_binders, prediction_algorithms, hla_types)
-            anno_count = self.calculate_annotation_count(peptides)
+            (peptides, anno_count) = self.get_good_binders_metrics(good_binders, prediction_algorithms, hla_types)
             peptide_count = self.calculate_unique_peptide_count(good_binders)
         else:
             hla = dict(map(lambda x : (x, ""), hla_types))
@@ -130,7 +125,7 @@ class AggregateAllEpitopes:
     def determine_columns_used_for_aggregation(self, prediction_algorithms):
         used_columns = [
             "Chromosome", "Start", "Stop", "Reference", "Variant",
-            "Transcript", "Variant Type", "Mutation",
+            "Transcript", "Transcript Support Level", "Variant Type", "Mutation",
             "Protein Position", "Gene Name", "HLA Allele",
             "Mutation Position", "MT Epitope Seq", "WT Epitope Seq",
             "Tumor DNA VAF", "Tumor RNA Depth",
@@ -329,9 +324,21 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
         good_peptides = good_binders["MT Epitope Seq"].unique()
         good_transcripts = good_binders['annotation'].unique()
+        peptide_sets = {}
         for annotation in good_transcripts:
             good_binders_annotation = good_binders[good_binders['annotation'] == annotation]
-            for peptide in good_peptides:
+            peptide_set = tuple(good_binders_annotation["MT Epitope Seq"].unique())
+            if peptide_set in peptide_sets:
+                peptide_sets[peptide_set].append(annotation)
+            else:
+                peptide_sets[peptide_set] = [annotation]
+
+        set_number = 1
+        for peptide_set, annotations in peptide_sets.items():
+            set_name = "Transcript Set {}".format(set_number)
+            annotation = annotations[0]
+            good_binders_annotation = good_binders[good_binders['annotation'] == annotation]
+            for peptide in list(peptide_set):
                 good_binders_peptide_annotation = good_binders_annotation[good_binders_annotation['MT Epitope Seq'] == peptide]
                 if len(good_binders_peptide_annotation) > 0:
                     individual_ic50_calls = { 'algorithms': prediction_algorithms }
@@ -357,14 +364,14 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                                 sorted_percentiles.append(percentiles[hla_type])
                             else:
                                 sorted_percentiles.append('X')
-                        peptides[annotation][peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
-                        peptides[annotation][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
+                        peptides[set_name][peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
+                        peptides[set_name][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
                         individual_ic50_calls[peptide_type] = ic50_calls
                         individual_percentile_calls[peptide_type] = percentile_calls
-                    peptides[annotation][peptide]['hla_types'] = sorted(hla_types)
-                    peptides[annotation][peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
-                    peptides[annotation][peptide]['individual_ic50_calls'] = individual_ic50_calls
-                    peptides[annotation][peptide]['individual_percentile_calls'] = individual_percentile_calls
+                    peptides[set_name][peptide]['hla_types'] = sorted(hla_types)
+                    peptides[set_name][peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
+                    peptides[set_name][peptide]['individual_ic50_calls'] = individual_ic50_calls
+                    peptides[set_name][peptide]['individual_percentile_calls'] = individual_percentile_calls
                     wt_peptide = good_binders_peptide_annotation.iloc[0]['WT Epitope Seq']
                     if wt_peptide == 'NA':
                         variant_type = good_binders_peptide_annotation.iloc[0]['Variant Type']
@@ -374,11 +381,17 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                             wt_peptide = 'INS-NA'
                         elif variant_type == 'inframe_deletion':
                             wt_peptide = 'DEL-NA'
-                    peptides[annotation][peptide]['wt_peptide'] = wt_peptide
-        return peptides
+                    peptides[set_name][peptide]['wt_peptide'] = wt_peptide
+            peptides[set_name]['transcripts'] = annotations
+            peptides[set_name]['transcript_expr'] = [good_binders[good_binders["annotation"] == x]['Transcript Expression'].iloc[0] for x in annotations]
+            tsls = [good_binders[good_binders["annotation"] == x]['Transcript Support Level'].iloc[0] for x in annotations]
+            peptides[set_name]['tsl'] = [x if x == 'NA' else round(float(x)) for x in tsls]
+            peptides[set_name]['transcript_count'] = len(annotations)
+            peptides[set_name]['peptide_count'] = len(peptide_set)
+            peptides[set_name]['total_expr'] = sum(peptides[set_name]['transcript_expr'])
+        anno_count = len(good_transcripts)
 
-    def calculate_annotation_count(self, peptides):
-        return len(peptides.keys())
+        return (peptides, anno_count)
 
     def calculate_unique_peptide_count(self, good_binders):
         return len(good_binders["MT Epitope Seq"].unique())
@@ -427,11 +440,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return out_dict
 
     def get_metrics(self, df, peptides, best):
-        transcripts = list(peptides.keys())
         return {
             'good_binders': peptides,
-            'good_binders_transcripts': transcripts,
-            'transcript_expr': [df[df["annotation"] == x]['Transcript Expression'].iloc[0] for x in transcripts],
+            'sets' : list(peptides.keys()),
             'DNA VAF': float(best['Tumor DNA VAF']),
             'RNA VAF': float(best['Tumor RNA VAF']),
             'gene_expr': float(best['Gene Expression']),
@@ -504,9 +515,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
     def get_good_binders_metrics(self, good_binders, prediction_algorithms, hla_types):
         return None
-
-    def calculate_annotation_count(self, peptides):
-        return "NA"
 
     def calculate_unique_peptide_count(self, good_binders):
         return len(good_binders["Epitope Seq"].unique())

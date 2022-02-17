@@ -184,26 +184,34 @@ ui <- dashboardPage(
           ),
   
           fluidRow(
-            tabBox(width = 6, title="Variant Information", 
-                   tabPanel("Transcripts of Selected Variant",
-                        DTOutput('transcriptsTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
+            column(6, offset = 0, style='padding:0px;',
+              tabBox(width = 12, title="Variant Information", 
+                   tabPanel("Transcript Sets of Selected Variant",
+                        DTOutput('transcriptSetsTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
                    tabPanel("Additional Data",
                            span("Additional Data Type: ", verbatimTextOutput('type_text')),
                            span("Median MT IC50: ", verbatimTextOutput('addData_IC50')),
                            span("Median MT Percentile: ", verbatimTextOutput('addData_percentile')) )
+              ),
+              box(width = 12, solidHeader = TRUE, title="Transcripts",
+                   DTOutput('transcriptsTable')%>% withSpinner(color="#8FCCFA") )
             ),
-            box(width = 4, solidHeader = TRUE, title="Variant & Gene Info",
+            column(4, offset = 0, style='padding:0px;',
+              box(width = 12, solidHeader = TRUE, title="Variant & Gene Info",
                    span("DNA VAF", verbatimTextOutput('metricsTextDNA')),
                    span("RNA VAF", verbatimTextOutput('metricsTextRNA')),
                    span("Gene Expression", verbatimTextOutput('metricsTextGene')),
                    span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput('metricsTextGenomicCoord')),
                    h5("Additional variant information:"),
                    uiOutput("url"),style = "overflow-x: scroll;font-size:100%"),
-            box(width = 2, solidHeader = TRUE, title="Peptide Evalutation Overview",
+            ),
+            column(2, offset = 0, style='padding:0px;',
+              box(width = 12, solidHeader = TRUE, title="Peptide Evalutation Overview",
                    tableOutput("checked"), style = "overflow-x: scroll;font-size:100%")
+            )
           ),
           fluidRow(
-            box(width = 12, title="Peptide Candidates from Selected Transcript", status='primary', solidHeader = TRUE, collapsible = TRUE,
+            box(width = 12, title="Peptide Candidates from Selected Transcript Set", status='primary', solidHeader = TRUE, collapsible = TRUE,
                    DTOutput('peptideTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%")
           ),
           fluidRow(
