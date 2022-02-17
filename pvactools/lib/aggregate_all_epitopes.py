@@ -388,7 +388,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             peptides[set_name]['tsl'] = [x if x == 'NA' else round(float(x)) for x in tsls]
             peptides[set_name]['transcript_count'] = len(annotations)
             peptides[set_name]['peptide_count'] = len(peptide_set)
-            peptides[set_name]['total_expr'] = sum(peptides[set_name]['transcript_expr'])
+            peptides[set_name]['total_expr'] = sum([0 if x == 'NA' else (float(x)) for x in peptides[set_name]['transcript_expr']])
         anno_count = len(good_transcripts)
 
         return (peptides, anno_count)
@@ -442,7 +442,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def get_metrics(self, df, peptides, best):
         return {
             'good_binders': peptides,
-            'sets' : list(peptides.keys()),
+            'sets': list(peptides.keys()),
+            'transcript_counts': [v['transcript_count'] for k, v in peptides.items()],
+            'peptide_counts': [v['peptide_count'] for k, v in peptides.items()],
+            'set_expr': [v['total_expr'] for k, v in peptides.items()],
             'DNA VAF': float(best['Tumor DNA VAF']),
             'RNA VAF': float(best['Tumor RNA VAF']),
             'gene_expr': float(best['Gene Expression']),
@@ -514,7 +517,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
 
     def get_good_binders_metrics(self, good_binders, prediction_algorithms, hla_types):
-        return None
+        return (None, "NA")
 
     def calculate_unique_peptide_count(self, good_binders):
         return len(good_binders["Epitope Seq"].unique())
