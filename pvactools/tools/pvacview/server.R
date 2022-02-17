@@ -428,14 +428,18 @@ server <- shinyServer(function(input, output, session) {
       withProgress(message = 'Loading Transcript Sets Table', value = 0, {
       GB_transcripts <- data.frame()
       if (length(df$metricsData[[selectedID()]]$sets) != 0){
-        GB_transcripts <- data.frame("Transcript Sets" = df$metricsData[[selectedID()]]$sets)
-        #GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders_transcript,"Expression" = df$metricsData[[selectedID()]]$transcript_expr, "TSL" = df$metricsData[[selectedID()]]$tsl)
+        GB_transcripts <- data.frame(
+          "Transcript Sets" = df$metricsData[[selectedID()]]$sets,
+          "# Transcripts" = df$metricsData[[selectedID()]]$transcript_counts,
+          "# Peptides" = df$metricsData[[selectedID()]]$peptide_counts,
+          "Total Expr" = df$metricsData[[selectedID()]]$set_expr
+        )
       }
       else{
-        GB_transcripts <- data.frame("Transcript Sets" = character())
+        GB_transcripts <- data.frame("Transcript Sets" = character(), "# Transcripts" = character(), "# Peptides" = character(), "Total Expr" = character())
       }
       incProgress(0.5)
-      names(GB_transcripts) <- c("Transcripts Sets")
+      names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
       incProgress(0.5)
       GB_transcripts 
       })
