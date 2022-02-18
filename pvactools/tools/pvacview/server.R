@@ -501,13 +501,7 @@ server <- shinyServer(function(input, output, session) {
   output$peptideTable = renderDT({
       withProgress(message = 'Loading Peptide Table', value = 0, {
         if (length(df$metricsData[[selectedID()]]$sets) != 0 & !is.null(df$metricsData)){
-          peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]
-          peptide_data$`transcripts` <- NULL
-          peptide_data$`transcript_expr` <- NULL
-          peptide_data$`tsl` <- NULL
-          peptide_data$`transcript_count` <- NULL
-          peptide_data$`peptide_count` <- NULL
-          peptide_data$`total_expr` <- NULL
+          peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
           peptide_names <- names(peptide_data)
           for(i in 1:length(peptide_names)){
             peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
@@ -542,9 +536,9 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(selection)){
       selection <- 1
     }
-    peptide_names <- names(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]])
+    peptide_names <- names(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`)
     index <- floor((as.numeric(selection)+1)/2)
-    df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]][[peptide_names[index]]]
+    df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[index]]]
   })
   
   ##Add legend for anchor heatmap 
@@ -576,13 +570,7 @@ server <- shinyServer(function(input, output, session) {
         print(p1)
       }
       else if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-        peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]
-        peptide_data$`transcripts` <- NULL
-        peptide_data$`transcript_expr` <- NULL
-        peptide_data$`tsl` <- NULL
-        peptide_data$`transcript_count` <- NULL
-        peptide_data$`peptide_count` <- NULL
-        peptide_data$`total_expr` <- NULL
+        peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
         peptide_names <- names(peptide_data)
         for(i in 1:length(peptide_names)){
           peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
@@ -593,8 +581,8 @@ server <- shinyServer(function(input, output, session) {
         all_peptides <- list()
         incProgress(0.1)
         for(i in 1:length(peptide_names)){
-          mutation_pos <- as.numeric(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]][[peptide_names[i]]]$`mutation_position`)
-          wt_peptide <- as.character(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]][[peptide_names[i]]]$`wt_peptide`)
+          mutation_pos <- as.numeric(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`mutation_position`)
+          wt_peptide <- as.character(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`wt_peptide`)
           df_mt_peptide <- data.frame("aa"=unlist(strsplit(peptide_names[i],"", fixed = TRUE)), "x_pos" = c(1:nchar(peptide_names[i])))
           df_mt_peptide$mutation <- 'not_mutated'
           df_mt_peptide$type <- 'mt'

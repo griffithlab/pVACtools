@@ -338,6 +338,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             set_name = "Transcript Set {}".format(set_number)
             annotation = annotations[0]
             good_binders_annotation = good_binders[good_binders['annotation'] == annotation]
+            results = defaultdict(lambda: defaultdict(list))
             for peptide in list(peptide_set):
                 good_binders_peptide_annotation = good_binders_annotation[good_binders_annotation['MT Epitope Seq'] == peptide]
                 if len(good_binders_peptide_annotation) > 0:
@@ -364,14 +365,14 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                                 sorted_percentiles.append(percentiles[hla_type])
                             else:
                                 sorted_percentiles.append('X')
-                        peptides[set_name][peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
-                        peptides[set_name][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
+                        results[peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
+                        results[peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
                         individual_ic50_calls[peptide_type] = ic50_calls
                         individual_percentile_calls[peptide_type] = percentile_calls
-                    peptides[set_name][peptide]['hla_types'] = sorted(hla_types)
-                    peptides[set_name][peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
-                    peptides[set_name][peptide]['individual_ic50_calls'] = individual_ic50_calls
-                    peptides[set_name][peptide]['individual_percentile_calls'] = individual_percentile_calls
+                    results[peptide]['hla_types'] = sorted(hla_types)
+                    results[peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
+                    results[peptide]['individual_ic50_calls'] = individual_ic50_calls
+                    results[peptide]['individual_percentile_calls'] = individual_percentile_calls
                     wt_peptide = good_binders_peptide_annotation.iloc[0]['WT Epitope Seq']
                     if wt_peptide == 'NA':
                         variant_type = good_binders_peptide_annotation.iloc[0]['Variant Type']
@@ -381,7 +382,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                             wt_peptide = 'INS-NA'
                         elif variant_type == 'inframe_deletion':
                             wt_peptide = 'DEL-NA'
-                    peptides[set_name][peptide]['wt_peptide'] = wt_peptide
+                    results[peptide]['wt_peptide'] = wt_peptide
+            peptides[set_name]['peptides'] = results
             peptides[set_name]['transcripts'] = annotations
             peptides[set_name]['transcript_expr'] = [good_binders[good_binders["annotation"] == x]['Transcript Expression'].iloc[0] for x in annotations]
             tsls = [good_binders[good_binders["annotation"] == x]['Transcript Support Level'].iloc[0] for x in annotations]
