@@ -185,6 +185,8 @@ tensorflow manually to version 1.5.0 should solve this problem:
 
    pip install tensorflow==1.5.0
 
+.. _blast:
+
 Installing BLAST
 ----------------
 
