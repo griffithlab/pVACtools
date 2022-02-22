@@ -464,13 +464,15 @@ server <- shinyServer(function(input, output, session) {
         if (length(df$metricsData[[selectedID()]]$sets) != 0){
           GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`,
                                        "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
-                                       "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`)
+                                       "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`,
+                                       "Biotype" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`biotype`,
+                                       "Length" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_length`)
         }
         else {
-          GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character())
+          GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character(), "Biotype" = character(), "Length" = character())
         }
         incProgress(0.5)
-        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level")
+        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)")
         incProgress(0.5)
         datatable(GB_transcripts,options =list(columnDefs = list(list(defaultContent="N/A",targets = c(3)))))
       }, 
