@@ -162,8 +162,6 @@ class AggregateAllEpitopes:
         return dtypes
 
     def execute(self):
-        pd.set_option('precision', 3)
-
         prediction_algorithms = self.determine_used_prediction_algorithms()
         used_columns = self.determine_columns_used_for_aggregation(prediction_algorithms)
         dtypes = self.set_column_types(prediction_algorithms)
