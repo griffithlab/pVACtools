@@ -114,9 +114,8 @@ class AggregateAllEpitopes:
         #assemble the line
         out_dict = self.assemble_result_line(best, key, vaf_clonal, hla, anno_count, peptide_count);
 
-        df_out = pd.DataFrame.from_dict(out_dict)
         metric = self.get_metrics(df, peptides, best)
-        return (df_out, metric)
+        return (out_dict, metric)
 
     def determine_used_prediction_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
@@ -175,11 +174,6 @@ class AggregateAllEpitopes:
         ##do a crude estimate of clonal vaf/purity
         vaf_clonal = self.calculate_clonal_vaf()
 
-        columns = ['ID']
-        columns.extend(sorted(list(set([x.replace('HLA-', '') for x in hla_types]))))
-        columns.extend(['Gene', 'AA Change', 'Num Passing Transcripts', 'Best Peptide', 'Pos', 'Num Passing Peptides', 'IC50 MT', 'IC50 WT', '%ile MT', '%ile WT', 'RNA Expr', 'RNA VAF', 'Allele Expr', 'RNA Depth', 'DNA VAF', 'Tier', 'Evaluation'])
-        peptide_table = pd.DataFrame(columns=columns)
-
         if vaf_clonal is not None:
             metrics = {
                 'tumor_purity': self.tumor_purity,
@@ -189,11 +183,13 @@ class AggregateAllEpitopes:
         else:
             metrics = {}
 
+        data = []
         for key in keys:
             (df, key_str) = self.read_input_file(key, used_columns, dtypes)
             (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, hla_types, prediction_algorithms, vaf_clonal, 1000)
-            peptide_table = peptide_table.append(best_mut_line, sort=False)
+            data.append(best_mut_line)
             metrics[key_str] = metrics_for_key
+        peptide_table = pd.DataFrame(data=data)
         peptide_table = self.sort_table(peptide_table)
 
         peptide_table.to_csv(self.output_file, sep='\t', na_rep='NA', index=False, float_format='%.3f')
@@ -401,26 +397,26 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         allele_expr = self.calculate_allele_expr(best)
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
-        out_dict = { k.replace('HLA-', ''):v for k,v in hla.items() }
+        out_dict = { 'ID': key }
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in hla.items() })
         out_dict.update({
-            'Gene': [best["Gene Name"]],
-            'AA Change': [self.get_best_aa_change(best)],
-            'Num Passing Transcripts': [anno_count],
-            'Best Peptide': [best["MT Epitope Seq"]],
-            'Pos': [best["Mutation Position"]],
-            'Num Passing Peptides': [peptide_count],
-            'IC50 MT': [best["Median MT Score"]],
-            'IC50 WT': [best["Median WT Score"]],
-            '%ile MT': [best["Median MT Percentile"]],
-            '%ile WT': [best["Median WT Percentile"]],
-            'RNA Expr': [best["Gene Expression"]],
-            'RNA VAF': [best["Tumor RNA VAF"]],
+            'Gene': best["Gene Name"],
+            'AA Change': self.get_best_aa_change(best),
+            'Num Passing Transcripts': anno_count,
+            'Best Peptide': best["MT Epitope Seq"],
+            'Pos': best["Mutation Position"],
+            'Num Passing Peptides': peptide_count,
+            'IC50 MT': best["Median MT Score"],
+            'IC50 WT': best["Median WT Score"],
+            '%ile MT': best["Median MT Percentile"],
+            '%ile WT': best["Median WT Percentile"],
+            'RNA Expr': best["Gene Expression"],
+            'RNA VAF': best["Tumor RNA VAF"],
             'Allele Expr': allele_expr,
-            'RNA Depth': [best["Tumor RNA Depth"]],
-            'DNA VAF': [best["Tumor DNA VAF"]],
-            'Tier': [tier],
+            'RNA Depth': best["Tumor RNA Depth"],
+            'DNA VAF': best["Tumor DNA VAF"],
+            'Tier': tier,
             'Evaluation': 'Pending',
-            'ID': [key],
         })
         return out_dict
 
@@ -522,30 +518,31 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         allele_expr = self.calculate_allele_expr(best)
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
-        out_dict = { k.replace('HLA-', ''):v for k,v in hla.items() }
+        out_dict = { 'ID': key }
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in hla.items() })
         if 'Gene Name' in best:
             gene = best['Gene Name']
         else:
             gene = 'NA'
         out_dict.update({
-            'Gene': [gene],
-            'AA Change': [self.get_best_aa_change(best)],
-            'Num Passing Transcripts': [anno_count],
-            'Best Peptide': [best["Epitope Seq"]],
-            'Pos': ["NA"],
-            'Num Passing Peptides': [peptide_count],
-            'IC50 MT': [best["Median Score"]],
-            'IC50 WT': ["NA"],
-            '%ile MT': [best["Median Percentile"]],
-            '%ile WT': ["NA"],
-            'RNA Expr': ["NA"],
-            'RNA VAF': ["NA"],
+            'Gene': gene,
+            'AA Change': self.get_best_aa_change(best),
+            'Num Passing Transcripts': anno_count,
+            'Best Peptide': best["Epitope Seq"],
+            'Pos': "NA",
+            'Num Passing Peptides': peptide_count,
+            'IC50 MT': best["Median Score"],
+            'IC50 WT': "NA",
+            '%ile MT': best["Median Percentile"],
+            '%ile WT': "NA",
+            'RNA Expr': "NA",
+            'RNA VAF': "NA",
             'Allele Expr': allele_expr,
-            'RNA Depth': ["NA"],
-            'DNA VAF': ["NA"],
-            'Tier': [tier],
+            'RNA Depth': "NA",
+            'DNA VAF': "NA",
+            'Tier': tier,
             'Evaluation': 'Pending',
-            'ID':[key],
+            'ID':key,
         })
         return out_dict
 
