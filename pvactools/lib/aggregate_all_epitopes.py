@@ -398,7 +398,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
         out_dict = { 'ID': key }
-        out_dict.update({ k.replace('HLA-', ''):v for k,v in hla.items() })
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
         out_dict.update({
             'Gene': best["Gene Name"],
             'AA Change': self.get_best_aa_change(best),
@@ -519,7 +519,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
         out_dict = { 'ID': key }
-        out_dict.update({ k.replace('HLA-', ''):v for k,v in hla.items() })
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
         if 'Gene Name' in best:
             gene = best['Gene Name']
         else:
