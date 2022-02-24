@@ -457,10 +457,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         df.sort_values(by=["rank_tier", "rank", "Gene", "AA Change"], inplace=True, ascending=True)
 
-        df.drop('rank_tier', 1, inplace=True)
-        df.drop('rank_ic50', 1, inplace=True)
-        df.drop('rank_expr', 1, inplace=True)
-        df.drop('rank', 1, inplace=True)
+        df.drop(labels='rank_tier', axis=1, inplace=True)
+        df.drop(labels='rank_ic50', axis=1, inplace=True)
+        df.drop(labels='rank_expr', axis=1, inplace=True)
+        df.drop(labels='rank', axis=1, inplace=True)
 
         return df
 
