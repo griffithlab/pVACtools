@@ -83,7 +83,7 @@ class CallIEDBClassITests(CallIEDBTests):
                 self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
 
     #the output from MHCflurry varies between operating systems and the version of tensorflow installed
-    #these outputs where created on tensorflow 1.8.0
+    #these outputs where created on tensorflow 2.2.2
     def test_mhcflurry_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
@@ -96,11 +96,11 @@ class CallIEDBClassITests(CallIEDBTests):
         ])
         if sys.platform == 'darwin':
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcflurry_osx.tsv')
-            expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[1,6,7])
-            actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[1,6,7])
-            pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_less_precise=0)
+            expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[1,7,8])
+            actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[1,7,8])
+            pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False, rtol=0.05)
 
-    def test_mhcnuggets_method_generates_expected_files(self):
+    def test_mhcnuggetsi_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
         pvactools.lib.call_iedb.main([
@@ -113,7 +113,7 @@ class CallIEDBClassITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_less_precise=0)
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
 
 class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
@@ -149,7 +149,7 @@ class CallIEDBClassIITests(CallIEDBTests):
                 expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
                 self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
 
-    def test_mhcnuggets_method_generates_expected_files(self):
+    def test_mhcnuggetsii_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
         pvactools.lib.call_iedb.main([
@@ -162,7 +162,7 @@ class CallIEDBClassIITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_less_precise=0)
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
 
 if __name__ == '__main__':
     unittest.main()

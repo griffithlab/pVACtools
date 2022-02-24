@@ -108,11 +108,13 @@ class TestPvacvector(unittest.TestCase):
             input_file = os.path.join(self.test_data_dir, 'Test.vector.results.output.fa')
             output_dir = tempfile.TemporaryDirectory()
             visualize.main([input_file, output_dir.name])
+            output_dir.cleanup()
         else:
             with self.assertRaises(Exception) as context:
                 input_file = os.path.join(self.test_data_dir, 'Test.vector.results.output.fa')
                 output_dir = tempfile.TemporaryDirectory()
                 visualize.main([input_file, output_dir.name])
+                output_dir.cleanup()
 
     def test_allele_specific_cutoffs_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
@@ -140,6 +142,7 @@ class TestPvacvector(unittest.TestCase):
     def test_download_example_data_runs(self):
         output_dir = tempfile.TemporaryDirectory()
         download_example_data.main([output_dir.name])
+        output_dir.cleanup()
 
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
