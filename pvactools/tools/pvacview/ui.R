@@ -184,62 +184,76 @@ ui <- dashboardPage(
           ),
   
           fluidRow(
-            tabBox(width = 6, title="Variant Information", 
-                   tabPanel("Transcripts of Selected Variant",
-                        DTOutput('transcriptsTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
+            box(width = 12, title = "Variant Information",  status='primary', solidHeader = TRUE, collapsible = TRUE,
+              tabBox(width = 6, title=" ", 
+                   tabPanel("Transcript Sets of Selected Variant",
+                        DTOutput('transcriptSetsTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
                    tabPanel("Additional Data",
                            span("Additional Data Type: ", verbatimTextOutput('type_text')),
                            span("Median MT IC50: ", verbatimTextOutput('addData_IC50')),
                            span("Median MT Percentile: ", verbatimTextOutput('addData_percentile')) )
-            ),
-            box(width = 4, solidHeader = TRUE, title="Variant & Gene Info",
+              ),
+              box(width = 4, solidHeader = TRUE, title="Variant & Gene Info",
                    span("DNA VAF", verbatimTextOutput('metricsTextDNA')),
                    span("RNA VAF", verbatimTextOutput('metricsTextRNA')),
                    span("Gene Expression", verbatimTextOutput('metricsTextGene')),
                    span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput('metricsTextGenomicCoord')),
                    h5("Additional variant information:"),
                    uiOutput("url"),style = "overflow-x: scroll;font-size:100%"),
-            box(width = 2, solidHeader = TRUE, title="Peptide Evalutation Overview",
+              box(width = 2, solidHeader = TRUE, title="Peptide Evalutation Overview",
                    tableOutput("checked"), style = "overflow-x: scroll;font-size:100%")
+            )
           ),
           fluidRow(
-            box(width = 12, title="Peptide Candidates from Selected Transcript", status='primary', solidHeader = TRUE, collapsible = TRUE,
-                   DTOutput('peptideTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%")
-          ),
-          fluidRow(
-            tabBox(
-              title = "Additional Info",
-              id = "info",
-  
-              tabPanel("MHC Binding Prediction Scores (IC50)", 
-                plotOutput(outputId = "bindingData_IC50")%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;"
-              ),
-              tabPanel("MHC Binding Prediction Scores (%ile)", 
-                       plotOutput(outputId = "bindingData_percentile")%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;"
-              ),
-              tabPanel("MHC Binding Predictions Table", 
-                       DTOutput(outputId = "bindingDatatable"), style = "overflow-x: scroll;"
-              ),
-              tabPanel("Allele Specific Anchor Prediction Heatmap",
-                       plotOutput(
-                         outputId = "peptideFigureLegend", height = "50px"),
-                       plotOutput(
-                         outputId = "anchorPlot"
-                       )%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;"
+            box(width = 12, title = "Transcript Set Detailed Data", solidHeader = TRUE, collapsible = TRUE, status='primary',
+              tabBox(width = 12, title = " ",
+                tabPanel("Peptide Candidates from Selected Transcript Set",
+                       DTOutput('peptideTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
+                tabPanel("Transcripts in Set",
+                      DTOutput('transcriptsTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%")
               )
-            ),
-            box(
-              column(width=4,
-              h4("Allele Specific Anchor Prediction Heatmap"),
-              h5(" This tab displays HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
-                 " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
-              h4("MHC Binding Prediction Scores"), 
-              h5(" This tab contains violin plots that showcase individual binding prediction scores from each algorithm used. A solid line is used to represent the median score.
-                 ")
+            )
+          ),
+          fluidRow(
+            box(width = 12, title = "Additional Peptide Information",  status='primary', solidHeader = TRUE, collapsible = TRUE,
+              tabBox(
+                title = " ",
+                id = "info",
+    
+                tabPanel("Score Plot (IC50)", 
+                         h4("Violin Plots showing distribution of MHC IC50 predictions for selected peptide pair (MT and WT)."),
+                         plotOutput(outputId = "bindingData_IC50")%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;"
+                ),
+                tabPanel("Score Plot (%ile)", 
+                         h4("Violin Plots showing distribution of MHC percentile predictions for selected peptide pair (MT and WT)."),
+                         plotOutput(outputId = "bindingData_percentile")%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;"
+                ),
+                tabPanel("Score Table", 
+                         h4("Prediction score table showing exact MHC binding values in for IC50 and percentile calculations."),
+                         DTOutput(outputId = "bindingDatatable"), style = "overflow-x: scroll;"
+                ),
+                tabPanel("Anchor Heatmap",
+                         h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
+                         plotOutput(
+                           outputId = "peptideFigureLegend", height = "50px"),
+                         plotOutput(
+                           outputId = "anchorPlot"
+                         )%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;"
+                )
               ),
-              column(width=8, 
-                     box(title = 'Anchor vs Mutation position Scenario Guide', collapsible = TRUE, collapsed = FALSE, width = 12,
-                         img(src='anchor.jpg', align = "center", height='350px', width='600px'), style = "overflow-x: scroll;"))
+              box(
+                column(width=4,
+                h4("Allele Specific Anchor Prediction Heatmap"),
+                h5(" This tab displays HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
+                   " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
+                h4("MHC Binding Prediction Scores"), 
+                h5(" This tab contains violin plots that showcase individual binding prediction scores from each algorithm used. A solid line is used to represent the median score.
+                   ")
+                ),
+                column(width=8, 
+                       box(title = 'Anchor vs Mutation position Scenario Guide', collapsible = TRUE, collapsed = FALSE, width = 12,
+                           img(src='anchor.jpg', align = "center", height='350px', width='600px'), style = "overflow-x: scroll;"))
+              )
             )
           )
         ),
