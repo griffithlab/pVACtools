@@ -116,7 +116,7 @@ server <- shinyServer(function(input, output, session) {
 
   #Option 2: Load from HCC1395 demo data from github
    observeEvent(input$loadDefaultmain,{
-     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/835a7e4ae8b660a362c0c0b54140e26830d72bf2/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.tsv")
+     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/f83c52c8b8387beae69be8b200a44dcf199d9af2/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
      mainData <- read.table(text = data, sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(mainData) <- mainData[1,]
      mainData <- mainData[-1,]
@@ -127,7 +127,7 @@ server <- shinyServer(function(input, output, session) {
      mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
      mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
      df$mainTable <- mainData
-     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/6423b8b65f2e3f5cc2979f33b86c4650a6aa4570/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.metrics.json")
+     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/f83c52c8b8387beae69be8b200a44dcf199d9af2/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
      df$metricsData <- fromJSON(txt = metricsdata)
      dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
      df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
