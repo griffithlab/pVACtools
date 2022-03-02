@@ -150,7 +150,7 @@ ui <- dashboardPage(
                 "*Please note that the metrics file is required in order to regenerate tiering information with different parameters", br(),
                 "Current version of pVACseq results defaults to positions 1, 2, n-1 and n (for a n-mer peptide) when determining anchor positions.
                 If you would like to use our allele specific anchor results and regenerate the tiering results for your variants,
-                please specify your contribution cutoff and submit for recalculation. ", tags$a(href="https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1", "More details can be found here."), br(),
+                please specify your contribution cutoff and submit for recalculation. ", tags$a(href="https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1", "More details can be found here.", target="_blank"), br(),
                 checkboxInput("use_anchor", "If you want to use allele-specific anchor calculations, please check this box. Otherwise anchors will be calculated as 1,2 and n-1,n for n-mer peptides.", value = FALSE, width = NULL),
                 sliderInput("anchor_contribution", "Contribution cutoff for determining anchor locations", 0.5, 0.9, 0.8, step = 0.1, width = 400),
                 numericInput("dna_cutoff", "Clonal DNA VAF (Anything lower than 1/2 of chosen VAF level will be considered subclonal)", 0.5, min = 0, max = 1, step = 0.01, width = 500),
@@ -158,7 +158,7 @@ ui <- dashboardPage(
                 h5("For your reference, the max DNA VAF under 0.6 in the current main table is: "), verbatimTextOutput("max_dna"), br(),
                 numericInput("allele_expr_high", "Allele Expression cutoff to be considered a Pass variant (default: 3)", 3, min = 0, max = 100, step = 0.1, width = 500),
                 numericInput("allele_expr_low", "Allele Expression cutoff to be considered a Relaxed variant (default: 1). Note that this criteria is also used in determining Anchor and Subclonal variants.", 1, min = 0, max = 100, step = 0.1, width = 500),
-                h5("For further explanations on these inputs, please refer to the ", tags$a(href="https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore", "pVACview documentation.")),
+                h5("For further explanations on these inputs, please refer to the ", tags$a(href="https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore", "pVACview documentation.", target="_blank")),
                 actionButton('submit','Recalculate Tiering with new parameters'),
                 style = "overflow-x: scroll;font-size:100%"),
             
