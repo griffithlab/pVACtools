@@ -51,6 +51,24 @@ Contents
    contact
    mailing_list
 
+New in Release |release|
+------------------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- There was small issue in pVACview where picking a different number of
+  variants in the main table would cause changes to variant evaluations
+  to not be recorded correctly.
+- This release also fixes a problem where loading a new set of files into
+  pVACview would not reset previous evaluation summary counts.
+- This release fixes an error in pVACtools that would occur when a chromosomal
+  region in the somatic VCF is not present in the proximal VCF.
+- This release adds further error checking for malformed CSQ header
+  descriptions.
+- This release updates various code portions to remove deprecation warnings and
+  add support for  newer versions of certain dependencies (e.g. pandas).
+
+
 New in Version |version|
 ------------------------
 
