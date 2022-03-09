@@ -1,62 +1,92 @@
 import os
-import sys
 import re
-import argparse
+import pandas as pd
 from pyfaidx import Fasta
 
 class FastaToKmers():
-    def __init__(self, tscript_fasta:str, output_dir:str, classI_lengths:str='8,9,10,11', classII_lengths:str='12,13,14,15,16,17,18'):
-        self.tscript_fasta = Fasta(tscript_fasta)
-        self.output_dir = output_dir
-        self.kmer_lengths = classI_lengths +classII_lengths
+    def __init__(self, **kwargs):
+        self.tscript_fasta   = Fasta(kwargs['fasta'])
+        self.output_dir      = kwargs['output_dir']
+        self.epitope_lengths = [8] #kwargs['epitope_lengths']
+        self.combined_df     = kwargs['combined_df']
         self.unique_kmers = {}
-        
+
 
     def create_kmers(self, seq_name):
         kmer_dict = {}
         sequence = str(self.tscript_fasta[seq_name])
-        # loop over sequence
+        # loop over entire sequence (doing this for WT and ALT) i == position in peptide
         for i in range(len(sequence)):
-            for x in self.kmer_lengths:
-                # create kmer
+            final_seq_name = f'{seq_name}.{i+1}'
+            # loop over lengths
+            for x in self.epitope_lengths:
+                # grab kmer sequence
                 k = sequence[i:x+i]
+                # if kmer matches target len
                 if len(k) == x:
-                    # add or append to dict
-                    if not k in kmer_dict.keys():
-                        kmer_dict[k] = {'length':x, 'name': []}
-                    kmer_dict[k]['name'].append(f'{seq_name}.{i}')
+                    # add entry to dictionary
+                    kmer_dict[k] = final_seq_name
         return kmer_dict
-    
+
     def save_kmer_dicts(self, wt_name, mt_name):
         wt_dict = self.create_kmers(wt_name)
         mut_dict = self.create_kmers(mt_name)
-        final_kmers = {k:v for k, v in mut_dict.items() if k not in list(wt_dict.keys())}
+        # all kmers not in wt kmers
+        final_kmers = {k: v for k, v in mut_dict.items() if k not in list(wt_dict.keys())}
         if len(final_kmers) == 0:
-            print(f'{self.tscript_id} does not produce any tumor-specific kmers.')
+            print(f'{wt_name} does not produce any tumor-specific kmers.') # sys.exit()
         return final_kmers
 
     def loop_through_tscripts(self):
+        # all fasta headers (WT and ALT)
         fasta_keys = list(self.tscript_fasta.keys())
+        # take off WT. and ALT. prefixes from fasta_keys to de-duplicate
         unique_keys = set([x.split('.', 1)[1] for x in fasta_keys])
         for key in unique_keys:
+            # selecting WT and ALT for each seq pair (bc calling fasta_keys not unique_keys)
             names = [x for x in fasta_keys if key in x]
+            # get final mutated kmer list from save_kmer_dicts()
             final_kmers = self.save_kmer_dicts(names[0], names[1])
             if not final_kmers:
                 continue
+            # create master dict of unique kmers: index(es)
             for k,v in final_kmers.items():
-                if not k in self.unique_kmers.keys():
-                    self.unique_kmers[k] = v
-                else:
-                    self.unique_kmers[k]['name'].extend(v['name'])
+                de_dup_v = v.replace('ALT.', '')
+                if k not in self.unique_kmers.keys():
+                    self.unique_kmers[k] = [de_dup_v]
+                elif de_dup_v not in self.unique_kmers[k]:
+                    self.unique_kmers[k].append(de_dup_v)
+    
+    def create_index_file(self):
+        # joined indexes for each unique kmer
+        fasta_info = {k:':'.join(v) for k,v in self.unique_kmers.items()}
+        # prepare data to convert to df
+        modified_dict = {'kmer': fasta_info.keys(), 'indexes': fasta_info.values()}
+        # convert to df
+        self.index_df = pd.DataFrame.from_dict(modified_dict)
+        # add length
+        self.index_df['length'] = self.index_df['kmer'].str.len()
+        # expand tscripts to one per line
+        pd.options.mode.chained_assignment = None
+        self.index_df['indexes'] = self.index_df.indexes.apply(lambda x: x.split(':'))
+        self.index_df = self.index_df.explode('indexes')
+        # add peptide_position
+        self.index_df['peptide_position'] = self.index_df.indexes.apply(lambda x: x.split('.')[-1])
+        self.index_df['indexes'] = self.index_df.indexes.apply(lambda x: '.'.join(x.split('.')[:-1]))
+        # save to_csv()
+        self.index_df.to_csv(f'{self.output_dir}/kmer_index.tsv' ,sep='\t', index=False)
 
-    def create_fasta_pvacbind(self):
-        for x in self.kmer_lengths:
-            # join transcripts by into string
-            fasta_info = {k:':'.join(v['name']) for k,v in self.unique_kmers.items() if v['length'] == x}
+    def create_epitope_fastas(self):
+        # for only 1 length at a time
+        for x in self.epitope_lengths:
+            index_subset = self.index_df[self.index_df['length'] == x]
             # 1 file per kmer length
-            file = f'{self.output_dir}/pvacbind_{x}mers.fa'
-            for k,v in fasta_info.items():
-                write_str = f'>{v}\n{k}\n'
+            file = f'{self.output_dir}/epitope_length_{x}.fa'
+            # loop over rows in subset df
+            for row in index_subset.itertuples():
+                print(row)
+                write_str = f'>{row.indexes}\n{row.kmer}\n'
+                # don't duplicate entries
                 if os.path.exists(file):
                     dup_content = re.search(write_str, open(file, 'r').read())
                     if dup_content == None:
@@ -66,21 +96,7 @@ class FastaToKmers():
                     with open(file, 'a') as f:
                         f.write(write_str)  
 
-
-def define_parser():
-    parser = argparse.ArgumentParser(
-        description="Create pVACbind input fasta from predicted mutant transcript",
-    )
-    parser.add_argument('tscript_fasta', help='output fasta file with wt and mut aa seqs', type=str)
-    parser.add_argument('output_dir', help='output path', type=str)
-    parser.add_argument('classI_kmer_lengths', help='List of desired HLA classI neoantigen lengths', default='8,9,10,11', type=str)
-    parser.add_argument('classII_kmer_lengths', help='List of desired HLA classII neoantigen lengths', default='12,13,14,15,16,17,18', type=str)
-    return parser
-
-def main(args_input = sys.argv[1:]):
-    parser = define_parser()
-    args = parser.parse_args(args_input)
-
-    j = FastaToKmers(args.tscript_fasta, args.output_dir)
-    j.loop_through_tscripts()
-    j.create_fasta_pvacbind()
+    def execute(self):
+        self.loop_through_tscripts()
+        self.create_index_file()
+        self.create_epitope_fastas()

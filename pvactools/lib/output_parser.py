@@ -837,10 +837,10 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Splice Transcript'   : tsv_index.split('.')[3],
                 'Transcript Support Level': tsv_entry['transcript_support_level'],
                 'Splice Junction'     : tsv_index.split('.')[2],
-                'Splice Gene Name'           : tsv_index.split('.')[1],
+                'Splice Gene Name'    : tsv_index.split('.')[1],
                 'Amino Acid Change'   : tsv_entry['amino_acid_change'],
                 'Variant Type'        : tsv_entry['variant_type'],
-                ### pvacbind minus mutation start ###
+                ### pvacbind ###
                 'HLA Allele'          : allele,
                 'Splice Protein Position': tsv_index.split('.')[4],
                 'Epitope Seq'         : mt_epitope_seq,
@@ -853,17 +853,6 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             }
             row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
             row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
-            for (tsv_key, row_key) in zip(['gene_expression', 'transcript_expression', 'normal_vaf', 'tdna_vaf', 'trna_vaf'], ['Gene Expression', 'Transcript Expression', 'Normal VAF', 'Tumor DNA VAF', 'Tumor RNA VAF']):
-                if tsv_key in tsv_entry:
-                    if tsv_entry[tsv_key] == 'NA':
-                        row[row_key] = 'NA'
-                    else:
-                        row[row_key] = round(float(tsv_entry[tsv_key]), 3)
-            for (tsv_key, row_key) in zip(['normal_depth', 'tdna_depth', 'trna_depth'], ['Normal Depth', 'Tumor DNA Depth', 'Tumor RNA Depth']):
-                if tsv_key in tsv_entry:
-                    row[row_key] = tsv_entry[tsv_key]
-            if self.add_sample_name:
-                    row['Sample Name'] = self.sample_name
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                 if method in mt_scores:

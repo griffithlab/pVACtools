@@ -52,6 +52,7 @@ setup(
         "pvactools.tools.pvacvector",
         "pvactools.tools.pvacseq",
         "pvactools.tools.pvacview",
+        "pvactools.tools.pvacsplice",
         "pvactools.lib",
     ],
     entry_points={
@@ -62,6 +63,7 @@ setup(
             "pvacfuse = pvactools.tools.pvacfuse.main:main",
             "pvacvector = pvactools.tools.pvacvector.main:main",
             "pvacview = pvactools.tools.pvacview.main:main",
+            "pvacsplice = pvactools.tools.pvacsplice.main:main",
         ]
     },
     install_requires=[
