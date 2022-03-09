@@ -2,11 +2,11 @@ import sys
 import os
 import pandas as pd
 from splice_pipeline import *
-from lib.prediction_class import *
-from lib.pipeline import *
-from lib.run_argument_parser import *
-from lib.post_processor import *
-from lib.run_utils import *
+from pvactools.lib.prediction_class import *
+from pvactools.lib.pipeline import *
+from pvactools.lib.run_argument_parser import *
+from pvactools.lib.post_processor import *
+from pvactools.lib.run_utils import *
 
 
 def define_parser():
@@ -57,6 +57,7 @@ def main(args_input = sys.argv[1:]):
 
     junction_arguments = {
         'input_file'                       : args.input_file, 
+        'annotated_vcf'                    : args.annotated_vcf,
         'sample_name'                      : args.sample_name,
         'base_output_dir'                  : base_output_dir,
         'ref_fasta'                        : args.ref_fasta,
@@ -74,9 +75,9 @@ def main(args_input = sys.argv[1:]):
     pvacbind_arguments = junction_arguments.copy()
     # for loop over epitope lengths (multiple input files)
     additional_args = {
-        'input_file'                : f'{base_output_dir}/pvacbind_8mers.fa',
-        'input_file_type'           : 'pvacsplice_vcf_fasta', #
-        'annotated_vcf'             : args.annotated_vcf, #
+        'input_file'                : f'{base_output_dir}/epitope_length_8.fa',
+        'input_file_type'           : 'junctions',
+        'base_output_dir'           : base_output_dir,
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
@@ -114,9 +115,8 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments['output_dir']              = output_dir
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
         
-        # This changes to PvacsplicePipeline(PvacbindPipeline) class in lib/pipeline.py
-        pipeline = PvacsplicePipeline(**class_i_arguments)
-        pipeline.execute()
+        pipeline = PvacbindPipeline(**class_i_arguments)
+        #pipeline.execute()
     elif len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
     elif len(class_i_alleles) == 0:
@@ -145,9 +145,8 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments['output_dir']              = output_dir
         class_ii_arguments['netmhc_stab']             = False
         
-        # This changes to PvacsplicePipeline(PvacbindPipeline) class in lib/pipeline.py
-        pipeline = PvacsplicePipeline(**class_ii_arguments)
-        pipeline.execute()
+        pipeline = PvacbindPipeline(**class_ii_arguments)
+        #pipeline.execute()
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
     elif len(class_ii_alleles) == 0:
