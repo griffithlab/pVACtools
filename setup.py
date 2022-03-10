@@ -44,7 +44,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/iedb_allele
 
 setup(
     name="pvactools",
-    version="3.0.0rc",
+    version="3.0.0",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",
@@ -65,7 +65,7 @@ setup(
         ]
     },
     install_requires=[
-        'PyVCF',
+        'vcfpy',
         'requests',
         'PyYAML>=5.1',
         'biopython==1.76',

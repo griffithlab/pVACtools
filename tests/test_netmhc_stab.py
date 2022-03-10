@@ -13,6 +13,17 @@ from filecmp import cmp
 from pvactools.lib.netmhc_stab import NetMHCStab
 from .test_utils import *
 
+def make_success_response(data, files, path):
+    reader = open(os.path.join(
+        path,
+        "Netmhcstab.{}.html".format(data['allele'])
+    ), mode='rb')
+    response_obj = lambda :None
+    response_obj.status_code = 200
+    response_obj.content = reader.read()
+    reader.close()
+    return response_obj
+
 def make_response(data, files, path, test_file):
     reader = open(os.path.join(
         path,
@@ -34,7 +45,7 @@ def make_rejected_response(data, files, path, self):
     else:
         reader = open(os.path.join(
             path,
-            'Netmhcstab.html'
+            "Netmhcstab.{}.html".format(data['allele'])
         ), mode='rb')
     response_obj = lambda :None
     response_obj.status_code = 200
@@ -64,16 +75,16 @@ class NetChopTest(unittest.TestCase):
         self.assertTrue(compiled_script_path)
 
     def test_netmhc_stab_runs(self):
-        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_success_response(
             data,
             files,
-            self.test_data_directory,
-            'Netmhcstab.html'
+            self.test_data_directory
            ))):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
-                output_file.name
+                output_file.name,
+                file_type='pVACseq'
             ).execute()
             self.assertTrue(cmp(
                 os.path.join(self.test_data_directory, 'Test_filtered.stab.tsv'),
@@ -81,7 +92,7 @@ class NetChopTest(unittest.TestCase):
             ))
 
     def test_netmhc_stab_fail(self):
-        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
             data,
             files,
             self.test_data_directory,
@@ -90,13 +101,14 @@ class NetChopTest(unittest.TestCase):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
-                output_file.name
+                output_file.name,
+                file_type='pVACseq'
             ).execute()
         self.assertTrue('NetMHCstabpan encountered an error during processing.' in str(context.exception))
 
     def test_netmhc_stab_rejected(self):
         logging.disable(logging.NOTSET)
-        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_rejected_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_rejected_response(
             data,
            files,
            self.test_data_directory,
@@ -105,7 +117,8 @@ class NetChopTest(unittest.TestCase):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
-                output_file.name
+                output_file.name,
+                file_type='pVACseq'
             ).execute()
             self.assertTrue(cmp(
                 os.path.join(self.test_data_directory, 'Test_filtered.stab.tsv'),
@@ -113,9 +126,24 @@ class NetChopTest(unittest.TestCase):
             ))
             l.check_present(('root', 'WARNING', S("Too many jobs submitted to NetMHCstabpan server. Waiting to retry.")))
 
+    def test_netmhc_stab_cannot_open_file_error_retry(self):
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
+            data,
+            files,
+            self.test_data_directory,
+            'Netmhcstab.cannot_open_file_error.html'
+           ))), self.assertRaises(Exception) as context:
+            output_file = tempfile.NamedTemporaryFile()
+            NetMHCStab(
+                os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
+                output_file.name,
+                file_type='pVACseq'
+            ).execute()
+        self.assertTrue('NetMHCstabpan server was unable to read the submitted fasta file:' in str(context.exception))
+
     #This is to ensure that we catch error cases that are not explicitly handled
     def test_netmhc_stab_other_error(self):
-        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
             data,
             files,
             self.test_data_directory,
@@ -124,6 +152,7 @@ class NetChopTest(unittest.TestCase):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
-                output_file.name
+                output_file.name,
+                file_type='pVACseq'
             ).execute()
         self.assertTrue('Unexpected return value from NetMHCstabpan server. Unable to parse response.' in str(context.exception))

@@ -60,6 +60,12 @@ def main(args_input = sys.argv[1:]):
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
+    if args.tumor_purity is not None:
+        if args.tumor_purity > 1:
+            raise Exception("--tumor-purity must be a float between 0 and 1. Value too large: {}".format(args.tumor_purity))
+        elif args.tumor_purity < 0:
+            raise Exception("--tumor-purity must be a float between 0 and 1. Value too small: {}".format(args.tumor_purity))
+
     input_file_type = 'vcf'
     base_output_dir = os.path.abspath(args.output_dir)
 
@@ -98,6 +104,7 @@ def main(args_input = sys.argv[1:]):
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,
         'blastp_db'                 : args.blastp_db,
+        'tumor_purity'              : args.tumor_purity,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:

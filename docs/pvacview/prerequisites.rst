@@ -6,14 +6,20 @@
 
 .. raw:: html
 
-   <style> .large {font-size: 110%; font-weight: bold} </style>
+  <style> .large {font-size: 90%; font-weight: bold} </style>
+  <style> .bold {font-size: 100%; font-weight: bold} </style>
+
+.. role:: large
+.. role:: bold
 
 Prerequisites
 ---------------
 
 In order to launch the pVACview R shiny application, you will need to have R/ R studio and a list of R packages correctly installed.
-Once launched, pVACview will provide you with the options of either uploading your corresponding input files for analysis,
-or choose to load input files from a default directory (Note that latter option is only valid when you are launching the R shiny app located in the directory of the sample you want to analyze).
+Once launched, pVACview will require you to upload your corresponding input files for analysis. Alternatively, there is also a demo dataset that can be loaded to explore basic features of the app.
+An online version of pVACview is also available at `pvacview.org <https://www.pvacview.org>`_.
+
+:bold:`Please note that you will need internet connection for pVACview, as it needs to download necessary datasets including both the demo data and anchor calculations.`
 
 Installing R/ R studio
 ____________________________
@@ -32,11 +38,15 @@ Additionally, there are a number of packages you will need to install in your R/
   install.packages("jsonlite", dependencies=TRUE)
   install.packages("tibble", dependencies=TRUE)
   install.packages("tidyr", dependencies=TRUE)
+  install.packages("plyr", dependencies=TRUE)
+  install.packages("dplyr", dependencies=TRUE)
   install.packages("shinydashboard", dependencies=TRUE)
   install.packages("shinydashboardPlus", dependencies=TRUE)
   install.packages("fresh", dependencies=TRUE)
   install.packages("shinycssloaders", dependencies=TRUE)
   install.packages("RCurl", dependencies=TRUE)
+  install.packages("curl", dependencies=TRUE)
+
 
 Note that certain R packages may have further dependencies that require additional installation. If you are using R studio, these should be automatically installed for you during the respective package
 installation process. However, if you are using conda-based R, you may need to install them manually (usually by running ``install.packages(<package name>)``).
@@ -44,7 +54,7 @@ installation process. However, if you are using conda-based R, you may need to i
 .. _launching_pvacview_label:
 
 Launching pVACview R Shiny App
-____________________________
+______________________________
 
 Once you have R packages and their respective dependencies successfully installed, you may now launch the pVACview app.
 

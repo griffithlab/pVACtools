@@ -21,7 +21,7 @@ class CsqParser:
     def resolve_alleles(self, entry):
         alleles = {}
         for alt in entry.ALT:
-            alt = str(alt)
+            alt = alt.value
             if self.is_insertion(entry.REF, alt) or self.is_deletion(entry.REF, alt):
                 if alt[0:1] != entry.REF[0:1]:
                     alleles[alt] = alt
