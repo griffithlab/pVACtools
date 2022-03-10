@@ -526,8 +526,8 @@ class OutputParser(metaclass=ABCMeta):
                     row['%s %s' % (pretty_method, suffix)] = s
                 
         else:
-            # when would this ever get called?
-            row['%s %s' % (prediction_method, suffix)] = 'NA'
+            # This covers cases where the allele/length of the result row is not supported by the prediction algorithm
+            row['%s %s' % (pretty_method, suffix)] = 'NA'
 
     def execute(self):
         tsv_entries = self.parse_input_tsv_file()
