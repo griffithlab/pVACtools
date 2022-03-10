@@ -31,6 +31,7 @@ class ValidAlleles:
         parser.add_argument(
             "-s", "--species",
             choices=sorted(set(list(PredictionClass.allele_to_species_map().values())), key=str.casefold),
-            help="Show valid alleles for the selected species only"
+            help="Show valid alleles for the selected species only",
+            default='human'
         )
         return parser

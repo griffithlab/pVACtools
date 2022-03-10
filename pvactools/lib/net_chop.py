@@ -10,6 +10,8 @@ from Bio import SeqIO
 import collections
 import logging
 import random
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 import pvactools.lib.run_utils
 
@@ -32,8 +34,10 @@ class NetChop:
             records_dict = {x.id: str(x.seq) for x in records}
         return records_dict
 
-    def extract_flanked_epitope(self, full_peptide, epitope):
+    def extract_flanked_epitope(self, full_peptide, epitope, seq_id):
         flanking_sequence_length = 9
+        if epitope not in full_peptide:
+            raise Exception("FASTA entry {} ({}) does not contain epitope {}. Please check that the FASTA file matches the input TSV.".format(seq_id, full_peptide, epitope))
         ep_start = full_peptide.index(epitope)
         start = ep_start - flanking_sequence_length
         if start < 0:
@@ -64,6 +68,7 @@ class NetChop:
             writer.writeheader()
             x = 0
             i=1
+            http = self.setup_adapter()
             for chunk in pvactools.lib.run_utils.split_file(reader, 100):
                 staging_file = tempfile.NamedTemporaryFile(mode='w+')
                 current_buffer = {}
@@ -72,18 +77,21 @@ class NetChop:
                     sequence_id = ('%010x'%x)[-10:]
                     staging_file.write('>'+sequence_id+'\n')
                     if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
-                        full_peptide = mt_records_dict[line['Mutation']]
+                        index = line['Mutation']
                         epitope = line['Epitope Seq']
                     else:
-                        full_peptide = mt_records_dict[line['Index']]
+                        index = line['Index']
                         epitope = line['MT Epitope Seq']
-                    peptide, start_diff = self.extract_flanked_epitope(full_peptide, epitope)
+                    if index not in mt_records_dict:
+                        raise Exception("FASTA entry for index {} not found. Please check that the FASTA file matches the input TSV.".format(index))
+                    full_peptide = mt_records_dict[index]
+                    peptide, start_diff = self.extract_flanked_epitope(full_peptide, epitope, index)
                     staging_file.write(peptide+'\n')
                     current_buffer[sequence_id] = {k:line[k] for k in line}
                     seqs_start_diff[sequence_id] = (start_diff, len(epitope))
                     x+=1
                 staging_file.seek(0)
-                response = self.query_netchop_server(staging_file, chosen_method, self.threshold, jobid_searcher)
+                response = self.query_netchop_server(http, staging_file, chosen_method, self.threshold, jobid_searcher)
 
                 if fail_searcher.search(response.content.decode()):
                     raise Exception("NetChop encountered an error during processing.\n{}".format(response.content.decode()))
@@ -92,7 +100,7 @@ class NetChop:
                     logging.warning("Too many jobs submitted to NetChop server. Waiting to retry.")
                     sleep(random.randint(5, 10))
                     staging_file.seek(0)
-                    response = self.query_netchop_server(staging_file, chosen_method, self.threshold, jobid_searcher)
+                    response = self.query_netchop_server(http, staging_file, chosen_method, self.threshold, jobid_searcher)
 
                 if success_searcher.search(response.content.decode()):
                     results = [item.strip() for item in result_delimiter.split(response.content.decode())]
@@ -126,11 +134,16 @@ class NetChop:
                                 for x in map(lambda x: (int(x[0]), x[1]), cleavage_scores.items())
                                 if x[0] >= start_diff and x[0] <= start_diff + ep_len
                             ]
-                            max_cleavage_score = max(epitope_cleavage_scores, key=lambda x: x[1])
-                            best_cleavage_position = max_cleavage_score[0]
-                            best_cleavage_score = max_cleavage_score[1]
-                            sorted_cleavage_scores = collections.OrderedDict(sorted(epitope_cleavage_scores))
-                            cleavage_sites = ','.join(['%s:%s' % (key, value) for (key, value) in sorted_cleavage_scores.items()])
+                            if len(epitope_cleavage_scores) == 0:
+                                best_cleavage_position = 'NA'
+                                best_cleavage_score = 'NA'
+                                cleavage_sites = 'NA'
+                            else:
+                                max_cleavage_score = max(epitope_cleavage_scores, key=lambda x: x[1])
+                                best_cleavage_position = max_cleavage_score[0]
+                                best_cleavage_score = max_cleavage_score[1]
+                                sorted_cleavage_scores = collections.OrderedDict(sorted(epitope_cleavage_scores))
+                                cleavage_sites = ','.join(['%s:%s' % (key, value) for (key, value) in sorted_cleavage_scores.items()])
                         line = current_buffer[sequence_name]
                         line.update({
                             'Best Cleavage Position': best_cleavage_position,
@@ -141,8 +154,37 @@ class NetChop:
                 else:
                     raise Exception("Unexpected return value from NetChop server. Unable to parse response.\n{}".format(response.content.decode()))
 
-    def query_netchop_server(self, staging_file, chosen_method, threshold, jobid_searcher):
-        response = requests.post(
+    def setup_adapter(self):
+        retry_strategy = Retry(
+            total=3,
+            status_forcelist=[408, 429, 500, 502, 503, 504],
+            method_whitelist=["POST", "GET"]
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        http = requests.Session()
+        http.mount("https://", adapter)
+        http.mount("http://", adapter)
+        return http
+
+    def query_netchop_server(self, http, staging_file, chosen_method, threshold, jobid_searcher):
+        try:
+            response = self.post_query(http, staging_file, chosen_method, threshold)
+        except requests.exceptions.ReadTimeout:
+            response = self.post_query(http, staging_file, chosen_method, threshold)
+        if response.status_code != 200:
+            raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
+        while jobid_searcher.search(response.content.decode()):
+            sleep(10)
+            try:
+                response = http.get(response.url, timeout=10)
+            except requests.exceptions.ReadTimeout:
+                response = http.get(response.url, timeout=10)
+            if response.status_code != 200:
+                raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
+        return response
+
+    def post_query(self, http, staging_file, chosen_method, threshold):
+        response = http.post(
             "https://services.healthtech.dtu.dk/cgi-bin/webface2.cgi",
             files={'SEQSUB':(staging_file.name, staging_file, 'text/plain')},
             data = {
@@ -150,15 +192,9 @@ class NetChop:
                 'SEQPASTE':'',
                 'method':chosen_method,
                 'thresh':'%0f'%threshold
-            }
+            },
+            timeout=10
         )
-        if response.status_code != 200:
-            raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
-        while jobid_searcher.search(response.content.decode()):
-            sleep(10)
-            response = requests.get(response.url)
-            if response.status_code != 200:
-                raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
         return response
 
     @classmethod

@@ -27,6 +27,7 @@ jobs:
           sudo apt-get -qq update
           sudo apt-get install -y ghostscript
           sudo apt-get install -y gcc
+          sudo apt-get install -y pandoc
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
@@ -38,7 +39,7 @@ jobs:
       - name: Run tests
         env:
           TEST_FLAG: 1
-        run: coverage run --source=lib,tools -m unittest discover -v
+        run: coverage run --source=pvactools.lib,pvactools.tools -m unittest discover -v
       - name: Coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

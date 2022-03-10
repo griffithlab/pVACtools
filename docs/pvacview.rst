@@ -5,7 +5,7 @@
 .. _pvacview:
 
 pVACview
-=======
+========
 
 pVACview is a R shiny based tool designed to aid specifically in the prioritization and selection of neoantigen candidates for personalized cancer vaccines.
 It takes as inputs a pVACseq output aggregate report file (tsv format) and a corresponding pVACseq output metrics file (json).

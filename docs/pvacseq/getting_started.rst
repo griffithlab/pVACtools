@@ -82,3 +82,14 @@ inside of the container and ``/local/path/to/output_dir`` on your local
 machine.
 
 Please note that our Docker container already includes installations of the IEDB class I and class II tools at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
+
+The Docker container also includes
+installation of BLAST at ``/opt/ncbi-blast-2.12.0+`` (``--blastp-path
+/opt/ncbi-blast-2.12.0+/bin/blastp``) as well as the ``refseq_select_prot``
+database under the ``/opt/blastdb`` directory. The ``BLASTDB`` environment variable is already
+set to this path inside of the Docker container so this database can be used
+without any additional modifications. The ``refseq_protein``
+database is not installed inside of the Docker container due to size
+constraints. If usage of this database is desired, we recommend installing it outside
+of the Docker container and mounting the database path using the ``-v`` flag in your
+``docker run`` command (``-v /local/path/to/blastdb:/opt/blastdb``).

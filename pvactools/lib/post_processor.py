@@ -44,7 +44,7 @@ class PostProcessor:
     def aggregate_all_epitopes(self):
         print("Creating aggregated report")
         if self.file_type == 'pVACseq':
-            PvacseqAggregateAllEpitopes(self.input_file, self.aggregate_report).execute()
+            PvacseqAggregateAllEpitopes(self.input_file, self.aggregate_report, self.tumor_purity).execute()
         else:
             UnmatchedSequenceAggregateAllEpitopes(self.input_file, self.aggregate_report).execute()
         print("Completed")
@@ -118,7 +118,7 @@ class PostProcessor:
     def call_netmhc_stab(self):
         if self.run_netmhc_stab:
             print("Running NetMHCStabPan")
-            NetMHCStab(self.net_chop_fh.name, self.netmhc_stab_fh.name).execute()
+            NetMHCStab(self.net_chop_fh.name, self.netmhc_stab_fh.name, self.file_type, self.top_score_metric).execute()
             print("Completed")
         else:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)

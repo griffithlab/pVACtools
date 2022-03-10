@@ -22,8 +22,9 @@ inframe ``protein_altering_variant``, or
 ``frameshift_variant`` by VEP as long as the transcript was not also annotated
 as ``start_lost``. In addition, pVACseq only includes variants that were
 called as homozygous or heterozygous variant. Variants that were not called
-in the sample specified are skipped (determined by examining the ``GT`` genotype 
-field in the VCF).
+in the sample specified are skipped (determined by examining the ``GT`` genotype
+field in the VCF). In addition, some variants might be skipped in cases where
+the VEP annotation does not contain protein position information.
 
 :large:`My pVACseq command has been running for a long time. Why is
 that?`
@@ -100,7 +101,38 @@ There are a number of factors that determine the number of IEDB calls to be made
   **Speedup suggestion**: Use a host with multiple cores and sufficient memory and 
   use a larger number of threads.
 
-:large:`My pVACseq output file does not contain entries for all of the
+:large:`My pVACseq all_epitopes output file does not contain entries for all of the
+variants in the VCF. Why is that?`
+
+There are a variety of reasons why a variant in your VCF might've been skipped
+by pVACseq.
+
+pVACseq only makes predictions for those transcripts of a variant that were annotated
+as ``missense_variant``, ``inframe_insertion``, ``inframe_deletion``,
+inframe ``protein_altering_variant``, or
+``frameshift_variant`` by VEP as long as the transcript was not also annotated
+as ``start_lost``.
+
+In addition, pVACseq only includes variants that were
+called as homozygous or heterozygous variant. Variants that were not called
+in the sample specified are skipped (determined by examining the ``GT`` genotype
+field in the VCF).
+
+Some variants might be skipped in cases where
+the VEP annotation does not contain protein position information.
+
+If the ``--pass-only`` flag is set, variants with a filter in the VCF FILTER
+column will be skipped.
+
+Variants may also be skipped if the resulting peptide sequence includes an
+unsupported amino acid or other character. Only ``A``, ``R``, ``N``, ``D``, ``C``, ``E``,
+``Q``, ``G``, ``H``, ``I``, ``L``, ``K``, ``M``, ``F``, ``P``, ``S``, ``T``, ``W``, ``Y``,
+and ``V`` are supported.
+
+Lastly, a variant may be skipped if the resulting peptide sequence would be
+too short for the chosen epitope length(s).
+
+:large:`My pVACseq all_epitopes output file does not contain entries for all of the
 alleles I chose. Why is that?`
 
 There could be a few reasons why the pVACseq output does not contain

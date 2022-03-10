@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACfuse logo
 
+.. _pvacfuse_tools:
+
 Optional Downstream Analysis Tools
 ==================================
 
