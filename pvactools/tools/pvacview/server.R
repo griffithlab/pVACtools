@@ -116,6 +116,7 @@ server <- shinyServer(function(input, output, session) {
 
   #Option 2: Load from HCC1395 demo data from github
    observeEvent(input$loadDefaultmain,{
+     ## Class I demo aggregate report
      data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/f83c52c8b8387beae69be8b200a44dcf199d9af2/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
      mainData <- read.table(text = data, sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(mainData) <- mainData[1,]
@@ -127,6 +128,7 @@ server <- shinyServer(function(input, output, session) {
      mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
      mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
      df$mainTable <- mainData
+     ## Class I demo metrics file
      metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/f83c52c8b8387beae69be8b200a44dcf199d9af2/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
      df$metricsData <- fromJSON(txt = metricsdata)
      dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
@@ -141,6 +143,13 @@ server <- shinyServer(function(input, output, session) {
        df$comments <- data.frame(matrix("No comments",nrow=nrow(df$mainTable)),ncol=1)
      }
      rownames(df$comments) <- df$mainTable$ID
+     ## Class II additional demo aggregate report 
+     add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/6c24091a9276618af422c76cc9f1c23f16c2074d/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+     addData <- read.table(text = add_data, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     colnames(addData) <- addData[1,]
+     addData <- addData[-1,]
+     row.names(addData) <- NULL
+     df$additionalData <- addData
      updateTabItems(session, "tabs", "explore")
    })
    
