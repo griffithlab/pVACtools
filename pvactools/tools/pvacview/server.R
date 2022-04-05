@@ -150,6 +150,11 @@ server <- shinyServer(function(input, output, session) {
      addData <- addData[-1,]
      row.names(addData) <- NULL
      df$additionalData <- addData
+     ## Hotspot gene list autoload
+     gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/7c7b8352d81b44ec7743578e7715c65261f5dab7/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
+     gene_list <- read.table(text = gene_data, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     df$gene_list <- gene_list
+     df$mainTable$`Gene of Interest` <- apply(df$mainTable,1, function(x) {any(x['Gene'] == df$gene_list)})
      updateTabItems(session, "tabs", "explore")
    })
    
