@@ -196,6 +196,10 @@ class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
             +"Maximum distance window (upstream and downstream) for a variant outside the junction.",
             default=100
         )
+        self.parser.add_argument(
+            '--normal-sample-name',
+            help="In a multi-sample VCF, the name of the matched normal sample."
+        )
 
 class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser):
     def __init__(self, tool_name, input_file_help):

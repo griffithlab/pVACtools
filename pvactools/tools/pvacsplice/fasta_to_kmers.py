@@ -9,7 +9,7 @@ class FastaToKmers():
         self.output_dir      = kwargs['output_dir']
         self.epitope_lengths = [8] #kwargs['epitope_lengths']
         self.combined_df     = kwargs['combined_df']
-        self.unique_kmers = {}
+        self.unique_kmers    = {}
 
 
     def create_kmers(self, seq_name):
@@ -34,7 +34,7 @@ class FastaToKmers():
         # all kmers not in wt kmers
         final_kmers = {k: v for k, v in mut_dict.items() if k not in list(wt_dict.keys())}
         if len(final_kmers) == 0:
-            print(f'{wt_name} does not produce any tumor-specific kmers.') # sys.exit()
+            print(f'{wt_name} does not produce any tumor-specific kmers.') # continue statement
         return final_kmers
 
     def loop_through_tscripts(self):
@@ -72,20 +72,24 @@ class FastaToKmers():
         self.index_df = self.index_df.explode('indexes')
         # add peptide_position
         self.index_df['peptide_position'] = self.index_df.indexes.apply(lambda x: x.split('.')[-1])
-        self.index_df['indexes'] = self.index_df.indexes.apply(lambda x: '.'.join(x.split('.')[:-1]))
+        #self.index_df['indexes'] = self.index_df.indexes.apply(lambda x: '.'.join(x.split('.')[:-1]))
         # save to_csv()
-        self.index_df.to_csv(f'{self.output_dir}/kmer_index.tsv' ,sep='\t', index=False)
+        #self.index_df.to_csv(f'{self.output_dir}/kmer_index.tsv' ,sep='\t', index=False)
 
     def create_epitope_fastas(self):
         # for only 1 length at a time
         for x in self.epitope_lengths:
-            index_subset = self.index_df[self.index_df['length'] == x]
+            index_subset = self.index_df[self.index_df['length'] == x].sort_values(by=['indexes'])
+            # unique indexes
+            #unique_indexes = index_subset['indexes'].unique().tolist()
+            #unique_dict = {i: 1 for i in unique_indexes}
             # 1 file per kmer length
             file = f'{self.output_dir}/epitope_length_{x}.fa'
             # loop over rows in subset df
             for row in index_subset.itertuples():
-                print(row)
+                #count = unique_dict[row.indexes]
                 write_str = f'>{row.indexes}\n{row.kmer}\n'
+                #unique_dict[row.indexes] += 1
                 # don't duplicate entries
                 if os.path.exists(file):
                     dup_content = re.search(write_str, open(file, 'r').read())

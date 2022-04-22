@@ -7,7 +7,7 @@ from filter_regtools_results import *
 from junction_to_fasta import *
 from fasta_to_kmers import *
 from pvactools.lib.run_argument_parser import *
-from pvactools.lib.input_file_converter import VcfConverter
+from pvactools.lib.input_file_converter import PvacspliceVcfConverter
 
 
 class JunctionPipeline():
@@ -38,14 +38,14 @@ class JunctionPipeline():
             'fasta'    : '_transcripts.fa',
         }
         file_name = self.sample_name + inputs[type]
-        return os.path.join(self.output_dir, file_name)
+        return os.path.join(self.output_dir, file_name) 
 
     def filter_regtools_results(self):
         print('Filtering regtools results')
         filter_params = {
             'input_file'  : self.input_file,
             'output_file' : self.create_file_path('filtered'),
-            'sample_name' : self.sample_name,
+            #'sample_name' : self.sample_name,
             'output_dir'  : self.output_dir,
             'score'       : self.junction_score,
             'distance'    : self.variant_distance,
@@ -62,39 +62,49 @@ class JunctionPipeline():
             'output_file' : self.create_file_path('annotated'),
             'sample_name' : self.sample_name,
         }
-        converter = VcfConverter(**convert_params)
+        converter = PvacspliceVcfConverter(**convert_params)
         converter.execute()
         print('Completed')
     
     def combine_inputs(self):
         print('Combining junction and variant information')
-        # should always have the same column names (specify regtools version)
+        # read in filtered junctions and annotated tsv
         junctions = pd.read_csv(self.create_file_path('filtered'), sep='\t')
-        # dif vcfs might have dif column names? (specify in docs)
         annotated = pd.read_csv(self.create_file_path('annotated'), sep='\t')
+        # rename annotated cols
         annotated.rename(columns={
-            'chromosome_name' : 'variant_chrom', 
-            'start'           : 'variant_start', 
-            'stop'            : 'variant_stop',
+                'transcript_name' : 'transcripts',
+                'chromosome_name' : 'variant_chrom', 
+                'start'           : 'variant_start', 
+                'stop'            : 'variant_stop',
             }, inplace=True
         )
-        # remove version number to compare with filtered junctions file
-        annotated['transcript_name'] = annotated['transcript_name'].str.split('.', expand=True)[[0]]
-        # merge dfs by variant_info, gene_id, gene_name, transcript_id
-        self.merged_df = junctions.merge(annotated, on=[
-            'variant_chrom', 
-            'variant_start', 
-            'variant_stop', 
-            'transcript_name', 
-            'ensembl_gene_id', 
-            'gene_name',
+        # remove version number in annotated  to compare with filtered junctions file
+        annotated['transcripts'] = annotated['transcripts'].str.split('.', expand=True)[[0]]
+        
+        # separate snvs and indels because need coors fix for indels
+        snv_df = annotated[(annotated['reference'].str.len() == 1) & (annotated['variant'].str.len() == 1)]
+        
+        # error here - if coordinates don't match and indel - check format
+        # temp: if indel, accept transcript only matching?
+        indel_df = annotated[~annotated['transcripts'].isin(snv_df['transcripts'].unique().tolist())]
+
+        # merge dfs by variant_info, transcript_id
+        # error message: if can't find tscript in vcf, it's a problem - can find all txpts just not all variants (indels in bed format from regtools)
+        self.merged_df = junctions.merge(snv_df, on=[
+                'variant_chrom', 
+                'variant_start', 
+                'variant_stop', 
+                'transcripts', 
             ]
         )
+
+        # f'{self.gene_name}.{self.tscript_id}.{self.junction_name}.{self.anchor}'
         # uniquify tsv indexes
-        self.merged_df['index'] = self.merged_df['index'] + '.' + self.merged_df['name'] 
+        self.merged_df['index'] = self.merged_df['Gene_name'] + '.' + self.merged_df['Transcript_stable_ID'] + '.' + self.merged_df['name'] + '.' + self.merged_df['anchor']
+
         self.merged_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
         print('Completed')
-
 
     def junction_to_fasta(self):
         print('Assembling tumor-specific splicing junctions')
@@ -104,14 +114,14 @@ class JunctionPipeline():
             for row in junction.itertuples():
                 junction_params = {
                     'fasta_path'     : self.ref_fasta,
-                    'tscript_id'     : row.transcript_name,
+                    'tscript_id'     : row.Transcript_stable_ID,
                     'chrom'          : row.junction_chrom,
                     'junction_name'  : row.name,
                     'junction_coors' : [row.junction_start, row.junction_stop],
                     'index'          : row.index, 
                     'anchor'         : row.anchor,
                     'strand'         : row.strand,
-                    'gene_name'      : row.gene_name,
+                    'gene_name'      : row.Gene_name,
                     'output_file'    : self.create_file_path('fasta'),
                     'output_dir'     : self.output_dir,
                 }
@@ -122,11 +132,13 @@ class JunctionPipeline():
                 mut = junctions.create_alt_df()
                 if mut.empty:
                     continue
-                wt_aa = junctions.get_aa_sequence(wt)
-                if not wt_aa:
+                wt_aa, wt_dna = junctions.get_aa_sequence(wt)
+                if not wt_aa or not wt_dna:
+                    print(f'{row.Transcript_stable_ID}: No WT sequence')
                     continue
-                mut_aa = junctions.get_aa_sequence(mut)
+                mut_aa, mut_dna = junctions.get_aa_sequence(mut)
                 junctions.create_sequence_fasta(wt_aa, mut_aa)
+                #junctions.create_sequence_fasta(wt_dna, mut_dna)
         print('Completed')
     
 
@@ -136,7 +148,7 @@ class JunctionPipeline():
             'fasta'           : self.create_file_path('fasta'),
             'output_dir'      : self.output_dir,
             'epitope_lengths' : self.class_i_epitope_length + self.class_ii_epitope_length, 
-            'combined_df'    : self.merged_df,
+            'combined_df'     : self.create_file_path('combined'),
         }
         fasta = FastaToKmers(**kmer_params)
         fasta.execute()
