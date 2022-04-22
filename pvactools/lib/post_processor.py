@@ -103,9 +103,10 @@ class PostProcessor:
             shutil.copy(self.coverage_filter_fh.name, self.transcript_support_level_filter_fh.name)
 
     def execute_top_score_filter(self):
-        print("Running Top Score Filter")
-        TopScoreFilter(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric, self.file_type).execute()
-        print("Completed")
+        if self.file_type != 'pVACsplice':
+            print("Running Top Score Filter")
+            TopScoreFilter(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric, self.file_type).execute()
+            print("Completed")
 
     def call_net_chop(self):
         if self.run_net_chop:

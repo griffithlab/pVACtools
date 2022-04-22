@@ -152,7 +152,7 @@ class JunctionToFasta():
         dna_seq = Seq(str_seq) # creating Seq object
         # negative strand
         if self.strand == -1:
-            dna_seq = dna_seq.reverse_complement()
+            dna_seq = dna_seq.reverse_complement() # still a Seq object
         # make biopython happy by making dna_seq a multiple of 3 
         # adding Ns to end of sequence if remainder != 0
         remainder = len(dna_seq) % 3
@@ -160,18 +160,19 @@ class JunctionToFasta():
             dna_seq += "NN"
         elif remainder == 2:
             dna_seq += "N"
-        aa_seq = str(dna_seq.translate(to_stop=True))
+        aa_seq = str(dna_seq.translate(to_stop=True)) # translating from Seq object
         if aa_seq[0] != 'M':
             print(f'{self.tscript_id} does not begin with start codon...skipping')
             aa_seq = ''
 
-        return aa_seq
+        return aa_seq, dna_seq
 
-    def create_sequence_fasta(self, wt_protein, alt_protein):
+    def create_sequence_fasta(self, wt_seq, alt_seq):
         #testing
         #file = f'{self.test_dir}/protein.fasta'
         #os.mkdir(f'{self.working_dir}/results')
-        write_str = f'>WT.{self.junction_index}\n{wt_protein}\n>ALT.{self.junction_index}\n{alt_protein}\n'
+        #header_line = f'{self.gene_name}.{self.tscript_id}.{self.junction_name}.{self.anchor}'
+        write_str = f'>WT.{self.junction_index}\n{wt_seq}\n>ALT.{self.junction_index}\n{alt_seq}\n'
         if os.path.exists(self.output_file):
             dup_content = re.search(write_str, open(self.output_file, "r").read())
             if dup_content == None:
@@ -180,6 +181,7 @@ class JunctionToFasta():
         else:
             with open(self.output_file, "a") as f:
                 f.write(write_str)
+
 
 
 

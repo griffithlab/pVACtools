@@ -33,7 +33,7 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['filtered_report_file'] = filtered_report_file
     post_processing_params['run_coverage_filter'] = False
     post_processing_params['minimum_fold_change'] = None
-    post_processing_params['file_type'] = 'pVACbind'
+    post_processing_params['file_type'] = 'pVACsplice'
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = False
@@ -115,8 +115,8 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments['output_dir']              = output_dir
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
         
-        pipeline = PvacbindPipeline(**class_i_arguments)
-        #pipeline.execute()
+        pipeline = PvacsplicePipeline(**class_i_arguments)
+        pipeline.execute()
     elif len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
     elif len(class_i_alleles) == 0:
@@ -145,8 +145,8 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments['output_dir']              = output_dir
         class_ii_arguments['netmhc_stab']             = False
         
-        pipeline = PvacbindPipeline(**class_ii_arguments)
-        #pipeline.execute()
+        pipeline = PvacsplicePipeline(**class_ii_arguments)
+        pipeline.execute()
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
     elif len(class_ii_alleles) == 0:

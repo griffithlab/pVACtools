@@ -8,77 +8,75 @@ class FilterRegtoolsResults():
     def __init__(self, **kwargs):
         self.input_file  = kwargs['input_file']
         self.output_file = kwargs['output_file']
-        self.sample_name = kwargs['sample_name']
+        #self.sample_name = kwargs['sample_name']
         self.output_dir  = kwargs['output_dir']
         self.score       = kwargs['score']
         self.distance    = kwargs['distance']
         self.tsl         = kwargs['tsl']
 
-
     def execute(self):
-        # load in ensembl dataset
-        dataset = Dataset(name='hsapiens_gene_ensembl', host='http://useast.ensembl.org')
-        
-        # read in regtools junctions.tsv
+        # open file, rename junction cols for clarity
         junctions = pd.read_csv(self.input_file, sep='\t')
         junctions = junctions.rename(columns={'chrom':'junction_chrom', 'start':'junction_start', 'end':'junction_stop'})
 
-        # filter junctions by score, strand, anchor, remove NAs, reset index
+        # filter on score, strand, and anchor
         filter_junctions = junctions[(junctions['score'] > self.score) & (junctions['strand'] != '?') & (junctions['anchor'].isin(['D', 'A', 'NDA']))].dropna().reset_index()
-        if len(filter_junctions) == 0:
-            raise ValueError('No junctions passed score and anchor filters. Exiting...')
-            
-        # expand variant_info field into chrom, start, end
+        # split variant_info into sep. cols
         filter_junctions[['variant_chrom', 'variant_start', 'variant_stop']] = filter_junctions['variant_info'].str.split(':|-|,', expand=True)[[0, 1, 2]]
 
-        # filter by chrom (necessary ??)
-        filter_junctions[filter_junctions['junction_chrom'] == filter_junctions['variant_chrom']]
-
-        # filter by distance: variant_start > start-distance and variant_start < end+distance 
-        # double check this logic
+        # filter by distance: variant_start > start-distance and variant_start < end+distance
+        # does strand matter here - no
         filter_junctions = filter_junctions[
-            (filter_junctions['variant_start'].astype(int) > filter_junctions['junction_start'].astype(int) - self.distance) & 
-            (filter_junctions['variant_start'].astype(int) < filter_junctions['junction_stop'].astype(int) + self.distance)
+           (filter_junctions['variant_start'].astype(int) > filter_junctions['junction_start'].astype(int) - self.distance) & 
+           (filter_junctions['variant_start'].astype(int) < filter_junctions['junction_stop'].astype(int) + self.distance)
         ] 
-
-        # get transcript info
+        
+        # example entry: 0: {'gene_ids': 'ENSG00000122483', 'transcripts': 'ENST00000343253,ENST00000370276,ENST00000401026,ENST00000421014,ENST00000455267'}
         tscript_dict = {i:{'gene_ids': x, 'transcripts': y} for i,(x,y) in enumerate(zip(filter_junctions['gene_ids'], filter_junctions['transcripts']))}
 
-        # filter by transcript biotype
+        # load ensembl database
+        dataset = Dataset(name='hsapiens_gene_ensembl', host='http://useast.ensembl.org')
+
+        # filter transcripts by protein_coding and there is a tsl assigned to tscript
         pc_junctions = pd.DataFrame()
         for k,v in tscript_dict.items():
+            # return these attributes
             protein_coding = dataset.query(attributes=[
                 'ensembl_transcript_id', 
                 'ensembl_gene_id', 
                 'external_gene_name',
                 'transcript_tsl',
-                ], 
+                'transcript_biotype'
+                ],
+                # filter on transcripts in tscript_dict
                 filters={
                     'link_ensembl_transcript_stable_id': v['transcripts'].split(','),
                     'transcript_biotype': 'protein_coding',
                     'transcript_tsl': True,
                 })
             if self.tsl:
+                # filter by tsl=1
                 protein_coding = protein_coding[protein_coding['Transcript support level (TSL)'].str.contains(f'tsl1')]
+            # add to df
             pc_junctions = pc_junctions.append(protein_coding)
-            tscript_dict[k]['transcript_name'] = ','.join(protein_coding['Transcript stable ID'].unique())
-            tscript_dict[k]['ensembl_gene_id'] = ','.join(protein_coding['Gene stable ID'].unique())
-            tscript_dict[k]['gene_name'] = ','.join(protein_coding['Gene name'].unique())
 
-        # merge new values with filter_junctions
-        tscript_df = pd.DataFrame(tscript_dict).transpose().replace('', float('NaN')).dropna().drop_duplicates()
-        merged_junctions = filter_junctions.merge(tscript_df, on=['transcripts', 'gene_ids'])
+        # save file
+        #pc_junctions.to_csv('/Users/mrichters/Desktop/Alt_Splicing/HCC1395/2022-3-29_pvacsplice/transcript_filtering.tsv', sep='\t')
 
-        # filter merged_junctions to include fields for junction_to_fasta.py
-        merged_junctions['strand'] = merged_junctions['strand'].replace(['+','-'], [1,-1])
-        final_merged = merged_junctions.drop('index', axis=1) #[['name', 'pc_transcripts','chrom','start','end','anchor','strand','pc_gene_names']]
-        
-        # expand tscripts to one per line
-        pd.options.mode.chained_assignment = None
-        final_merged['transcript_name'] = final_merged.transcript_name.apply(lambda x: x.split(','))
-        
-        final_merged = final_merged.explode('transcript_name')
+        # now choose junctions based on remaining transcripts:
 
-        final_merged.to_csv(os.path.join(self.output_dir, self.output_file), index=False, sep='\t')
+        # make transcripts from str to list and explode the list
+        filter_junctions['transcripts'] = filter_junctions['transcripts'].str.split(',')
+        explode_junctions = filter_junctions.explode('transcripts', ignore_index=True).drop('index', 1)
 
-        return final_merged
+        #explode_junctions.to_csv('/Users/mrichters/Desktop/Alt_Splicing/HCC1395/2022-3-29_pvacsplice/explode_transcripts.tsv', sep='\t')
+
+        # filter explode_junctions with pc['transcripts'] list
+        final_df = explode_junctions[explode_junctions['transcripts'].isin(pc_junctions['Transcript stable ID'])]
+        # merge and drop duplicates
+        final_df = final_df.merge(pc_junctions, left_on='transcripts', right_on='Transcript stable ID').drop_duplicates()
+        # remove spaces from col names and switch strand to numeral
+        final_df.columns = final_df.columns.str.replace(r'\s+', '_', regex=True)
+        final_df['strand'] = final_df['strand'].replace(['+','-'], [1,-1])
+
+        final_df.to_csv(os.path.join(self.output_dir, self.output_file), sep='\t', index=False)
