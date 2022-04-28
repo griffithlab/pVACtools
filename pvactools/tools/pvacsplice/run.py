@@ -58,7 +58,7 @@ def create_combined_reports_length(base_output_dir, args, mhc_class):
     post_processing_params['input_file'] = combined_file
     post_processing_params['file_type'] = 'pVACsplice'
     post_processing_params['filtered_report_file'] = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
-    post_processing_params['run_coverage_filter'] = False
+    post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['minimum_fold_change'] = None
     post_processing_params['run_manufacturability_metrics'] = True
@@ -119,7 +119,14 @@ def main(args_input = sys.argv[1:]):
         'keep_tmp_files'            : args.keep_tmp_files,
         'n_threads'                 : args.n_threads,
         'species'                   : species,
-        'run_reference_proteome_similarity': args.run_reference_proteome_similarity
+        'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
+        'normal_cov'                : args.normal_cov,
+        'normal_vaf'                : args.normal_vaf,
+        'tdna_cov'                  : args.tdna_cov,
+        'tdna_vaf'                  : args.tdna_vaf,
+        'trna_cov'                  : args.trna_cov,
+        'trna_vaf'                  : args.trna_vaf,
+        'expn_val'                  : args.expn_val,
     }
     pvacbind_arguments.update(additional_args)
 

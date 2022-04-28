@@ -200,6 +200,41 @@ class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
             '--normal-sample-name',
             help="In a multi-sample VCF, the name of the matched normal sample."
         )
+        self.parser.add_argument(
+            '--normal-cov', type=int,
+            help="Normal Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
+            default=5
+        )
+        self.parser.add_argument(
+            '--tdna-cov', type=int,
+            help="Tumor DNA Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
+            default=10
+        )
+        self.parser.add_argument(
+            '--trna-cov', type=int,
+            help="Tumor RNA Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
+            default=10
+        )
+        self.parser.add_argument(
+            '--normal-vaf', type=float,
+            help="Normal VAF Cutoff. Only sites BELOW this cutoff in normal will be considered.",
+            default=0.02
+        )
+        self.parser.add_argument(
+            '--tdna-vaf', type=float,
+            help="Tumor DNA VAF Cutoff. Only sites above this cutoff will be considered.",
+            default=0.25
+        )
+        self.parser.add_argument(
+            '--trna-vaf', type=float,
+            help="Tumor RNA VAF Cutoff. Only sites above this cutoff will be considered.",
+            default=0.25
+        )
+        self.parser.add_argument(
+            '--expn-val', type=float,
+            default=1.0,
+            help="Gene and Transcript Expression cutoff. Only sites above this cutoff will be considered.",
+        )
 
 class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser):
     def __init__(self, tool_name, input_file_help):
