@@ -7,7 +7,7 @@ class FastaToKmers():
     def __init__(self, **kwargs):
         self.tscript_fasta   = Fasta(kwargs['fasta'])
         self.output_dir      = kwargs['output_dir']
-        self.epitope_lengths = [8] #kwargs['epitope_lengths']
+        self.epitope_lengths = kwargs['epitope_lengths']
         self.combined_df     = kwargs['combined_df']
         self.unique_kmers    = {}
 

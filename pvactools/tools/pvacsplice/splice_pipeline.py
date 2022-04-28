@@ -17,11 +17,12 @@ class JunctionPipeline():
         self.sample_name                      = kwargs['sample_name']
         self.output_dir                       = kwargs['base_output_dir']
         self.ref_fasta                        = kwargs['ref_fasta']
-        self.class_i_epitope_length           = kwargs.pop('class_i_epitope_length', [8,9,10,11])
-        self.class_ii_epitope_length          = kwargs.pop('class_ii_epitope_length', [12,13,14,15,16,17,18])
+        self.class_i_epitope_length           = kwargs.pop('class_i_epitope_length', None)
+        self.class_ii_epitope_length          = kwargs.pop('class_ii_epitope_length', None)
         self.junction_score                   = kwargs.pop('junction_score', 10)
         self.variant_distance                 = kwargs.pop('variant_distance', 100)
         self.maximum_transcript_support_level = kwargs.pop('maximum_transcript_support_level', 1)
+        self.normal_sample_name               = kwargs.pop('normal_sample_name', None)
 
     def execute(self):
         self.filter_regtools_results()
@@ -45,7 +46,6 @@ class JunctionPipeline():
         filter_params = {
             'input_file'  : self.input_file,
             'output_file' : self.create_file_path('filtered'),
-            #'sample_name' : self.sample_name,
             'output_dir'  : self.output_dir,
             'score'       : self.junction_score,
             'distance'    : self.variant_distance,
@@ -62,6 +62,8 @@ class JunctionPipeline():
             'output_file' : self.create_file_path('annotated'),
             'sample_name' : self.sample_name,
         }
+        if self.normal_sample_name is not None:
+            convert_params['normal_sample_name'] = self.normal_sample_name
         converter = PvacspliceVcfConverter(**convert_params)
         converter.execute()
         print('Completed')
