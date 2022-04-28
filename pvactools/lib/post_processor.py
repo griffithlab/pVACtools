@@ -107,6 +107,8 @@ class PostProcessor:
             print("Running Top Score Filter")
             TopScoreFilter(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric, self.file_type).execute()
             print("Completed")
+        else:
+            shutil.copy(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name)
 
     def call_net_chop(self):
         if self.run_net_chop:

@@ -67,7 +67,7 @@ class FilterRegtoolsResults():
 
         # make transcripts from str to list and explode the list
         filter_junctions['transcripts'] = filter_junctions['transcripts'].str.split(',')
-        explode_junctions = filter_junctions.explode('transcripts', ignore_index=True).drop('index', 1)
+        explode_junctions = filter_junctions.explode('transcripts', ignore_index=True).drop('index', axis=1)
 
         #explode_junctions.to_csv('/Users/mrichters/Desktop/Alt_Splicing/HCC1395/2022-3-29_pvacsplice/explode_transcripts.tsv', sep='\t')
 
