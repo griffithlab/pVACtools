@@ -153,7 +153,9 @@ Here are a few things that might resolve this error:
 - Realigning and redoing variant calling on your sample with a reference that
   matches what is expected by VEP
 
-If this mismatch cannot be resolved the VCF cannot be used by pVACseq.
+If this mismatch cannot be resolved the VCF cannot be used by pVACseq. We
+create the ref-transcript-mismatch-reporter tool to identify and remove such
+variants from your VCF. The tool is available as part of `https://vatools.readthedocs.io/en/latest/ref_transcript_mismatch_reporter.html <VAtools>`_.
 
 Other
 _____
