@@ -223,8 +223,8 @@ of the Docker container and mounting the database path using the ``-v`` flag in 
 ``docker run`` command (``-v <blastdb_path>:/opt/blastdb``).
 
 A slim Docker container without BLAST (but including IEDB) is available with the
-``<version>-slim``/``<latest>-slim`` version tags. A minimal version with just
-pVACtools is available with the ``<version>-xs``/``<lastest>-xs`` version
+``<version>-slim``/``latest-slim`` version tags. A minimal version with just
+pVACtools is available with the ``<version>-xs``/``lastest-xs`` version
 tags.
 
 An example on how to run pVACseq using Docker can be found on the :ref:`Getting Started <pvacseq_docker>` page.
