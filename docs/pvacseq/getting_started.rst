@@ -95,6 +95,6 @@ of the Docker container and mounting the database path using the ``-v`` flag in 
 ``docker run`` command (``-v /local/path/to/blastdb:/opt/blastdb``).
 
 A slim Docker container without BLAST (but including IEDB) is available with the
-``<version>-slim``/``<latest>-slim`` version tags. A minimal version with just
-pVACtools is available with the ``<version>-xs``/``<lastest>-xs`` version
+``<version>-slim``/``latest-slim`` version tags. A minimal version with just
+pVACtools is available with the ``<version>-xs``/``lastest-xs`` version
 tags.
