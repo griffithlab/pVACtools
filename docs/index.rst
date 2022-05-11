@@ -67,6 +67,11 @@ This is a bugfix release. It fixes the following problem(s):
   descriptions.
 - This release updates various code portions to remove deprecation warnings and
   add support for  newer versions of certain dependencies (e.g. pandas).
+- This release fixes an bug with the standalone ``pvacseq
+  calculate_reference_proteome_similarity`` command where picking a custom
+  ``--match-length`` would 1throw an error.
+- Some users were reporting errors during the tmp file cleanup stages of
+  running the various pipelines. This releases fixes that issue.
 
 
 New in Version |version|

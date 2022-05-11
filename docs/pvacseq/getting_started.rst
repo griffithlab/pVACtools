@@ -88,7 +88,7 @@ The output from your pVACseq run can be found under ``/pvacseq_output_data``
 inside of the container and ``/local/path/to/output_dir`` on your local
 machine.
 
-Please note that the slim and full Docker containers already includes installations of the IEDB class I and class II tools at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
+Please note that the slim and full Docker containers already include installations of the IEDB class I and class II tools at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
 
 The full Docker container also includes
 installation of BLAST at ``/opt/ncbi-blast-2.12.0+`` (``--blastp-path
@@ -100,8 +100,3 @@ database is not installed inside of the Docker container due to size
 constraints. If usage of this database is desired, we recommend installing it outside
 of the Docker container and mounting the database path using the ``-v`` flag in your
 ``docker run`` command (``-v /local/path/to/blastdb:/opt/blastdb``).
-
-A slim Docker container without BLAST (but including IEDB) is available with the
-``<version>-slim``/``latest-slim`` version tags. A minimal version with just
-pVACtools is available with the ``<version>-xs``/``lastest-xs`` version
-tags.
