@@ -100,3 +100,8 @@ database is not installed inside of the Docker container due to size
 constraints. If usage of this database is desired, we recommend installing it outside
 of the Docker container and mounting the database path using the ``-v`` flag in your
 ``docker run`` command (``-v /local/path/to/blastdb:/opt/blastdb``).
+
+A slim Docker container without BLAST (but including IEDB) is available with the
+``<version>-slim``/``latest-slim`` version tags. A minimal version with just
+pVACtools is available with the ``<version>-xs``/``lastest-xs`` version
+tags.
