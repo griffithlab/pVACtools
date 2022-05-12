@@ -206,14 +206,13 @@ installation directory of your BLAST reference proteome databases.
 Docker and CWL
 --------------
 
-A Docker container for pVACtools is available on DockerHub using the
-`griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo. This Docker
-container includes installations of the IEDB class I and class II tools
-at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
-
-The Docker container also includes
-installation of BLAST at ``/opt/ncbi-blast-2.12.0+`` (``--blastp-path
-/opt/ncbi-blast-2.12.0+/bin/blastp``) as well as the ``refseq_select_prot``
+Three kinds of Docker containers for pVACtools are available on DockerHub using the
+`griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo:
+- <version>-xs: Includes pVACtools only
+- <version>-slim: Includes everything in xs plus IEDB MHC Class I and Class II tools.
+  These tools are installed at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
+- <version>: Includes everything in slim plus an installation of BLAST at ``/opt/ncbi-blast-2.12.0+`` (``--blastp-path
+/opt/ncbi-blast-2.12.0+/bin/blastp``) and the ``refseq_select_prot``
 database under the ``/opt/blastdb`` directory. The ``BLASTDB`` environment variable is already
 set to this path inside of the Docker container so this database can be used
 without any additional modifications. The ``refseq_protein``

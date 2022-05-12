@@ -85,7 +85,7 @@ class PvacseqTests(unittest.TestCase):
                 command,
                 '-h'
             ], shell=False, stdout=PIPE)
-            self.assertFalse(result.returncode)
+            self.assertFalse(result.returncode, "Failed `pvacseq {} -h`".format(command))
             self.assertRegex(result.stdout.decode(), usage_search)
 
     def test_run_compiles(self):
