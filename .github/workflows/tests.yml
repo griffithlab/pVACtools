@@ -28,9 +28,16 @@ jobs:
           sudo apt-get install -y ghostscript
           sudo apt-get install -y gcc
           sudo apt-get install -y pandoc
-      - name: Install Python dependencies
+      - name: Install version-specific Python dependencies
+        if: ${{ matrix.python-version != 3.9 }}
         run: |
           pip install -r requirements.txt
+      - name: Install version-specific Python dependencies
+        if: ${{ matrix.python-version == 3.9 }}
+        run: |
+          pip install -r requirements_3.9.txt
+      - name: Install Python dependencies
+        run: |
           pip install -e .
           mhcflurry-downloads fetch
       - name: List installed packages
