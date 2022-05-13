@@ -124,7 +124,7 @@ class AggregateAllEpitopes:
     def determine_columns_used_for_aggregation(self, prediction_algorithms):
         used_columns = [
             "Chromosome", "Start", "Stop", "Reference", "Variant",
-            "Transcript", "Transcript Support Level", "Variant Type", "Mutation",
+            "Transcript", "Transcript Support Level", "Biotype", "Transcript Length", "Variant Type", "Mutation",
             "Protein Position", "Gene Name", "HLA Allele",
             "Mutation Position", "MT Epitope Seq", "WT Epitope Seq",
             "Tumor DNA VAF", "Tumor RNA Depth",
@@ -147,6 +147,7 @@ class AggregateAllEpitopes:
             "Median MT Score": "float32",
             "Median MT Percentile": "float16",
             "Protein Position": "str",
+            "Transcript Length": "int32",
         }
         for algorithm in prediction_algorithms:
             if algorithm == 'SMM' or algorithm == 'SMMPMBEC':
@@ -382,6 +383,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             peptides[set_name]['transcript_expr'] = [good_binders[good_binders["annotation"] == x]['Transcript Expression'].iloc[0] for x in annotations]
             tsls = [good_binders[good_binders["annotation"] == x]['Transcript Support Level'].iloc[0] for x in annotations]
             peptides[set_name]['tsl'] = [x if x == 'NA' else round(float(x)) for x in tsls]
+            peptides[set_name]['tsl'] = [x if x == 'NA' else round(float(x)) for x in tsls]
+            peptides[set_name]['biotype'] = [good_binders[good_binders["annotation"] == x]['Biotype'].iloc[0] for x in annotations]
+            peptides[set_name]['transcript_length'] = [int(good_binders[good_binders["annotation"] == x]['Transcript Length'].iloc[0]) for x in annotations]
             peptides[set_name]['transcript_count'] = len(annotations)
             peptides[set_name]['peptide_count'] = len(peptide_set)
             peptides[set_name]['total_expr'] = sum([0 if x == 'NA' else (float(x)) for x in peptides[set_name]['transcript_expr']])
