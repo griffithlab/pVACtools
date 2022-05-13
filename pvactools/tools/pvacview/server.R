@@ -65,6 +65,7 @@ server <- shinyServer(function(input, output, session) {
  
   #Option 1: User uploaded main aggregate report file
   observeEvent(input$mainDataInput$datapath,{
+    session$sendCustomMessage('unbind-DT', 'mainTable')
     mainData <- read.table(input$mainDataInput$datapath, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
     colnames(mainData) <- mainData[1,]
     mainData <- mainData[-1,]
@@ -117,6 +118,7 @@ server <- shinyServer(function(input, output, session) {
   #Option 2: Load from HCC1395 demo data from github
    observeEvent(input$loadDefaultmain,{
      ## Class I demo aggregate report
+     session$sendCustomMessage('unbind-DT', 'mainTable')
      data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/f83c52c8b8387beae69be8b200a44dcf199d9af2/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
      mainData <- read.table(text = data, sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(mainData) <- mainData[1,]
@@ -245,7 +247,13 @@ server <- shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$page_length,{
+    if (is.null(df$mainTable)){
+      return ()
+    }
     df$pageLength <- as.numeric(input$page_length)
+    session$sendCustomMessage('unbind-DT', 'mainTable')
+    df$mainTable$`Evaluation` <- shinyValue("selecter_",nrow(df$mainTable), df$mainTable)
+    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput,nrow(df$mainTable),"selecter_", choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
   })
   
   output$filesUploaded <- reactive({
@@ -781,6 +789,7 @@ server <- shinyServer(function(input, output, session) {
   ##############################EXPORT TAB##############################################
 
   #evalutation overview table
+  
   output$checked <- renderTable({
     if (is.null(df$mainTable)){
       return ()
