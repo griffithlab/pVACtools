@@ -4,6 +4,8 @@ class CsqParser:
     def __init__(self, csq_header_description):
         format_pattern = re.compile('Format: (.*)')
         match = format_pattern.search(csq_header_description)
+        if match is None:
+            raise Exception("Formatting error in the CSQ header description:\n{}\nNo match for regex `Format: (.*)`".format(csq_header_description))
         self.csq_format = match.group(1).split('|')
 
     def parse_csq_entries_for_allele(self, csq_entries, csq_allele):

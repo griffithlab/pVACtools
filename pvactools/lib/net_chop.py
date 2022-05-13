@@ -119,7 +119,7 @@ class NetChop:
                                 ep_len = seqs_start_diff[sequence_name][1]
                             currentPosition = data[0]
                             isCleavage = data[2]
-                            if isCleavage is not 'S':
+                            if isCleavage != 'S':
                                 continue
                             currentScore = float(data[3])
                             cleavage_scores[currentPosition] = currentScore
@@ -153,12 +153,13 @@ class NetChop:
                         writer.writerow(line)
                 else:
                     raise Exception("Unexpected return value from NetChop server. Unable to parse response.\n{}".format(response.content.decode()))
+            http.close()
 
     def setup_adapter(self):
         retry_strategy = Retry(
             total=3,
             status_forcelist=[408, 429, 500, 502, 503, 504],
-            method_whitelist=["POST", "GET"]
+            allowed_methods=["POST", "GET"]
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         http = requests.Session()

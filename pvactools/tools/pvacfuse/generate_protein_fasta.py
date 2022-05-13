@@ -125,7 +125,7 @@ def main(args_input = sys.argv[1:], save_tsv_file=False):
     convert_fusion_input(args.input, temp_dir)
     generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file)
     parse_files(args.output_file, temp_dir, args.input_tsv)
-    shutil.rmtree(temp_dir)
+    shutil.rmtree(temp_dir, ignore_errors=True)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")
     CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()
