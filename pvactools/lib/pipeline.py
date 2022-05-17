@@ -521,7 +521,7 @@ class Pipeline(metaclass=ABCMeta):
         PostProcessor(**post_processing_params).execute()
 
         if self.keep_tmp_files is False:
-            shutil.rmtree(self.tmp_dir)
+            shutil.rmtree(self.tmp_dir, ignore_errors=True)
 
 class PvacbindPipeline(Pipeline):
     def fasta_entry_count(self):
@@ -795,4 +795,4 @@ class PvacbindPipeline(Pipeline):
         PostProcessor(**post_processing_params).execute()
 
         if self.keep_tmp_files is False:
-            shutil.rmtree(self.tmp_dir)
+            shutil.rmtree(self.tmp_dir, ignore_errors=True)

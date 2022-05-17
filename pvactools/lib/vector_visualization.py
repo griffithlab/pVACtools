@@ -231,7 +231,8 @@ class VectorVisualization:
         out_file = os.path.join(self.output_directory, "vector.jpg")
         ts = self.turtle.getscreen()
         ts.getcanvas().postscript(file=ps_file)
-        Image.open(ps_file).save(out_file)
+        with Image.open(ps_file) as img:
+            img.save(out_file)
         os.remove(ps_file)
 
     #select color from scheme

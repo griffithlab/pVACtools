@@ -347,7 +347,7 @@ class MHCflurry(MHCI):
                     epitope_df = df[df['peptide'] == epitope]
                     epitope_df['seq_num'] = seq_num
                     epitope_df['start'] = start
-                    results = results.append(epitope_df)
+                    results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
 class MHCflurryEL(MHCflurry):

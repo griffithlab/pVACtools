@@ -115,7 +115,11 @@ class OutputParser(metaclass=ABCMeta):
         #The WT epitope at the same position is the match
         match_position = mt_position
         mt_epitope_seq = result['mt_epitope_seq']
-        wt_result      = wt_results[match_position]
+        try:
+            wt_result      = wt_results[match_position]
+        except:
+            import pdb
+            pdb.set_trace()
         wt_epitope_seq = wt_result['wt_epitope_seq']
         result['wt_epitope_position'] = match_position
         total_matches  = self.determine_total_matches(mt_epitope_seq, wt_epitope_seq)
@@ -437,6 +441,8 @@ class OutputParser(metaclass=ABCMeta):
             'Variant',
             'Transcript',
             'Transcript Support Level',
+            'Transcript Length',
+            'Biotype',
             'Ensembl Gene ID',
             'Variant Type',
             'Mutation',
@@ -588,6 +594,8 @@ class OutputParser(metaclass=ABCMeta):
                     'Variant'             : tsv_entry['variant'],
                     'Transcript'          : tsv_entry['transcript_name'],
                     'Transcript Support Level': tsv_entry['transcript_support_level'],
+                    'Transcript Length'   : tsv_entry['transcript_length'],
+                    'Biotype'             : tsv_entry['biotype'],
                     'Ensembl Gene ID'     : tsv_entry['ensembl_gene_id'],
                     'HGVSc'               : tsv_entry['hgvsc'],
                     'HGVSp'               : tsv_entry['hgvsp'],

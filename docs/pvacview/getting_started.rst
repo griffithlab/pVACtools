@@ -64,7 +64,7 @@ Specifically, the features can be separated into three main categories:
 - :bold:`Transcript level information`
 
   - Transcripts of selected mutation that produces good binding peptides
-  - Transcript Expression
+  - Transcript expression, transcript support level, and biotype information etc.
 
 - :bold:`Peptide level information`
 

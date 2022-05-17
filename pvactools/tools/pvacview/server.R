@@ -65,6 +65,7 @@ server <- shinyServer(function(input, output, session) {
  
   #Option 1: User uploaded main aggregate report file
   observeEvent(input$mainDataInput$datapath,{
+    session$sendCustomMessage('unbind-DT', 'mainTable')
     mainData <- read.table(input$mainDataInput$datapath, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
     colnames(mainData) <- mainData[1,]
     mainData <- mainData[-1,]
@@ -116,7 +117,9 @@ server <- shinyServer(function(input, output, session) {
 
   #Option 2: Load from HCC1395 demo data from github
    observeEvent(input$loadDefaultmain,{
-     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/835a7e4ae8b660a362c0c0b54140e26830d72bf2/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.tsv")
+     ## Class I demo aggregate report
+     session$sendCustomMessage('unbind-DT', 'mainTable')
+     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/f83c52c8b8387beae69be8b200a44dcf199d9af2/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
      mainData <- read.table(text = data, sep = '\t', header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      colnames(mainData) <- mainData[1,]
      mainData <- mainData[-1,]
@@ -127,7 +130,8 @@ server <- shinyServer(function(input, output, session) {
      mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
      mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
      df$mainTable <- mainData
-     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/6423b8b65f2e3f5cc2979f33b86c4650a6aa4570/tools/pvacview/data/H_NJ-HCC1395-HCC1395.all_epitopes.aggregated.metrics.json")
+     ## Class I demo metrics file
+     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/f83c52c8b8387beae69be8b200a44dcf199d9af2/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
      df$metricsData <- fromJSON(txt = metricsdata)
      dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
      df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
@@ -141,6 +145,18 @@ server <- shinyServer(function(input, output, session) {
        df$comments <- data.frame(matrix("No comments",nrow=nrow(df$mainTable)),ncol=1)
      }
      rownames(df$comments) <- df$mainTable$ID
+     ## Class II additional demo aggregate report 
+     add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/6c24091a9276618af422c76cc9f1c23f16c2074d/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+     addData <- read.table(text = add_data, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     colnames(addData) <- addData[1,]
+     addData <- addData[-1,]
+     row.names(addData) <- NULL
+     df$additionalData <- addData
+     ## Hotspot gene list autoload
+     gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/7c7b8352d81b44ec7743578e7715c65261f5dab7/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
+     gene_list <- read.table(text = gene_data, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
+     df$gene_list <- gene_list
+     df$mainTable$`Gene of Interest` <- apply(df$mainTable,1, function(x) {any(x['Gene'] == df$gene_list)})
      updateTabItems(session, "tabs", "explore")
    })
    
@@ -231,7 +247,13 @@ server <- shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$page_length,{
+    if (is.null(df$mainTable)){
+      return ()
+    }
     df$pageLength <- as.numeric(input$page_length)
+    session$sendCustomMessage('unbind-DT', 'mainTable')
+    df$mainTable$`Evaluation` <- shinyValue("selecter_",nrow(df$mainTable), df$mainTable)
+    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput,nrow(df$mainTable),"selecter_", choices=c("Pending", "Accept", "Reject", "Review"), width="60px")
   })
   
   output$filesUploaded <- reactive({
@@ -464,13 +486,15 @@ server <- shinyServer(function(input, output, session) {
         if (length(df$metricsData[[selectedID()]]$sets) != 0){
           GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`,
                                        "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
-                                       "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`)
+                                       "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`,
+                                       "Biotype" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`biotype`,
+                                       "Length" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_length`)
         }
         else {
-          GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character())
+          GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character(), "Biotype" = character(), "Length" = character())
         }
         incProgress(0.5)
-        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level")
+        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)")
         incProgress(0.5)
         datatable(GB_transcripts,options =list(columnDefs = list(list(defaultContent="N/A",targets = c(3)))))
       }, 
@@ -765,6 +789,7 @@ server <- shinyServer(function(input, output, session) {
   ##############################EXPORT TAB##############################################
 
   #evalutation overview table
+  
   output$checked <- renderTable({
     if (is.null(df$mainTable)){
       return ()
