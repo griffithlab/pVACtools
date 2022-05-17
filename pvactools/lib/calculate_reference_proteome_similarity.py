@@ -379,6 +379,7 @@ class CalculateReferenceProteomeSimilarity:
         parser.add_argument(
             '--match-length',
             default=8,
+            type=int,
             help="The desired matching epitope length."
         )
         parser.add_argument(

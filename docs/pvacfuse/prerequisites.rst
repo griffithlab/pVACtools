@@ -22,7 +22,7 @@ For a full list see the `AGFusion documentation <https://github.com/murphycj/AGF
    -f <star_fusion_tsv> \
    -a starfusion \
    -db agfusion.homo_sapiens.87.db \
-   - <output_directory> \
+   -o <output_directory> \
    --middlestar \
    --noncanonical
 
