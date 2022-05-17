@@ -84,7 +84,6 @@ class AggregateAllEpitopes:
     def copy_pvacview_r_files(self):
         raise Exception("Must implement method in child class")
 
-
     def get_best_mut_line(self, df, key, hla_types, prediction_algorithms, vaf_clonal, max_ic50=1000):
         #order by best median score and get best ic50 peptide
         best = self.get_best_binder(df)
@@ -192,7 +191,6 @@ class AggregateAllEpitopes:
 
         self.write_metrics_file(metrics)
         self.copy_pvacview_r_files()
-
 
 
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
