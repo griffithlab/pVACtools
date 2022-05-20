@@ -116,6 +116,8 @@ class AggregateAllEpitopes:
         potential_algorithms = PredictionClass.prediction_methods()
         prediction_algorithms = []
         for algorithm in potential_algorithms:
+            if algorithm == 'NetMHCpanEL':
+                continue
             if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
