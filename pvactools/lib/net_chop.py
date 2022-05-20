@@ -1,6 +1,7 @@
 import argparse
 import sys
 import requests
+from requests.exceptions import Timeout
 import csv
 import tempfile
 import re
@@ -170,16 +171,16 @@ class NetChop:
     def query_netchop_server(self, http, staging_file, chosen_method, threshold, jobid_searcher):
         try:
             response = self.post_query(http, staging_file, chosen_method, threshold)
-        except requests.exceptions.ReadTimeout:
-            response = self.post_query(http, staging_file, chosen_method, threshold)
+        except Timeout:
+            raise Exception("Timeout while posting request to NetChop server. The server may be unresponsive. Please try again later.")
         if response.status_code != 200:
             raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
         while jobid_searcher.search(response.content.decode()):
             sleep(10)
             try:
-                response = http.get(response.url, timeout=10)
-            except requests.exceptions.ReadTimeout:
-                response = http.get(response.url, timeout=10)
+                response = http.get(response.url, timeout=(10,60))
+            except Timeout:
+                raise Exception("Timeout while posting request to NetChop server. The server may be unresponsive. Please try again later.")
             if response.status_code != 200:
                 raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
         return response
@@ -194,7 +195,7 @@ class NetChop:
                 'method':chosen_method,
                 'thresh':'%0f'%threshold
             },
-            timeout=10
+            timeout=(10,60)
         )
         return response
 
