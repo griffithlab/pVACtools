@@ -1,6 +1,7 @@
 import argparse
 import sys
 import requests
+from requests.exceptions import Timeout
 import csv
 import tempfile
 import re
@@ -141,32 +142,38 @@ class NetMHCStab:
             writer.writerows(sorted_lines)
 
     def query_netmhcstabpan_server(self, staging_file, peptide_length, allele):
-        response = requests.post(
-            "https://services.healthtech.dtu.dk/cgi-bin/webface2.cgi",
-            files={'SEQSUB':(staging_file.name, staging_file, 'text/plain')},
-            data = {
-                'configfile':'/var/www/html/services/NetMHCstabpan-1.0/webface.cf',
-                'inp':'0',
-                'len': peptide_length,
-                'master':'1',
-                'slave0':allele,
-                'allele':allele,
-                'thrs':'0.5',
-                'thrw': '2',
-                'incaff': '0',
-                'sort1':'-1',
-                'waff':'0.8',
-                'sort2':'-1',
-            },
-            timeout=10
-        )
+        try:
+            response = requests.post(
+                "https://services.healthtech.dtu.dk/cgi-bin/webface2.cgi",
+                files={'SEQSUB':(staging_file.name, staging_file, 'text/plain')},
+                data = {
+                    'configfile':'/var/www/html/services/NetMHCstabpan-1.0/webface.cf',
+                    'inp':'0',
+                    'len': peptide_length,
+                    'master':'1',
+                    'slave0':allele,
+                    'allele':allele,
+                    'thrs':'0.5',
+                    'thrw': '2',
+                    'incaff': '0',
+                    'sort1':'-1',
+                    'waff':'0.8',
+                    'sort2':'-1',
+                },
+                timeout=(10,60)
+            )
+        except Timeout:
+            raise Exception("Timeout while posting request to NetMHCstabpan server. The server may be unresponsive. Please try again later.")
         if response.status_code != 200:
             raise Exception("Error posting request to NetMHCstabpan server.\n{}".format(response.content.decode()))
 
         jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
         while jobid_searcher.search(response.content.decode()):
             sleep(10)
-            response = requests.get(response.url, timeout=10)
+            try:
+                response = requests.get(response.url, timeout=(10,60))
+            except Timeout:
+                raise Exception("Timeout while posting request to NetMHCstabpan server. The server may be unresponsive. Please try again later.")
             if response.status_code != 200:
                 raise Exception("Error posting request to NetMHCstabpan server.\n{}".format(response.content.decode()))
         return response
