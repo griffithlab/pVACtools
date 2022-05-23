@@ -1,4 +1,4 @@
-Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median Score	Best Score	Best Score Method	Median Percentile	Best Percentile	Best Percentile Method	PickPocket Score	PickPocket Percentile
+Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	PickPocket Score	PickPocket Percentile
 31	HLA-G*01:09	9	MDCLSDRCKI	50000.0	50000.0	PickPocket	43.0	43.0	PickPocket	50000.0	43.0
 30	HLA-G*01:09	1487	PSLPELQFQP	50000.0	50000.0	PickPocket	43.0	43.0	PickPocket	50000.0	43.0
 28	HLA-G*01:09	1	SLLHTVSPEP	19717.81	19717.81	PickPocket	16.0	16.0	PickPocket	19717.81	16.0

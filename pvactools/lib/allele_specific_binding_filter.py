@@ -24,21 +24,21 @@ class AlleleSpecificBindingFilter:
             for entry in reader:
                 if self.file_type == 'pVACbind':
                     if self.top_score_metric == 'median':
-                        score = float(entry['Median Score'])
+                        score = float(entry['Median IC50 Score'])
                         percentile_column = 'Median Percentile'
                     elif self.top_score_metric == 'lowest':
-                        score = float(entry['Best Score'])
+                        score = float(entry['Best IC50 Score'])
                         percentile_column = 'Best Percentile'
                 else:
                     if self.top_score_metric == 'median':
-                        score = float(entry['Median MT Score'])
+                        score = float(entry['Median MT IC50 Score'])
                         if self.exclude_nas and entry['Median Fold Change'] == 'NA':
                             continue
                         else:
                             fold_change = sys.maxsize if entry['Median Fold Change'] == 'NA' else float(entry['Median Fold Change'])
                         percentile_column = 'Median MT Percentile'
                     elif self.top_score_metric == 'lowest':
-                        score = float(entry['Best MT Score'])
+                        score = float(entry['Best MT IC50 Score'])
                         if self.exclude_nas and entry['Corresponding Fold Change'] == 'NA':
                             continue
                         else:

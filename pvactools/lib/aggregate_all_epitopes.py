@@ -116,6 +116,8 @@ class AggregateAllEpitopes:
         potential_algorithms = PredictionClass.prediction_methods()
         prediction_algorithms = []
         for algorithm in potential_algorithms:
+            if algorithm == 'NetMHCpanEL':
+                continue
             if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
@@ -128,7 +130,7 @@ class AggregateAllEpitopes:
             "Mutation Position", "MT Epitope Seq", "WT Epitope Seq",
             "Tumor DNA VAF", "Tumor RNA Depth",
             "Tumor RNA VAF", "Gene Expression", "Transcript Expression",
-            "Median MT Score", "Median WT Score", "Median MT Percentile", "Median WT Percentile",
+            "Median MT IC50 Score", "Median WT IC50 Score", "Median MT Percentile", "Median WT Percentile",
         ]
         for algorithm in prediction_algorithms:
             used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm), "{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
@@ -143,7 +145,7 @@ class AggregateAllEpitopes:
             'Variant': str,
             "Variant Type": "category",
             "Mutation Position": "category",
-            "Median MT Score": "float32",
+            "Median MT IC50 Score": "float32",
             "Median MT Percentile": "float16",
             "Protein Position": "str",
             "Transcript Length": "int32",
@@ -242,7 +244,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return (df, key_str)
 
     def get_best_binder(self, df):
-        df.sort_values(by=["Median MT Score", "Median WT Score"], inplace=True, ascending=[True, False])
+        df.sort_values(by=["Median MT IC50 Score", "Median WT IC50 Score"], inplace=True, ascending=[True, False])
         return df.iloc[0].to_dict()
 
     #assign mutations to a "Classification" based on their favorability
@@ -252,34 +254,34 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         position = mutation["Mutation Position"]
         if position != "NA":
             if int(float(position)) in anchors:
-                if mutation["Median WT Score"] == "NA":
+                if mutation["Median WT IC50 Score"] == "NA":
                       anchor_residue_pass = False
-                elif mutation["Median WT Score"] < 1000:
+                elif mutation["Median WT IC50 Score"] < 1000:
                       anchor_residue_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
-        if (mutation["Median MT Score"] < 500 and
+        if (mutation["Median MT IC50 Score"] < 500 and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 3 and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            anchor_residue_pass):
             return "Pass"
 
         #relax mt and expr
-        if (mutation["Median MT Score"] < 1000 and
+        if (mutation["Median MT IC50 Score"] < 1000 and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            anchor_residue_pass):
             return "Relaxed"
 
         #anchor residues
-        if (mutation["Median MT Score"] < 1000 and
+        if (mutation["Median MT IC50 Score"] < 1000 and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            not anchor_residue_pass):
             return "Anchor"
 
         #not in founding clone
-        if (mutation["Median MT Score"] < 1000 and
+        if (mutation["Median MT IC50 Score"] < 1000 and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
            mutation["Tumor DNA VAF"] < (vaf_clonal/2) and
            anchor_residue_pass):
@@ -294,7 +296,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
              lowexpr=True
 
         #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
-        if (mutation["Median MT Score"] < 1000 and
+        if (mutation["Median MT IC50 Score"] < 1000 and
             lowexpr==True and
             mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
             anchor_residue_pass):
@@ -308,7 +310,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return "Poor"
 
     def get_good_binders(self, df, max_ic50):
-        return df[df["Median MT Score"] < max_ic50]
+        return df[df["Median MT IC50 Score"] < max_ic50]
 
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
@@ -343,7 +345,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         ic50_calls = {}
                         percentile_calls = {}
                         for index, line in good_binders_peptide_annotation.to_dict(orient='index').items():
-                            ic50s[line['HLA Allele']] = line['Median {} Score'.format(peptide_type)]
+                            ic50s[line['HLA Allele']] = line['Median {} IC50 Score'.format(peptide_type)]
                             percentiles[line['HLA Allele']] = line['Median {} Percentile'.format(peptide_type)]
                             ic50_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
                             percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
@@ -424,8 +426,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             'Best Peptide': best["MT Epitope Seq"],
             'Pos': best["Mutation Position"],
             'Num Passing Peptides': peptide_count,
-            'IC50 MT': best["Median MT Score"],
-            'IC50 WT': best["Median WT Score"],
+            'IC50 MT': best["Median MT IC50 Score"],
+            'IC50 WT': best["Median WT IC50 Score"],
             '%ile MT': best["Median MT Percentile"],
             '%ile WT': best["Median WT Percentile"],
             'RNA Expr': best["Gene Expression"],
@@ -503,14 +505,14 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return (df, key)
 
     def get_best_binder(self, df):
-        df.sort_values(by=["Median Score"], inplace=True, ascending=True)
+        df.sort_values(by=["Median IC50 Score"], inplace=True, ascending=True)
         return df.iloc[0]
 
     def get_tier(self, mutation, vaf_clonal):
         return "NA"
 
     def get_good_binders(self, df, max_ic50):
-        return df[df["Median Score"] < max_ic50]
+        return df[df["Median IC50 Score"] < max_ic50]
 
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
@@ -547,7 +549,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             'Best Peptide': best["Epitope Seq"],
             'Pos': "NA",
             'Num Passing Peptides': peptide_count,
-            'IC50 MT': best["Median Score"],
+            'IC50 MT': best["Median IC50 Score"],
             'IC50 WT': "NA",
             '%ile MT': best["Median Percentile"],
             '%ile WT': "NA",
