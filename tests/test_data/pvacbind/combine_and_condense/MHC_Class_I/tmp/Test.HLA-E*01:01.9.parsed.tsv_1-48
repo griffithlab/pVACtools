@@ -1,4 +1,4 @@
-Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median Score	Best Score	Best Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHC Score	NetMHC Percentile	PickPocket Score	PickPocket Percentile
+Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHC Score	NetMHC Percentile	PickPocket Score	PickPocket Percentile
 31	HLA-E*01:01	9	MDCLSDRCK	30971.94	18882.64	PickPocket	63.5	50.0	PickPocket	43061.24	77.0	18882.64	50.0
 30	HLA-E*01:01	1487	PSLPELQFQ	44988.47	39976.94	NetMHC	67.0	46.0	NetMHC	39976.94	46.0	50000.0	88.0
 28	HLA-E*01:01	1	SLLHTVSPE	37109.14	32434.8	PickPocket	68.5	63.0	NetMHC	41783.48	63.0	32434.8	74.0
