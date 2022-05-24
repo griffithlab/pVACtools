@@ -530,6 +530,8 @@ server <- shinyServer(function(input, output, session) {
           for(i in 1:length(peptide_names)){
             peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
             peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
+            peptide_data[[peptide_names[[i]]]]$individual_el_calls <- NULL
+            peptide_data[[peptide_names[[i]]]]$individual_el_percentile_calls <- NULL
           }
           incProgress(0.5)
           peptide_data <- as.data.frame(peptide_data)
@@ -599,6 +601,8 @@ server <- shinyServer(function(input, output, session) {
         for(i in 1:length(peptide_names)){
           peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
           peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
+            peptide_data[[peptide_names[[i]]]]$individual_el_calls <- NULL
+            peptide_data[[peptide_names[[i]]]]$individual_el_percentile_calls <- NULL
         }
         peptide_data <- as.data.frame(peptide_data)
         p1 <- ggplot() + scale_x_continuous(limits=c(0,80)) + scale_y_continuous(limits=c(-31, 1)) 
@@ -785,6 +789,80 @@ server <- shinyServer(function(input, output, session) {
     })
   })
 
+  ##updating elution score for selected peptide pair
+  elutionScoreData <- reactive({
+    if (is.null(df$metricsData)){
+      return ()
+    }
+    if (length(df$metricsData[[selectedID()]]$sets) != 0 && length(selectedPeptideData()$individual_el_calls$algorithms) > 0){
+      algorithm_names <- data.frame(algorithms=selectedPeptideData()$individual_el_calls$algorithms)
+      wt_data <- as.data.frame(selectedPeptideData()$individual_el_calls$WT, check.names=FALSE)
+      colnames(wt_data) <- paste(colnames(wt_data),"_WT_Score", sep="")
+      mt_data <- as.data.frame(selectedPeptideData()$individual_el_calls$MT, check.names=FALSE)
+      colnames(mt_data) <- paste(colnames(mt_data),"_MT_Score", sep="")
+      full_data <- cbind(algorithm_names,mt_data,wt_data) %>%
+        gather('col', 'val', colnames(mt_data)[1]:tail(colnames(wt_data), n=1)) %>%
+        separate(col, c('HLA_allele','Mutant','Score'), sep='\\_') %>%
+        spread('Score', val)
+      full_data
+    }
+    else{
+      return()
+    }
+  })
+
+  ##updating elution percentile for selected peptide pair
+  elutionPercentileData <- reactive({
+    if (length(df$metricsData[[selectedID()]]$sets) != 0){
+      algorithm_names <- data.frame(algorithms=selectedPeptideData()$individual_el_percentile_calls$algorithms)
+      wt_data <- as.data.frame(selectedPeptideData()$individual_el_percentile_calls$WT, check.names=FALSE)
+      colnames(wt_data) <- paste(colnames(wt_data),"_WT_Score", sep="")
+      mt_data <- as.data.frame(selectedPeptideData()$individual_el_percentile_calls$MT, check.names=FALSE)
+      colnames(mt_data) <- paste(colnames(mt_data),"_MT_Score", sep="")
+      full_data <- cbind(algorithm_names,mt_data,wt_data) %>%
+        gather('col', 'val', colnames(mt_data)[1]:tail(colnames(wt_data), n=1)) %>%
+        separate(col, c('HLA_allele','Mutant','Score'), sep='\\_') %>%
+        spread('Score', val)
+      full_data
+    }
+    else{
+      return()
+    }
+  })
+
+  ##plotting elution data table
+  output$elutionDatatable <- renderDT({
+    withProgress(message = 'Loading elution datatable', value = 0, {
+      if (length(df$metricsData[[selectedID()]]$sets) != 0) {
+        elution_data <- elutionScoreData()
+        if (!is.null(elution_data)) {
+          names(elution_data)[names(elution_data) == 'Score'] <- 'Elution Score'
+          elution_data['% Score'] <- elutionPercentileData()['Score']
+          elution_data['Score'] <- paste(round(as.numeric(elution_data$`Elution Score`),2)," (%: ",round(as.numeric(elution_data$`% Score`),2),")", sep="")
+          elution_data['Elution Score'] <- NULL
+          elution_data['% Score'] <- NULL
+          elution_reformat <- dcast(elution_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+          incProgress(1)
+          dtable <- datatable(elution_reformat, options =list(
+            pageLength = 10,
+            lengthMenu = c(10),
+            rowCallback = JS('function(row, data, index, rowId) {',
+                           'console.log(rowId)','if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {',
+                           'row.style.backgroundColor = "#E0E0E0";','}','}')
+          )) %>% formatStyle('Mutant', fontWeight = styleEqual('MT','bold'), color = styleEqual('MT', '#E74C3C'))
+          dtable
+        }
+        else {
+          incProgress(1)
+          datatable(data.frame("Elution Datatable"=character()))
+        }
+      }
+      else {
+        incProgress(1)
+        datatable(data.frame("Elution Datatable"=character()))
+      }
+    })
+  })
   
   ##############################EXPORT TAB##############################################
 

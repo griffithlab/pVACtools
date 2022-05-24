@@ -220,17 +220,21 @@ ui <- dashboardPage(
                 title = " ",
                 id = "info",
     
-                tabPanel("Score Plot (IC50)", 
+                tabPanel("IC50 Plot",
                          h4("Violin Plots showing distribution of MHC IC50 predictions for selected peptide pair (MT and WT)."),
                          plotOutput(outputId = "bindingData_IC50")%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;"
                 ),
-                tabPanel("Score Plot (%ile)", 
+                tabPanel("%ile Plot",
                          h4("Violin Plots showing distribution of MHC percentile predictions for selected peptide pair (MT and WT)."),
                          plotOutput(outputId = "bindingData_percentile")%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;"
                 ),
-                tabPanel("Score Table", 
-                         h4("Prediction score table showing exact MHC binding values in for IC50 and percentile calculations."),
+                tabPanel("IC50 Table",
+                         h4("Prediction score table showing exact MHC binding values for IC50 and percentile calculations."),
                          DTOutput(outputId = "bindingDatatable"), style = "overflow-x: scroll;"
+                ),
+                tabPanel("Elution Table",
+                         h4("Prediction score table showing exact MHC binding values for elution and percentile calculations."),
+                         DTOutput(outputId = "elutionDatatable"), style = "overflow-x: scroll;"
                 ),
                 tabPanel("Anchor Heatmap",
                          h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
