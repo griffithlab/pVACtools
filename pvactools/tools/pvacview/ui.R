@@ -234,7 +234,17 @@ ui <- dashboardPage(
                 ),
                 tabPanel("Elution Table",
                          h4("Prediction score table showing exact MHC binding values for elution and percentile calculations."),
-                         DTOutput(outputId = "elutionDatatable"), style = "overflow-x: scroll;"
+                         DTOutput(outputId = "elutionDatatable"),
+                         br(),
+                         strong('MHCflurryEL Processing'), span(': An "antigen processing" predictor that attempts to model MHC allele-independent effects such as proteosomal cleavage. ('),
+                         a(href="https://www.sciencedirect.com/science/article/pii/S2405471220302398", "Citation"), span(')'),
+                         br(),
+                         strong('MHCflurryEL Presentation'), span(': A predictor that integrates processing predictions with binding affinity predictions to give a composite "presentation score." ('),
+                         a(href="https://www.sciencedirect.com/science/article/pii/S2405471220302398", "Citation"), span(')'),
+                         br(),
+                         strong('NetMHCpanEL'), span(': A predictor trained on eluted ligand data. ('),
+                         a(href="https://academic.oup.com/nar/article/48/W1/W449/5837056", "Citation"), span(')'),
+                         style = "overflow-x: scroll;"
                 ),
                 tabPanel("Anchor Heatmap",
                          h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
