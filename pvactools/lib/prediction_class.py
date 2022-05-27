@@ -495,6 +495,11 @@ class NetMHCIIpan(IEDBMHCII):
     def iedb_prediction_method(self):
         return 'NetMHCIIpan'
 
+class NetMHCIIpanEL(IEDBMHCII):
+    @property
+    def iedb_prediction_method(self):
+        return 'netmhciipan_el'
+
 class NNalign(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
