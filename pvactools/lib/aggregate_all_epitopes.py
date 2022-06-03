@@ -117,7 +117,7 @@ class AggregateAllEpitopes:
         potential_algorithms = PredictionClass.prediction_methods()
         prediction_algorithms = []
         for algorithm in potential_algorithms:
-            if algorithm == 'NetMHCpanEL':
+            if algorithm == 'NetMHCpanEL' or algorithm == 'NetMHCIIpanEL':
                 continue
             if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
@@ -125,7 +125,7 @@ class AggregateAllEpitopes:
 
     def determine_used_el_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["MHCflurryEL Processing", "MHCflurryEL Presentation", "NetMHCpanEL"]
+        potential_algorithms = ["MHCflurryEL Processing", "MHCflurryEL Presentation", "NetMHCpanEL", "NetMHCIIpanEL"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
