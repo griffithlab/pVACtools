@@ -105,6 +105,8 @@ class OutputParser(metaclass=ABCMeta):
                 return {'ic50': float(line['ic50'])}
         elif method.lower() == 'netmhcpan_el':
             return {'score': float(line['score'])}
+        elif method.lower() == 'netmhciipan_el':
+            return {'score': float(line['score'])}
         else:
             return {'ic50': float(line['ic50'])}
 
