@@ -6,6 +6,7 @@ from Bio import SeqIO
 import os
 import shutil
 from abc import ABCMeta, abstractmethod
+import itertools
 
 from pvactools.lib.prediction_class import PredictionClass
 
@@ -45,7 +46,7 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def get_good_binders_metrics(self, good_binders, prediction_algorithms, hla_types):
+    def get_good_binders_metrics(self, good_binders, prediction_algorithms, el_algorithms, hla_types):
         raise Exception("Must implement method in child class")
 
     @abstractmethod
@@ -84,7 +85,7 @@ class AggregateAllEpitopes:
     def copy_pvacview_r_files(self):
         raise Exception("Must implement method in child class")
 
-    def get_best_mut_line(self, df, key, hla_types, prediction_algorithms, vaf_clonal, max_ic50=1000):
+    def get_best_mut_line(self, df, key, hla_types, prediction_algorithms, el_algorithms, vaf_clonal, max_ic50=1000):
         #order by best median score and get best ic50 peptide
         best = self.get_best_binder(df)
 
@@ -97,7 +98,7 @@ class AggregateAllEpitopes:
             hla = dict(map(lambda x : (x, good_binders_hla[x]) if x in good_binders_hla else (x, ""), hla_types))
             #get a list of all unique gene/transcript/aa_change combinations
             #store a count of all unique peptides that passed
-            (peptides, anno_count) = self.get_good_binders_metrics(good_binders, prediction_algorithms, hla_types)
+            (peptides, anno_count) = self.get_good_binders_metrics(good_binders, prediction_algorithms, el_algorithms, hla_types)
             peptide_count = self.calculate_unique_peptide_count(good_binders)
         else:
             hla = dict(map(lambda x : (x, ""), hla_types))
@@ -122,7 +123,16 @@ class AggregateAllEpitopes:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
 
-    def determine_columns_used_for_aggregation(self, prediction_algorithms):
+    def determine_used_el_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = ["MHCflurryEL Processing", "MHCflurryEL Presentation", "NetMHCpanEL"]
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
+
+    def determine_columns_used_for_aggregation(self, prediction_algorithms, el_algorithms):
         used_columns = [
             "Chromosome", "Start", "Stop", "Reference", "Variant",
             "Transcript", "Transcript Support Level", "Biotype", "Transcript Length", "Variant Type", "Mutation",
@@ -132,8 +142,10 @@ class AggregateAllEpitopes:
             "Tumor RNA VAF", "Gene Expression", "Transcript Expression",
             "Median MT IC50 Score", "Median WT IC50 Score", "Median MT Percentile", "Median WT Percentile",
         ]
-        for algorithm in prediction_algorithms:
-            used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm), "{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
+        for algorithm in itertools.chain(prediction_algorithms, el_algorithms):
+            used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm)])
+            if algorithm != "MHCflurryEL Processing":
+                used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
         return used_columns
 
     def set_column_types(self, prediction_algorithms):
@@ -159,7 +171,8 @@ class AggregateAllEpitopes:
 
     def execute(self):
         prediction_algorithms = self.determine_used_prediction_algorithms()
-        used_columns = self.determine_columns_used_for_aggregation(prediction_algorithms)
+        el_algorithms = self.determine_used_el_algorithms()
+        used_columns = self.determine_columns_used_for_aggregation(prediction_algorithms, el_algorithms)
         dtypes = self.set_column_types(prediction_algorithms)
 
         ## get a list of all represented hla types
@@ -183,7 +196,7 @@ class AggregateAllEpitopes:
         data = []
         for key in keys:
             (df, key_str) = self.read_input_file(key, used_columns, dtypes)
-            (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, hla_types, prediction_algorithms, vaf_clonal, 1000)
+            (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, hla_types, prediction_algorithms, el_algorithms, vaf_clonal, 1000)
             data.append(best_mut_line)
             metrics[key_str] = metrics_for_key
         peptide_table = pd.DataFrame(data=data)
@@ -315,7 +328,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
 
-    def get_good_binders_metrics(self, good_binders, prediction_algorithms, hla_types):
+    def get_good_binders_metrics(self, good_binders, prediction_algorithms, el_algorithms, hla_types):
         peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
         good_peptides = good_binders["MT Epitope Seq"].unique()
         good_transcripts = good_binders['annotation'].unique()
@@ -339,16 +352,22 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 if len(good_binders_peptide_annotation) > 0:
                     individual_ic50_calls = { 'algorithms': prediction_algorithms }
                     individual_percentile_calls = { 'algorithms': prediction_algorithms }
+                    individual_el_calls = { 'algorithms': el_algorithms }
+                    individual_el_percentile_calls = { 'algorithms': el_algorithms }
                     for peptide_type in ['MT', 'WT']:
                         ic50s = {}
                         percentiles = {}
                         ic50_calls = {}
                         percentile_calls = {}
+                        el_calls = {}
+                        el_percentile_calls = {}
                         for index, line in good_binders_peptide_annotation.to_dict(orient='index').items():
                             ic50s[line['HLA Allele']] = line['Median {} IC50 Score'.format(peptide_type)]
                             percentiles[line['HLA Allele']] = line['Median {} Percentile'.format(peptide_type)]
                             ic50_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
                             percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
+                            el_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in el_algorithms]
+                            el_percentile_calls[line['HLA Allele']] = ['NA' if algorithm == 'MHCflurryEL Processing' else line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in el_algorithms]
                         sorted_ic50s = []
                         sorted_percentiles = []
                         for hla_type in sorted(hla_types):
@@ -364,10 +383,14 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         results[peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
                         individual_ic50_calls[peptide_type] = ic50_calls
                         individual_percentile_calls[peptide_type] = percentile_calls
+                        individual_el_calls[peptide_type] = el_calls
+                        individual_el_percentile_calls[peptide_type] = el_percentile_calls
                     results[peptide]['hla_types'] = sorted(hla_types)
                     results[peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
                     results[peptide]['individual_ic50_calls'] = individual_ic50_calls
                     results[peptide]['individual_percentile_calls'] = individual_percentile_calls
+                    results[peptide]['individual_el_calls'] = individual_el_calls
+                    results[peptide]['individual_el_percentile_calls'] = individual_el_percentile_calls
                     wt_peptide = good_binders_peptide_annotation.iloc[0]['WT Epitope Seq']
                     if wt_peptide == 'NA':
                         variant_type = good_binders_peptide_annotation.iloc[0]['Variant Type']
@@ -517,7 +540,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
 
-    def get_good_binders_metrics(self, good_binders, prediction_algorithms, hla_types):
+    def get_good_binders_metrics(self, good_binders, prediction_algorithms, el_algorithms, hla_types):
         return (None, "NA")
 
     def calculate_unique_peptide_count(self, good_binders):
