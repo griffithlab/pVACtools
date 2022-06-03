@@ -100,6 +100,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "PLLPLLLLL"
           },
           "LLPLLPLLL": {
@@ -194,6 +212,24 @@
                   1.4,
                   1.4
                 ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
               }
             },
             "wt_peptide": "LLPLLLLLL"
@@ -292,6 +328,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "LLPLLLLLL"
           },
           "LLPLLPLLLL": {
@@ -386,6 +440,24 @@
                   6.3,
                   9.1
                 ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
               }
             },
             "wt_peptide": "LLPLLLLLLG"
@@ -484,6 +556,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "LPLLLLLLGA"
           },
           "PLLPLLPLLL": {
@@ -580,6 +670,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "PLLPLLLLLL"
           },
           "LPLLPLLLL": {
@@ -674,6 +782,24 @@
                   9.1,
                   7.5
                 ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
               }
             },
             "wt_peptide": "LPLLLLLLG"
@@ -829,6 +955,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
             "wt_peptide": "RPLELAYCL"
           },
           "AVRPLELVY": {
@@ -923,6 +1067,24 @@
                   2.7,
                   3.1
                 ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
               }
             },
             "wt_peptide": "AVRPLELAY"
@@ -1104,6 +1266,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
             "wt_peptide": "GSSPTTVIY"
           }
         },
@@ -1270,6 +1450,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "NPFNCECDL"
           },
           "LMVCELAGNL": {
@@ -1366,6 +1564,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "LMVCELAGNP"
           },
           "MVCELAGNLF": {
@@ -1460,6 +1676,24 @@
                   0.3,
                   0.2
                 ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
               }
             },
             "wt_peptide": "MVCELAGNPF"
@@ -1615,6 +1849,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "LLHTVSPEPP"
           }
         },
@@ -1753,6 +2005,24 @@
                   "NA",
                   "NA"
                 ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
               }
             },
             "wt_peptide": "FS-NA"
@@ -1895,6 +2165,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "CLSDRCKIL"
           },
           "YQPCDDMDYL": {
@@ -1989,6 +2277,24 @@
                   22.0,
                   19.0
                 ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
               }
             },
             "wt_peptide": "YQPCDDMDCL"
@@ -2157,6 +2463,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
             "wt_peptide": "YSYGLLHTY"
           },
           "HIYGSGGYAL": {
@@ -2251,6 +2575,24 @@
                   9.3,
                   7.3
                 ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
               }
             },
             "wt_peptide": "HTYGSGGYAL"
@@ -2406,6 +2748,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "ALGWEFLAST"
           }
         },
@@ -2546,6 +2906,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "SLFGALVHS"
           },
           "FGALVRSRTY": {
@@ -2640,6 +3018,24 @@
                   0.6,
                   1.2
                 ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
               }
             },
             "wt_peptide": "FGALVHSRTY"
@@ -2795,6 +3191,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-B*35:01": []
+              },
+              "WT": {
+                "HLA-B*35:01": []
+              }
+            },
             "wt_peptide": "SAAAAAAAA"
           }
         },
@@ -2935,6 +3349,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "TLSRTLLAAA"
           },
           "TLSRTLLLA": {
@@ -3031,6 +3463,24 @@
                 ]
               }
             },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
             "wt_peptide": "TLSRTLLAA"
           },
           "ATLSRTLLL": {
@@ -3125,6 +3575,24 @@
                   12.0,
                   12.0
                 ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
               }
             },
             "wt_peptide": "ATLSRTLLA"
