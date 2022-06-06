@@ -19,6 +19,12 @@ def define_parser():
         "output_file",
         help="The file path to write the aggregated report tsv to"
     )
+    parser.add_argument(
+        '-b', '--binding-threshold', type=int,
+        help="Tier epitopes in the \"Pass\" tier when the mutant allele "
+             + "has ic50 binding scores below this value and in the \"Relaxed\" tier when the mutation allele has ic50 binding scores below double this value.",
+        default=500
+    )
 
     return parser
 
@@ -29,7 +35,7 @@ def main(args_input = sys.argv[1:]):
     tmp_fh = tempfile.NamedTemporaryFile()
 
     print("Creating Aggreggated Report")
-    UnmatchedSequenceAggregateAllEpitopes(args.input_file, args.output_file).execute()
+    UnmatchedSequenceAggregateAllEpitopes(args.input_file, args.output_file, binding_threshold=args.binding_threshold).execute()
     print("Completed")
 
 if __name__ == '__main__':
