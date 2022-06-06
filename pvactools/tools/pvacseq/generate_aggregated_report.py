@@ -24,6 +24,12 @@ def define_parser():
         help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used during aggregate report creation for a simple estimation of whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.",
         type=float,
     )
+    parser.add_argument(
+        '-b', '--binding-threshold', type=int,
+        help="Tier epitopes in the \"Pass\" tier when the mutant allele "
+             + "has ic50 binding scores below this value and in the \"Relaxed\" tier when the mutation allele has ic50 binding scores below double this value.",
+        default=500
+    )
 
     return parser
 
@@ -40,7 +46,7 @@ def main(args_input = sys.argv[1:]):
     tmp_fh = tempfile.NamedTemporaryFile()
 
     print("Creating Aggreggated Report")
-    PvacseqAggregateAllEpitopes(args.input_file, args.output_file, args.tumor_purity).execute()
+    PvacseqAggregateAllEpitopes(args.input_file, args.output_file, tumor_purity=args.tumor_purity, binding_threshold=args.binding_threshold).execute()
     print("Completed")
 
 if __name__ == '__main__':
