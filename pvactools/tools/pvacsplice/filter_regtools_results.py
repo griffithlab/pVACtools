@@ -8,7 +8,6 @@ class FilterRegtoolsResults():
     def __init__(self, **kwargs):
         self.input_file  = kwargs['input_file']
         self.output_file = kwargs['output_file']
-        #self.sample_name = kwargs['sample_name']
         self.output_dir  = kwargs['output_dir']
         self.score       = kwargs['score']
         self.distance    = kwargs['distance']
