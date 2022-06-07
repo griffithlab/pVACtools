@@ -1,8 +1,9 @@
 import os
-import sys
-import argparse
+from random import sample
+import shutil
 from turtle import distance
 import pandas as pd
+import pyfaidx
 from filter_regtools_results import *
 from junction_to_fasta import *
 from fasta_to_kmers import *
@@ -16,7 +17,7 @@ class JunctionPipeline():
         self.annotated_vcf                    = kwargs['annotated_vcf']
         self.sample_name                      = kwargs['sample_name']
         self.output_dir                       = kwargs['base_output_dir']
-        self.ref_fasta                        = kwargs['ref_fasta']
+        self.fasta_path                       = kwargs['ref_fasta']
         self.class_i_epitope_length           = kwargs.pop('class_i_epitope_length', None)
         self.class_ii_epitope_length          = kwargs.pop('class_ii_epitope_length', None)
         self.junction_score                   = kwargs.pop('junction_score', 10)
@@ -24,12 +25,13 @@ class JunctionPipeline():
         self.maximum_transcript_support_level = kwargs.pop('maximum_transcript_support_level', 1)
         self.normal_sample_name               = kwargs.pop('normal_sample_name', None)
 
+
     def execute(self):
-        self.filter_regtools_results()
-        self.vcf_to_tsv()
-        self.combine_inputs()
+        #self.filter_regtools_results()
+        #self.vcf_to_tsv()
+        #self.combine_inputs()
         self.junction_to_fasta()
-        self.fasta_to_kmers()
+        #self.fasta_to_kmers()
 
     def create_file_path(self, type):
         inputs = {
@@ -115,7 +117,7 @@ class JunctionPipeline():
             junction = filtered_df.loc[[i], :]
             for row in junction.itertuples():
                 junction_params = {
-                    'fasta_path'     : self.ref_fasta,
+                    'fasta_path'     : self.fasta_path,
                     'tscript_id'     : row.Transcript_stable_ID,
                     'chrom'          : row.junction_chrom,
                     'junction_name'  : row.name,
@@ -126,7 +128,26 @@ class JunctionPipeline():
                     'gene_name'      : row.Gene_name,
                     'output_file'    : self.create_file_path('fasta'),
                     'output_dir'     : self.output_dir,
+                    'vcf'            : self.annotated_vcf,
+                    'sample_name'    : self.sample_name,
                 }
+
+                # write chrs here - include work dir cleanup at the end
+                # chrom_fasta = pyfaidx.Fasta(self.fasta_path)[row.junction_chrom][:]
+                
+                # ref_path = os.path.join(self.output_dir, f'{row.junction_chrom}.fa')
+                # alt_path = os.path.join(self.output_dir, f'{row.junction_chrom}_alt.fa')
+                
+                # for x in [ref_path, alt_path]:
+                #     if not os.path.exists(x):
+                #         f = open(x, 'w')
+                #         f.write(f'>{chrom_fasta.name}\n{chrom_fasta.seq}\n')
+                #         f.close()
+
+                # junction_params['ref_fasta'] = pyfaidx.Fasta(ref_path)
+                # junction_params['alt_fasta'] = pyfaidx.FastaVariant(alt_path, self.annotated_vcf, sample=self.sample_name)
+                # end
+                
                 junctions = JunctionToFasta(**junction_params)
                 wt = junctions.create_wt_df()
                 if wt.empty:
@@ -134,12 +155,14 @@ class JunctionPipeline():
                 mut = junctions.create_alt_df()
                 if mut.empty:
                     continue
-                wt_aa, wt_dna = junctions.get_aa_sequence(wt)
-                if not wt_aa or not wt_dna:
-                    print(f'{row.Transcript_stable_ID}: No WT sequence')
-                    continue
-                mut_aa, mut_dna = junctions.get_aa_sequence(mut)
+                wt_aa, mut_aa = junctions.get_sequence_wrapper()
                 junctions.create_sequence_fasta(wt_aa, mut_aa)
+                # wt_aa, wt_dna = junctions.get_aa_sequence(wt)
+                # if not wt_aa or not wt_dna:
+                #     print(f'{row.Transcript_stable_ID} Error: reference sequence not found')
+                #     continue
+                # mut_aa, mut_dna = junctions.get_aa_sequence(mut)
+                
                 #junctions.create_sequence_fasta(wt_dna, mut_dna)
         print('Completed')
     

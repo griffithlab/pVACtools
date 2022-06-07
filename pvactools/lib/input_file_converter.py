@@ -469,31 +469,31 @@ class PvacspliceVcfConverter(VcfConverter):
                     transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], 'deletion')
 
                 for transcript in transcripts:
-                    # if '/' in transcript['Protein_position']:
-                    #     protein_position = transcript['Protein_position'].split('/')[0]
-                    #     if protein_position == '-':
-                    #         protein_position = transcript['Protein_position'].split('/')[1]
-                    # else:
-                    #     protein_position = transcript['Protein_position']
-                    # if protein_position == '-' or protein_position == '':
-                    #     print("Variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
-                    #     continue
+                    if '/' in transcript['Protein_position']:
+                        protein_position = transcript['Protein_position'].split('/')[0]
+                        if protein_position == '-':
+                            protein_position = transcript['Protein_position'].split('/')[1]
+                    else:
+                        protein_position = transcript['Protein_position']
+                    if protein_position == '-' or protein_position == '':
+                        print("Variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        continue
                     transcript_name = transcript['Feature']
-                    # consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
-                    # if consequence is None:
-                    #     continue
-                    # elif consequence == 'FS':
-                    #     if transcript['FrameshiftSequence'] == '':
-                    #         print("frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
-                    #         continue
-                    #     else:
-                    #         amino_acid_change_position = "%s%s/%s" % (protein_position, entry.REF, alt)
-                    # else:
-                    #     if transcript['Amino_acids'] == '':
-                    #         print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
-                    #         continue
-                    #     else:
-                    #         amino_acid_change_position = protein_position + transcript['Amino_acids']
+                    consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
+                    if consequence is None:
+                        continue
+                    elif consequence == 'FS':
+                        if transcript['FrameshiftSequence'] == '':
+                            print("frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                            continue
+                        else:
+                            amino_acid_change_position = "%s%s/%s" % (protein_position, entry.REF, alt)
+                    else:
+                        if transcript['Amino_acids'] == '':
+                            print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                            continue
+                        else:
+                            amino_acid_change_position = protein_position + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
                     # index = pvactools.lib.run_utils.construct_index(count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     # if index in indexes:
@@ -550,7 +550,7 @@ class PvacspliceVcfConverter(VcfConverter):
                         #'frameshift_amino_acid_sequence' : transcript['FrameshiftSequence'],
                         #'fusion_amino_acid_sequence'     : '',
                         'variant_type'                   : transcript['Consequence'], 
-                        # 'protein_position'               : protein_position,
+                        'protein_position'               : protein_position,
                         # 'index'                          : index,
                         'protein_length_change'          : protein_length_change,
                     }

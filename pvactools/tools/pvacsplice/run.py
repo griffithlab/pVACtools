@@ -101,7 +101,7 @@ def main(args_input = sys.argv[1:]):
     }
 
     pipeline = JunctionPipeline(**junction_arguments)
-    #pipeline.execute()
+    pipeline.execute()
 
     pvacbind_arguments = junction_arguments.copy()
     additional_args = {
@@ -155,7 +155,7 @@ def main(args_input = sys.argv[1:]):
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
             
             pipeline = PvacsplicePipeline(**class_i_arguments)
-            pipeline.execute()
+            #pipeline.execute()
 
         create_combined_reports_length(base_output_dir, args, 'MHC_Class_I')
 
@@ -190,7 +190,7 @@ def main(args_input = sys.argv[1:]):
             class_ii_arguments['netmhc_stab']             = False
             
             pipeline = PvacsplicePipeline(**class_ii_arguments)
-            pipeline.execute()
+            #pipeline.execute()
 
         create_combined_reports_length(base_output_dir, args, 'MHC_Class_II')
 
