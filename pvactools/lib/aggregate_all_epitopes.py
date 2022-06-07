@@ -603,7 +603,14 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return df.iloc[0]
 
     def get_tier(self, mutation, vaf_clonal):
-        return "NA"
+        if mutation["Median IC50 Score"] < self.binding_threshold:
+            return "Pass"
+
+        #relax mt and expr
+        if mutation["Median IC50 Score"] < self.relaxed_binding_threshold:
+            return "Relaxed"
+
+        return "Poor"
 
     def get_good_binders(self, df):
         if self.allele_specific_binding_thresholds:
