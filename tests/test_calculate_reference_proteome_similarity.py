@@ -8,7 +8,7 @@ import py_compile
 from Bio.Blast import NCBIWWW
 
 from pvactools.lib.calculate_reference_proteome_similarity import CalculateReferenceProteomeSimilarity
-from .test_utils import *
+from tests.utils import *
 
 class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
     @classmethod

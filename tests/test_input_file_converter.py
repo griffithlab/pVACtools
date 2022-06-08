@@ -8,7 +8,7 @@ import logging
 from testfixtures import LogCapture, StringComparison as S
 
 from pvactools.lib.input_file_converter import VcfConverter, FusionInputConverter
-from .test_utils import *
+from tests.utils import *
 
 class InputFileConverterTests(unittest.TestCase):
     @classmethod
