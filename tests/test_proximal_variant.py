@@ -5,7 +5,7 @@ import py_compile
 import vcfpy
 
 from pvactools.lib.proximal_variant import ProximalVariant
-from .test_utils import *
+from tests.utils import *
 
 class ProximalVariantTests(unittest.TestCase):
     @classmethod
