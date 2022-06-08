@@ -20,7 +20,7 @@ from pvactools.lib.vector_visualization import VectorVisualization
 from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
 from pvactools.lib.pvacvector_input_fasta_generator import PvacvectorInputFastaGenerator
 from pvactools.lib.pipeline import *
-from pvactools.lib.run_utils import *
+import pvactools.lib.run_utils
 
 def define_parser():
     return PvacvectorRunArgumentParser().parser
@@ -436,6 +436,7 @@ def main(args_input=sys.argv[1:]):
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
 
     (class_i_alleles, class_ii_alleles, species) = pvactools.lib.run_utils.split_alleles(args.allele)
+    class_ii_alleles = pvactools.lib.run_utils.combine_class_ii_alleles(class_ii_alleles)
     if len(class_i_alleles) == 0:
         print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
     elif len(class_ii_alleles) == 0:
