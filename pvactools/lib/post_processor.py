@@ -50,6 +50,7 @@ class PostProcessor:
                 tumor_purity=self.tumor_purity,
                 binding_threshold=self.binding_threshold,
                 trna_vaf=self.trna_vaf,
+                trna_cov=self.trna_cov,
                 expn_val=self.expn_val,
             ).execute()
         else:

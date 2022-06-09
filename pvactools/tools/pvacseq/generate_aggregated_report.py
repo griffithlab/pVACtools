@@ -36,6 +36,11 @@ def define_parser():
         default=0.25
     )
     parser.add_argument(
+        '--trna-cov', type=int,
+        help="Tumor RNA Coverage Cutoff. Used as a cutoff for tiering.",
+        default=10
+    )
+    parser.add_argument(
         '--expn-val', type=float,
         default=1.0,
         help="Gene and Expression cutoff. Used to calculate the allele expression cutoff for tiering.",
@@ -62,6 +67,7 @@ def main(args_input = sys.argv[1:]):
         tumor_purity=args.tumor_purity,
         binding_threshold=args.binding_threshold,
         trna_vaf=args.trna_vaf,
+        trna_cov=args.trna_cov,
         expn_val=args.expn_val
     ).execute()
     print("Completed")
