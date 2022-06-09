@@ -211,7 +211,7 @@ class AggregateAllEpitopes:
 
 
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, expn_val=1):
+    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1):
         self.input_file = input_file
         self.output_file = output_file
         self.tumor_purity = tumor_purity
@@ -219,6 +219,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.relaxed_binding_threshold = self.binding_threshold * 2
         self.allele_expr_threshold = trna_vaf * expn_val * 10
         self.relaxed_allele_expr_threshold = trna_vaf * expn_val * 5
+        self.trna_cov = trna_cov
+        self.trna_vaf = trna_vaf
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
 
     def get_list_unique_mutation_keys(self):
@@ -310,8 +312,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         lowexpr=False
         if ((mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 0) or
            (mutation["Gene Expression"] == 0 and
-           mutation["Tumor RNA Depth"] > 50 and
-           mutation["Tumor RNA VAF"] > 0.10)):
+           mutation["Tumor RNA Depth"] > self.trna_cov and
+           mutation["Tumor RNA VAF"] > self.trna_vaf)):
              lowexpr=True
 
         #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
