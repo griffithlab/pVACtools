@@ -86,20 +86,18 @@ class JunctionPipeline():
         
         # separate snvs and indels because need coors fix for indels
         snv_df = annotated[(annotated['reference'].str.len() == 1) & (annotated['variant'].str.len() == 1)]
-        
-        # error here - if coordinates don't match and indel - check format
-        # temp: if indel, accept transcript only matching?
-        indel_df = annotated[~annotated['transcripts'].isin(snv_df['transcripts'].unique().tolist())]
+      
+        # increment variant_start for indels in junctions to match coords from annotated
+        junctions.loc[~junctions['transcripts'].isin(snv_df['transcripts'].unique().tolist()), ['variant_start']] += 1
 
-        # merge dfs by variant_info, transcript_id
-        # error message: if can't find tscript in vcf, it's a problem - can find all txpts just not all variants (indels in bed format from regtools)
-        self.merged_df = junctions.merge(snv_df, on=[
-                'variant_chrom', 
-                'variant_start', 
-                'variant_stop', 
-                'transcripts', 
-            ]
-        )
+        # remove junctions variant_stop as it is redundant for snvs and unwanted for indels (correct version supplied by annotated)
+        # then, merge dfs by variant_info, transcript_id
+        self.merged_df = junctions.drop(columns=['variant_stop']).merge(annotated, on=['variant_chrom', 'variant_start', 'transcripts'])
+
+        # usage of annotated's variant_stop col over junctions' leaves it non-adjacent to variant_start
+        # [OPTIONAL] below, move variant_stop to be right after variant_start for readability
+        stop_index = self.merged_df.columns.tolist().index('variant_start') + 1
+        self.merged_df.insert(stop_index, 'variant_stop', self.merged_df.pop('variant_stop'))
 
         # f'{self.gene_name}.{self.tscript_id}.{self.junction_name}.{self.anchor}'
         # uniquify tsv indexes
