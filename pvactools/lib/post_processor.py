@@ -48,7 +48,9 @@ class PostProcessor:
                 self.input_file,
                 self.aggregate_report,
                 tumor_purity=self.tumor_purity,
-                binding_threshold=self.binding_threshold
+                binding_threshold=self.binding_threshold,
+                trna_vaf=self.trna_vaf,
+                expn_val=self.expn_val,
             ).execute()
         else:
             UnmatchedSequenceAggregateAllEpitopes(

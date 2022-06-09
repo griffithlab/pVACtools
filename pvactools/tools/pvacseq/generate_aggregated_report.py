@@ -30,6 +30,16 @@ def define_parser():
              + "has ic50 binding scores below this value and in the \"Relaxed\" tier when the mutation allele has ic50 binding scores below double this value.",
         default=500
     )
+    parser.add_argument(
+        '--trna-vaf', type=float,
+        help="Tumor RNA VAF Cutoff. Used to calculate the allele expression cutoff for tiering.",
+        default=0.25
+    )
+    parser.add_argument(
+        '--expn-val', type=float,
+        default=1.0,
+        help="Gene and Expression cutoff. Used to calculate the allele expression cutoff for tiering.",
+    )
 
     return parser
 
@@ -46,7 +56,14 @@ def main(args_input = sys.argv[1:]):
     tmp_fh = tempfile.NamedTemporaryFile()
 
     print("Creating Aggreggated Report")
-    PvacseqAggregateAllEpitopes(args.input_file, args.output_file, tumor_purity=args.tumor_purity, binding_threshold=args.binding_threshold).execute()
+    PvacseqAggregateAllEpitopes(
+        args.input_file,
+        args.output_file,
+        tumor_purity=args.tumor_purity,
+        binding_threshold=args.binding_threshold,
+        trna_vaf=args.trna_vaf,
+        expn_val=args.expn_val
+    ).execute()
     print("Completed")
 
 if __name__ == '__main__':

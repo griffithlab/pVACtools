@@ -211,12 +211,14 @@ class AggregateAllEpitopes:
 
 
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500):
+    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, expn_val=1):
         self.input_file = input_file
         self.output_file = output_file
         self.tumor_purity = tumor_purity
         self.binding_threshold = binding_threshold
         self.relaxed_binding_threshold = self.binding_threshold * 2
+        self.allele_expr_threshold = trna_vaf * expn_val * 10
+        self.relaxed_allele_expr_threshold = trna_vaf * expn_val * 5
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
 
     def get_list_unique_mutation_keys(self):
@@ -278,28 +280,28 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         #writing these out as explicitly as possible for ease of understanding
         if (mutation["Median MT IC50 Score"] < self.binding_threshold and
-           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 3 and
+           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            anchor_residue_pass):
             return "Pass"
 
         #relax mt and expr
         if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
-           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
+           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            anchor_residue_pass):
             return "Relaxed"
 
         #anchor residues
         if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
-           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
+           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            not anchor_residue_pass):
             return "Anchor"
 
         #not in founding clone
         if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
-           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
+           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] < (vaf_clonal/2) and
            anchor_residue_pass):
             return "Subclonal"
