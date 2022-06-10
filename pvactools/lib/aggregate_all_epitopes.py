@@ -683,6 +683,14 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     #sort the table in our preferred manner
     def sort_table(self, df):
         df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
+
+        tier_sorter = ["Pass", "Relaxed", "Poor"]
+        sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
+        df["rank_tier"] = df['Tier'].map(sorter_index)
+
+        df.sort_values(by=["rank_tier", "IC50 MT", "ID"], inplace=True, ascending=[True, True, True])
+
+        df.drop(labels='rank_tier', axis=1, inplace=True)
         return df
 
     def copy_pvacview_r_files(self):
