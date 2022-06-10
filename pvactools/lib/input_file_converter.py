@@ -29,6 +29,8 @@ class InputFileConverter(metaclass=ABCMeta):
             'gene_name',
             'transcript_name',
             'transcript_support_level',
+            'transcript_length',
+            'biotype',
             'amino_acid_change',
             'codon_change',
             'ensembl_gene_id',
@@ -349,6 +351,11 @@ class VcfConverter(InputFileConverter):
                     else:
                         tsl = 'NA'
 
+                    if 'BIOTYPE' in transcript and transcript['BIOTYPE'] is not None and transcript['BIOTYPE'] != '':
+                        biotype = transcript['BIOTYPE']
+                    else:
+                        biotype = 'NA'
+
                     wildtype_amino_acid_sequence = transcript['WildtypeProtein']
                     if '*' in wildtype_amino_acid_sequence:
                         logging.warning("Transcript WildtypeProtein sequence contains internal stop codon. These can occur in Ensembl transcripts of the biotype polymorphic_pseudogene. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
@@ -379,6 +386,8 @@ class VcfConverter(InputFileConverter):
                         'gene_name'                      : gene_name,
                         'transcript_name'                : transcript_name,
                         'transcript_support_level'       : tsl,
+                        'transcript_length'              : len(wildtype_amino_acid_sequence),
+                        'biotype'                        : biotype,
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,

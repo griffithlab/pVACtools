@@ -76,7 +76,12 @@ class ProximalVariant:
     def find_phased_somatic_variant_and_potential_proximal_variants(self, somatic_variant, alt, transcript):
         potential_proximal_variants = []
         phased_somatic_variant = None
-        for entry in self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.begin - self.flanking_bases, somatic_variant.affected_end + self.flanking_bases):
+        try:
+            entries = self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.begin - self.flanking_bases, somatic_variant.affected_end + self.flanking_bases)
+        except ValueError as e:
+            return (phased_somatic_variant, potential_proximal_variants)
+
+        for entry in entries:
             if self.pass_only:
                 filt = entry.FILTER
                 if not (filt is None or len(filt) == 0 or filt == ['PASS']):

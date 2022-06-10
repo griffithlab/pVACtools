@@ -35,7 +35,7 @@ This version adds a host of new features to pVACtools:
 - The default ``--tdna-vaf`` and ``--trna-vaf`` cutoff values have been
   updated from 0.4 to 0.25. This is the minimum VAF threshold that an epitope
   candidate must meet in order to pass the coverage filter.
-- We now offer a graphical user interface, :ref:`pvacviz`, to run pVACseq as an alernative
+- We now offer a graphical user interface, pVACviz, to run pVACseq as an alernative
   to using the command line. pVACviz, can also be used to plot and filter your pVACseq
   results.
 
