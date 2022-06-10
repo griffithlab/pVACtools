@@ -23,7 +23,7 @@ Once you've successfully launched pVACview by completing the :ref:`prerequisites
 your local directories to load in the aggregate report and metrics files, usually located in the same directory as your ``app.R`` file.
 You will need to select the type of your files uploaded (Class I or Class II).
 
-The two required inputs are ``SAMPLE_NAME.class_name.all_epitopes.aggregated.tsv`` and ``SAMPLE_NAME.class_name.all_epitopes.aggregated.metrics.json``(these names may vary depending on your specific commands).
+The two required inputs are ``SAMPLE_NAME.class_name.all_epitopes.aggregated.tsv`` and ``SAMPLE_NAME.class_name.all_epitopes.aggregated.metrics.json`` (these names may vary depending on your specific commands).
 Both of which are output files from the pVACseq pipeline. The aggregated tsv file is a list of all predicted epitopes and their binding affinity scores,
 with additional variant information and the metrics json file contains additional transcript and peptide level information that is needed for certain features
 of the pVACview application. You can find further details on them :ref:`here <pvacseq_output_files>`.
@@ -37,7 +37,7 @@ highlighted using bold font and a green box around the cell.
 
 .. figure:: ../images/screenshots/pvacview-upload.png
     :width: 1000px
-    :height: 500px
+    :height: 350px
     :align: right
     :alt: pVACview Upload
     :figclass: align-left
@@ -64,7 +64,7 @@ Specifically, the features can be separated into three main categories:
 - :bold:`Transcript level information`
 
   - Transcripts of selected mutation that produces good binding peptides
-  - Transcript Expression
+  - Transcript expression, transcript support level, and biotype information etc.
 
 - :bold:`Peptide level information`
 
@@ -104,7 +104,7 @@ Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers
   then the variant is labeled as ANCHOR. Otherwise if the variant has an allele expression greater than 1, but fails the subclonal criteria (DNA VAF < 1/2 of the clonal VAF), then it is labeled as SUBCLONAL.
   More details can be found in the tooltip Help button on the top right of the aggreate report table.
 
-  Here we provide users with the option of changing the high and low allele expression cutoffs to customize Tiering for their individual samples.
+  Here we provide users with the option of changing the high and low allele expression cutoffs to customize tiering for their individual samples.
 
 
 .. figure:: ../images/screenshots/pvacview-regenerate_tier.png

@@ -25,7 +25,7 @@ class FilterTests(unittest.TestCase):
             ),
             output_file.name,
             [{
-                'column': "Median MT Score",
+                'column': "Median MT IC50 Score",
                 'operator': "<",
                 'threshold': "500",
                 'exclude_nas': False
@@ -46,7 +46,7 @@ class FilterTests(unittest.TestCase):
             ),
             output_file.name,
             [{
-                'column': "Median MT Score",
+                'column': "Median MT IC50 Score",
                 'operator': "<=",
                 'threshold': "500",
                 'exclude_nas': False
@@ -67,7 +67,7 @@ class FilterTests(unittest.TestCase):
             ),
             output_file.name,
             [{
-                'column': "Median MT Score",
+                'column': "Median MT IC50 Score",
                 'operator': "==",
                 'threshold': "500",
                 'exclude_nas': False
@@ -88,7 +88,7 @@ class FilterTests(unittest.TestCase):
             ),
             output_file.name,
             [{
-                'column': "Median MT Score",
+                'column': "Median MT IC50 Score",
                 'operator': ">=",
                 'threshold': "500",
                 'exclude_nas': False
@@ -109,7 +109,7 @@ class FilterTests(unittest.TestCase):
             ),
             output_file.name,
             [{
-                'column': "Median MT Score",
+                'column': "Median MT IC50 Score",
                 'operator': ">",
                 'threshold': "500",
                 'exclude_nas': False

@@ -17,20 +17,17 @@ tools:
    A tool designed to aid specifically in the construction of DNA-based
    cancer vaccines.
 
-**pVACviz**
-   A browser-based user interface that assists
-   users in launching, managing, reviewing, and visualizing the results of
-   pVACtools processes.
-
 **pVACview**
    An application based on R Shiny that assists
    users in reviewing, exploring and prioritizing neoantigens from the results of
    pVACtools processes for personalized cancer vaccine design.
 
-.. image:: images/pVACtools_main-figure_v5a.png
+.. image:: images/pVACtools_main-figure_v6b.png
     :align: center
     :alt: pVACtools immunotherapy workflow
 
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
@@ -39,7 +36,6 @@ tools:
    pvacbind
    pvacfuse
    pvacvector
-   pvacviz
    pvacview
 
 .. toctree::
@@ -55,102 +51,96 @@ tools:
    contact
    mailing_list
 
-New in release |release|
+New in Release |release|
 ------------------------
 
 This is a bugfix release. It fixes the following problem(s):
 
-- Some users have reported "Cannot open file" errors when running
-  NetMHCstabpan. This release adds a retry when this error in encountered.
-- This release adds stricter checking to pVACbind for unsupported amino acids.
-  Sequences containing an unsupported amino acid will be skipped. The
-  following amino acids are supported: ``A``, ``R``, ``N``, ``D``, ``C``, ``E``,
-  ``Q``, ``G``, ``H``, ``I``, ``L``, ``K``, ``M``, ``F``, ``P``, ``S``, ``T``,
-  ``W``, ``Y``, ``V``.
-- Some VEP predictions for supported variant types might not contain any
-  protein position information, rendering pVACseq unable to parse such
-  annotations. Annotations without protein position information will now be skipped.
+- There was small issue in pVACview where picking a different number of
+  variants in the main table would cause changes to variant evaluations
+  to not be recorded correctly.
+- This release also fixes a problem where loading a new set of files into
+  pVACview would not reset previous evaluation summary counts.
+- This release fixes an error in pVACtools that would occur when a chromosomal
+  region in the somatic VCF is not present in the proximal VCF.
+- This release adds further error checking for malformed CSQ header
+  descriptions.
+- This release updates various code portions to remove deprecation warnings and
+  add support for  newer versions of certain dependencies (e.g. pandas).
+- This release fixes an bug with the standalone ``pvacseq
+  calculate_reference_proteome_similarity`` command where picking a custom
+  ``--match-length`` would throw an error.
+- Some users were reporting errors during the tmp file cleanup stages of
+  running the various pipelines. This releases fixes that issue.
 
-New in version |version|
+
+New in Version |version|
 ------------------------
 
 This version adds the following features, outlined below. Please note that
-pVACtools 2.0 is not backwards-compatible and certain changes will break old
+pVACtools 3.0 is not backwards-compatible and certain changes will break old
 workflows.
 
-Breaking changes
+Breaking Changes
 ________________
 
-- pVACtools now supports variable epitope lengths for class II prediction algorithms. The previous option
-  ``--epitope-length`` (``-e``) no longer exists. It has been replaced with
-  ``--class-i-epitope-length`` (``-e1``) and ``--class-ii-epitope-length``
-  (``-e2``) for class I and class II epitope lengths, respectively. The
-  defaults are ``[8, 9, 10, 11]`` and ``[12, 13, 14, 15, 16, 17, 18]``,
-  respectively.
-- The ``--peptide-sequence-length`` option has been removed. The peptide
-  sequence length is now determined by the epitope length(s) to determine the
-  flanking sequence length before and after the mutation.
-- pVACtools no longer depends on conda. pVACtools remains compatible with
-  Python 3.5 and above but users may chose any environment manager to set up
-  an appropriate Python environment.
-- When using standalone IEDB, pVACtools is now only compatible with IEDB 3.1
-  and above. Please see :ref:`install` for instructions on installing the
-  latest IEDB version.
-- pVACseq is no longer dependent on annotations with the VEP Downstream
-  plugin. This dependency has been replaced with the VEP Frameshift plugin.
-  This requires changes to your existing VEP installation in order to install
-  the Frameshift plugin. Existing VCFs that were previously annotated to work
-  with pVACtools 1.5 and below will no longer work with version 2.0 and above
-  and will need to be reannotated. Please see our documentation on :ref:`vep`
-  for more information.
-- The filtered.condensed.tsv report has been removed and replaced with the
-  all_epitopes.aggregated.tsv report. We believe that this new report will
-  provide a more useful summary of your
-  results. Please see the Output Files sections of each tool for more
-  information on this new report.
+- The pVACapi and pVACviz tools have been removed. They have been replaced by
+  the :ref:`pvacview` tool.
+- The package namespace has been updated. The files will now be installed
+  underneath a ``pvactools`` directory in your python package installation
+  path.
+- The aggregated report format has been updated. The headers have been updated for
+  clarity. An additional column ``Allele Expr`` has been added, representing
+  RNA expression * RNA VAF. For more information see :ref:`aggregated`.
+- pVACfuse no longer supports inputs from Integrate NEO. Only AGFusion inputs
+  will be supported going forward.
+- The format of the pVACfuse all_epitopes and filtered reports has been updated to
+  remove columns that aren't applicable for the tool. Please see the documentation
+  for the pVACfuse :ref:`pvacfuse_all_ep_and_filtered` for more information.
 
-New features
+New Features
 ____________
 
-- pVACtools now provides binding affinity percentile rank information, in
-  addition to the raw ic50 binding affinity values. Users may filter on the
-  percentile rank by using the new ``--percentile-threshold`` argument.
-- Users now have the option of calculating the reference proteome similarity
-  of their filtered epitopes. For this, the peptide sequence for the
-  remaining variants is mapped to the reference proteome using BLAST. Variants
-  where this yields a hit to a reference proteome are marked accordingly and a
-  ``.reference_matches`` file provides more information about the matches.
-  This option can be enabled using the ``--run-reference-proteome-similarity``
-  option.
-- Users may now use the options ``all``, ``all_class_i``, or ``all_class_ii``
-  instead of specific prediction algorithms in order to run all prediction
-  algorithms, all class I prediction algorithms, or all class II prediction
-  algorithms, respectively.
-- For successful pVACvector runs, we now output a ``_results.dna.fa`` file
-  with the most likely nucleic acid sequence for the predicted vector.
+- This release adds a new tool, :ref:`pvacview`. pVACview is an R Shiny application that
+  allows for that visualization of the pVACseq aggregated report file to review, explore,
+  and prioritize the different neoantigen candidates predicted by pVACseq.
+- The 3.0 release adds several improvements to the reference proteome
+  similarity step:
+
+  - Users can now run the reference proteome similarity step with a standalone
+    Protein BLAST installation. To use a standalone BLASTp installation, provide the
+    installation path using the ``--blastp-path`` parameter. The supported
+    Protein BLAST databases are ``refseq_select_prot`` and ``refseq_protein``.
+    Please reference the :ref:`blast` documentation for further instructions.
+  - When running the reference proteome similarity step using the NCBI Protein BLAST API,
+    users can now pick between the ``refseq_select_prot`` and ``refseq_protein``
+    databases.
+  - Parallelization has been added to the reference proteome similarity step.
+    When running this step as part of the pVACseq, pVACfuse, or pVACbind
+    pipelines, the existing ``--t`` parameter will also be used to set the number of
+    parallel threads in this step.
+
+- This release adds standalone commands to run stability predictions, cleavage
+  site predictions, and the reference proteome similarity step on the output
+  of the :ref:`pVACseq<optional_downstream_analysis_tools_label>`, :ref:`pVACfuse<pvacfuse_tools>`, and :ref:`pVACbind<pvacbind_tools>` pipelines.
 
 Minor Updates
 _____________
 
-- When running pVACseq with a proximal variants VCF we would previously assume
-  that your ran VEP with the ``--pick`` option and only process the first transcript
-  annotation for a variant. With this update we will now associate the correct
-  transcript for a proximal variant with the matching transcript of the main
-  somatic variant of interest.
-- The ``pvacseq generate_protein_fasta`` command now allows users to provide a
-  proximal variants VCF using the ``--phased-proximal-variants-vcf`` option.
-- The ``pvacseq generate_protein_fasta`` command now supports multi-sample
-  VCFs. Users may use the ``--sample-name`` to provide the sample name of the
-  sample they wish to process.
-- pVACseq and pVACfuse would previously error out if the intermediate TSV
-  parsed from the input was empty. In 2.0 the tool will no longer
-  error out but exit with an appropriate message.
-- pVACvector would previously error out when no valid path was found. In 2.0
-  pVACvector will not longer error out but exit with an appropriate message.
-- We now set consistent file permissions on all output files.
-- We've updated our license to BSD 3-Cause Clear. Please note that the
-  individual licenses of our dependent tools remain in place. These can be
-  viewed by on the :ref:`tools` page.
+- Previously, when running NetChop for cleavage site predictions, predictions
+  were made for each epitope individually. However, these predictions will
+  differ if additional flanking amino acids are provided and will be stable
+  with 9 or more flanking amino acids. We updated this step to make predictions
+  with 9 flanking amino acids around each epitope to generate stable
+  predictions.
+- This release adds a ``--species`` option to the ``valid_alleles`` commands
+  to filter alleles on a species of interest.
+- This release adds a ``--pass-only`` flag to the ``pvacseq
+  generate_protein_fasta`` commands to only process VCF entries that do not
+  have a FILTER set.
+- This release adds a new parameter ``--tumor-purity``. This parameter indicates
+  the fraction of tumor cells in the tumor sample and is used during aggregate
+  report creation for a simple estimation whether variants are subclonal or clonal based on VAF.
 
 Past release notes can be found on our :ref:`releases` page.
 

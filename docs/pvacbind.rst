@@ -12,6 +12,7 @@ This component of the pVACtools is used to predict neoantigens for the peptides 
 .. toctree::
    :glob:
 
+   pvacbind/features
    pvacbind/prerequisites
    pvacbind/getting_started
    pvacbind/run

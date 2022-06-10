@@ -27,8 +27,15 @@ A detailed description of all command options can be found on the :ref:`Usage <p
 Running pVACseq using Docker
 ____________________________
 
-A pVACtools Docker image is available on `DockerHub <https://hub.docker.com/r/griffithlab/pvactools>`_ using the
-``griffitlab/pvactools`` tag. After `installing Docker <https://docs.docker.com/install/>`_
+Three kinds of Docker containers for pVACtools are available on DockerHub using the
+`griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo:
+- <version>-xs: Includes pVACtools only
+- <version>-slim: Includes everything in xs plus IEDB MHC Class I and Class II tools.
+  These tools are installed at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
+- <version>: Includes everything in slim plus an installation of BLAST and the ``refseq_select_prot``
+database.
+
+After `installing Docker <https://docs.docker.com/install/>`_
 you can start an interactive Docker instance by running the following command:
 
 .. code-block:: none
@@ -81,4 +88,15 @@ The output from your pVACseq run can be found under ``/pvacseq_output_data``
 inside of the container and ``/local/path/to/output_dir`` on your local
 machine.
 
-Please note that our Docker container already includes installations of the IEDB class I and class II tools at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
+Please note that the slim and full Docker containers already include installations of the IEDB class I and class II tools at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
+
+The full Docker container also includes
+installation of BLAST at ``/opt/ncbi-blast-2.12.0+`` (``--blastp-path
+/opt/ncbi-blast-2.12.0+/bin/blastp``) as well as the ``refseq_select_prot``
+database under the ``/opt/blastdb`` directory. The ``BLASTDB`` environment variable is already
+set to this path inside of the Docker container so this database can be used
+without any additional modifications. The ``refseq_protein``
+database is not installed inside of the Docker container due to size
+constraints. If usage of this database is desired, we recommend installing it outside
+of the Docker container and mounting the database path using the ``-v`` flag in your
+``docker run`` command (``-v /local/path/to/blastdb:/opt/blastdb``).

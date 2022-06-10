@@ -6,6 +6,7 @@ from Bio import SeqIO
 import os
 import shutil
 from abc import ABCMeta, abstractmethod
+import itertools
 
 from pvactools.lib.prediction_class import PredictionClass
 
@@ -45,11 +46,7 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def get_good_binders_metrics(self, good_binders, prediction_algorithms, hla_types):
-        raise Exception("Must implement method in child class")
-
-    @abstractmethod
-    def calculate_annotation_count(self, peptides):
+    def get_good_binders_metrics(self, good_binders, prediction_algorithms, el_algorithms, hla_types):
         raise Exception("Must implement method in child class")
 
     @abstractmethod
@@ -88,8 +85,7 @@ class AggregateAllEpitopes:
     def copy_pvacview_r_files(self):
         raise Exception("Must implement method in child class")
 
-
-    def get_best_mut_line(self, df, key, hla_types, prediction_algorithms, vaf_clonal, max_ic50=1000):
+    def get_best_mut_line(self, df, key, hla_types, prediction_algorithms, el_algorithms, vaf_clonal, max_ic50=1000):
         #order by best median score and get best ic50 peptide
         best = self.get_best_binder(df)
 
@@ -102,8 +98,7 @@ class AggregateAllEpitopes:
             hla = dict(map(lambda x : (x, good_binders_hla[x]) if x in good_binders_hla else (x, ""), hla_types))
             #get a list of all unique gene/transcript/aa_change combinations
             #store a count of all unique peptides that passed
-            peptides = self.get_good_binders_metrics(good_binders, prediction_algorithms, hla_types)
-            anno_count = self.calculate_annotation_count(peptides)
+            (peptides, anno_count) = self.get_good_binders_metrics(good_binders, prediction_algorithms, el_algorithms, hla_types)
             peptide_count = self.calculate_unique_peptide_count(good_binders)
         else:
             hla = dict(map(lambda x : (x, ""), hla_types))
@@ -114,31 +109,43 @@ class AggregateAllEpitopes:
         #assemble the line
         out_dict = self.assemble_result_line(best, key, vaf_clonal, hla, anno_count, peptide_count);
 
-        df_out = pd.DataFrame.from_dict(out_dict)
         metric = self.get_metrics(df, peptides, best)
-        return (df_out, metric)
+        return (out_dict, metric)
 
     def determine_used_prediction_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
         potential_algorithms = PredictionClass.prediction_methods()
         prediction_algorithms = []
         for algorithm in potential_algorithms:
+            if algorithm == 'NetMHCpanEL' or algorithm == 'NetMHCIIpanEL':
+                continue
             if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
 
-    def determine_columns_used_for_aggregation(self, prediction_algorithms):
+    def determine_used_el_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = ["MHCflurryEL Processing", "MHCflurryEL Presentation", "NetMHCpanEL", "NetMHCIIpanEL"]
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
+
+    def determine_columns_used_for_aggregation(self, prediction_algorithms, el_algorithms):
         used_columns = [
             "Chromosome", "Start", "Stop", "Reference", "Variant",
-            "Transcript", "Variant Type", "Mutation",
+            "Transcript", "Transcript Support Level", "Biotype", "Transcript Length", "Variant Type", "Mutation",
             "Protein Position", "Gene Name", "HLA Allele",
             "Mutation Position", "MT Epitope Seq", "WT Epitope Seq",
             "Tumor DNA VAF", "Tumor RNA Depth",
             "Tumor RNA VAF", "Gene Expression", "Transcript Expression",
-            "Median MT Score", "Median WT Score", "Median MT Percentile", "Median WT Percentile",
+            "Median MT IC50 Score", "Median WT IC50 Score", "Median MT Percentile", "Median WT Percentile",
         ]
-        for algorithm in prediction_algorithms:
-            used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm), "{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
+        for algorithm in itertools.chain(prediction_algorithms, el_algorithms):
+            used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm)])
+            if algorithm != "MHCflurryEL Processing":
+                used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
         return used_columns
 
     def set_column_types(self, prediction_algorithms):
@@ -150,9 +157,10 @@ class AggregateAllEpitopes:
             'Variant': str,
             "Variant Type": "category",
             "Mutation Position": "category",
-            "Median MT Score": "float32",
+            "Median MT IC50 Score": "float32",
             "Median MT Percentile": "float16",
             "Protein Position": "str",
+            "Transcript Length": "int32",
         }
         for algorithm in prediction_algorithms:
             if algorithm == 'SMM' or algorithm == 'SMMPMBEC':
@@ -162,10 +170,9 @@ class AggregateAllEpitopes:
         return dtypes
 
     def execute(self):
-        pd.set_option('precision', 3)
-
         prediction_algorithms = self.determine_used_prediction_algorithms()
-        used_columns = self.determine_columns_used_for_aggregation(prediction_algorithms)
+        el_algorithms = self.determine_used_el_algorithms()
+        used_columns = self.determine_columns_used_for_aggregation(prediction_algorithms, el_algorithms)
         dtypes = self.set_column_types(prediction_algorithms)
 
         ## get a list of all represented hla types
@@ -177,16 +184,22 @@ class AggregateAllEpitopes:
         ##do a crude estimate of clonal vaf/purity
         vaf_clonal = self.calculate_clonal_vaf()
 
-        columns = ['ID']
-        columns.extend(sorted(list(set([x.replace('HLA-', '') for x in hla_types]))))
-        columns.extend(['Gene', 'AA Change', 'Num Passing Transcripts', 'Best Peptide', 'Pos', 'Num Passing Peptides', 'IC50 MT', 'IC50 WT', '%ile MT', '%ile WT', 'RNA Expr', 'RNA VAF', 'Allele Expr', 'RNA Depth', 'DNA VAF', 'Tier', 'Evaluation'])
-        peptide_table = pd.DataFrame(columns=columns)
-        metrics = {}
+        if vaf_clonal is not None:
+            metrics = {
+                'tumor_purity': self.tumor_purity,
+                'vaf_clonal': round(vaf_clonal, 3),
+                'vaf_subclonal': round(vaf_clonal/2, 3)
+            }
+        else:
+            metrics = {}
+
+        data = []
         for key in keys:
             (df, key_str) = self.read_input_file(key, used_columns, dtypes)
-            (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, hla_types, prediction_algorithms, vaf_clonal, 1000)
-            peptide_table = peptide_table.append(best_mut_line, sort=False)
+            (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, hla_types, prediction_algorithms, el_algorithms, vaf_clonal, 1000)
+            data.append(best_mut_line)
             metrics[key_str] = metrics_for_key
+        peptide_table = pd.DataFrame(data=data)
         peptide_table = self.sort_table(peptide_table)
 
         peptide_table.to_csv(self.output_file, sep='\t', na_rep='NA', index=False, float_format='%.3f')
@@ -195,8 +208,13 @@ class AggregateAllEpitopes:
         self.copy_pvacview_r_files()
 
 
-
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
+    def __init__(self, input_file, output_file, tumor_purity=None):
+        self.input_file = input_file
+        self.output_file = output_file
+        self.tumor_purity = tumor_purity
+        self.metrics_file = output_file.replace('.tsv', '.metrics.json')
+
     def get_list_unique_mutation_keys(self):
         key_columns = {
             'Chromosome': str,
@@ -211,9 +229,20 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return sorted(keys)
 
     def calculate_clonal_vaf(self):
-        vafs = np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["Tumor DNA VAF"])['Tumor DNA VAF'].unique())[::-1]
-        vaf_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))[0]
-        return vaf_clonal
+        if self.tumor_purity:
+            vaf_clonal =  self.tumor_purity * 0.5
+            print("Tumor clonal VAF estimated as {} (calculated from user-provided tumor purity of {}). Assuming variants with VAF < {} are subclonal".format(round(vaf_clonal, 3), round(self.tumor_purity, 3), round(vaf_clonal/2, 3)))
+            return vaf_clonal
+        else:
+        #if no tumor purity is provided, make a rough estimate by taking the list of VAFs < 0.6 (assumption is that these are CN-neutral) and return the largest as the marker of the founding clone
+            vafs = np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["Tumor DNA VAF"])['Tumor DNA VAF'].unique())[::-1]
+            vafs_clonal = list(filter(lambda vaf: vaf < 0.6, vafs))
+            if len(vafs_clonal) == 0:
+                vaf_clonal = 0.6
+            else:
+                vaf_clonal = vafs_clonal[0]
+            print("Tumor clonal VAF estimated as {} (estimated from Tumor DNA VAF data). Assuming variants with VAF < {} are subclonal".format(round(vaf_clonal, 3), round(vaf_clonal/2, 3)))
+            return vaf_clonal
 
     def read_input_file(self, key, used_columns, dtypes):
         key_str = "{}-{}-{}-{}-{}".format(key[0], key[1], key[2], key[3], key[4])
@@ -228,7 +257,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return (df, key_str)
 
     def get_best_binder(self, df):
-        df.sort_values(by=["Median MT Score", "Median WT Score"], inplace=True, ascending=[True, False])
+        df.sort_values(by=["Median MT IC50 Score", "Median WT IC50 Score"], inplace=True, ascending=[True, False])
         return df.iloc[0].to_dict()
 
     #assign mutations to a "Classification" based on their favorability
@@ -238,34 +267,34 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         position = mutation["Mutation Position"]
         if position != "NA":
             if int(float(position)) in anchors:
-                if mutation["Median WT Score"] == "NA":
+                if mutation["Median WT IC50 Score"] == "NA":
                       anchor_residue_pass = False
-                elif mutation["Median WT Score"] < 1000:
+                elif mutation["Median WT IC50 Score"] < 1000:
                       anchor_residue_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
-        if (mutation["Median MT Score"] < 500 and
+        if (mutation["Median MT IC50 Score"] < 500 and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 3 and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            anchor_residue_pass):
             return "Pass"
 
         #relax mt and expr
-        if (mutation["Median MT Score"] < 1000 and
+        if (mutation["Median MT IC50 Score"] < 1000 and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            anchor_residue_pass):
             return "Relaxed"
 
         #anchor residues
-        if (mutation["Median MT Score"] < 1000 and
+        if (mutation["Median MT IC50 Score"] < 1000 and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            not anchor_residue_pass):
             return "Anchor"
 
         #not in founding clone
-        if (mutation["Median MT Score"] < 1000 and
+        if (mutation["Median MT IC50 Score"] < 1000 and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 1 and
            mutation["Tumor DNA VAF"] < (vaf_clonal/2) and
            anchor_residue_pass):
@@ -280,7 +309,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
              lowexpr=True
 
         #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
-        if (mutation["Median MT Score"] < 1000 and
+        if (mutation["Median MT IC50 Score"] < 1000 and
             lowexpr==True and
             mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
             anchor_residue_pass):
@@ -294,60 +323,99 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return "Poor"
 
     def get_good_binders(self, df, max_ic50):
-        return df[df["Median MT Score"] < max_ic50]
+        return df[df["Median MT IC50 Score"] < max_ic50]
 
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
 
-    def get_good_binders_metrics(self, good_binders, prediction_algorithms, hla_types):
+    def get_good_binders_metrics(self, good_binders, prediction_algorithms, el_algorithms, hla_types):
         peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
-        for peptide in good_binders["MT Epitope Seq"].unique():
-            good_binders_peptide = good_binders[good_binders['MT Epitope Seq'] == peptide]
-            individual_ic50_calls = { 'algorithms': prediction_algorithms }
-            individual_percentile_calls = { 'algorithms': prediction_algorithms }
-            for peptide_type in ['MT', 'WT']:
-                ic50s = {}
-                percentiles = {}
-                ic50_calls = {}
-                percentile_calls = {}
-                for index, line in good_binders_peptide.to_dict(orient='index').items():
-                    ic50s[line['HLA Allele']] = line['Median {} Score'.format(peptide_type)]
-                    percentiles[line['HLA Allele']] = line['Median {} Percentile'.format(peptide_type)]
-                    ic50_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
-                    percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
-                sorted_ic50s = []
-                sorted_percentiles = []
-                for hla_type in sorted(hla_types):
-                    if hla_type in ic50s:
-                        sorted_ic50s.append(ic50s[hla_type])
-                    else:
-                        sorted_ic50s.append('X')
-                    if hla_type in percentiles:
-                        sorted_percentiles.append(percentiles[hla_type])
-                    else:
-                        sorted_percentiles.append('X')
-                peptides[line['annotation']][peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
-                peptides[line['annotation']][peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
-                individual_ic50_calls[peptide_type] = ic50_calls
-                individual_percentile_calls[peptide_type] = percentile_calls
-            peptides[line['annotation']][peptide]['hla_types'] = sorted(hla_types)
-            peptides[line['annotation']][peptide]['mutation_position'] = str(good_binders_peptide.iloc[0]['Mutation Position'])
-            peptides[line['annotation']][peptide]['individual_ic50_calls'] = individual_ic50_calls
-            peptides[line['annotation']][peptide]['individual_percentile_calls'] = individual_percentile_calls
-            wt_peptide = good_binders_peptide.iloc[0]['WT Epitope Seq']
-            if wt_peptide == 'NA':
-                variant_type = good_binders_peptide.iloc[0]['Variant Type']
-                if variant_type == 'FS':
-                    wt_peptide = 'FS-NA'
-                elif variant_type == 'inframe_ins':
-                    wt_peptide = 'INS-NA'
-                elif variant_type == 'inframe_deletion':
-                    wt_peptide = 'DEL-NA'
-            peptides[line['annotation']][peptide]['wt_peptide'] = wt_peptide
-        return peptides
+        good_peptides = good_binders["MT Epitope Seq"].unique()
+        good_transcripts = good_binders['annotation'].unique()
+        peptide_sets = {}
+        for annotation in good_transcripts:
+            good_binders_annotation = good_binders[good_binders['annotation'] == annotation]
+            peptide_set = tuple(good_binders_annotation["MT Epitope Seq"].unique())
+            if peptide_set in peptide_sets:
+                peptide_sets[peptide_set].append(annotation)
+            else:
+                peptide_sets[peptide_set] = [annotation]
 
-    def calculate_annotation_count(self, peptides):
-        return len(peptides.keys())
+        set_number = 1
+        for peptide_set, annotations in peptide_sets.items():
+            set_name = "Transcript Set {}".format(set_number)
+            annotation = annotations[0]
+            good_binders_annotation = good_binders[good_binders['annotation'] == annotation]
+            results = defaultdict(lambda: defaultdict(list))
+            for peptide in list(peptide_set):
+                good_binders_peptide_annotation = good_binders_annotation[good_binders_annotation['MT Epitope Seq'] == peptide]
+                if len(good_binders_peptide_annotation) > 0:
+                    individual_ic50_calls = { 'algorithms': prediction_algorithms }
+                    individual_percentile_calls = { 'algorithms': prediction_algorithms }
+                    individual_el_calls = { 'algorithms': el_algorithms }
+                    individual_el_percentile_calls = { 'algorithms': el_algorithms }
+                    for peptide_type in ['MT', 'WT']:
+                        ic50s = {}
+                        percentiles = {}
+                        ic50_calls = {}
+                        percentile_calls = {}
+                        el_calls = {}
+                        el_percentile_calls = {}
+                        for index, line in good_binders_peptide_annotation.to_dict(orient='index').items():
+                            ic50s[line['HLA Allele']] = line['Median {} IC50 Score'.format(peptide_type)]
+                            percentiles[line['HLA Allele']] = line['Median {} Percentile'.format(peptide_type)]
+                            ic50_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
+                            percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
+                            el_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in el_algorithms]
+                            el_percentile_calls[line['HLA Allele']] = ['NA' if algorithm == 'MHCflurryEL Processing' else line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in el_algorithms]
+                        sorted_ic50s = []
+                        sorted_percentiles = []
+                        for hla_type in sorted(hla_types):
+                            if hla_type in ic50s:
+                                sorted_ic50s.append(ic50s[hla_type])
+                            else:
+                                sorted_ic50s.append('X')
+                            if hla_type in percentiles:
+                                sorted_percentiles.append(percentiles[hla_type])
+                            else:
+                                sorted_percentiles.append('X')
+                        results[peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
+                        results[peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
+                        individual_ic50_calls[peptide_type] = ic50_calls
+                        individual_percentile_calls[peptide_type] = percentile_calls
+                        individual_el_calls[peptide_type] = el_calls
+                        individual_el_percentile_calls[peptide_type] = el_percentile_calls
+                    results[peptide]['hla_types'] = sorted(hla_types)
+                    results[peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
+                    results[peptide]['individual_ic50_calls'] = individual_ic50_calls
+                    results[peptide]['individual_percentile_calls'] = individual_percentile_calls
+                    results[peptide]['individual_el_calls'] = individual_el_calls
+                    results[peptide]['individual_el_percentile_calls'] = individual_el_percentile_calls
+                    wt_peptide = good_binders_peptide_annotation.iloc[0]['WT Epitope Seq']
+                    if wt_peptide == 'NA':
+                        variant_type = good_binders_peptide_annotation.iloc[0]['Variant Type']
+                        if variant_type == 'FS':
+                            wt_peptide = 'FS-NA'
+                        elif variant_type == 'inframe_ins':
+                            wt_peptide = 'INS-NA'
+                        elif variant_type == 'inframe_deletion':
+                            wt_peptide = 'DEL-NA'
+                    results[peptide]['wt_peptide'] = wt_peptide
+            peptides[set_name]['peptides'] = results
+            peptides[set_name]['transcripts'] = annotations
+            peptides[set_name]['transcript_expr'] = [good_binders[good_binders["annotation"] == x]['Transcript Expression'].iloc[0] for x in annotations]
+            tsls = [good_binders[good_binders["annotation"] == x]['Transcript Support Level'].iloc[0] for x in annotations]
+            peptides[set_name]['tsl'] = [x if x == 'NA' else round(float(x)) for x in tsls]
+            peptides[set_name]['tsl'] = [x if x == 'NA' else round(float(x)) for x in tsls]
+            peptides[set_name]['biotype'] = [good_binders[good_binders["annotation"] == x]['Biotype'].iloc[0] for x in annotations]
+            peptides[set_name]['transcript_length'] = [int(good_binders[good_binders["annotation"] == x]['Transcript Length'].iloc[0]) for x in annotations]
+            peptides[set_name]['transcript_count'] = len(annotations)
+            peptides[set_name]['peptide_count'] = len(peptide_set)
+            peptides[set_name]['total_expr'] = sum([0 if x == 'NA' else (float(x)) for x in peptides[set_name]['transcript_expr']])
+            set_number += 1
+        anno_count = len(good_transcripts)
+
+        return (peptides, anno_count)
 
     def calculate_unique_peptide_count(self, good_binders):
         return len(good_binders["MT Epitope Seq"].unique())
@@ -372,35 +440,36 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         allele_expr = self.calculate_allele_expr(best)
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
-        out_dict = { k.replace('HLA-', ''):v for k,v in hla.items() }
+        out_dict = { 'ID': key }
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
         out_dict.update({
-            'Gene': [best["Gene Name"]],
-            'AA Change': [self.get_best_aa_change(best)],
-            'Num Passing Transcripts': [anno_count],
-            'Best Peptide': [best["MT Epitope Seq"]],
-            'Pos': [best["Mutation Position"]],
-            'Num Passing Peptides': [peptide_count],
-            'IC50 MT': [best["Median MT Score"]],
-            'IC50 WT': [best["Median WT Score"]],
-            '%ile MT': [best["Median MT Percentile"]],
-            '%ile WT': [best["Median WT Percentile"]],
-            'RNA Expr': [best["Gene Expression"]],
-            'RNA VAF': [best["Tumor RNA VAF"]],
+            'Gene': best["Gene Name"],
+            'AA Change': self.get_best_aa_change(best),
+            'Num Passing Transcripts': anno_count,
+            'Best Peptide': best["MT Epitope Seq"],
+            'Pos': best["Mutation Position"],
+            'Num Passing Peptides': peptide_count,
+            'IC50 MT': best["Median MT IC50 Score"],
+            'IC50 WT': best["Median WT IC50 Score"],
+            '%ile MT': best["Median MT Percentile"],
+            '%ile WT': best["Median WT Percentile"],
+            'RNA Expr': best["Gene Expression"],
+            'RNA VAF': best["Tumor RNA VAF"],
             'Allele Expr': allele_expr,
-            'RNA Depth': [best["Tumor RNA Depth"]],
-            'DNA VAF': [best["Tumor DNA VAF"]],
-            'Tier': [tier],
+            'RNA Depth': best["Tumor RNA Depth"],
+            'DNA VAF': best["Tumor DNA VAF"],
+            'Tier': tier,
             'Evaluation': 'Pending',
-            'ID': [key],
         })
         return out_dict
 
     def get_metrics(self, df, peptides, best):
-        transcripts = list(peptides.keys())
         return {
             'good_binders': peptides,
-            'good_binders_transcripts': transcripts,
-            'transcript_expr': [df[df["annotation"] == x]['Transcript Expression'].iloc[0] for x in transcripts],
+            'sets': list(peptides.keys()),
+            'transcript_counts': [v['transcript_count'] for k, v in peptides.items()],
+            'peptide_counts': [v['peptide_count'] for k, v in peptides.items()],
+            'set_expr': [v['total_expr'] for k, v in peptides.items()],
             'DNA VAF': float(best['Tumor DNA VAF']),
             'RNA VAF': float(best['Tumor RNA VAF']),
             'gene_expr': float(best['Gene Expression']),
@@ -426,10 +495,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         df.sort_values(by=["rank_tier", "rank", "Gene", "AA Change"], inplace=True, ascending=True)
 
-        df.drop('rank_tier', 1, inplace=True)
-        df.drop('rank_ic50', 1, inplace=True)
-        df.drop('rank_expr', 1, inplace=True)
-        df.drop('rank', 1, inplace=True)
+        df.drop(labels='rank_tier', axis=1, inplace=True)
+        df.drop(labels='rank_ic50', axis=1, inplace=True)
+        df.drop(labels='rank_expr', axis=1, inplace=True)
+        df.drop(labels='rank', axis=1, inplace=True)
 
         return df
 
@@ -459,23 +528,20 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return (df, key)
 
     def get_best_binder(self, df):
-        df.sort_values(by=["Median Score"], inplace=True, ascending=True)
+        df.sort_values(by=["Median IC50 Score"], inplace=True, ascending=True)
         return df.iloc[0]
 
     def get_tier(self, mutation, vaf_clonal):
         return "NA"
 
     def get_good_binders(self, df, max_ic50):
-        return df[df["Median Score"] < max_ic50]
+        return df[df["Median IC50 Score"] < max_ic50]
 
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
 
-    def get_good_binders_metrics(self, good_binders, prediction_algorithms, hla_types):
-        return None
-
-    def calculate_annotation_count(self, peptides):
-        return "NA"
+    def get_good_binders_metrics(self, good_binders, prediction_algorithms, el_algorithms, hla_types):
+        return (None, "NA")
 
     def calculate_unique_peptide_count(self, good_binders):
         return len(good_binders["Epitope Seq"].unique())
@@ -484,7 +550,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return "NA"
 
     def get_best_aa_change(self, best):
-        return best['Mutation']
+        return 'NA'
 
     def calculate_allele_expr(self, line):
         return 'NA'
@@ -493,30 +559,31 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         allele_expr = self.calculate_allele_expr(best)
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
-        out_dict = { k.replace('HLA-', ''):v for k,v in hla.items() }
+        out_dict = { 'ID': key }
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
         if 'Gene Name' in best:
             gene = best['Gene Name']
         else:
             gene = 'NA'
         out_dict.update({
-            'Gene': [gene],
-            'AA Change': [self.get_best_aa_change(best)],
-            'Num Passing Transcripts': [anno_count],
-            'Best Peptide': [best["Epitope Seq"]],
-            'Pos': ["NA"],
-            'Num Passing Peptides': [peptide_count],
-            'IC50 MT': [best["Median Score"]],
-            'IC50 WT': ["NA"],
-            '%ile MT': [best["Median Percentile"]],
-            '%ile WT': ["NA"],
-            'RNA Expr': ["NA"],
-            'RNA VAF': ["NA"],
+            'Gene': gene,
+            'AA Change': self.get_best_aa_change(best),
+            'Num Passing Transcripts': anno_count,
+            'Best Peptide': best["Epitope Seq"],
+            'Pos': "NA",
+            'Num Passing Peptides': peptide_count,
+            'IC50 MT': best["Median IC50 Score"],
+            'IC50 WT': "NA",
+            '%ile MT': best["Median Percentile"],
+            '%ile WT': "NA",
+            'RNA Expr': "NA",
+            'RNA VAF': "NA",
             'Allele Expr': allele_expr,
-            'RNA Depth': ["NA"],
-            'DNA VAF': ["NA"],
-            'Tier': [tier],
+            'RNA Depth': "NA",
+            'DNA VAF': "NA",
+            'Tier': tier,
             'Evaluation': 'Pending',
-            'ID':[key],
+            'ID':key,
         })
         return out_dict
 

@@ -1,6 +1,7 @@
 import argparse
 import sys
 import requests
+from requests.exceptions import Timeout
 import csv
 import tempfile
 import re
@@ -83,7 +84,7 @@ class NetChop:
                         index = line['Index']
                         epitope = line['MT Epitope Seq']
                     if index not in mt_records_dict:
-                        raise Exception("FASTA entry for index {} not found. Please check that the FASTA file matches the input TSV.".format(seq_id))
+                        raise Exception("FASTA entry for index {} not found. Please check that the FASTA file matches the input TSV.".format(index))
                     full_peptide = mt_records_dict[index]
                     peptide, start_diff = self.extract_flanked_epitope(full_peptide, epitope, index)
                     staging_file.write(peptide+'\n')
@@ -119,7 +120,7 @@ class NetChop:
                                 ep_len = seqs_start_diff[sequence_name][1]
                             currentPosition = data[0]
                             isCleavage = data[2]
-                            if isCleavage is not 'S':
+                            if isCleavage != 'S':
                                 continue
                             currentScore = float(data[3])
                             cleavage_scores[currentPosition] = currentScore
@@ -153,12 +154,13 @@ class NetChop:
                         writer.writerow(line)
                 else:
                     raise Exception("Unexpected return value from NetChop server. Unable to parse response.\n{}".format(response.content.decode()))
+            http.close()
 
     def setup_adapter(self):
         retry_strategy = Retry(
             total=3,
             status_forcelist=[408, 429, 500, 502, 503, 504],
-            method_whitelist=["POST", "GET"]
+            allowed_methods=["POST", "GET"]
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         http = requests.Session()
@@ -169,16 +171,16 @@ class NetChop:
     def query_netchop_server(self, http, staging_file, chosen_method, threshold, jobid_searcher):
         try:
             response = self.post_query(http, staging_file, chosen_method, threshold)
-        except requests.exceptions.ReadTimeout:
-            response = self.post_query(http, staging_file, chosen_method, threshold)
+        except Timeout:
+            raise Exception("Timeout while posting request to NetChop server. The server may be unresponsive. Please try again later.")
         if response.status_code != 200:
             raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
         while jobid_searcher.search(response.content.decode()):
             sleep(10)
             try:
-                response = http.get(response.url, timeout=10)
-            except requests.exceptions.ReadTimeout:
-                response = http.get(response.url, timeout=10)
+                response = http.get(response.url, timeout=(10,60))
+            except Timeout:
+                raise Exception("Timeout while posting request to NetChop server. The server may be unresponsive. Please try again later.")
             if response.status_code != 200:
                 raise Exception("Error posting request to NetChop server.\n{}".format(response.content.decode()))
         return response
@@ -193,7 +195,7 @@ class NetChop:
                 'method':chosen_method,
                 'thresh':'%0f'%threshold
             },
-            timeout=10
+            timeout=(10,60)
         )
         return response
 
