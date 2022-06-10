@@ -881,3 +881,126 @@ class UnmatchedSequencesOutputParser(OutputParser):
         tmp_output_filehandle.close()
         os.replace(tmp_output_file, self.output_file)
 
+
+class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
+    def base_headers(self):
+        return[
+            'Chromosome',
+            'Start',
+            'Stop',
+            'Reference',
+            'Variant',
+            'Junction',
+            'Junction Start',
+            'Junction Stop',
+            'Junction Score',
+            'Junction Anchor',
+            'Transcript',
+            'Transcript Support Level',
+            'Ensembl Gene ID',
+            'Variant Type',
+            'Protein Position',
+            'Gene Name',
+            'Amino Acid Change',
+            'HGVSc',
+            'HGVSp',
+            'Peptide Length',
+            'HLA Allele',
+            'Epitope Seq',
+            'Median Score',
+            'Best Score',
+            'Best Score Method',
+            'Median Percentile',
+            'Best Percentile',
+            'Best Percentile Method',
+            'Tumor DNA Depth',
+            'Tumor DNA VAF',
+            'Tumor RNA Depth',
+            'Tumor RNA VAF',
+            'Normal Depth',
+            'Normal VAF',
+            'Gene Expression',
+            'Transcript Expression',
+            'Mutation'
+        ]
+
+    def execute(self):
+        tmp_output_file = self.output_file + '.tmp'
+        tmp_output_filehandle = open(tmp_output_file, 'w')
+        tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
+        tsv_writer.writeheader()
+        
+        tsv_entries = self.parse_input_tsv_file()
+
+        iedb_results = self.process_input_iedb_file()
+        for (
+            position,
+            mt_scores,
+            mt_percentiles,
+            mt_epitope_seq,
+            tsv_index,
+            allele,
+            best_mt_score,
+            best_mt_score_method,
+            median_mt_score,
+            best_mt_percentile,
+            best_mt_percentile_method,
+            median_mt_percentile,
+        ) in iedb_results:
+            index = '.'.join(tsv_index.split('.')[:-1])
+            tsv_entry = tsv_entries[index]
+            row = {
+                'Chromosome'          : tsv_entry['variant_chrom'],
+                'Start'               : tsv_entry['variant_start'],
+                'Stop'                : tsv_entry['variant_stop'],
+                'Reference'           : tsv_entry['reference'],
+                'Variant'             : tsv_entry['variant'],
+                'Transcript'          : tsv_entry['Transcript_stable_ID'],
+                'Transcript Support Level': tsv_entry['transcript_support_level'],
+                'Junction'            : tsv_index.split('.')[2],
+                'Junction Start'      : tsv_entry['junction_start'],
+                'Junction Stop'       : tsv_entry['junction_stop'],
+                'Junction Score'      : tsv_entry['score'],
+                'Junction Anchor'     : tsv_entry['anchor'],
+                'Gene Name'           : tsv_index.split('.')[0],
+                'Amino Acid Change'   : tsv_entry['amino_acid_change'],
+                'Variant Type'        : tsv_entry['variant_type'],
+                'Ensembl Gene ID'     : tsv_entry['Gene_stable_ID'],
+                'HGVSc'               : tsv_entry['hgvsc'],
+                'HGVSp'               : tsv_entry['hgvsp'],
+                'Tumor DNA Depth'     : tsv_entry['tdna_depth'],
+                'Tumor DNA VAF'       : tsv_entry['tdna_vaf'],
+                'Tumor RNA Depth'     : tsv_entry['trna_depth'],  
+                'Tumor RNA VAF'       : tsv_entry['tdna_vaf'],
+                'Normal Depth'        : tsv_entry['normal_depth'],
+                'Normal VAF'          : tsv_entry['normal_vaf'],      
+                'Gene Expression'     : tsv_entry['gene_expression'],
+                'Transcript Expression' : tsv_entry['transcript_expression'],
+                ### pvacbind ###
+                'HLA Allele'          : allele,
+                'Peptide Length'      : len(mt_epitope_seq),
+                'Protein Position'    : tsv_index.split('.')[4],
+                'Epitope Seq'         : mt_epitope_seq,
+                'Best Score Method'   : PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
+                'Best Score'          : best_mt_score,
+                'Median Score'        : round(median_mt_score, 3),
+                'Best Percentile'     : best_mt_percentile,
+                'Mutation'            : index
+                ### end ###
+            }
+            row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
+            row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
+            for method in self.prediction_methods():
+                pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
+                if method in mt_scores:
+                    row["%s Score" % pretty_method] = mt_scores[method]
+                else:
+                    row["%s Score" % pretty_method] = 'NA'
+                if method in mt_percentiles:
+                    row["%s Percentile" % pretty_method] = mt_percentiles[method]
+                else:
+                    row["%s Percentile" % pretty_method] = 'NA'
+            tsv_writer.writerow(row)
+
+        tmp_output_filehandle.close()
+        os.replace(tmp_output_file, self.output_file)
