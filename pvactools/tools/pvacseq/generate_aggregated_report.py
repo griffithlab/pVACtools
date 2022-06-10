@@ -45,6 +45,13 @@ def define_parser():
         default=1.0,
         help="Gene and Expression cutoff. Used to calculate the allele expression cutoff for tiering.",
     )
+    parser.add_argument(
+        "--maximum-transcript-support-level", type=int,
+        help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
+        +"Transcript support level needs to be <= this cutoff to be included in most tiers.",
+        default=1,
+        choices=[1,2,3,4,5]
+    )
 
     return parser
 
@@ -68,7 +75,8 @@ def main(args_input = sys.argv[1:]):
         binding_threshold=args.binding_threshold,
         trna_vaf=args.trna_vaf,
         trna_cov=args.trna_cov,
-        expn_val=args.expn_val
+        expn_val=args.expn_val,
+        maximum_transcript_support_level=args.maximum_transcript_support_level,
     ).execute()
     print("Completed")
 

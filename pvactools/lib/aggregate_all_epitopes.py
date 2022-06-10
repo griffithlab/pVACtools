@@ -211,7 +211,7 @@ class AggregateAllEpitopes:
 
 
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1):
+    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1):
         self.input_file = input_file
         self.output_file = output_file
         self.tumor_purity = tumor_purity
@@ -221,6 +221,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.relaxed_allele_expr_threshold = trna_vaf * expn_val * 5
         self.trna_cov = trna_cov
         self.trna_vaf = trna_vaf
+        self.maximum_transcript_support_level = maximum_transcript_support_level
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
 
     def get_list_unique_mutation_keys(self):
@@ -265,7 +266,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return (df, key_str)
 
     def get_best_binder(self, df):
-        df.sort_values(by=["Median MT IC50 Score", "Median WT IC50 Score"], inplace=True, ascending=[True, False])
+        df.sort_values(by=["Median MT IC50 Score", "Transcript Support Level", "Median WT IC50 Score"], inplace=True, ascending=[True, True, False])
         return df.iloc[0].to_dict()
 
     #assign mutations to a "Classification" based on their favorability
@@ -284,6 +285,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if (mutation["Median MT IC50 Score"] < self.binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
+           mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
            anchor_residue_pass):
             return "Pass"
 
@@ -291,6 +293,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
+           mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
            anchor_residue_pass):
             return "Relaxed"
 
@@ -298,6 +301,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
+           mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
            not anchor_residue_pass):
             return "Anchor"
 
@@ -305,6 +309,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] < (vaf_clonal/2) and
+           mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
            anchor_residue_pass):
             return "Subclonal"
 
@@ -314,13 +319,14 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            (mutation["Gene Expression"] == 0 and
            mutation["Tumor RNA Depth"] > self.trna_cov and
            mutation["Tumor RNA VAF"] > self.trna_vaf)):
-             lowexpr=True
+            lowexpr=True
 
         #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
         if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
-            lowexpr==True and
-            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
-            anchor_residue_pass):
+           lowexpr==True and
+           mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
+           mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
+           anchor_residue_pass):
             return "LowExpr"
 
         #zero expression
