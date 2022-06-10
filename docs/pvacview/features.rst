@@ -69,7 +69,10 @@ There are three separate boxes in this section as shown, from left to right you 
   - Transcripts of selected mutation
 
     The selected variant may have multiple transcripts covering the region and those that produce good binding peptides against at least 1 HLA allele will be shown in this table. The table
-    also provides the transcript expression values for all displayed transcripts.
+    also provides the transcript expression values for all displayed transcripts. Based on which good binding peptides
+    each transcript produces, the transcripts are grouped into different sets (e.g. if two transcripts produce the
+    exact same peptides then they belong to the same set). The number of transcripts in each set, number of corresponding
+    peptides and the total expression of all transcripts in set are calculated and provided.
 
   - Additional data
 
@@ -95,13 +98,25 @@ There are three separate boxes in this section as shown, from left to right you 
     :figclass: align-left
 
 
-:large:`Peptide table`
+:large:`Transcript Set Detailed Data (Peptide Information)`
 ____________________________
 
-The peptide table displays all peptide sequences (from your selected transcript in the transcripts table) that were predicted to be good binders (for at least 1 HLA allele). Both mutant (MT) and wildtype (WT) sequences
+Upon selecting the transcript set for further examination, users can navigate to this table which displays
+all peptide sequences (from your selected transcript set in the transcripts table) that were predicted to be good binders
+(for at least 1 HLA allele). Both mutant (MT) and wildtype (WT) sequences
 are shown, along with median binding affinities (where the MT binding passed the binding threshold).
 
 .. figure:: ../images/screenshots/pvacview-peptide_table.png
+    :width: 1000px
+    :height: 200px
+    :align: right
+    :alt: pVACview Upload
+    :figclass: align-left
+
+We also provide (in the "Transcripts in Set" tab), additional information regarding the transcripts producing these peptides.
+This includes: transcript id, individual transcript expression, `transcript support level <http://uswest.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_, biotype and transcript length.
+
+.. figure:: ../images/screenshots/pvacview-transcript_set.png
     :width: 1000px
     :height: 200px
     :align: right

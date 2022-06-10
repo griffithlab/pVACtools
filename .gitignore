@@ -22,3 +22,5 @@ nytprof.out
 __pycache__
 build/
 dist/
+.DS_Store
+docs/.DS_Store

@@ -48,18 +48,18 @@ class TopScoreFilter:
                     index = '%s.%s.%s.%s.%s.%s' % (chromosome, start, stop, ref, var, transcript)
                     if index not in top_per_variant_transcript:
                         top_per_variant_transcript[index] = line
-                    top_median_score = float(top_per_variant_transcript[index]['Median MT Score'])
-                    top_best_score = float(top_per_variant_transcript[index]['Best MT Score'])
-                    median_score = float(line['Median MT Score'])
-                    best_score = float(line['Best MT Score'])
+                    top_median_score = float(top_per_variant_transcript[index]['Median MT IC50 Score'])
+                    top_best_score = float(top_per_variant_transcript[index]['Best MT IC50 Score'])
+                    median_score = float(line['Median MT IC50 Score'])
+                    best_score = float(line['Best MT IC50 Score'])
                 else:
                     index = line['Mutation']
                     if index not in top_per_variant_transcript:
                         top_per_variant_transcript[index] = line
-                    top_median_score = float(top_per_variant_transcript[index]['Median Score'])
-                    top_best_score = float(top_per_variant_transcript[index]['Best Score'])
-                    median_score = float(line['Median Score'])
-                    best_score = float(line['Best Score'])
+                    top_median_score = float(top_per_variant_transcript[index]['Median IC50 Score'])
+                    top_best_score = float(top_per_variant_transcript[index]['Best IC50 Score'])
+                    median_score = float(line['Median IC50 Score'])
+                    best_score = float(line['Best IC50 Score'])
                 if ((self.top_score_metric == 'median' and median_score < top_median_score) or
                     (self.top_score_metric == 'lowest' and best_score < top_best_score)):
                     top_per_variant_transcript[index] = line

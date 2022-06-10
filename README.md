@@ -25,13 +25,9 @@ A tool for detecting neoantigens resulting from gene fusions.
 
 A tool designed to aid specifically in the construction of DNA vector-based cancer vaccines.
 
-**pVACviz**
+**pVACview**
 
-A browser-based user interface that assists users in launching, managing, reviewing, and visualizing the results of pVACtools processes. pVACviz relies on the pVACapi and a client application. The source code for the client application can be found <a href="https://github.com/griffithlab/BGA-interface-projects/tree/master/apps/pvacviz">here</a>.
-
-**pVACapi**
-
-The pVACapi provides a HTTP REST interface to the pVACtools suite.
+An application based on R Shiny that assists users in reviewing, exploring and prioritizing neoantigens from the results of pVACtools processes for personalized cancer vaccine design.
 
 ## Citations
 Jasreet Hundal , Susanna Kiwala , Joshua McMichael, Chris Miller, Huiming Xia, Alex Wollam, Conner Liu, Sidi Zhao, Yang-Yang Feng, Aaron Graubert, Amber Wollam, Jonas Neichin, Megan Neveau, Jason Walker, William Gillanders, Elaine Mardis, Obi Griffith, Malachi Griffith. pVACtools: A Computational Toolkit to Identify and Visualize Cancer Neoantigens. Cancer Immunology Research. 2020 Mar;8(3):409-420. doi: 10.1158/2326-6066.CIR-19-0401. PMID: <a href="https://www.ncbi.nlm.nih.gov/pubmed/31907209">31907209</a>.
@@ -44,27 +40,25 @@ Jasreet Hundal, Beatriz M. Carreno, Allegra A. Petti, Gerald P. Linette, Obi L. 
 This project is licensed under <a href="https://spdx.org/licenses/BSD-3-Clause-Clear.html">BSD 3-Clause Clear License</a>.
 
 ## Installation
-pVACtools requires Python 3.5. Before running any installation steps check the Python version installed on your system:
+pVACtools is written for Linux but some users have been able to run it successfully on Mac OS X. If you are using Windows you will need to set up a Linux environment, for example by setting up a virtual machine.
+
+pVACtools requires Python 3.6 or above. Before running any installation steps, check the Python version installed on your system:
 
 `python -V`
 
-If you don’t have Python 3.5 installed, we recommend using Conda to emulate a Python 3.5. environment. We’ve encountered problems with users that already have Python 2.x installed when they also try to install Python 3.5. The defaults will not be set correctly in that case. If you already have Python 2.x installed we strongly recommmend using Conda instead of installing Python 3.5 locally.
+If you don’t have Python 3 installed, we recommend using [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) to emulate a Python 3 environment. We’ve encountered problems with users that already have Python 2.x installed when they also try to install Python 3. The defaults will not be set correctly in that case. If you already have Python 2.x installed we **strongly** recommmend using Conda instead of installing Python 3 locally.
 
-Once you have set up your Python 3.5 environment correctly you can use pip to install pVACtools. Make sure you have pip installed. pip is generally included in python distributions, but may need to be upgraded before use. See the instructions for installing or upgrading pip.
+Once you have set up your Python 3 environment correctly you can use `pip` to install pVACtools. Make sure you have `pip` installed. `pip` is generally included in python distributions, but may need to be upgraded before use. See the [instructions](https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel) for installing or upgrading `pip`.
 
-After you have pip installed/upgraded, type the following command on your Terminal:
+After you have `pip` installed, type the following command on your Terminal:
 
 `pip install pvactools`
 
-You can check that pVACtools has been installed under the default environment by listing all installed packages:
+You can check that `pvactools` has been installed under the default environment like so:
 
-`pip list`
+`pip show pvactools`
 
-You can also check the installed version:
-
-`pvactools -v`
-
-`pip` will fetch and install pVACtools and its dependencies for you. After installing, each tool of the pVACtools suite is available with its own command line tree directly from the Terminal.
+`pip` will fetch and install pVACtools and its dependencies for you. After installing, each tool of the pVACtools suite is available in its own command line tree directly from the Terminal.
 
 If you have an old version of pVACtools installed you might want to consider upgrading to the latest version:
 

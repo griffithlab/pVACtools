@@ -110,3 +110,9 @@ protein sequences that account for proximal variants when MHC binding prediction
 Cleavage position predictions are added with optional processing through NetChop.
 
 Stability predictions can be added if desired by the user. These predictions are obtained via NetMHCstabpan.
+
+**Reference proteome similarity analysis**
+
+This optional feature will search for an epitope in the reference proteome
+using BLAST to determine if the epitope occurs elsewhere in the proteome and
+is, therefore, not tumor-specific.

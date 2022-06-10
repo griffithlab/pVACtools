@@ -67,6 +67,11 @@ class PvacvectorInputFastaGenerator():
                 for id in ids:
                     (type, count, index) = id.split('.', 2)
                     dataframe[index] = sequence
+
+        tsv_file.close()
+        fasta_file.close()
+        key_file.close()
+
         return dataframe
 
     def write_output_fasta(self, peptides):

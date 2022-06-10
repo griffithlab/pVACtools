@@ -34,7 +34,10 @@ created):
      - A fasta file with mutant and wildtype peptide subsequences specific for use in running the net_chop tool.
    * - ``<sample_name>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
-       additional variant information from the ``<sample_name>.tsv``.
+       additional variant information from the ``<sample_name>.tsv``. Only
+       epitopes resulting from supported variants (missense, inframe indels, and frameshifts)
+       are included. If the ``--pass-only`` flag is
+       set, variants that have a FILTER set in the VCF are excluded.
    * - ``<sample_name>.filtered.tsv``
      - The above file after applying all filters, with (optionally) cleavage site, stability
        predictions, and reference proteome similarity metrics added.
@@ -43,6 +46,10 @@ created):
    * - ``<sample_name>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format.
+   * - ``ui.R``, ``app.R``, ``server.R``, ``styling.R``, ``anchor_and_helper_functions.R``
+     - pVACview R Shiny application files
+   * - ``www`` (directory)
+     - Directory containing image files for pVACview
 
 Filters applied to the filtered.tsv file
 ----------------------------------------
@@ -59,6 +66,30 @@ Please see the :ref:`Standalone Filter Commands<filter_commands>`
 documentation for more information on each individual filter. The standalone
 filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
+
+Prediction Algorithms Supporting Percentile Information
+_______________________________________________________
+
+pVACseq outputs binding affinity percentile rank information when provided by
+a chosen prediction algorithm. The following prediction algorithms calculate a
+percentile rank:
+
+MHCnuggets
+MHCnuggets
+- MHCflurry
+- NetMHC
+- NetMHCcons
+- NetMHCpan
+- NetMHCIIpan
+- NNalign
+- PickPocket
+- SMM
+- SMMPMBEC
+- SMMalign
+
+The following prediction algorithms do not provide a percentile rank:
+
+- MHCnuggets
 
 .. _all_ep_and_filtered:
 
@@ -262,42 +293,48 @@ that offer suggestions as to the suitability of variants for use in vaccines.
 
    * - Column Name
      - Description
-   * - ``HLA Alleles`` (multiple) (T/F)
-     - For each HLA allele in the run, did the mutation result in an epitope that bound well
-       to the HLA allele? (with median mutant binding affinity < 1000).
+   * - ``ID``
+     - A unique identifier for the variant
+   * - ``HLA Alleles`` (multiple)
+     - For each HLA allele in the run, the number of this variant's epitopes that bound well
+       to the HLA allele (with median mutant binding affinity < 1000)
    * - ``Gene``
      - The Ensembl gene name of the affected gene
-   * - ``AA_change``
+   * - ``AA Change``
      - The amino acid change for the mutation
-   * - ``Num_Transcript``
+   * - ``Num Passing Transcripts``
      - The number of transcripts for this mutation that resulted in at least
        one well-binding peptide (median mutant binding affinity < 1000).
-   * - ``Peptide``
+   * - ``Best Peptide``
      - The best-binding mutant epitope sequence (lowest median mutant binding
        affinity)
    * - ``Pos``
      - The one-based position of the start of the mutation within the epitope sequence. ``0`` if the
        start of the mutation is before the epitope (as can occur downstream of frameshift mutations)
-   * - ``Num_Peptides``
+   * - ``Num Passing Peptides``
      - The number of unique well-binding peptides for this mutation.
-   * - ``ic50_MT``
+   * - ``IC50 MT``
      - Median ic50 binding affinity of the best-binding mutant epitope across all prediction algorithms used
-   * - ``ic50_WT``
+   * - ``IC50 WT``
      - Median ic50 binding affinity of the corresponding wildtype epitope across all prediction algorithms used.
-   * - ``percentile_MT``
+   * - ``%ile MT``
      - Median binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used (those that provide percentile output)
-   * - ``percentile_WT``
+   * - ``%ile WT``
      - Median binding affinity percentile rank of the corresponding wildtype epitope across all prediction algorithms used (those that provide percentile output)
-   * - ``RNA_expr``
+   * - ``RNA Expr``
      - Gene expression value for the annotated gene containing the variant.
-   * - ``RNA_VAF``
+   * - ``RNA VAF``
      - Tumor RNA variant allele frequency (VAF) at this position.
-   * - ``RNA_Depth``
+   * - ``Allele Expr``
+     - RNA Expr * RNA VAF
+   * - ``RNA Depth``
      - Tumor RNA depth at this position.
-   * - ``DNA_VAF``
+   * - ``DNA VAF``
      - Tumor DNA variant allele frequency (VAF) at this position.
-   * - ``tier``
+   * - ``Tier``
      - A tier suggesting the suitability of variants for use in vaccines.
+   * - ``Evaluation``
+     - Column to store the evaluation of each variant when evaluating the run in pVACview. Either ``Accept``, ``Reject``, or ``Review``.
 
 .. _pvacseq_aggregate_report_tiers_label:
 
