@@ -25,17 +25,17 @@ class BindingFilter:
         else:
             if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse' or self.file_type == 'pVACsplice':
                 if self.top_score_metric == 'median':
-                    ic50_column = 'Median Score'
+                    ic50_column = 'Median IC50 Score'
                     percentile_column = 'Median Percentile'
                 elif self.top_score_metric == 'lowest':
-                    ic50_column = 'Best Score'
+                    ic50_column = 'Best IC50 Score'
                     percentile_column = 'Best Percentile'
             else:
                 if self.top_score_metric == 'median':
-                    ic50_column = 'Median MT Score'
+                    ic50_column = 'Median MT IC50 Score'
                     percentile_column = 'Median MT Percentile'
                 elif self.top_score_metric == 'lowest':
-                    ic50_column = 'Best MT Score'
+                    ic50_column = 'Best MT IC50 Score'
                     percentile_column = 'Best MT Percentile'
             filter_criteria.append({'column': ic50_column, 'operator': '<=', 'threshold': self.binding_threshold, 'exclude_nas': self.exclude_nas})
             if self.percentile_threshold is not None:
@@ -90,8 +90,8 @@ class BindingFilter:
             '-m', '--top-score-metric',
             choices=['lowest', 'median'],
             help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
-                 + "lowest: Use the Best MT Score and corresponding Fold Change (i.e. use the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
-                 + "median: Use the Median MT Score and Median Fold Change (i.e. use the median MT ic50 binding score and fold change of all chosen prediction methods).",
+                 + "lowest: Use the Best MT IC50 Score and corresponding Fold Change (i.e. use the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
+                 + "median: Use the Median MT IC50 Score and Median Fold Change (i.e. use the median MT ic50 binding score and fold change of all chosen prediction methods).",
             default='median',
         )
         parser.add_argument(

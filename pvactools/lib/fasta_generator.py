@@ -111,20 +111,42 @@ class FastaGenerator(metaclass=ABCMeta):
                     codon_changes = [ item['codon_change'] for item in filtered_lines ]
                     proximal_variant_mutant_amino_acid = ProximalVariant.combine_conflicting_variants(codon_changes)
 
-                proximal_variant_position = int(protein_position) - 1 - mutation_offset
-                if proximal_variant_position <= 0 or proximal_variant_position >= len(wildtype_subsequence):
+                if '-' in protein_position:
+                    proximal_variant_start_position = int(protein_position.split('-')[0]) - 1 - mutation_offset
+                else:
+                    proximal_variant_start_position = int(protein_position) - 1 - mutation_offset
+                proximal_variant_end_position = proximal_variant_start_position + len(proximal_variant_mutant_amino_acid)
+
+                if proximal_variant_end_position <= 0 or proximal_variant_start_position >= len(wildtype_subsequence):
                     continue
                 if len(proximal_variant_wildtype_amino_acid) != len(proximal_variant_mutant_amino_acid):
                     print("Nearby variant is not a missense mutation. Skipping.")
                     continue
-                if wildtype_subsequence[proximal_variant_position] != proximal_variant_wildtype_amino_acid:
+
+                if proximal_variant_end_position > len(wildtype_subsequence):
+                    #the DNP extends past the end of the wildtype_subsequence
+                    missing_amino_acids_count = proximal_variant_end_position - len(wildtype_subsequence)
+                    #remove proximal variant amino acids after wildtype subsquence end
+                    proximal_variant_wildtype_amino_acid = proximal_variant_wildtype_amino_acid[:len(proximal_variant_wildtype_amino_acid) - missing_amino_acids_count]
+                    proximal_variant_mutant_amino_acid = proximal_variant_mutant_amino_acid[:len(proximal_variant_mutant_amino_acid) - missing_amino_acids_count]
+
+                if proximal_variant_start_position < 0:
+                    #DNP starts before the beginning of the wildtype subsequence
+                    missing_amino_acids_count = abs(proximal_variant_start_position)
+                    proximal_variant_start_position = 0
+                    #remove proximal variant amino acids before wildtype subsequence start
+                    proximal_variant_wildtype_amino_acid = proximal_variant_wildtype_amino_acid[missing_amino_acids_count:]
+                    proximal_variant_mutant_amino_acid = proximal_variant_mutant_amino_acid[missing_amino_acids_count:]
+
+                if wildtype_subsequence[proximal_variant_start_position:proximal_variant_end_position] != proximal_variant_wildtype_amino_acid:
                     sys.exit(
                         "Error when processing proximal variant.\n" +
                         "The wildtype amino acid for variant %s with substring %s is different than expected.\n" % (somatic_variant_index, wildtype_subsequence) +
-                        "Actual wildtype amino acid: %s\n" % wildtype_subsequence[proximal_variant_position] +
+                        "Actual wildtype amino acid: %s\n" % wildtype_subsequence[proximal_variant_start_position:proximal_variant_end_position] +
                         "Wildtype amino acid of the proximal_variant: %s" % proximal_variant_wildtype_amino_acid
                     )
-                wildtype_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:proximal_variant_position] + proximal_variant_mutant_amino_acid + wildtype_subsequence_with_proximal_variants[proximal_variant_position+1:]
+
+                wildtype_subsequence_with_proximal_variants = wildtype_subsequence_with_proximal_variants[:proximal_variant_start_position] + proximal_variant_mutant_amino_acid + wildtype_subsequence_with_proximal_variants[proximal_variant_end_position:]
         return wildtype_subsequence_with_proximal_variants
 
     def execute(self):

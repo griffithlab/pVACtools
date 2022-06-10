@@ -347,8 +347,11 @@ class MHCflurry(MHCI):
                     epitope_df = df[df['peptide'] == epitope]
                     epitope_df['seq_num'] = seq_num
                     epitope_df['start'] = start
-                    results = results.append(epitope_df)
+                    results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
+
+class MHCflurryEL(MHCflurry):
+    pass
 
 class MHCnuggetsI(MHCI, MHCnuggets):
     def valid_allele_names(self):
@@ -413,6 +416,11 @@ class NetMHCpan(IEDBMHCI):
     @property
     def iedb_prediction_method(self):
         return 'netmhcpan'
+
+class NetMHCpanEL(IEDBMHCI):
+    @property
+    def iedb_prediction_method(self):
+        return 'netmhcpan_el'
 
 class SMMPMBEC(IEDBMHCI):
     @property
@@ -486,6 +494,11 @@ class NetMHCIIpan(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
         return 'NetMHCIIpan'
+
+class NetMHCIIpanEL(IEDBMHCII):
+    @property
+    def iedb_prediction_method(self):
+        return 'netmhciipan_el'
 
 class NNalign(IEDBMHCII):
     @property

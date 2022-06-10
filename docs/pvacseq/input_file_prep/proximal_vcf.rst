@@ -57,10 +57,30 @@ _______________________________
    R=reference.fa \
    O=reference.dict
 
+Extract a tumor-only VCF from the somatic VCF
+_____________________________________________
+
+.. code-block:: none
+
+    /usr/bin/java -Xmx4g -jar /opt/GenomeAnalysisTK.jar \
+    -T SelectVariants \
+    -R reference.fa
+    --variant somatic.vcf
+    --sample-name tumor_sample_name
+    --output tumor_only.vcf
+
+Index the tumor-only VCF
+________________________
+
+.. code-block:: none
+
+   tabix -p vcf tumor_only.vcf
+
+
 Update sample names
 ___________________
 
-The sample names in the ``tumor.bam``, the ``somatic.vcf``, and the
+The sample names in the ``tumor.bam``, the newly-created ``tumor_only.vcf``, and the
 ``germline.vcf`` need to match. If they don't you need to edit the sample names
 in the VCF files to match the tumor BAM file.
 
@@ -73,7 +93,7 @@ __________________________________________________________________
     -T CombineVariants \
     -R reference.fa \
     --variant germline.vcf \
-    --variant somatic.vcf \
+    --variant tumor_only.vcf \
     -o combined_somatic_plus_germline.vcf \
     --assumeIdenticalSamples
 
@@ -136,7 +156,7 @@ In order to use the ``--phased-proximal-variants-vcf`` option you will also
 need to bgzip and index the VCF you plan on using as the main input VCF to
 pVACseq. This step would be done after all the required and optional
 preprocessing steps (e.g. VEP annotation, adding readcount and expression
-data). 
+data).
 
 .. code-block:: none
 

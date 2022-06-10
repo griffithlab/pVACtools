@@ -320,11 +320,17 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
             default=False,
             action='store_true'
         )
+        self.parser.add_argument(
+            "--tumor-purity",
+            help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used during aggregate report creation for a simple estimation of whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.",
+            type=float,
+        )
+
 
 class PvacfuseRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
     def __init__(self):
         tool_name = "pvacfuse"
-        input_file_help = "An INTEGRATE-Neo annotated bedpe file with fusions or a AGfusion output directory."
+        input_file_help = "An AGfusion output directory."
         PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
 
 class PvacvectorRunArgumentParser(RunArgumentParser):
