@@ -1,9 +1,5 @@
 import os
-from random import sample
-import shutil
-from turtle import distance
 import pandas as pd
-import pyfaidx
 from filter_regtools_results import *
 from junction_to_fasta import *
 from fasta_to_kmers import *
@@ -27,11 +23,11 @@ class JunctionPipeline():
 
 
     def execute(self):
-        #self.filter_regtools_results()
-        #self.vcf_to_tsv()
-        #self.combine_inputs()
+        self.filter_regtools_results()
+        self.vcf_to_tsv()
+        self.combine_inputs()
         self.junction_to_fasta()
-        #self.fasta_to_kmers()
+        self.fasta_to_kmers()
 
     def create_file_path(self, type):
         inputs = {
@@ -89,8 +85,7 @@ class JunctionPipeline():
         # separate snvs and indels because need coors fix for indels
         snv_df = annotated[(annotated['reference'].str.len() == 1) & (annotated['variant'].str.len() == 1)]
         
-        # error here - if coordinates don't match and indel - check format
-        # temp: if indel, accept transcript only matching?
+        # error here - indel coordinates don't match in vcf annotated tsv vs junctions file
         indel_df = annotated[~annotated['transcripts'].isin(snv_df['transcripts'].unique().tolist())]
 
         # merge dfs by variant_info, transcript_id
@@ -131,22 +126,6 @@ class JunctionPipeline():
                     'vcf'            : self.annotated_vcf,
                     'sample_name'    : self.sample_name,
                 }
-
-                # write chrs here - include work dir cleanup at the end
-                # chrom_fasta = pyfaidx.Fasta(self.fasta_path)[row.junction_chrom][:]
-                
-                # ref_path = os.path.join(self.output_dir, f'{row.junction_chrom}.fa')
-                # alt_path = os.path.join(self.output_dir, f'{row.junction_chrom}_alt.fa')
-                
-                # for x in [ref_path, alt_path]:
-                #     if not os.path.exists(x):
-                #         f = open(x, 'w')
-                #         f.write(f'>{chrom_fasta.name}\n{chrom_fasta.seq}\n')
-                #         f.close()
-
-                # junction_params['ref_fasta'] = pyfaidx.Fasta(ref_path)
-                # junction_params['alt_fasta'] = pyfaidx.FastaVariant(alt_path, self.annotated_vcf, sample=self.sample_name)
-                # end
                 
                 junctions = JunctionToFasta(**junction_params)
                 wt = junctions.create_wt_df()
@@ -157,13 +136,6 @@ class JunctionPipeline():
                     continue
                 wt_aa, mut_aa = junctions.get_sequence_wrapper()
                 junctions.create_sequence_fasta(wt_aa, mut_aa)
-                # wt_aa, wt_dna = junctions.get_aa_sequence(wt)
-                # if not wt_aa or not wt_dna:
-                #     print(f'{row.Transcript_stable_ID} Error: reference sequence not found')
-                #     continue
-                # mut_aa, mut_dna = junctions.get_aa_sequence(mut)
-                
-                #junctions.create_sequence_fasta(wt_dna, mut_dna)
         print('Completed')
     
 

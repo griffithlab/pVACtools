@@ -1,8 +1,6 @@
 import os
-import sys
 import pandas as pd
 from pybiomart import Dataset
-import argparse
 
 class FilterRegtoolsResults():
     def __init__(self, **kwargs):
@@ -54,8 +52,8 @@ class FilterRegtoolsResults():
                     'transcript_tsl': True,
                 })
             if self.tsl:
-                # filter by tsl=1
-                protein_coding = protein_coding[protein_coding['Transcript support level (TSL)'].str.contains(f'tsl1')]
+                # filter by tsl=1, add in NA for TSL
+                protein_coding = protein_coding[protein_coding['Transcript support level (TSL)'].str.contains('tsl1')]
             # add to df
             pc_junctions = pc_junctions.append(protein_coding)
 
