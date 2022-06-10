@@ -421,6 +421,38 @@ class VcfConverter(InputFileConverter):
         self.close_filehandles()
 
 class PvacspliceVcfConverter(VcfConverter):
+    def output_headers(self):
+        return[
+            'chromosome_name',
+            'start',
+            'stop',
+            'reference',
+            'variant',
+            'gene_name',
+            'transcript_name',
+            'transcript_support_level',
+            'amino_acid_change',
+            'codon_change',
+            'ensembl_gene_id',
+            'hgvsc',
+            'hgvsp',
+            #'wildtype_amino_acid_sequence',
+            #'frameshift_amino_acid_sequence',
+            #'fusion_amino_acid_sequence',
+            'variant_type',
+            'protein_position',
+            'transcript_expression',
+            'gene_expression',
+            'normal_depth',
+            'normal_vaf',
+            'tdna_depth',
+            'tdna_vaf',
+            'trna_depth',
+            'trna_vaf',
+            #'index',
+            'protein_length_change',
+        ]
+    
     def execute(self):
         # indexes = []
         # count = 1
@@ -476,22 +508,26 @@ class PvacspliceVcfConverter(VcfConverter):
                     else:
                         protein_position = transcript['Protein_position']
                     if protein_position == '-' or protein_position == '':
-                        print("Variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
-                        continue
+                        pass
+                    #     print("Variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                    #     continue
                     transcript_name = transcript['Feature']
                     consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
                     if consequence is None:
-                        continue
+                        pass
+                        #continue
                     elif consequence == 'FS':
                         if transcript['FrameshiftSequence'] == '':
-                            print("frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
-                            continue
+                            pass
+                            # print("frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                            # continue
                         else:
                             amino_acid_change_position = "%s%s/%s" % (protein_position, entry.REF, alt)
                     else:
                         if transcript['Amino_acids'] == '':
-                            print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
-                            continue
+                            pass
+                            # print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                            # continue
                         else:
                             amino_acid_change_position = protein_position + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']

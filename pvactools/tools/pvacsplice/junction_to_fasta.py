@@ -1,6 +1,5 @@
 import os
 import re
-from tracemalloc import start
 import pandas as pd
 from pyfaidx import Fasta, FastaVariant
 from Bio.Seq import Seq
@@ -139,7 +138,6 @@ class JunctionToFasta():
         for x in coordinates:
             start = int(x.split(',')[0]); end = int(x.split(',')[1])
             seq = fasta_version[self.chrom][start:end].seq
-            print(seq[0:5])
             final_seq += str(seq)
         # using Seq from Bio.Seq to translate str_seq
         # positive strand
