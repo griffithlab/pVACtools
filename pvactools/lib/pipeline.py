@@ -20,7 +20,7 @@ import logging
 from pvactools.lib.prediction_class import *
 from pvactools.lib.input_file_converter import VcfConverter
 from pvactools.lib.fasta_generator import FastaGenerator, VectorFastaGenerator
-from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser
+from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser, PvacspliceOutputParser
 from pvactools.lib.post_processor import PostProcessor
 import pvactools.lib.call_iedb
 import pvactools.lib.combine_parsed_outputs
@@ -75,6 +75,7 @@ class Pipeline(metaclass=ABCMeta):
         self.run_post_processor          = kwargs.pop('run_post_processor', True)
         self.flurry_state                = self.get_flurry_state()
         self.proximal_variants_file      = None
+        self.base_output_dir             = kwargs.pop('base_output_dir', None)
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
@@ -135,6 +136,8 @@ class Pipeline(metaclass=ABCMeta):
     def tsv_file_path(self):
         if self.input_file_type == 'pvacvector_input_fasta':
             return self.input_file
+        if self.input_file_type == 'junctions':
+            return os.path.join(self.base_output_dir, f'{self.sample_name}_combined.tsv')
         else:
             tsv_file = self.sample_name + '.tsv'
             return os.path.join(self.output_dir, tsv_file)
@@ -150,6 +153,7 @@ class Pipeline(metaclass=ABCMeta):
     def converter(self, params):
         converter_types = {
             'vcf'  : 'VcfConverter',
+            'junctions' : 'PvacspliceVcfConverter',
         }
         converter_type = converter_types[self.input_file_type]
         converter = getattr(sys.modules[__name__], converter_type)
@@ -169,6 +173,7 @@ class Pipeline(metaclass=ABCMeta):
             'vcf'  : 'DefaultOutputParser',
             'pvacvector_input_fasta': 'UnmatchedSequencesOutputParser',
             'fasta': 'UnmatchedSequencesOutputParser',
+            'junctions' : 'PvacspliceOutputParser',
         }
         parser_type = parser_types[self.input_file_type]
         parser = getattr(sys.modules[__name__], parser_type)
@@ -637,7 +642,7 @@ class PvacbindPipeline(Pipeline):
         warning_messages = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
-            if self.input_file_type == 'fasta':
+            if self.input_file_type == 'fasta' or self.input_file_type == 'junctions':
                 fasta_chunk = tsv_chunk
             else:
                 fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
@@ -704,7 +709,7 @@ class PvacbindPipeline(Pipeline):
         split_parsed_output_files = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
-            if self.input_file_type == 'fasta':
+            if self.input_file_type == 'fasta' or self.input_file_type == 'junctions':
                 fasta_chunk = tsv_chunk
             else:
                 fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
@@ -745,6 +750,8 @@ class PvacbindPipeline(Pipeline):
                         'key_file'               : split_fasta_key_file_path,
                         'output_file'            : split_parsed_file_path,
                     }
+                    if self.input_file_type == 'junctions':
+                        params['input_tsv_file'] = self.tsv_file_path()
                     params['sample_name'] = self.sample_name
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['add_sample_name_column'] = True 
@@ -796,3 +803,55 @@ class PvacbindPipeline(Pipeline):
 
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir, ignore_errors=True)
+
+class PvacsplicePipeline(PvacbindPipeline):
+    # remove warning about past/current inputs since there will be multiple input files
+    def print_log(self):
+        pass
+
+    def combined_parsed_path(self):
+        combined_parsed = "%s.%s.all_epitopes.tsv" % (self.sample_name, str(self.epitope_lengths))
+        return os.path.join(self.output_dir, combined_parsed)
+
+    def execute(self):
+        self.print_log()
+
+        split_parsed_output_files = []
+        self.create_per_length_fasta_and_process_stops(self.epitope_lengths)
+        chunks = self.split_fasta_file(self.epitope_lengths)
+        self.call_iedb(chunks, self.epitope_lengths)
+        split_parsed_output_files.extend(self.parse_outputs(chunks, self.epitope_lengths))
+
+        if len(split_parsed_output_files) == 0:
+            status_message("No output files were created. Aborting.")
+            return
+
+        # creates all_epitopes.tsv
+        self.combined_parsed_outputs(split_parsed_output_files)
+
+        # if not self.run_post_processor:
+        #     return
+
+        # post_processing_params = copy.copy(vars(self))
+        # post_processing_params['input_file'] = self.combined_parsed_path()
+        # post_processing_params['file_type'] = 'pVACsplice'
+        # post_processing_params['filtered_report_file'] = self.final_path()
+        # post_processing_params['run_coverage_filter'] = False
+        # post_processing_params['run_transcript_support_level_filter'] = False
+        # post_processing_params['minimum_fold_change'] = None
+        # post_processing_params['run_manufacturability_metrics'] = True
+        # post_processing_params['fasta'] = self.input_file
+        # if self.net_chop_method:
+        #     post_processing_params['net_chop_fasta'] = self.net_chop_fasta
+        #     post_processing_params['run_net_chop'] = True
+        # else:
+        #     post_processing_params['run_net_chop'] = False
+        # if self.netmhc_stab:
+        #     post_processing_params['run_netmhc_stab'] = True
+        # else:
+        #     post_processing_params['run_netmhc_stab'] = False
+        # PostProcessor(**post_processing_params).execute()
+
+        # if self.keep_tmp_files is False:
+        #     shutil.rmtree(self.tmp_dir)
+
