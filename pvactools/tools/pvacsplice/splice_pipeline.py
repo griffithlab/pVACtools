@@ -3,6 +3,7 @@ import pandas as pd
 from filter_regtools_results import *
 from junction_to_fasta import *
 from fasta_to_kmers import *
+from combine_inputs import *
 from pvactools.lib.run_argument_parser import *
 from pvactools.lib.input_file_converter import PvacspliceVcfConverter
 
@@ -67,41 +68,15 @@ class JunctionPipeline():
         print('Completed')
     
     def combine_inputs(self):
-        print('Combining junction and variant information')
-        # read in filtered junctions and annotated tsv
-        junctions = pd.read_csv(self.create_file_path('filtered'), sep='\t')
-        annotated = pd.read_csv(self.create_file_path('annotated'), sep='\t')
-        # rename annotated cols
-        annotated.rename(columns={
-                'transcript_name' : 'transcripts',
-                'chromosome_name' : 'variant_chrom', 
-                'start'           : 'variant_start', 
-                'stop'            : 'variant_stop',
-            }, inplace=True
-        )
-        # remove version number in annotated  to compare with filtered junctions file
-        annotated['transcripts'] = annotated['transcripts'].str.split('.', expand=True)[[0]]
-        
-        # separate snvs and indels because need coors fix for indels
-        snv_df = annotated[(annotated['reference'].str.len() == 1) & (annotated['variant'].str.len() == 1)]
-      
-        # increment variant_start for indels in junctions to match coords from annotated
-        junctions.loc[~junctions['transcripts'].isin(snv_df['transcripts'].unique().tolist()), ['variant_start']] += 1
-
-        # remove junctions variant_stop as it is redundant for snvs and unwanted for indels (correct version supplied by annotated)
-        # then, merge dfs by variant_info, transcript_id
-        self.merged_df = junctions.drop(columns=['variant_stop']).merge(annotated, on=['variant_chrom', 'variant_start', 'transcripts'])
-
-        # usage of annotated's variant_stop col over junctions' leaves it non-adjacent to variant_start
-        # [OPTIONAL] below, move variant_stop to be right after variant_start for readability
-        stop_index = self.merged_df.columns.tolist().index('variant_start') + 1
-        self.merged_df.insert(stop_index, 'variant_stop', self.merged_df.pop('variant_stop'))
-
-        # f'{self.gene_name}.{self.tscript_id}.{self.junction_name}.{self.anchor}'
-        # uniquify tsv indexes
-        self.merged_df['index'] = self.merged_df['Gene_name'] + '.' + self.merged_df['Transcript_stable_ID'] + '.' + self.merged_df['name'] + '.' + self.merged_df['anchor']
-
-        self.merged_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
+        print('Combine junction and variant information')
+        combine_params = {
+            'junctions_file' : self.create_file_path('filtered'),
+            'variant_file'   : self.create_file_path('annotated'),
+            'sample_name' : self.sample_name,
+            'output_dir'  : self.output_dir,
+        }
+        combined = CombineInputs(**combine_params)
+        combined.execute()
         print('Completed')
 
     def junction_to_fasta(self):
