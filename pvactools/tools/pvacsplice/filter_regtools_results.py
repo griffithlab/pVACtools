@@ -79,15 +79,15 @@ class FilterRegtoolsResults():
         merged_df.to_csv(os.path.join(self.output_dir, self.output_file), sep='\t', index=False)
 
 # debugging
-if __name__ == '__main__':
-    print('Filtering regtools results')
-    filter_params = {
-        'input_file'  : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/junctions.tsv',
-        'output_file' : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/2022-6-14_indel_fix/H_NJ-HCC1395-HCC1395_filtered.tsv',
-        'output_dir'  : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/2022-6-14_indel_fix',
-        'score'       : 10,
-        'distance'    : 100,
-    }
-    filter = FilterRegtoolsResults(**filter_params)
-    filter.execute()
-    print('Completed')
+# if __name__ == '__main__':
+#     print('Filtering regtools results')
+#     filter_params = {
+#         'input_file'  : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/junctions.tsv',
+#         'output_file' : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/2022-6-14_indel_fix/H_NJ-HCC1395-HCC1395_filtered.tsv',
+#         'output_dir'  : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/2022-6-14_indel_fix',
+#         'score'       : 10,
+#         'distance'    : 100,
+#     }
+#     filter = FilterRegtoolsResults(**filter_params)
+#     filter.execute()
+#     print('Completed')
