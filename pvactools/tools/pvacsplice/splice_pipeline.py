@@ -48,7 +48,6 @@ class JunctionPipeline():
             'output_dir'  : self.output_dir,
             'score'       : self.junction_score,
             'distance'    : self.variant_distance,
-            'tsl'         : self.maximum_transcript_support_level,
         }
         filter = FilterRegtoolsResults(**filter_params)
         filter.execute()
