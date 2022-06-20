@@ -10,6 +10,9 @@ class FilterRegtoolsResults():
         self.score       = kwargs['score']
         self.distance    = kwargs['distance']
 
+    def split_string(self, df, col, delimiter):
+        df[col] = df[col].str.split(delimiter)
+    
     def execute(self):
         # open file, rename junction cols for clarity
         junctions = pd.read_csv(self.input_file, sep='\t')
@@ -43,7 +46,7 @@ class FilterRegtoolsResults():
                 'external_gene_name',
                 'ensembl_gene_id',
                 'ensembl_transcript_id', 
-                'transcript_biotype'
+                'transcript_biotype',
                 ],
                 # filter on transcripts and protein_coding
                 filters={
@@ -53,41 +56,40 @@ class FilterRegtoolsResults():
             # add to df
             pc_junctions = pd.concat([pc_junctions, protein_coding])
 
-        # make transcripts from str to transcript list
-        filter_junctions['transcripts'] = filter_junctions['transcripts'].str.split(',')
-        # explode the transcript list
-        explode_junctions = filter_junctions.explode('transcripts', ignore_index=True).drop('index', axis=1)
+        # make transcripts/variants from str to transcript list
+        self.split_string(filter_junctions, 'transcripts', ',')
+        self.split_string(filter_junctions, 'variant_info', ',')
 
+        # explode the transcript list and variant list
+        explode_junctions = filter_junctions.explode('transcripts', ignore_index=True).explode('variant_info', ignore_index=True).drop('index', axis=1)
+
+        # rename cols to match
+        explode_junctions = explode_junctions.rename(columns={'transcripts': 'transcript_name'}) 
+        pc_junctions = pc_junctions.rename(columns={'Transcript stable ID': 'transcript_name'})
+        
         # filter - pc_tscripts and unique_all_transcripts - 1 to 1 comparison bc 'transcripts' has been exploded
-        pc_junctions = pc_junctions[pc_junctions['Transcript stable ID'].isin(explode_junctions['transcripts'])]
-
+        pc_junctions = pc_junctions[pc_junctions['transcript_name'].isin(explode_junctions['transcript_name'])]
         # merge dfs
-        merged_df = explode_junctions.merge(pc_junctions, left_on='transcripts', right_on='Transcript stable ID').drop_duplicates()
+        merged_df = explode_junctions.merge(pc_junctions, on='transcript_name').drop_duplicates()
         # drop repetitive or unneeded cols
-        merged_df = merged_df.drop(columns=['gene_names', 'gene_ids', 'transcripts', 'variant_start', 'Transcript type'])
+        merged_df = merged_df.drop(columns=['gene_names', 'gene_ids', 'variant_start'])
         # remove spaces from col names
         merged_df.columns = merged_df.columns.str.replace(r'\s+', '_', regex=True)
         # switch strand to numeral
         merged_df['strand'].replace(['+','-'], [1,-1])
-
-        # testing
-        # print(len(set(merged_df['name'])))
-        # print(len(set(merged_df['Transcript_stable_ID'])))
-        # print(len(set(merged_df['Gene_stable_ID'])))
-
         # create filtered tsv file
         merged_df.to_csv(os.path.join(self.output_dir, self.output_file), sep='\t', index=False)
 
 # debugging
-# if __name__ == '__main__':
-#     print('Filtering regtools results')
-#     filter_params = {
-#         'input_file'  : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/junctions.tsv',
-#         'output_file' : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/2022-6-14_indel_fix/H_NJ-HCC1395-HCC1395_filtered.tsv',
-#         'output_dir'  : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/2022-6-14_indel_fix',
-#         'score'       : 10,
-#         'distance'    : 100,
-#     }
-#     filter = FilterRegtoolsResults(**filter_params)
-#     filter.execute()
-#     print('Completed')
+if __name__ == '__main__':
+    print('Filtering regtools results')
+    filter_params = {
+        'input_file'  : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/junctions.tsv',
+        'output_file' : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/2022-6-16_splice_run/H_NJ-HCC1395-HCC1395_filtered.tsv',
+        'output_dir'  : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/2022-6-16_splice_run',
+        'score'       : 10,
+        'distance'    : 100,
+    }
+    filter = FilterRegtoolsResults(**filter_params)
+    filter.execute()
+    print('Completed')
