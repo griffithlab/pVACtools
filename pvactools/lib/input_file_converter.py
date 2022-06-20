@@ -440,6 +440,8 @@ class PvacspliceVcfConverter(VcfConverter):
             'gene_name',
             'transcript_name',
             'transcript_support_level',
+            'transcript_length',
+            'biotype',
             'amino_acid_change',
             'codon_change',
             'ensembl_gene_id',
@@ -461,7 +463,7 @@ class PvacspliceVcfConverter(VcfConverter):
             #'index',
             'protein_length_change',
         ]
-    
+
     def execute(self):
         # indexes = []
         # count = 1
@@ -485,10 +487,12 @@ class PvacspliceVcfConverter(VcfConverter):
             genotype = entry.call_for_sample[self.sample_name]
             if not genotype.called:
                 #The genotype is uncalled or hom_ref
+                print('genotype filter 1 - skipped')
                 continue
 
             filt = entry.FILTER
             if self.pass_only and not (filt is None or len(filt) == 0 or filt == ['PASS']):
+                print('pass only filter - skipped')
                 continue
 
             if 'CSQ' not in entry.INFO:
@@ -498,8 +502,9 @@ class PvacspliceVcfConverter(VcfConverter):
             for alt in alts:
                 alt = alt.value
                 if genotype.gt_bases and alt not in genotype.gt_bases:
+                    print('genotype filter 2 - skipped')
                     continue
-
+                    
                 coverage_for_entry = self.calculate_coverage_for_entry(entry, reference, alt, genotype)
 
                 transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)
@@ -516,29 +521,26 @@ class PvacspliceVcfConverter(VcfConverter):
                             protein_position = transcript['Protein_position'].split('/')[1]
                     else:
                         protein_position = transcript['Protein_position']
-                    if protein_position == '-' or protein_position == '':
-                        pass
+                    # if protein_position == '-' or protein_position == '':
                     #     print("Variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                     #     continue
                     transcript_name = transcript['Feature']
-                    consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
-                    if consequence is None:
-                        pass
-                        #continue
-                    elif consequence == 'FS':
-                        if transcript['FrameshiftSequence'] == '':
-                            pass
-                            # print("frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
-                            # continue
-                        else:
-                            amino_acid_change_position = "%s%s/%s" % (protein_position, entry.REF, alt)
-                    else:
-                        if transcript['Amino_acids'] == '':
-                            pass
-                            # print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
-                            # continue
-                        else:
-                            amino_acid_change_position = protein_position + transcript['Amino_acids']
+                    consequence = transcript['Consequence']
+                    #consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
+                    # if consequence is None:
+                    #     continue
+                    # if consequence == 'FS':
+                        # if transcript['FrameshiftSequence'] == '':
+                        #     print("frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        #     continue
+                        # else:
+                    #     amino_acid_change_position = "%s%s/%s" % (protein_position, entry.REF, alt)
+                    # else:
+                        # if transcript['Amino_acids'] == '':
+                        #     print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        #     continue
+                        # else:
+                        # amino_acid_change_position = protein_position + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
                     # index = pvactools.lib.run_utils.construct_index(count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     # if index in indexes:
@@ -557,11 +559,17 @@ class PvacspliceVcfConverter(VcfConverter):
                         tsl = transcript['TSL']
                     else:
                         tsl = 'NA'
+                    
+
+                    if 'BIOTYPE' in transcript and transcript['BIOTYPE'] is not None and transcript['BIOTYPE'] != '':
+                        biotype = transcript['BIOTYPE']
+                    else:
+                        biotype = 'NA'
 
                     wildtype_amino_acid_sequence = transcript['WildtypeProtein']
-                    if '*' in wildtype_amino_acid_sequence:
-                        logging.warning("Transcript WildtypeProtein sequence contains internal stop codon. These can occur in Ensembl transcripts of the biotype polymorphic_pseudogene. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
-                        continue
+                    # if '*' in wildtype_amino_acid_sequence:
+                    #     logging.warning("Transcript WildtypeProtein sequence contains internal stop codon. These can occur in Ensembl transcripts of the biotype polymorphic_pseudogene. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                    #     continue
 
                     if transcript['FrameshiftSequence'] != '':
                         wt_len = len(wildtype_amino_acid_sequence)
@@ -588,15 +596,17 @@ class PvacspliceVcfConverter(VcfConverter):
                         'gene_name'                      : gene_name,
                         'transcript_name'                : transcript_name,
                         'transcript_support_level'       : tsl,
+                        'transcript_length'              : len(wildtype_amino_acid_sequence),
+                        'biotype'                        : biotype,
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,
                         #'wildtype_amino_acid_sequence'   : wildtype_amino_acid_sequence,
                         #'frameshift_amino_acid_sequence' : transcript['FrameshiftSequence'],
                         #'fusion_amino_acid_sequence'     : '',
-                        'variant_type'                   : transcript['Consequence'], 
+                        'variant_type'                   : consequence,
                         'protein_position'               : protein_position,
-                        # 'index'                          : index,
+                        #'index'                          : index,
                         'protein_length_change'          : protein_length_change,
                     }
                     if transcript['Amino_acids']:
@@ -628,9 +638,6 @@ class PvacspliceVcfConverter(VcfConverter):
                     self.tsv_writer.writerow(output_row)
 
         self.close_filehandles()
-        
-        
-        pass
 
 class FusionInputConverter(InputFileConverter):
     def determine_fusion_sequence(self, full_sequence, variant_type):

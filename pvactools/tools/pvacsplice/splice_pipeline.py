@@ -21,14 +21,15 @@ class JunctionPipeline():
         self.variant_distance                 = kwargs.pop('variant_distance', 100)
         self.maximum_transcript_support_level = kwargs.pop('maximum_transcript_support_level', 1)
         self.normal_sample_name               = kwargs.pop('normal_sample_name', None)
+        self.tsl                              = kwargs.pop('tsl', None)
 
 
     def execute(self):
         self.filter_regtools_results()
         self.vcf_to_tsv()
         self.combine_inputs()
-        self.junction_to_fasta()
-        self.fasta_to_kmers()
+        #self.junction_to_fasta()
+        #self.fasta_to_kmers()
 
     def create_file_path(self, type):
         inputs = {
@@ -73,6 +74,7 @@ class JunctionPipeline():
             'variant_file'   : self.create_file_path('annotated'),
             'sample_name' : self.sample_name,
             'output_dir'  : self.output_dir,
+            'tsl'         : self.tsl
         }
         combined = CombineInputs(**combine_params)
         combined.execute()
