@@ -284,8 +284,16 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         anchor_residue_pass = True
         anchors = [1, 2, len(mutation["MT Epitope Seq"])-1, len(mutation["MT Epitope Seq"])]
+        # parse out mutation position from str
         position = mutation["Mutation Position"]
-        if position != "NA":
+        if '-' in position:
+            d_ind = position.index('-')
+            if any(pos in anchors for pos in range(int(position[0:d_ind]), int(position[d_ind+1:])+1)):
+                if mutation["Median WT IC50 Score"] == "NA":
+                      anchor_residue_pass = False
+                elif mutation["Median WT IC50 Score"] < 1000:
+                      anchor_residue_pass = False
+        elif position != "NA":
             if int(float(position)) in anchors:
                 if mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
                     anchor_residue_pass = False
