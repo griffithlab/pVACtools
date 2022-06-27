@@ -11,11 +11,13 @@ import itertools
 from pvactools.lib.prediction_class import PredictionClass
 
 class AggregateAllEpitopes:
-    def __init__(self, input_file, output_file, binding_threshold=500):
+    def __init__(self, input_file, output_file, binding_threshold=500, percentile_threshold=None):
         self.input_file = input_file
         self.output_file = output_file
         self.binding_threshold = binding_threshold
         self.relaxed_binding_threshold = self.binding_threshold * 2
+        self.percentile_threshold = percentile_threshold
+        self.relaxed_percentile_threshold = None if percentile_threshold is None else percentile_threshold * 2
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
 
 
@@ -211,12 +213,14 @@ class AggregateAllEpitopes:
 
 
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1):
+    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1, percentile_threshold=None):
         self.input_file = input_file
         self.output_file = output_file
         self.tumor_purity = tumor_purity
         self.binding_threshold = binding_threshold
         self.relaxed_binding_threshold = self.binding_threshold * 2
+        self.percentile_threshold = percentile_threshold
+        self.relaxed_percentile_threshold = None if percentile_threshold is None else percentile_threshold * 2
         self.allele_expr_threshold = trna_vaf * expn_val * 10
         self.relaxed_allele_expr_threshold = trna_vaf * expn_val * 5
         self.trna_cov = trna_cov
@@ -277,9 +281,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if position != "NA":
             if int(float(position)) in anchors:
                 if mutation["Median WT IC50 Score"] == "NA":
-                      anchor_residue_pass = False
+                    anchor_residue_pass = False
                 elif mutation["Median WT IC50 Score"] < self.relaxed_binding_threshold:
-                      anchor_residue_pass = False
+                    anchor_residue_pass = False
+                elif self.relaxed_percentile_threshold and mutation['Median WT IC50 Percentile'] < self.relaxed_percentile_threshold:
+                    anchor_residue_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
         if (mutation["Median MT IC50 Score"] < self.binding_threshold and
@@ -287,7 +293,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
            anchor_residue_pass):
-            return "Pass"
+            if self.percentile_threshold:
+                if mutation["Median MT IC50 Percentile"] < self.percentile_threshold:
+                    return "Pass"
+            else:
+                return "Pass"
 
         #relax mt and expr
         if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
@@ -295,7 +305,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
            anchor_residue_pass):
-            return "Relaxed"
+            if self.relaxed_percentile_threshold:
+                if mutation["Median MT IC50 Percentile"] < self.relaxed_percentile_threshold:
+                    return "Relaxed"
+            else:
+                return "Relaxed"
 
         #anchor residues
         if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
@@ -303,7 +317,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
            not anchor_residue_pass):
-            return "Anchor"
+            if self.relaxed_percentile_threshold:
+                if mutation["Median MT IC50 Percentile"] < self.relaxed_percentile_threshold:
+                    return "Anchor"
+            else:
+                return "Anchor"
 
         #not in founding clone
         if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
@@ -311,7 +329,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            mutation["Tumor DNA VAF"] < (vaf_clonal/2) and
            mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
            anchor_residue_pass):
-            return "Subclonal"
+            if self.relaxed_percentile_threshold:
+                if mutation["Median MT IC50 Percentile"] < self.relaxed_percentile_threshold:
+                    return "Subclonal"
+            else:
+                return "Subclonal"
 
         #relax expression.  Include sites that have reasonable vaf but zero overall gene expression
         lowexpr=False
@@ -327,7 +349,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
            anchor_residue_pass):
-            return "LowExpr"
+            if self.relaxed_percentile_threshold:
+                if mutation["Median MT IC50 Percentile"] < self.relaxed_percentile_threshold:
+                    return "LowExpr"
+            else:
+                return "LowExpr"
 
         #zero expression
         if (mutation["Gene Expression"] == 0 or mutation["Tumor RNA VAF"] == 0) and lowexpr==False:
