@@ -64,8 +64,6 @@ pVACfuse outputs binding affinity percentile rank information when provided by
 a chosen prediction algorithm. The following prediction algorithms calculate a
 percentile rank:
 
-MHCnuggets
-MHCnuggets
 - MHCflurry
 - NetMHC
 - NetMHCcons

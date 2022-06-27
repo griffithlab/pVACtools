@@ -333,6 +333,8 @@ class VcfConverter(InputFileConverter):
                         else:
                             amino_acid_change_position = protein_position + transcript['Amino_acids']
                     gene_name = transcript['SYMBOL']
+                    if gene_name is None or gene_name == '':
+                        gene_name = transcript['Gene']
                     index = pvactools.lib.run_utils.construct_index(count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
                         sys.exit("Warning: TSV index already exists: {}".format(index))
