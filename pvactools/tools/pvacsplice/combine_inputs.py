@@ -58,10 +58,12 @@ class CombineInputs():
 
         # merge by transcript and variant coors
         merged_df = junction_df.merge(variant_df, on=['transcript_name', 'variant_info']).drop_duplicates()
+
+        # create index to match with kmers
+        merged_df['fasta_index'] = merged_df['Gene_name'] + '.' + merged_df['transcript_name'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
         
         merged_df.to_csv(f'{self.output_prefix}_combined.tsv', sep='\t', index=False)
         # print(set(merged_df['variant_info']))
-
 
 # debugging
 if __name__ == '__main__':
