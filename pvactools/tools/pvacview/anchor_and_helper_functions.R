@@ -68,6 +68,29 @@ calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution){
   }
 }
 
+#converts string range (e.g. '2-4', '6') to associated list
+range_str_to_seq <- function(mutation_position) {
+  rnge = strsplit(mutation_position, '-')[[1]]
+  if (length(rnge) == 2) {
+    return (seq(rnge[1], rnge[2]))
+  }
+  else {
+    return (c(strtoi(rnge[1])))
+  }
+  return (0)
+}
+
+#get data from metrics file associated with peptide if available
+get_mt_peptide_data <- function(metrics_data_row, mt_peptide){
+  for (trn in metrics_data_row$sets) {
+    res = metrics_data_row$good_binders[[trn]]$peptides[[mt_peptide]]
+    if (!is.null(res)) {
+      return (res)
+    }
+  }
+  return (c())
+}
+
 #calculate the positions different between MT and WT peptide
 calculate_mutation_info <- function(metrics_data_row){
   wt_peptide <- metrics_data_row$best_peptide_wt
@@ -75,8 +98,15 @@ calculate_mutation_info <- function(metrics_data_row){
     return (0)
   }
   mt_peptide <- metrics_data_row$best_peptide_mt
-  split_positions <- strsplit(c(wt_peptide, mt_peptide), split = "")
-  diff_positions <- which(split_positions[[1]] != split_positions[[2]])
+  mt_data <- get_mt_peptide_data(metrics_data_row, mt_peptide)
+  # if recorded mutation_position range, use it
+  if (length(mt_data) > 0){
+    diff_positions = range_str_to_seq(mt_data$'mutation_position')
+  }
+  else {
+    split_positions <- strsplit(c(wt_peptide, mt_peptide), split = "")
+    diff_positions <- which(split_positions[[1]] != split_positions[[2]])
+  }
   return (diff_positions)
 }
 
@@ -99,7 +129,8 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_high
     }
   }
   anchor_residue_pass <- TRUE
-  if (all(as.numeric(mutation_pos_list) %in% anchor_list)){
+  # if at least one mutated position in anchors
+  if (any(as.numeric(mutation_pos_list) %in% anchor_list)){
     if (is.na(wt_binding)){
       anchor_residue_pass <- FALSE
     }
@@ -133,8 +164,11 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_high
   return ("Poor")
 }
 
-
+#Determine the Tier Count for given variant with specific cutoffs
 tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_high, allele_expr_low, mutation_pos_list, hla_allele = NULL, anchor_mode = "allele-specific"){
+  #assuming mutation_pos_list is a string (from x["Pos"]), need convert to list
+  mutation_pos_list <- range_str_to_seq(mutation_pos_list)
+  #set relevant variables for calculations
   mt_binding <- as.numeric(variant_info['IC50 MT'])
   wt_binding <- as.numeric(variant_info['IC50 WT'])
   gene_expr <- as.numeric(variant_info['RNA Expr'])
@@ -153,13 +187,22 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
     }
   }
   anchor_residue_pass <- TRUE
-  if (all(as.numeric(mutation_pos_list) %in% anchor_list)){
+  if (any(as.numeric(mutation_pos_list) %in% anchor_list)){
     if (is.na(wt_binding)){
       anchor_residue_pass <- FALSE
     }
     else if (wt_binding < 1000) {
       anchor_residue_pass <- FALSE
     }
+  }
+  #test
+  if (variant_info['Best Peptide'] == "LPLLLLLGASGGGG"){
+    print(mt_binding)
+    print(allele_expr_low)
+    print(dna_cutoff)
+    print(anchor_residue_pass)
+    print(mutation_pos_list)
+    print(anchor_list)
   }
   ## Pass
   if ((mt_binding < 500) & (allele_expr > allele_expr_high) & (dna_vaf >= dna_cutoff/2) & anchor_residue_pass){
