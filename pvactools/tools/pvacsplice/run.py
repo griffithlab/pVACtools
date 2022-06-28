@@ -94,7 +94,7 @@ def main(args_input = sys.argv[1:]):
         'ref_fasta'                        : args.ref_fasta,
         'class_i_epitope_length'           : args.class_i_epitope_length,
         'class_ii_epitope_length'          : args.class_ii_epitope_length,
-        'maximum_transcript_support_level' : args.maximum_transcript_support_level,
+        'tsl'                              : args.maximum_transcript_support_level,
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'normal_sample_name'               : args.normal_sample_name,
@@ -154,10 +154,10 @@ def main(args_input = sys.argv[1:]):
             class_i_arguments['output_dir']              = output_dir
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
             
-            pipeline = PvacsplicePipeline(**class_i_arguments)
-            pipeline.execute()
+            #pipeline = PvacsplicePipeline(**class_i_arguments)
+            #pipeline.execute()
 
-        create_combined_reports_length(base_output_dir, args, 'MHC_Class_I')
+        #create_combined_reports_length(base_output_dir, args, 'MHC_Class_I')
 
     elif len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
@@ -189,10 +189,10 @@ def main(args_input = sys.argv[1:]):
             class_ii_arguments['output_dir']              = output_dir
             class_ii_arguments['netmhc_stab']             = False
             
-            pipeline = PvacsplicePipeline(**class_ii_arguments)
-            pipeline.execute()
+            #pipeline = PvacsplicePipeline(**class_ii_arguments)
+            #pipeline.execute()
 
-        create_combined_reports_length(base_output_dir, args, 'MHC_Class_II')
+        #create_combined_reports_length(base_output_dir, args, 'MHC_Class_II')
 
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
