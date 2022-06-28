@@ -76,7 +76,7 @@ class FilterRegtoolsResults():
         # remove spaces from col names
         merged_df.columns = merged_df.columns.str.replace(r'\s+', '_', regex=True)
         # switch strand to numeral
-        merged_df['strand'].replace(['+','-'], [1,-1])
+        merged_df['strand'] = merged_df['strand'].replace(['+','-'], [1,-1])
         # create filtered tsv file
         merged_df.to_csv(os.path.join(self.output_dir, self.output_file), sep='\t', index=False)
 
