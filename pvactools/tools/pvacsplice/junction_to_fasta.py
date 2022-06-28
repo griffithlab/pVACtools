@@ -1,7 +1,6 @@
 import os
 import re
 import pandas as pd
-from pyfaidx import Fasta, FastaVariant
 from Bio.Seq import Seq
 from load_ensembl_data import *
 
@@ -12,7 +11,8 @@ class JunctionToFasta():
         self.chrom          = kwargs['chrom']
         self.junction_name  = kwargs['junction_name']
         self.junction_coors = kwargs['junction_coors']
-        self.junction_index = kwargs['index']
+        self.fasta_index    = kwargs['fasta_index']
+        self.variant_info   = kwargs['variant_info']
         self.anchor         = kwargs['anchor']
         self.strand         = kwargs['strand']
         self.gene_name      = kwargs['gene_name']
@@ -31,7 +31,7 @@ class JunctionToFasta():
             self.alt_coor = int(self.junction_coors[1])
             self.wt_row   = "Genomic coding end"
             self.alt_row  = "Genomic coding start"
-            self.reverse  = False      
+            self.reverse  = False
 
 
     def create_wt_df(self):
@@ -44,17 +44,29 @@ class JunctionToFasta():
             index = [index for index,value in self.wt_df[self.wt_row].items() if value == self.wt_coor]
             # value not found in df (Exception)
             if not index:
-                print(f'{self.tscript_id} anchor coordinate is not within coding transcript...skipping')
+                print(f'{self.tscript_id} WT coordinate is not within coding transcript...Skipping')
+                print(f'missing: {self.wt_coor}')
                 self.wt_df = pd.DataFrame()
+            else:
+                print(f'{self.anchor} WT: {self.wt_coor} {index[0]}')
         # if exon skip, check that both coordinates are inside the coding region of transcript
-        elif self.anchor == 'NDA':
+        elif self.anchor == 'NDA':                    
             # check for presence of both coordinates 
             index_wt = [index for index,value in self.wt_df[self.wt_row].items() if value == self.wt_coor]
             index_alt = [index for index,value in self.wt_df[self.alt_row].items() if value == self.alt_coor]
-            if not index_wt or not index_alt:
-                # here i can add option to look for next start OR stop codon
-                print(f'{self.tscript_id} exon skip: at least 1 junction coordinate is not within coding transcript...skipping')
-                self.wt_df = pd.DataFrame()   
+            if index_wt and index_alt:
+                print(f'NDA both coors present: {self.wt_coor}, {index_wt[0]}, {self.alt_coor}, {index_alt[0]}')
+            else:    
+                if not index_wt and not index_alt:
+                    print(f'{self.tscript_id} {self.junction_name} exon skip: both junction coordinates not in coding transcript...skipping')
+                    print(f'missing: {self.wt_coor} {self.alt_coor}')
+                elif (not index_wt and index_alt) or (index_wt and not index_alt):
+                    print(f'{self.tscript_id} {self.junction_name} exon skip: 1 junction coordinate not in coding transcript...skipping')
+                    if index_wt:
+                        print(f'missing: {self.alt_coor}')
+                    elif index_alt:
+                        print(f'missing: {self.wt_coor}')
+                self.wt_df = pd.DataFrame()
         return self.wt_df
         
 
@@ -75,6 +87,7 @@ class JunctionToFasta():
                     alt_index = i-1
                     # modify alt_df to include alt coor and return new alt_df
                     self.alt_df.at[alt_index, self.alt_row] = self.alt_coor
+                    print(f'{self.anchor} ALT: {self.alt_coor} {alt_index}')
                     break
                 # if i IS NOT between two wt coordinates and it IS NOT the last index in list
                 # go to next index in loop
@@ -84,8 +97,10 @@ class JunctionToFasta():
                 # return an empty df that will cause an exception in run.py                
                 else:
                     # here i can add option to look for next start codon (start lost)
-                    print(f'{self.tscript_id} alternate junction coordinate is not within coding transcript...skipping')
+                    print(f'{self.tscript_id} {self.junction_name} alternate junction coordinate not within coding transcript...skipping')
+                    print(f'{self.anchor} ALT missing: {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
+                    continue
                 
         # forward direction
         if self.reverse == False:
@@ -101,6 +116,7 @@ class JunctionToFasta():
                     alt_index = i+1
                     # modify alt_df to include alt coor and return new alt_df
                     self.alt_df.at[alt_index, self.alt_row] = self.alt_coor
+                    print(f'{self.anchor} ALT: {self.alt_coor} {alt_index}')
                     break
                 # if i IS NOT between two wt coordinates and it IS NOT the last index in list
                 # go to next index in loop
@@ -110,8 +126,10 @@ class JunctionToFasta():
                 # return an empty df that will cause an exception in run.py
                 else:
                     # here i can add option to look for next stop codon (stop lost)
-                    print(f'{self.tscript_id} alternate junction coordinate is not within coding transcript...skipping')
-                    self.alt_df = pd.DataFrame()    
+                    print(f'{self.tscript_id} {self.junction_name} alternate junction coordinate not in coding transcript...skipping')
+                    print(f'{self.anchor} ALT missing: {self.alt_coor}')
+                    self.alt_df = pd.DataFrame()
+                    continue    
                 
         # exon skip
         # starting knowing both coors are in coding region
@@ -122,9 +140,6 @@ class JunctionToFasta():
             # [1:] to remove 1st index from index_list (because of range function)
             index_list = list(range(stop_index, start_index))[1:]
             self.alt_df = self.alt_df.drop(index_list)
-            
-        # testing
-        #self.alt_df.to_csv(f'{self.test_dir}/alt_dataframe.tsv', sep='\t', index=False)
         return self.alt_df
 
     def get_aa_sequence(self, dataframe, fasta_version):
@@ -156,32 +171,10 @@ class JunctionToFasta():
         if aa_seq[0] != 'M':
             print(f'{self.tscript_id} does not begin with start codon...skipping')
             aa_seq = ''
-
         return aa_seq
 
-    def get_sequence_wrapper(self):
-        chrom_fasta = Fasta(self.fasta_path)[self.chrom][:]
-        
-        ref_path = os.path.join(self.output_dir, f'{self.chrom}.fa')
-        alt_path = os.path.join(self.output_dir, f'{self.chrom}_alt.fa')
-        
-        for x in [ref_path, alt_path]:
-            if not os.path.exists(x):
-                f = open(x, 'w')
-                f.write(f'>{chrom_fasta.name}\n{chrom_fasta.seq}\n')
-                f.close()
-
-        ref_fasta = Fasta(ref_path)
-        alt_fasta = FastaVariant(alt_path, self.vcf_file, sample=self.sample_name)
-
-        wt_seq = self.get_aa_sequence(self.wt_df, ref_fasta)
-        alt_seq = self.get_aa_sequence(self.alt_df, alt_fasta)
-
-        return wt_seq, alt_seq
-
-
     def create_sequence_fasta(self, wt_seq, alt_seq):
-        write_str = f'>WT.{self.junction_index}\n{wt_seq}\n>ALT.{self.junction_index}\n{alt_seq}\n'
+        write_str = f'>WT.{self.fasta_index}\n{wt_seq}\n>ALT.{self.fasta_index}\n{alt_seq}\n'
         if os.path.exists(self.output_file):
             dup_content = re.search(write_str, open(self.output_file, "r").read())
             if dup_content == None:
@@ -190,8 +183,6 @@ class JunctionToFasta():
         else:
             with open(self.output_file, "a") as f:
                 f.write(write_str)
-
-
 
 
 # GBM examples #
