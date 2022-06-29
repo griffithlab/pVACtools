@@ -55,6 +55,7 @@ class PostProcessor:
                 trna_cov=self.trna_cov,
                 expn_val=self.expn_val,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
+                top_score_metric=self.top_score_metric,
             ).execute()
         else:
             UnmatchedSequenceAggregateAllEpitopes(
@@ -63,6 +64,7 @@ class PostProcessor:
                 binding_threshold=self.binding_threshold,
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 percentile_threshold=self.percentile_threshold,
+                top_score_metric=self.top_score_metric,
             ).execute()
         print("Completed")
 

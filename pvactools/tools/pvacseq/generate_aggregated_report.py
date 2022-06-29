@@ -44,6 +44,14 @@ def define_parser():
              + "when the mutant allele has percentile scores below double this value.",
     )
     parser.add_argument(
+        '-m', '--top-score-metric',
+        choices=['lowest', 'median'],
+        default='median',
+        help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
+             + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
+             + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
+    )
+    parser.add_argument(
         '--trna-vaf', type=float,
         help="Tumor RNA VAF Cutoff. Used to calculate the allele expression cutoff for tiering.",
         default=0.25
@@ -92,6 +100,7 @@ def main(args_input = sys.argv[1:]):
         trna_cov=args.trna_cov,
         expn_val=args.expn_val,
         maximum_transcript_support_level=args.maximum_transcript_support_level,
+        top_score_metric=args.top_score_metric,
     ).execute()
     print("Completed")
 

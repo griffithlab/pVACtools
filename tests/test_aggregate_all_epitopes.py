@@ -106,3 +106,40 @@ class AggregateAllEptiopesTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "output.allele_specific_binding_thresholds.metrics.json"),
         ))
         os.remove(metrics_file)
+
+    def test_aggregate_all_epitopes_lowest_top_score_metric_runs_and_produces_expected_output(self):
+        self.assertTrue(py_compile.compile(self.executable))
+        output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
+        self.assertFalse(
+            PvacseqAggregateAllEpitopes(
+                os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'),
+                output_file.name,
+                top_score_metric="lowest"
+            ).execute()
+        )
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output.lowest_top_score_metric.tsv"),
+        ))
+
+        metrics_file = output_file.name.replace('.tsv', '.metrics.json')
+        self.assertTrue(cmp(
+            metrics_file,
+            os.path.join(self.test_data_dir, "output.lowest_top_score_metric.metrics.json"),
+        ))
+        os.remove(metrics_file)
+
+    def test_aggregate_all_epitopes_pvacbind_lowest_top_score_metric_runs_and_produces_expected_output(self):
+        self.assertTrue(py_compile.compile(self.executable))
+        output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
+        self.assertFalse(
+            UnmatchedSequenceAggregateAllEpitopes(
+                os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacbind.tsv'),
+                output_file.name,
+                top_score_metric="lowest"
+            ).execute()
+        )
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output.pvacbind.lowest_top_score_metric.tsv"),
+        ))
