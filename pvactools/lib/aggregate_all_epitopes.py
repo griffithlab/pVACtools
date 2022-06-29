@@ -11,13 +11,14 @@ import itertools
 from pvactools.lib.prediction_class import PredictionClass
 
 class AggregateAllEpitopes:
-    def __init__(self, input_file, output_file, binding_threshold=500, percentile_threshold=None):
+    def __init__(self, input_file, output_file, binding_threshold=500, percentile_threshold=None, allele_specific_binding_thresholds=False):
         self.input_file = input_file
         self.output_file = output_file
         self.binding_threshold = binding_threshold
         self.relaxed_binding_threshold = self.binding_threshold * 2
         self.percentile_threshold = percentile_threshold
         self.relaxed_percentile_threshold = None if percentile_threshold is None else percentile_threshold * 2
+        self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
 
 
@@ -213,12 +214,13 @@ class AggregateAllEpitopes:
 
 
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1, percentile_threshold=None):
+    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1, percentile_threshold=None, allele_specific_binding_thresholds=False):
         self.input_file = input_file
         self.output_file = output_file
         self.tumor_purity = tumor_purity
         self.binding_threshold = binding_threshold
         self.relaxed_binding_threshold = self.binding_threshold * 2
+        self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.percentile_threshold = percentile_threshold
         self.relaxed_percentile_threshold = None if percentile_threshold is None else percentile_threshold * 2
         self.allele_expr_threshold = trna_vaf * expn_val * 10
@@ -275,6 +277,13 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
+        if self.allele_specific_binding_thresholds:
+            threshold = PredictionClass.cutoff_for_allele(mutation['HLA Allele'])
+            binding_threshold = self.binding_threshold if threshold is None else float(threshold)
+        else:
+            binding_threshold = self.binding_threshold
+        relaxed_binding_threshold = binding_threshold * 2
+
         anchor_residue_pass = True
         anchors = [1, 2, len(mutation["MT Epitope Seq"])-1, len(mutation["MT Epitope Seq"])]
         position = mutation["Mutation Position"]
@@ -282,13 +291,13 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             if int(float(position)) in anchors:
                 if mutation["Median WT IC50 Score"] == "NA":
                     anchor_residue_pass = False
-                elif mutation["Median WT IC50 Score"] < self.relaxed_binding_threshold:
+                elif mutation["Median WT IC50 Score"] < relaxed_binding_threshold:
                     anchor_residue_pass = False
                 elif self.relaxed_percentile_threshold and mutation['Median WT IC50 Percentile'] < self.relaxed_percentile_threshold:
                     anchor_residue_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
-        if (mutation["Median MT IC50 Score"] < self.binding_threshold and
+        if (mutation["Median MT IC50 Score"] < binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
@@ -300,7 +309,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 return "Pass"
 
         #relax mt and expr
-        if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
+        if (mutation["Median MT IC50 Score"] < relaxed_binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
@@ -312,7 +321,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 return "Relaxed"
 
         #anchor residues
-        if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
+        if (mutation["Median MT IC50 Score"] < relaxed_binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
@@ -324,7 +333,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 return "Anchor"
 
         #not in founding clone
-        if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
+        if (mutation["Median MT IC50 Score"] < relaxed_binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] < (vaf_clonal/2) and
            mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
@@ -344,7 +353,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             lowexpr=True
 
         #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
-        if (mutation["Median MT IC50 Score"] < self.relaxed_binding_threshold and
+        if (mutation["Median MT IC50 Score"] < relaxed_binding_threshold and
            lowexpr==True and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
            mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
@@ -363,7 +372,16 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return "Poor"
 
     def get_good_binders(self, df):
-        return df[df["Median MT IC50 Score"] < self.relaxed_binding_threshold]
+        if self.allele_specific_binding_thresholds:
+            selection = []
+            for index, row in df.iterrows():
+                threshold = PredictionClass.cutoff_for_allele(row['HLA Allele'])
+                relaxed_binding_threshold = self.relaxed_binding_threshold if threshold is None else float(threshold) * 2
+                if row["Median MT IC50 Score"] < relaxed_binding_threshold:
+                    selection.append(index)
+            return df[df.index.isin(selection)]
+        else:
+            return df[df["Median MT IC50 Score"] < self.relaxed_binding_threshold]
 
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
@@ -575,7 +593,16 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return "NA"
 
     def get_good_binders(self, df):
-        return df[df["Median IC50 Score"] < self.relaxed_binding_threshold]
+        if self.allele_specific_binding_thresholds:
+            selection = []
+            for index, row in df.iterrows():
+                threshold = PredictionClass.cutoff_for_allele(row['HLA Allele'])
+                relaxed_binding_threshold = self.relaxed_binding_threshold if threshold is None else float(threshold) * 2
+                if row["Median IC50 Score"] < relaxed_binding_threshold:
+                    selection.append(index)
+            return df[df.index.isin(selection)]
+        else:
+            return df[df["Median IC50 Score"] < self.relaxed_binding_threshold]
 
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())

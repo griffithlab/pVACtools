@@ -84,3 +84,25 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
             self.assertFalse(os.path.isfile(pvacview_file))
+
+    def test_aggregate_all_epitopes_allele_specific_binding_thresholds_runs_and_produces_expected_output(self):
+        self.assertTrue(py_compile.compile(self.executable))
+        output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
+        self.assertFalse(
+            PvacseqAggregateAllEpitopes(
+                os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'),
+                output_file.name,
+                allele_specific_binding_thresholds=True
+            ).execute()
+        )
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output.allele_specific_binding_thresholds.tsv"),
+        ))
+
+        metrics_file = output_file.name.replace('.tsv', '.metrics.json')
+        self.assertTrue(cmp(
+            metrics_file,
+            os.path.join(self.test_data_dir, "output.allele_specific_binding_thresholds.metrics.json"),
+        ))
+        os.remove(metrics_file)

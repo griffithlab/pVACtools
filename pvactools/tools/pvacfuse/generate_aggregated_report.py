@@ -26,6 +26,13 @@ def define_parser():
         default=500
     )
     parser.add_argument(
+        '--allele-specific-binding-thresholds',
+        help="Use allele-specific binding thresholds. To print the allele-specific binding thresholds run `pvacfuse allele_specific_cutoffs`. "
+             + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
+        default=False,
+        action='store_true',
+    )
+    parser.add_argument(
         '--percentile-threshold', type=float,
         help="When set, tier epitopes in the \"Pass\" tier when the mutant allele "
              + "has percentile scores below this value and in the \"Relaxed\" tier "
@@ -45,6 +52,7 @@ def main(args_input = sys.argv[1:]):
         args.input_file,
         args.output_file,
         binding_threshold=args.binding_threshold,
+        allele_specific_binding_thresholds=args.allele_specific_binding_thresholds,
         percentile_threshold=args.percentile_threshold
     ).execute()
     print("Completed")

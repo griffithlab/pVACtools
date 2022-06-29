@@ -50,6 +50,7 @@ class PostProcessor:
                 tumor_purity=self.tumor_purity,
                 binding_threshold=self.binding_threshold,
                 percentile_threshold=self.percentile_threshold,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 trna_vaf=self.trna_vaf,
                 trna_cov=self.trna_cov,
                 expn_val=self.expn_val,
@@ -60,6 +61,7 @@ class PostProcessor:
                 self.input_file,
                 self.aggregate_report,
                 binding_threshold=self.binding_threshold,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 percentile_threshold=self.percentile_threshold,
             ).execute()
         print("Completed")
