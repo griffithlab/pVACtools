@@ -195,15 +195,6 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
       anchor_residue_pass <- FALSE
     }
   }
-  #test
-  if (variant_info['Best Peptide'] == "LPLLLLLGASGGGG"){
-    print(mt_binding)
-    print(allele_expr_low)
-    print(dna_cutoff)
-    print(anchor_residue_pass)
-    print(mutation_pos_list)
-    print(anchor_list)
-  }
   ## Pass
   if ((mt_binding < 500) & (allele_expr > allele_expr_high) & (dna_vaf >= dna_cutoff/2) & anchor_residue_pass){
     return (1)
