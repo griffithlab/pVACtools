@@ -107,6 +107,14 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         ))
         os.remove(metrics_file)
 
+        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+            pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
+            os.remove(pvacview_file)
+
+        for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
+            pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
+            os.remove(pvacview_file)
+
     def test_aggregate_all_epitopes_lowest_top_score_metric_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
@@ -128,6 +136,14 @@ class AggregateAllEptiopesTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "output.lowest_top_score_metric.metrics.json"),
         ))
         os.remove(metrics_file)
+
+        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+            pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
+            os.remove(pvacview_file)
+
+        for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
+            pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
+            os.remove(pvacview_file)
 
     def test_aggregate_all_epitopes_pvacbind_lowest_top_score_metric_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
