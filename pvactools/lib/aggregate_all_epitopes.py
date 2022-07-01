@@ -610,17 +610,17 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             binding_threshold = self.binding_threshold
         relaxed_binding_threshold = binding_threshold * 2
 
-        if mutation["Median IC50 Score"] < binding_threshold:
+        if mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
             if self.percentile_threshold:
-                if mutation["Median Percentile"] < self.percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
                     return "Pass"
             else:
                 return "Pass"
 
         #relax mt and expr
-        if mutation["Median IC50 Score"] < relaxed_binding_threshold:
+        if mutation["{} IC50 Score".format(self.top_score_metric)] < relaxed_binding_threshold:
             if self.relaxed_percentile_threshold:
-                if mutation["Median Percentile"] < self.relaxed_percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.relaxed_percentile_threshold:
                     return "Relaxed"
             else:
                 return "Relaxed"
