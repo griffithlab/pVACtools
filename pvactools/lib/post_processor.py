@@ -44,9 +44,28 @@ class PostProcessor:
     def aggregate_all_epitopes(self):
         print("Creating aggregated report")
         if self.file_type == 'pVACseq':
-            PvacseqAggregateAllEpitopes(self.input_file, self.aggregate_report, self.tumor_purity).execute()
+            PvacseqAggregateAllEpitopes(
+                self.input_file,
+                self.aggregate_report,
+                tumor_purity=self.tumor_purity,
+                binding_threshold=self.binding_threshold,
+                percentile_threshold=self.percentile_threshold,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                trna_vaf=self.trna_vaf,
+                trna_cov=self.trna_cov,
+                expn_val=self.expn_val,
+                maximum_transcript_support_level=self.maximum_transcript_support_level,
+                top_score_metric=self.top_score_metric,
+            ).execute()
         else:
-            UnmatchedSequenceAggregateAllEpitopes(self.input_file, self.aggregate_report).execute()
+            UnmatchedSequenceAggregateAllEpitopes(
+                self.input_file,
+                self.aggregate_report,
+                binding_threshold=self.binding_threshold,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                percentile_threshold=self.percentile_threshold,
+                top_score_metric=self.top_score_metric,
+            ).execute()
         print("Completed")
 
     def calculate_manufacturability(self):
