@@ -603,7 +603,29 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return df.iloc[0]
 
     def get_tier(self, mutation, vaf_clonal):
-        return "NA"
+        if self.allele_specific_binding_thresholds:
+            threshold = PredictionClass.cutoff_for_allele(mutation['HLA Allele'])
+            binding_threshold = self.binding_threshold if threshold is None else float(threshold)
+        else:
+            binding_threshold = self.binding_threshold
+        relaxed_binding_threshold = binding_threshold * 2
+
+        if mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
+            if self.percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
+                    return "Pass"
+            else:
+                return "Pass"
+
+        #relax mt and expr
+        if mutation["{} IC50 Score".format(self.top_score_metric)] < relaxed_binding_threshold:
+            if self.relaxed_percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.relaxed_percentile_threshold:
+                    return "Relaxed"
+            else:
+                return "Relaxed"
+
+        return "Poor"
 
     def get_good_binders(self, df):
         if self.allele_specific_binding_thresholds:
@@ -676,6 +698,14 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     #sort the table in our preferred manner
     def sort_table(self, df):
         df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
+
+        tier_sorter = ["Pass", "Relaxed", "Poor"]
+        sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
+        df["rank_tier"] = df['Tier'].map(sorter_index)
+
+        df.sort_values(by=["rank_tier", "IC50 MT", "ID"], inplace=True, ascending=[True, True, True])
+
+        df.drop(labels='rank_tier', axis=1, inplace=True)
         return df
 
     def copy_pvacview_r_files(self):
