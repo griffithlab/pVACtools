@@ -604,11 +604,19 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
     def get_tier(self, mutation, vaf_clonal):
         if mutation["Median IC50 Score"] < self.binding_threshold:
-            return "Pass"
+            if self.percentile_threshold:
+                if mutation["Median Percentile"] < self.percentile_threshold:
+                    return "Pass"
+            else:
+                return "Pass"
 
         #relax mt and expr
         if mutation["Median IC50 Score"] < self.relaxed_binding_threshold:
-            return "Relaxed"
+            if self.relaxed_percentile_threshold:
+                if mutation["Median Percentile"] < self.relaxed_percentile_threshold:
+                    return "Relaxed"
+            else:
+                return "Relaxed"
 
         return "Poor"
 
