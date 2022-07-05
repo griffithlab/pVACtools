@@ -282,6 +282,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             binding_threshold = self.binding_threshold
         relaxed_binding_threshold = binding_threshold * 2
 
+        if mutation["Transcript Support Level"] == "NA":
+            transcript_support_level = 1
+        else:
+            transcript_support_level = mutation["Transcript Support Level"]
+
         anchor_residue_pass = True
         anchors = [1, 2, len(mutation["MT Epitope Seq"])-1, len(mutation["MT Epitope Seq"])]
         position = mutation["Mutation Position"]
@@ -298,7 +303,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
-           mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
+           transcript_support_level <= self.maximum_transcript_support_level and
            anchor_residue_pass):
             if self.percentile_threshold:
                 if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
@@ -310,7 +315,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < relaxed_binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
-           mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
+           transcript_support_level <= self.maximum_transcript_support_level and
            anchor_residue_pass):
             if self.relaxed_percentile_threshold:
                 if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
@@ -322,7 +327,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < relaxed_binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
-           mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
+           transcript_support_level <= self.maximum_transcript_support_level and
            not anchor_residue_pass):
             if self.relaxed_percentile_threshold:
                 if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
@@ -334,7 +339,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < relaxed_binding_threshold and
            mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
            mutation["Tumor DNA VAF"] < (vaf_clonal/2) and
-           mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
+           transcript_support_level <= self.maximum_transcript_support_level and
            anchor_residue_pass):
             if self.relaxed_percentile_threshold:
                 if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
@@ -354,7 +359,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < relaxed_binding_threshold and
            lowexpr==True and
            mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
-           mutation["Transcript Support Level"] <= self.maximum_transcript_support_level and
+           transcript_support_level <= self.maximum_transcript_support_level and
            anchor_residue_pass):
             if self.relaxed_percentile_threshold:
                 if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
