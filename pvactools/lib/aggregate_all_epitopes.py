@@ -185,7 +185,18 @@ class AggregateAllEpitopes:
             metrics = {
                 'tumor_purity': self.tumor_purity,
                 'vaf_clonal': round(vaf_clonal, 3),
-                'vaf_subclonal': round(vaf_clonal/2, 3)
+                'vaf_subclonal': round(vaf_clonal/2, 3),
+                'binding_threshold': self.binding_threshold,
+                'relaxed_binding_threshold': self.relaxed_binding_threshold,
+                'trna_vaf': self.trna_vaf,
+                'trna_cov': self.trna_cov,
+                'allele_expr_threshold': self.allele_expr_threshold,
+                'relaxed_allele_expr_threshold': self.relaxed_allele_expr_threshold,
+                'maximum_transcript_support_level': self.maximum_transcript_support_level,
+                'percentile_threshold': self.percentile_threshold,
+                'allele_specific_binding_thresholds': self.allele_specific_binding_thresholds,
+                'mt_top_score_metric': self.mt_top_score_metric,
+                'wt_top_score_metric': self.wt_top_score_metric,
             }
         else:
             metrics = {}

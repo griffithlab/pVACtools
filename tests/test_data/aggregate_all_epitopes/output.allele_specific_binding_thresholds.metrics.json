@@ -2,6 +2,17 @@
   "tumor_purity": null,
   "vaf_clonal": 0.571,
   "vaf_subclonal": 0.286,
+  "binding_threshold": 500,
+  "relaxed_binding_threshold": 1000,
+  "trna_vaf": 0.25,
+  "trna_cov": 10,
+  "allele_expr_threshold": 2.5,
+  "relaxed_allele_expr_threshold": 1.25,
+  "maximum_transcript_support_level": 1,
+  "percentile_threshold": null,
+  "allele_specific_binding_thresholds": true,
+  "mt_top_score_metric": "Median",
+  "wt_top_score_metric": "Median",
   "2-217498305-217498305-T-TGCTGCC": {
     "good_binders": {
       "Transcript Set 1": {
