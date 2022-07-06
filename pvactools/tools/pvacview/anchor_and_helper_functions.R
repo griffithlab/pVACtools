@@ -129,8 +129,8 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_high
     }
   }
   anchor_residue_pass <- TRUE
-  # if at least one mutated position in anchors
-  if (any(as.numeric(mutation_pos_list) %in% anchor_list)){
+  # if all of mutated positions in anchors
+  if (all(as.numeric(mutation_pos_list) %in% anchor_list)){
     if (is.na(wt_binding)){
       anchor_residue_pass <- FALSE
     }
