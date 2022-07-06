@@ -169,7 +169,10 @@ class VcfConverter(InputFileConverter):
         if af_tag in genotype.data:
             allele_frequencies = genotype.data[af_tag]
             if isinstance(allele_frequencies, list):
-                vaf = allele_frequencies[alts.index(alt)]
+                if len(allele_frequencies) == 0:
+                    vaf = 'NA'
+                else:
+                    vaf = allele_frequencies[alts.index(alt)]
             else:
                 vaf = allele_frequencies
             if vaf > 1:
