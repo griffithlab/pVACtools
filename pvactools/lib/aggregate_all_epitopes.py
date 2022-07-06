@@ -288,7 +288,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         position = mutation["Mutation Position"]
         if '-' in position:
             d_ind = position.index('-')
-            if any(pos in anchors for pos in range(int(position[0:d_ind]), int(position[d_ind+1:])+1)):
+            if all(pos in anchors for pos in range(int(position[0:d_ind]), int(position[d_ind+1:])+1)):
                 if mutation["Median WT IC50 Score"] == "NA":
                       anchor_residue_pass = False
                 elif mutation["Median WT IC50 Score"] < 1000:
