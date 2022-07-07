@@ -948,6 +948,7 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             median_mt_percentile,
         ) in iedb_results:
             index = '.'.join(tsv_index.split('.')[:-1])
+            print(index, tsv_index)
             tsv_entry = tsv_entries[index]
             row = {
                 'Chromosome'          : tsv_entry['variant_chrom'],

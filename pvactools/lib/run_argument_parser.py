@@ -179,7 +179,7 @@ class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
             +"of RegTools to extract only putative regulatory splicing variants from the original VCF file."
         )
         self.parser.add_argument(
-            "-tsl", "--maximum-transcript-support-level", type=int,
+            "--maximum-transcript-support-level", type=int,
             help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
             +"Keep all epitopes with a transcript support level <= to this cutoff.",
             default=1,

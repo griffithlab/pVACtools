@@ -6,7 +6,6 @@ class FilterRegtoolsResults():
     def __init__(self, **kwargs):
         self.input_file  = kwargs['input_file']
         self.output_file = kwargs['output_file']
-        self.output_dir  = kwargs['output_dir']
         self.score       = kwargs['score']
         self.distance    = kwargs['distance']
 
@@ -78,7 +77,7 @@ class FilterRegtoolsResults():
         # switch strand to numeral
         merged_df['strand'] = merged_df['strand'].replace(['+','-'], [1,-1])
         # create filtered tsv file
-        merged_df.to_csv(os.path.join(self.output_dir, self.output_file), sep='\t', index=False)
+        merged_df.to_csv(self.output_file, sep='\t', index=False)
 
 # debugging
 if __name__ == '__main__':
