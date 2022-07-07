@@ -47,15 +47,16 @@ class JunctionToFasta():
                 print(f'{self.tscript_id} WT coordinate is not within coding transcript...Skipping')
                 print(f'missing: {self.wt_coor}')
                 self.wt_df = pd.DataFrame()
-            else:
-                print(f'{self.anchor} WT: {self.wt_coor} {index[0]}')
+            # else:
+            #     print(f'{self.anchor} WT: {self.wt_coor} {index[0]}')
         # if exon skip, check that both coordinates are inside the coding region of transcript
         elif self.anchor == 'NDA':                    
             # check for presence of both coordinates 
             index_wt = [index for index,value in self.wt_df[self.wt_row].items() if value == self.wt_coor]
             index_alt = [index for index,value in self.wt_df[self.alt_row].items() if value == self.alt_coor]
             if index_wt and index_alt:
-                print(f'NDA both coors present: {self.wt_coor}, {index_wt[0]}, {self.alt_coor}, {index_alt[0]}')
+                # print(f'NDA both coors present: {self.wt_coor}, {index_wt[0]}, {self.alt_coor}, {index_alt[0]}')
+                pass
             else:    
                 if not index_wt and not index_alt:
                     print(f'{self.tscript_id} {self.junction_name} exon skip: both junction coordinates not in coding transcript...skipping')
@@ -87,7 +88,7 @@ class JunctionToFasta():
                     alt_index = i-1
                     # modify alt_df to include alt coor and return new alt_df
                     self.alt_df.at[alt_index, self.alt_row] = self.alt_coor
-                    print(f'{self.anchor} ALT: {self.alt_coor} {alt_index}')
+                    #print(f'{self.anchor} ALT: {self.alt_coor} {alt_index}')
                     break
                 # if i IS NOT between two wt coordinates and it IS NOT the last index in list
                 # go to next index in loop
@@ -116,7 +117,7 @@ class JunctionToFasta():
                     alt_index = i+1
                     # modify alt_df to include alt coor and return new alt_df
                     self.alt_df.at[alt_index, self.alt_row] = self.alt_coor
-                    print(f'{self.anchor} ALT: {self.alt_coor} {alt_index}')
+                    #print(f'{self.anchor} ALT: {self.alt_coor} {alt_index}')
                     break
                 # if i IS NOT between two wt coordinates and it IS NOT the last index in list
                 # go to next index in loop

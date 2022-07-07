@@ -32,7 +32,7 @@ class FastaToKmers():
     def save_kmer_dicts(self, wt_name, mt_name):
         wt_dict = self.create_kmers(wt_name)
         mut_dict = self.create_kmers(mt_name)
-        junction_name = wt_name.split('.')[1:]
+        junction_name = ' '.join(wt_name.split('.')[1:])
         # all kmers not in wt kmers
         final_kmers = {k: v for k, v in mut_dict.items() if k not in list(wt_dict.keys())}
         if len(final_kmers) == 0:
@@ -71,7 +71,7 @@ class FastaToKmers():
         # add length
         self.fasta_df['length'] = self.fasta_df['kmer'].str.len()
         # debugging save
-        self.fasta_df.to_csv(f'{self.output_dir}/fasta_index.tsv' ,sep='\t', index=False)
+        # self.fasta_df.to_csv(f'{self.output_dir}/fasta_index.tsv' ,sep='\t', index=False)
         # expand tscripts to one per line in separate df and save to tsv
         # how to copy self.fasta_df
         index_df = self.fasta_df.copy()

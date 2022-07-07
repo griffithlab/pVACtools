@@ -88,13 +88,13 @@ def main(args_input = sys.argv[1:]):
 
     junction_arguments = {
         'input_file'                       : args.input_file, 
-        'annotated_vcf'                    : args.annotated_vcf,
         'sample_name'                      : args.sample_name,
         'base_output_dir'                  : base_output_dir,
         'ref_fasta'                        : args.ref_fasta,
+        'annotated_vcf'                    : args.annotated_vcf,
         'class_i_epitope_length'           : args.class_i_epitope_length,
         'class_ii_epitope_length'          : args.class_ii_epitope_length,
-        'tsl'                              : args.maximum_transcript_support_level,
+        'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'normal_sample_name'               : args.normal_sample_name,
@@ -113,12 +113,12 @@ def main(args_input = sys.argv[1:]):
         'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
-        'additional_report_columns' : args.additional_report_columns,
+        #'additional_report_columns' : args.additional_report_columns,
         'fasta_size'                : args.fasta_size,
         'iedb_retries'              : args.iedb_retries,
         'keep_tmp_files'            : args.keep_tmp_files,
         'n_threads'                 : args.n_threads,
-        'species'                   : species,
+        #'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'normal_cov'                : args.normal_cov,
         'normal_vaf'                : args.normal_vaf,
@@ -139,14 +139,14 @@ def main(args_input = sys.argv[1:]):
             iedb_mhc_i_executable = None
 
         print("Executing MHC Class I predictions")
-
         output_dir = os.path.join(base_output_dir, 'MHC_Class_I')
         os.makedirs(output_dir, exist_ok=True)
 
         for x in args.class_i_epitope_length:
 
             class_i_arguments = pvacbind_arguments.copy()
-            class_i_arguments['input_file']              = f'{base_output_dir}/epitope_length_{x}.fa'
+            # in tmp dir
+            class_i_arguments['input_file']              = f'{base_output_dir}/peptides_length_{x}.fa'
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
@@ -181,7 +181,8 @@ def main(args_input = sys.argv[1:]):
         for y in args.class_ii_epitope_length:
 
             class_ii_arguments = pvacbind_arguments.copy()
-            class_i_arguments['input_file']               = f'{base_output_dir}/epitope_length_{y}.fa'
+            # in tmp dir
+            class_i_arguments['input_file']               = f'{base_output_dir}/peptides_length_{y}.fa'
             class_ii_arguments['alleles']                 = class_ii_alleles
             class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
             class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
