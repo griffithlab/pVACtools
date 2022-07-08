@@ -56,7 +56,7 @@ class CombineInputs():
         merged_df = junction_df.merge(variant_df, on=['transcript_name', 'variant_info']).drop_duplicates()
 
         # create index to match with kmers
-        merged_df['fasta_index'] = merged_df['Gene_name'] + '.' + merged_df['transcript_name'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
+        merged_df['index'] = merged_df['Gene_name'] + '.' + merged_df['transcript_name'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
         
         # create final file
         merged_df.to_csv(self.output_file, sep='\t', index=False)

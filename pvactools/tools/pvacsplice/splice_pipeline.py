@@ -112,7 +112,7 @@ class JunctionPipeline():
                     'chrom'          : row.junction_chrom,
                     'junction_name'  : row.name,
                     'junction_coors' : [row.junction_start, row.junction_stop],
-                    'fasta_index'    : row.fasta_index,
+                    'fasta_index'    : row.index,
                     'variant_info'   : row.variant_info,
                     'anchor'         : row.anchor,
                     'strand'         : row.strand,
@@ -139,7 +139,7 @@ class JunctionPipeline():
     
 
     def fasta_to_kmers(self):
-        print('Creating a fasta of kmer peptides from altered portion of transcripts')
+        print('Creating a fasta of kmer peptides')
         kmer_params = {
             'fasta'           : self.create_file_path('fasta'),
             'output_dir'      : self.tmp_dir,

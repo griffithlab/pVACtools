@@ -42,22 +42,23 @@ def create_combined_reports(base_output_dir, args):
 
     PostProcessor(**post_processing_params).execute()
 
-def create_combined_reports_length(base_output_dir, args, mhc_class):
+def combine_reports_mhc_class(base_output_dir, args, mhc_class):
     output_dir = os.path.join(base_output_dir, mhc_class)
     
     files = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith('all_epitopes.tsv')]
 
     combined_file = os.path.join(output_dir, f'{args.sample_name}.all_epitopes.tsv')
-
     combine_reports(files, combined_file)
+    
+    filtered_file = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
 
-    for f in files:
-        os.remove(f)
+    #for f in files:
+    #    os.remove(f)
 
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_file
     post_processing_params['file_type'] = 'pVACsplice'
-    post_processing_params['filtered_report_file'] = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
+    post_processing_params['filtered_report_file'] = filtered_file
     post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['minimum_fold_change'] = None
@@ -81,6 +82,7 @@ def main(args_input = sys.argv[1:]):
         sys.exit("The number of IEDB retries must be less than or equal to 100")
 
     base_output_dir = os.path.abspath(args.output_dir)
+    tmp_dir = os.path.join(base_output_dir, 'tmp')
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
@@ -100,8 +102,8 @@ def main(args_input = sys.argv[1:]):
         'normal_sample_name'               : args.normal_sample_name,
     }
 
-    pipeline = JunctionPipeline(**junction_arguments)
-    pipeline.execute()
+    #pipeline = JunctionPipeline(**junction_arguments)
+    #pipeline.execute()
 
     pvacbind_arguments = junction_arguments.copy()
     additional_args = {
@@ -113,12 +115,12 @@ def main(args_input = sys.argv[1:]):
         'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
-        #'additional_report_columns' : args.additional_report_columns,
+        'additional_report_columns' : args.additional_report_columns,
         'fasta_size'                : args.fasta_size,
         'iedb_retries'              : args.iedb_retries,
         'keep_tmp_files'            : args.keep_tmp_files,
         'n_threads'                 : args.n_threads,
-        #'species'                   : species,
+        'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'normal_cov'                : args.normal_cov,
         'normal_vaf'                : args.normal_vaf,
@@ -145,8 +147,7 @@ def main(args_input = sys.argv[1:]):
         for x in args.class_i_epitope_length:
 
             class_i_arguments = pvacbind_arguments.copy()
-            # in tmp dir
-            class_i_arguments['input_file']              = f'{base_output_dir}/peptides_length_{x}.fa'
+            class_i_arguments['input_file']              = f'{tmp_dir}/peptides_length_{x}.fa'
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
@@ -154,10 +155,10 @@ def main(args_input = sys.argv[1:]):
             class_i_arguments['output_dir']              = output_dir
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
             
-            #pipeline = PvacsplicePipeline(**class_i_arguments)
-            #pipeline.execute()
+            pipeline = PvacsplicePipeline(**class_i_arguments)
+            pipeline.execute()
 
-        #create_combined_reports_length(base_output_dir, args, 'MHC_Class_I')
+        create_combined_reports_length(base_output_dir, args, 'MHC_Class_I')
 
     elif len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
@@ -181,8 +182,7 @@ def main(args_input = sys.argv[1:]):
         for y in args.class_ii_epitope_length:
 
             class_ii_arguments = pvacbind_arguments.copy()
-            # in tmp dir
-            class_i_arguments['input_file']               = f'{base_output_dir}/peptides_length_{y}.fa'
+            class_i_arguments['input_file']               = f'{tmp_dir}/peptides_length_{y}.fa'
             class_ii_arguments['alleles']                 = class_ii_alleles
             class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
             class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
@@ -190,10 +190,10 @@ def main(args_input = sys.argv[1:]):
             class_ii_arguments['output_dir']              = output_dir
             class_ii_arguments['netmhc_stab']             = False
             
-            #pipeline = PvacsplicePipeline(**class_ii_arguments)
-            #pipeline.execute()
+            pipeline = PvacsplicePipeline(**class_ii_arguments)
+            pipeline.execute()
 
-        #create_combined_reports_length(base_output_dir, args, 'MHC_Class_II')
+        create_combined_reports_length(base_output_dir, args, 'MHC_Class_II')
 
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
