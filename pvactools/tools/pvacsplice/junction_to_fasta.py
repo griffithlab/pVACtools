@@ -45,7 +45,7 @@ class JunctionToFasta():
             # value not found in df (Exception)
             if not index:
                 print(f'{self.tscript_id} WT coordinate is not within coding transcript...Skipping')
-                print(f'missing: {self.wt_coor}')
+                print(f'Missing coordinate: {self.wt_coor}')
                 self.wt_df = pd.DataFrame()
             # else:
             #     print(f'{self.anchor} WT: {self.wt_coor} {index[0]}')
@@ -59,14 +59,14 @@ class JunctionToFasta():
                 pass
             else:    
                 if not index_wt and not index_alt:
-                    print(f'{self.tscript_id} {self.junction_name} exon skip: both junction coordinates not in coding transcript...skipping')
-                    print(f'missing: {self.wt_coor} {self.alt_coor}')
+                    print(f'{self.tscript_id} {self.junction_name} Exon skip: both junction coordinates not in coding transcript...Skipping')
+                    print(f'Missing coordinates: {self.wt_coor} {self.alt_coor}')
                 elif (not index_wt and index_alt) or (index_wt and not index_alt):
-                    print(f'{self.tscript_id} {self.junction_name} exon skip: 1 junction coordinate not in coding transcript...skipping')
+                    print(f'{self.tscript_id} {self.junction_name} Exon skip: one junction coordinate not in coding transcript...Skipping')
                     if index_wt:
-                        print(f'missing: {self.alt_coor}')
+                        print(f'Missing coordinate: {self.alt_coor}')
                     elif index_alt:
-                        print(f'missing: {self.wt_coor}')
+                        print(f'Missing coordinate: {self.wt_coor}')
                 self.wt_df = pd.DataFrame()
         return self.wt_df
         
@@ -98,8 +98,8 @@ class JunctionToFasta():
                 # return an empty df that will cause an exception in run.py                
                 else:
                     # here i can add option to look for next start codon (start lost)
-                    print(f'{self.tscript_id} {self.junction_name} alternate junction coordinate not within coding transcript...skipping')
-                    print(f'{self.anchor} ALT missing: {self.alt_coor}')
+                    print(f'{self.tscript_id} {self.junction_name} Alternate junction coordinate not within coding transcript...Skipping')
+                    print(f'{self.anchor} Missing coordinate: {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
                     continue
                 
@@ -127,8 +127,8 @@ class JunctionToFasta():
                 # return an empty df that will cause an exception in run.py
                 else:
                     # here i can add option to look for next stop codon (stop lost)
-                    print(f'{self.tscript_id} {self.junction_name} alternate junction coordinate not in coding transcript...skipping')
-                    print(f'{self.anchor} ALT missing: {self.alt_coor}')
+                    print(f'{self.tscript_id} {self.junction_name} Alternate junction coordinate not in coding transcript...Skipping')
+                    print(f'{self.anchor} Missing coordinate: {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
                     continue    
                 
@@ -170,7 +170,7 @@ class JunctionToFasta():
             dna_seq += "N"
         aa_seq = str(dna_seq.translate(to_stop=True)) # translating from Seq object
         if aa_seq[0] != 'M':
-            print(f'{self.tscript_id} does not begin with start codon...skipping')
+            print(f'{self.tscript_id} does not begin with start codon...Skipping')
             aa_seq = ''
         return aa_seq
 

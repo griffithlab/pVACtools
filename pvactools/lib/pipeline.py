@@ -814,6 +814,7 @@ class PvacsplicePipeline(PvacbindPipeline):
         return os.path.join(self.output_dir, combined_parsed)
 
     def execute(self):
+        # write my own yml log file
         self.print_log()
 
         split_parsed_output_files = []
