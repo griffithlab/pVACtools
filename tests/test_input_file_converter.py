@@ -495,3 +495,18 @@ class InputFileConverterTests(unittest.TestCase):
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_protein_altering_variants.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
+    def test_no_gene_name(self):
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_no_gene_name.vcf')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'        : convert_vcf_input_file,
+            'output_file'       : convert_vcf_output_file.name,
+            'sample_name'       : 'TUMOR',
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_no_gene_name.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
