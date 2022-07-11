@@ -770,8 +770,6 @@ class UnmatchedSequencesOutputParser(OutputParser):
                     row["%s Percentile" % pretty_method] = mt_percentiles[method]
                 else:
                     row["%s Percentile" % pretty_method] = 'NA'
-            if self.add_sample_name:
-                row['Sample Name'] = self.sample_name
             tsv_writer.writerow(row)
 
         tmp_output_filehandle.close()
