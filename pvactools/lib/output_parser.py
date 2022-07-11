@@ -86,7 +86,7 @@ class OutputParser(metaclass=ABCMeta):
         else:
             return {'percentile': 'NA'}
 
-        return dict((k, float(v)) if v != 'None' else (k, 'NA') for k, v in percentiles.items())
+        return dict((k, float(v)) if v != 'None' and v is not None and v != "" else (k, 'NA') for k, v in percentiles.items())
 
     def get_scores(self, line, method):
         if method.lower() == 'mhcflurry':
