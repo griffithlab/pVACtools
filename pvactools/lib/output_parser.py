@@ -74,7 +74,7 @@ class OutputParser(metaclass=ABCMeta):
             percentile = line['rank']
         else:
             return 'NA'
-        if percentile == 'None':
+        if percentile == 'None' or percentile is None or percentile == "":
             return 'NA'
         else:
             return float(percentile)
