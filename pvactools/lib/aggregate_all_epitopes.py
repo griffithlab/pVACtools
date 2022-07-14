@@ -203,6 +203,7 @@ class AggregateAllEpitopes:
                 'relaxed_allele_expr_threshold': self.relaxed_allele_expr_threshold,
                 'maximum_transcript_support_level': self.maximum_transcript_support_level,
                 'percentile_threshold': self.percentile_threshold,
+                'relaxed_percentile_threshold': self.relaxed_percentile_threshold,
                 'allele_specific_binding_thresholds': self.allele_specific_binding_thresholds,
                 'mt_top_score_metric': self.mt_top_score_metric,
                 'wt_top_score_metric': self.wt_top_score_metric,
