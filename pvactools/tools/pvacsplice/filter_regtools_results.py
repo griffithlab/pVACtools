@@ -11,12 +11,8 @@ class FilterRegtoolsResults():
 
     def split_string(self, df, col, delimiter):
         df[col] = df[col].str.split(delimiter)
-    
-    def execute(self):
-        # open file, rename junction cols for clarity
-        junctions = pd.read_csv(self.input_file, sep='\t')
-        junctions = junctions.rename(columns={'chrom':'junction_chrom', 'start':'junction_start', 'end':'junction_stop'})
 
+    def filter_junction_rows(self, junctions):
         # filter on score, strand, and anchor
         filter_junctions = junctions[(junctions['score'] > self.score) & (junctions['strand'] != '?') & (junctions['anchor'].isin(['D', 'A', 'NDA']))].dropna()
         
@@ -24,11 +20,12 @@ class FilterRegtoolsResults():
         filter_junctions['variant_start'] = filter_junctions['variant_info'].str.split(':|-|,', expand=True)[[1]]
         # filter by distance: variant_start > start-distance and variant_start < end+distance
         # does strand matter here - no
-        filter_junctions = filter_junctions[
+        return filter_junctions[
            (filter_junctions['variant_start'].astype(int) > filter_junctions['junction_start'].astype(int) - self.distance) & 
            (filter_junctions['variant_start'].astype(int) < filter_junctions['junction_stop'].astype(int) + self.distance)
         ].reset_index()
 
+    def pc_junction_rows(self, filter_junctions):
         # example entry: 0: {'gene_ids': 'ENSG00000122483', 'transcripts': 'ENST00000343253,ENST00000370276,ENST00000401026,ENST00000421014,ENST00000455267'}
         tscript_dict = {i:{'gene_ids': x, 'transcripts': y} for i,(x,y) in enumerate(zip(filter_junctions['gene_ids'], filter_junctions['transcripts']))}
 
@@ -55,6 +52,16 @@ class FilterRegtoolsResults():
             # add to df
             pc_junctions = pd.concat([pc_junctions, protein_coding])
 
+        # html tag can be returned as empty col (bug); so filter here
+        if '<html>' in pc_junctions.columns:
+            pc_junctions.drop(columns=['<html>'], inplace=True)
+
+        # rename cols to match explode_junctions naming
+        pc_junctions = pc_junctions.rename(columns={'Transcript stable ID': 'transcript_name'})
+
+        return pc_junctions
+
+    def explode_junction_rows(self, filter_junctions):
         # make transcripts/variants from str to transcript list
         self.split_string(filter_junctions, 'transcripts', ',')
         self.split_string(filter_junctions, 'variant_info', ',')
@@ -62,10 +69,12 @@ class FilterRegtoolsResults():
         # explode the transcript list and variant list
         explode_junctions = filter_junctions.explode('transcripts', ignore_index=True).explode('variant_info', ignore_index=True).drop('index', axis=1)
 
-        # rename cols to match
+        # rename cols to match pc_junctions naming
         explode_junctions = explode_junctions.rename(columns={'transcripts': 'transcript_name'}) 
-        pc_junctions = pc_junctions.rename(columns={'Transcript stable ID': 'transcript_name'})
-        
+
+        return explode_junctions
+
+    def merge_and_write(self, pc_junctions, explode_junctions):
         # filter - pc_tscripts and unique_all_transcripts - 1 to 1 comparison bc 'transcripts' has been exploded
         pc_junctions = pc_junctions[pc_junctions['transcript_name'].isin(explode_junctions['transcript_name'])]
         # merge dfs
@@ -78,6 +87,23 @@ class FilterRegtoolsResults():
         merged_df['strand'] = merged_df['strand'].replace(['+','-'], [1,-1])
         # create filtered tsv file
         merged_df.to_csv(self.output_file, sep='\t', index=False)
+    
+    def execute(self):
+        # open file, rename junction cols for clarity
+        junctions = pd.read_csv(self.input_file, sep='\t')
+        junctions = junctions.rename(columns={'chrom':'junction_chrom', 'start':'junction_start', 'end':'junction_stop'})
+
+        # filter on score, strand, anchor, and distance; add variant_start column
+        filter_junctions = self.filter_junction_rows(junctions)
+
+        # filter transcripts by protein_coding and transcript_id
+        pc_junctions = self.pc_junction_rows(filter_junctions)
+
+        # explode the transcript list and variant list
+        explode_junctions = self.explode_junction_rows(filter_junctions)
+
+        # merge dfs and create associated filtered tsv file
+        self.merge_and_write(pc_junctions, explode_junctions)
 
 # debugging
 if __name__ == '__main__':
