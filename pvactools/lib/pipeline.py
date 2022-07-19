@@ -830,29 +830,5 @@ class PvacsplicePipeline(PvacbindPipeline):
         # creates all_epitopes.tsv
         self.combined_parsed_outputs(split_parsed_output_files)
 
-        # if not self.run_post_processor:
-        #     return
-
-        # post_processing_params = copy.copy(vars(self))
-        # post_processing_params['input_file'] = self.combined_parsed_path()
-        # post_processing_params['file_type'] = 'pVACsplice'
-        # post_processing_params['filtered_report_file'] = self.final_path()
-        # post_processing_params['run_coverage_filter'] = False
-        # post_processing_params['run_transcript_support_level_filter'] = False
-        # post_processing_params['minimum_fold_change'] = None
-        # post_processing_params['run_manufacturability_metrics'] = True
-        # post_processing_params['fasta'] = self.input_file
-        # if self.net_chop_method:
-        #     post_processing_params['net_chop_fasta'] = self.net_chop_fasta
-        #     post_processing_params['run_net_chop'] = True
-        # else:
-        #     post_processing_params['run_net_chop'] = False
-        # if self.netmhc_stab:
-        #     post_processing_params['run_netmhc_stab'] = True
-        # else:
-        #     post_processing_params['run_netmhc_stab'] = False
-        # PostProcessor(**post_processing_params).execute()
-
-        # if self.keep_tmp_files is False:
-        #     shutil.rmtree(self.tmp_dir)
-
+        if self.keep_tmp_files is False:
+            shutil.rmtree(self.tmp_dir, ignore_errors=True)
