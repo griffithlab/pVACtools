@@ -46,14 +46,18 @@ def combine_reports_mhc_class(base_output_dir, args, mhc_class):
     output_dir = os.path.join(base_output_dir, mhc_class)
     
     files = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith('all_epitopes.tsv')]
-
+    print(files)
     combined_file = os.path.join(output_dir, f'{args.sample_name}.all_epitopes.tsv')
-    combine_reports(files, combined_file)
-    
     filtered_file = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
-
-    #for f in files:
-    #    os.remove(f)
+    
+    if len(files) > 1:
+        combine_reports(files, combined_file)
+        print('Finish combined report')
+        if os.path.exists(combined_file):
+            for f in files:
+                os.remove(f)
+    elif len(files) == 1:
+        os.rename(files[0], combined_file)
 
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_file
@@ -72,6 +76,7 @@ def combine_reports_mhc_class(base_output_dir, args, mhc_class):
         post_processing_params['run_netmhc_stab'] = True
     else:
         post_processing_params['run_netmhc_stab'] = False
+    print('Begin post processor')
     PostProcessor(**post_processing_params).execute()
 
 def main(args_input = sys.argv[1:]):
@@ -102,8 +107,8 @@ def main(args_input = sys.argv[1:]):
         'normal_sample_name'               : args.normal_sample_name,
     }
 
-    #pipeline = JunctionPipeline(**junction_arguments)
-    #pipeline.execute()
+    pipeline = JunctionPipeline(**junction_arguments)
+    pipeline.execute()
 
     pvacbind_arguments = junction_arguments.copy()
     additional_args = {
@@ -158,7 +163,7 @@ def main(args_input = sys.argv[1:]):
             pipeline = PvacsplicePipeline(**class_i_arguments)
             pipeline.execute()
 
-        create_combined_reports_length(base_output_dir, args, 'MHC_Class_I')
+        combine_reports_mhc_class(base_output_dir, args, 'MHC_Class_I')
 
     elif len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
@@ -193,7 +198,7 @@ def main(args_input = sys.argv[1:]):
             pipeline = PvacsplicePipeline(**class_ii_arguments)
             pipeline.execute()
 
-        create_combined_reports_length(base_output_dir, args, 'MHC_Class_II')
+        combine_reports_mhc_class(base_output_dir, args, 'MHC_Class_II')
 
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
