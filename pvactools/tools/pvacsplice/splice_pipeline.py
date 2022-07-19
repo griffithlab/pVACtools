@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import pyfaidx
 import shutil
-import timeit
 from filter_regtools_results import *
 from junction_to_fasta import *
 from fasta_to_kmers import *
@@ -41,12 +40,8 @@ class JunctionPipeline():
         fasta_basename = os.path.basename(self.fasta_path)
         alt_fasta_path = os.path.join(self.tmp_dir, f'{fasta_basename.split(".")[0]}_alt.{".".join(fasta_basename.split(".")[1:])}')
         if not os.path.exists(alt_fasta_path):
-            print('start copy')
             shutil.copy(self.fasta_path, alt_fasta_path)
-            print('end copy')
-        print('make wt fa object')
         self.ref_fasta = pyfaidx.Fasta(self.fasta_path)
-        print('make alt fa object')
         self.alt_fasta = pyfaidx.FastaVariant(alt_fasta_path, self.annotated_vcf, sample=self.sample_name)
         print('Completed')
 
@@ -54,7 +49,7 @@ class JunctionPipeline():
         inputs = {
             'annotated'    : {'suffix': '_annotated.tsv', 'output_dir': self.tmp_dir},
             'filtered'     : {'suffix': '_filtered.tsv', 'output_dir': self.tmp_dir},
-            'combined'     : {'suffix': '_combined.tsv', 'output_dir': self.output_dir},
+            'combined'     : {'suffix': '_junctions.tsv', 'output_dir': self.output_dir},
             'fasta'        : {'suffix': '_transcripts.fa', 'output_dir': self.output_dir},
         }
         file_name = self.sample_name + inputs[key]['suffix']
@@ -101,10 +96,8 @@ class JunctionPipeline():
     def junction_to_fasta(self):
         print('Assembling tumor-specific splicing junctions')
         filtered_df = pd.read_csv(self.create_file_path('combined'), sep='\t')
-        count = 1
         for i in filtered_df.index.unique().to_list():
-            junction = filtered_df.loc[[i], :]
-            count += 1            
+            junction = filtered_df.loc[[i], :]         
             for row in junction.itertuples():
                 junction_params = {
                     'fasta_path'     : self.fasta_path,
