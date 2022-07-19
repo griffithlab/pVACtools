@@ -56,9 +56,20 @@ New in Release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- Newer versions of Ensembl annotations added genes without a HUGO gene name.
-  Variants on those genes cause downstream errors in the aggregate report creation when running
-  the pVACseq pipeline. This release fixes this error.
+- When using the ``--additional-report-columns`` parameter in
+  pVACview/pVACfuse, no contents were previously written to the additional columns.
+- MHCflurry may return no value for the percentile binding score. This would
+  previously result in an error which has been fixed in this release.
+- Variants in a VCF may contain an empty AF field, which was previsouly not
+  being handled correctly in all cases, resulting in an error.
+
+This release also includes some minor improvements:
+
+- When running the pVACseq pipeline there would be a lot of warning messages
+  about missing position column parameters. These would mostly be noise
+  because the underlying consequence type wasn't supported by pVACseq to begin
+  with. This release removes these warning messages for mutations with
+  consequences that are not supported by pVACseq.
 
 
 New in Version |version|
