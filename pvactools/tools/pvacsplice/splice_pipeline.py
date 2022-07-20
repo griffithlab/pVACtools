@@ -40,11 +40,12 @@ class JunctionPipeline():
     def create_fastas(self):
         fasta_basename = os.path.basename(self.fasta_path)
         alt_fasta_path = os.path.join(self.tmp_dir, f'{fasta_basename.split(".")[0]}_alt.{".".join(fasta_basename.split(".")[1:])}')
+        print("Building alternative fasta")
         if not os.path.exists(alt_fasta_path):
             shutil.copy(self.fasta_path, alt_fasta_path)
-            print("Building alt fasta")
+            print('Completed')    
         else: 
-            print('alt fasta already exists')
+            print('Alternative fasta already exists. Skipping.')
         print('Creating fasta objects')
         self.ref_fasta = pyfaidx.Fasta(self.fasta_path)
         self.alt_fasta = pyfaidx.FastaVariant(alt_fasta_path, self.annotated_vcf, sample=self.sample_name)
@@ -69,15 +70,15 @@ class JunctionPipeline():
             'score'       : self.junction_score,
             'distance'    : self.variant_distance,
         }
-        if not os.path.exists(self.create_file_path('filtered')):
+        if os.path.exists(self.create_file_path('filtered')):
+            print("Filtered junctions file already exists. Skipping.")
+        else:
             filter = FilterRegtoolsResults(**filter_params)
             filter.execute()
             print('Completed')
-        else:
-            print("Filtered junctions file already exists. Skipping.")
+
 
     def vcf_to_tsv(self):
-        print('Converting .vcf to TSV')
         convert_params = {
             'input_file'  : self.annotated_vcf,
             'output_file' : self.create_file_path('annotated'),
@@ -85,15 +86,15 @@ class JunctionPipeline():
         }
         if self.normal_sample_name:
             convert_params['normal_sample_name'] = self.normal_sample_name
-        if not os.path.exists(self.create_file_path('annotated')):
+        print('Converting .vcf to TSV')
+        if os.path.exists(self.create_file_path('annotated')):
+            print('Annotated variant file already exists. Skipping.')
+        else:
             converter = PvacspliceVcfConverter(**convert_params)
             converter.execute()
             print('Completed')
-        else:
-            print('Annotated variant file already exists. Skipping.')
     
     def combine_inputs(self):
-        print('Combine junction and variant information')
         combine_params = {
             'junctions_file' : self.create_file_path('filtered'),
             'variant_file'   : self.create_file_path('annotated'),
@@ -101,17 +102,21 @@ class JunctionPipeline():
             'output_file'    : self.create_file_path('combined'),
             'maximum_transcript_support_level' : self.maximum_transcript_support_level,
         }
-        if not os.path.exists(self.create_file_path('combined')):
+        print('Combining junction and variant information')
+        if os.path.exists(self.create_file_path('combined')):
+            print('Combined file already exists. Skipping.')
+        else:
             combined = CombineInputs(**combine_params)
             combined.execute()
             print('Completed')
-        else:
-            print('Final junction/variant file already exists. Skipping.')
+
 
     # self.ensembl_version
     def junction_to_fasta(self):
         print('Assembling tumor-specific splicing junctions')
-        if not os.path.exists(self.create_file_path('fasta')):    
+        if os.path.exists(self.create_file_path('fasta')):
+            print('Junction fasta file already exists. Skipping.')
+        else:    
             filtered_df = pd.read_csv(self.create_file_path('combined'), sep='\t')
             for i in filtered_df.index.unique().to_list():
                 junction = filtered_df.loc[[i], :]         
@@ -142,22 +147,27 @@ class JunctionPipeline():
                     wt_aa = junctions.get_aa_sequence(wt, self.ref_fasta)
                     alt_aa = junctions.get_aa_sequence(alt, self.alt_fasta)
                     if wt_aa == '' or alt_aa == '':
-                        print('Amino acid sequence was not produced...Skipping')
+                        print('Amino acid sequence was not produced. Skipping.')
                         continue
                     junctions.create_sequence_fasta(wt_aa, alt_aa)
             print('Completed')
-        else:
-            print('Junction fasta file already exists. Skipping.')
     
-
+    
     def fasta_to_kmers(self):
+        files = [f for f in os.listdir(self.tmp_dir) if f.startswith('peptides')]
+        lens = sorted([int(''.join(re.findall('[0-9]+', f))) for f in files])
+        input_lens = self.class_i_epitope_length + self.class_ii_epitope_length
         print('Creating a fasta of kmer peptides')
-        kmer_params = {
-            'fasta'           : self.create_file_path('fasta'),
-            'output_dir'      : self.tmp_dir,
-            'epitope_lengths' : self.class_i_epitope_length + self.class_ii_epitope_length, 
-            'combined_df'     : self.create_file_path('combined'),
-        }
-        fasta = FastaToKmers(**kmer_params)
-        fasta.execute()
-        print('Completed')
+        if lens == input_lens:
+            print('Kmer fasta files already exist. Skipping.')
+        else:
+            kmer_params = {
+                'fasta'           : self.create_file_path('fasta'),
+                'output_dir'      : self.tmp_dir,
+                'epitope_lengths' : input_lens, 
+                'combined_df'     : self.create_file_path('combined'),
+            }            
+            fasta = FastaToKmers(**kmer_params)
+            fasta.execute()
+            print('Completed')     
+        
