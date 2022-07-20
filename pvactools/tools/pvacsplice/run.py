@@ -46,7 +46,6 @@ def combine_reports_mhc_class(base_output_dir, args, mhc_class):
     output_dir = os.path.join(base_output_dir, mhc_class)
     
     files = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith('all_epitopes.tsv')]
-    print(files)
     combined_file = os.path.join(output_dir, f'{args.sample_name}.all_epitopes.tsv')
     filtered_file = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
     
