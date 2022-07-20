@@ -169,5 +169,6 @@ class JunctionPipeline():
             }            
             fasta = FastaToKmers(**kmer_params)
             fasta.execute()
-            print('Completed')     
+            print('Completed')
+     
         
