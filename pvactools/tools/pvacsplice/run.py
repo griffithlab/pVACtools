@@ -42,26 +42,34 @@ def create_combined_reports(base_output_dir, args):
 
     PostProcessor(**post_processing_params).execute()
 
-def combine_reports_mhc_class(base_output_dir, args, mhc_class):
-    output_dir = os.path.join(base_output_dir, mhc_class)
-    
-    files = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith('all_epitopes.tsv')]
-    combined_file = os.path.join(output_dir, f'{args.sample_name}.all_epitopes.tsv')
-    filtered_file = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
-    
-    if len(files) > 1:
-        combine_reports(files, combined_file)
+
+def combine_file_reports(file_list, file_final_name):
+    if len(file_list) > 1:
+        combine_reports(file_list, file_final_name)
         print('Finish combined report')
-        if os.path.exists(combined_file):
-            for f in files:
-                os.remove(f)
-    elif len(files) == 1:
-        os.rename(files[0], combined_file)
+        # if os.path.exists(file_final_name):
+        #     for f in file_list:
+        #         os.remove(f)
+    elif len(file_list) == 1:
+        os.rename(file_list[0], file_final_name)
+    print('Completed')
+
+
+def combine_reports_epitope_lengths(base_output_dir, args, mhc_class):
+    mhc_dirs = [os.path.join(base_output_dir, 'MHC', f) for f in os.listdir(base_output_dir) if f.startswith(f'MHC_Class_{mhc_class}')]
+    combined_files = [os.path.join(m, f'{args.sample_name}.all_epitopes.tsv') for m in mhc_dirs]
+    filtered_files = [os.path.join(m, f'{args.sample_name}.filtered.tsv') for m in mhc_dirs]
+    
+    combined_name = os.path.join(base_output_dir, 'MHC', f'{args.sample_name}.all_epitopes_all_lengths.tsv)')
+    filtered_name = os.path.join(base_output_dir, 'MHC', f'{args.sample_name}.filtered_all_lengths.tsv)')
+
+    combine_file_reports(combined_files, os.path.join(base_output_dir, 'MHC', combined_name))
+    combine_file_reports(filtered_files, os.path.join(base_output_dir, 'MHC', filtered_name))
 
     post_processing_params = vars(args)
-    post_processing_params['input_file'] = combined_file
+    post_processing_params['input_file'] = combined_name
     post_processing_params['file_type'] = 'pVACsplice'
-    post_processing_params['filtered_report_file'] = filtered_file
+    post_processing_params['filtered_report_file'] = filtered_name
     post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['minimum_fold_change'] = None
@@ -90,7 +98,6 @@ def main(args_input = sys.argv[1:]):
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
-
 
     junction_arguments = {
         'input_file'                       : args.input_file, 
@@ -143,12 +150,12 @@ def main(args_input = sys.argv[1:]):
                 sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
         else:
             iedb_mhc_i_executable = None
-
-        print("Executing MHC Class I predictions")
-        output_dir = os.path.join(base_output_dir, 'MHC_Class_I')
-        os.makedirs(output_dir, exist_ok=True)
-
+        
         for x in args.class_i_epitope_length:
+
+            print(f'Executing MHC Class I predictions for {x}mers')
+            output_dir = os.path.join(base_output_dir, f'MHC_Class_I_{x}')
+            os.makedirs(output_dir, exist_ok=True)
 
             class_i_arguments = pvacbind_arguments.copy()
             class_i_arguments['input_file']              = f'{tmp_dir}/peptides_length_{x}.fa'
@@ -162,7 +169,7 @@ def main(args_input = sys.argv[1:]):
             pipeline = PvacsplicePipeline(**class_i_arguments)
             pipeline.execute()
 
-        combine_reports_mhc_class(base_output_dir, args, 'MHC_Class_I')
+        combine_reports_epitope_lengths(base_output_dir, args, 'I')
 
     elif len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
@@ -178,12 +185,11 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_ii_executable = None
 
-        print("Executing MHC Class II predictions")
-
-        output_dir = os.path.join(base_output_dir, 'MHC_Class_II')
-        os.makedirs(output_dir, exist_ok=True)
-
         for y in args.class_ii_epitope_length:
+
+            print(f'Executing MHC Class II predictions for {y}mers')
+            output_dir = os.path.join(base_output_dir, f'MHC_Class_II_{y}')
+            os.makedirs(output_dir, exist_ok=True)
 
             class_ii_arguments = pvacbind_arguments.copy()
             class_i_arguments['input_file']               = f'{tmp_dir}/peptides_length_{y}.fa'
@@ -197,7 +203,7 @@ def main(args_input = sys.argv[1:]):
             pipeline = PvacsplicePipeline(**class_ii_arguments)
             pipeline.execute()
 
-        combine_reports_mhc_class(base_output_dir, args, 'MHC_Class_II')
+        combine_reports_epitope_lengths(base_output_dir, args, 'II')
 
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
