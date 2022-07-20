@@ -263,7 +263,7 @@ class PvacseqTests(unittest.TestCase):
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
                 '--netmhc-stab',
-                '--tdna-vaf', '20',
+                '--tdna-vaf', '0.2',
                 '-d', 'full',
                 '--pass-only',
                 '--run-reference-proteome-similarity',
