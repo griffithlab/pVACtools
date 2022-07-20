@@ -137,7 +137,7 @@ class Pipeline(metaclass=ABCMeta):
         if self.input_file_type == 'pvacvector_input_fasta':
             return self.input_file
         if self.input_file_type == 'junctions':
-            return os.path.join(self.base_output_dir, f'{self.sample_name}_combined.tsv')
+            return os.path.join(self.base_output_dir, f'{self.sample_name}.final_junctions.tsv')
         else:
             tsv_file = self.sample_name + '.tsv'
             return os.path.join(self.output_dir, tsv_file)
