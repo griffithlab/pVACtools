@@ -30,7 +30,7 @@ class FilterRegtoolsResults():
         tscript_dict = {i:{'gene_ids': x, 'transcripts': y} for i,(x,y) in enumerate(zip(filter_junctions['gene_ids'], filter_junctions['transcripts']))}
 
         # load ensembl database
-        dataset = Dataset(name='hsapiens_gene_ensembl', host='http://useast.ensembl.org')
+        dataset = Dataset(name='hsapiens_gene_ensembl', host='http://www.ensembl.org')
 
         # filter transcripts by protein_coding and transcript_id
         pc_junctions = pd.DataFrame()
