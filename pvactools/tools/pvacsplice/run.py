@@ -1,7 +1,7 @@
 import sys
 import os
 import pandas as pd
-from splice_pipeline import *
+from pvactools.tools.pvacsplice.splice_pipeline import *
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import *
 from pvactools.lib.run_argument_parser import *
@@ -94,6 +94,7 @@ def main(args_input = sys.argv[1:]):
         sys.exit("The number of IEDB retries must be less than or equal to 100")
 
     base_output_dir = os.path.abspath(args.output_dir)
+    os.makedirs(base_output_dir, exist_ok=True)
     tmp_dir = os.path.join(base_output_dir, 'tmp')
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
