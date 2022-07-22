@@ -1,7 +1,7 @@
 import sys
 import os
 import pandas as pd
-from pvactools.tools.pvacsplice.splice_pipeline import *
+from pvactools.lib.splice_pipeline import *
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import *
 from pvactools.lib.run_argument_parser import *
@@ -47,24 +47,27 @@ def combine_file_reports(file_list, file_final_name):
     if len(file_list) > 1:
         combine_reports(file_list, file_final_name)
         print('Finish combined report')
-        # if os.path.exists(file_final_name):
-        #     for f in file_list:
-        #         os.remove(f)
     elif len(file_list) == 1:
         os.rename(file_list[0], file_final_name)
     print('Completed')
 
 
 def combine_reports_epitope_lengths(base_output_dir, args, mhc_class):
-    mhc_dirs = [os.path.join(base_output_dir, 'MHC', f) for f in os.listdir(base_output_dir) if f.startswith(f'MHC_Class_{mhc_class}')]
+    output_dir = os.path.join(base_output_dir, f'MHC_Class_{mhc_class}')
+
+    mhc_dirs = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.startswith(f'MHC_Class_{mhc_class}')]
+
+    if not mhc_dirs:
+        print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
+
     combined_files = [os.path.join(m, f'{args.sample_name}.all_epitopes.tsv') for m in mhc_dirs]
     filtered_files = [os.path.join(m, f'{args.sample_name}.filtered.tsv') for m in mhc_dirs]
-    
-    combined_name = os.path.join(base_output_dir, 'MHC', f'{args.sample_name}.all_epitopes_all_lengths.tsv)')
-    filtered_name = os.path.join(base_output_dir, 'MHC', f'{args.sample_name}.filtered_all_lengths.tsv)')
 
-    combine_file_reports(combined_files, os.path.join(base_output_dir, 'MHC', combined_name))
-    combine_file_reports(filtered_files, os.path.join(base_output_dir, 'MHC', filtered_name))
+    combined_name = os.path.join(output_dir, f'{args.sample_name}.final.all_epitopes.tsv')
+    filtered_name = os.path.join(output_dir, f'{args.sample_name}.final.filtered.tsv')
+
+    combine_file_reports(combined_files, combined_name)
+    combine_file_reports(filtered_files, filtered_name)
 
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_name
@@ -121,6 +124,7 @@ def main(args_input = sys.argv[1:]):
     additional_args = {
         'input_file_type'           : 'junctions',
         'base_output_dir'           : base_output_dir,
+        'output_dir'                : os.path.join(base_output_dir, 'MHC_Class_I'),
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
@@ -155,7 +159,7 @@ def main(args_input = sys.argv[1:]):
         for x in args.class_i_epitope_length:
 
             print(f'Executing MHC Class I predictions for {x}mers')
-            output_dir = os.path.join(base_output_dir, f'MHC_Class_I_{x}')
+            output_dir = os.path.join(base_output_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
             os.makedirs(output_dir, exist_ok=True)
 
             class_i_arguments = pvacbind_arguments.copy()
@@ -189,7 +193,7 @@ def main(args_input = sys.argv[1:]):
         for y in args.class_ii_epitope_length:
 
             print(f'Executing MHC Class II predictions for {y}mers')
-            output_dir = os.path.join(base_output_dir, f'MHC_Class_II_{y}')
+            output_dir = os.path.join(base_output_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
             os.makedirs(output_dir, exist_ok=True)
 
             class_ii_arguments = pvacbind_arguments.copy()
