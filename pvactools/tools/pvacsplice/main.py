@@ -16,6 +16,8 @@ def define_parser():
         add_help=False
     )
     run_main_program_parser.set_defaults(func=run)
+    return parser
+
 
 def main():
     parser = define_parser()
