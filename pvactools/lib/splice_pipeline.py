@@ -2,10 +2,10 @@ import os
 import pandas as pd
 import pyfaidx
 import shutil
-from pvactools.tools.pvacsplice.filter_regtools_results import *
-from pvactools.tools.pvacsplice.junction_to_fasta import *
-from pvactools.tools.pvacsplice.fasta_to_kmers import *
-from pvactools.tools.pvacsplice.combine_inputs import *
+from pvactools.lib.filter_regtools_results import *
+from pvactools.lib.junction_to_fasta import *
+from pvactools.lib.fasta_to_kmers import *
+from pvactools.lib.combine_inputs import *
 from pvactools.lib.run_argument_parser import *
 from pvactools.lib.input_file_converter import PvacspliceVcfConverter
 
