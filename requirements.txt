@@ -48,6 +48,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pyensembl==1.9.4
 pyerfa==1.7.3
+pyfaidx==0.6.4
 pymp-pypi==0.5.0
 pypandoc==1.7.2
 pysam==0.18.0
