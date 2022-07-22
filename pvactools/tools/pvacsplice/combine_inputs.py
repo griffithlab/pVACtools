@@ -5,7 +5,6 @@ class CombineInputs():
     def __init__(self, **kwargs):
         self.junctions     = kwargs['junctions_file']
         self.variants      = kwargs['variant_file']
-        self.sample_name   = kwargs['sample_name']
         self.output_file    = kwargs['output_file']
         self.maximum_transcript_support_level = kwargs['maximum_transcript_support_level']
 
@@ -46,17 +45,21 @@ class CombineInputs():
         
         return var_df
 
+    def merge_and_write(self, junction_df, variant_df):
+        # merge by transcript and variant coors
+        merged_df = junction_df.merge(variant_df, on=['transcript_name', 'variant_info']).drop_duplicates()
+
+        # create index to match with kmers
+        merged_df['index'] = merged_df['Gene_name'] + '.' + merged_df['transcript_name'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
+ 
+        # create final file
+        merged_df.to_csv(self.output_file, sep='\t', index=False)
 
     def execute(self):
         # create dfs
         variant_df = self.add_junction_coordinates_to_variants()
         junction_df = pd.read_csv(self.junctions, sep='\t')
 
-        # merge by transcript and variant coors
-        merged_df = junction_df.merge(variant_df, on=['transcript_name', 'variant_info']).drop_duplicates()
+        # merge dfs and create associated combined file
+        self.merge_and_write(junction_df, variant_df)
 
-        # create index to match with kmers
-        merged_df['index'] = merged_df['Gene_name'] + '.' + merged_df['transcript_name'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
-        
-        # create final file
-        merged_df.to_csv(self.output_file, sep='\t', index=False)
