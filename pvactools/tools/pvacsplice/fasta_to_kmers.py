@@ -70,15 +70,15 @@ class FastaToKmers():
         self.fasta_df = pd.DataFrame.from_dict(modified_dict)
         # add length
         self.fasta_df['length'] = self.fasta_df['kmer'].str.len()
-        # debugging save
-        # self.fasta_df.to_csv(f'{self.output_dir}/fasta_index.tsv' ,sep='\t', index=False)
         # expand tscripts to one per line in separate df and save to tsv
-        # how to copy self.fasta_df
         index_df = self.fasta_df.copy()
         index_df['indexes'] = index_df.indexes.apply(lambda x: x.split(','))
         index_df = index_df.explode('indexes')
-        # save to_csv()
-        index_df.to_csv(f'{self.output_dir}/kmer_index.tsv' ,sep='\t', index=False)
+        if os.path.exists(f'{self.output_dir}/kmer_index.tsv'):
+            print('Kmer index already exists. Skipping.')
+        else:
+            index_df.to_csv(f'{self.output_dir}/kmer_index.tsv' ,sep='\t', index=False)
+            print('Kmer index file - complete')
 
     def create_epitope_fastas(self):
         # for only 1 length at a time
