@@ -2,7 +2,7 @@ import os
 import re
 import pandas as pd
 from Bio.Seq import Seq
-from load_ensembl_data import *
+from pvactools.tools.pvacsplice.load_ensembl_data import *
 
 class JunctionToFasta():
     def __init__(self, **kwargs):
