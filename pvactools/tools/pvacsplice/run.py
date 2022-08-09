@@ -61,20 +61,18 @@ def combine_reports_epitope_lengths(base_output_dir, args, mhc_class):
         print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
 
     combined_files = [os.path.join(m, f'{args.sample_name}.all_epitopes.tsv') for m in mhc_dirs]
-    filtered_files = [os.path.join(m, f'{args.sample_name}.filtered.tsv') for m in mhc_dirs]
 
     combined_name = os.path.join(output_dir, f'{args.sample_name}.final.all_epitopes.tsv')
     filtered_name = os.path.join(output_dir, f'{args.sample_name}.final.filtered.tsv')
 
     combine_file_reports(combined_files, combined_name)
-    combine_file_reports(filtered_files, filtered_name)
 
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_name
     post_processing_params['file_type'] = 'pVACsplice'
     post_processing_params['filtered_report_file'] = filtered_name
     post_processing_params['run_coverage_filter'] = True
-    post_processing_params['run_transcript_support_level_filter'] = False
+    post_processing_params['run_transcript_support_level_filter'] = True
     post_processing_params['minimum_fold_change'] = None
     post_processing_params['run_manufacturability_metrics'] = True
     if args.net_chop_method:
@@ -96,9 +94,9 @@ def main(args_input = sys.argv[1:]):
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
 
-    base_output_dir = os.path.abspath(args.output_dir)
+    base_output_dir = os.path.abspath(args.output_dir) # junctions dir
     os.makedirs(base_output_dir, exist_ok=True)
-    tmp_dir = os.path.join(base_output_dir, 'tmp')
+    junction_tmp_dir = os.path.join(base_output_dir, 'tmp') # junctions tmp dir
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
@@ -163,7 +161,7 @@ def main(args_input = sys.argv[1:]):
             os.makedirs(output_dir, exist_ok=True)
 
             class_i_arguments = pvacbind_arguments.copy()
-            class_i_arguments['input_file']              = f'{tmp_dir}/peptides_length_{x}.fa'
+            class_i_arguments['input_file']              = f'{junction_tmp_dir}/{args.sample_name}.{x}.fa'
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
@@ -197,7 +195,7 @@ def main(args_input = sys.argv[1:]):
             os.makedirs(output_dir, exist_ok=True)
 
             class_ii_arguments = pvacbind_arguments.copy()
-            class_i_arguments['input_file']               = f'{tmp_dir}/peptides_length_{y}.fa'
+            class_i_arguments['input_file']               = f'{junction_tmp_dir}/{args.sample_name}.{x}.fa'
             class_ii_arguments['alleles']                 = class_ii_alleles
             class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
             class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
