@@ -166,6 +166,7 @@ class JunctionPipeline():
                 'output_dir'      : self.tmp_dir,
                 'epitope_lengths' : input_lens, 
                 'combined_df'     : self.create_file_path('combined'),
+                'sample_name'     : self.sample_name
             }            
             fasta = FastaToKmers(**kmer_params)
             fasta.execute()
