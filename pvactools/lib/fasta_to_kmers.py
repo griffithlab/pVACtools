@@ -10,6 +10,7 @@ class FastaToKmers():
         self.output_dir      = kwargs['output_dir']
         self.epitope_lengths = kwargs['epitope_lengths']
         self.combined_df     = kwargs['combined_df']
+        self.sample_name     = kwargs['sample_name']
         self.unique_kmers    = {}
 
 
@@ -85,7 +86,7 @@ class FastaToKmers():
         for x in self.epitope_lengths:
             len_subset = self.fasta_df[self.fasta_df['length'] == x].sort_values(by=['indexes'])
             # 1 file per kmer length
-            output_file = f'{self.output_dir}/peptides_length_{x}.fa'
+            output_file = f'{self.output_dir}/{self.sample_name}.{x}.fa'
             # loop over rows in subset df
             for row in len_subset.itertuples():
                 # fasta entry
