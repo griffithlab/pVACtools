@@ -44,7 +44,7 @@ class NetMHCStab:
         rejected_searcher = re.compile(r'status: rejected')
         success_searcher = re.compile(r'Rank Threshold for Strong binding peptides')
         cannot_open_file_searcher = re.compile(r'Cannot open file')
-        allele_searcher = re.compile(r'^(.*?) : Distance to trai?ning data .*? nearest neighbor (.*?)\)$', re.MULTILINE)
+        allele_searcher = re.compile(r'^(.*?) : Distance to trai?ning data\s+(\d.\d+).*? nearest neighbor (.*?)\)$', re.MULTILINE)
         with open(self.output_file, 'w') as output_fh:
             headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
             writer = csv.DictWriter(
@@ -104,7 +104,11 @@ class NetMHCStab:
                                 raise Exception("NetMHCstabpan server was unable to read the submitted fasta file:\n{}.".format(staging_file.read()))
 
                         if success_searcher.search(response.content.decode()):
-                            allele_map = {item[0]:item[1] for item in allele_searcher.findall(response.content.decode())}
+                            allele_map = {}
+                            for item in allele_searcher.findall(response.content.decode()):
+                                allele_map[item[0]] = "{} (distance: {})".format(item[2], item[1])
+                                if item[1] != "0.000":
+                                    print("NetMHCstabpan substituted {} for {} (distance: {})".format(item[2], item[0], item[1]))
                             results = [item.strip() for item in result_delimiter.split(response.content.decode())]
                             if len(results) == 0:
                                 raise Exception("Unexpected return value from NetMHCstabpan server. Unable to parse response.\n{}".format(response.content.decode()))
