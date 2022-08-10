@@ -136,8 +136,6 @@ class Pipeline(metaclass=ABCMeta):
     def tsv_file_path(self):
         if self.input_file_type == 'pvacvector_input_fasta':
             return self.input_file
-        if self.input_file_type == 'junctions':
-            return os.path.join(self.base_output_dir, f'{self.sample_name}.final_junctions.tsv')
         else:
             tsv_file = self.sample_name + '.tsv'
             return os.path.join(self.output_dir, tsv_file)
@@ -750,8 +748,6 @@ class PvacbindPipeline(Pipeline):
                         'key_file'               : split_fasta_key_file_path,
                         'output_file'            : split_parsed_file_path,
                     }
-                    if self.input_file_type == 'junctions':
-                        params['input_tsv_file'] = self.tsv_file_path()
                     params['sample_name'] = self.sample_name
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['add_sample_name_column'] = True 
@@ -805,20 +801,10 @@ class PvacbindPipeline(Pipeline):
             shutil.rmtree(self.tmp_dir, ignore_errors=True)
 
 class PvacsplicePipeline(PvacbindPipeline):
-    # remove warning about past/current inputs since there will be multiple input files
-    def print_log(self):
-        pass
-
-    def combined_parsed_path(self):
-        combined_parsed = "%s.%s.all_epitopes.tsv" % (self.sample_name, str(self.epitope_lengths))
-        return os.path.join(self.output_dir, combined_parsed)
-
     def execute(self):
-        # write my own yml log file
         self.print_log()
 
         split_parsed_output_files = []
-        self.create_per_length_fasta_and_process_stops(self.epitope_lengths)
         chunks = self.split_fasta_file(self.epitope_lengths)
         self.call_iedb(chunks, self.epitope_lengths)
         split_parsed_output_files.extend(self.parse_outputs(chunks, self.epitope_lengths))
