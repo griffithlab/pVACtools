@@ -12,18 +12,21 @@ from pvactools.lib.input_file_converter import PvacspliceVcfConverter
 
 class JunctionPipeline():
     def __init__(self, **kwargs):
-        self.input_file                  = kwargs['input_file']
-        self.sample_name                 = kwargs['sample_name']
-        self.output_dir                  = kwargs['base_output_dir']
-        self.fasta_path                  = kwargs['ref_fasta']        
-        self.annotated_vcf               = kwargs['annotated_vcf']
-        #self.ensembl_version             = kwargs['ensembl_version']
-        self.class_i_epitope_length      = kwargs['class_i_epitope_length']
-        self.class_ii_epitope_length     = kwargs['class_ii_epitope_length']
-        self.junction_score              = kwargs.pop('junction_score', 10)
-        self.variant_distance            = kwargs.pop('variant_distance', 100)
+        self.input_file              = kwargs['input_file']
+        self.sample_name             = kwargs['sample_name']
+        self.output_dir              = kwargs['base_output_dir']
+        self.fasta_path              = kwargs['ref_fasta']        
+        self.annotated_vcf           = kwargs['annotated_vcf']
+        #self.ensembl_version        = kwargs['ensembl_version']
+        self.class_i_epitope_length  = kwargs['class_i_epitope_length']
+        self.class_ii_epitope_length = kwargs['class_ii_epitope_length']
+        self.class_i_hla             = kwargs['class_i_hla']
+        self.class_ii_hla            = kwargs['class_ii_hla']
+        self.junction_score          = kwargs.pop('junction_score', 10)
+        self.variant_distance        = kwargs.pop('variant_distance', 100)
         self.maximum_transcript_support_level = kwargs.pop('maximum_transcript_support_level', None)
-        self.normal_sample_name          = kwargs.pop('normal_sample_name', None)
+        self.normal_sample_name      = kwargs.pop('normal_sample_name', None)
+
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
         self.tmp_dir = tmp_dir
@@ -154,22 +157,21 @@ class JunctionPipeline():
     
     
     def fasta_to_kmers(self):
-        files = [f for f in os.listdir(self.tmp_dir) if f.startswith('peptides')]
+        files = [f for f in os.listdir(self.tmp_dir) if f.startswith(f'{self.sample_name}') and f.endswith('.fa')]
         lens = sorted([int(''.join(re.findall('[0-9]+', f))) for f in files])
-        input_lens = self.class_i_epitope_length + self.class_ii_epitope_length
-        print('Creating a fasta of kmer peptides')
-        if lens == input_lens:
-            print('Kmer fasta files already exist. Skipping.')
-        else:
-            kmer_params = {
-                'fasta'           : self.create_file_path('fasta'),
-                'output_dir'      : self.tmp_dir,
-                'epitope_lengths' : input_lens, 
-                'combined_df'     : self.create_file_path('combined'),
-                'sample_name'     : self.sample_name
-            }            
-            fasta = FastaToKmers(**kmer_params)
-            fasta.execute()
-            print('Completed')
+        kmer_params = {
+            'fasta'           : self.create_file_path('fasta'),
+            'output_dir'      : self.tmp_dir,
+            'class_i_epitope_length' : self.class_i_epitope_length,
+            'class_ii_epitope_length': self.class_ii_epitope_length,
+            'class_i_hla'  : self.class_i_hla,
+            'class_ii_hla' : self.class_ii_hla,
+            'combined_df'     : self.create_file_path('combined'),
+            'sample_name'     : self.sample_name,
+        }       
+        print(self.class_i_hla)     
+        fasta = FastaToKmers(**kmer_params)
+        fasta.execute()
+        print('Completed')
      
         

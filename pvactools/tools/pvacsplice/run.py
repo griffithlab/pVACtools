@@ -67,6 +67,15 @@ def combine_reports_epitope_lengths(base_output_dir, args, mhc_class):
 
     combine_file_reports(combined_files, combined_name)
 
+    # pvacbind post processor inputs:
+    # self.input_file,
+    # self.aggregate_report,
+    # binding_threshold=self.binding_threshold,
+    # allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+    # percentile_threshold=self.percentile_threshold,
+    # top_score_metric=self.top_score_metric,
+
+
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_name
     post_processing_params['file_type'] = 'pVACsplice'
@@ -96,7 +105,7 @@ def main(args_input = sys.argv[1:]):
 
     base_output_dir = os.path.abspath(args.output_dir) # junctions dir
     os.makedirs(base_output_dir, exist_ok=True)
-    junction_tmp_dir = os.path.join(base_output_dir, 'tmp') # junctions tmp dir
+    junctions_tmp_dir = os.path.join(base_output_dir, 'tmp') # junctions tmp dir
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
@@ -113,6 +122,8 @@ def main(args_input = sys.argv[1:]):
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'normal_sample_name'               : args.normal_sample_name,
+        'class_i_hla'                      : class_i_alleles,
+        'class_ii_hla'                     : class_ii_alleles,
     }
 
     pipeline = JunctionPipeline(**junction_arguments)
@@ -161,7 +172,7 @@ def main(args_input = sys.argv[1:]):
             os.makedirs(output_dir, exist_ok=True)
 
             class_i_arguments = pvacbind_arguments.copy()
-            class_i_arguments['input_file']              = f'{junction_tmp_dir}/{args.sample_name}.{x}.fa'
+            class_i_arguments['input_file']              = f'{junctions_tmp_dir}/{args.sample_name}.{x}.fa'
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
@@ -195,7 +206,7 @@ def main(args_input = sys.argv[1:]):
             os.makedirs(output_dir, exist_ok=True)
 
             class_ii_arguments = pvacbind_arguments.copy()
-            class_i_arguments['input_file']               = f'{junction_tmp_dir}/{args.sample_name}.{x}.fa'
+            class_i_arguments['input_file']               = f'{junctions_tmp_dir}/{args.sample_name}.{x}.fa'
             class_ii_arguments['alleles']                 = class_ii_alleles
             class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
             class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
