@@ -8,11 +8,14 @@ class FastaToKmers():
         self.tscript_fasta   = Fasta(kwargs['fasta'])
         self.fasta_path      = kwargs['fasta']
         self.output_dir      = kwargs['output_dir']
-        self.epitope_lengths = kwargs['epitope_lengths']
+        self.class_i_epitope_length  = kwargs['class_i_epitope_length']
+        self.class_ii_epitope_length = kwargs['class_ii_epitope_length']
+        self.class_i_hla  = kwargs['class_i_hla']
+        self.class_ii_hla = kwargs['class_ii_hla']
         self.combined_df     = kwargs['combined_df']
         self.sample_name     = kwargs['sample_name']
         self.unique_kmers    = {}
-
+        self.final_lengths = self.choose_final_lenghts()
 
     def create_kmers(self, seq_name):
         kmer_dict = {}
@@ -21,7 +24,7 @@ class FastaToKmers():
         for i in range(len(sequence)):
             final_seq_name = f'{seq_name}.{i+1}'
             # loop over lengths
-            for x in self.epitope_lengths:
+            for x in self.final_lengths:
                 # grab kmer sequence
                 k = sequence[i:x+i]
                 # if kmer matches target len
@@ -81,9 +84,16 @@ class FastaToKmers():
             index_df.to_csv(f'{self.output_dir}/kmer_index.tsv' ,sep='\t', index=False)
             print('Kmer index file - complete')
 
+    def choose_final_lenghts(self):
+        if not self.class_i_hla:
+            lengths = self.class_ii_epitope_length
+        elif not self.class_ii_hla:
+            lengths = self.class_i_epitope_length
+        return lengths
+
     def create_epitope_fastas(self):
         # for only 1 length at a time
-        for x in self.epitope_lengths:
+        for x in self.final_lengths:
             len_subset = self.fasta_df[self.fasta_df['length'] == x].sort_values(by=['indexes'])
             # 1 file per kmer length
             output_file = f'{self.output_dir}/{self.sample_name}.{x}.fa'
