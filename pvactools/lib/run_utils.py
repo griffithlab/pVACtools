@@ -5,6 +5,7 @@ import binascii
 from itertools import islice
 
 from pvactools.lib.prediction_class import *
+import argparse
 
 def split_algorithms(prediction_algorithms):
     if 'all' in prediction_algorithms:
@@ -89,3 +90,25 @@ def split_file(reader, lines):
 
 def construct_index(count, gene, transcript, variant_type, position):
     return '{}.{}.{}.{}.{}'.format(count, gene, transcript, variant_type, position)
+
+def float_range(minimum, maximum):
+    """Return function handle of an argument type function for
+       ArgumentParser checking a float range: minimum <= arg <= maximum
+         minimum - minimum acceptable argument
+         maximum - maximum acceptable argument"""
+
+    # Define the function with default arguments
+    def float_range_checker(arg):
+        """New Type function for argparse - a float within predefined range."""
+
+        try:
+            f = float(arg)
+        except ValueError:
+            raise argparse.ArgumentTypeError("must be a floating point number")
+        if f < minimum or f > maximum:
+            raise argparse.ArgumentTypeError("must be in range [" + str(minimum) + " .. " + str(maximum)+"]")
+        return f
+
+    # Return function handle to checking function
+    return float_range_checker
+
