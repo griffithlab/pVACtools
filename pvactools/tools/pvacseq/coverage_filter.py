@@ -5,6 +5,7 @@ import os
 import csv
 
 from pvactools.lib.filter import Filter
+from pvactools.lib.run_utils import *
 
 def define_parser():
     parser = argparse.ArgumentParser(
@@ -36,18 +37,18 @@ def define_parser():
         default=10
     )
     parser.add_argument(
-        '--normal-vaf', type=float,
-        help="Normal VAF Cutoff. Sites BELOW this cutoff in normal will be considered.",
+        '--normal-vaf', type=float_range(0.0,1.0),
+        help="Normal VAF Cutoff in decimal format. Sites BELOW this cutoff in normal will be considered.",
         default=0.02
     )
     parser.add_argument(
-        '--tdna-vaf', type=float,
-        help="Tumor DNA VAF Cutoff. Sites above this cutoff will be considered.",
+        '--tdna-vaf', type=float_range(0.0,1.0),
+        help="Tumor DNA VAF Cutoff in decimal format. Sites above this cutoff will be considered.",
         default=0.25
     )
     parser.add_argument(
-        '--trna-vaf', type=float,
-        help="Tumor RNA VAF Cutoff. Sites above this cutoff will be considered.",
+        '--trna-vaf', type=float_range(0.0,1.0),
+        help="Tumor RNA VAF Cutoff in decimal format. Sites above this cutoff will be considered.",
         default=0.25
     )
     parser.add_argument(
