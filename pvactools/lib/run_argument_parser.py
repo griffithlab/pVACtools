@@ -3,6 +3,7 @@ import argparse
 
 from pvactools.lib.prediction_class import PredictionClass
 import pvactools.lib.net_chop
+from pvactools.lib.run_utils import *
 
 class RunArgumentParser(metaclass=ABCMeta):
     def __init__(self, tool_name, input_file_help):
@@ -213,18 +214,18 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
             default=10
         )
         self.parser.add_argument(
-            '--normal-vaf', type=float,
-            help="Normal VAF Cutoff. Only sites BELOW this cutoff in normal will be considered.",
+            '--normal-vaf', type=float_range(0.0,1.0),
+            help="Normal VAF Cutoff in decimal format. Only sites BELOW this cutoff in normal will be considered.",
             default=0.02
         )
         self.parser.add_argument(
-            '--tdna-vaf', type=float,
-            help="Tumor DNA VAF Cutoff. Only sites above this cutoff will be considered.",
+            '--tdna-vaf', type=float_range(0.0,1.0),
+            help="Tumor DNA VAF Cutoff in decimal format. Only sites above this cutoff will be considered.",
             default=0.25
         )
         self.parser.add_argument(
-            '--trna-vaf', type=float,
-            help="Tumor RNA VAF Cutoff. Only sites above this cutoff will be considered.",
+            '--trna-vaf', type=float_range(0.0,1.0),
+            help="Tumor RNA VAF Cutoff in decimal format. Only sites above this cutoff will be considered.",
             default=0.25
         )
         self.parser.add_argument(
