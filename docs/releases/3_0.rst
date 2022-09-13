@@ -119,3 +119,15 @@ This release also includes some minor improvements:
   because the underlying consequence type wasn't supported by pVACseq to begin
   with. This release removes these warning messages for mutations with
   consequences that are not supported by pVACseq.
+
+Version 3.0.4
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- This fixes an issue introduced in the previous release where VCF entries with no
+  VAF value would result in an error.
+- This release adds a new constraint to the vaf cutoff command line arguments
+  to ensure that they are a fraction between 0 and 1.
+- This release also fixes an issue where the wrong binding filter class was
+  being used when running pVACfuse with allele-specific binding cutoffs.

@@ -56,20 +56,12 @@ New in Release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- When using the ``--additional-report-columns`` parameter in
-  pVACview/pVACfuse, no contents were previously written to the additional columns.
-- MHCflurry may return no value for the percentile binding score. This would
-  previously result in an error which has been fixed in this release.
-- Variants in a VCF may contain an empty AF field, which was previsouly not
-  being handled correctly in all cases, resulting in an error.
-
-This release also includes some minor improvements:
-
-- When running the pVACseq pipeline there would be a lot of warning messages
-  about missing position column parameters. These would mostly be noise
-  because the underlying consequence type wasn't supported by pVACseq to begin
-  with. This release removes these warning messages for mutations with
-  consequences that are not supported by pVACseq.
+- This fixes an issue introduced in the previous release where VCF entries with no
+  VAF value would result in an error.
+- This release adds a new constraint to the vaf cutoff command line arguments
+  to ensure that they are a fraction between 0 and 1.
+- This release also fixes an issue where the wrong binding filter class was
+  being used when running pVACfuse with allele-specific binding cutoffs.
 
 
 New in Version |version|
