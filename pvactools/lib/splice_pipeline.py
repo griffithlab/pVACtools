@@ -26,11 +26,6 @@ class JunctionPipeline():
         self.variant_distance        = kwargs.pop('variant_distance', 100)
         self.maximum_transcript_support_level = kwargs.pop('maximum_transcript_support_level', None)
         self.normal_sample_name      = kwargs.pop('normal_sample_name', None)
-
-        tmp_dir = os.path.join(self.output_dir, 'tmp')
-        os.makedirs(tmp_dir, exist_ok=True)
-        self.tmp_dir = tmp_dir
-    
     
     def execute(self):
         self.filter_regtools_results()
@@ -42,12 +37,21 @@ class JunctionPipeline():
 
     def create_fastas(self):
         fasta_basename = os.path.basename(self.fasta_path)
-        alt_fasta_path = os.path.join(self.tmp_dir, f'{fasta_basename.split(".")[0]}_alt.{".".join(fasta_basename.split(".")[1:])}')
+        alt_fasta_path = os.path.join(self.output_dir, f'{fasta_basename.split(".")[0]}_alt.{".".join(fasta_basename.split(".")[1:])}')
         print("Building alternative fasta")
+        size1 = os.path.getsize(self.fasta_path)
         if not os.path.exists(alt_fasta_path):
             shutil.copy(self.fasta_path, alt_fasta_path)
-            print('Completed')    
-        else: 
+            size2 = os.path.getsize(alt_fasta_path)
+            if os.path.exists(alt_fasta_path) and size1 == size2:
+                print('Completed')
+        elif os.path.exists(alt_fasta_path) and size1 != os.path.getsize(alt_fasta_path):
+            print('Fasta transfer is incomplete. Trying again.')
+            shutil.copy(self.fasta_path, alt_fasta_path)
+            size2 = os.path.getsize(alt_fasta_path)
+            if size1 == size2:
+                print('Completed')
+        elif os.path.exists(alt_fasta_path) and size1 == os.path.getsize(alt_fasta_path):
             print('Alternative fasta already exists. Skipping.')
         print('Creating fasta objects')
         self.ref_fasta = pyfaidx.Fasta(self.fasta_path)
@@ -56,14 +60,15 @@ class JunctionPipeline():
 
     def create_file_path(self, key):
         inputs = {
-            'annotated'    : {'suffix': '_annotated.tsv', 'output_dir': self.tmp_dir},
-            'filtered'     : {'suffix': '_filtered.tsv', 'output_dir': self.tmp_dir},
-            'combined'     : {'suffix': '.final_junctions.tsv', 'output_dir': self.output_dir},
-            'fasta'        : {'suffix': '.transcripts.fa', 'output_dir': self.output_dir},
+            'annotated' : '_annotated.tsv',
+            'filtered'  : '_filtered.tsv',
+            'combined'  : '_combined.tsv',
+            'fasta'     : '.transcripts.fa', 
         }
-        file_name = self.sample_name + inputs[key]['suffix']
-        return os.path.join(inputs[key]['output_dir'], file_name) 
+        file_name = os.path.join(self.output_dir, self.sample_name + inputs[key])
+        return file_name
 
+    # creates filtered file
     # self.ensembl_version
     def filter_regtools_results(self):
         print('Filtering regtools results')
@@ -80,7 +85,7 @@ class JunctionPipeline():
             filter.execute()
             print('Completed')
 
-
+    # creates annotated file
     def vcf_to_tsv(self):
         convert_params = {
             'input_file'  : self.annotated_vcf,
@@ -97,6 +102,7 @@ class JunctionPipeline():
             converter.execute()
             print('Completed')
     
+    # creates combined file
     def combine_inputs(self):
         combine_params = {
             'junctions_file' : self.create_file_path('filtered'),
@@ -113,7 +119,7 @@ class JunctionPipeline():
             combined.execute()
             print('Completed')
 
-
+    # creates transcripts.fa
     # self.ensembl_version
     def junction_to_fasta(self):
         print('Assembling tumor-specific splicing junctions')
@@ -155,21 +161,19 @@ class JunctionPipeline():
                     junctions.create_sequence_fasta(wt_aa, alt_aa)
             print('Completed')
     
-    
+    # creates kmer fasta files for input into prediction pipeline
     def fasta_to_kmers(self):
-        files = [f for f in os.listdir(self.tmp_dir) if f.startswith(f'{self.sample_name}') and f.endswith('.fa')]
-        lens = sorted([int(''.join(re.findall('[0-9]+', f))) for f in files])
+        files = [f for f in os.listdir(self.output_dir) if f.startswith(f'{self.sample_name}') and f.endswith('.fa')]
+        #lens = sorted([int(''.join(re.findall('[0-9]+', f))) for f in files])
         kmer_params = {
             'fasta'           : self.create_file_path('fasta'),
-            'output_dir'      : self.tmp_dir,
+            'output_dir'      : self.output_dir,
             'class_i_epitope_length' : self.class_i_epitope_length,
             'class_ii_epitope_length': self.class_ii_epitope_length,
-            'class_i_hla'  : self.class_i_hla,
-            'class_ii_hla' : self.class_ii_hla,
-            'combined_df'     : self.create_file_path('combined'),
+            'class_i_hla'     : self.class_i_hla,
+            'class_ii_hla'    : self.class_ii_hla,
             'sample_name'     : self.sample_name,
-        }       
-        print(self.class_i_hla)     
+        }           
         fasta = FastaToKmers(**kmer_params)
         fasta.execute()
         print('Completed')
