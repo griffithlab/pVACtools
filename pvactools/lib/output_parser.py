@@ -1025,8 +1025,7 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
         # parsed iedb files
         for (
             gene_name,
-            amino_acid_change,  
-            position,
+            amino_acid_change,
             mt_scores,
             mt_percentiles,
             mt_epitope_seq,
@@ -1039,12 +1038,8 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             best_mt_percentile_method,
             median_mt_percentile,
         ) in iedb_results:
-        # where to add in kmer index to make sure everything is being labelled correctly
-        # oh shit it is I think - from tsv_index - since it has both
-
-            final_index = tsv_index.split('|')[0]
             start_pos = tsv_index.split('|')[1]
-            tsv_entry = tsv_entries[final_index]
+            tsv_entry = tsv_entries[tsv_index]
             row = {
                 'Chromosome'          : tsv_entry['chromosome_name'],
                 'Start'               : tsv_entry['start'],
@@ -1056,7 +1051,7 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Transcript Length'   : tsv_entry['transcript_length'],
                 'Biotype'             : tsv_entry['biotype'],
                 ### junction info from RegTools
-                'Junction'            : final_index.split('.')[2],
+                'Junction'            : tsv_index.split('.')[2],
                 'Junction Start'      : tsv_entry['junction_start'],
                 'Junction Stop'       : tsv_entry['junction_stop'],
                 'Junction Score'      : tsv_entry['score'],
@@ -1065,11 +1060,11 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Ensembl Gene ID'     : gene_name,
                 'Variant Type'        : tsv_entry['variant_type'],
                 'Mutation'            : amino_acid_change,
-                'Transcript Position'    : start_pos,
-                'Gene Name'           : final_index.split('.')[0], 
+                'Transcript Position' : start_pos,
+                'Gene Name'           : tsv_index.split('.')[0], 
                 'HGVSc'               : tsv_entry['hgvsc'],
                 'HGVSp'               : tsv_entry['hgvsp'],
-                'Index'               : final_index,
+                'Index'               : tsv_index,
                 ### pvacbind info
                 'HLA Allele'          : allele,
                 'Peptide Length'      : len(mt_epitope_seq),
