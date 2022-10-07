@@ -22,7 +22,7 @@ class AlleleSpecificBindingFilter:
             writer.writeheader()
 
             for entry in reader:
-                if self.file_type == 'pVACbind':
+                if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                     if self.top_score_metric == 'median':
                         score = float(entry['Median IC50 Score'])
                         percentile_column = 'Median Percentile'
