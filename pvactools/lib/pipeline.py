@@ -76,9 +76,9 @@ class Pipeline(metaclass=ABCMeta):
         self.flurry_state                = self.get_flurry_state()
         self.proximal_variants_file      = None
         self.base_output_dir             = kwargs.pop('base_output_dir', None)
-        tmp_dir = os.path.join(self.output_dir, 'tmp')
-        os.makedirs(tmp_dir, exist_ok=True)
-        self.tmp_dir = tmp_dir
+        self.input_tsv_file              = kwargs.pop('input_tsv_file', None)
+        self.tmp_dir = os.path.join(self.output_dir, 'tmp')
+        os.makedirs(self.tmp_dir, exist_ok=True)
 
     def log_dir(self):
         dir = os.path.join(self.output_dir, 'log')
@@ -136,6 +136,8 @@ class Pipeline(metaclass=ABCMeta):
     def tsv_file_path(self):
         if self.input_file_type == 'pvacvector_input_fasta':
             return self.input_file
+        if self.input_file_type == 'junctions':
+            return os.path.join(self.base_output_dir, f'{self.sample_name}_combined.tsv')
         else:
             tsv_file = self.sample_name + '.tsv'
             return os.path.join(self.output_dir, tsv_file)
@@ -168,10 +170,10 @@ class Pipeline(metaclass=ABCMeta):
 
     def output_parser(self, params):
         parser_types = {
-            'vcf'  : 'DefaultOutputParser',
+            'vcf': 'DefaultOutputParser',
             'pvacvector_input_fasta': 'UnmatchedSequencesOutputParser',
             'fasta': 'UnmatchedSequencesOutputParser',
-            'junctions' : 'PvacspliceOutputParser',
+            'junctions': 'PvacspliceOutputParser',
         }
         parser_type = parser_types[self.input_file_type]
         parser = getattr(sys.modules[__name__], parser_type)
@@ -748,6 +750,8 @@ class PvacbindPipeline(Pipeline):
                         'key_file'               : split_fasta_key_file_path,
                         'output_file'            : split_parsed_file_path,
                     }
+                    if self.input_file_type == 'junctions':
+                        params['input_tsv_file'] = self.tsv_file_path()
                     params['sample_name'] = self.sample_name
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['add_sample_name_column'] = True 
@@ -802,12 +806,17 @@ class PvacbindPipeline(Pipeline):
 
 class PvacsplicePipeline(PvacbindPipeline):
     def execute(self):
+
+        #mv fasta file to MHC temp dir
+        shutil.copy(self.input_file, os.path.join(self.tmp_dir, os.path.basename(self.input_file)))
+
         self.print_log()
 
         split_parsed_output_files = []
         chunks = self.split_fasta_file(self.epitope_lengths)
         self.call_iedb(chunks, self.epitope_lengths)
-        split_parsed_output_files.extend(self.parse_outputs(chunks, self.epitope_lengths))
+        # parse iedb output files
+        split_parsed_output_files.extend(self.parse_outputs(chunks, self.epitope_lengths)) # chunks - [[1,200], [201,235]] (list of lists)
 
         if len(split_parsed_output_files) == 0:
             status_message("No output files were created. Aborting.")
