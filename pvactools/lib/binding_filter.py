@@ -48,7 +48,11 @@ class BindingFilter:
                     column = 'Corresponding Fold Change'
                 filter_criteria.append({'column': column, 'operator': '>=', 'threshold': self.minimum_fold_change, 'exclude_nas': self.exclude_nas})
 
-            Filter(self.input_file, self.output_file, filter_criteria).execute()
+            if self.file_type == 'pVACseq':
+                split_column = 'Index'
+            else:
+                split_column = 'Mutation'
+            Filter(self.input_file, self.output_file, filter_criteria, split=True, split_column=split_column).execute()
 
     @classmethod
     def parser(cls, tool):

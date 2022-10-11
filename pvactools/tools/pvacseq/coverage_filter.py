@@ -87,7 +87,7 @@ def main(args_input = sys.argv[1:]):
     filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': args.expn_val, 'exclude_nas': args.exclude_NAs})
     filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': args.expn_val, 'exclude_nas': args.exclude_NAs})
 
-    Filter(args.input_file, args.output_file, filter_criteria).execute()
+    Filter(args.input_file, args.output_file, filter_criteria, split=True, split_column='Index').execute()
 
 if __name__ == "__main__":
     main()

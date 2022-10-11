@@ -37,12 +37,7 @@ def main(args_input = sys.argv[1:]):
     args = parser.parse_args(args_input)
 
     filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': args.maximum_transcript_support_level, 'exclude_nas': args.exclude_NAs}]
-    Filter(
-        args.input_file,
-        args.output_file,
-        filter_criteria,
-        ['Transcript Support Level'],
-    ).execute()
+    Filter(args.input_file, args.output_file, filter_criteria, ['Transcript Support Level'], split=True, split_column='Index').execute()
 
 if __name__ == "__main__":
     main()
