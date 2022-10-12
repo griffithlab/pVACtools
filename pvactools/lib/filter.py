@@ -14,17 +14,20 @@ class Filter:
     def execute(self):
         if self.split:
             keys = self.get_indexes()
-            filtered_datasets = []
+            append = False
             for key in keys:
                 data = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, dtype={self.split_column: str})
                         [lambda x: (x[self.split_column] == key)])
                 (filtered_data, header) = self.filter_data(data)
-                filtered_datasets.append(filtered_data)
-            filtered_data = pd.concat(filtered_datasets)
+                if append:
+                    filtered_data.to_csv(self.output_file, mode='a', sep='\t', header=False, index=False, na_rep='NA')
+                else:
+                    filtered_data.to_csv(self.output_file, sep='\t', header=header, index=False, na_rep='NA')
+                    append = True
         else:
             data = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False)
             (filtered_data, header) = self.filter_data(data)
-        filtered_data.to_csv(self.output_file, sep='\t', header=header, index=False, na_rep='NA')
+            filtered_data.to_csv(self.output_file, sep='\t', header=header, index=False, na_rep='NA')
 
     def get_indexes(self):
         key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=[self.split_column], dtype={self.split_column: str})
