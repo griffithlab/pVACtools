@@ -1,5 +1,7 @@
 import pandas as pd
 
+from pvactools.lib.prediction_class import PredictionClass
+
 pd.options.mode.chained_assignment = None
 
 class Filter:
@@ -16,7 +18,8 @@ class Filter:
             keys = self.get_indexes()
             append = False
             for key in keys:
-                data = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, dtype={self.split_column: str})
+                dtypes = self.set_column_types()
+                data = (pd.read_csv(self.input_file, delimiter='\t', float_precision='round_trip', low_memory=False, dtype=dtypes)
                         [lambda x: (x[self.split_column] == key)])
                 (filtered_data, header) = self.filter_data(data)
                 if append:
@@ -25,7 +28,7 @@ class Filter:
                     filtered_data.to_csv(self.output_file, sep='\t', header=header, index=False, na_rep='NA')
                     append = True
         else:
-            data = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False)
+            data = pd.read_csv(self.input_file, delimiter='\t', float_precision='round_trip', low_memory=False)
             (filtered_data, header) = self.filter_data(data)
             filtered_data.to_csv(self.output_file, sep='\t', header=header, index=False, na_rep='NA')
 
@@ -33,6 +36,37 @@ class Filter:
         key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=[self.split_column], dtype={self.split_column: str})
         keys = key_df[self.split_column].values.tolist()
         return sorted(list(set(keys)))
+
+    def set_column_types(self):
+        dtypes = { self.split_column: str }
+        if self.split_column == 'Index':
+            dtypes.update({
+                'Chromosome': str,
+                "Start": "int32",
+                "Stop": "int32",
+                'Reference': str,
+                'Variant': str,
+                "Variant Type": "category",
+                "Mutation Position": "category",
+                "Median MT Score": "float",
+                "Median MT Percentile": "float",
+                "Protein Position": "str",
+            })
+            for algorithm in self.determine_used_prediction_algorithms():
+                if algorithm == 'SMM' or algorithm == 'SMMPMBEC':
+                    continue
+                dtypes["{} MT Score".format(algorithm)] = "float"
+                dtypes["{} MT Percentile".format(algorithm)] = "float"
+        return dtypes
+
+    def determine_used_prediction_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = PredictionClass.prediction_methods()
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
 
     def filter_data(self, data):
         header = data.columns
