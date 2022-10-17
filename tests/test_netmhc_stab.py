@@ -13,6 +13,9 @@ from filecmp import cmp
 from pvactools.lib.netmhc_stab import NetMHCStab
 from .test_utils import *
 
+def default_alleles(alleles):
+    return ['HLA-G*01:09', 'HLA-E*01:01']
+
 def make_success_response(data, files, path):
     reader = open(os.path.join(
         path,
@@ -53,6 +56,23 @@ def make_rejected_response(data, files, path, self):
     reader.close()
     return response_obj
 
+def make_invalid_allele_response(data, files, path):
+    if data['allele'] == 'HLA-B39:90':
+        reader = open(os.path.join(
+            path,
+            "Netmhcstab.invalid_allele.html"
+        ), mode='rb')
+    else:
+        reader = open(os.path.join(
+            path,
+            "Netmhcstab.{}.html".format(data['allele'])
+        ), mode='rb')
+    response_obj = lambda :None
+    response_obj.status_code = 200
+    response_obj.content = reader.read()
+    reader.close()
+    return response_obj
+
 class NetChopTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -79,7 +99,7 @@ class NetChopTest(unittest.TestCase):
             data,
             files,
             self.test_data_directory
-           ))):
+           ))), unittest.mock.patch('pvactools.lib.netmhc_stab.NetMHCStab.valid_alleles', side_effect=default_alleles):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
@@ -97,7 +117,7 @@ class NetChopTest(unittest.TestCase):
             files,
             self.test_data_directory,
             'Netmhcstab.fail.html'
-           ))), self.assertRaises(Exception) as context:
+           ))), self.assertRaises(Exception) as context, unittest.mock.patch('pvactools.lib.netmhc_stab.NetMHCStab.valid_alleles', side_effect=default_alleles):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
@@ -110,10 +130,10 @@ class NetChopTest(unittest.TestCase):
         logging.disable(logging.NOTSET)
         with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_rejected_response(
             data,
-           files,
-           self.test_data_directory,
-           self
-           ))), LogCapture() as l:
+            files,
+            self.test_data_directory,
+            self
+          ))), LogCapture() as l, unittest.mock.patch('pvactools.lib.netmhc_stab.NetMHCStab.valid_alleles', side_effect=default_alleles):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
@@ -132,7 +152,7 @@ class NetChopTest(unittest.TestCase):
             files,
             self.test_data_directory,
             'Netmhcstab.cannot_open_file_error.html'
-           ))), self.assertRaises(Exception) as context:
+           ))), self.assertRaises(Exception) as context, unittest.mock.patch('pvactools.lib.netmhc_stab.NetMHCStab.valid_alleles', side_effect=default_alleles):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
@@ -148,7 +168,7 @@ class NetChopTest(unittest.TestCase):
             files,
             self.test_data_directory,
             'Netmhcstab.other_error.html'
-           ))), self.assertRaises(Exception) as context:
+           ))), self.assertRaises(Exception) as context, unittest.mock.patch('pvactools.lib.netmhc_stab.NetMHCStab.valid_alleles', side_effect=default_alleles):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
@@ -156,3 +176,16 @@ class NetChopTest(unittest.TestCase):
                 file_type='pVACseq'
             ).execute()
         self.assertTrue('Unexpected return value from NetMHCstabpan server. Unable to parse response.' in str(context.exception))
+
+    def test_invalid_alleles(self):
+        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_invalid_allele_response(
+            data,
+            files,
+            self.test_data_directory,
+          ))):
+            valid_alleles = NetMHCStab(
+                os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
+                "",
+                file_type='pVACseq'
+            ).valid_alleles(['HLA-G*01:09', 'HLA-E*01:01', 'HLA-B*39:90'])
+            self.assertEqual(valid_alleles, ['HLA-G*01:09', 'HLA-E*01:01'])
