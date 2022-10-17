@@ -80,6 +80,7 @@ setup(
         'vaxrank>=1.1.0',
         'keras==2.4.3',
         'tensorflow==2.2.2',
+        'protobuf==3.19.4',
         'mhcnuggets==2.3.3',
         'mhcflurry==2.0.1',
         'testfixtures'
