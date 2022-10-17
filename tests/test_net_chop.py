@@ -10,7 +10,7 @@ import tempfile
 import py_compile
 from filecmp import cmp
 
-from .test_utils import *
+from tests.utils import *
 from pvactools.lib.net_chop import NetChop
 
 def make_response(data, files, path, test_file):

@@ -6,7 +6,7 @@ from subprocess import call
 import sys
 import py_compile
 
-from .test_utils import *
+from tests.utils import *
 
 #python -m unittest tests/test_coverage_filter.py
 class CoverageFilterTests(unittest.TestCase):

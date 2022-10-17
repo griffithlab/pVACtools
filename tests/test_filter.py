@@ -5,7 +5,7 @@ from filecmp import cmp
 import py_compile
 
 from pvactools.lib.filter import Filter
-from .test_utils import *
+from tests.utils import *
 
 class FilterTests(unittest.TestCase):
     @classmethod

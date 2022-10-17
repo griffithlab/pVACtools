@@ -14,7 +14,7 @@ import argparse
 
 from pvactools.tools.pvacvector import *
 import pvactools.tools.pvacvector.main as pvacvector_main
-from .test_utils import *
+from tests.utils import *
 
 def make_response(data, path, test_name):
     filename = 'response_%s_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'], test_name)
