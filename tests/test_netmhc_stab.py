@@ -11,7 +11,7 @@ import py_compile
 from filecmp import cmp
 
 from pvactools.lib.netmhc_stab import NetMHCStab
-from .test_utils import *
+from tests.utils import *
 
 def default_alleles(alleles):
     return ['HLA-G*01:09', 'HLA-E*01:01']

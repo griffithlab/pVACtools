@@ -6,7 +6,7 @@ import sys
 import py_compile
 
 from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, UnmatchedSequenceAggregateAllEpitopes
-from .test_utils import *
+from tests.utils import *
 
 class AggregateAllEptiopesTests(unittest.TestCase):
     @classmethod
