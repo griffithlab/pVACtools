@@ -6,7 +6,7 @@ import sys
 import py_compile
 
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
-from .test_utils import *
+from tests.utils import *
 
 class CalculateManufacturabilityTests(unittest.TestCase):
     @classmethod

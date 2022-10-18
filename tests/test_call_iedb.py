@@ -13,7 +13,7 @@ from mock import patch
 import pvactools.lib.call_iedb
 from pvactools.lib.prediction_class import PredictionClass, IEDB
 
-from .test_utils import *
+from tests.utils import *
 
 def test_data_directory():
     return os.path.join(pvactools_directory(), 'tests', 'test_data', 'call_iedb')

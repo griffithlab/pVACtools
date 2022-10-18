@@ -6,7 +6,7 @@ from filecmp import cmp
 import py_compile
 
 from pvactools.lib.fasta_generator import FastaGenerator, FusionFastaGenerator, VectorFastaGenerator
-from .test_utils import *
+from tests.utils import *
 
 class FastaGeneratorTests(unittest.TestCase):
     @classmethod

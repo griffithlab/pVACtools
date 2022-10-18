@@ -6,7 +6,7 @@ import sys
 import py_compile
 
 from pvactools.lib.binding_filter import BindingFilter
-from .test_utils import *
+from tests.utils import *
 
 #python -m unittest tests/test_binding_filter.py
 class BindingFilterTests(unittest.TestCase):
