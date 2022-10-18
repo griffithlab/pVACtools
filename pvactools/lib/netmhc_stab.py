@@ -32,19 +32,18 @@ class NetMHCStab:
         self.top_score_metric = top_score_metric
 
     def execute(self):
-        valid_alleles = MHCI.all_valid_allele_names()
+        mhci_alleles = MHCI.all_valid_allele_names()
         observed_alleles = self.observed_alleles()
-        alleles = list(set(observed_alleles).intersection(set(valid_alleles)))
+        alleles = self.valid_alleles(list(set(observed_alleles).intersection(set(mhci_alleles))))
         invalid_alleles = list(set(observed_alleles) - set(alleles))
         lengths = self.observed_epitope_lengths()
 
-        jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
         result_delimiter = re.compile(r'-{20,}')
         fail_searcher = re.compile(r'(Failed run|Problematic input:|Configuration error)')
         rejected_searcher = re.compile(r'status: rejected')
         success_searcher = re.compile(r'Rank Threshold for Strong binding peptides')
         cannot_open_file_searcher = re.compile(r'Cannot open file')
-        allele_searcher = re.compile(r'^(.*?) : Distance to trai?ning data .*? nearest neighbor (.*?)\)$', re.MULTILINE)
+        allele_searcher = re.compile(r'^(.*?) : Distance to trai?ning data\s+(\d.\d+).*? nearest neighbor (.*?)\)$', re.MULTILINE)
         with open(self.output_file, 'w') as output_fh:
             headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
             writer = csv.DictWriter(
@@ -56,7 +55,7 @@ class NetMHCStab:
             writer.writeheader()
 
             output_lines = []
-            for allele in valid_alleles:
+            for allele in alleles:
                 for length in lengths:
                     df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False)
                             [lambda x: (x['HLA Allele'] == allele) & (x[self.epitope_seq_column_name].str.len() == length) ])
@@ -81,7 +80,7 @@ class NetMHCStab:
                             x+=1
                         SeqIO.write(records, staging_file.name, "fasta")
                         staging_file.seek(0)
-                        response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele, jobid_searcher)
+                        response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele)
 
                         if fail_searcher.search(response.content.decode()):
                             raise Exception("NetMHCstabpan encountered an error during processing.\n{}".format(response.content.decode()))
@@ -90,21 +89,25 @@ class NetMHCStab:
                             logging.warning("Too many jobs submitted to NetMHCstabpan server. Waiting to retry.")
                             sleep(random.randint(5, 10))
                             staging_file.seek(0)
-                            response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele, jobid_searcher)
+                            response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele)
 
                         if cannot_open_file_searcher.search(response.content.decode()):
                             sleep(random.randint(5, 10))
                             staging_file.seek(0)
-                            response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele, jobid_searcher)
+                            response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele)
                             while rejected_searcher.search(response.content.decode()):
                                 sleep(random.randint(5, 10))
                                 staging_file.seek(0)
-                                response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele, jobid_searcher)
+                                response = self.query_netmhcstabpan_server(staging_file, length, netmhcstabpan_allele)
                             if cannot_open_file_searcher.search(response.content.decode()):
                                 raise Exception("NetMHCstabpan server was unable to read the submitted fasta file:\n{}.".format(staging_file.read()))
 
                         if success_searcher.search(response.content.decode()):
-                            allele_map = {item[0]:item[1] for item in allele_searcher.findall(response.content.decode())}
+                            allele_map = {}
+                            for item in allele_searcher.findall(response.content.decode()):
+                                allele_map[item[0]] = "{} (distance: {})".format(item[2], item[1])
+                                if item[1] != "0.000":
+                                    print("NetMHCstabpan substituted {} for {} (distance: {})".format(item[2], item[0], item[1]))
                             results = [item.strip() for item in result_delimiter.split(response.content.decode())]
                             if len(results) == 0:
                                 raise Exception("Unexpected return value from NetMHCstabpan server. Unable to parse response.\n{}".format(response.content.decode()))
@@ -142,7 +145,7 @@ class NetMHCStab:
                 sorted_lines = pvactools.lib.sort.pvacbind_sort(output_lines, self.top_score_metric)
             writer.writerows(sorted_lines)
 
-    def query_netmhcstabpan_server(self, staging_file, peptide_length, allele, jobid_searcher):
+    def query_netmhcstabpan_server(self, staging_file, peptide_length, allele):
         try:
             response = requests.post(
                 "https://services.healthtech.dtu.dk/cgi-bin/webface2.cgi",
@@ -167,6 +170,8 @@ class NetMHCStab:
             raise Exception("Timeout while posting request to NetMHCstabpan server. The server may be unresponsive. Please try again later.")
         if response.status_code != 200:
             raise Exception("Error posting request to NetMHCstabpan server.\n{}".format(response.content.decode()))
+
+        jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
         while jobid_searcher.search(response.content.decode()):
             sleep(10)
             try:
@@ -176,6 +181,20 @@ class NetMHCStab:
             if response.status_code != 200:
                 raise Exception("Error posting request to NetMHCstabpan server.\n{}".format(response.content.decode()))
         return response
+
+    def valid_alleles(self, alleles):
+        invalid_searcher = re.compile(r'cannot be found in hla_pseudo list')
+        valid_alleles = []
+        for allele in alleles:
+            staging_file = tempfile.NamedTemporaryFile(mode='w+')
+            records = [SeqRecord(Seq("ASTPGHTIIYEAVCLHNDRTTIP", IUPAC.protein), id="0", description="0")]
+            SeqIO.write(records, staging_file.name, "fasta")
+            staging_file.seek(0)
+            response = self.query_netmhcstabpan_server(staging_file, 9, allele.replace("*", ""))
+
+            if not invalid_searcher.search(response.content.decode()):
+                valid_alleles.append(allele)
+        return valid_alleles
 
     def observed_alleles(self):
         return np.sort(pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique())[::-1]

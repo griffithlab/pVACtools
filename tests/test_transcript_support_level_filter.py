@@ -6,7 +6,7 @@ from subprocess import call
 import sys
 import py_compile
 
-from .test_utils import *
+from tests.utils import *
 
 #python -m unittest tests/test_coverage_filter.py
 class CoverageFilterTests(unittest.TestCase):
@@ -36,7 +36,7 @@ class CoverageFilterTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "Test.filtered.default.tsv"),
         ))
 
-    def test_transcript_support_level_filter_runs_and_produces_expected_output(self):
+    def test_transcript_support_level_filter_with_max_tsl_runs_and_produces_expected_output(self):
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(call([
             self.python,

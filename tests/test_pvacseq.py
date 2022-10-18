@@ -15,7 +15,7 @@ import argparse
 
 from pvactools.tools.pvacseq import *
 import pvactools.tools.pvacseq.main as pvacseq_main
-from .test_utils import *
+from tests.utils import *
 
 def test_data_directory():
     return os.path.join(
@@ -263,7 +263,7 @@ class PvacseqTests(unittest.TestCase):
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
                 '--netmhc-stab',
-                '--tdna-vaf', '20',
+                '--tdna-vaf', '0.2',
                 '-d', 'full',
                 '--pass-only',
                 '--run-reference-proteome-similarity',

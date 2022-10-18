@@ -5,7 +5,7 @@ import tempfile
 import py_compile
 from subprocess import call
 
-from .test_utils import *
+from tests.utils import *
 
 class CombineParsedOutputsTests(unittest.TestCase):
     @classmethod

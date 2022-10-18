@@ -44,7 +44,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/iedb_allele
 
 setup(
     name="pvactools",
-    version="3.0.2",
+    version="3.1.0",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",
@@ -80,6 +80,7 @@ setup(
         'vaxrank>=1.1.0',
         'keras==2.4.3',
         'tensorflow==2.2.2',
+        'protobuf==3.19.4',
         'mhcnuggets==2.3.3',
         'mhcflurry==2.0.1',
         'testfixtures'

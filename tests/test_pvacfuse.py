@@ -15,7 +15,7 @@ import argparse
 
 from pvactools.tools.pvacfuse import *
 import pvactools.tools.pvacfuse.main as pvacfuse_main
-from .test_utils import *
+from tests.utils import *
 
 def test_data_directory():
     return os.path.join(

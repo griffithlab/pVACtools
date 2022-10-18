@@ -54,12 +54,25 @@ Contents
 New in Release |release|
 ------------------------
 
-This is a bugfix release. It fixes the following problem(s):
+This release adds the following new features:
 
-- Newer versions of Ensembl annotations added genes without a HUGO gene name.
-  Variants on those genes cause downstream errors in the aggregate report creation when running
-  the pVACseq pipeline. This release fixes this error.
+- When running the pipelines with the ``--netmhc-stab`` flag enabled, the
+  ``NetMHCstab allele`` column now also reports the distance of the
+  NetMHCstabpan allele when that allele is not identical to the ``HLA Allele``
+  of the original result.
+- When running the pipelines with a set of individual class II alleles, the pipeline now
+  also auto-generates valid combinations of these alleles so that users no
+  longer need to explicitly provide these combinations.
 
+This release also fixes the following problem(s):
+
+- Some class I alleles are not supported by NetMHCstabpan and will lead to an
+  error when attempt to make predictions with them. This release will skip
+  such alleles for the stability prediction step.
+- For very large result sets the filtering steps would stall or be killed
+  because the steps would run out of memory. This release fixes this issue.
+- This release adds better handling of timeout errors while running
+  NetMHCstabpan and/or NetChop.
 
 New in Version |version|
 ------------------------
