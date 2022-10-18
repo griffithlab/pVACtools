@@ -5,7 +5,7 @@ import tempfile
 import py_compile
 
 from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser
-from .test_utils import *
+from tests.utils import *
 
 class OutputParserTests(unittest.TestCase):
     @classmethod

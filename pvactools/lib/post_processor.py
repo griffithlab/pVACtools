@@ -94,14 +94,14 @@ class PostProcessor:
         if self.run_coverage_filter:
             print("Running Coverage Filters")
             filter_criteria = []
-            filter_criteria.append({'column': "Normal_Depth", 'operator': '>=', 'threshold': self.normal_cov, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Normal_VAF", 'operator': '<=', 'threshold': self.normal_vaf, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Tumor_DNA_Depth", 'operator': '>=', 'threshold': self.tdna_cov, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Tumor_DNA_VAF", 'operator': '>=', 'threshold': self.tdna_vaf, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Tumor_RNA_Depth", 'operator': '>=', 'threshold': self.trna_cov, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Tumor_RNA_VAF", 'operator': '>=', 'threshold': self.trna_vaf, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Gene_Expression", 'operator': '>=', 'threshold': self.expn_val, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Transcript_Expression", 'operator': '>=', 'threshold': self.expn_val, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Normal Depth", 'operator': '>=', 'threshold': self.normal_cov, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Normal VAF", 'operator': '<=', 'threshold': self.normal_vaf, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Tumor DNA Depth", 'operator': '>=', 'threshold': self.tdna_cov, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Tumor DNA VAF", 'operator': '>=', 'threshold': self.tdna_vaf, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Tumor RNA Depth", 'operator': '>=', 'threshold': self.trna_cov, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Tumor RNA VAF", 'operator': '>=', 'threshold': self.trna_vaf, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Gene Expression", 'operator': '>=', 'threshold': self.expn_val, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append({'column': "Transcript Expression", 'operator': '>=', 'threshold': self.expn_val, 'exclude_nas': self.exclude_NAs})
             Filter(self.binding_filter_fh.name, self.coverage_filter_fh.name, filter_criteria).execute()
             print("Completed")
         else:
