@@ -154,6 +154,7 @@ class PostProcessor:
                 n_threads=self.n_threads,
                 blastp_path=self.blastp_path,
                 blastp_db=self.blastp_db,
+                peptide_fasta=self.peptide_fasta
             ).execute()
             shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.filtered_report_file))
             print("Completed")
