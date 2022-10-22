@@ -1,6 +1,7 @@
 import os
 import re
 import pandas as pd
+import numpy as np
 from pyfaidx import Fasta
 
 class FastaToKmers():
@@ -66,8 +67,6 @@ class FastaToKmers():
                 elif de_dup_v not in self.unique_kmers[k]:
                     self.unique_kmers[k].append(de_dup_v)
 
-    ## ordered dict is default in python 3.9?? ##
-
     def create_index_file(self):
         # joined indexes for each unique kmer - to format for df since lists are dif sizes
         fasta_info = {k:','.join(v) for k,v in self.unique_kmers.items()}
@@ -81,14 +80,15 @@ class FastaToKmers():
         index_df['name'] = index_df['name'].str.split(',')
         index_df = index_df.explode('name')
         # now split each index into index, pos, len
-        index_df[['index', 'transcript_position']] = index_df['name'].str.split(';', expand=True)
+        index_df[['junction_index', 'transcript_position']] = index_df['name'].str.split(';', expand=True)
         index_df['name'] = index_df['name'].str.replace(';', '.') 
+        # I don't think I need to save this file
         # create a tsv file
-        if os.path.exists(f'{self.output_dir}/kmer_index.tsv'):
-            print('Kmer index already exists. Skipping.')
-        else:
-            index_df.to_csv(f'{self.output_dir}/kmer_index.tsv', sep='\t', index=False)
-            print('Kmer index file - complete')
+        #if os.path.exists(f'{self.output_dir}/kmer_index.tsv'):
+        #    print('Kmer index already exists. Skipping.')
+        #else:
+        index_df.to_csv(f'{self.output_dir}/kmer_index.tsv', sep='\t', index=False)
+        print('Kmer index file - complete')
 
     def choose_final_lengths(self):
         if not self.class_i_hla:
