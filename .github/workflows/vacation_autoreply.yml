@@ -14,5 +14,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         respondableId: ${{ github.event.issue.node_id }}
-        response: "Thank you for your interest in pVACtools. Please note that the lead developer on this project is currently on vacation until January 3rd, 2022. They will respond to your issue after they are back at work.\n\nThis is an auto-reply."
+        response: "Thank you for your interest in pVACtools. Please note that the lead developer on this project is currently on vacation until October 5th, 2022. They will respond to your issue after they are back at work.\n\nThis is an auto-reply."
         author: ${{ github.event.issue.user.login }}

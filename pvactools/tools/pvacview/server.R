@@ -609,13 +609,18 @@ server <- shinyServer(function(input, output, session) {
         all_peptides <- list()
         incProgress(0.1)
         for(i in 1:length(peptide_names)){
-          mutation_pos <- as.numeric(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`mutation_position`)
+          #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
+          mutation_pos <- range_str_to_seq(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`mutation_position`)
+          mt_peptide_length <- nchar(peptide_names[i])
+          mutation_pos <- mutation_pos[mutation_pos <= mt_peptide_length]
+          #set associated wt peptide to current mt peptide
           wt_peptide <- as.character(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`wt_peptide`)
+          #create dataframes for mt/wt pair
           df_mt_peptide <- data.frame("aa"=unlist(strsplit(peptide_names[i],"", fixed = TRUE)), "x_pos" = c(1:nchar(peptide_names[i])))
           df_mt_peptide$mutation <- 'not_mutated'
           df_mt_peptide$type <- 'mt'
           df_mt_peptide$y_pos <- (i*2-1)*-1
-          df_mt_peptide$length <- nchar(peptide_names[i])
+          df_mt_peptide$length <- mt_peptide_length
           df_mt_peptide[mutation_pos, 'mutation'] <- 'mutated'
           df_wt_peptide <- data.frame("aa"=unlist(strsplit(wt_peptide,"", fixed = TRUE)), "x_pos" = c(1:nchar(wt_peptide)))
           df_wt_peptide$mutation <- 'not_mutated'

@@ -1,5 +1,6 @@
 import csv
 import argparse
+import gzip
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from Bio import SeqIO, SearchIO
@@ -48,6 +49,9 @@ class CalculateReferenceProteomeSimilarity:
     blastp_db : str
         The name of the database to perform blast with
 
+    peptide_fasta: str
+        The path to a FASTA file with transcript peptide sequences to search for matches
+
     n_threads : int
         The number of threads for multiprocessing
 
@@ -80,11 +84,17 @@ class CalculateReferenceProteomeSimilarity:
         Note:
             TMP FILE NEEDS TO BE CLOSED OUTSIDE OF FUNCTION
 
+    _match_from_peptide_fasta(self, full_peptide)
+        Finds matches for the windows in full_peptide in the peptide fasta
+
     _needs_processing(full_peptide, processed_peptides)
         Returns true if protein has not been processed and false otherwise
 
-    _generate_reference_match_dict(self, full_peptide, processed_peptides, peptide, p)
-        Returns a dictionary that contains information about matches
+    _generate_reference_match_dict_from_blast_records(self, blast_records, peptide)
+        Returns a dictionary that contains information about matches obtained from blast
+
+    _generate_reference_match_dict_from_peptide_fasta_results(self, results, peptide, transcript)
+        Returns a dictionary that contains information about matches obtained from the peptide fasta
 
     _write_outputs(input_fh, processed_peptides, mt_records_dict, wt_records_dict)
         Uses the blast records in processed_peptides to add results to information in the input_file and
@@ -97,7 +107,7 @@ class CalculateReferenceProteomeSimilarity:
         Peforms the calculation of reference proteome similarity. The only method that should be 
         called from outside of the class
     '''
-    def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='pVACseq', blastp_path=None, blastp_db='refseq_select_prot', n_threads=1):
+    def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='pVACseq', blastp_path=None, blastp_db='refseq_select_prot', peptide_fasta=None, n_threads=1):
         self.input_file = input_file
         self.input_fasta = input_fasta
         output_dir = os.path.dirname(output_file)
@@ -112,6 +122,7 @@ class CalculateReferenceProteomeSimilarity:
         self.blastp_db = blastp_db
         if self.blastp_db == 'refseq_select_prot' and self.species != 'human' and self.species != 'mouse':
             raise Exception("refseq_select_prot blastp database is only compatible with human and mouse species.")
+        self.peptide_fasta = peptide_fasta
         self.species_to_organism = {
             'human': 'Homo sapiens',
             'atlantic salmon': 'Salmo salar',
@@ -260,7 +271,20 @@ class CalculateReferenceProteomeSimilarity:
         return result_handle
 
 
-    def _generate_reference_match_dict(self, blast_records, peptide):
+    def _match_from_peptide_fasta(self, full_peptide):
+        results = []
+        with gzip.open(self.peptide_fasta, 'rt') as handle:
+            transcript_sequences = SeqIO.parse(handle, "fasta")
+            for transcript_seq in transcript_sequences:
+                seq = str(transcript_seq.seq)
+                for i in range(0, len(full_peptide)-self.match_length+1):
+                    epitope = full_peptide[i:i+self.match_length]
+                    if epitope in seq:
+                        results.append([transcript_seq, epitope, seq.index(epitope)])
+        return results
+
+
+    def _generate_reference_match_dict_from_blast_records(self, blast_records, peptide):
 
         reference_match_dict = defaultdict(list)
         for blast_record in blast_records:
@@ -287,6 +311,23 @@ class CalculateReferenceProteomeSimilarity:
         return reference_match_dict
 
 
+    def _generate_reference_match_dict_from_peptide_fasta_results(self, results, peptide, transcript):
+        reference_match_dict = defaultdict(list)
+        for transcript_seq, epitope, match_start in results:
+            if transcript in transcript_seq.description:
+                continue
+            reference_match_dict[peptide].append({
+                'Hit ID': transcript_seq.id,
+                'Hit Definition': transcript_seq.description,
+                'Query Sequence': peptide,
+                'Query Window'  : epitope,
+                'Match Sequence': str(transcript_seq.seq),
+                'Match Start': match_start + 1,
+                'Match Stop': match_start + len(epitope) + 1,
+            })
+        return reference_match_dict
+
+
     def _write_outputs(self, processed_peptides, mt_records_dict, wt_records_dict):
 
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh, open(self.metric_file, 'w') as metric_fh:
@@ -299,8 +340,12 @@ class CalculateReferenceProteomeSimilarity:
             for line in reader:
                 peptide, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
 
-                blast_records = processed_peptides[full_peptide]
-                reference_match_dict = self._generate_reference_match_dict(blast_records, peptide)
+                results = processed_peptides[full_peptide]
+
+                if self.peptide_fasta:
+                    reference_match_dict = self._generate_reference_match_dict_from_peptide_fasta_results(results, peptide, line['Transcript'])
+                else:
+                    reference_match_dict = self._generate_reference_match_dict_from_blast_records(results, peptide)
 
                 if peptide in reference_match_dict:
                     line['Reference Match'] = True
@@ -345,13 +390,15 @@ class CalculateReferenceProteomeSimilarity:
 
                 full_peptide = unique_peptides[i]
 
-                result_handle = self._call_blast(full_peptide, p)
-
-                blast_records = [x for x in NCBIXML.parse(result_handle)]
+                if self.peptide_fasta:
+                    results = self._match_from_peptide_fasta(full_peptide)
+                else:
+                    result_handle = self._call_blast(full_peptide, p)
+                    results = [x for x in NCBIXML.parse(result_handle)]
+                    result_handle.close()
 
                 with p.lock:
-                    processed_peptides[full_peptide] = blast_records
-                result_handle.close()
+                    processed_peptides[full_peptide] = results
 
         self._write_outputs(processed_peptides, mt_records_dict, wt_records_dict)
 
@@ -397,6 +444,10 @@ class CalculateReferenceProteomeSimilarity:
             choices=['refseq_select_prot', 'refseq_protein'],
             default='refseq_select_prot',
             help="The blastp database to use.",
+        )
+        parser.add_argument(
+            '--peptide-fasta',
+            help="A reference peptide FASTA file to use for finding reference matches instead of blastp."
         )
         parser.add_argument(
             "-t", "--n-threads",type=int,

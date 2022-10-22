@@ -177,7 +177,7 @@ There's three different tabs in this section of the app, providing peptide-level
   (`"Accurate neoantigen prediction depends on mutation position relative to patient allele-specific MHC anchor location" <https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1>`_).
   These predictions are normalized probabilities representing the likelihood of each position of the peptide to participate in anchoring to the hla allele.
   Top 30 MT/WT peptide pairs from the peptide table are shown in this tab with anchor probabilities overlaying as a heatmap. These anchor probabilities shown are both allele and peptide length specific.
-  The mutated amino acid is marked in red (for missense mutations) and each MT/WT pair are separated from others using a dotted line.
+  The mutated amino acid(s) is/are marked in red (or the flanking ones are, in the case of deletions) and each MT/WT pair are separated from others using a dotted line.
 
 |
 

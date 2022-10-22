@@ -29,7 +29,7 @@ Commonly Asked Questions
 
 - :underline:`Best Peptide:` The best-binding mutant epitope sequence (lowest median mutant binding affinity).
 
-- :underline:`Pos:` The one-based position of the start of the mutation within the epitope sequence. 0 if the start of the mutation is before the epitope (as can occur downstream of frameshift mutations).
+- :underline:`Pos:` The one-based positional range (inclusive) of the mutation within the epitope sequence.  If the mutation is a deletion, the amino acids flanking the deletion are recorded. 0 represents that some or all of the mutation is before the epitope, length+1 represents some or all of the mutation is after the epitope, otherwise it indexes specific amino acid(s) within the epitope.  Note that in the case of ambiguous amino acid changes, this reflects the change that is left-aligned, starting from the first changed amino acid; this may differ from the `AA Change` column.
 
 - :underline:`Num Passing Peptides:` The number of unique well-binding peptides for this mutation.
 
@@ -78,7 +78,7 @@ Commonly Asked Questions
 
 - Anchor locations and its relative position can influence prioritization decisions for neoantigens as shown `here <https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1>`_ and we want to provide users
   with the data to be able to take these considerations into account. In the anchor plot, peptide sequences (from the peptide table) are plotted and a heatmap overlays the sequences where a darker blue represents
-  a higher probability of being an anchor location. The mutation(s) is marked in red letters.
+  a higher probability of being an anchor location. The mutation(s) is/are marked in red letters.
 
 - To the right of the additional information box, we provide a graphical guide regarding how one can take anchor information into account, more details on how to interpret this data can be found in `our paper <https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1>`_.
 
