@@ -221,17 +221,17 @@ class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
             default=10
         )
         self.parser.add_argument(
-            '--normal-vaf', type=float,
+            '--normal-vaf', type=float_range(0.0,1.0),
             help="Normal VAF Cutoff. Only sites BELOW this cutoff in normal will be considered.",
             default=0.02
         )
         self.parser.add_argument(
-            '--tdna-vaf', type=float,
+            '--tdna-vaf', type=float_range(0.0,1.0),
             help="Tumor DNA VAF Cutoff. Only sites above this cutoff will be considered.",
             default=0.25
         )
         self.parser.add_argument(
-            '--trna-vaf', type=float,
+            '--trna-vaf', type=float_range(0.0,1.0),
             help="Tumor RNA VAF Cutoff. Only sites above this cutoff will be considered.",
             default=0.25
         )
