@@ -1,4 +1,6 @@
 import pandas as pd
+import csv
+import sys
 
 pd.options.mode.chained_assignment = None
 
@@ -10,26 +12,21 @@ class Filter:
         self.int_filter_columns = int_filter_columns
 
     def execute(self):
-        data = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False)
-        header = data.columns
-        clean_header = header.map(lambda x: x.replace(' ', '_') if isinstance(x, str) else x)
-        data.columns = clean_header
-        for criteria in self.filter_criteria:
-            clean_column = criteria['column'].replace(' ', '_')
-#           #clean_column != clean_column is a hacky way to keep all NA values
-            if criteria['exclude_nas']:
-                expression = "(%s %s %s)" % (clean_column, criteria['operator'], criteria['threshold'])
-            else:
-                expression = "(%s %s %s) | (%s != %s)" % (clean_column, criteria['operator'], criteria['threshold'], clean_column, clean_column)
-            data = data.query(expression)
-        for column in self.int_filter_columns:
-            clean_column = column.replace(' ', '_')
-            data[clean_column] = data[clean_column].astype(str).apply(trim_fraction)
-        data.to_csv(self.output_file, sep='\t', header=header, index=False, na_rep='NA')
-
-def trim_fraction(text):
-    if '.0' in text:
-        return text[:text.rfind('.0')]
-    elif 'nan' in text:
-        return 'NA'
-    return text
+        with open(self.input_file, 'r') as read_fh, open(self.output_file, 'w') as write_fh:
+            reader = csv.DictReader(read_fh, delimiter="\t")
+            writer = csv.DictWriter(write_fh, delimiter='\t', fieldnames = reader.fieldnames, lineterminator="\n")
+            writer.writeheader()
+            for line in reader:
+                to_filter = False
+                for criteria in self.filter_criteria:
+                    value = line[criteria['column']]
+                    if value == 'inf':
+                        value = sys.maxsize
+                    if value == 'NA':
+                        if criteria['exclude_nas']:
+                            to_filter = True
+                    else:
+                        if not eval("{} {} {}".format(value, criteria['operator'], criteria['threshold'])):
+                            to_filter = True
+                if not to_filter:
+                    writer.writerow(line)

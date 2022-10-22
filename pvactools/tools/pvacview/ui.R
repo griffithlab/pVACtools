@@ -27,8 +27,8 @@ ui <- dashboardPage(
   ## HEADER ##
   header = dashboardHeader(
     title=tagList(tags$a(class="logo",
-                         span(class= "logo-mini", tags$img(src='pVACview_logo_mini.png')),
-                         span(class= "logo-lg", tags$img(src='pVACview_logo.png'))
+                         span(class= "logo-mini", tags$img(src='https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/pVACview_logo_mini.png')),
+                         span(class= "logo-lg", tags$img(src='https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/pVACview_logo.png'))
                   )),
     tags$li(class = "dropdown", tags$a(href = "https://pvactools.readthedocs.io/en/latest/", class = "my_class", "Help", target="_blank"))
     ),
@@ -266,7 +266,7 @@ ui <- dashboardPage(
                 ),
                 column(width=8, 
                        box(title = 'Anchor vs Mutation position Scenario Guide', collapsible = TRUE, collapsed = FALSE, width = 12,
-                           img(src='anchor.jpg', align = "center", height='350px', width='600px'), style = "overflow-x: scroll;"))
+                           img(src='https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/anchor.jpg', align = "center", height='350px', width='600px'), style = "overflow-x: scroll;"))
               )
             )
           )

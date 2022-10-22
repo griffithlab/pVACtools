@@ -6,7 +6,7 @@ import sys
 import py_compile
 
 from pvactools.lib.allele_specific_binding_filter import AlleleSpecificBindingFilter
-from .test_utils import *
+from tests.utils import *
 
 #python -m unittest tests/test_binding_filter.py
 class BindingFilterTests(unittest.TestCase):
