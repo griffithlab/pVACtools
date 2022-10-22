@@ -4,6 +4,7 @@ import csv
 import re
 import operator
 import os
+import pandas as pd
 from math import ceil, inf
 from statistics import median
 import yaml
@@ -21,6 +22,8 @@ class OutputParser(metaclass=ABCMeta):
         self.sample_name             = kwargs['sample_name']
         self.add_sample_name         = kwargs.get('add_sample_name_column')
         self.flurry_state            = kwargs.get('flurry_state')
+        # pvacsplice
+        self.kmer_index_file         = kwargs.pop('kmer_index_file', None)
 
     def parse_input_tsv_file(self):
         with open(self.input_tsv_file, 'r') as reader:
@@ -884,13 +887,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
 
 
 class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
-    def process_input_iedb_file(self, tsv_entries):
-        iedb_results = self.parse_iedb_file(tsv_entries)
-        iedb_results_with_metrics = self.add_summary_metrics(iedb_results)
-        flattened_iedb_results = self.flatten_iedb_results(iedb_results_with_metrics)
-        return flattened_iedb_results
-
-    def parse_iedb_file(self, tsv_entries):
+    def parse_iedb_file(self):
         # input key file
         with open(self.key_file, 'r') as key_file_reader:
             protein_identifiers_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
@@ -902,47 +899,33 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
                 method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
+                # header: allele, seq_num, start, end, length, peptide, ic50, percentile_rank
                 for line in iedb_tsv_reader:
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
                         continue
-                    protein_label  = int(line['seq_num'])
-                    # not necessary because the mutations can also be frameshit / indels etc.
-                    # if 'core_peptide' in line and int(line['end']) - int(line['start']) == 8:
-                    #     #Start and end refer to the position of the core peptide
-                    #     #Infer the (start) position of the peptide from the positions of the core peptide
-                    #     position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
-                    # else:
-                    #     position   = line['start']
-                    percentiles    = self.get_percentiles(line, method)
-                    epitope        = line['peptide']
-                    scores         = self.get_scores(line, method)
                     allele         = line['allele']
+                    fasta_label    = int(line['seq_num'])
+                    epitope        = line['peptide']
                     peptide_length = len(epitope)
-
-                    # get key from key file 
-                    if protein_identifiers_from_label[protein_label] is not None:
+                    scores         = self.get_scores(line, method)
+                    percentiles    = self.get_percentiles(line, method)
+                    # get fasta_id/combined_name from fasta key file
+                    if protein_identifiers_from_label[fasta_label] is not None:
                         # comma-separated string (1 or more ids) as 1 entry in list
-                        protein_identifier = protein_identifiers_from_label[protein_label][0]
+                        protein_label = protein_identifiers_from_label[fasta_label][0]
                         # one index at a time
-                        for tsv_index in protein_identifier.split(','):
-
-                            tsv_index = ('.').join(tsv_index.split('.')[:-1])
-                            tsv_entry = tsv_entries[tsv_index]
-                            key = "%s|%s" % (tsv_index, protein_label)
+                        for key in protein_label.split(','):
 
                             if key not in iedb_results:
-                                iedb_results[key]                      = {}
-                                iedb_results[key]['mt_scores']         = {}
-                                iedb_results[key]['mt_percentiles']    = {}
-                                iedb_results[key]['mt_epitope_seq']    = epitope
-                                iedb_results[key]['gene_name']         = tsv_entry['gene_name']
-                                iedb_results[key]['amino_acid_change'] = tsv_entry['amino_acid_change']
-                                iedb_results[key]['variant_type']      = tsv_entry['variant_type']
-                                iedb_results[key]['position']          = protein_label
-                                iedb_results[key]['tsv_index']         = key
-                                iedb_results[key]['allele']            = allele
-                                iedb_results[key]['peptide_length']    = peptide_length
-                            iedb_results[key]['mt_scores'][method] = scores
+                                iedb_results[key]                   = {}
+                                iedb_results[key]['mt_scores']      = {}
+                                iedb_results[key]['mt_percentiles'] = {}
+                                iedb_results[key]['mt_epitope_seq'] = epitope
+                                iedb_results[key]['fasta_id']       = fasta_label
+                                iedb_results[key]['tsv_index']      = key
+                                iedb_results[key]['allele']         = allele
+                                iedb_results[key]['peptide_length'] = peptide_length
+                            iedb_results[key]['mt_scores'][method]  = scores
                             iedb_results[key]['mt_percentiles'][method] = percentiles
 
         return iedb_results
@@ -950,9 +933,7 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
     def flatten_iedb_results(self, iedb_results):
         #transform the iedb_results dictionary into a two-dimensional list
         flattened_iedb_results = list((
-            value['gene_name'],
-            value['amino_acid_change'],
-            value['position'],
+            value['fasta_id'],
             value['mt_scores'],
             value['mt_percentiles'],
             value['mt_epitope_seq'],
@@ -985,11 +966,11 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             'Biotype',
             'Ensembl Gene ID',
             'Variant Type',
-            'Mutation', # this is amino acid change
-            'Protein Position',
+            'Amino Acid Change',
             'Gene Name',
             'HGVSc',
             'HGVSp',
+            'Transcript Position', # start position of peptide in alt transcript
             'HLA Allele',
             'Peptide Length',
             'Epitope Seq',
@@ -1007,7 +988,8 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             'Normal VAF',
             'Gene Expression',
             'Transcript Expression',
-            'Index' # this is junction index
+            'Index', # this is junction index
+            'Fasta Key', # unique num for traceback to correct sequence - key to combined fasta header
         ]
 
     def execute(self):
@@ -1020,12 +1002,11 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
         tsv_entries = self.parse_input_tsv_file()
         
         # get binding info from iedb files
-        iedb_results = self.process_input_iedb_file(tsv_entries)
+        iedb_results = self.process_input_iedb_file()
 
-        # parsed iedb files
+        # from input iedb files
         for (
-            gene_name,
-            amino_acid_change,
+            fasta_id,
             mt_scores,
             mt_percentiles,
             mt_epitope_seq,
@@ -1038,8 +1019,10 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             best_mt_percentile_method,
             median_mt_percentile,
         ) in iedb_results:
-            start_pos = tsv_index.split('|')[1]
-            tsv_entry = tsv_entries[tsv_index]
+            # get unique index
+            tscript_position = tsv_index.split('.')[-1]
+            final_index = '.'.join(tsv_index.split('.')[:-1])
+            tsv_entry = tsv_entries[final_index]
             row = {
                 'Chromosome'          : tsv_entry['chromosome_name'],
                 'Start'               : tsv_entry['start'],
@@ -1051,20 +1034,22 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Transcript Length'   : tsv_entry['transcript_length'],
                 'Biotype'             : tsv_entry['biotype'],
                 ### junction info from RegTools
-                'Junction'            : tsv_index.split('.')[2],
+                'Junction'            : tsv_entry['name'],
                 'Junction Start'      : tsv_entry['junction_start'],
                 'Junction Stop'       : tsv_entry['junction_stop'],
                 'Junction Score'      : tsv_entry['score'],
                 'Junction Anchor'     : tsv_entry['anchor'],
                 ###
-                'Ensembl Gene ID'     : gene_name,
+                'Ensembl Gene ID'     : tsv_entry['gene_name'],
                 'Variant Type'        : tsv_entry['variant_type'],
-                'Mutation'            : amino_acid_change,
-                'Transcript Position' : start_pos,
-                'Gene Name'           : tsv_index.split('.')[0], 
+                'Amino Acid Change'   : tsv_entry['amino_acid_change'],
+                #'Transcript Position' : start_pos,
+                'Gene Name'           : tsv_entry['gene_name'], 
                 'HGVSc'               : tsv_entry['hgvsc'],
                 'HGVSp'               : tsv_entry['hgvsp'],
                 'Index'               : tsv_index,
+                'Fasta Key'           : fasta_id,
+                'Transcript Position' : tscript_position,
                 ### pvacbind info
                 'HLA Allele'          : allele,
                 'Peptide Length'      : len(mt_epitope_seq),

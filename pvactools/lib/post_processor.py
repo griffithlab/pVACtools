@@ -1,7 +1,7 @@
 import tempfile
 import shutil
 
-from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, UnmatchedSequenceAggregateAllEpitopes
+from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, UnmatchedSequenceAggregateAllEpitopes, PvacspliceAggregateAllEpitopes
 from pvactools.lib.binding_filter import BindingFilter
 from pvactools.lib.filter import Filter
 from pvactools.lib.top_score_filter import TopScoreFilter
@@ -57,6 +57,19 @@ class PostProcessor:
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
                 top_score_metric=self.top_score_metric,
             ).execute()
+        elif self.file_type == 'pVACsplice':
+            PvacspliceAggregateAllEpitopes(
+                self.input_file,
+                self.aggregate_report,
+                binding_threshold=self.binding_threshold,
+                percentile_threshold=self.percentile_threshold,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                trna_vaf=self.trna_vaf,
+                trna_cov=self.trna_cov,
+                expn_val=self.expn_val,
+                maximum_transcript_support_level=self.maximum_transcript_support_level,
+                top_score_metric=self.top_score_metric,
+            )
         else:
             UnmatchedSequenceAggregateAllEpitopes(
                 self.input_file,
@@ -122,12 +135,9 @@ class PostProcessor:
             shutil.copy(self.coverage_filter_fh.name, self.transcript_support_level_filter_fh.name)
 
     def execute_top_score_filter(self):
-        if self.file_type != 'pVACsplice':
             print("Running Top Score Filter")
             TopScoreFilter(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric, self.file_type).execute()
             print("Completed")
-        else:
-            shutil.copy(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name)
 
     def call_net_chop(self):
         if self.run_net_chop:
