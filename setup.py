@@ -81,7 +81,7 @@ setup(
         'keras==2.4.3',
         'tensorflow==2.2.2',
         'protobuf==3.19.4',
-        'mhcnuggets==2.3.3',
+        'mhcnuggets==2.4.0',
         'mhcflurry==2.0.1',
         'testfixtures'
     ],
