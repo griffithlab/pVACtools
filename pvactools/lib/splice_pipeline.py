@@ -30,32 +30,32 @@ class JunctionPipeline():
     def execute(self):
         self.filter_regtools_results()
         self.vcf_to_tsv()
+        self.create_fastas()
         self.combine_inputs()
         self.junction_to_fasta()
         self.fasta_to_kmers()
 
-    # def create_fastas(self):
-    #     fasta_basename = os.path.basename(self.fasta_path)
-    #     alt_fasta_path = os.path.join(self.output_dir, f'{fasta_basename.split(".")[0]}_alt.{".".join(fasta_basename.split(".")[1:])}')
-    #     print("Building alternative fasta")
-    #     size1 = os.path.getsize(self.fasta_path)
-    #     if not os.path.exists(alt_fasta_path):
-    #         shutil.copy(self.fasta_path, alt_fasta_path)
-    #         size2 = os.path.getsize(alt_fasta_path)
-    #         if os.path.exists(alt_fasta_path) and size1 == size2:
-    #             print('Completed')
-    #     elif os.path.exists(alt_fasta_path) and size1 != os.path.getsize(alt_fasta_path):
-    #         print('Fasta transfer is incomplete. Trying again.')
-    #         shutil.copy(self.fasta_path, alt_fasta_path)
-    #         size2 = os.path.getsize(alt_fasta_path)
-    #         if size1 == size2:
-    #             print('Completed')
-    #     elif os.path.exists(alt_fasta_path) and size1 == os.path.getsize(alt_fasta_path):
-    #         print('Alternative fasta already exists. Skipping.')
-    #     print('Creating fasta objects')
-    #     self.ref_fasta = pyfaidx.Fasta(self.fasta_path)
-    #     self.alt_fasta = pyfaidx.FastaVariant(alt_fasta_path, self.annotated_vcf, sample=self.sample_name)
-    #     print('Completed')
+    def create_fastas(self):
+        fasta_basename = os.path.basename(self.fasta_path)
+        alt_fasta_path = os.path.join(self.output_dir, f'{fasta_basename.split(".")[0]}_alt.{".".join(fasta_basename.split(".")[1:])}')
+        print("Building alternative fasta")
+        size1 = os.path.getsize(self.fasta_path)
+        if not os.path.exists(alt_fasta_path):
+            shutil.copy(self.fasta_path, alt_fasta_path)
+            size2 = os.path.getsize(alt_fasta_path)
+            if os.path.exists(alt_fasta_path) and size1 == size2:
+                print('Completed')
+        elif os.path.exists(alt_fasta_path) and size1 != os.path.getsize(alt_fasta_path):
+            print('Fasta transfer is incomplete. Trying again.')
+            shutil.copy(self.fasta_path, alt_fasta_path)
+            size2 = os.path.getsize(alt_fasta_path)
+            if size1 == size2:
+                print('Completed')
+        elif os.path.exists(alt_fasta_path) and size1 == os.path.getsize(alt_fasta_path):
+            print('Alternative fasta already exists. Skipping.')
+        print('Creating fasta objects')
+        self.personalized_fasta = pyfaidx.FastaVariant(alt_fasta_path, self.annotated_vcf, sample=self.sample_name)
+        print('Completed')
 
     def create_file_path(self, key):
         inputs = {
@@ -104,7 +104,7 @@ class JunctionPipeline():
             'junctions_df'   : self.filter_df,
             'variant_file'   : self.create_file_path('annotated'),
             'sample_name'    : self.sample_name,
-            'output_file'    : self.create_file_path('combined'),
+            #'output_file'    : self.create_file_path('combined'),
             'maximum_transcript_support_level' : self.maximum_transcript_support_level,
         }
         print('Combining junction and variant information')
@@ -114,48 +114,51 @@ class JunctionPipeline():
 
     # creates transcripts.fa
     def junction_to_fasta(self):
-        print('Assembling tumor-specific splicing junctions')
-        if os.path.exists(self.create_file_path('fasta')):
-            print('Junction fasta file already exists. Skipping.')
-        else:    
-            for i in self.combined_df.index.unique().to_list():
-                print(i)
-                junction = self.combined_df.loc[[i], :]         
-                for row in junction.itertuples():
-                    junction_params = {
-                        'fasta_path'     : self.fasta_path,
-                        'junction_df'    : self.combined_df,
-                        'tscript_id'     : row.transcript_name,
-                        'chrom'          : row.junction_chrom,
-                        'junction_name'  : row.name,
-                        'junction_coors' : [row.junction_start, row.junction_stop],
-                        'fasta_index'    : row.index,
-                        'variant_info'   : row.variant_info,
-                        'anchor'         : row.anchor,
-                        'strand'         : row.strand,
-                        'gene_name'      : row.Gene_name,
-                        'output_file'    : self.create_file_path('fasta'),
-                        'output_dir'     : self.output_dir,
-                        'sample_name'    : self.sample_name,
-                        'vcf'            : self.annotated_vcf,
-                    }
-                    junctions = JunctionToFasta(**junction_params)
-                    wt = junctions.create_wt_df()
-                    if wt.empty:
-                        continue
-                    alt = junctions.create_alt_df()
-                    if alt.empty:
-                        continue
-                    wt_aa, is_frameshift = junctions.get_aa_sequence(wt, 'wt')
-                    alt_aa, is_frameshift = junctions.get_aa_sequence(alt, 'alt')
-                    if wt_aa == '' or alt_aa == '':
-                        print('Amino acid sequence was not produced. Skipping.')
-                        continue
-                    junctions.create_sequence_fasta(wt_aa, alt_aa)
-                    self.combined_df[i, ['wt_protein_length', 'alt_protein_length', 'frameshift_event']] = [len(wt_aa), len(alt_aa), is_frameshift]
-            print(self.combined_df)
-            print('Completed')
-
+        self.final_combined_df = self.combined_df.copy()
+        print(self.final_combined_df.columns)
+        print('Assembling tumor-specific splicing junctions')   
+        for i in self.combined_df.index.unique().to_list():
+            print(i)
+            junction = self.combined_df.loc[[i], :]         
+            for row in junction.itertuples():
+                junction_params = {
+                    'fasta'          : self.personalized_fasta,
+                    'junction_df'    : self.combined_df,
+                    'tscript_id'     : row.transcript_name,
+                    'chrom'          : row.junction_chrom,
+                    'junction_name'  : row.name,
+                    'junction_coors' : [row.junction_start, row.junction_stop],
+                    'fasta_index'    : row.index,
+                    'variant_info'   : row.variant_info,
+                    'anchor'         : row.anchor,
+                    'strand'         : row.strand,
+                    'gene_name'      : row.Gene_name,
+                    'output_file'    : self.create_file_path('fasta'),
+                    'output_dir'     : self.output_dir,
+                    'sample_name'    : self.sample_name,
+                    'vcf'            : self.annotated_vcf,
+                }
+                junctions = JunctionToFasta(**junction_params)
+                wt = junctions.create_wt_df()
+                if wt.empty:
+                    continue
+                alt = junctions.create_alt_df()
+                if alt.empty:
+                    continue
+                wt_aa, is_fs = junctions.get_aa_sequence(wt, 'wt')
+                alt_aa, is_fs = junctions.get_aa_sequence(alt, 'alt')
+                if wt_aa == '' or alt_aa == '':
+                    print('Amino acid sequence was not produced. Skipping.')
+                    continue
+                junctions.create_sequence_fasta(wt_aa, alt_aa)
+                # df[row, col]
+                self.final_combined_df.loc[i, 'wt_protein_length'] = len(wt_aa)
+                self.final_combined_df.loc[i, 'alt_protein_length'] = len(alt_aa)
+                self.final_combined_df.loc[i, 'frameshift_event'] = len(is_fs)
+        print('Completed')
+        self.final_combined_df.dropna()
+        self.final_combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
+    
     # creates kmer fasta files for input into prediction pipeline
     def fasta_to_kmers(self):
         kmer_params = {

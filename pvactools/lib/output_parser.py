@@ -1112,7 +1112,6 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Variant'             : tsv_entry['variant'],
                 'Transcript'          : tsv_entry['transcript_name'],
                 'Transcript Support Level': tsv_entry['transcript_support_level'],
-                'Transcript Length'   : tsv_entry['transcript_length'],
                 'Biotype'             : tsv_entry['biotype'],
                 ### junction info from RegTools
                 'Junction'            : tsv_entry['name'],
@@ -1131,8 +1130,8 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Index'               : tsv_index,
                 'Fasta Key'           : fasta_id,
                 'Transcript Position' : tscript_position,
-                'WT Protein Length' : tsv_entry['wt_protein_len'],
-                'ALT Protein Length': tsv_entry['alt_protein_len'],
+                'WT Protein Length' : tsv_entry['wt_protein_length'],
+                'ALT Protein Length': tsv_entry['alt_protein_length'],
                 'Frameshift Event'     : tsv_entry['frameshift_event'],
                 ### pvacbind info
                 'HLA Allele'          : allele,

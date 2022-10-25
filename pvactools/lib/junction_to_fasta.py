@@ -7,10 +7,10 @@ from load_ensembl_data import *
 
 class JunctionToFasta():
     def __init__(self, **kwargs):
-        self.fasta_path     = kwargs['fasta_path']
+        self.personalized_fasta = kwargs['fasta']
         self.tscript_id     = kwargs['tscript_id']
         self.chrom          = kwargs['chrom']
-        self.gtf_file       = 'local_gtf_file'
+        #self.gtf_file       = 'local_gtf_file'
         self.junction_name  = kwargs['junction_name']
         self.junction_coors = kwargs['junction_coors']
         self.junction_df    = kwargs['junction_df']
@@ -147,8 +147,6 @@ class JunctionToFasta():
         return self.alt_df
 
     def get_aa_sequence(self, dataframe, type:str):
-        # generate fasta object
-        ref_fasta = pyfaidx.Fasta(self.fasta_path)
         # pyfaidx has 0-based indexing so subtract 1 from coding exon start positions
         dataframe["Genomic coding start"] = dataframe["Genomic coding start"] -1 
         # create coding_coors column for fasta indexing
@@ -158,7 +156,7 @@ class JunctionToFasta():
         final_seq = ''
         for x in coordinates:
             start = int(x.split(',')[0]); end = int(x.split(',')[1])
-            seq = ref_fasta[self.chrom][start:end].seq
+            seq = self.personalized_fasta[self.chrom][start:end].seq
             final_seq += str(seq)
         # using Seq from Bio.Seq to translate str_seq
         # positive strand
@@ -179,7 +177,7 @@ class JunctionToFasta():
             aa_seq = ''
         if type == 'alt':
             fs = self.find_frameshift_junctions(dna_seq)
-        else:
+        elif type == 'wt':
             fs = 'NA'
         
         return aa_seq, fs
@@ -187,7 +185,7 @@ class JunctionToFasta():
     def find_frameshift_junctions(self, alt_dna_seq):
         remainder = len(alt_dna_seq) % 3
         if remainder == 0:
-            is_frameshift == 'no'
+            is_frameshift = 'no'
         elif remainder == 1:
             is_frameshift = 'yes'
         elif remainder == 2:
