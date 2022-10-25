@@ -55,6 +55,7 @@ def main(args_input = sys.argv[1:]):
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = pvactools.lib.run_utils.split_algorithms(args.prediction_algorithms)
     (class_i_alleles, class_ii_alleles, species) = pvactools.lib.run_utils.split_alleles(args.allele)
+    class_ii_alleles = pvactools.lib.run_utils.combine_class_ii_alleles(class_ii_alleles)
 
     shared_arguments = {
         'input_file'                : args.input_file,
