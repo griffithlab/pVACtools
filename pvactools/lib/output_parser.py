@@ -22,8 +22,8 @@ class OutputParser(metaclass=ABCMeta):
         self.sample_name             = kwargs['sample_name']
         self.add_sample_name         = kwargs.get('add_sample_name_column')
         self.flurry_state            = kwargs.get('flurry_state')
-        # pvacsplice
-        self.kmer_index_file         = kwargs.pop('kmer_index_file', None)
+        # for pvacsplice
+        #self.kmer_index_file         = kwargs.pop('kmer_index_file', None)
 
     def parse_input_tsv_file(self):
         with open(self.input_tsv_file, 'r') as reader:
@@ -962,7 +962,6 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             'Junction Anchor',
             'Transcript',
             'Transcript Support Level',
-            'Transcript Length',
             'Biotype',
             'Ensembl Gene ID',
             'Variant Type',
@@ -970,6 +969,9 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             'Gene Name',
             'HGVSc',
             'HGVSp',
+            'WT Protein Length',
+            'ALT Protein Length',
+            'Frameshift Event',
             'Transcript Position', # start position of peptide in alt transcript
             'HLA Allele',
             'Peptide Length',
@@ -1043,13 +1045,16 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Ensembl Gene ID'     : tsv_entry['gene_name'],
                 'Variant Type'        : tsv_entry['variant_type'],
                 'Amino Acid Change'   : tsv_entry['amino_acid_change'],
-                #'Transcript Position' : start_pos,
+                'Transcript Position' : tscript_position,
                 'Gene Name'           : tsv_entry['gene_name'], 
                 'HGVSc'               : tsv_entry['hgvsc'],
                 'HGVSp'               : tsv_entry['hgvsp'],
                 'Index'               : tsv_index,
                 'Fasta Key'           : fasta_id,
                 'Transcript Position' : tscript_position,
+                'WT Protein Length' : tsv_entry['wt_protein_len'],
+                'ALT Protein Length': tsv_entry['alt_protein_len'],
+                'Frameshift Event'     : tsv_entry['frameshift_event'],
                 ### pvacbind info
                 'HLA Allele'          : allele,
                 'Peptide Length'      : len(mt_epitope_seq),

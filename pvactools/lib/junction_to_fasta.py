@@ -1,5 +1,6 @@
 import os
 import re
+import pyfaidx
 import pandas as pd
 from Bio.Seq import Seq
 from load_ensembl_data import *
@@ -9,8 +10,10 @@ class JunctionToFasta():
         self.fasta_path     = kwargs['fasta_path']
         self.tscript_id     = kwargs['tscript_id']
         self.chrom          = kwargs['chrom']
+        self.gtf_file       = 'local_gtf_file'
         self.junction_name  = kwargs['junction_name']
         self.junction_coors = kwargs['junction_coors']
+        self.junction_df    = kwargs['junction_df']
         self.fasta_index    = kwargs['fasta_index']
         self.variant_info   = kwargs['variant_info']
         self.anchor         = kwargs['anchor']
@@ -143,7 +146,9 @@ class JunctionToFasta():
             self.alt_df = self.alt_df.drop(index_list)
         return self.alt_df
 
-    def get_aa_sequence(self, dataframe, fasta_version):
+    def get_aa_sequence(self, dataframe, type:str):
+        # generate fasta object
+        ref_fasta = pyfaidx.Fasta(self.fasta_path)
         # pyfaidx has 0-based indexing so subtract 1 from coding exon start positions
         dataframe["Genomic coding start"] = dataframe["Genomic coding start"] -1 
         # create coding_coors column for fasta indexing
@@ -153,7 +158,7 @@ class JunctionToFasta():
         final_seq = ''
         for x in coordinates:
             start = int(x.split(',')[0]); end = int(x.split(',')[1])
-            seq = fasta_version[self.chrom][start:end].seq
+            seq = ref_fasta[self.chrom][start:end].seq
             final_seq += str(seq)
         # using Seq from Bio.Seq to translate str_seq
         # positive strand
@@ -172,7 +177,23 @@ class JunctionToFasta():
         if aa_seq[0] != 'M':
             print(f'{self.tscript_id} does not begin with start codon...Skipping')
             aa_seq = ''
-        return aa_seq
+        if type == 'alt':
+            fs = self.find_frameshift_junctions(dna_seq)
+        else:
+            fs = 'NA'
+        
+        return aa_seq, fs
+
+    def find_frameshift_junctions(self, alt_dna_seq):
+        remainder = len(alt_dna_seq) % 3
+        if remainder == 0:
+            is_frameshift == 'no'
+        elif remainder == 1:
+            is_frameshift = 'yes'
+        elif remainder == 2:
+            is_frameshift = 'yes'
+        
+        return is_frameshift
 
     def create_sequence_fasta(self, wt_seq, alt_seq):
         write_str = f'>WT.{self.fasta_index}\n{wt_seq}\n>ALT.{self.fasta_index}\n{alt_seq}\n'
