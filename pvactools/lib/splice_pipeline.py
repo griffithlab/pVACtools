@@ -115,10 +115,9 @@ class JunctionPipeline():
     # creates transcripts.fa
     def junction_to_fasta(self):
         self.final_combined_df = self.combined_df.copy()
-        print(self.final_combined_df.columns)
         print('Assembling tumor-specific splicing junctions')   
         for i in self.combined_df.index.unique().to_list():
-            print(i)
+            #print(i)
             junction = self.combined_df.loc[[i], :]         
             for row in junction.itertuples():
                 junction_params = {
@@ -145,8 +144,8 @@ class JunctionPipeline():
                 alt = junctions.create_alt_df()
                 if alt.empty:
                     continue
-                wt_aa, is_fs = junctions.get_aa_sequence(wt, 'wt')
-                alt_aa, is_fs = junctions.get_aa_sequence(alt, 'alt')
+                wt_aa, wt_fs = junctions.get_aa_sequence(wt, 'wt')
+                alt_aa, alt_fs = junctions.get_aa_sequence(alt, 'alt')
                 if wt_aa == '' or alt_aa == '':
                     print('Amino acid sequence was not produced. Skipping.')
                     continue
@@ -154,7 +153,7 @@ class JunctionPipeline():
                 # df[row, col]
                 self.final_combined_df.loc[i, 'wt_protein_length'] = len(wt_aa)
                 self.final_combined_df.loc[i, 'alt_protein_length'] = len(alt_aa)
-                self.final_combined_df.loc[i, 'frameshift_event'] = len(is_fs)
+                self.final_combined_df.loc[i, 'frameshift_event'] = alt_fs
         print('Completed')
         self.final_combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
     
