@@ -14,13 +14,16 @@ class AggregateAllEpitopes:
     def __init__(self):
         self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
         binding_thresholds = {}
+        binding_affinity_color_cutoffs = {}
         for hla_type in self.hla_types:
             if self.allele_specific_binding_thresholds:
                 threshold = PredictionClass.cutoff_for_allele(hla_type)
                 binding_thresholds[hla_type] = self.binding_threshold if threshold is None else float(threshold)
             else:
                 binding_thresholds[hla_type] = self.binding_threshold
+            binding_affinity_color_cutoffs[hla_type] = [(binding_thresholds[hla_type] * p) for p in [0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2]]
         self.binding_thresholds = binding_thresholds
+        self.binding_affinity_color_cutoffs = binding_affinity_color_cutoffs
 
 
     @abstractmethod
@@ -207,6 +210,8 @@ class AggregateAllEpitopes:
                 'allele_specific_binding_thresholds': self.allele_specific_binding_thresholds,
                 'mt_top_score_metric': self.mt_top_score_metric,
                 'wt_top_score_metric': self.wt_top_score_metric,
+                'binding_cutoffs': self.binding_thresholds,
+                'binding_affinity_colors_cutoffs': self.binding_affinity_color_cutoffs,
             }
         else:
             metrics = {}
@@ -538,6 +543,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             'AA Change': self.get_best_aa_change(best),
             'Num Passing Transcripts': anno_count,
             'Best Peptide': best["MT Epitope Seq"],
+            'Allele': best["HLA Allele"],
             'Pos': best["Mutation Position"],
             'Num Passing Peptides': peptide_count,
             'IC50 MT': best["{} MT IC50 Score".format(self.mt_top_score_metric)],
@@ -706,6 +712,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             'AA Change': self.get_best_aa_change(best),
             'Num Passing Transcripts': anno_count,
             'Best Peptide': best["Epitope Seq"],
+            'Allele': best['HLA Allele'],
             'Pos': "NA",
             'Num Passing Peptides': peptide_count,
             'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
