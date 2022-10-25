@@ -71,6 +71,7 @@ class Pipeline(metaclass=ABCMeta):
         self.run_reference_proteome_similarity = kwargs.pop('run_reference_proteome_similarity', False)
         self.blastp_path                 = kwargs.pop('blastp_path', None)
         self.blastp_db                   = kwargs.pop('blastp_db', 'refseq_select_prot')
+        self.peptide_fasta               = kwargs.pop('peptide_fasta', None)
         self.tumor_purity                = kwargs.pop('tumor_purity', None)
         self.run_post_processor          = kwargs.pop('run_post_processor', True)
         self.flurry_state                = self.get_flurry_state()

@@ -6,7 +6,7 @@ import tempfile
 from filecmp import cmp
 
 from pvactools.lib.top_score_filter import TopScoreFilter
-from .test_utils import *
+from tests.utils import *
 
 class TopScoreFilterTests(unittest.TestCase):
     @classmethod

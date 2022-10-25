@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 
 import sys
-if sys.version_info < (3,6):
+if (sys.version_info.major, sys.version_info.minor) < (3,6):
     print("This python version is not supported:")
     print(sys.version)
     print("pVACtools requires python 3.6 or greater")
@@ -44,7 +44,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/iedb_allele
 
 setup(
     name="pvactools",
-    version="3.0.2",
+    version="3.1.0",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",
@@ -77,11 +77,10 @@ setup(
         'Pillow',
         'pymp-pypi',
         'mock',
+        'setuptools==57',
         'vaxrank>=1.1.0',
-        'keras==2.4.3',
-        'tensorflow==2.2.2',
-        'mhcnuggets==2.3.3',
-        'mhcflurry==2.0.1',
+        'mhcnuggets==2.4.0',
+        'mhcflurry==2.0.6',
         'testfixtures'
     ],
     package_data={

@@ -13,7 +13,7 @@ from mock import patch
 import pvactools.lib.call_iedb
 from pvactools.lib.prediction_class import PredictionClass, IEDB
 
-from .test_utils import *
+from tests.utils import *
 
 def test_data_directory():
     return os.path.join(pvactools_directory(), 'tests', 'test_data', 'call_iedb')
@@ -110,7 +110,10 @@ class CallIEDBClassITests(CallIEDBTests):
             self.allele,
             '-l', str(self.epitope_length)
         ])
-        expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
+        if (sys.version_info.major, sys.version_info.minor) == (3, 6):
+            expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.python36.tsv')
+        else:
+            expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
@@ -159,7 +162,10 @@ class CallIEDBClassIITests(CallIEDBTests):
             'DPA1*01:03',
             '-l', '15',
         ])
-        expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
+        if (sys.version_info.major, sys.version_info.minor) == (3, 6):
+            expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.python36.tsv')
+        else:
+            expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
