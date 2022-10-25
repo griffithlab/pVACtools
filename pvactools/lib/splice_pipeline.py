@@ -156,7 +156,6 @@ class JunctionPipeline():
                 self.final_combined_df.loc[i, 'alt_protein_length'] = len(alt_aa)
                 self.final_combined_df.loc[i, 'frameshift_event'] = len(is_fs)
         print('Completed')
-        self.final_combined_df.dropna()
         self.final_combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
     
     # creates kmer fasta files for input into prediction pipeline
