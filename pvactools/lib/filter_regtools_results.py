@@ -87,6 +87,8 @@ class FilterRegtoolsResults():
         merged_df['strand'] = merged_df['strand'].replace(['+','-'], [1,-1])
         # create filtered tsv file
         merged_df.to_csv(self.output_file, sep='\t', index=False)
+        
+        return merged_df
     
     def execute(self):
         # open file, rename junction cols for clarity
@@ -103,18 +105,5 @@ class FilterRegtoolsResults():
         explode_junctions = self.explode_junction_rows(filter_junctions)
 
         # merge dfs and create associated filtered tsv file
-        self.merge_and_write(pc_junctions, explode_junctions)
-
-# debugging
-if __name__ == '__main__':
-    print('Filtering regtools results')
-    filter_params = {
-        'input_file'  : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/junctions.tsv',
-        'output_file' : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/2022-6-16_splice_run/H_NJ-HCC1395-HCC1395_filtered.tsv',
-        'output_dir'  : '/Users/mrichters/Documents/Alt_Splicing/HCC1395/2022-6-16_splice_run',
-        'score'       : 10,
-        'distance'    : 100,
-    }
-    filter = FilterRegtoolsResults(**filter_params)
-    filter.execute()
-    print('Completed')
+        filtered_df = self.merge_and_write(pc_junctions, explode_junctions)
+        return filtered_df
