@@ -167,31 +167,20 @@ class JunctionToFasta():
         # make biopython happy by making dna_seq a multiple of 3 
         # adding Ns to end of sequence if remainder != 0
         remainder = len(dna_seq) % 3
-        if remainder == 1:
-            dna_seq += "NN"
-        elif remainder == 2:
-            dna_seq += "N"
+        if remainder == 0:
+            frameshift = 'yes'
+        else:
+            frameshift = 'no'
+            if remainder == 1:
+                dna_seq += "NN"
+            elif remainder == 2:
+                dna_seq += "N"
         aa_seq = str(dna_seq.translate(to_stop=True)) # translating from Seq object
         if aa_seq[0] != 'M':
             print(f'{self.tscript_id} does not begin with start codon...Skipping')
             aa_seq = ''
-        if type == 'alt':
-            fs = self.find_frameshift_junctions(dna_seq)
-        elif type == 'wt':
-            fs = 'NA'
-        
-        return aa_seq, fs
 
-    def find_frameshift_junctions(self, alt_dna_seq):
-        remainder = len(alt_dna_seq) % 3
-        if remainder == 0:
-            is_frameshift = 'no'
-        elif remainder == 1:
-            is_frameshift = 'yes'
-        elif remainder == 2:
-            is_frameshift = 'yes'
-        
-        return is_frameshift
+        return aa_seq, frameshift
 
     def create_sequence_fasta(self, wt_seq, alt_seq):
         write_str = f'>WT.{self.fasta_index}\n{wt_seq}\n>ALT.{self.fasta_index}\n{alt_seq}\n'
