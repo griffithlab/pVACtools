@@ -14,7 +14,7 @@ from mock import patch
 
 from pvactools.lib.pipeline import PvacbindPipeline
 from pvactools.tools.pvacbind import *
-from .test_utils import *
+from tests.utils import *
 import logging
 from testfixtures import LogCapture, StringComparison as S
 
