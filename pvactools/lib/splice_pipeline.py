@@ -17,7 +17,7 @@ class JunctionPipeline():
         self.output_dir              = kwargs['base_output_dir']
         self.fasta_path              = kwargs['ref_fasta']        
         self.annotated_vcf           = kwargs['annotated_vcf']
-        #self.input_gtf              = kwargs['input_gtf']
+        self.input_gtf              = 'insert_cluster_gtf_path'
         self.class_i_epitope_length  = kwargs['class_i_epitope_length']
         self.class_ii_epitope_length = kwargs['class_ii_epitope_length']
         self.class_i_hla             = kwargs['class_i_hla']
@@ -117,7 +117,7 @@ class JunctionPipeline():
         self.final_combined_df = self.combined_df.copy()
         print('Assembling tumor-specific splicing junctions')   
         for i in self.combined_df.index.unique().to_list():
-            #print(i)
+            print(i)
             junction = self.combined_df.loc[[i], :]         
             for row in junction.itertuples():
                 junction_params = {
