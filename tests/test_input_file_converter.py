@@ -8,7 +8,7 @@ import logging
 from testfixtures import LogCapture, StringComparison as S
 
 from pvactools.lib.input_file_converter import VcfConverter, FusionInputConverter
-from .test_utils import *
+from tests.utils import *
 
 class InputFileConverterTests(unittest.TestCase):
     @classmethod
@@ -76,6 +76,37 @@ class InputFileConverterTests(unittest.TestCase):
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
+    def test_input_vcf_with_empty_vaf_generates_expected_tsv(self):
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_empty_vaf_list.vcf.gz')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'  : convert_vcf_input_file,
+            'output_file' : convert_vcf_output_file.name,
+            'sample_name' : 'TUMOR',
+            'normal_sample_name': 'NORMAL',
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_empty_vaf.tsv')
+        self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+
+        convert_vcf_input_file  = os.path.join(self.test_data_dir, 'input_empty_vaf_single.vcf.gz')
+        convert_vcf_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'  : convert_vcf_input_file,
+            'output_file' : convert_vcf_output_file.name,
+            'sample_name' : 'TUMOR',
+            'normal_sample_name': 'NORMAL',
+        }
+        converter = VcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_empty_vaf.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
 
     def test_input_vcf_with_tx_annotation_generates_expected_tsv(self):

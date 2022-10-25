@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
 
     steps:
       - uses: actions/checkout@v2
@@ -28,9 +28,12 @@ jobs:
           sudo apt-get install -y ghostscript
           sudo apt-get install -y gcc
           sudo apt-get install -y pandoc
+          pip install setuptools==57
+          pip install pypandoc==1.7.2
+          pip install coverage
+          pip install coveralls
       - name: Install Python dependencies
         run: |
-          pip install -r requirements.txt
           pip install -e .
           mhcflurry-downloads fetch
       - name: List installed packages

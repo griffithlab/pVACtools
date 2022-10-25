@@ -171,11 +171,17 @@ class VcfConverter(InputFileConverter):
         if af_tag in genotype.data:
             allele_frequencies = genotype.data[af_tag]
             if isinstance(allele_frequencies, list):
-                vaf = allele_frequencies[alts.index(alt)]
+                if len(allele_frequencies) == 0:
+                    return 'NA'
+                else:
+                    vaf = allele_frequencies[alts.index(alt)]
             else:
                 vaf = allele_frequencies
+                if vaf is None or vaf == "":
+                    return 'NA'
             if vaf > 1:
                 print("Warning: VAF is expected to be a fraction, but is larger than 1. If VAFs are encoded as percentages, please adjust the coverage cutoffs accordingly.")
+            return vaf
         else:
             if ad_tag in genotype.data and dp_tag in genotype.data:
                 allele_depths = genotype.data[ad_tag]
@@ -195,10 +201,10 @@ class VcfConverter(InputFileConverter):
                 depth = genotype.data[dp_tag]
                 if depth is None or depth == "":
                     return 'NA'
-                vaf = self.calculate_vaf(int(var_count), int(depth))
+                else:
+                    return self.calculate_vaf(int(var_count), int(depth))
             else:
-                vaf = 'NA'
-        return vaf
+                return 'NA'
 
     def calculate_coverage_for_entry(self, entry, reference, alt, genotype):
         coverage_for_entry = {}
@@ -307,6 +313,11 @@ class VcfConverter(InputFileConverter):
                     transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], 'deletion')
 
                 for transcript in transcripts:
+                    transcript_name = transcript['Feature']
+                    consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
+                    if consequence is None:
+                        continue
+
                     if '/' in transcript['Protein_position']:
                         protein_position = transcript['Protein_position'].split('/')[0]
                         if protein_position == '-':
@@ -316,10 +327,7 @@ class VcfConverter(InputFileConverter):
                     if protein_position == '-' or protein_position == '':
                         print("Variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
                         continue
-                    transcript_name = transcript['Feature']
-                    consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
-                    if consequence is None:
-                        continue
+
                     elif consequence == 'FS':
                         if transcript['FrameshiftSequence'] == '':
                             print("frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))

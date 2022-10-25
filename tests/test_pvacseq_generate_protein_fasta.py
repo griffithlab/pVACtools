@@ -7,7 +7,7 @@ from filecmp import cmp
 import py_compile
 
 from pvactools.tools.pvacseq import generate_protein_fasta
-from .test_utils import *
+from tests.utils import *
 
 class GenerateFastaTests(unittest.TestCase):
     @classmethod
