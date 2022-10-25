@@ -4,7 +4,7 @@ class CombineInputs():
     def __init__(self, **kwargs):
         self.junctions_df = kwargs['junctions_df']
         self.variants     = kwargs['variant_file']
-        self.output_file  = kwargs['output_file']
+        #self.output_file  = kwargs['output_file']
         self.maximum_transcript_support_level = kwargs['maximum_transcript_support_level']
 
     def add_junction_coordinates_to_variants(self):
@@ -52,10 +52,10 @@ class CombineInputs():
         merged_df['index'] = merged_df['Gene_name'] + '.' + merged_df['transcript_name'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
         
         # cols for frameshift info
-        merged_df[['Wt protein length', 'Alt protein length', 'Frameshift Junction']] = 'NA'
+        merged_df[['wt_protein_length', 'alt_protein_length', 'frameshift_event']] = 'NA'
         
         # create final file
-        merged_df.to_csv(self.output_file, sep='\t', index=False)
+        #merged_df.to_csv(self.output_file, sep='\t', index=False)
 
         return merged_df
 
