@@ -313,9 +313,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if '-' in position:
             d_ind = position.index('-')
             if all(pos in anchors for pos in range(int(position[0:d_ind]), int(position[d_ind+1:])+1)):
-                if mutation["Median WT IC50 Score"] == "NA":
+                if mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
                       anchor_residue_pass = False
-                elif mutation["Median WT IC50 Score"] < 1000:
+                elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < relaxed_binding_threshold:
                       anchor_residue_pass = False
         elif position != "NA":
             if int(float(position)) in anchors:
@@ -323,7 +323,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     anchor_residue_pass = False
                 elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < relaxed_binding_threshold:
                     anchor_residue_pass = False
-                elif self.relaxed_percentile_threshold and mutation['{} WT IC50 Percentile'.format(self.wt_top_score_metric)] < self.relaxed_percentile_threshold:
+                elif self.relaxed_percentile_threshold and mutation['{} WT Percentile'.format(self.wt_top_score_metric)] < self.relaxed_percentile_threshold:
                     anchor_residue_pass = False
 
         tsl_pass = True
@@ -337,7 +337,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            tsl_pass and
            anchor_residue_pass):
             if self.percentile_threshold:
-                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
+                if mutation["{} MT Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
                     return "Pass"
             else:
                 return "Pass"
@@ -349,7 +349,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            tsl_pass and
            anchor_residue_pass):
             if self.relaxed_percentile_threshold:
-                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
+                if mutation["{} MT Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
                     return "Relaxed"
             else:
                 return "Relaxed"
@@ -361,7 +361,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            tsl_pass and
            not anchor_residue_pass):
             if self.relaxed_percentile_threshold:
-                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
+                if mutation["{} MT Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
                     return "Anchor"
             else:
                 return "Anchor"
@@ -373,7 +373,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            tsl_pass and
            anchor_residue_pass):
             if self.relaxed_percentile_threshold:
-                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
+                if mutation["{} MT Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
                     return "Subclonal"
             else:
                 return "Subclonal"
@@ -393,7 +393,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
            tsl_pass and
            anchor_residue_pass):
             if self.relaxed_percentile_threshold:
-                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
+                if mutation["{} MT Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
                     return "LowExpr"
             else:
                 return "LowExpr"
