@@ -103,6 +103,10 @@ class VcfConverter(InputFileConverter):
             sys.exit("VCF doesn't contain VEP FrameshiftSequence annotations. Please re-annotate the VCF with VEP and the Wildtype and Frameshift plugins.")
         if 'WildtypeProtein' not in self.csq_parser.csq_format:
             sys.exit("VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Frameshift plugins.")
+        if 'TSL' not in self.csq_parser.csq_format:
+            sys.exit("VCF {} doesn't contain VEP TSL annotations. Please re-annotate the VCF with VEP and the --tsl option enabled.".format(self.input_file))
+        if 'BIOTYPE' not in self.csq_parser.csq_format:
+            sys.exit("VCF doesn't contain VEP BIOTYPE annotations. Please re-annotate the VCF with VEP and the --biotype option enabled.")
 
     def is_insertion(self, ref, alt):
         return len(alt) > len(ref)
@@ -356,12 +360,12 @@ class VcfConverter(InputFileConverter):
                     ensembl_gene_id = transcript['Gene']
                     hgvsc = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSc']) if 'HGVSc' in transcript else 'NA'
                     hgvsp = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSp']) if 'HGVSp' in transcript else 'NA'
-                    if 'TSL' in transcript and transcript['TSL'] is not None and transcript['TSL'] != '':
+                    if transcript['TSL'] is not None and transcript['TSL'] != '':
                         tsl = transcript['TSL']
                     else:
                         tsl = 'NA'
 
-                    if 'BIOTYPE' in transcript and transcript['BIOTYPE'] is not None and transcript['BIOTYPE'] != '':
+                    if transcript['BIOTYPE'] is not None and transcript['BIOTYPE'] != '':
                         biotype = transcript['BIOTYPE']
                     else:
                         biotype = 'NA'
