@@ -110,7 +110,7 @@ class PostProcessor:
     def execute_transcript_support_level_filter(self):
         if self.run_transcript_support_level_filter:
             print("Running Transcript Support Level Filter")
-            filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': self.maximum_transcript_support_level, 'exclude_nas': self.exclude_NAs}]
+            filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': self.maximum_transcript_support_level, 'exclude_nas': True}]
             Filter(
                 self.coverage_filter_fh.name,
                 self.transcript_support_level_filter_fh.name,
