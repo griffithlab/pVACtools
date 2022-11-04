@@ -303,8 +303,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     anchor_residue_pass = False
 
         tsl_pass = True
-        if mutation["Transcript Support Level"] != "NA" and mutation["Transcript Support Level"] > self.maximum_transcript_support_level:
+        if mutation["Transcript Support Level"] == "NA":
             tsl_pass = False
+        else:
+            if mutation["Transcript Support Level"] > self.maximum_transcript_support_level:
+                tsl_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold and

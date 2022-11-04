@@ -52,20 +52,3 @@ class CoverageFilterTests(unittest.TestCase):
             output_file.name,
             os.path.join(self.test_data_dir, "Test.filtered.max_tsl_3.tsv"),
         ))
-
-    def test_transcript_support_level_filter_exclude_nas(self):
-        output_file = tempfile.NamedTemporaryFile()
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            os.path.join(
-                self.test_data_dir,
-                'Test.all_epitopes.tsv'
-            ),
-            output_file.name,
-            '--exclude-NAs',
-        ], shell=False))
-        self.assertTrue(cmp(
-            output_file.name,
-            os.path.join(self.test_data_dir, "Test.filtered.exclude_nas.tsv"),
-        ))

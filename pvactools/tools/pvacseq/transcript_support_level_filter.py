@@ -24,19 +24,13 @@ def define_parser():
         default=1,
         choices=[1,2,3,4,5]
     )
-    parser.add_argument(
-        '--exclude-NAs',
-        help="Exclude NA values from the filtered output.",
-        default=False,
-        action='store_true'
-    )
     return parser
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': args.maximum_transcript_support_level, 'exclude_nas': args.exclude_NAs}]
+    filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': args.maximum_transcript_support_level, 'exclude_nas': True}]
     Filter(
         args.input_file,
         args.output_file,
