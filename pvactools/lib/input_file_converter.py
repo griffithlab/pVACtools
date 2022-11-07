@@ -125,6 +125,14 @@ class VcfConverter(InputFileConverter):
         else:
             return CsqParser(csq_header.description)
 
+    def is_build38(self):
+        headers = [i for i in self.vcf_reader.header.lines if i.key == 'reference' or i.key == 'VEP']
+        for header in headers:
+            if 'GRCh38' in header.value:
+                return True
+
+        return False
+
     def resolve_consequence(self, consequence_string, ref, alt):
         if '&' in consequence_string:
             consequences = {consequence.lower() for consequence in consequence_string.split('&')}
@@ -360,10 +368,13 @@ class VcfConverter(InputFileConverter):
                     ensembl_gene_id = transcript['Gene']
                     hgvsc = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSc']) if 'HGVSc' in transcript else 'NA'
                     hgvsp = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSp']) if 'HGVSp' in transcript else 'NA'
-                    if transcript['TSL'] is not None and transcript['TSL'] != '':
-                        tsl = transcript['TSL']
+                    if not self.is_build38():
+                        tsl = 'Not Supported'
                     else:
-                        tsl = 'NA'
+                        if transcript['TSL'] is not None and transcript['TSL'] != '':
+                            tsl = transcript['TSL']
+                        else:
+                            tsl = 'NA'
 
                     if transcript['BIOTYPE'] is not None and transcript['BIOTYPE'] != '':
                         biotype = transcript['BIOTYPE']

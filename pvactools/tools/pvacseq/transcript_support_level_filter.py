@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from pvactools.lib.filter import Filter
+from pvactools.lib.filter import Filter, FilterCriterion
 
 def define_parser():
     parser = argparse.ArgumentParser(
@@ -30,7 +30,7 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': args.maximum_transcript_support_level, 'exclude_nas': True}]
+    filter_criteria = [FilterCriterion('Transcript Support Level', '<=', args.maximum_transcript_support_level, exclude_nas=True, skip_value='Not Supported')]
     Filter(
         args.input_file,
         args.output_file,
