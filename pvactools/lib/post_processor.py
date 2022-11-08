@@ -26,6 +26,15 @@ class PostProcessor:
         self.file_type = kwargs.pop('file_type', None)
         self.fasta = kwargs.pop('fasta', None)
         self.net_chop_fasta = kwargs.pop('net_chop_fasta', None)
+        self.el_only = all([self.is_el(a) for a in self.prediction_algorithms])
+
+
+    def is_el(self, algorithm):
+        if algorithm == 'MHCflurry' and self.flurry_state == 'EL_only':
+            return True
+        if algorithm in ['NetMHCIIpanEL', 'NetMHCpanEL']:
+            return True
+        return False
 
     def execute(self):
         self.aggregate_all_epitopes()
@@ -42,6 +51,8 @@ class PostProcessor:
         print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
 
     def aggregate_all_epitopes(self):
+        if self.el_only:
+            return
         print("Creating aggregated report")
         if self.file_type == 'pVACseq':
             PvacseqAggregateAllEpitopes(
@@ -76,6 +87,9 @@ class PostProcessor:
             print("Completed")
 
     def execute_binding_filter(self):
+        if self.el_only:
+            shutil.copy(self.input_file, self.binding_filter_fh.name)
+            return
         print("Running Binding Filters")
         BindingFilter(
             self.input_file,
@@ -122,6 +136,9 @@ class PostProcessor:
             shutil.copy(self.coverage_filter_fh.name, self.transcript_support_level_filter_fh.name)
 
     def execute_top_score_filter(self):
+        if self.el_only:
+            shutil.copy(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name)
+            return
         print("Running Top Score Filter")
         TopScoreFilter(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric, self.file_type).execute()
         print("Completed")
