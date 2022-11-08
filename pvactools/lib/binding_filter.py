@@ -4,6 +4,7 @@ import re
 import csv
 from pvactools.lib.filter import Filter, FilterCriterion
 from pvactools.lib.allele_specific_binding_filter import AlleleSpecificBindingFilter
+from pvactools.lib.run_utils import *
 
 class BindingFilter:
     def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, exclude_nas, allele_specific_cutoffs, percentile_threshold, file_type='pVACseq'):
@@ -73,7 +74,7 @@ class BindingFilter:
             default=500
         )
         parser.add_argument(
-            '-p', '--percentile-threshold', type=float,
+            '-p', '--percentile-threshold', type=float_range(0.0,100.0),
             help="Report only epitopes where the mutant allele "
                  +"has a percentile rank below this value."
         )

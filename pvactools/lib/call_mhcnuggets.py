@@ -71,7 +71,7 @@ def main(args_input = sys.argv[1:]):
             new_row['seq_num'] = seq_num
             new_row['start'] = start
             new_row['allele'] = args.allele
-            new_row['percentile'] = row['human_proteome_rank']
+            new_row['percentile'] = float(row['human_proteome_rank']) * 100
             processed_df = processed_df.append(new_row)
     processed_df['start'] = pd.to_numeric(processed_df['start'], downcast='integer')
     processed_df = processed_df[['peptide', 'ic50', 'percentile', 'seq_num', 'start', 'allele']]
