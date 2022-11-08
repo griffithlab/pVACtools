@@ -303,8 +303,13 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     anchor_residue_pass = False
 
         tsl_pass = True
-        if mutation["Transcript Support Level"] != "NA" and mutation["Transcript Support Level"] > self.maximum_transcript_support_level:
+        if mutation["Transcript Support Level"] == "Not Supported":
+            pass
+        elif mutation["Transcript Support Level"] == "NA":
             tsl_pass = False
+        else:
+            if mutation["Transcript Support Level"] > self.maximum_transcript_support_level:
+                tsl_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold and
@@ -473,8 +478,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             peptides[set_name]['transcripts'] = annotations
             peptides[set_name]['transcript_expr'] = [good_binders[good_binders["annotation"] == x]['Transcript Expression'].iloc[0] for x in annotations]
             tsls = [good_binders[good_binders["annotation"] == x]['Transcript Support Level'].iloc[0] for x in annotations]
-            peptides[set_name]['tsl'] = [x if x == 'NA' else round(float(x)) for x in tsls]
-            peptides[set_name]['tsl'] = [x if x == 'NA' else round(float(x)) for x in tsls]
+            peptides[set_name]['tsl'] = [x if x == 'NA' or x == 'Not Supported' else round(float(x)) for x in tsls]
             peptides[set_name]['biotype'] = [good_binders[good_binders["annotation"] == x]['Biotype'].iloc[0] for x in annotations]
             peptides[set_name]['transcript_length'] = [int(good_binders[good_binders["annotation"] == x]['Transcript Length'].iloc[0]) for x in annotations]
             peptides[set_name]['transcript_count'] = len(annotations)
