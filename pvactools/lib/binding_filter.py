@@ -2,8 +2,9 @@ import argparse
 import sys
 import re
 import csv
-from pvactools.lib.filter import Filter
+from pvactools.lib.filter import Filter, FilterCriterion
 from pvactools.lib.allele_specific_binding_filter import AlleleSpecificBindingFilter
+from pvactools.lib.run_utils import *
 
 class BindingFilter:
     def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, exclude_nas, allele_specific_cutoffs, percentile_threshold, file_type='pVACseq'):
@@ -37,16 +38,16 @@ class BindingFilter:
                 elif self.top_score_metric == 'lowest':
                     ic50_column = 'Best MT IC50 Score'
                     percentile_column = 'Best MT Percentile'
-            filter_criteria.append({'column': ic50_column, 'operator': '<=', 'threshold': self.binding_threshold, 'exclude_nas': self.exclude_nas})
+            filter_criteria.append(FilterCriterion(ic50_column, '<=', self.binding_threshold, exclude_nas=self.exclude_nas))
             if self.percentile_threshold is not None:
-                filter_criteria.append({'column': percentile_column, 'operator': '<=', 'threshold': self.percentile_threshold, 'exclude_nas': False})
+                filter_criteria.append(FilterCriterion(percentile_column, '<=', self.percentile_threshold, exclude_nas=False))
 
             if self.minimum_fold_change is not None:
                 if self.top_score_metric == 'median':
                     column = 'Median Fold Change'
                 elif self.top_score_metric == 'lowest':
                     column = 'Corresponding Fold Change'
-                filter_criteria.append({'column': column, 'operator': '>=', 'threshold': self.minimum_fold_change, 'exclude_nas': self.exclude_nas})
+                filter_criteria.append(FilterCriterion(column, '>=', self.minimum_fold_change, exclude_nas=self.exclude_nas))
 
             Filter(self.input_file, self.output_file, filter_criteria).execute()
 
@@ -73,7 +74,7 @@ class BindingFilter:
             default=500
         )
         parser.add_argument(
-            '-p', '--percentile-threshold', type=float,
+            '-p', '--percentile-threshold', type=float_range(0.0,100.0),
             help="Report only epitopes where the mutant allele "
                  +"has a percentile rank below this value."
         )

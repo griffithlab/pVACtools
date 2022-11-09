@@ -3,7 +3,7 @@ import shutil
 
 from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, UnmatchedSequenceAggregateAllEpitopes
 from pvactools.lib.binding_filter import BindingFilter
-from pvactools.lib.filter import Filter
+from pvactools.lib.filter import Filter, FilterCriterion
 from pvactools.lib.top_score_filter import TopScoreFilter
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.calculate_reference_proteome_similarity import CalculateReferenceProteomeSimilarity
@@ -26,6 +26,15 @@ class PostProcessor:
         self.file_type = kwargs.pop('file_type', None)
         self.fasta = kwargs.pop('fasta', None)
         self.net_chop_fasta = kwargs.pop('net_chop_fasta', None)
+        self.el_only = all([self.is_el(a) for a in self.prediction_algorithms])
+
+
+    def is_el(self, algorithm):
+        if algorithm == 'MHCflurry' and self.flurry_state == 'EL_only':
+            return True
+        if algorithm in ['NetMHCIIpanEL', 'NetMHCpanEL']:
+            return True
+        return False
 
     def execute(self):
         self.aggregate_all_epitopes()
@@ -42,6 +51,8 @@ class PostProcessor:
         print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
 
     def aggregate_all_epitopes(self):
+        if self.el_only:
+            return
         print("Creating aggregated report")
         if self.file_type == 'pVACseq':
             PvacseqAggregateAllEpitopes(
@@ -76,6 +87,9 @@ class PostProcessor:
             print("Completed")
 
     def execute_binding_filter(self):
+        if self.el_only:
+            shutil.copy(self.input_file, self.binding_filter_fh.name)
+            return
         print("Running Binding Filters")
         BindingFilter(
             self.input_file,
@@ -94,14 +108,14 @@ class PostProcessor:
         if self.run_coverage_filter:
             print("Running Coverage Filters")
             filter_criteria = []
-            filter_criteria.append({'column': "Normal Depth", 'operator': '>=', 'threshold': self.normal_cov, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Normal VAF", 'operator': '<=', 'threshold': self.normal_vaf, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Tumor DNA Depth", 'operator': '>=', 'threshold': self.tdna_cov, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Tumor DNA VAF", 'operator': '>=', 'threshold': self.tdna_vaf, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Tumor RNA Depth", 'operator': '>=', 'threshold': self.trna_cov, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Tumor RNA VAF", 'operator': '>=', 'threshold': self.trna_vaf, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Gene Expression", 'operator': '>=', 'threshold': self.expn_val, 'exclude_nas': self.exclude_NAs})
-            filter_criteria.append({'column': "Transcript Expression", 'operator': '>=', 'threshold': self.expn_val, 'exclude_nas': self.exclude_NAs})
+            filter_criteria.append(FilterCriterion("Normal Depth", '>=', self.normal_cov, exclude_nas=self.exclude_NAs))
+            filter_criteria.append(FilterCriterion("Normal VAF", '<=', self.normal_vaf, exclude_nas=self.exclude_NAs))
+            filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', self.tdna_cov, exclude_nas=self.exclude_NAs))
+            filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', self.tdna_vaf, exclude_nas=self.exclude_NAs))
+            filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', self.trna_cov, exclude_nas=self.exclude_NAs))
+            filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf, exclude_nas=self.exclude_NAs))
+            filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
+            filter_criteria.append(FilterCriterion("Transcript Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
             Filter(self.binding_filter_fh.name, self.coverage_filter_fh.name, filter_criteria).execute()
             print("Completed")
         else:
@@ -110,7 +124,7 @@ class PostProcessor:
     def execute_transcript_support_level_filter(self):
         if self.run_transcript_support_level_filter:
             print("Running Transcript Support Level Filter")
-            filter_criteria = [{'column': 'Transcript Support Level', 'operator': '<=', 'threshold': self.maximum_transcript_support_level, 'exclude_nas': self.exclude_NAs}]
+            filter_criteria = [FilterCriterion('Transcript Support Level', '<=', self.maximum_transcript_support_level, exclude_nas=True, skip_value='Not Supported')]
             Filter(
                 self.coverage_filter_fh.name,
                 self.transcript_support_level_filter_fh.name,
@@ -122,6 +136,9 @@ class PostProcessor:
             shutil.copy(self.coverage_filter_fh.name, self.transcript_support_level_filter_fh.name)
 
     def execute_top_score_filter(self):
+        if self.el_only:
+            shutil.copy(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name)
+            return
         print("Running Top Score Filter")
         TopScoreFilter(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric, self.file_type).execute()
         print("Completed")

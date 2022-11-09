@@ -4,7 +4,7 @@ import re
 import os
 import csv
 
-from pvactools.lib.filter import Filter
+from pvactools.lib.filter import Filter, FilterCriterion
 from pvactools.lib.run_utils import *
 
 def define_parser():
@@ -78,14 +78,14 @@ def main(args_input = sys.argv[1:]):
 #Gene Expression
 #Transcript Expression
     filter_criteria = []
-    filter_criteria.append({'column': "Normal Depth", 'operator': '>=', 'threshold': args.normal_cov, 'exclude_nas': args.exclude_NAs})
-    filter_criteria.append({'column': "Normal VAF", 'operator': '<=', 'threshold': args.normal_vaf, 'exclude_nas': args.exclude_NAs})
-    filter_criteria.append({'column': "Tumor DNA Depth", 'operator': '>=', 'threshold': args.tdna_cov, 'exclude_nas': args.exclude_NAs})
-    filter_criteria.append({'column': "Tumor DNA VAF", 'operator': '>=', 'threshold': args.tdna_vaf, 'exclude_nas': args.exclude_NAs})
-    filter_criteria.append({'column': "Tumor RNA Depth", 'operator': '>=', 'threshold': args.trna_cov, 'exclude_nas': args.exclude_NAs})
-    filter_criteria.append({'column': "Tumor RNA VAF", 'operator': '>=', 'threshold': args.trna_vaf, 'exclude_nas': args.exclude_NAs})
-    filter_criteria.append({'column': "Gene Expression", 'operator': '>=', 'threshold': args.expn_val, 'exclude_nas': args.exclude_NAs})
-    filter_criteria.append({'column': "Transcript Expression", 'operator': '>=', 'threshold': args.expn_val, 'exclude_nas': args.exclude_NAs})
+    filter_criteria.append(FilterCriterion("Normal Depth", '>=', args.normal_cov, exclude_nas=args.exclude_NAs))
+    filter_criteria.append(FilterCriterion("Normal VAF", '<=', args.normal_vaf, exclude_nas=args.exclude_NAs))
+    filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', args.tdna_cov, exclude_nas=args.exclude_NAs))
+    filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', args.tdna_vaf, exclude_nas=args.exclude_NAs))
+    filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', args.trna_cov, exclude_nas=args.exclude_NAs))
+    filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', args.trna_vaf, exclude_nas=args.exclude_NAs))
+    filter_criteria.append(FilterCriterion("Gene Expression", '>=', args.expn_val, exclude_nas=args.exclude_NAs))
+    filter_criteria.append(FilterCriterion("Transcript Expression", '>=', args.expn_val, exclude_nas=args.exclude_NAs))
 
     Filter(args.input_file, args.output_file, filter_criteria).execute()
 

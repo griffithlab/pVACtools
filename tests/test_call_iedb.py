@@ -124,10 +124,6 @@ class CallIEDBClassIITests(CallIEDBTests):
         cls.input_file     = os.path.join(cls.test_data_dir, 'input_31.fasta')
         cls.allele         = 'H2-IAb'
         cls.methods = ['nn_align']
-        cls.request_mock = unittest.mock.Mock(side_effect = (
-            make_response(method, cls.test_data_dir) for method in cls.methods
-        ))
-        pvactools.lib.call_iedb.requests.post = cls.request_mock
 
     def test_iedb_methods_generate_expected_files(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
