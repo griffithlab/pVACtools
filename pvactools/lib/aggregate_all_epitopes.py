@@ -293,18 +293,27 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return (df, key_str)
 
     def get_best_binder(self, df):
-        df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "{} WT IC50 Score".format(self.wt_top_score_metric)], inplace=True, ascending=[True, True, False])
-        return df.iloc[0].to_dict()
+        #get all entries with Biotype 'protein_coding'
+        biotype_df = df[df['Biotype'] == 'protein_coding']
+        #if there are none, reset to previous dataframe
+        if biotype_df.shape[0] == 0:
+            biotype_df = df
+        #subset protein_coding dataframe to only include entries with a TSL < maximum_transcript_support_level
+        tsl_df = biotype_df[biotype_df['Transcript Support Level'] != 'NA']
+        tsl_df = tsl_df[tsl_df['Transcript Support Level'] != 'Not Supported']
+        tsl_df = tsl_df[tsl_df['Transcript Support Level'] < self.maximum_transcript_support_level]
+        #if this results in an empty dataframe, reset to previous dataframe
+        if tsl_df.shape[0] == 0:
+            tsl_df = biotype_df
+
+        #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
+        tsl_df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "Transcript Length".format(self.wt_top_score_metric)], inplace=True, ascending=[True, True, False])
+        return tsl_df.iloc[0].to_dict()
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
         binding_threshold = self.binding_thresholds[mutation['HLA Allele']]
         relaxed_binding_threshold = binding_threshold * 2
-
-        if mutation["Transcript Support Level"] == "NA":
-            transcript_support_level = 1
-        else:
-            transcript_support_level = mutation["Transcript Support Level"]
 
         anchor_residue_pass = True
         anchors = [1, 2, len(mutation["MT Epitope Seq"])-1, len(mutation["MT Epitope Seq"])]
@@ -543,6 +552,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             'AA Change': self.get_best_aa_change(best),
             'Num Passing Transcripts': anno_count,
             'Best Peptide': best["MT Epitope Seq"],
+            'Best Transcript': best["Transcript"],
             'Allele': best["HLA Allele"],
             'Pos': best["Mutation Position"],
             'Num Passing Peptides': peptide_count,
