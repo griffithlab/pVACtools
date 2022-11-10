@@ -717,11 +717,16 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             gene = best['Gene Name']
         else:
             gene = 'NA'
+        if 'Transcript' in best:
+            transcript = best['Transcript']
+        else:
+            transcript = 'NA'
         out_dict.update({
             'Gene': gene,
             'AA Change': self.get_best_aa_change(best),
             'Num Passing Transcripts': anno_count,
             'Best Peptide': best["Epitope Seq"],
+            'Best Transcript': transcript,
             'Allele': best['HLA Allele'],
             'Pos': "NA",
             'Num Passing Peptides': peptide_count,
