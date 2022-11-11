@@ -526,3 +526,31 @@ class PvacseqTests(unittest.TestCase):
             ])
             output_dir.cleanup()
         self.assertTrue('Requested alleles are not from the same species.' in str(context.exception))
+
+    def test_problematic_amino_acids(self):
+        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            test_data_directory()
+        ))) as mock_request:
+            run.main([
+                os.path.join(self.test_data_directory, "input.vcf"),
+                'Test',
+                'HLA-G*01:09,HLA-E*01:01',
+                'NetMHC',
+                'PickPocket',
+                output_dir.name,
+                '-e1', '9,10',
+                '--problematic-amino-acids', 'C',
+            ])
+
+        for file_name in (
+            'Test.all_epitopes.tsv',
+            'Test.filtered.tsv',
+            'Test.all_epitopes.aggregated.tsv',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'problematic_amino_acids', 'MHC_CLass_I', file_name)
+            self.assertTrue(compare(output_file, expected_file))
+        output_dir.cleanup()
