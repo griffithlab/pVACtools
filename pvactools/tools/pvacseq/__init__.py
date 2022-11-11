@@ -13,6 +13,7 @@ __all__ = [
     'netmhc_stab',
     'calculate_reference_proteome_similarity',
     'transcript_support_level_filter',
+    'identify_problematic_amino_acids',
 ]
 
 from . import *

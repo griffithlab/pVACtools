@@ -60,6 +60,13 @@ def main():
     )
     generate_aggregated_report_parser.set_defaults(func=generate_aggregated_report)
 
+    identify_problematic_amino_acids_parser = subparsers.add_parser(
+        "identify_problematic_amino_acids",
+        help="Mark problematic amino acid positions in each epitope or filter entries that have problematic amino acids.",
+        add_help = False
+        )
+    identify_problematic_amino_acids_parser.set_defaults(func=identify_problematic_amino_acids)
+
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
         help="Download example input and output files",

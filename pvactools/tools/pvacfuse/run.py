@@ -148,7 +148,8 @@ def main(args_input = sys.argv[1:]):
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,
         'blastp_db'                 : args.blastp_db,
-        'run_post_processor'        : False
+        'run_post_processor'        : False,
+        'problematic_amino_acids'   : args.problematic_amino_acids,
     }
 
     if args.iedb_install_directory:
