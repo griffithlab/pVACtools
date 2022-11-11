@@ -78,6 +78,7 @@ class PvacseqTests(unittest.TestCase):
             "top_score_filter",
             "transcript_support_level_filter",
             "valid_alleles",
+            'identify_problematic_amino_acids',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -132,7 +133,7 @@ class PvacseqTests(unittest.TestCase):
             'pvactools',
             "tools",
             "pvacseq",
-            "binding_filter.py"
+            "coverage_filter.py"
         ))
         self.assertTrue(compiled_run_path)
 
@@ -242,6 +243,21 @@ class PvacseqTests(unittest.TestCase):
 
     def test_valid_alleles_runs(self):
         valid_alleles.main(["-p", "SMM"])
+
+    def test_identify_problematic_amino_acids_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacseq",
+            "identify_problematic_amino_acids.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_identify_problematic_amino_acids_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
 
     def test_pvacseq_pipeline(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
@@ -510,3 +526,31 @@ class PvacseqTests(unittest.TestCase):
             ])
             output_dir.cleanup()
         self.assertTrue('Requested alleles are not from the same species.' in str(context.exception))
+
+    def test_problematic_amino_acids(self):
+        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            test_data_directory()
+        ))) as mock_request:
+            run.main([
+                os.path.join(self.test_data_directory, "input.vcf"),
+                'Test',
+                'HLA-G*01:09,HLA-E*01:01',
+                'NetMHC',
+                'PickPocket',
+                output_dir.name,
+                '-e1', '9,10',
+                '--problematic-amino-acids', 'C',
+            ])
+
+        for file_name in (
+            'Test.all_epitopes.tsv',
+            'Test.filtered.tsv',
+            'Test.all_epitopes.aggregated.tsv',
+        ):
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'problematic_amino_acids', 'MHC_Class_I', file_name)
+            self.assertTrue(compare(output_file, expected_file))
+        output_dir.cleanup()

@@ -130,3 +130,6 @@ def float_range(minimum, maximum):
     # Return function handle to checking function
     return float_range_checker
 
+def supported_amino_acids():
+    return ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
+

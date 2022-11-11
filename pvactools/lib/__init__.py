@@ -5,6 +5,7 @@ __all__ = [
     "call_iedb",
     "combine_parsed_outputs",
     "csq_parser",
+    "identify_problematic_amino_acids",
     "input_file_converter",
     "download_example_data",
     "fasta_generator",

@@ -1,6 +1,7 @@
 import tempfile
 import shutil
 
+from pvactools.lib.identify_problematic_amino_acids import IdentifyProblematicAminoAcids
 from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, UnmatchedSequenceAggregateAllEpitopes
 from pvactools.lib.binding_filter import BindingFilter
 from pvactools.lib.filter import Filter, FilterCriterion
@@ -15,6 +16,7 @@ class PostProcessor:
         for (k,v) in kwargs.items():
            setattr(self, k, v)
         self.aggregate_report = self.input_file.replace('.tsv', '.aggregated.tsv')
+        self.identify_problematic_amino_acids_fh = tempfile.NamedTemporaryFile()
         self.binding_filter_fh = tempfile.NamedTemporaryFile()
         self.coverage_filter_fh = tempfile.NamedTemporaryFile()
         self.transcript_support_level_filter_fh = tempfile.NamedTemporaryFile()
@@ -37,6 +39,7 @@ class PostProcessor:
         return False
 
     def execute(self):
+        self.identify_problematic_amino_acids()
         self.aggregate_all_epitopes()
         self.calculate_manufacturability()
         self.execute_binding_filter()
@@ -49,6 +52,13 @@ class PostProcessor:
         shutil.copy(self.reference_similarity_fh.name, self.filtered_report_file)
         self.close_filehandles()
         print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
+
+    def identify_problematic_amino_acids(self):
+        if self.problematic_amino_acids:
+            print("Identifying peptides with problematic amino acids")
+            IdentifyProblematicAminoAcids(self.input_file, self.identify_problematic_amino_acids_fh.name, self.problematic_amino_acids, file_type=self.file_type).execute()
+            shutil.copy(self.identify_problematic_amino_acids_fh.name, self.input_file)
+            print("Completed")
 
     def aggregate_all_epitopes(self):
         if self.el_only:
