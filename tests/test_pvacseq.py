@@ -551,6 +551,6 @@ class PvacseqTests(unittest.TestCase):
             'Test.all_epitopes.aggregated.tsv',
         ):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'problematic_amino_acids', 'MHC_CLass_I', file_name)
+            expected_file = os.path.join(self.test_data_directory, 'problematic_amino_acids', 'MHC_Class_I', file_name)
             self.assertTrue(compare(output_file, expected_file))
         output_dir.cleanup()
