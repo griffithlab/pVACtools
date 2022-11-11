@@ -77,6 +77,7 @@ def main(args_input = sys.argv[1:]):
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,
         'blastp_db'                 : args.blastp_db,
+        'problematic_amino_acids'   : args.problematic_amino_acids,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:

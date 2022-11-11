@@ -106,6 +106,7 @@ def main(args_input = sys.argv[1:]):
         'blastp_path'               : args.blastp_path,
         'blastp_db'                 : args.blastp_db,
         'tumor_purity'              : args.tumor_purity,
+        'problematic_amino_acids'   : args.problematic_amino_acids,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
