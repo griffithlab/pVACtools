@@ -3,6 +3,7 @@ import argparse
 import tempfile
 
 from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes
+from pvactools.lib.run_utils import *
 
 def define_parser():
     parser = argparse.ArgumentParser(
@@ -38,7 +39,7 @@ def define_parser():
         action='store_true',
     )
     parser.add_argument(
-        '--percentile-threshold', type=float,
+        '--percentile-threshold', type=float_range(0.0,100.0),
         help="When set, tier epitopes in the \"Pass\" tier when the mutant allele "
              + "has percentile scores below this value and in the \"Relaxed\" tier "
              + "when the mutant allele has percentile scores below double this value.",

@@ -1,4 +1,5 @@
 ##fileformat=VCFv4.2
+##reference=ftp://ftp.ncbi.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh38/special_requests/GRCh38-lite.fa.gz
 ##FILTER=<ID=FAIL,Description="Fail the site if all alleles fail but for different reasons.">
 ##FILTER=<ID=LowDepth,Description="Tumor or normal sample read depth at this locus is below 2">
 ##FILTER=<ID=LowEVS,Description="Somatic Empirical Variant Score (SomaticEVS) is below threshold">
