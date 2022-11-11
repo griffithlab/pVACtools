@@ -72,6 +72,13 @@ def define_parser():
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
 
+    identify_problematic_amino_acids_parser = subparsers.add_parser(
+        "identify_problematic_amino_acids",
+        help="Mark problematic amino acid positions in each epitope or filter entries that have problematic amino acids.",
+        add_help = False
+        )
+    identify_problematic_amino_acids_parser.set_defaults(func=identify_problematic_amino_acids)
+
     allele_specific_cutoffs_parser = subparsers.add_parser(
         "allele_specific_cutoffs",
         help="Show the allele specific cutoffs",

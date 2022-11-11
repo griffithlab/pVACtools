@@ -31,6 +31,7 @@ table_formatting = function(x,y){
   ic50_wt <- add_column(ic50_wt, Type = "WT", .after="Peptide Sequence") 
   combined_data <- rbind(ic50_mt, ic50_wt)
   combined_data$`Mutation Position` <- peptide_columns$mutation_position[[1]]
+  combined_data$`Problematic Positions` <- peptide_columns$problematic_positions[[1]]
   combined_data
 }
 #generate peptide coloring for hla allele 

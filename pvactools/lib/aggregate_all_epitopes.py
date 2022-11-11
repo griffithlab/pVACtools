@@ -129,6 +129,10 @@ class AggregateAllEpitopes:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
 
+    def problematic_positions_exist(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        return 'Problematic Positions' in headers
+
     def determine_used_el_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
         potential_algorithms = ["MHCflurryEL Processing", "MHCflurryEL Presentation", "NetMHCpanEL", "NetMHCIIpanEL"]
@@ -153,6 +157,8 @@ class AggregateAllEpitopes:
             used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm)])
             if algorithm != "MHCflurryEL Processing":
                 used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
+        if self.problematic_positions_exist():
+            used_columns.append("Problematic Positions")
         return used_columns
 
     def set_column_types(self, prediction_algorithms):
@@ -493,6 +499,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         individual_el_percentile_calls[peptide_type] = el_percentile_calls
                     results[peptide]['hla_types'] = sorted(self.hla_types)
                     results[peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
+                    results[peptide]['problematic_positions'] = str(good_binders_peptide_annotation.iloc[0]['Problematic Positions']) if 'Problematic Positions' in good_binders_peptide_annotation.iloc[0] else ''
                     results[peptide]['individual_ic50_calls'] = individual_ic50_calls
                     results[peptide]['individual_percentile_calls'] = individual_percentile_calls
                     results[peptide]['individual_el_calls'] = individual_el_calls
@@ -545,6 +552,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         allele_expr = self.calculate_allele_expr(best)
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
+        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else ''
+
         out_dict = { 'ID': key }
         out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
         out_dict.update({
@@ -555,6 +564,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             'Best Transcript': best["Transcript"],
             'Allele': best["HLA Allele"],
             'Pos': best["Mutation Position"],
+            'Problematic Pos': problematic_positions,
             'Num Passing Peptides': peptide_count,
             'IC50 MT': best["{} MT IC50 Score".format(self.mt_top_score_metric)],
             'IC50 WT': best["{} WT IC50 Score".format(self.wt_top_score_metric)],
@@ -713,14 +723,9 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
         out_dict = { 'ID': key }
         out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
-        if 'Gene Name' in best:
-            gene = best['Gene Name']
-        else:
-            gene = 'NA'
-        if 'Transcript' in best:
-            transcript = best['Transcript']
-        else:
-            transcript = 'NA'
+        gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
+        transcript = best['Transcript'] if 'Transcript' in best else 'NA'
+        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else ''
         out_dict.update({
             'Gene': gene,
             'AA Change': self.get_best_aa_change(best),
@@ -729,6 +734,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             'Best Transcript': transcript,
             'Allele': best['HLA Allele'],
             'Pos': "NA",
+            'Problematic Pos': problematic_positions,
             'Num Passing Peptides': peptide_count,
             'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
             'IC50 WT': "NA",

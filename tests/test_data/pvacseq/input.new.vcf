@@ -1,0 +1,92 @@
+##fileformat=VCFv4.0
+##source=VarscanSomatic
+##reference=ftp://ftp.ncbi.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37/special_requests/GRCh37-lite.fa.gz
+##phasing=none
+##center=genome.wustl.edu
+##FILTER=<ID=PASS,Description="Passed all filters">
+##FILTER=<ID=VarscanHighConfidenceIndel,Description="Filter description">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth at this position in the sample">
+##FORMAT=<ID=AD,Number=.,Type=Integer,Description="Depth of reads supporting alleles 0/1/2/3...">
+##FORMAT=<ID=DP4,Number=4,Type=Integer,Description="Number of high-quality ref-forward, ref-reverse, alt-forward and alt-reverse bases">
+##FORMAT=<ID=BQ,Number=.,Type=Integer,Description="Average base quality for reads supporting alleles">
+##FORMAT=<ID=SS,Number=1,Type=Integer,Description="Variant status relative to non-adjacent Normal,0=wildtype,1=germline,2=somatic,3=LOH,4=post-transcriptional modification,5=unknown">
+##FORMAT=<ID=GQ,Number=.,Type=Integer,Description="Conditional Phred-scaled genotype quality">
+##FORMAT=<ID=MQ,Number=1,Type=Integer,Description="Phred style probability score that the variant is novel with respect to the genome's ancestor">
+##FORMAT=<ID=FA,Number=1,Type=Float,Description="Fraction of reads supporting ALT">
+##FORMAT=<ID=VAQ,Number=1,Type=Integer,Description="Variant allele quality">
+##FORMAT=<ID=FT,Number=1,Type=String,Description="Sample genotype filter">
+##FORMAT=<ID=AMQ,Number=.,Type=Integer,Description="Average mapping quality for each allele present in the genotype">
+##FORMAT=<ID=IGT,Number=1,Type=String,Description="Genotype when called independently (only filled if called in joint prior mode)">
+##FORMAT=<ID=BCOUNT,Number=4,Type=Integer,Description="Occurrence count for each base at this site (A,C,G,T)">
+##FORMAT=<ID=JGQ,Number=1,Type=Integer,Description="Joint genotype quality (only filled if called in join prior mode)">
+##FORMAT=<ID=SSC,Number=1,Type=Integer,Description="Somatic score between 0 and 255">
+##source=Strelka
+##FORMAT=<ID=FDP,Number=1,Type=Integer,Description="Number of basecalls filtered from original read depth for tier1">
+##FORMAT=<ID=SDP,Number=1,Type=Integer,Description="Number of reads with deletions spanning this site at tier1">
+##FORMAT=<ID=SUBDP,Number=1,Type=Integer,Description="Number of reads below tier1 mapping quality threshold aligned across this site">
+##FORMAT=<ID=AU,Number=2,Type=Integer,Description="Number of 'A' alleles used in tiers 1,2">
+##FORMAT=<ID=CU,Number=2,Type=Integer,Description="Number of 'C' alleles used in tiers 1,2">
+##FORMAT=<ID=GU,Number=2,Type=Integer,Description="Number of 'G' alleles used in tiers 1,2">
+##FORMAT=<ID=TU,Number=2,Type=Integer,Description="Number of 'T' alleles used in tiers 1,2">
+##FORMAT=<ID=DP2,Number=1,Type=Integer,Description="Read depth for tier2">
+##FORMAT=<ID=TAR,Number=2,Type=Integer,Description="Reads strongly supporting alternate allele for tiers 1,2">
+##FORMAT=<ID=TIR,Number=2,Type=Integer,Description="Reads strongly supporting indel allele for tiers 1,2">
+##FORMAT=<ID=TOR,Number=2,Type=Integer,Description="Other reads (weak support or insufficient indel breakpoint overlap) for tiers 1,2">
+##FORMAT=<ID=DP50,Number=1,Type=Float,Description="Average tier1 read depth within 50 bases">
+##FORMAT=<ID=FDP50,Number=1,Type=Float,Description="Average tier1 number of basecalls filtered from original read depth within 50 bases">
+##FORMAT=<ID=SUBDP50,Number=1,Type=Float,Description="Average number of reads below tier1 mapping quality threshold aligned across sites within 50 bases">
+##INFO=<ID=QSI,Number=1,Type=Integer,Description="Quality score for any somatic variant, ie. for the ALT haplotype to be present at a significantly different frequency in the tumor and normal">
+##INFO=<ID=TQSI,Number=1,Type=Integer,Description="Data tier used to compute QSI">
+##INFO=<ID=NT,Number=1,Type=String,Description="Genotype of the normal in all data tiers, as used to classify somatic variants. One of {ref,het,hom,conflict}.">
+##INFO=<ID=QSI_NT,Number=1,Type=Integer,Description="Quality score reflecting the joint probability of a somatic variant and NT">
+##INFO=<ID=TQSI_NT,Number=1,Type=Integer,Description="Data tier used to compute QSI_NT">
+##INFO=<ID=SGT,Number=1,Type=String,Description="Most likely somatic genotype excluding normal noise states">
+##INFO=<ID=RU,Number=1,Type=String,Description="Smallest repeating sequence unit in inserted or deleted sequence">
+##INFO=<ID=RC,Number=1,Type=Integer,Description="Number of times RU repeats in the reference allele">
+##INFO=<ID=IC,Number=1,Type=Integer,Description="Number of times RU repeats in the indel allele">
+##INFO=<ID=IHP,Number=1,Type=Integer,Description="Largest reference interupted homopolymer length intersecting with the indel">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=OVERLAP,Number=0,Type=Flag,Description="Somatic indel possibly overlaps a second indel.">
+##FILTER=<ID=DP,Description="Greater than 3.0x chromosomal mean depth in Normal sample">
+##FILTER=<ID=Repeat,Description="Sequence repeat of more than 8x in the reference sequence">
+##FILTER=<ID=iHpol,Description="Indel overlaps an interupted homopolymer longer than 14x in the reference sequence">
+##FILTER=<ID=BCNoise,Description="Average fraction of filtered basecalls within 50 bases of the indel exceeds 0.3">
+##FILTER=<ID=QSI_ref,Description="Normal sample is not homozygous ref or sindel Q-score < 30, ie calls with NT!=ref or QSI_NT < 30">
+##source=Pindel
+##FILTER=<ID=PindelSomaticCalls,Description="Filter description">
+##FILTER=<ID=PindelVafFilter,Description="Filter description">
+##FILTER=<ID=PindelReadSupport,Description="Filter description">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=NTLEN,Number=.,Type=Integer,Description="Number of bases inserted in place of deleted code">
+##source=GatkSomaticIndel
+##fileDate=20160321
+##INFO=<ID=QSS,Number=1,Type=Integer,Description="Quality score for any somatic snv, ie. for the ALT allele to be present at a significantly different frequency in the tumor and normal">
+##INFO=<ID=TQSS,Number=1,Type=Integer,Description="Data tier used to compute QSS">
+##INFO=<ID=QSS_NT,Number=1,Type=Integer,Description="Quality score reflecting the joint probability of a somatic variant and NT">
+##INFO=<ID=TQSS_NT,Number=1,Type=Integer,Description="Data tier used to compute QSS_NT">
+##FILTER=<ID=VarFilterSnv,Description="Filter description">
+##FILTER=<ID=FalsePositiveVcf,Description="Filter description">
+##FILTER=<ID=FalsePositive,Description="Filter description">
+##FILTER=<ID=SomaticScoreMappingQuality,Description="Filter description">
+##FILTER=<ID=IntersectionFailure,Description="Variant callers do not agree on this position">
+##FILTER=<ID=SpanDel,Description="Fraction of reads crossing site with spanning deletions in either sample exceeeds 0.75">
+##FILTER=<ID=QSS_ref,Description="Normal sample is not homozygous ref or ssnv Q-score < 15, ie calls with NT!=ref or QSS_NT < 15">
+##FORMAT=<ID=TLOD,Number=.,Type=Float,Description="Log of (likelihood tumor event is real / likelihood event is sequencing error)">
+##FILTER=<ID=REJECT,Description="Rejected as a confident somatic mutation by MuTect">
+##FILTER=<ID=VarscanHighConfidence,Description="Filter description">
+##FILTER=<ID=PASS,Description="Passed all filters">
+##FrameshiftSequence=Predicted sequence for frameshift mutations
+##WildtypeProtein=The normal, non-mutated protein sequence
+##VEP="v101" time="2022-11-04 15:11:06" db="homo_sapiens_core_101_38@ensembldb.ensembl.org" ensembl=101.856c8e8 ensembl-funcgen=101.b918a49 ensembl-io=101.943b6c2 ensembl-variation=101.50e7372 assembly="GRCh38.p13" gencode="GENCODE 35" genebuild="2014-07"
+##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|TSL|HGVS_OFFSET|FrameshiftSequence|WildtypeProtein">
+##FrameshiftSequence=Predicted sequence for frameshift mutations
+##WildtypeProtein=The normal, non-mutated protein sequence
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	H_NJ-HCC1395-HCC1395
+2	217498305	.	T	TGCTGCC	.	.	CSQ=GCTGCC|intron_variant&non_coding_transcript_variant|MODIFIER|DIRC3|ENSG00000231672|Transcript|ENST00000474063|lncRNA||1/11|ENST00000474063.5:n.322-19748_322-19747insGGCAGC|||||||||-1||HGNC|HGNC:17805|2|||,GCTGCC|intron_variant&non_coding_transcript_variant|MODIFIER|DIRC3|ENSG00000231672|Transcript|ENST00000486365|lncRNA||2/10|ENST00000486365.5:n.1345-19748_1345-19747insGGCAGC|||||||||-1||HGNC|HGNC:17805|5|||,GCTGCC|intron_variant&non_coding_transcript_variant|MODIFIER|DIRC3|ENSG00000231672|Transcript|ENST00000663562|lncRNA||1/11|ENST00000663562.1:n.1432-19748_1432-19747insGGCAGC|||||||||-1||HGNC|HGNC:17805||||,GCTGCC|intron_variant&non_coding_transcript_variant|MODIFIER|DIRC3|ENSG00000231672|Transcript|ENST00000676082|lncRNA||1/9|ENST00000676082.1:n.95-19748_95-19747insGGCAGC|||||||||-1||HGNC|HGNC:17805||||	GT:AD:BQ:SS:DP:DP2:TAR:TIR:TOR:DP50:FDP50:SUBDP50:FT	0/1:90:.:2:101:101:90,91:4,4:40,40:103.29:0.59:0:PASS
+4	40434704	.	AGCGGCTGCGGCGGCTGCGGCC	A	.	.	CSQ=-|intron_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000295971|protein_coding||5/6|ENST00000295971.12:c.1330+1716_1330+1736del|||||||||-1||HGNC|HGNC:30358|5|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGYAFVMYCHKHEAKRAVRELNNYEIRPGRLLGVCCSVDNCRLFIGGIPKMKKREEILEEIAKVTEGVLDVIVYASAADKMKNRGFAFVEYESHRAAAMARRKLMPGRIQLWGHQIAVDWAEPEIDVDEDVMETVKILYVRNLMIETTEDTIKKSFGQFNPGCVERVKKIRDYAFVHFTSREDAVHAMNNLNGTELEGSCLEVTLAKPVDKEQYSRYQKAARGGGAAEAAQQPSYVYSCDPYTLAYYGYPYNALIGPNRDYFVKAGSIRGRGRGAAGNRAPGPRGSYLGGYSAGRGIYSRYHEGKGKQQEKGYELVPNLEIPTVNPVAIKPGTVAIPAIGAQYSMFPAAPAPKMIEDGKIHTVEHMISPIAVQPDPASAAAAAAAAAAAAAAVIPTVSTPPPFQGRPITPVYTVAPNVQRIPTAGIYGASYVPFAAPATATIATLQKNAAAAAAMYGGYAGYIPQAFPAAAIQVPIPDVYQTY,-|intron_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000381793|protein_coding||4/5|ENST00000381793.6:c.1330+1716_1330+1736del|||||||||-1||HGNC|HGNC:30358|2|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGYAFVMYCHKHEAKRAVRELNNYEIRPGRLLGVCCSVDNCRLFIGGIPKMKKREEILEEIAKVTEGVLDVIVYASAADKMKNRGFAFVEYESHRAAAMARRKLMPGRIQLWGHQIAVDWAEPEIDVDEDVMETVKILYVRNLMIETTEDTIKKSFGQFNPGCVERVKKIRDYAFVHFTSREDAVHAMNNLNGTELEGSCLEVTLAKPVDKEQYSRYQKAARGGGAAEAAQQPSYVYSCDPYTLAYYGYPYNALIGPNRDYFVKAGSIRGRGRGAAGNRAPGPRGSYLGGYSAGRGIYSRYHEGKGKQQEKGYELVPNLEIPTVNPVAIKPGTVAIPAIGAQYSMFPAAPAPKMIEDGKIHTVEHMISPIAVQPDPASAAAAAAAAAAAAAAVIPTVSTPPPFQGRPITPVYTVAPNVQRIPTAGIYGASYVPFAAPATATIATLQKNAAAAAAMYGGYAGYIPQAFPAAAIQVPIPDVYQTY,-|intron_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000381795|protein_coding||3/4|ENST00000381795.10:c.1124-1863_1124-1843del|||||||||-1||HGNC|HGNC:30358|2|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGYAFVMYCHKHEAKRAVRELNNYEIRPGRLLGVCCSVDNCRLFIGGIPKMKKREEILEEIAKVTEGVLDVIVYASAADKMKNRGFAFVEYESHRAAAMARRKLMPGRIQLWGHQIAVDWAEPEIDVDEDVMETVKILYVRNLMIETTEDTIKKSFGQFNPGCVERVKKIRDYAFVHFTSREDAVHAMNNLNGTELEGSCLEVTLAKPVDKEQYSRYQKAARGGGAAEAAQQPSYVYSCDPYTLAYYGYPYNALIGPNRDYFVKVAIPAIGAQYSMFPAAPAPKMIEDGKIHTVEHMISPIAVQPDPASAAAAAAAAAAAAAAVIPTVSTPPPFQGRPITPVYTVAPNVQRIPTAGIYGASYVPFAAPATATIATLQKNAAAAAAMYGGYAGYIPQAFPAAAIQVPIPDVYQTY,-|downstream_gene_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000505220|protein_coding|||||||||||3991|-1|cds_end_NF|HGNC|HGNC:30358|2|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPP,-|downstream_gene_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000505414|protein_coding|||||||||||3693|-1|cds_end_NF|HGNC|HGNC:30358|3|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGYAFVMYCHKHEAKRAVRELNNYEIRPGRLLGVCCSVDNCRLFIGGI,-|downstream_gene_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000507180|protein_coding|||||||||||3798|-1|cds_end_NF|HGNC|HGNC:30358|3|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGYAFVMYCHKHE,-|intron_variant&NMD_transcript_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000510871|nonsense_mediated_decay||5/6|ENST00000510871.5:c.*386+1716_*386+1736del|||||||||-1||HGNC|HGNC:30358|1|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGYAFVMYCHKHEAKRAVRELNNYEIRPGRLLGVCCSVDNCRLFIGGIPKMKKREEILEEIAKVTEGVLDVIVYASAADKMKNRGFAFVEYESHRAAAMARRKLMPGRIQLWGHQIAVDWAEPEIDVDEDVMETVKILYVRNLMIETTEDTIKKSFGQFNPGCVERVKKIRDYAFVHFTSREDAVHAMNNLNGTELEGSCLEVTLAKPVDKEQYSRYQKAARGGGAAEAAQQPSYVYSCDPYTLAYYGYPYNALIGPNRDYFVKDTILETHPASLPLVLRRHA,-|downstream_gene_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000511598|protein_coding|||||||||||3828|-1|cds_end_NF|HGNC|HGNC:30358|2|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGY,-|downstream_gene_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000511902|protein_coding|||||||||||3990|-1||HGNC|HGNC:30358|3|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPP,-|downstream_gene_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000513473|protein_coding|||||||||||3590|-1|cds_end_NF|HGNC|HGNC:30358|3|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGYAFVMYCHKHEAKRAVRELNNYEIRPGRLLGVCCSVDNCRLFIGGIPKMKKREEILEEIAKVTEGVLDVIVYASAADKMKN,-|intron_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000514014|protein_coding||4/5|ENST00000514014.1:c.1216+1716_1216+1736del|||||||||-1||HGNC|HGNC:30358|2|||MERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGYAFVMYCHKHEAKRAVRELNNYEIRPGRLLGVCCSVDNCRLFIGGIPKMKKREEILEEIAKVTEGVLDVIVYASAADKMKNRGFAFVEYESHRAAAMARRKLMPGRIQLWGHQIAVDWAEPEIDVDEDVMETVKILYVRNLMIETTEDTIKKSFGQFNPGCVERVKKIRDYAFVHFTSREDAVHAMNNLNGTELEGSCLEVTLAKPVDKEQYSRYQKAARGGGAAEAAQQPSYVYSCDPYTLAYYGYPYNALIGPNRDYFVKAGSIRGRGRGAAGNRAPGPRGSYLGGYSAGRGIYSRYHEGKGKQQEKGYELVPNLEIPTVNPVAIKPGTVAIPAIGAQYSMFPAAPAPKMIEDGKIHTVEHMISPIAVQPDPASAAAAAAAAAAAAAAVIPTVSTPPPFQGRPITPVYTVAPNVQRIPTAGIYGASYVPFAAPATATIATLQKNAAAAAAMYGGYAGYIPQAFPAAAIQVPIPDVYQTY,-|downstream_gene_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000514782|protein_coding|||||||||||3757|-1|cds_end_NF|HGNC|HGNC:30358|3|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGYAFVMYCHKHEAKRAVRELNNYEIR,-|downstream_gene_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000515053|protein_coding|||||||||||3517|-1|cds_end_NF|HGNC|HGNC:30358|2|||MTAEDSTAAMSSDSAAGSSAKVPEGVAGAPNEAALLALMERTGYSMVQENGQRKYGGPPPGWEGPHPQRGCEVFVGKIPRDVYEDELVPVFEAVGRIYELRLMMDFDGKNRGYAFVMYCHKHEAKRAVRELNNYEIRPGRLLGVCCSVDNCRLFIGGIPKMKKREEILEEIAKVTEGVLDVIVYASAADKMKNRGFAFVEYESHRAAAMARRKLMPG,-|intron_variant&non_coding_transcript_variant|MODIFIER|RBM47|ENSG00000163694|Transcript|ENST00000515809|processed_transcript||1/1|ENST00000515809.1:n.70-1863_70-1843del|||||||||-1||HGNC|HGNC:30358|2|||	GT:AD:BQ:SS:DP:DP2:TAR:TIR:TOR:DP50:FDP50:SUBDP50:FT	0/1:125:.:2:128:128:125,125:5,5:12,12:119.5:1.75:0:PASS
+6	41754573	.	C	CCTT	.	.	CSQ=CTT|upstream_gene_variant|MODIFIER|PGC|ENSG00000096088|Transcript|ENST00000415707|protein_coding|||||||||||464|-1|cds_end_NF|HGNC|HGNC:8890|5|||MCLHPSSTPPFHQPRKEAVICKQRVPLKKFKSIRETMKEKGLLGEFLRTHKYDPAWKYRFGDLSVTYEPMAYMDAAYFGEISIGTP	GT:DP:DP4:BQ:SS:AD:DP2:TAR:TIR:TOR:DP50:FDP50:SUBDP50:FT	0/1:76:13,9,28,26:36:2:12:78:12,12:55,55:12,12:80.52:1.92:0:PASS
+6	43250725	.	GGAA	G	.	.	CSQ=-|intron_variant|MODIFIER|TTBK1|ENSG00000146216|Transcript|ENST00000259750|protein_coding||2/14|ENST00
