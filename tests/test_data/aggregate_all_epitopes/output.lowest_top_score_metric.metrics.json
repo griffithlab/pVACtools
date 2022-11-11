@@ -28,6 +28,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "5",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -186,6 +187,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "7",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -300,6 +302,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "4",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -414,6 +417,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "5",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -528,6 +532,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "6",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -642,6 +647,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "3",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -756,6 +762,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "7",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -870,6 +877,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "6",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -984,6 +992,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "4",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -1098,6 +1107,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "3",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -1212,6 +1222,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -1326,6 +1337,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "2",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -1440,6 +1452,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -1611,6 +1624,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -1725,6 +1739,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "6",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -1883,6 +1898,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "2",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -1997,6 +2013,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -2155,6 +2172,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -2269,6 +2287,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "4",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -2383,6 +2402,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -2541,6 +2561,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "4",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -2699,6 +2720,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "2",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -2857,6 +2879,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "3",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -2971,6 +2994,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "5",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -3129,6 +3153,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "6",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -3300,6 +3325,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "2",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -3414,6 +3440,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "10",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -3528,6 +3555,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -3642,6 +3670,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -3756,6 +3785,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "6",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -3870,6 +3900,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "3",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -3984,6 +4015,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "2",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -4098,6 +4130,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "1",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -4269,6 +4302,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "10",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -4427,6 +4461,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "0",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -4585,6 +4620,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "1",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -4699,6 +4735,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -4813,6 +4850,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -4927,6 +4965,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "10",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -5041,6 +5080,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -5199,6 +5239,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "1",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -5313,6 +5354,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -5471,6 +5513,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "5",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -5585,6 +5628,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "3",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -5743,6 +5787,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -5857,6 +5902,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -5971,6 +6017,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "2",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -6085,6 +6132,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -6199,6 +6247,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "2",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -6313,6 +6362,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "5",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -6427,6 +6477,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "5",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -6541,6 +6592,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "3",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -6655,6 +6707,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "10",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -6826,6 +6879,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -6940,6 +6994,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "4",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -7054,6 +7109,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -7168,6 +7224,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -7282,6 +7339,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "4",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -7440,6 +7498,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -7554,6 +7613,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "5",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -7668,6 +7728,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "6",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -7782,6 +7843,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "3",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -7896,6 +7958,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "4",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -8010,6 +8073,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -8181,6 +8245,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -8339,6 +8404,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "10",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -8497,6 +8563,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -8611,6 +8678,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "8",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -8725,6 +8793,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -8839,6 +8908,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "3",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -8953,6 +9023,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "4",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
@@ -9067,6 +9138,7 @@
               "HLA-B*35:01"
             ],
             "mutation_position": "9",
+            "problematic_positions": "",
             "individual_ic50_calls": {
               "algorithms": [
                 "MHCflurry",
