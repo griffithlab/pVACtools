@@ -93,7 +93,7 @@ class IdentifyProblematicAminoAcids:
         )
         parser.add_argument(
             '--filter-type', '-f', choices=['soft', 'hard'], default="soft",
-            help="Set the type of filtering done. Choosing `soft` will add a new column \"Problematic Positions\t that lists positions in the epitope with problematic amino acids. "
+            help="Set the type of filtering done. Choosing `soft` will add a new column \"Problematic Positions\" that lists positions in the epitope with problematic amino acids. "
                + "Choosing `hard` will remove epitope entries with problematic amino acids."
         )
         return parser
