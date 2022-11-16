@@ -43,27 +43,27 @@ class JunctionPipeline():
         # this worked in VScode interactive python but not in the pvacsplice docker?? #
 
         # mem: 1.25 GB
-        # gtf_df_all = read_gtf(self.gtf_file, usecols=['feature', 'seqname', 'start', 'end', 'transcript_id', 'transcript_biotype', 'transcript_version', 'transcript_support_level', 'exon_number', 'gene_name', 'gene_id'])
+        gtf_df_all = read_gtf(self.gtf_file, usecols=['feature', 'seqname', 'start', 'end', 'transcript_id', 'transcript_biotype', 'transcript_version', 'transcript_support_level', 'exon_number', 'gene_name', 'gene_id'])
 
-        # print('GTF all df')
-        # print(gtf_df_all['feature'].unique())
-        # print(gtf_df_all.dtypes)
+        print('GTF all df')
+        print(gtf_df_all['feature'].unique())
+        print(gtf_df_all.dtypes)
 
-        # # mem: 0.68 GB 
-        # # tscript and CDS - this is coding coordinates exon by exon (leaving out 5/3' UTRs in exon body)
-        # gtf_df = gtf_df_all.loc[(gtf_df_all['feature'].isin(['CDS', 'transcript'])) & (gtf_df_all['transcript_support_level'] == '1') & (gtf_df_all['transcript_biotype'] == 'protein_coding')].replace(["^\s*$"], 'NA', regex=True)
+        # mem: 0.68 GB 
+        # tscript and CDS - this is coding coordinates exon by exon (leaving out 5/3' UTRs in exon body)
+        gtf_df = gtf_df_all.loc[(gtf_df_all['feature'].isin(['CDS', 'transcript'])) & (gtf_df_all['transcript_support_level'] == '1') & (gtf_df_all['transcript_biotype'] == 'protein_coding')].replace(["^\s*$"], 'NA', regex=True)
         
-        # print('GTF feaure df')
-        # print(gtf_df['feature'].unique())
-        # print(gtf_df.dtypes)
-        # print(len(gtf_df.index))
+        print('GTF feaure df')
+        print(gtf_df['feature'].unique())
+        print(gtf_df.dtypes)
+        print(len(gtf_df.index))
         
-        # gtf_df = gtf_df.rename(columns={'start': 'cds_start', 'end': 'cds_stop', 'seqname': 'cds_chrom'})
+        gtf_df = gtf_df.rename(columns={'start': 'cds_start', 'end': 'cds_stop', 'seqname': 'cds_chrom'})
         
-        # gtf_df.to_csv(f'{self.output_dir}/gtf_v95.tsv', sep='\t', index=False)
+        gtf_df.to_csv(f'{self.output_dir}/{self.sample_name}_gtf.tsv', sep='\t', index=False)
 
-        # na_values = 'NA', 'NULL'
-        gtf_df = pd.read_csv(f'{self.output_dir}/gtf_v95.tsv', sep='\t')
+        # pandas na values = 'NA', 'NULL', etc
+        #gtf_df = pd.read_csv(f'{self.output_dir}/{self.sample_name}_gtf.tsv', sep='\t')
 
         print('Completed')
 
