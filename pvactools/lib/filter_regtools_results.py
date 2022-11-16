@@ -1,11 +1,11 @@
 import os
 import pandas as pd
-from pybiomart import Dataset
 
 class FilterRegtoolsResults():
     def __init__(self, **kwargs):
         self.input_file  = kwargs['input_file']
         self.output_file = kwargs['output_file']
+        self.gtf_df      = kwargs['gtf_df']
         self.score       = kwargs['score']
         self.distance    = kwargs['distance']
 
@@ -20,45 +20,30 @@ class FilterRegtoolsResults():
         filter_junctions['variant_start'] = filter_junctions['variant_info'].str.split(':|-|,', expand=True)[[1]]
         # filter by distance: variant_start > start-distance and variant_start < end+distance
         # does strand matter here - no
-        return filter_junctions[
+        final_filter = filter_junctions[
            (filter_junctions['variant_start'].astype(int) > filter_junctions['junction_start'].astype(int) - self.distance) & 
            (filter_junctions['variant_start'].astype(int) < filter_junctions['junction_stop'].astype(int) + self.distance)
         ].reset_index()
 
+        return final_filter
+
     def pc_junction_rows(self, filter_junctions):
         # example entry: 0: {'gene_ids': 'ENSG00000122483', 'transcripts': 'ENST00000343253,ENST00000370276,ENST00000401026,ENST00000421014,ENST00000455267'}
         tscript_dict = {i:{'gene_ids': x, 'transcripts': y} for i,(x,y) in enumerate(zip(filter_junctions['gene_ids'], filter_junctions['transcripts']))}
-
-        # load ensembl database
-        dataset = Dataset(name='hsapiens_gene_ensembl', host='http://www.ensembl.org/')
-
+        
         # filter transcripts by protein_coding and transcript_id
         pc_junctions = pd.DataFrame()
-        # this adds 4 columns to the end of junctions file
-        # Transcript_stable_ID, Gene_stable_ID, Gene_name, Transcript_type
+
         for k,v in tscript_dict.items():
-            # return these attributes
-            protein_coding = dataset.query(attributes=[
-                'external_gene_name',
-                'ensembl_gene_id',
-                'ensembl_transcript_id', 
-                'transcript_biotype',
-                ],
-                # filter on transcripts and protein_coding
-                filters={
-                    'link_ensembl_transcript_stable_id': v['transcripts'].split(','),
-                    'transcript_biotype': 'protein_coding',
-                })
-            # add to df
-            pc_junctions = pd.concat([pc_junctions, protein_coding])
 
-        # html tag can be returned as empty col (bug); so filter here
-        if '<html>' in pc_junctions.columns:
-            pc_junctions.drop(columns=['<html>'], inplace=True)
+            # subset df by transcript_id
+            gtf_transcripts = self.gtf_df[(self.gtf_df['feature'] == 'transcript') & (self.gtf_df['transcript_id'].isin(v['transcripts'].split(',')))]
 
-        # rename cols to match explode_junctions naming
-        pc_junctions = pc_junctions.rename(columns={'Transcript stable ID': 'transcript_name'})
+            if not gtf_transcripts.empty:
+                # add to df
+                pc_junctions = pd.concat([pc_junctions, gtf_transcripts])
 
+        # subset of self.gtf_df
         return pc_junctions
 
     def explode_junction_rows(self, filter_junctions):
@@ -68,26 +53,23 @@ class FilterRegtoolsResults():
 
         # explode the transcript list and variant list
         explode_junctions = filter_junctions.explode('transcripts', ignore_index=True).explode('variant_info', ignore_index=True).drop('index', axis=1)
-
-        # rename cols to match pc_junctions naming
-        explode_junctions = explode_junctions.rename(columns={'transcripts': 'transcript_name'}) 
+        
+        explode_junctions = explode_junctions.rename(columns={'transcripts': 'transcript_id'})
 
         return explode_junctions
 
     def merge_and_write(self, pc_junctions, explode_junctions):
-        # filter - pc_tscripts and unique_all_transcripts - 1 to 1 comparison bc 'transcripts' has been exploded
-        pc_junctions = pc_junctions[pc_junctions['transcript_name'].isin(explode_junctions['transcript_name'])]
         # merge dfs
-        merged_df = explode_junctions.merge(pc_junctions, on='transcript_name').drop_duplicates()
+        merged_df = explode_junctions.merge(pc_junctions, on='transcript_id').drop_duplicates()
         # drop repetitive or unneeded cols
         merged_df = merged_df.drop(columns=['gene_names', 'gene_ids', 'variant_start'])
         # remove spaces from col names
-        merged_df.columns = merged_df.columns.str.replace(r'\s+', '_', regex=True)
+        #merged_df.columns = merged_df.columns.str.replace(r'\s+', '_', regex=True)
         # switch strand to numeral
         merged_df['strand'] = merged_df['strand'].replace(['+','-'], [1,-1])
         # create filtered tsv file
         merged_df.to_csv(self.output_file, sep='\t', index=False)
-        
+
         return merged_df
     
     def execute(self):
