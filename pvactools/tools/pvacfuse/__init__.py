@@ -10,6 +10,7 @@ __all__ = [
     'calculate_reference_proteome_similarity',
     'generate_protein_fasta',
     "generate_aggregated_report",
+    'identify_problematic_amino_acids',
 ]
 
 from . import *

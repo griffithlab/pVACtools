@@ -569,7 +569,7 @@ class OutputParser(metaclass=ABCMeta):
             if method.lower() == 'mhcflurry':
                 if self.flurry_state == 'EL_only':
                     self.flurry_headers(headers)
-                    continue 
+                    continue
                 elif self.flurry_state == 'both':
                     self.flurry_headers(headers)
 
@@ -654,7 +654,7 @@ class OutputParser(metaclass=ABCMeta):
         ) in iedb_results:
             tsv_entry = tsv_entries[tsv_index]
             if mt_epitope_seq != wt_epitope_seq:
-                if wt_epitope_seq == 'NA':
+                if corresponding_wt_score == 'NA':
                     corresponding_fold_change = 'NA'
                 elif best_mt_score == 0:
                     corresponding_fold_change = inf
@@ -662,6 +662,7 @@ class OutputParser(metaclass=ABCMeta):
                 else:
                     corresponding_fold_change = round((corresponding_wt_score/best_mt_score), 3)
                     corresponding_wt_score = round(corresponding_wt_score, 3)
+
                 if median_wt_score == 'NA':
                     median_fold_change = 'NA'
                 elif median_mt_score == 0:
@@ -693,18 +694,18 @@ class OutputParser(metaclass=ABCMeta):
                     'Mutation Position'   : mutation_position,
                     'MT Epitope Seq'      : mt_epitope_seq,
                     'WT Epitope Seq'      : wt_epitope_seq,
-                    'Best MT IC50 Score Method': PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
-                    'Best MT IC50 Score'       : round(best_mt_score, 3),
                     'Corresponding WT IC50 Score': corresponding_wt_score,
                     'Corresponding Fold Change' : corresponding_fold_change,
-                    'Median MT IC50 Score'     : round(median_mt_score, 3),
                     'Median WT IC50 Score'     : median_wt_score,
                     'Median Fold Change'  : median_fold_change,
                     'Index'               : tsv_index,
                 }
+                row['Best MT IC50 Score Method'] = 'NA' if best_mt_score_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method)
                 row['Best MT Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
+                row['Best MT IC50 Score'] = 'NA' if best_mt_score == 'NA' else round(best_mt_score, 3)
                 row['Best MT Percentile'] = 'NA' if best_mt_percentile == 'NA' else round(best_mt_percentile, 3)
                 row['Corresponding WT Percentile'] = 'NA' if corresponding_wt_percentile == 'NA' else round(corresponding_wt_percentile, 3)
+                row['Median MT IC50 Score'] = 'NA' if median_mt_score == 'NA' else round(median_mt_score, 3)
                 row['Median MT Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
                 row['Median WT Percentile'] = 'NA' if median_wt_percentile == 'NA' else round(median_wt_percentile, 3)
                 for method in self.prediction_methods():
@@ -947,13 +948,13 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 'HLA Allele'          : allele,
                 'Sub-peptide Position': position,
                 'Epitope Seq'         : mt_epitope_seq,
-                'Best IC50 Score Method': PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
                 'Best IC50 Score'     : best_mt_score,
-                'Median IC50 Score'   : round(median_mt_score, 3),
                 'Best Percentile'     : best_mt_percentile,
                 'Mutation'            : tsv_index,
             }
+            row['Best IC50 Score Method'] = 'NA' if best_mt_score_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method)
             row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
+            row['Median IC50 Score'] = 'NA' if median_mt_score == 'NA' else round(median_mt_score, 3)
             row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)

@@ -1,5 +1,6 @@
 from abc import ABCMeta
 import argparse
+import textwrap
 
 from pvactools.lib.prediction_class import PredictionClass
 import pvactools.lib.net_chop
@@ -67,7 +68,7 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Report only epitopes where the mutant allele has ic50 binding scores below this value.",
         )
         parser.add_argument(
-            '--percentile-threshold', type=float,
+            '--percentile-threshold', type=float_range(0.0,100.0),
             help="Report only epitopes where the mutant allele "
                  +"has a percentile rank below this value."
         )
@@ -121,6 +122,22 @@ class PredictionRunArgumentParser(RunArgumentParser):
             '--net-chop-threshold', type=float,
             default=0.5,
             help="NetChop prediction threshold (increasing the threshold results in better specificity, but worse sensitivity).",
+        )
+        self.parser.add_argument(
+            '--problematic-amino-acids', type=lambda s:[a for a in s.split(',')],
+            help=textwrap.dedent('''\
+            A list of amino acids to consider as problematic. Each entry can be specified in the following format:
+            `amino_acid(s)`: One or more one-letter amino acid codes. Any occurrence of this amino acid string,
+                             regardless of the position in the epitope, is problematic. When specifying more than
+                             one amino acid, they will need to occur together in the specified order.
+            `amino_acid:position`: A one letter amino acid code, followed by a colon separator, followed by a positive
+                                   integer position (one-based). The occurrence of this amino acid at the position
+                                   specified is problematic., E.g. G:2 would check for a Glycine at the second position
+                                   of the epitope. The N-terminus is defined as position 1.
+            `amino_acid:-position`: A one letter amino acid code, followed by a colon separator, followed by a negative
+                                    integer position. The occurrence of this amino acid at the specified position from
+                                    the end of the epitope is problematic. E.g., G:-3 would check for a Glycine at the
+                                    third position from the end of the epitope. The C-terminus is defined as position -1.''')
         )
         self.parser.add_argument(
             '--run-reference-proteome-similarity',
