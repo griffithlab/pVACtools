@@ -22,6 +22,7 @@ from pvactools.lib.input_file_converter import VcfConverter
 from pvactools.lib.fasta_generator import FastaGenerator, VectorFastaGenerator
 from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser, PvacspliceOutputParser
 from pvactools.lib.post_processor import PostProcessor
+from pvactools.lib.run_utils import *
 import pvactools.lib.call_iedb
 import pvactools.lib.combine_parsed_outputs
 
@@ -74,6 +75,7 @@ class Pipeline(metaclass=ABCMeta):
         self.peptide_fasta               = kwargs.pop('peptide_fasta', None)
         self.tumor_purity                = kwargs.pop('tumor_purity', None)
         self.run_post_processor          = kwargs.pop('run_post_processor', True)
+        self.problematic_amino_acids     = kwargs.pop('problematic_amino_acids', None)
         self.flurry_state                = self.get_flurry_state()
         self.proximal_variants_file      = None
         self.splice_output_dir             = kwargs.pop('splice_output_dir', None)
@@ -563,14 +565,14 @@ class PvacbindPipeline(Pipeline):
 
     def create_per_length_fasta_and_process_stops(self, length):
         stop_chars = set('X*')
-        supported_amino_acids = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
+        supported_aas = supported_amino_acids()
         records = []
         for record in SeqIO.parse(self.input_file, "fasta"):
             sequence = str(record.seq).upper()
             x_index = sequence.index('X') if 'X' in sequence else len(sequence)
             star_index = sequence.index('*') if '*' in sequence else len(sequence)
             sequence = sequence[0:min(x_index, star_index)]
-            if not all([c in supported_amino_acids for c in sequence]):
+            if not all([c in supported_aas for c in sequence]):
                 logging.warning("Record {} contains unsupported amino acids. Skipping.".format(record.id))
                 continue
             if len(sequence) >= length:
