@@ -725,7 +725,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
 
 class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1, percentile_threshold=None, allele_specific_binding_thresholds=False, top_score_metric="median"):
+    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, percentile_threshold=None, allele_specific_binding_thresholds=False, top_score_metric="median"):
         self.input_file = input_file
         self.output_file = output_file
         self.tumor_purity = tumor_purity
@@ -738,7 +738,6 @@ class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, meta
         self.relaxed_allele_expr_threshold = trna_vaf * expn_val * 5
         self.trna_cov = trna_cov
         self.trna_vaf = trna_vaf
-        self.maximum_transcript_support_level = maximum_transcript_support_level
         if top_score_metric == 'median':
             self.top_score_metric = "Median"
         else:
