@@ -66,22 +66,15 @@ def combine_reports_per_class(base_output_dir, args, mhc_class):
 
     combine_class_reports(combined_files, combined_name)
 
-    # pvacbind post processor inputs:
-    # self.input_file,
-    # self.aggregate_report,
-    # binding_threshold=self.binding_threshold,
-    # allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
-    # percentile_threshold=self.percentile_threshold,
-    # top_score_metric=self.top_score_metric,
-
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_name
     post_processing_params['file_type'] = 'pVACsplice'
     post_processing_params['filtered_report_file'] = filtered_name
     post_processing_params['run_coverage_filter'] = True
-    post_processing_params['run_transcript_support_level_filter'] = True
+    post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['minimum_fold_change'] = None
     post_processing_params['run_manufacturability_metrics'] = True
+    post_processing_params['run_reference_proteome_similarity'] = False
     if args.net_chop_method:
         post_processing_params['net_chop_fasta'] = args.net_chop_fasta
         post_processing_params['run_net_chop'] = True
@@ -109,6 +102,7 @@ def main(args_input = sys.argv[1:]):
 
     junction_arguments = {
         'input_file'                       : args.input_file, 
+        'gtf_file'                         : args.gtf_file,
         'sample_name'                      : args.sample_name,
         'base_output_dir'                  : base_output_dir,
         'ref_fasta'                        : args.ref_fasta,
@@ -224,7 +218,7 @@ def main(args_input = sys.argv[1:]):
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
-        #combine_class_reports(base_output_dir, args)
+        combine_class_reports(base_output_dir, args)
 
     change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
