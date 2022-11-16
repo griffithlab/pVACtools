@@ -1,16 +1,14 @@
 import os
 import re
-import pyfaidx
 import pandas as pd
 from Bio.Seq import Seq
-from load_ensembl_data import *
 
 class JunctionToFasta():
     def __init__(self, **kwargs):
         self.personalized_fasta = kwargs['fasta']
         self.tscript_id     = kwargs['tscript_id']
         self.chrom          = kwargs['chrom']
-        #self.gtf_file       = 'local_gtf_file'
+        self.gtf_df         = kwargs['gtf_df']
         self.junction_name  = kwargs['junction_name']
         self.junction_coors = kwargs['junction_coors']
         self.junction_df    = kwargs['junction_df']
@@ -26,20 +24,26 @@ class JunctionToFasta():
         if (self.anchor == 'A' and self.strand == 1) or (self.anchor == 'D' and self.strand == -1) or (self.anchor == 'NDA'):
             self.wt_coor  = int(self.junction_coors[1])
             self.alt_coor = int(self.junction_coors[0])
-            self.wt_row   = "Genomic coding start"
-            self.alt_row  = "Genomic coding end"
+            self.wt_row   = "cds_start"
+            self.alt_row  = "cds_stop"
             self.reverse  = True
         elif (self.anchor == 'D' and self.strand == 1) or (self.anchor == 'A' and self.strand == -1):
             self.wt_coor  = int(self.junction_coors[0])
             self.alt_coor = int(self.junction_coors[1])
-            self.wt_row   = "Genomic coding end"
-            self.alt_row  = "Genomic coding start"
+            self.wt_row   = "cds_stop"
+            self.alt_row  = "cds_start"
             self.reverse  = False
 
+    def load_gtf_data(self):
+        # subset df by transcript_id, get coding coordinates
+        # sort by cds_start - if on reverse strand, will be reverse comp. in aa sequence
+        coding_df = self.gtf_df[(self.gtf_df['transcript_id'] == self.tscript_id) & (self.gtf_df['feature'] == 'CDS')][['cds_chrom', 'cds_start', 'cds_stop']].sort_values('cds_start').reset_index(drop=True)
+
+        return coding_df
 
     def create_wt_df(self):
         # load in wt transcript df
-        self.wt_df = load_ensembl_data(self.tscript_id)
+        self.wt_df = self.load_gtf_data()
         # if anchor is D or A, make sure the wt coordinate is inside in the coding region of transcript
         # (alt coordinate won't be present because ensembl only lists the wt coordinates) 
         if self.anchor in ['D', 'A']:
@@ -62,17 +66,17 @@ class JunctionToFasta():
                 pass
             else:    
                 if not index_wt and not index_alt:
-                    print(f'{self.tscript_id} {self.junction_name} Exon skip: both junction coordinates not in coding transcript...Skipping')
+                    print(f'{self.fasta_index} Exon skip: both junction coordinates not in coding transcript...Skipping')
                     print(f'Missing coordinates ({self.anchor}): {self.wt_coor} {self.alt_coor}')
                 elif (not index_wt and index_alt) or (index_wt and not index_alt):
-                    print(f'{self.tscript_id} {self.junction_name} Exon skip: one junction coordinate not in coding transcript...Skipping')
+                    print(f'{self.fasta_index} Exon skip: one junction coordinate not in coding transcript...Skipping')
                     if index_wt:
                         print(f'Missing coordinate ({self.anchor}): {self.alt_coor}')
                     elif index_alt:
                         print(f'Missing coordinate ({self.anchor}): {self.wt_coor}')
                 self.wt_df = pd.DataFrame()
         return self.wt_df
-        
+
 
     def create_alt_df(self):
         # copy wt_df so its not directly affected
@@ -101,7 +105,7 @@ class JunctionToFasta():
                 # return an empty df that will cause an exception in run.py                
                 else:
                     # here i can add option to look for next start codon (start lost)
-                    print(f'{self.tscript_id} {self.junction_name} Alternate junction coordinate not within coding transcript...Skipping')
+                    print(f'{self.fasta_index} Alternate junction coordinate not within coding transcript...Skipping')
                     print(f'Missing coordinate ({self.anchor}): {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
                     continue
@@ -130,7 +134,7 @@ class JunctionToFasta():
                 # return an empty df that will cause an exception in run.py
                 else:
                     # here i can add option to look for next stop codon (stop lost)
-                    print(f'{self.tscript_id} {self.junction_name} Alternate junction coordinate not in coding transcript...Skipping')
+                    print(f'{self.fasta_index} Alternate junction coordinate not in coding transcript...Skipping')
                     print(f'Missing coordinate ({self.anchor}): {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
                     continue    
@@ -148,9 +152,9 @@ class JunctionToFasta():
 
     def get_aa_sequence(self, dataframe, type:str):
         # pyfaidx has 0-based indexing so subtract 1 from coding exon start positions
-        dataframe["Genomic coding start"] = dataframe["Genomic coding start"] -1 
+        dataframe["cds_start"] = dataframe["cds_start"] -1 
         # create coding_coors column for fasta indexing
-        dataframe["coding_coors"] = dataframe["Genomic coding start"].astype(str) + "," + dataframe["Genomic coding end"].astype(str)
+        dataframe["coding_coors"] = dataframe["cds_start"].astype(str) + "," + dataframe["cds_stop"].astype(str)
         coordinates = dataframe["coding_coors"].tolist()
         # generate AA sequence from coding exon coordinates (pyfaidx)
         final_seq = ''
@@ -168,9 +172,9 @@ class JunctionToFasta():
         # adding Ns to end of sequence if remainder != 0
         remainder = len(dna_seq) % 3
         if remainder == 0:
-            frameshift = 'yes'
-        else:
             frameshift = 'no'
+        else:
+            frameshift = 'yes'
             if remainder == 1:
                 dna_seq += "NN"
             elif remainder == 2:
