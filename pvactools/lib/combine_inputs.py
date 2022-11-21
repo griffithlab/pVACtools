@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 
 class CombineInputs():
@@ -5,6 +6,8 @@ class CombineInputs():
         self.junctions_df = kwargs['junctions_df']
         self.variants     = kwargs['variant_file']
         self.output_file  = kwargs['output_file']
+        self.sample_name  = kwargs['sample_name']
+        self.output_dir   = kwargs['output_dir']
 
     def add_junction_coordinates_to_variants(self):
         # read in df
@@ -40,19 +43,25 @@ class CombineInputs():
 
         # format junction variant info to match vcf
         var_df['variant_info'] = var_df['chromosome_name'] + ':' + var_df['variant_start'].astype('string') + '-' + var_df['variant_stop'].astype('string')
-
+        #var_df.to_csv(f'{self.output_dir}/{self.sample_name}_var_df.tsv', sep='\t', index=False)
         return var_df
 
-    def merge_and_write(self, j_df, var_df):
-        # merge cols: 'transcript_support_level', 'gene_name', 'start' ('stop' vs. 'end')
-        # merge by transcript and variant coors
-        merged_df = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'gene_name', 'gene_id', 'variant_info']).drop_duplicates()
+    def merge_and_write(self, j_df, var_df):        
+        # is protein change/seq is NA in var_df, go ahead and remove the lines bc if there is no protein change, then can't create alt transcript
+        merged_df = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'gene_name', 'gene_id', 'variant_info']) #.dropna(subset=['hgvsp', 'amino_acid_change', 'protein_position'])
+
+        left_merge = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'gene_name', 'gene_id', 'variant_info'], how='left', indicator=True)
+        not_merged_lines = left_merge.loc[left_merge['_merge'] != 'both']
+        if not not_merged_lines.empty:
+            # fatal error if there are any that don't merge
+            print(not_merged_lines[['chromosome_name', 'start', 'stop', 'variant_info', 'transcript_id', 'transcript_version', 'gene_name', 'gene_id', ]])
+            print(f'This set of transcript(s) and/or variant(s) are linked to alternative junctions via RegTools but are present in the somatic VCF. Please double check inputs - the VCF and GTF files should be the same used in the initial RegTools analysis.')
 
         # create index to match with kmers
         merged_df['index'] = merged_df['gene_name'] + '.' + merged_df['transcript_id'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
         
         # cols for frameshift info
-        merged_df[['wt_protein_length', 'alt_protein_length', 'frameshift_event']] = 'NA'
+        merged_df[['wt_protein_length', 'alt_protein_length', 'frameshift_event']] = pd.NA
         
         # create final file
         merged_df.to_csv(self.output_file, sep='\t', index=False)
@@ -64,16 +73,5 @@ class CombineInputs():
         variant_df = self.add_junction_coordinates_to_variants()
         # merge dfs and create associated combined file
         combined_df = self.merge_and_write(self.junctions_df, variant_df)
-
-        # is protein is NA, can I go ahead and remove the lines? do these correspond to skipped junctions in jtf?
         
         return combined_df
-
-# fatal error if not found
-# error - doesn't allow you to continue - input not found, data not in correct format
-# warning: they meant to so something stupid
-# base - griffithlab staging; head - mrichters staging
-# testing not whole vcf for rest data - one chromosome w/ HCC
-# test edge case - just a single variant
-# module test, specific cases
-# moved package reqs into setup.py - req.txt is optional, actually in setup.py
