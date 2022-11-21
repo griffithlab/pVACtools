@@ -83,7 +83,8 @@ setup(
         'vaxrank>=1.1.0',
         'mhcnuggets==2.4.0',
         'mhcflurry==2.0.6',
-        'testfixtures'
+        'testfixtures',
+        'pyfaidx'
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,
