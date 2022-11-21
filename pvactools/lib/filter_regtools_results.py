@@ -17,7 +17,7 @@ class FilterRegtoolsResults():
         filter_junctions = junctions[(junctions['score'] > self.score) & (junctions['strand'] != '?') & (junctions['anchor'].isin(['D', 'A', 'NDA']))].dropna()
         
         # create variant_start col
-        filter_junctions['variant_start'] = filter_junctions['variant_info'].str.split(':|-|,', expand=True)[[1]]
+        filter_junctions['variant_start'] = filter_junctions['variant_info'].str.split(':|-', expand=True)[[1]]
         # filter by distance: variant_start > start-distance and variant_start < end+distance
         # does strand matter here - no
         final_filter = filter_junctions[
@@ -42,7 +42,7 @@ class FilterRegtoolsResults():
             if not gtf_transcripts.empty:
                 # add to df
                 pc_junctions = pd.concat([pc_junctions, gtf_transcripts])
-
+                
         # subset of self.gtf_df
         return pc_junctions
 
@@ -52,14 +52,14 @@ class FilterRegtoolsResults():
         self.split_string(filter_junctions, 'variant_info', ',')
 
         # explode the transcript list and variant list
-        explode_junctions = filter_junctions.explode('transcripts', ignore_index=True).explode('variant_info', ignore_index=True).drop('index', axis=1)
+        explode_junctions = filter_junctions.explode('transcripts', ignore_index=True).explode('variant_info', ignore_index=True).drop('index', axis=1) 
         
         explode_junctions = explode_junctions.rename(columns={'transcripts': 'transcript_id'})
 
         return explode_junctions
 
     def merge_and_write(self, pc_junctions, explode_junctions):
-        # merge dfs
+        # merge dfs - explode_junctions from filtered file and pc_junctions from gtf file, all gtf info is based on tscript
         merged_df = explode_junctions.merge(pc_junctions, on='transcript_id').drop_duplicates()
         # drop repetitive or unneeded cols
         merged_df = merged_df.drop(columns=['gene_names', 'gene_ids', 'variant_start'])

@@ -14,33 +14,33 @@ class CombineInputs():
         var_df[['transcript_id', 'transcript_version']] = var_df['transcript_name'].str.split('.', expand=True)
         var_df = var_df.astype({'transcript_version': 'float64'})
 
-        # # create new cols
-        # var_df[['junction_variant_start', 'junction_variant_stop']] = 0
+        # create new cols
+        var_df[['variant_start', 'variant_stop']] = 0
 
-        # # set up variant_category
-        # var_df['variant_category'] = 'SNV'
-        # var_df.loc[var_df['reference'].str.len() > var_df['variant'].str.len(), 'variant_category'] = 'DEL'
-        # var_df.loc[var_df['reference'].str.len() < var_df['variant'].str.len(), 'variant_category'] = 'INS'
+        # set up variant_category
+        var_df['variant_category'] = 'SNV'
+        var_df.loc[var_df['reference'].str.len() > var_df['variant'].str.len(), 'variant_category'] = 'DEL'
+        var_df.loc[var_df['reference'].str.len() < var_df['variant'].str.len(), 'variant_category'] = 'INS'
 
-        # # copy values - SNVs
-        # var_df.loc[var_df['variant_category'] == 'SNV', 'junction_variant_start'] = var_df['start']
-        # var_df.loc[var_df['variant_category'] == 'SNV', 'junction_variant_stop'] = var_df['stop']
+        # copy values - SNVs
+        var_df.loc[var_df['variant_category'] == 'SNV', 'variant_start'] = var_df['start']
+        var_df.loc[var_df['variant_category'] == 'SNV', 'variant_stop'] = var_df['stop']
 
-        # # deletions - bp size matters
-        # var_df.loc[var_df['variant_category'] == 'DEL', 'junction_variant_start'] = var_df['start']
-        # var_df.loc[var_df['variant_category'] == 'DEL', 'junction_variant_stop'] = var_df['start'] + var_df['reference'].str.len() - var_df['variant'].str.len()
+        # deletions - bp size matters
+        var_df.loc[var_df['variant_category'] == 'DEL', 'variant_start'] = var_df['start'] - 1
+        var_df.loc[var_df['variant_category'] == 'DEL', 'variant_stop'] = var_df['start']
 
-        # # insertions
-        # var_df.loc[var_df['variant_category'] == 'INS', 'junction_variant_start'] = var_df['start']
-        # var_df.loc[var_df['variant_category'] == 'INS', 'junction_variant_stop'] = var_df['start']
+        # insertions
+        var_df.loc[var_df['variant_category'] == 'INS', 'variant_start'] = var_df['start']
+        var_df.loc[var_df['variant_category'] == 'INS', 'variant_stop'] = var_df['start']
         
         # MNV support (exploded variants now in SNV notation)
         
         var_df = var_df.rename(columns={'ensembl_gene_id': 'gene_id'}).drop(columns=['transcript_support_level'])
 
         # format junction variant info to match vcf
-        var_df['variant_info'] = var_df['chromosome_name'] + ':' + var_df['start'].astype('string') + '-' + var_df['stop'].astype('string')
-        
+        var_df['variant_info'] = var_df['chromosome_name'] + ':' + var_df['variant_start'].astype('string') + '-' + var_df['variant_stop'].astype('string')
+
         return var_df
 
     def merge_and_write(self, j_df, var_df):
@@ -49,7 +49,7 @@ class CombineInputs():
         merged_df = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'gene_name', 'gene_id', 'variant_info']).drop_duplicates()
 
         # create index to match with kmers
-        merged_df['index'] = merged_df['gene_name'] + '.' + merged_df['transcript_id'] + '.' + merged_df['name'] + '.' + merged_df['variant'] + '.' + merged_df['anchor']
+        merged_df['index'] = merged_df['gene_name'] + '.' + merged_df['transcript_id'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
         
         # cols for frameshift info
         merged_df[['wt_protein_length', 'alt_protein_length', 'frameshift_event']] = 'NA'
@@ -69,3 +69,11 @@ class CombineInputs():
         
         return combined_df
 
+# fatal error if not found
+# error - doesn't allow you to continue - input not found, data not in correct format
+# warning: they meant to so something stupid
+# base - griffithlab staging; head - mrichters staging
+# testing not whole vcf for rest data - one chromosome w/ HCC
+# test edge case - just a single variant
+# module test, specific cases
+# moved package reqs into setup.py - req.txt is optional, actually in setup.py
