@@ -40,29 +40,24 @@ class JunctionPipeline():
     def load_gtf_df(self):
         print('Converting gtf file to dataframe')
 
-        # this worked in VScode interactive python but not in the pvacsplice docker?? #
-
-        # mem: 1.25 GB
         gtf_df_all = read_gtf(self.gtf_file, usecols=['feature', 'seqname', 'start', 'end', 'transcript_id', 'transcript_biotype', 'transcript_version', 'transcript_support_level', 'exon_number', 'gene_name', 'gene_id'])
 
         print('GTF all df')
         print(gtf_df_all['feature'].unique())
-        print(gtf_df_all.dtypes)
-
-        # mem: 0.68 GB 
+        print(len(gtf_df_all.index))
+        
         # tscript and CDS - this is coding coordinates exon by exon (leaving out 5/3' UTRs in exon body)
         gtf_df = gtf_df_all.loc[(gtf_df_all['feature'].isin(['CDS', 'transcript'])) & (gtf_df_all['transcript_support_level'] == '1') & (gtf_df_all['transcript_biotype'] == 'protein_coding')].replace(["^\s*$"], 'NA', regex=True)
         
         print('GTF feaure df')
         print(gtf_df['feature'].unique())
-        print(gtf_df.dtypes)
         print(len(gtf_df.index))
         
         gtf_df = gtf_df.rename(columns={'start': 'cds_start', 'end': 'cds_stop', 'seqname': 'cds_chrom'})
         
         gtf_df.to_csv(f'{self.output_dir}/{self.sample_name}_gtf.tsv', sep='\t', index=False)
 
-        # pandas na values = 'NA', 'NULL', etc
+        # pandas na values = pd.NA
         #gtf_df = pd.read_csv(f'{self.output_dir}/{self.sample_name}_gtf.tsv', sep='\t')
 
         print('Completed')
@@ -132,10 +127,11 @@ class JunctionPipeline():
     # creates combined file
     def combine_inputs(self):
         combine_params = {
-            'junctions_df'   : self.filter_df,
-            'variant_file'   : self.create_file_path('annotated'),
-            'sample_name'    : self.sample_name,
-            'output_file'    : self.create_file_path('combined'),
+            'junctions_df' : self.filter_df,
+            'variant_file' : self.create_file_path('annotated'),
+            'sample_name'  : self.sample_name,
+            'output_dir'   : self.output_dir,
+            'output_file'  : self.create_file_path('combined'),
             
         }
         print('Combining junction and variant information')
@@ -145,7 +141,6 @@ class JunctionPipeline():
 
     # creates transcripts.fa
     def junction_to_fasta(self):
-        self.final_combined_df = self.combined_df.copy()
         print('Assembling tumor-specific splicing junctions')   
         for i in self.combined_df.index.to_list():
             print(i)
@@ -179,15 +174,16 @@ class JunctionPipeline():
                 wt_aa, wt_fs = junctions.get_aa_sequence(wt, 'wt')
                 alt_aa, alt_fs = junctions.get_aa_sequence(alt, 'alt')
                 if wt_aa == '' or alt_aa == '':
-                    print('Amino acid sequence was not produced. Skipping.')
+                    print('No amino acid sequence was produced. Skipping.')
                     continue
                 junctions.create_sequence_fasta(wt_aa, alt_aa)
                 # df[row, col]
-                self.final_combined_df.loc[i, 'wt_protein_length'] = len(wt_aa)
-                self.final_combined_df.loc[i, 'alt_protein_length'] = len(alt_aa)
-                self.final_combined_df.loc[i, 'frameshift_event'] = alt_fs
+                self.combined_df.loc[i, 'wt_protein_length'] = len(wt_aa)
+                self.combined_df.loc[i, 'alt_protein_length'] = len(alt_aa)
+                self.combined_df.loc[i, 'frameshift_event'] = alt_fs
         print('Completed')
-        self.final_combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
+        self.combined_df = self.combined_df.dropna(subset=['wt_protein_length', 'alt_protein_length', 'frameshift_event'])
+        self.combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
     
     # creates kmer fasta files for input into prediction pipeline
     def fasta_to_kmers(self):
