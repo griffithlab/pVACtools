@@ -67,13 +67,13 @@ class JunctionToFasta():
             else:    
                 if not index_wt and not index_alt:
                     print(f'{self.fasta_index} Exon skip: both junction coordinates not in coding transcript...Skipping')
-                    print(f'Missing coordinates ({self.anchor}): {self.wt_coor} {self.alt_coor}')
+                    print(f'Missing coordinates: {self.wt_coor} {self.alt_coor}')
                 elif (not index_wt and index_alt) or (index_wt and not index_alt):
                     print(f'{self.fasta_index} Exon skip: one junction coordinate not in coding transcript...Skipping')
                     if index_wt:
-                        print(f'Missing coordinate ({self.anchor}): {self.alt_coor}')
+                        print(f'Missing coordinate: {self.alt_coor}')
                     elif index_alt:
-                        print(f'Missing coordinate ({self.anchor}): {self.wt_coor}')
+                        print(f'Missing coordinate: {self.wt_coor}')
                 self.wt_df = pd.DataFrame()
         return self.wt_df
 
@@ -106,7 +106,7 @@ class JunctionToFasta():
                 else:
                     # here i can add option to look for next start codon (start lost)
                     print(f'{self.fasta_index} Alternate junction coordinate not within coding transcript...Skipping')
-                    print(f'Missing coordinate ({self.anchor}): {self.alt_coor}')
+                    print(f'Missing coordinate: {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
                     continue
                 
@@ -135,7 +135,7 @@ class JunctionToFasta():
                 else:
                     # here i can add option to look for next stop codon (stop lost)
                     print(f'{self.fasta_index} Alternate junction coordinate not in coding transcript...Skipping')
-                    print(f'Missing coordinate ({self.anchor}): {self.alt_coor}')
+                    print(f'Missing coordinate: {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
                     continue    
                 
