@@ -15,7 +15,8 @@ class CombineInputs():
 
         # remove version number in annotated to compare with filtered junctions file
         var_df[['transcript_id', 'transcript_version']] = var_df['transcript_name'].str.split('.', expand=True)
-        var_df = var_df.astype({'transcript_version': 'float64'})
+        var_df = var_df.loc[var_df['transcript_id'].str.startswith('ENST') == True]
+        var_df['transcript_version'] = var_df['transcript_version'].astype('int64')
 
         # create new cols
         var_df[['variant_start', 'variant_stop']] = 0
@@ -44,17 +45,18 @@ class CombineInputs():
         # format junction variant info to match vcf
         var_df['variant_info'] = var_df['chromosome_name'] + ':' + var_df['variant_start'].astype('string') + '-' + var_df['variant_stop'].astype('string')
         #var_df.to_csv(f'{self.output_dir}/{self.sample_name}_var_df.tsv', sep='\t', index=False)
+
         return var_df
 
     def merge_and_write(self, j_df, var_df):        
         # is protein change/seq is NA in var_df, go ahead and remove the lines bc if there is no protein change, then can't create alt transcript
-        merged_df = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'gene_name', 'gene_id', 'variant_info']) #.dropna(subset=['hgvsp', 'amino_acid_change', 'protein_position'])
+        merged_df = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'gene_name', 'gene_id', 'variant_info'])
 
         left_merge = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'gene_name', 'gene_id', 'variant_info'], how='left', indicator=True)
         not_merged_lines = left_merge.loc[left_merge['_merge'] != 'both']
         if not not_merged_lines.empty:
             # fatal error if there are any that don't merge
-            print(not_merged_lines[['chromosome_name', 'start', 'stop', 'variant_info', 'transcript_id', 'transcript_version', 'gene_name', 'gene_id', ]])
+            print(not_merged_lines[['chromosome_name', 'start', 'stop', 'variant_info', 'transcript_id', 'transcript_version', 'gene_name', 'gene_id']])
             print(f'This set of transcript(s) and/or variant(s) are linked to alternative junctions via RegTools but are present in the somatic VCF. Please double check inputs - the VCF and GTF files should be the same used in the initial RegTools analysis.')
 
         # create index to match with kmers
