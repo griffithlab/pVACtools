@@ -92,7 +92,7 @@ def append_columns(intermediate_output_file, tsv_file, output_file):
 
     with open(intermediate_output_file, 'r') as input_fh, open(output_file, 'w') as output_fh:
         reader = csv.DictReader(input_fh, delimiter="\t")
-        fieldnames = ['Chromosome', 'Start', 'Stop', 'Transcript', 'Gene Name', 'Variant Type'] + reader.fieldnames
+        fieldnames = ['Chromosome', 'Start', 'Stop', 'Transcript', 'Gene Name', 'Variant Type'] + reader.fieldnames + ['Read Support', 'Expression']
         writer = csv.DictWriter(output_fh, delimiter="\t", fieldnames=fieldnames)
         writer.writeheader()
         for line in reader:
@@ -103,6 +103,8 @@ def append_columns(intermediate_output_file, tsv_file, output_file):
             line['Transcript'] = matching_line['transcript_name']
             line['Gene Name'] = matching_line['gene_name']
             line['Variant Type'] = matching_line['variant_type']
+            line['Read Support'] = matching_line['fusion_read_support']
+            line['Expression'] = matching_line['fusion_expression']
             writer.writerow(line)
 
 def main(args_input = sys.argv[1:]):
