@@ -1,0 +1,17 @@
+5'_gene,3'_gene,5'_transcript,3'_transcript,5'_strand,3'_strand,5'_transcript_biotype,3'_transcript_biotype,Fusion_effect,Protein_length,Protein_weight_(kD)
+HNRNPUL2,AHNAK,ENST00000301785,ENST00000530124,-,-,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+HNRNPUL2,AHNAK,ENST00000301785,ENST00000257247,-,-,protein_coding,protein_coding,out-of-frame,677,75.19623190000024
+HNRNPUL2,AHNAK,ENST00000301785,ENST00000525875,-,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+HNRNPUL2,AHNAK,ENST00000301785,ENST00000533365,-,-,protein_coding,protein_coding,exon-exon,NA,NA
+HNRNPUL2,AHNAK,ENST00000301785,ENST00000378024,-,-,protein_coding,protein_coding,out-of-frame,677,75.19623190000024
+HNRNPUL2,AHNAK,ENST00000301785,ENST00000530285,-,-,protein_coding,protein_coding,exon-exon,NA,NA
+HNRNPUL2,AHNAK,ENST00000301785,ENST00000528508,-,-,protein_coding,protein_coding,exon-exon,NA,NA
+HNRNPUL2,AHNAK,ENST00000301785,ENST00000531324,-,-,protein_coding,protein_coding,exon-exon,NA,NA
+HNRNPUL2,AHNAK,ENST00000540127,ENST00000530124,-,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+HNRNPUL2,AHNAK,ENST00000540127,ENST00000257247,-,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+HNRNPUL2,AHNAK,ENST00000540127,ENST00000525875,-,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+HNRNPUL2,AHNAK,ENST00000540127,ENST00000533365,-,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+HNRNPUL2,AHNAK,ENST00000540127,ENST00000378024,-,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+HNRNPUL2,AHNAK,ENST00000540127,ENST00000530285,-,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+HNRNPUL2,AHNAK,ENST00000540127,ENST00000528508,-,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+HNRNPUL2,AHNAK,ENST00000540127,ENST00000531324,-,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
