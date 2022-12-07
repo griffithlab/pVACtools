@@ -591,7 +591,7 @@ class FusionInputConverter(InputFileConverter):
         count = 1
         for input_file in sorted(glob.glob(os.path.join(self.input_file, '*', '*_protein.fa'))):
             (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end) = self.parse_exon_file(input_file)
-            if len(starfusion_entries) > 0:
+            if starfusion_entries is not None:
                 starfusion_entry = self.find_matching_starfusion_entry(starfusion_entries, five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end)
             else:
                 starfusion_entry = None
@@ -647,7 +647,7 @@ class FusionInputConverter(InputFileConverter):
         writer = open(self.output_file, 'w')
         tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         tsv_writer.writeheader()
-        starfusion_entries = {}
+        starfusion_entries = None
         if self.starfusion_file:
             starfusion_entries = self.parse_starfusion_file()
         if os.path.isfile(self.input_file):

@@ -25,7 +25,7 @@ def create_net_class_report(files, all_epitopes_output_file, filtered_report_fil
     post_processing_params['input_file'] = all_epitopes_output_file
     post_processing_params['filtered_report_file'] = filtered_report_file
     post_processing_params['minimum_fold_change'] = None
-    post_processing_params['run_coverage_filter'] = False
+    post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_manufacturability_metrics'] = True
     if run_params['net_chop_method']:
@@ -52,7 +52,7 @@ def create_combined_reports(files, all_epitopes_output_file, filtered_report_fil
     post_processing_params['input_file'] = all_epitopes_output_file
     post_processing_params['filtered_report_file'] = filtered_report_file
     post_processing_params['minimum_fold_change'] = None
-    post_processing_params['run_coverage_filter'] = False
+    post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = False
@@ -153,6 +153,8 @@ def main(args_input = sys.argv[1:]):
         'run_post_processor'        : False,
         'problematic_amino_acids'   : args.problematic_amino_acids,
         'starfusion_file'           : args.starfusion_file,
+        'read_support'              : args.read_support,
+        'expn_val'                  : args.expn_val,
     }
 
     if args.iedb_install_directory:
