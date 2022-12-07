@@ -281,7 +281,17 @@ class PvacfuseRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
         PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
         self.parser.add_argument(
             '--starfusion-file',
-            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from."
+            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from. Only used when running with AGFusion data."
+        )
+        self.parser.add_argument(
+            '--read-support', type=int,
+            help="Read Support Cutoff. Sites above this cutoff will be considered.",
+            default=5
+        )
+        self.parser.add_argument(
+            '--expn-val', type=float,
+            help="Expression Cutoff. Expression is meassured as FFPM (fusion fragments per million total reads). Sites above this cutoff will be considered.",
+            default=0.1
         )
 
 
