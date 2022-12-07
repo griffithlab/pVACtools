@@ -77,6 +77,7 @@ class Pipeline(metaclass=ABCMeta):
         self.run_post_processor          = kwargs.pop('run_post_processor', True)
         self.problematic_amino_acids     = kwargs.pop('problematic_amino_acids', None)
         self.flurry_state                = self.get_flurry_state()
+        self.starfusion_file             = kwargs.pop('starfusion_file', None)
         self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)

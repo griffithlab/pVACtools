@@ -1,0 +1,113 @@
+5'_gene,3'_gene,5'_transcript,3'_transcript,5'_strand,3'_strand,5'_transcript_biotype,3'_transcript_biotype,Fusion_effect,Protein_length,Protein_weight_(kD)
+MDH1,LINC01278,ENST00000485781,ENST00000610088,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485781,ENST00000610234,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485781,ENST00000608788,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485781,ENST00000609401,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485781,ENST00000608623,+,-,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485781,ENST00000609143,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485781,ENST00000433061,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000233114,ENST00000610088,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000233114,ENST00000610234,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000233114,ENST00000608788,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000233114,ENST00000609401,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000233114,ENST00000608623,+,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000233114,ENST00000609143,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000233114,ENST00000433061,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000409908,ENST00000610088,+,-,protein_coding,sense_overlapping,intron-exon,NA,NA
+MDH1,LINC01278,ENST00000409908,ENST00000610234,+,-,protein_coding,sense_overlapping,intron-exon,NA,NA
+MDH1,LINC01278,ENST00000409908,ENST00000608788,+,-,protein_coding,sense_overlapping,intron-exon,NA,NA
+MDH1,LINC01278,ENST00000409908,ENST00000609401,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000409908,ENST00000608623,+,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000409908,ENST00000609143,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000409908,ENST00000433061,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000442225,ENST00000610088,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000442225,ENST00000610234,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000442225,ENST00000608788,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000442225,ENST00000609401,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000442225,ENST00000608623,+,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000442225,ENST00000609143,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000442225,ENST00000433061,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000409476,ENST00000610088,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000409476,ENST00000610234,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000409476,ENST00000608788,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000409476,ENST00000609401,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000409476,ENST00000608623,+,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000409476,ENST00000609143,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000409476,ENST00000433061,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485155,ENST00000610088,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485155,ENST00000610234,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485155,ENST00000608788,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485155,ENST00000609401,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485155,ENST00000608623,+,-,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485155,ENST00000609143,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000485155,ENST00000433061,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000436321,ENST00000610088,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000436321,ENST00000610234,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000436321,ENST00000608788,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000436321,ENST00000609401,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000436321,ENST00000608623,+,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000436321,ENST00000609143,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000436321,ENST00000433061,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000462944,ENST00000610088,+,-,processed_transcript,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000462944,ENST00000610234,+,-,processed_transcript,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000462944,ENST00000608788,+,-,processed_transcript,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000462944,ENST00000609401,+,-,processed_transcript,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000462944,ENST00000608623,+,-,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000462944,ENST00000609143,+,-,processed_transcript,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000462944,ENST00000433061,+,-,processed_transcript,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000454035,ENST00000610088,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000454035,ENST00000610234,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000454035,ENST00000608788,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000454035,ENST00000609401,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000454035,ENST00000608623,+,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000454035,ENST00000609143,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000454035,ENST00000433061,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000472098,ENST00000610088,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000472098,ENST00000610234,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000472098,ENST00000608788,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000472098,ENST00000609401,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000472098,ENST00000608623,+,-,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000472098,ENST00000609143,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000472098,ENST00000433061,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000432309,ENST00000610088,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000432309,ENST00000610234,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000432309,ENST00000608788,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000432309,ENST00000609401,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000432309,ENST00000608623,+,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000432309,ENST00000609143,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000432309,ENST00000433061,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000421012,ENST00000610088,+,-,nonsense_mediated_decay,sense_overlapping,3UTR-exon,NA,NA
+MDH1,LINC01278,ENST00000421012,ENST00000610234,+,-,nonsense_mediated_decay,sense_overlapping,3UTR-exon,NA,NA
+MDH1,LINC01278,ENST00000421012,ENST00000608788,+,-,nonsense_mediated_decay,sense_overlapping,3UTR-exon,NA,NA
+MDH1,LINC01278,ENST00000421012,ENST00000609401,+,-,nonsense_mediated_decay,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000421012,ENST00000608623,+,-,nonsense_mediated_decay,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000421012,ENST00000609143,+,-,nonsense_mediated_decay,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000421012,ENST00000433061,+,-,nonsense_mediated_decay,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000484538,ENST00000610088,+,-,retained_intron,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000484538,ENST00000610234,+,-,retained_intron,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000484538,ENST00000608788,+,-,retained_intron,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000484538,ENST00000609401,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000484538,ENST00000608623,+,-,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000484538,ENST00000609143,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000484538,ENST00000433061,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000495083,ENST00000610088,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000495083,ENST00000610234,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000495083,ENST00000608788,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000495083,ENST00000609401,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000495083,ENST00000608623,+,-,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000495083,ENST00000609143,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000495083,ENST00000433061,+,-,retained_intron,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000539945,ENST00000610088,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000539945,ENST00000610234,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000539945,ENST00000608788,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000539945,ENST00000609401,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000539945,ENST00000608623,+,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000539945,ENST00000609143,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000539945,ENST00000433061,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000544381,ENST00000610088,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000544381,ENST00000610234,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000544381,ENST00000608788,+,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+MDH1,LINC01278,ENST00000544381,ENST00000609401,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000544381,ENST00000608623,+,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000544381,ENST00000609143,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
+MDH1,LINC01278,ENST00000544381,ENST00000433061,+,-,protein_coding,sense_overlapping,Outside transcript boundry,NA,NA
