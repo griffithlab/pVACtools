@@ -279,6 +279,11 @@ class PvacfuseRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
         tool_name = "pvacfuse"
         input_file_help="An AGFusion output directory or Arriba fusion.tsv output file."
         PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
+        self.parser.add_argument(
+            '--starfusion-file',
+            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from."
+        )
+
 
 class PvacvectorRunArgumentParser(RunArgumentParser):
     def __init__(self):

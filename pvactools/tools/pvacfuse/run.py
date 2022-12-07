@@ -79,7 +79,7 @@ def generate_fasta(args, output_dir, epitope_length, epitope_flank_length=0, net
         params.extend(["-d", str(args.downstream_sequence_length)])
     else:
         params.extend(["-d", 'full'])
-    pvactools.tools.pvacfuse.generate_protein_fasta.main(params, save_tsv_file=True)
+    pvactools.tools.pvacfuse.generate_protein_fasta.main(params, save_tsv_file=True, starfusion_file=args.starfusion_file)
     os.unlink("{}.manufacturability.tsv".format(output_file))
     return (output_file, per_epitope_output_dir)
 
@@ -152,6 +152,7 @@ def main(args_input = sys.argv[1:]):
         'blastp_db'                 : args.blastp_db,
         'run_post_processor'        : False,
         'problematic_amino_acids'   : args.problematic_amino_acids,
+        'starfusion_file'           : args.starfusion_file,
     }
 
     if args.iedb_install_directory:
