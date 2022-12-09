@@ -86,6 +86,8 @@ class PostProcessor:
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 percentile_threshold=self.percentile_threshold,
                 top_score_metric=self.top_score_metric,
+                read_support=self.read_support,
+                expn_val=self.expn_val,
             ).execute()
         elif self.file_type == 'pVACbind':
             PvacbindAggregateAllEpitopes(

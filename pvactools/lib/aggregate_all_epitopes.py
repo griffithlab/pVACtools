@@ -620,31 +620,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
         return df.iloc[0]
 
-    def get_tier(self, mutation, vaf_clonal):
-        if self.allele_specific_binding_thresholds:
-            threshold = PredictionClass.cutoff_for_allele(mutation['HLA Allele'])
-            binding_threshold = self.binding_threshold if threshold is None else float(threshold)
-        else:
-            binding_threshold = self.binding_threshold
-        relaxed_binding_threshold = binding_threshold * 2
-
-        if mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
-            if self.percentile_threshold:
-                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
-                    return "Pass"
-            else:
-                return "Pass"
-
-        #relax mt and expr
-        if mutation["{} IC50 Score".format(self.top_score_metric)] < relaxed_binding_threshold:
-            if self.relaxed_percentile_threshold:
-                if mutation["{} Percentile".format(self.top_score_metric)] < self.relaxed_percentile_threshold:
-                    return "Relaxed"
-            else:
-                return "Relaxed"
-
-        return "Poor"
-
     def get_good_binders(self, df):
         if self.allele_specific_binding_thresholds:
             selection = []
@@ -692,6 +667,11 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         pass
 
 class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
+    def __init__(self, input_file, output_file, binding_threshold=500, percentile_threshold=None, allele_specific_binding_thresholds=False,top_score_metric="median", read_support=5, expn_val=0.1):
+        UnmatchedSequenceAggregateAllEpitopes.__init__(self, input_file, output_file, binding_threshold=500, percentile_threshold=None, allele_specific_binding_thresholds=False,top_score_metric="median")
+        self.read_support = read_support
+        self.expn_val = expn_val
+
     def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
@@ -713,6 +693,64 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         })
         return out_dict
 
+    def get_tier(self, mutation, vaf_clonal):
+        if self.allele_specific_binding_thresholds:
+            threshold = PredictionClass.cutoff_for_allele(mutation['HLA Allele'])
+            binding_threshold = self.binding_threshold if threshold is None else float(threshold)
+        else:
+            binding_threshold = self.binding_threshold
+        relaxed_binding_threshold = binding_threshold * 2
+
+        low_read_support = False
+        if mutation['Read Support'] != 'NA' and mutation['Read Support'] < self.read_support:
+            low_read_support = True
+
+        low_expr = False
+        if mutation['Expression'] != 'NA' and mutation['Expression'] < self.expn_val:
+            low_expr = True
+
+        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+          not low_read_support and
+          not low_expr):
+            if self.percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
+                    return "Pass"
+            else:
+                return "Pass"
+
+        #relax mt
+        if (mutation["{} IC50 Score".format(self.top_score_metric)] < relaxed_binding_threshold and
+          not low_read_support and
+          not low_expr):
+            if self.relaxed_percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.relaxed_percentile_threshold:
+                    return "Relaxed"
+            else:
+                return "Relaxed"
+
+        #low read support
+        if (mutation["{} IC50 Score".format(self.top_score_metric)] < relaxed_binding_threshold and
+          low_read_support and
+          not low_expr):
+            if self.relaxed_percentile_threshold:
+                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
+                    return "LowReadSupport"
+            else:
+                return "LowReadSupport"
+
+        #low expression
+        if (mutation["{} IC50 Score".format(self.top_score_metric)] < relaxed_binding_threshold and
+          not low_read_support and
+          low_expr):
+            if self.relaxed_percentile_threshold:
+                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.relaxed_percentile_threshold:
+                    return "LowExpr"
+            else:
+                return "LowExpr"
+
+        return "Poor"
+
+
 class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
     def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
@@ -730,3 +768,29 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             'Evaluation': 'Pending',
         })
         return out_dict
+
+    def get_tier(self, mutation, vaf_clonal):
+        if self.allele_specific_binding_thresholds:
+            threshold = PredictionClass.cutoff_for_allele(mutation['HLA Allele'])
+            binding_threshold = self.binding_threshold if threshold is None else float(threshold)
+        else:
+            binding_threshold = self.binding_threshold
+        relaxed_binding_threshold = binding_threshold * 2
+
+        if mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
+            if self.percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
+                    return "Pass"
+            else:
+                return "Pass"
+
+        #relax mt
+        if mutation["{} IC50 Score".format(self.top_score_metric)] < relaxed_binding_threshold:
+            if self.relaxed_percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.relaxed_percentile_threshold:
+                    return "Relaxed"
+            else:
+                return "Relaxed"
+
+        return "Poor"
+
