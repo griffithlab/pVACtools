@@ -52,14 +52,6 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def get_best_aa_change(self, best):
-        raise Exception("Must implement method in child class")
-
-    @abstractmethod
-    def calculate_allele_expr(self, line):
-        raise Exception("Must implement method in child class")
-
-    @abstractmethod
     def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
         raise Exception("Must implement method in child class")
 
@@ -677,43 +669,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     def get_default_annotation_count(self):
         return "NA"
 
-    def get_best_aa_change(self, best):
-        return 'NA'
-
-    def calculate_allele_expr(self, line):
-        return 'NA'
-
-    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
-        allele_expr = self.calculate_allele_expr(best)
-        tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
-
-        out_dict = { 'ID': key }
-        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
-        gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
-        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else ''
-        out_dict.update({
-            'Gene': gene,
-            'AA Change': self.get_best_aa_change(best),
-            'Num Passing Transcripts': anno_count,
-            'Best Peptide': best["Epitope Seq"],
-            'Pos': "NA",
-            'Problematic Pos': problematic_positions,
-            'Num Passing Peptides': peptide_count,
-            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
-            'IC50 WT': "NA",
-            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
-            '%ile WT': "NA",
-            'RNA Expr': "NA",
-            'RNA VAF': "NA",
-            'Allele Expr': allele_expr,
-            'RNA Depth': "NA",
-            'DNA VAF': "NA",
-            'Tier': tier,
-            'Evaluation': 'Pending',
-            'ID':key,
-        })
-        return out_dict
-
     def get_metrics(self, df, peptides, best):
         return None
 
@@ -735,3 +690,43 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
     def copy_pvacview_r_files(self):
         pass
+
+class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
+    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
+        tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
+
+        out_dict = { 'ID': key }
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
+        gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
+        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else ''
+        out_dict.update({
+            'Gene': gene,
+            'Best Peptide': best["Epitope Seq"],
+            'Problematic Pos': problematic_positions,
+            'Num Passing Peptides': peptide_count,
+            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
+            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
+            'Expr': best['Expression'],
+            'Read Support': best['Read Support'],
+            'Tier': tier,
+            'Evaluation': 'Pending',
+        })
+        return out_dict
+
+class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
+    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
+        tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
+
+        out_dict = { 'ID': key }
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
+        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else ''
+        out_dict.update({
+            'Best Peptide': best["Epitope Seq"],
+            'Problematic Pos': problematic_positions,
+            'Num Passing Peptides': peptide_count,
+            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
+            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
+            'Tier': tier,
+            'Evaluation': 'Pending',
+        })
+        return out_dict
