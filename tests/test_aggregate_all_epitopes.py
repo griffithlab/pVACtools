@@ -5,7 +5,7 @@ from filecmp import cmp
 import sys
 import py_compile
 
-from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, UnmatchedSequenceAggregateAllEpitopes
+from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes
 from tests.utils import *
 
 class AggregateAllEptiopesTests(unittest.TestCase):
@@ -48,7 +48,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
     def test_aggregate_all_epitopes_pvacfuse_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
-        self.assertFalse(UnmatchedSequenceAggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacfuse.tsv'), output_file.name).execute())
+        self.assertFalse(PvacfuseAggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacfuse.tsv'), output_file.name).execute())
         self.assertTrue(compare(
             output_file.name,
             os.path.join(self.test_data_dir, "output.pvacfuse.tsv"),
@@ -68,7 +68,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
     def test_aggregate_all_epitopes_pvacbind_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
-        self.assertFalse(UnmatchedSequenceAggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacbind.tsv'), output_file.name).execute())
+        self.assertFalse(PvacbindAggregateAllEpitopes(os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacbind.tsv'), output_file.name).execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "output.pvacbind.tsv"),
@@ -149,7 +149,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
         self.assertFalse(
-            UnmatchedSequenceAggregateAllEpitopes(
+            PvacbindAggregateAllEpitopes(
                 os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacbind.tsv'),
                 output_file.name,
                 top_score_metric="lowest"
