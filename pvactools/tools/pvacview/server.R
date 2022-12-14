@@ -95,7 +95,10 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$metricsDataInput,{
     df$metricsData <- fromJSON(input$metricsDataInput$datapath)
     df$dna_cutoff <- df$metricsData$vaf_clonal
+    df$allele_expr_high <- df$metricsData$allele_expr_threshold
+    df$allele_expr_low <- df$metricsData$relaxed_allele_expr_threshold
     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, df$allele_expr_high, df$allele_expr_low, unlist(x["Pos"]), anchor_mode="default"))
+    df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$metricsData$binding_cutoffs, x["Allele"], x["IC50 MT"]))
   })
   
   #Option 1: User uploaded additional data file 
@@ -133,8 +136,9 @@ server <- shinyServer(function(input, output, session) {
      ## Class I demo metrics file
      metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/f83c52c8b8387beae69be8b200a44dcf199d9af2/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
      df$metricsData <- fromJSON(txt = metricsdata)
-     dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
-     df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
+     df$dna_cutoff <- df$metricsData$vaf_clonal
+     df$allele_expr_high <- df$metricsData$allele_expr_threshold
+     df$allele_expr_low <- df$metricsData$relaxed_allele_expr_threshold
      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, df$allele_expr_high, df$allele_expr_low, unlist(x["Pos"]), anchor_mode="default"))
      df$mainTable$`Gene of Interest` <- apply(df$mainTable,1, function(x) {any(x['Gene'] == df$gene_list)})
      if("Comments" %in% colnames(df$mainTable))
@@ -157,6 +161,7 @@ server <- shinyServer(function(input, output, session) {
      gene_list <- read.table(text = gene_data, sep = '\t',  header = FALSE, stringsAsFactors = FALSE, check.names=FALSE)
      df$gene_list <- gene_list
      df$mainTable$`Gene of Interest` <- apply(df$mainTable,1, function(x) {any(x['Gene'] == df$gene_list)})
+     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$metricsData$binding_cutoffs, x["Allele"], x["IC50 MT"]))
      updateTabItems(session, "tabs", "explore")
    })
    
@@ -188,6 +193,8 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$submit,{
       session$sendCustomMessage('unbind-DT', 'mainTable')
       df$dna_cutoff <- input$dna_cutoff
+      df$allele_expr_high <- input$allele_expr_high
+      df$allele_expr_low <- input$allele_expr_low
       df$mainTable$`Evaluation` <- shinyValue("selecter_",nrow(df$mainTable), df$mainTable)
       df$mainTable$`Mutated Positions` <- apply(df$mainTable, 1, function(x) calculate_mutation_info(df$metricsData[[x[["ID"]]]]))
       df$mainTable$`Best HLA allele` <- apply(df$mainTable, 1, function(x) df$metricsData[[x[["ID"]]]]$best_hla_allele)
@@ -239,6 +246,21 @@ server <- shinyServer(function(input, output, session) {
     dna_cutoff 
   })
   
+  output$paramTable = renderTable(
+    data <- data.frame(
+      "Parameter" = c("Tumor Purity", "VAF Clonal", "VAF Subclonal", "Allele Expression for Pass Variants", "Allele Expression for Relaxed Variants",
+                      "Binding Threshold", "Relaxed Binding Threshold", "Maximum TSL",
+                      "Percentile Threshold", "Relaxed Percentile Threshold", "Allele Specific Binding Thresholds",
+                      "MT Top Score Metric", "WT Top Score Metric"),
+      "Value" = c(if (is.null(df$metricsData$tumor_purity)){"NULL"}else{df$metricsData$tumor_purity},
+                  df$dna_cutoff, df$dna_cutoff/2, df$allele_expr_high, df$allele_expr_low,
+                  df$metricsData$binding_threshold, df$metricsData$relaxed_binding_threshold, df$metricsData$maximum_transcript_support_level,
+                  if (is.null(df$metricsData$percentile_threshold)){"NULL"}else{df$metricsData$percentile_threshold},
+                  if (is.null(df$metricsData$relaxed_percentile_threshold)){"NULL"}else{df$metricsData$relaxed_percentile_threshold},
+                  df$metricsData$allele_specific_binding_thresholds,
+                  df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric)
+    ), digits=3
+  )
   output$comment_text <- renderText({
     if (is.null(df$mainTable)){
       return ("N/A")
@@ -270,11 +292,11 @@ server <- shinyServer(function(input, output, session) {
       return (datatable(data.frame("Aggregate Report"=character())))
     }
     else{
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Best HLA allele") & !(colnames(df$mainTable) == "Comments")]
-    , escape = FALSE, callback = JS(callBack(hla_count())), class = 'stripe',
+      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Allele") & !(colnames(df$mainTable) == "Comments")]
+    , escape = FALSE, callback = JS(callBack(hla_count(), df$metricsData$mt_top_score_metric)), class = 'stripe',
           options=list(lengthChange = FALSE, 
                    dom = 'Bfrtip', pageLength = df$pageLength,
-                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(25-(7-hla_count()),26-(7-hla_count()))),
+                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(25-(7-hla_count()),26-(7-hla_count()), 27-(7-hla_count()))),
                                      list(orderable=TRUE, targets=0)),
                    buttons = list(I('colvis')), 
                    initComplete = htmlwidgets::JS(
@@ -289,7 +311,7 @@ server <- shinyServer(function(input, output, session) {
                    ),
       selection = 'none', 
       extensions = c("Buttons"))}
-    %>% formatStyle('IC50 MT', backgroundColor = styleInterval(c(50,100,200,300,400,500,600, 700, 800, 900, 1000), 
+    %>% formatStyle('IC50 MT', 'Scaled BA', backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
                                                                 c("#00FF00", "#00EE00","#00D500","#00BC00","#00A300", "#008B00", "#FFFF00", "#FFEB00", "#FFD800","#FFC500","#FFB100", "#FF9999"))
                      ,fontWeight = styleInterval(c(1000), c('normal', 'bold')), border= styleInterval(c(1000), c('normal','2px solid red')))
     %>% formatStyle('%ile MT', backgroundColor = styleInterval(c(0.1,0.2,0.3,0.4,0.5,0.75,1,1.5,2),
@@ -889,7 +911,7 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)){
       return ()
     }
-    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval") & !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Tier Count") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Gene of Interest")  & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Best HLA allele")]
+    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval") & !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Scaled BA") & !(colnames(df$mainTable) == "Tier Count") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Gene of Interest")  & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Allele")]
     col_names <- colnames(data)
     data <- data.frame(data, Evaluation=shinyValue("selecter_",nrow(df$mainTable), df$mainTable))
     colnames(data) <- c(col_names,"Evaluation")
