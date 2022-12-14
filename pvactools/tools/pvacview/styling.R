@@ -13,7 +13,7 @@ rowCallback <- function(hla_count, row_num) {
   ))
 )}
 
-callBack <- function(hla_count) {
+callBack <- function(hla_count, score_mode) {
   c(
   "var tips = ['Gene - The Ensembl gene name of the affected gene.',",
   "        'AA Change - The amino acid change for the mutation. Note that FS indicates a frameshift variant.',",
@@ -21,10 +21,10 @@ callBack <- function(hla_count) {
   "        'Best Peptide - The best-binding mutant epitope sequence (lowest median mutant binding affinity).',",
   "        'Pos - The one-based position of the start of the mutation within the epitope sequence. 0 if the start of the mutation is before the epitope (as can occur downstream of frameshift mutations).',",
   "        'Num Passing Peptides - The number of unique well-binding peptides for this mutation.',",
-  "        'IC50 MT - Median ic50 binding affinity of the best-binding mutant epitope across all prediction algorithms used.', ",
-  "        'IC50 WT - Median ic50 binding affinity of the corresponding wildtype epitope across all prediction algorithms used.',",
-  "        '%ile MT - Median binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used (those that provide percentile output).', ",
-  "        '%ile WT - Median binding affinity percentile rank of the corresponding wildtype epitope across all prediction algorithms used (those that provide percentile output).', ",
+  gsub("X", score_mode,"      'IC50 MT - X IC50 binding affinity of the best-binding mutant epitope across all prediction algorithms used.', "),
+  "        'IC50 WT - IC50 binding affinity of the corresponding wildtype epitope.',",
+  gsub("X", score_mode,"      '%ile MT - X binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used (those that provide percentile output).', "),
+  "        '%ile WT - Binding affinity percentile rank of the corresponding wildtype epitope across all prediction algorithms used (those that provide percentile output).', ",
   "        'RNA Expr - Gene expression value for the annotated gene containing the variant.',",
   "        'RNA VAF - Tumor RNA variant allele frequency (VAF) at this position.',",
   "        'Allele Expr - Gene expression value * Tumor RNA VAF. This is used to approximate the expression of the variant allele.',",

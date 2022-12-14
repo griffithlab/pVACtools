@@ -8,6 +8,13 @@ anchor_data[[9]] <- read.table(curl("https://raw.githubusercontent.com/griffithl
 anchor_data[[10]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/ae938113ddbbe6c6eeecebf94459d449facd2c2f/tools/pvacview/data/Normalized_anchor_predictions_10_mer.tsv"), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/ae938113ddbbe6c6eeecebf94459d449facd2c2f/tools/pvacview/data/Normalized_anchor_predictions_11_mer.tsv"), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 
+#get binding affinity colors cutoffs given HLA
+
+scale_binding_affinity <- function(data, hla, current_ba){
+  threshold <- as.numeric(data[hla])
+  return (as.numeric(current_ba)/threshold)
+}
+
 
 #reformat table for display
 table_formatting = function(x,y){
