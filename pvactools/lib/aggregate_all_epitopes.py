@@ -304,6 +304,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         #if there are none, reset to previous dataframe
         if biotype_df.shape[0] == 0:
             biotype_df = df
+
         #subset protein_coding dataframe to only include entries with a TSL < maximum_transcript_support_level
         tsl_df = biotype_df[biotype_df['Transcript Support Level'] != 'NA']
         tsl_df = tsl_df[tsl_df['Transcript Support Level'] != 'Not Supported']
@@ -312,9 +313,18 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if tsl_df.shape[0] == 0:
             tsl_df = biotype_df
 
+        #subset tsl dataframe to only include entries with no problematic positions
+        if self.problematic_positions_exist():
+            prob_pos_df = tsl_df[tsl_df['Problematic Positions'] == ""]
+            #if this results in an empty dataframe, reset to previous dataframe
+            if prob_pos_df.shape[0] == 0:
+                prob_pos_df = tsl_df
+        else:
+            prob_pos_df = tsl_df
+
         #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
-        tsl_df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "Transcript Length".format(self.wt_top_score_metric)], inplace=True, ascending=[True, True, False])
-        return tsl_df.iloc[0].to_dict()
+        prob_pos_df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "Transcript Length".format(self.wt_top_score_metric)], inplace=True, ascending=[True, True, False])
+        return prob_pos_df.iloc[0].to_dict()
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
