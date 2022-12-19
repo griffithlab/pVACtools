@@ -97,6 +97,7 @@ def main(args_input = sys.argv[1:]):
         'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
+        'save_gtf'                         : args.save_gtf,
         'normal_sample_name'               : args.normal_sample_name,
         'class_i_hla'                      : class_i_alleles,
         'class_ii_hla'                     : class_ii_alleles,

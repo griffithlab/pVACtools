@@ -14,7 +14,7 @@ import numpy as np
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
+#from Bio.Alphabet import IUPAC
 
 import pvactools.lib.run_utils
 from pvactools.lib.prediction_class import MHCI

@@ -16,6 +16,14 @@ def define_parser():
         add_help=False
     )
     run_main_program_parser.set_defaults(func=run)
+
+    gtf_to_tsv = subparsers.add_parser(
+        "gtf_to_tsv",
+        help="Filter and convert reference GTF to TSV format.",
+        add_help=False
+    )
+    gtf_to_tsv.set_defaults(func=run)
+    
     return parser
 
 
