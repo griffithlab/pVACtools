@@ -29,7 +29,9 @@ class FastaToKmers():
                 # grab kmer sequence
                 k = sequence[i:x+i]
                 # if kmer matches target len
-                if len(k) == x:
+                # if k seq doies not include X (any aa); continue
+                match = re.search('X', k)
+                if not match and len(k) == x:
                     # add entry to dictionary
                     kmer_dict[k] = final_seq_name
         return kmer_dict
@@ -81,12 +83,12 @@ class FastaToKmers():
         index_df = index_df.explode('name')
         # now split each index into index, pos, len
         index_df[['junction_index', 'transcript_position']] = index_df['name'].str.split(';', expand=True)
-        index_df['name'] = index_df['name'].str.replace(';', '.') 
+        index_df['name'] = index_df['name'].str.replace(';', '.')
         # I don't think I need to save this file
         # create a tsv file
-        #if os.path.exists(f'{self.output_dir}/kmer_index.tsv'):
+        # if os.path.exists(f'{self.output_dir}/kmer_index.tsv'):
         #    print('Kmer index already exists. Skipping.')
-        #else:
+        # else:
         index_df.to_csv(f'{self.output_dir}/kmer_index.tsv', sep='\t', index=False)
         print('Kmer index file - complete')
 

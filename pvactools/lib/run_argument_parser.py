@@ -186,11 +186,11 @@ class PvacbindRunArgumentParser(PredictionRunArgumentParser):
 class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
     def __init__(self):
         tool_name = "pvacsplice"
-        input_file_help = "A RegTools output tsv file"
+        input_file_help = "RegTools junctions output file (option: -o)"
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
         self.parser.add_argument(
             "ref_fasta",
-            help="A reference FASTA file to identify transcript sequences from Ensembl coordinates."
+            help="A reference FASTA file to identify transcript sequences from GTF coordinates."
         )
         self.parser.add_argument(
             "annotated_vcf",
@@ -205,7 +205,7 @@ class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
             help="Reference GTF file. Note: make sure to use the same file used for Regtools analysis."
         )
         self.parser.add_argument(
-            "--maximum-transcript-support-level", type=int,
+            "-tsl", "--maximum-transcript-support-level", type=int,
             help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
             +"Keep all epitopes with a transcript support level <= to this cutoff.",
             default=1,
@@ -221,6 +221,13 @@ class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
             help="Regulatory variants can lie inside or outside of splicing junction."
             +"Maximum distance window (upstream and downstream) for a variant outside the junction.",
             default=100
+        )
+        self.parser.add_argument(
+            "-g", "--save_gtf",
+            help="Save a tsv file from the uploaded filtered GTF data."
+            +"Use this option to bypass GTF data upload time for multiple pVACsplice runs.",
+            default=False,
+            action='store_true'
         )
         self.parser.add_argument(
             '--normal-sample-name',

@@ -55,9 +55,10 @@ class CombineInputs():
         left_merge = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'gene_name', 'gene_id', 'variant_info'], how='left', indicator=True)
         not_merged_lines = left_merge.loc[left_merge['_merge'] != 'both']
         if not not_merged_lines.empty:
-            # fatal error if there are any that don't merge
+            # warning: if there are any that don't merge
             print(not_merged_lines[['chromosome_name', 'start', 'stop', 'variant_info', 'transcript_id', 'transcript_version', 'gene_name', 'gene_id']])
-            print(f'This set of transcript(s) and/or variant(s) are linked to alternative junctions via RegTools but are present in the somatic VCF. Please double check inputs - the VCF and GTF files should be the same used in the initial RegTools analysis.')
+            # sys.exit('exit_code')
+            print(f'This variant(s) is linked to alternative junctions via RegTools but is not present in the somatic VCF. Please double check inputs - the VCF and GTF files should be the same used in the initial RegTools analysis.')
 
         # create index to match with kmers
         merged_df['index'] = merged_df['gene_name'] + '.' + merged_df['transcript_id'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']

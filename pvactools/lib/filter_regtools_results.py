@@ -6,13 +6,17 @@ class FilterRegtoolsResults():
         self.input_file  = kwargs['input_file']
         self.output_file = kwargs['output_file']
         self.gtf_df      = kwargs['gtf_df']
-        self.score       = kwargs['score']
-        self.distance    = kwargs['distance']
+        self.score       = kwargs['score'] #10 reads, 100, 500 -j (cohort stats combined junction tsv filters out junctions with <= 5 reads).  
+        self.distance    = kwargs['distance'] #50, 100 bp, 150 -v
 
     def split_string(self, df, col, delimiter):
         df[col] = df[col].str.split(delimiter)
 
-    def filter_junction_rows(self, junctions):
+    def filter_junction_rows(self):
+        # open file, rename junction cols for clarity
+        junctions = pd.read_csv(self.input_file, sep='\t')
+        junctions = junctions.rename(columns={'chrom':'junction_chrom', 'start':'junction_start', 'end':'junction_stop'})
+
         # filter on score, strand, and anchor
         filter_junctions = junctions[(junctions['score'] > self.score) & (junctions['strand'] != '?') & (junctions['anchor'].isin(['D', 'A', 'NDA']))].dropna()
         
@@ -73,12 +77,8 @@ class FilterRegtoolsResults():
         return merged_df
     
     def execute(self):
-        # open file, rename junction cols for clarity
-        junctions = pd.read_csv(self.input_file, sep='\t')
-        junctions = junctions.rename(columns={'chrom':'junction_chrom', 'start':'junction_start', 'end':'junction_stop'})
-
         # filter on score, strand, anchor, and distance; add variant_start column
-        filter_junctions = self.filter_junction_rows(junctions)
+        filter_junctions = self.filter_junction_rows()
 
         # filter transcripts by protein_coding and transcript_id
         pc_junctions = self.pc_junction_rows(filter_junctions)
