@@ -77,6 +77,8 @@ class PostProcessor:
                 expn_val=self.expn_val,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
                 top_score_metric=self.top_score_metric,
+                allele_specific_anchors=self.allele_specific_anchors,
+                anchor_contribution_threshold=self.anchor_contribution_threshold,
             ).execute()
         else:
             UnmatchedSequenceAggregateAllEpitopes(
