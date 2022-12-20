@@ -135,7 +135,7 @@ def main(args_input = sys.argv[1:]):
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
-        'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
+        'allele_specific_binding_thresholds': args.allele_specific_binding_thresholds,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
         'additional_report_columns' : args.additional_report_columns,
@@ -148,7 +148,8 @@ def main(args_input = sys.argv[1:]):
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,
         'blastp_db'                 : args.blastp_db,
-        'run_post_processor'        : False
+        'run_post_processor'        : False,
+        'exclude_NAs'               : args.exclude_NAs,
     }
 
     if args.iedb_install_directory:
