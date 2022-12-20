@@ -262,6 +262,25 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
             choices=[1,2,3,4,5]
         )
         self.parser.add_argument(
+            "--allele-specific-anchors",
+            help="Use allele-specific anchor positions when tiering epitopes in the aggregate report. This option "
+                 + "is available for 8, 9, 10, and 11mers and only for HLA-A, B, and C alleles. If this option is "
+                 + "not enabled or as a fallback for unsupported lengths and alleles, the default positions of 1, "
+                 + "2, epitope length - 1, and epitope length are used. Please see https://doi.org/10.1101/2020.12.08.416271 "
+                 + "for more details.",
+            default=False,
+            action='store_true',
+        )
+        self.parser.add_argument(
+            "--anchor-contribution-threshold", type=float,
+            help="For determining allele-specific anchors, each position is assigned a score based on how binding is "
+                 + "influenced by mutations. From these scores, the relative contribution of each position to the "
+                 + "overall binding is calculated. Starting with the highest relative contribution, positions whose "
+                 + "score together account for the selected contribution threshold are assigned as anchor locations. "
+                 + " As a result, a higher threshold leads to the inclusion of more positions to be considered anchors.",
+            default=0.8
+        )
+        self.parser.add_argument(
             '--pass-only',
             help="Only process VCF entries with a PASS status.",
             default=False,

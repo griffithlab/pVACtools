@@ -7,6 +7,7 @@ import os
 import shutil
 from abc import ABCMeta, abstractmethod
 import itertools
+import csv
 
 from pvactools.lib.prediction_class import PredictionClass
 
@@ -21,7 +22,6 @@ class AggregateAllEpitopes:
             else:
                 binding_thresholds[hla_type] = self.binding_threshold
         self.binding_thresholds = binding_thresholds
-
 
     @abstractmethod
     def get_list_unique_mutation_keys(self):
@@ -234,7 +234,7 @@ class AggregateAllEpitopes:
 
 
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1, percentile_threshold=None, allele_specific_binding_thresholds=False, top_score_metric="median"):
+    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1, percentile_threshold=None, allele_specific_binding_thresholds=False, top_score_metric="median", allele_specific_anchors=True, anchor_contribution_threshold=0.8):
         self.input_file = input_file
         self.output_file = output_file
         self.tumor_purity = tumor_purity
@@ -255,6 +255,20 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             self.mt_top_score_metric = "Best"
             self.wt_top_score_metric = "Corresponding"
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
+        anchor_probabilities = {}
+        for length in [8, 9, 10, 11]:
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "Normalized_anchor_predictions_{}_mer.tsv".format(length))
+            probs = {}
+            with open(file_name, 'r') as fh:
+                reader = csv.DictReader(fh, delimiter="\t")
+                for line in reader:
+                    hla = line.pop('HLA')
+                    probs[hla] = line
+            anchor_probabilities[length] = probs
+        self.anchor_probabilities = anchor_probabilities
+        self.allele_specific_anchors = allele_specific_anchors
+        self.anchor_contribution_threshold = anchor_contribution_threshold
         super().__init__()
 
     def get_list_unique_mutation_keys(self):
@@ -326,13 +340,27 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         prob_pos_df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "Transcript Length".format(self.wt_top_score_metric)], inplace=True, ascending=[True, True, False])
         return prob_pos_df.iloc[0].to_dict()
 
+    def get_anchor_positions(self, hla_allele, epitope_length):
+        if self.allele_specific_anchors and epitope_length in self.anchor_probabilities and hla_allele in self.anchor_probabilities[epitope_length]:
+            probs = self.anchor_probabilities[epitope_length][hla_allele]
+            positions = []
+            total_prob = 0
+            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
+                total_prob += float(prob)
+                positions.append(pos)
+                if total_prob > self.anchor_contribution_threshold:
+                    return positions
+
+        return [1, 2, epitope_length - 1 , epitope_length]
+
+
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
         binding_threshold = self.binding_thresholds[mutation['HLA Allele']]
         relaxed_binding_threshold = binding_threshold * 2
 
         anchor_residue_pass = True
-        anchors = [1, 2, len(mutation["MT Epitope Seq"])-1, len(mutation["MT Epitope Seq"])]
+        anchors = self.get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']))
         # parse out mutation position from str
         position = mutation["Mutation Position"]
         if '-' in position:
