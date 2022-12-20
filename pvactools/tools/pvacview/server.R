@@ -296,7 +296,7 @@ server <- shinyServer(function(input, output, session) {
     , escape = FALSE, callback = JS(callBack(hla_count(), df$metricsData$mt_top_score_metric)), class = 'stripe',
           options=list(lengthChange = FALSE, 
                    dom = 'Bfrtip', pageLength = df$pageLength,
-                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(25-(7-hla_count()),26-(7-hla_count()), 27-(7-hla_count()))),
+                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(-1, -2 , -3)),
                                      list(orderable=TRUE, targets=0)),
                    buttons = list(I('colvis')), 
                    initComplete = htmlwidgets::JS(
@@ -312,10 +312,10 @@ server <- shinyServer(function(input, output, session) {
       selection = 'none', 
       extensions = c("Buttons"))}
     %>% formatStyle('IC50 MT', 'Scaled BA', backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
-                                                                c("#00FF00", "#00EE00","#00D500","#00BC00","#00A300", "#008B00", "#FFFF00", "#FFEB00", "#FFD800","#FFC500","#FFB100", "#FF9999"))
+                                                                c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F","#F0CD5B","#F1C664", "#FF9999"))
                      ,fontWeight = styleInterval(c(1000), c('normal', 'bold')), border= styleInterval(c(1000), c('normal','2px solid red')))
     %>% formatStyle('%ile MT', backgroundColor = styleInterval(c(0.1,0.2,0.3,0.4,0.5,0.75,1,1.5,2),
-                                                                c("#00EE00","#00D500","#00BC00","#00A300", "#008B00", "#FFFF00", "#FFEB00", "#FFD800","#FFC500", "#FF9999")))
+                                                                c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F","#F1C664", "#FF9999")))
     %>% formatStyle( 'Tier', color = styleEqual(c('Pass', 'Relaxed', 'Poor','Anchor','Subclonal','LowExpr', 'NoExpr'), c('green','lightgreen', 'orange', '#b0b002', '#D4AC0D', 'salmon', 'red')) )
     %>% formatStyle(c('RNA VAF'),background = styleColorBar(range(0,1), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right')
     %>% formatStyle(c('DNA VAF'),background = styleColorBar(range(0,1), 'lightblue'), backgroundSize = '98% 88%', backgroundRepeat = 'no-repeat', backgroundPosition = 'right') 
@@ -471,6 +471,7 @@ server <- shinyServer(function(input, output, session) {
     {
       withProgress(message = 'Loading Transcript Sets Table', value = 0, {
       GB_transcripts <- data.frame()
+      best_transcript <- df$mainTable[df$mainTable$ID == selectedID(),]$`Best Transcript`
       if (length(df$metricsData[[selectedID()]]$sets) != 0){
         GB_transcripts <- data.frame(
           "Transcript Sets" = df$metricsData[[selectedID()]]$sets,
@@ -484,11 +485,19 @@ server <- shinyServer(function(input, output, session) {
       }
       incProgress(0.5)
       names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
+      best_transcript_set <- NULL
+      for (i in 1:length(df$metricsData[[selectedID()]]$sets)){
+        transcript_set <- df$metricsData[[selectedID()]]$good_binders[[df$metricsData[[selectedID()]]$sets[i]]]$`transcripts`
+        transcript_set <- lapply(transcript_set, function(x) strsplit(x, "-")[[1]][1])
+        if (best_transcript %in% transcript_set){
+          best_transcript_set <- df$metricsData[[selectedID()]]$sets[i]
+        }
+      }
       incProgress(0.5)
-      GB_transcripts 
+      datatable(GB_transcripts, selection = list(mode='single', selected = '1')) %>%
+        formatStyle("Transcripts Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
       })
-    },
-    selection = list(mode='single', selected = '1')
+    }
   )
 
   ##update selected transcript set id
@@ -505,20 +514,23 @@ server <- shinyServer(function(input, output, session) {
     {
       withProgress(message = 'Loading Transcripts Table', value = 0, {
         GB_transcripts <- data.frame()
+        best_transcript <- df$mainTable[df$mainTable$ID == selectedID(),]$`Best Transcript`
         if (length(df$metricsData[[selectedID()]]$sets) != 0){
           GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`,
                                        "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
                                        "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`,
                                        "Biotype" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`biotype`,
                                        "Length" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_length`)
+          GB_transcripts$`Best Transcript` <- apply(GB_transcripts, 1, function (x) grepl(best_transcript, x["Transcripts"], fixed = TRUE))
         }
         else {
           GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character(), "Biotype" = character(), "Length" = character())
         }
         incProgress(0.5)
-        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)")
+        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
         incProgress(0.5)
-        datatable(GB_transcripts,options =list(columnDefs = list(list(defaultContent="N/A",targets = c(3)))))
+        datatable(GB_transcripts,options =list(columnDefs = list(list(defaultContent="N/A",targets = c(3)), list(visible=FALSE, targets=c(-1))))) %>%
+          formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
       }, 
       )
     })
@@ -548,6 +560,7 @@ server <- shinyServer(function(input, output, session) {
       withProgress(message = 'Loading Peptide Table', value = 0, {
         if (length(df$metricsData[[selectedID()]]$sets) != 0 & !is.null(df$metricsData)){
           peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
+          best_peptide <- df$mainTable[df$mainTable$ID == selectedID(),]$`Best Peptide`
           peptide_names <- names(peptide_data)
           for(i in 1:length(peptide_names)){
             peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
@@ -562,11 +575,16 @@ server <- shinyServer(function(input, output, session) {
             pageLength = 10,
             columnDefs = list(list(defaultContent="X",
               targets = c(2:hla_count()+1)),
-              list(orderable=TRUE, targets=0)),
+              list(orderable=TRUE, targets=0),
+              list(visible=FALSE, targets=c(-1))),
             rowCallback = JS('function(row, data, index, rowId) {',
                              'console.log(rowId)','if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {',
                              'row.style.backgroundColor = "#E0E0E0";','}','}')
-          ), selection = list(mode='single', selected = '1')) %>% formatStyle('Type', fontWeight = styleEqual('MT','bold'), color = styleEqual('MT', '#E74C3C'))
+          ),
+          selection = list(mode='single', selected = '1')) %>%
+            formatStyle('Type', fontWeight = styleEqual('MT','bold'), color = styleEqual('MT', '#E74C3C')) %>%
+            formatStyle(c("Peptide Sequence"),'Has ProbPos', border= styleEqual(c(TRUE), c('2px solid red'))) %>%
+            formatStyle("Peptide Sequence", backgroundColor = styleEqual(c(best_peptide), c("#98FF98")))
           dtable$x$data[[1]] <- as.numeric(dtable$x$data[[1]])
           dtable
         }
