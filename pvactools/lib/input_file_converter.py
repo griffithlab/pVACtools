@@ -1,4 +1,3 @@
-import vcf
 import vcfpy
 import csv
 import sys
