@@ -30,17 +30,19 @@ table_formatting = function(x,y){
   ic50_mt[, !names(ic50_mt) == 'Mutant'] <- round(as.numeric(ic50_mt[, !names(ic50_mt) == 'Mutant']),2)
   colnames(ic50_mt)[colnames(ic50_mt) == "Mutant"] <- "Peptide Sequence"
   ic50_mt <- add_column(ic50_mt, Type = "MT", .after="Peptide Sequence") 
+  ic50_mt <- add_column(ic50_mt, `Problematic Positions` = peptide_columns$problematic_positions[[1]])
   peptide_columns_wt <- peptide_columns
   peptide_columns_wt$Mutant <- NULL
   ic50_wt <- dcast(peptide_columns_wt, wt_peptide ~ hla_types, value.var = "ic50s_WT")
   ic50_wt[, !names(ic50_wt) == 'wt_peptide'] <- round(as.numeric(ic50_wt[, !names(ic50_wt) == 'wt_peptide']),2)
   colnames(ic50_wt)[colnames(ic50_wt) == "wt_peptide"] <- "Peptide Sequence"
   ic50_wt <- add_column(ic50_wt, Type = "WT", .after="Peptide Sequence") 
+  ic50_wt <- add_column(ic50_wt, `Problematic Positions` = "")
   combined_data <- rbind(ic50_mt, ic50_wt)
   combined_data$`Mutation Position` <- peptide_columns$mutation_position[[1]]
-  combined_data$`Problematic Positions` <- peptide_columns$problematic_positions[[1]]
-  combined_data$`Has ProbPos` <- apply(combined_data, 1, function (x) x['Problematic Positions'] != "")
-  combined_data
+  reordered_data <- combined_data %>% select(-one_of('Problematic Positions'), one_of('Problematic Positions'))
+  reordered_data$`Has ProbPos` <- apply(reordered_data, 1, function (x) x['Problematic Positions'] != "")
+  reordered_data
 }
 #generate peptide coloring for hla allele 
 peptide_coloring <- function(hla_allele, peptide_row){
