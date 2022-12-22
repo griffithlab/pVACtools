@@ -54,6 +54,18 @@ Contents
 New in Release |release|
 ------------------------
 
+This is a bugfix release. It fixes the following problem(s):
+
+- The ``--exclude-NAs`` flag was not being passed along correctly to the main
+  pipeline and didn't have any effect on downstream filtering.
+- The aggregate report creation step had some inefficiencies which caused its
+  runtime to be much longer than necessary.
+- An unneeded import statement for the PyVCF package had the potential to
+  cause errors while running the pVACseq pipeline.
+
+New in Version |version|
+------------------------
+
 This release adds the following new features:
 
 - When running the pipelines with the ``--netmhc-stab`` flag enabled, the
@@ -72,75 +84,6 @@ This release also fixes the following problem(s):
 - For very large result sets the filtering steps would stall or be killed
   because the steps would run out of memory. This release fixes this issue.
 - This release adds better handling of timeout errors while running
-  NetMHCstabpan and/or NetChop.
-
-New in Version |version|
-------------------------
-
-This version adds the following features, outlined below. Please note that
-pVACtools 3.0 is not backwards-compatible and certain changes will break old
-workflows.
-
-Breaking Changes
-________________
-
-- The pVACapi and pVACviz tools have been removed. They have been replaced by
-  the :ref:`pvacview` tool.
-- The package namespace has been updated. The files will now be installed
-  underneath a ``pvactools`` directory in your python package installation
-  path.
-- The aggregated report format has been updated. The headers have been updated for
-  clarity. An additional column ``Allele Expr`` has been added, representing
-  RNA expression * RNA VAF. For more information see :ref:`aggregated`.
-- pVACfuse no longer supports inputs from Integrate NEO. Only AGFusion inputs
-  will be supported going forward.
-- The format of the pVACfuse all_epitopes and filtered reports has been updated to
-  remove columns that aren't applicable for the tool. Please see the documentation
-  for the pVACfuse :ref:`pvacfuse_all_ep_and_filtered` for more information.
-
-New Features
-____________
-
-- This release adds a new tool, :ref:`pvacview`. pVACview is an R Shiny application that
-  allows for that visualization of the pVACseq aggregated report file to review, explore,
-  and prioritize the different neoantigen candidates predicted by pVACseq.
-- The 3.0 release adds several improvements to the reference proteome
-  similarity step:
-
-  - Users can now run the reference proteome similarity step with a standalone
-    Protein BLAST installation. To use a standalone BLASTp installation, provide the
-    installation path using the ``--blastp-path`` parameter. The supported
-    Protein BLAST databases are ``refseq_select_prot`` and ``refseq_protein``.
-    Please reference the :ref:`blast` documentation for further instructions.
-  - When running the reference proteome similarity step using the NCBI Protein BLAST API,
-    users can now pick between the ``refseq_select_prot`` and ``refseq_protein``
-    databases.
-  - Parallelization has been added to the reference proteome similarity step.
-    When running this step as part of the pVACseq, pVACfuse, or pVACbind
-    pipelines, the existing ``--t`` parameter will also be used to set the number of
-    parallel threads in this step.
-
-- This release adds standalone commands to run stability predictions, cleavage
-  site predictions, and the reference proteome similarity step on the output
-  of the :ref:`pVACseq<optional_downstream_analysis_tools_label>`, :ref:`pVACfuse<pvacfuse_tools>`, and :ref:`pVACbind<pvacbind_tools>` pipelines.
-
-Minor Updates
-_____________
-
-- Previously, when running NetChop for cleavage site predictions, predictions
-  were made for each epitope individually. However, these predictions will
-  differ if additional flanking amino acids are provided and will be stable
-  with 9 or more flanking amino acids. We updated this step to make predictions
-  with 9 flanking amino acids around each epitope to generate stable
-  predictions.
-- This release adds a ``--species`` option to the ``valid_alleles`` commands
-  to filter alleles on a species of interest.
-- This release adds a ``--pass-only`` flag to the ``pvacseq
-  generate_protein_fasta`` commands to only process VCF entries that do not
-  have a FILTER set.
-- This release adds a new parameter ``--tumor-purity``. This parameter indicates
-  the fraction of tumor cells in the tumor sample and is used during aggregate
-  report creation for a simple estimation whether variants are subclonal or clonal based on VAF.
 
 Past release notes can be found on our :ref:`releases` page.
 
