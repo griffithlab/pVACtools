@@ -588,8 +588,9 @@ server <- shinyServer(function(input, output, session) {
                              'row.style.backgroundColor = "#E0E0E0";','}','}')
           ),
           selection = list(mode='single', selected = '1')) %>%
-            formatStyle('Type', fontWeight = styleEqual('MT','bold'), color = styleEqual('MT', '#E74C3C')) %>%
+            formatStyle('Type', fontWeight = styleEqual('MT','bold')) %>%
             formatStyle(c("Peptide Sequence"),'Has ProbPos', border= styleEqual(c(TRUE), c('2px solid red'))) %>%
+            formatStyle(c("Problematic Positions"), 'Has ProbPos', border = styleEqual(c(TRUE), c('2px solid red'))) %>%
             formatStyle("Peptide Sequence", backgroundColor = styleEqual(c(best_peptide), c("#98FF98")))
           dtable$x$data[[1]] <- as.numeric(dtable$x$data[[1]])
           dtable
