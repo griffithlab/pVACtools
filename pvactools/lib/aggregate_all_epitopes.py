@@ -598,6 +598,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
         problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else ''
+        tsl = best['Transcript Support Level'] if best['Transcript Support Level'] in ["NA", "Not Supported"] else round(best['Transcript Support Level'])
 
         out_dict = { 'ID': key }
         out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
@@ -607,9 +608,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             'Num Passing Transcripts': anno_count,
             'Best Peptide': best["MT Epitope Seq"],
             'Best Transcript': best["Transcript"],
+            'TSL': tsl,
             'Allele': best["HLA Allele"],
             'Pos': best["Mutation Position"],
-            'Problematic Pos': problematic_positions,
+            'Prob Pos': problematic_positions,
             'Num Passing Peptides': peptide_count,
             'IC50 MT': best["{} MT IC50 Score".format(self.mt_top_score_metric)],
             'IC50 WT': best["{} WT IC50 Score".format(self.wt_top_score_metric)],
@@ -638,8 +640,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             'best_peptide_mt': best['MT Epitope Seq'],
             'best_peptide_wt': best['WT Epitope Seq'],
             'best_hla_allele': best['HLA Allele'],
-            'best_hla_allele_binding_threshold': self.binding_thresholds[best['HLA Allele']],
-            'best_hla_allele_relaxed_binding_threshold': self.binding_thresholds[best['HLA Allele']] * 2,
         }
 
     def write_metrics_file(self, metrics):

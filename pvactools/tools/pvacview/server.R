@@ -75,6 +75,7 @@ server <- shinyServer(function(input, output, session) {
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
     mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
+    mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
     df$mainTable <- mainData
     dna_vaf <- as.numeric(as.character(unlist(df$mainTable['DNA VAF'])))
     df$dna_cutoff <- max(dna_vaf[dna_vaf < 0.6])
@@ -99,6 +100,7 @@ server <- shinyServer(function(input, output, session) {
     df$allele_expr_low <- df$metricsData$relaxed_allele_expr_threshold
     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, df$dna_cutoff, df$allele_expr_high, df$allele_expr_low, unlist(x["Pos"]), anchor_mode="default"))
     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$metricsData$binding_cutoffs, x["Allele"], x["IC50 MT"]))
+    df$mainTable$`Bad TSL` <- apply(df$mainTable, 1, function(x) { x['TSL'] == 'NA' | (x['TSL'] != 'NA' & x['TSL'] != 'Not Supported' & x['TSL'] > df$metricsData$maximum_transcript_support_level) } )
   })
   
   #Option 1: User uploaded additional data file 
@@ -132,6 +134,7 @@ server <- shinyServer(function(input, output, session) {
      mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
      mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
      mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
+     mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
      df$mainTable <- mainData
      ## Class I demo metrics file
      metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/f83c52c8b8387beae69be8b200a44dcf199d9af2/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
@@ -162,6 +165,7 @@ server <- shinyServer(function(input, output, session) {
      df$gene_list <- gene_list
      df$mainTable$`Gene of Interest` <- apply(df$mainTable,1, function(x) {any(x['Gene'] == df$gene_list)})
      df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$metricsData$binding_cutoffs, x["Allele"], x["IC50 MT"]))
+     df$mainTable$`Bad TSL` <- apply(df$mainTable, 1, function(x) { x['TSL'] == 'NA' | (x['TSL'] != 'NA' & x['TSL'] != 'Not Supported' & x['TSL'] > df$metricsData$maximum_transcript_support_level) } )
      updateTabItems(session, "tabs", "explore")
    })
    
@@ -206,6 +210,7 @@ server <- shinyServer(function(input, output, session) {
         df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, input$anchor_contribution, input$dna_cutoff, input$allele_expr_high, input$allele_expr_low, unlist(x["Pos"]), hla_allele = x["Best HLA allele"], anchor_mode="default"))
       }
       df$mainTable$`Gene of Interest` <- apply(df$mainTable,1, function(x) {any(x['Gene'] == df$gene_list)})
+      df$mainTable$`Bad TSL` <- apply(df$mainTable, 1, function(x) { x['TSL'] == 'NA' | (x['TSL'] != 'NA' & x['TSL'] != 'Not Supported' & x['TSL'] > df$metricsData$maximum_transcript_support_level) } )
       tier_sorter <- c("Pass", "Relaxed", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr")
       df$mainTable$`Rank_ic50` <- NA
       df$mainTable$`Rank_expr` <- NA
@@ -296,7 +301,7 @@ server <- shinyServer(function(input, output, session) {
     , escape = FALSE, callback = JS(callBack(hla_count(), df$metricsData$mt_top_score_metric)), class = 'stripe',
           options=list(lengthChange = FALSE, 
                    dom = 'Bfrtip', pageLength = df$pageLength,
-                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(-1, -2 , -3)),
+                   columnDefs = list(list(className = 'dt-center', targets =c(0:hla_count()-1)), list(visible=FALSE, targets=c(-1, -2, -3, -4)),
                                      list(orderable=TRUE, targets=0)),
                    buttons = list(I('colvis')), 
                    initComplete = htmlwidgets::JS(
@@ -341,6 +346,7 @@ server <- shinyServer(function(input, output, session) {
     %>% formatStyle(c('IC50 WT','Pos', 'Allele Expr'),'Tier Count', fontWeight = styleEqual(c('21'), c('bold')), border= styleEqual(c('21'), c('2px solid red')))
     %>% formatStyle(c('Allele Expr'),'Tier Count', fontWeight = styleEqual(c('20'), c('bold')), border= styleEqual(c('20'), c('2px solid red')))
     %>% formatStyle(c('Gene'),'Gene of Interest', fontWeight = styleEqual(c(TRUE), c('bold')), border= styleEqual(c(TRUE), c('2px solid green')))
+    %>% formatStyle(c('TSL'), 'Bad TSL', border=styleEqual(c(TRUE), c('2px solid red')))
     , server=FALSE)
   
   #help menu for main table
@@ -929,7 +935,7 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)){
       return ()
     }
-    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval") & !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Scaled BA") & !(colnames(df$mainTable) == "Tier Count") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Gene of Interest")  & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Allele")]
+    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval") & !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Scaled BA") & !(colnames(df$mainTable) == "Tier Count") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Gene of Interest")  & !(colnames(df$mainTable) == "Mutated Positions") & !(colnames(df$mainTable) == "Allele") & !(colnames(df$mainTable) == 'Bad TSL')]
     col_names <- colnames(data)
     data <- data.frame(data, Evaluation=shinyValue("selecter_",nrow(df$mainTable), df$mainTable))
     colnames(data) <- c(col_names,"Evaluation")

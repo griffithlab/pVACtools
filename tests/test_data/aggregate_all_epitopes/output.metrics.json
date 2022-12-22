@@ -835,7 +835,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -865,9 +865,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "PLLPLLPLL",
     "best_peptide_wt": "PLLPLLLLL",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-18020271-18020272-G-A": {
     "good_binders": {},
@@ -880,9 +878,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "SGGSHVWTH",
     "best_peptide_wt": "SGGSHVWTR",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-18644672-18644673-C-T": {
     "good_binders": {
@@ -1126,7 +1122,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -1156,9 +1152,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "RPLELVYCL",
     "best_peptide_wt": "RPLELAYCL",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-19175521-19175522-G-T": {
     "good_binders": {},
@@ -1171,9 +1165,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "SVNEALNNL",
     "best_peptide_wt": "SVNEALNHL",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-20709231-20709232-G-C": {
     "good_binders": {},
@@ -1186,9 +1178,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "IANQDAAQG",
     "best_peptide_wt": "IANEDAAQG",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-22550449-22550450-C-G": {
     "good_binders": {},
@@ -1201,9 +1191,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "ISCTGSSGSI",
     "best_peptide_wt": "ISCTRSSGSI",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-22550509-22550510-T-G": {
     "good_binders": {
@@ -1332,7 +1320,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "IG_V_gene"
@@ -1362,9 +1350,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "GSAPTTVIY",
     "best_peptide_wt": "GSSPTTVIY",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-26936775-26936776-G-T": {
     "good_binders": {},
@@ -1377,9 +1363,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "DLIGKHGGV",
     "best_peptide_wt": "DLIGKPGGV",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-29886116-29886117-C-A": {
     "good_binders": {},
@@ -1392,9 +1376,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "SPVKEEEKT",
     "best_peptide_wt": "SPVKEEEKP",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-37771017-37771018-G-A": {
     "good_binders": {
@@ -1753,7 +1735,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -1783,9 +1765,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "NLFNCECDL",
     "best_peptide_wt": "NPFNCECDL",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-37966274-37966275-C-G": {
     "good_binders": {},
@@ -1798,9 +1778,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "FNMSSFKLKQ",
     "best_peptide_wt": "FNMSSFKLKE",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-38027027-38027028-C-G": {
     "good_binders": {
@@ -1929,7 +1907,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -1959,9 +1937,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "LLHTVSPEPA",
     "best_peptide_wt": "LLHTVSPEPP",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-38119219-38119220-GA-G": {
     "good_binders": {
@@ -2090,7 +2066,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -2120,9 +2096,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "CPWSGTGQH",
     "best_peptide_wt": "NA",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-39994238-39994239-G-A": {
     "good_binders": {
@@ -2366,7 +2340,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -2396,9 +2370,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "YLSDRCKIL",
     "best_peptide_wt": "CLSDRCKIL",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-41895790-41895791-C-A": {
     "good_binders": {},
@@ -2411,9 +2383,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "EMSHFEPNEY",
     "best_peptide_wt": "AMSHFEPNEY",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-41920894-41920895-G-C": {
     "good_binders": {},
@@ -2426,9 +2396,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "NPQTDYLTG",
     "best_peptide_wt": "NPETDYLTG",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-46653595-46653596-G-A": {
     "good_binders": {
@@ -2672,7 +2640,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -2702,9 +2670,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "YSYGLLHIY",
     "best_peptide_wt": "YSYGLLHTY",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-50555769-50555770-G-A": {
     "good_binders": {},
@@ -2717,9 +2683,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "SAKTTVVVTT",
     "best_peptide_wt": "SAKTTVVVTA",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-50615580-50615581-C-T": {
     "good_binders": {
@@ -2848,7 +2812,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -2878,9 +2842,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "ALGWEFLAFT",
     "best_peptide_wt": "ALGWEFLAST",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-50682229-50682230-T-C": {
     "good_binders": {
@@ -3124,7 +3086,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -3154,9 +3116,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "SLFGALVRS",
     "best_peptide_wt": "SLFGALVHS",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-50869713-50869714-C-A": {
     "good_binders": {},
@@ -3169,9 +3129,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "YESRVEPPH",
     "best_peptide_wt": "SESRVEPPH",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "4-40434704-40434725-AGCGGCTGCGGCGGCTGCGGCC-A": {
     "good_binders": {
@@ -3300,7 +3258,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -3330,9 +3288,7 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "SAAAAAAAV",
     "best_peptide_wt": "SAAAAAAAA",
-    "best_hla_allele": "HLA-B*35:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-B*35:01"
   },
   "6-41754573-41754573-C-CCTT": {
     "good_binders": {
@@ -3691,7 +3647,7 @@
           "NA"
         ],
         "tsl": [
-          "NA"
+          "Not Supported"
         ],
         "biotype": [
           "protein_coding"
@@ -3721,8 +3677,6 @@
     "gene_expr": 0.0,
     "best_peptide_mt": "TLSRTLLLAA",
     "best_peptide_wt": "TLSRTLLAAA",
-    "best_hla_allele": "HLA-A*02:01",
-    "best_hla_allele_binding_threshold": 500,
-    "best_hla_allele_relaxed_binding_threshold": 1000
+    "best_hla_allele": "HLA-A*02:01"
   }
 }
