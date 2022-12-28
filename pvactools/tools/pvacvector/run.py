@@ -32,6 +32,9 @@ def run_pipelines(input_file, base_output_dir, args, spacer, class_i_prediction_
         'sample_name'     : args.sample_name,
         'n_threads'       : args.n_threads,
         'spacers'         : [spacer],
+        'downstream_sequence_length': 200,
+        'iedb_retries'    : args.iedb_retries,
+        'additional_report_columns' : None,
     }
 
     parsed_output_files = []
