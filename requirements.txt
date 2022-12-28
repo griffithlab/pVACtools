@@ -62,7 +62,7 @@ scikit-learn==0.24.2
 scipy==1.5.4
 sercol==0.1.4
 serializable==0.2.1
-setuptools==57.4.0
+setuptools==65.5.1
 shellinford==0.4.1
 simanneal==0.5.0
 simplejson==3.17.6
