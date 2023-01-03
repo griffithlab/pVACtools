@@ -861,8 +861,8 @@
       0
     ],
     "DNA VAF": 0.891,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "PLLPLLPLL",
     "best_peptide_wt": "PLLPLLLLL",
     "best_hla_allele": "HLA-A*02:01"
@@ -874,8 +874,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.071,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "SGGSHVWTH",
     "best_peptide_wt": "SGGSHVWTR",
     "best_hla_allele": "HLA-B*35:01"
@@ -1033,8 +1033,8 @@
       0
     ],
     "DNA VAF": 0.053,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "RPLELVYCL",
     "best_peptide_wt": "RPLELAYCL",
     "best_hla_allele": "HLA-B*35:01"
@@ -1046,8 +1046,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.1,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "SVNEALNNL",
     "best_peptide_wt": "SVNEALNHL",
     "best_hla_allele": "HLA-A*02:01"
@@ -1059,8 +1059,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.5,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "IANQDAAQG",
     "best_peptide_wt": "IANEDAAQG",
     "best_hla_allele": "HLA-B*35:01"
@@ -1072,8 +1072,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 1.0,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "ISCTGSSGSI",
     "best_peptide_wt": "ISCTRSSGSI",
     "best_hla_allele": "HLA-A*02:01"
@@ -1231,8 +1231,8 @@
       0
     ],
     "DNA VAF": 0.571,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "GSAPTTVIY",
     "best_peptide_wt": "GSSPTTVIY",
     "best_hla_allele": "HLA-B*35:01"
@@ -1244,8 +1244,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.179,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "DLIGKHGGV",
     "best_peptide_wt": "DLIGKPGGV",
     "best_hla_allele": "HLA-A*02:01"
@@ -1257,8 +1257,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.038,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "SPVKEEEKT",
     "best_peptide_wt": "SPVKEEEKP",
     "best_hla_allele": "HLA-B*35:01"
@@ -1531,8 +1531,8 @@
       0
     ],
     "DNA VAF": 0.135,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "NLFNCECDL",
     "best_peptide_wt": "NPFNCECDL",
     "best_hla_allele": "HLA-A*02:01"
@@ -1544,8 +1544,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.496,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "FNMSSFKLKQ",
     "best_peptide_wt": "FNMSSFKLKE",
     "best_hla_allele": "HLA-A*02:01"
@@ -1557,8 +1557,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.486,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "LLHTVSPEPA",
     "best_peptide_wt": "LLHTVSPEPP",
     "best_hla_allele": "HLA-A*02:01"
@@ -1716,8 +1716,8 @@
       0
     ],
     "DNA VAF": 0.768,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "CPWSGTGQH",
     "best_peptide_wt": "NA",
     "best_hla_allele": "HLA-B*35:01"
@@ -1875,8 +1875,8 @@
       0
     ],
     "DNA VAF": 0.043,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "YLSDRCKIL",
     "best_peptide_wt": "CLSDRCKIL",
     "best_hla_allele": "HLA-A*02:01"
@@ -1888,8 +1888,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.044,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "EMSHFEPNEY",
     "best_peptide_wt": "AMSHFEPNEY",
     "best_hla_allele": "HLA-B*35:01"
@@ -1901,8 +1901,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.25,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "NPQTDYLTG",
     "best_peptide_wt": "NPETDYLTG",
     "best_hla_allele": "HLA-B*35:01"
@@ -2060,8 +2060,8 @@
       0
     ],
     "DNA VAF": 0.233,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "YSYGLLHIY",
     "best_peptide_wt": "YSYGLLHTY",
     "best_hla_allele": "HLA-B*35:01"
@@ -2073,8 +2073,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.042,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "SAKTTVVVTT",
     "best_peptide_wt": "SAKTTVVVTA",
     "best_hla_allele": "HLA-A*02:01"
@@ -2232,8 +2232,8 @@
       0
     ],
     "DNA VAF": 0.959,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "ALGWEFLAFT",
     "best_peptide_wt": "ALGWEFLAST",
     "best_hla_allele": "HLA-A*02:01"
@@ -2245,8 +2245,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.686,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "SLFGALVRS",
     "best_peptide_wt": "SLFGALVHS",
     "best_hla_allele": "HLA-A*02:01"
@@ -2258,8 +2258,8 @@
     "peptide_counts": [],
     "set_expr": [],
     "DNA VAF": 0.043,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "YESRVEPPH",
     "best_peptide_wt": "SESRVEPPH",
     "best_hla_allele": "HLA-B*35:01"
@@ -2417,8 +2417,8 @@
       0
     ],
     "DNA VAF": 0.977,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "SAAAAAAAV",
     "best_peptide_wt": "SAAAAAAAA",
     "best_hla_allele": "HLA-B*35:01"
@@ -2691,8 +2691,8 @@
       0
     ],
     "DNA VAF": 0.158,
-    "RNA VAF": 0.0,
-    "gene_expr": 0.0,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
     "best_peptide_mt": "TLSRTLLLAA",
     "best_peptide_wt": "TLSRTLLAAA",
     "best_hla_allele": "HLA-A*02:01"
