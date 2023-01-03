@@ -311,7 +311,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def get_sub_df(self, all_epitopes_df, key):
         key_str = "{}-{}-{}-{}-{}".format(key[0], key[1], key[2], key[3], key[4])
         df = (all_epitopes_df[lambda x: (x['Chromosome'] == key[0]) & (x['Start'] == key[1]) & (x['Stop'] == key[2]) & (x['Reference'] == key[3]) & (x['Variant'] == key[4])]).copy()
-        df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
         df['Variant Type'] = df['Variant Type'].cat.add_categories('NA')
         df['Mutation Position'] = df['Mutation Position'].cat.add_categories('NA')
         df.fillna(value="NA", inplace=True)
@@ -395,10 +394,23 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             if mutation["Transcript Support Level"] > self.maximum_transcript_support_level:
                 tsl_pass = False
 
+        allele_expr_pass = True
+        if (mutation['Tumor RNA VAF'] != 'NA' and mutation['Gene Expression'] != 'NA' and
+            mutation['Tumor RNA VAF'] * mutation['Gene Expression'] <= self.allele_expr_threshold):
+            allele_expr_pass = False
+        relaxed_allele_expr_pass = True
+        if (mutation['Tumor RNA VAF'] != 'NA' and mutation['Gene Expression'] != 'NA' and
+            mutation['Tumor RNA VAF'] * mutation['Gene Expression'] <= self.relaxed_allele_expr_threshold):
+            relaxed_allele_expr_pass = False
+
+        vaf_clonal_pass = True
+        if (mutation['Tumor DNA VAF'] != 'NA' and mutation['Tumor DNA VAF'] < (vaf_clonal/2)):
+            vaf_clonal_pass = False
+
         #writing these out as explicitly as possible for ease of understanding
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold and
-           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.allele_expr_threshold and
-           mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
+           allele_expr_pass and
+           vaf_clonal_pass and
            tsl_pass and
            anchor_residue_pass):
             if self.percentile_threshold:
@@ -409,8 +421,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         #relax mt and expr
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < relaxed_binding_threshold and
-           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
-           mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
+           relaxed_allele_expr_pass and
+           vaf_clonal_pass and
            tsl_pass and
            anchor_residue_pass):
             if self.relaxed_percentile_threshold:
@@ -421,8 +433,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         #anchor residues
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < relaxed_binding_threshold and
-           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
-           mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
+           relaxed_allele_expr_pass and
+           vaf_clonal_pass and
            tsl_pass and
            not anchor_residue_pass):
             if self.relaxed_percentile_threshold:
@@ -433,8 +445,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         #not in founding clone
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < relaxed_binding_threshold and
-           mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > self.relaxed_allele_expr_threshold and
-           mutation["Tumor DNA VAF"] < (vaf_clonal/2) and
+           relaxed_allele_expr_pass and
+           not vaf_clonal_pass and
            tsl_pass and
            anchor_residue_pass):
             if self.relaxed_percentile_threshold:
@@ -445,16 +457,17 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         #relax expression.  Include sites that have reasonable vaf but zero overall gene expression
         lowexpr=False
-        if ((mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 0) or
-           (mutation["Gene Expression"] == 0 and
-           mutation["Tumor RNA Depth"] > self.trna_cov and
-           mutation["Tumor RNA VAF"] > self.trna_vaf)):
-            lowexpr=True
+        if mutation['Tumor RNA VAF'] != 'NA' and mutation['Gene Expression'] != 'NA' and ['Tumor RNA Depth'] != 'NA':
+            if ((mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 0) or
+               (mutation["Gene Expression"] == 0 and
+               mutation["Tumor RNA Depth"] > self.trna_cov and
+               mutation["Tumor RNA VAF"] > self.trna_vaf)):
+                lowexpr=True
 
         #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
         if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < relaxed_binding_threshold and
-           lowexpr==True and
-           mutation["Tumor DNA VAF"] >= (vaf_clonal/2) and
+           lowexpr and
+           vaf_clonal_pass and
            tsl_pass and
            anchor_residue_pass):
             if self.relaxed_percentile_threshold:
@@ -464,7 +477,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 return "LowExpr"
 
         #zero expression
-        if (mutation["Gene Expression"] == 0 or mutation["Tumor RNA VAF"] == 0) and lowexpr==False:
+        if (mutation["Gene Expression"] == 0 or mutation["Tumor RNA VAF"] == 0) and not lowexpr:
             return "NoExpr"
 
         #everything else
@@ -634,9 +647,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             'transcript_counts': [v['transcript_count'] for k, v in peptides.items()],
             'peptide_counts': [v['peptide_count'] for k, v in peptides.items()],
             'set_expr': [v['total_expr'] for k, v in peptides.items()],
-            'DNA VAF': float(best['Tumor DNA VAF']),
-            'RNA VAF': float(best['Tumor RNA VAF']),
-            'gene_expr': float(best['Gene Expression']),
+            'DNA VAF': 'NA' if best['Tumor DNA VAF'] == 'NA' else float(best['Tumor DNA VAF']),
+            'RNA VAF': 'NA' if best['Tumor RNA VAF'] == 'NA' else float(best['Tumor RNA VAF']),
+            'gene_expr': 'NA' if best['Gene Expression'] == 'NA' else float(best['Gene Expression']),
             'best_peptide_mt': best['MT Epitope Seq'],
             'best_peptide_wt': best['WT Epitope Seq'],
             'best_hla_allele': best['HLA Allele'],
@@ -654,7 +667,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         df["rank_tier"] = df['Tier'].map(sorter_index)
 
         df["rank_ic50"] = df["IC50 MT"].rank(ascending=True, method='dense')
-        df["rank_expr"] = df["Allele Expr"].rank(ascending=False, method='dense')
+        df["rank_expr"] = pd.to_numeric(df["Allele Expr"], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
         df["rank"] = df["rank_ic50"] + df["rank_expr"]
 
         df.sort_values(by=["rank_tier", "rank", "Gene", "AA Change"], inplace=True, ascending=True)
