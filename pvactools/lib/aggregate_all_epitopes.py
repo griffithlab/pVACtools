@@ -239,7 +239,7 @@ class AggregateAllEpitopes:
 
 
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1, percentile_threshold=None, allele_specific_binding_thresholds=False, top_score_metric="median", allele_specific_anchors=True, anchor_contribution_threshold=0.8):
+    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1, percentile_threshold=None, allele_specific_binding_thresholds=False, top_score_metric="median", allele_specific_anchors=False, anchor_contribution_threshold=0.8):
         self.input_file = input_file
         self.output_file = output_file
         self.tumor_purity = tumor_purity
