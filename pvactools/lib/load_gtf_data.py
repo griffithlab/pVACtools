@@ -5,7 +5,7 @@ class LoadGtfData():
     def __init__(self, **kwargs):
         self.gtf_file    = kwargs['gtf_file']
         self.output_file = kwargs['output_file']
-        self.save_gtf    = kwargs['save_gtf']
+        self.save_gtf    = kwargs['save_gtf'] # default false
 
     def execute(self):
         print('Converting gtf file to dataframe')
