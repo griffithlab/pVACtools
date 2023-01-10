@@ -6,6 +6,7 @@ class LoadGtfData():
         self.gtf_file    = kwargs['gtf_file']
         self.output_file = kwargs['output_file']
         self.save_gtf    = kwargs['save_gtf'] # default false
+        self.tsl         = kwargs['tsl']
 
     def execute(self):
         print('Converting gtf file to dataframe')
@@ -17,7 +18,7 @@ class LoadGtfData():
         # print(len(gtf_df_all.index))
         
         # tscript and CDS - this is coding coordinates exon by exon (leaving out 5/3' UTRs in exon body)
-        gtf_df = gtf_df_all.loc[(gtf_df_all['feature'].isin(['CDS', 'transcript'])) & (gtf_df_all['transcript_support_level'] == '1') & (gtf_df_all['transcript_biotype'] == 'protein_coding')].replace(["^\s*$"], 'NA', regex=True)
+        gtf_df = gtf_df_all.loc[(gtf_df_all['feature'].isin(['CDS', 'transcript'])) & (gtf_df_all['transcript_support_level'] == self.tsl) & (gtf_df_all['transcript_biotype'] == 'protein_coding')].replace(["^\s*$"], 'NA', regex=True)
         
         # print('GTF filtered df')
         # print(gtf_df['feature'].unique())
