@@ -6,8 +6,8 @@ from subprocess import call
 from filecmp import cmp
 import py_compile
 
-from pvactools.tools.pvacsplice.combine_inputs import CombineInputs
-from .test_utils import *
+from pvactools.lib.combine_inputs import CombineInputs
+from tests.utils import *
 
 class CombineInputsTests(unittest.TestCase):
     @classmethod
