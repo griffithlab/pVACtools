@@ -102,6 +102,8 @@ class JunctionPipeline():
         }
         filter = FilterRegtoolsResults(**filter_params)
         self.filter_df = filter.execute()
+        # creating test files
+        #self.filter_df.to_csv(os.path.join(self.output_dir, 'Test.{}_{}_filtered.tsv'.format(self.junction_score, self.variant_distance)), sep='\t', index=False)
         print('Completed')
 
     # creates annotated file
@@ -121,18 +123,15 @@ class JunctionPipeline():
     
     # testing done
     # creates combined df
-    # combined output file is not created until junction_to_fasta runs
     def combine_inputs(self):
         print('Combining junction and variant information')
         combine_params = {
             'junctions_df' : self.filter_df,
             'variant_file' : self.create_file_path('annotated'),
-            'sample_name'  : self.sample_name,
             'output_dir'   : self.output_dir,
             'output_file'  : self.create_file_path('combined'),
             
         }
-        
         combined = CombineInputs(**combine_params)
         self.combined_df = combined.execute()
         print('Completed')
@@ -163,6 +162,7 @@ class JunctionPipeline():
                     'sample_name'    : self.sample_name,
                     'vcf'            : self.annotated_vcf,
                 }
+                print(junction_params)
                 junctions = JunctionToFasta(**junction_params)
                 wt = junctions.create_wt_df()
                 if wt.empty:
@@ -182,8 +182,9 @@ class JunctionPipeline():
                 self.combined_df.loc[i, 'wt_protein_length'] = len(wt_aa)
                 self.combined_df.loc[i, 'alt_protein_length'] = len(alt_aa)
                 self.combined_df.loc[i, 'frameshift_event'] = alt_fs
-        self.combined_df = self.combined_df.dropna(subset=['wt_protein_length', 'alt_protein_length', 'frameshift_event'])
-        self.combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
+        # creates testing error! don't change this file after its created in combine_inputs
+        #self.combined_df = self.combined_df.dropna(subset=['wt_protein_length', 'alt_protein_length', 'frameshift_event'])
+        #self.combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
         print('Completed')
 
     # needs unittesting
