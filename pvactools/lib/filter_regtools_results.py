@@ -21,12 +21,13 @@ class FilterRegtoolsResults():
         filter_junctions = junctions[(junctions['score'] > self.score) & (junctions['strand'] != '?') & (junctions['anchor'].isin(['D', 'A', 'NDA']))].dropna()
         
         # create variant_start col
-        filter_junctions['variant_start'] = filter_junctions['variant_info'].str.split(':|-', expand=True)[[1]]
+        filter_junctions['variant_start'] = filter_junctions['variant_info'].str.split(':|-').str[1].astype('int64')
+
         # filter by distance: variant_start > start-distance and variant_start < end+distance
         # does strand matter here - no
         final_filter = filter_junctions[
-           (filter_junctions['variant_start'].astype(int) > filter_junctions['junction_start'].astype(int) - self.distance) & 
-           (filter_junctions['variant_start'].astype(int) < filter_junctions['junction_stop'].astype(int) + self.distance)
+           (filter_junctions['variant_start'] > filter_junctions['junction_start'].astype('int64') - self.distance) & 
+           (filter_junctions['variant_start'] < filter_junctions['junction_stop'].astype('int64') + self.distance)
         ].reset_index()
 
         return final_filter
@@ -66,7 +67,7 @@ class FilterRegtoolsResults():
         # merge dfs - explode_junctions from filtered file and pc_junctions from gtf file, all gtf info is based on tscript
         merged_df = explode_junctions.merge(pc_junctions, on='transcript_id').drop_duplicates()
         # drop repetitive or unneeded cols
-        merged_df = merged_df.drop(columns=['gene_names', 'gene_ids', 'variant_start'])
+        merged_df = merged_df.drop(columns=['gene_names', 'gene_ids', 'variant_start', 'exon_number'])
         # remove spaces from col names
         #merged_df.columns = merged_df.columns.str.replace(r'\s+', '_', regex=True)
         # switch strand to numeral
