@@ -50,7 +50,8 @@ class JunctionPipeline():
             gtf_params = {
             'gtf_file'    : self.gtf_file,
             'output_file' : self.create_file_path('gtf'),
-            'save_gtf'    : self.save_gtf # default no but option to save for running cohorts processed with the same reference data
+            'save_gtf'    : self.save_gtf, # default no but option to save for running cohorts processed with the same reference data
+            'tsl'         : self.tsl,
             }
             gtf_data = LoadGtfData(**gtf_params)
             self.gtf_df = gtf_data.execute()
