@@ -230,6 +230,21 @@ class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
             action='store_true'
         )
         self.parser.add_argument(
+            "--anchor_types", type=lambda s:[a for a in s.split(',')],
+            choices=['A','D','NDA','DA','N'],
+            help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list.",
+            default=['A','D','NDA'],
+        )
+        # parser.add_argument(
+        #     "-e1", "--class-i-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+        #     default=[8,9,10,11],
+        #     help="Length of MHC Class I subpeptides (neoepitopes) to predict. "
+        #          + "Multiple epitope lengths can be specified using a comma-separated list. "
+        #          + "Typical epitope lengths vary between 8-15. "
+        #          + "Required for Class I prediction algorithms.",
+        # )
+
+        self.parser.add_argument(
             '--normal-sample-name',
             help="In a multi-sample VCF, the name of the matched normal sample."
         )
