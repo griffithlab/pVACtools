@@ -74,3 +74,15 @@ _______
 - Citation: Rubinsteyn, A., Hodes, I., Kodysh, J., & Hammerbacher, J. (2017). Vaxrank: a computational tool for designing personalized cancer vaccines.
   bioRxiv, `142919 <https://www.biorxiv.org/content/10.1101/142919v2>`_.
 - License: `Apache License 2.0 <https://github.com/openvax/vaxrank/blob/master/LICENSE>`_
+
+BLAST
+_____
+
+- Website: https://blast.ncbi.nlm.nih.gov/Blast.cgi
+- Citations: `Link <https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=References>`_
+- License: This software/database is a "United States Government Work" under the
+  terms of the United States Copyright Act.  It was written as part of
+  the author's official duties as a United States Government employee and
+  thus cannot be copyrighted.  This software/database is freely available
+  to the public for use. The National Library of Medicine and the U.S.
+  Government have not placed any restriction on its use or reproduction.
