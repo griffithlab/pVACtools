@@ -154,9 +154,11 @@ __________________________________________
 
 In order to use the ``--phased-proximal-variants-vcf`` option you will also
 need to bgzip and index the VCF you plan on using as the main input VCF to
-pVACseq. This step would be done after all the required and optional
+pVACseq. This is usually the same somatic.vcf used as input for creating the
+phased proximal VCF after all the required and desired optional
 preprocessing steps (e.g. VEP annotation, adding readcount and expression
-data).
+data) have been done on that VCF. Bgzipping and indexing the fully
+pre-processed somatic VCF is the last step.
 
 .. code-block:: none
 
