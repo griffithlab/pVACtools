@@ -2,10 +2,12 @@ import os
 import re
 import pandas as pd
 from Bio.Seq import Seq
+import pyfaidx
+import pdb
 
 class JunctionToFasta():
     def __init__(self, **kwargs):
-        self.personalized_fasta = kwargs['fasta']
+        self.personalized_fasta = kwargs['alt_fasta_object']
         self.tscript_id     = kwargs['tscript_id']
         self.chrom          = kwargs['chrom']
         self.gtf_df         = kwargs['gtf_df']
@@ -66,10 +68,10 @@ class JunctionToFasta():
                 pass
             else:    
                 if not index_wt and not index_alt:
-                    print(f'{self.fasta_index} Exon skip: both junction coordinates not in coding transcript...Skipping')
+                    print(f'{self.fasta_index} Exon skip: both junction coordinates outside of coding transcript...Skipping')
                     print(f'Missing coordinates: {self.wt_coor} {self.alt_coor}')
                 elif (not index_wt and index_alt) or (index_wt and not index_alt):
-                    print(f'{self.fasta_index} Exon skip: one junction coordinate not in coding transcript...Skipping')
+                    print(f'{self.fasta_index} Exon skip: one junction coordinate outside of coding transcript...Skipping')
                     if index_wt:
                         print(f'Missing coordinate: {self.alt_coor}')
                     elif index_alt:
@@ -105,7 +107,7 @@ class JunctionToFasta():
                 # return an empty df that will cause an exception in run.py                
                 else:
                     # here i can add option to look for next start codon (start lost)
-                    print(f'{self.fasta_index} Alternate junction coordinate not within coding transcript...Skipping')
+                    print(f'{self.fasta_index} Alternate junction coordinate outside of coding transcript...Skipping')
                     print(f'Missing coordinate: {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
                     continue
@@ -134,7 +136,7 @@ class JunctionToFasta():
                 # return an empty df that will cause an exception in run.py
                 else:
                     # here i can add option to look for next stop codon (stop lost)
-                    print(f'{self.fasta_index} Alternate junction coordinate not in coding transcript...Skipping')
+                    print(f'{self.fasta_index} Alternate junction coordinate outside of coding transcript...Skipping')
                     print(f'Missing coordinate: {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
                     continue    
@@ -151,8 +153,6 @@ class JunctionToFasta():
         return self.alt_df
 
     def get_aa_sequence(self, dataframe, type:str):
-        # pyfaidx has 0-based indexing so subtract 1 from coding exon start positions
-        dataframe["cds_start"] = dataframe["cds_start"] -1 
         # create coding_coors column for fasta indexing
         dataframe["coding_coors"] = dataframe["cds_start"].astype(str) + "," + dataframe["cds_stop"].astype(str)
         coordinates = dataframe["coding_coors"].tolist()
@@ -160,7 +160,7 @@ class JunctionToFasta():
         final_seq = ''
         for x in coordinates:
             start = int(x.split(',')[0]); end = int(x.split(',')[1])
-            seq = self.personalized_fasta[self.chrom][start:end].seq
+            seq = self.personalized_fasta.get_seq(self.chrom, start, end)
             final_seq += str(seq)
         # using Seq from Bio.Seq to translate str_seq
         # positive strand
@@ -189,14 +189,14 @@ class JunctionToFasta():
     def create_sequence_fasta(self, wt_seq, alt_seq):
         write_str = f'>WT.{self.fasta_index}\n{wt_seq}\n>ALT.{self.fasta_index}\n{alt_seq}\n'
         if os.path.exists(self.output_file):
-            dup_content = re.search(write_str, open(self.output_file, "r").read())
-            if dup_content == None:
-                with open(self.output_file, "a") as f:
+            with open(self.output_file, 'r+') as f:
+                dup_content = re.search(write_str, f.read())
+                if dup_content == None:
                     f.write(write_str)
         else:
-            with open(self.output_file, "a") as f:
-                f.write(write_str)
-
+            with open(self.output_file, 'w') as e:
+                e.write(write_str)
+        print("WT and ALT AA sequence written to file")
 
 # GBM examples #
 # ex 1: KLHL5 A (+, 1) FS # 
