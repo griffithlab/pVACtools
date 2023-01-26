@@ -5,8 +5,10 @@ import tempfile
 from filecmp import cmp
 import py_compile
 import pandas as pd
+from pyfaidx import Fasta
 
 from pvactools.lib.junction_to_fasta import JunctionToFasta
+from pvactools.lib.create_personal_fasta import create_personal_fasta
 from tests.utils import *
 
 #python -m unittest tests/test_pvacsplice_junction_to_fasta.py
@@ -15,13 +17,13 @@ class JunctionToFastaTests(unittest.TestCase):
     def setUpClass(cls):
         cls.python = sys.executable
         cls.executable = os.path.join(pvactools_directory(), "pvactools", "tools", "pvacsplice", "junction_to_fasta.py")
-        cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice", 'results')
+        cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice")
         # inputs
-        cls.combined_df = pd.read_csv(os.path.join(cls.test_data_dir, 'Test.combined.tsv'), sep='\t')
-        cls.gtf_df = pd.read_csv(os.path.join(cls.test_data_dir, 'Test.gtf.tsv'), sep='\t')
+        cls.combined_df = pd.read_csv(os.path.join(cls.test_data_dir, 'results', 'Test.combined.tsv'), sep='\t')
+        cls.gtf_df = pd.read_csv(os.path.join(cls.test_data_dir, 'results', 'Test.gtf_1.tsv'), sep='\t')
+        cls.annotated_vcf = os.path.join(pvactools_directory(), cls.test_data_dir, 'inputs', 'annotated.expression_chr1.vcf.gz')
         cls.sample_name = 'HCC1395_TUMOR_DNA'
-        cls.personalized_fasta = os.path.join(cls.test_data_dir, 'all_sequences_chr1_alt.fa')
-        cls.annotated_vcf = os.path.join(pvactools_directory(), 'tests', 'test_data', 'inputs', 'annotated.expression_chr1.vcf.gz')
+        cls.personalized_fasta = create_personal_fasta(os.path.join(cls.test_data_dir, 'inputs', 'all_sequences_chr1.fa'), os.path.join(cls.test_data_dir, 'results', 'all_sequences_chr1_alt.fa'), cls.annotated_vcf, cls.sample_name)
 
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
@@ -29,14 +31,15 @@ class JunctionToFastaTests(unittest.TestCase):
     # using GBM data instead? - how about i run one with current gtf and fa - one of every type going through the pipeline
     def test_junction_to_fasta_runs_and_produces_expected_output(self):
         # inputs
-        output_dir = tempfile.TemporaryDirectory()
+        output_dir = tempfile.TemporaryDirectory() #output_dir.name
         output_file = os.path.join(output_dir.name, 'sample_transcripts.fa')
+       
         for i in self.combined_df.index.to_list():
             print(i)
             junction = self.combined_df.loc[[i], :]         
             for row in junction.itertuples():
                 junction_params = {
-                    'fasta'          : self.personalized_fasta,
+                    'alt_fasta_object' : self.personalized_fasta,
                     'junction_df'    : self.combined_df,
                     'gtf_df'         : self.gtf_df,
                     'tscript_id'     : row.transcript_id,
@@ -49,7 +52,7 @@ class JunctionToFastaTests(unittest.TestCase):
                     'strand'         : row.strand,
                     'gene_name'      : row.gene_name,
                     'output_file'    : output_file,
-                    'output_dir'     : output_dir.name,
+                    'output_dir'     : output_dir,
                     'sample_name'    : self.sample_name,
                     'vcf'            : self.annotated_vcf,
                 }
@@ -67,13 +70,9 @@ class JunctionToFastaTests(unittest.TestCase):
                     continue
                 # creates output transcript fasta
                 junctions.create_sequence_fasta(wt_aa, alt_aa)
-                # df[row, col]
-                self.combined_df.loc[i, 'wt_protein_length'] = len(wt_aa)
-                self.combined_df.loc[i, 'alt_protein_length'] = len(alt_aa)
-                self.combined_df.loc[i, 'frameshift_event'] = alt_fs
 
-        expected_file = os.path.join(self.test_data_dir, 'Test.transcripts.fa')
-
+        expected_file = os.path.join(self.test_data_dir, 'results', 'Test.transcripts.fa')
+        
         self.assertTrue(cmp(
             output_file, 
             expected_file), 
@@ -81,3 +80,5 @@ class JunctionToFastaTests(unittest.TestCase):
             )
 
         output_dir.cleanup()
+
+    
