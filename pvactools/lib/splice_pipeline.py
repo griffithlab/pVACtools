@@ -1,7 +1,5 @@
 import os
 import pandas as pd
-import pyfaidx
-import shutil
 from pvactools.lib.filter_regtools_results import *
 from pvactools.lib.junction_to_fasta import *
 from pvactools.lib.fasta_to_kmers import *
@@ -9,6 +7,7 @@ from pvactools.lib.combine_inputs import *
 from pvactools.lib.run_argument_parser import *
 from pvactools.lib.input_file_converter import PvacspliceVcfConverter
 from pvactools.lib.load_gtf_data import *
+from pvactools.lib.create_personal_fasta import *
 
 class JunctionPipeline():
     def __init__(self, **kwargs):
@@ -27,12 +26,14 @@ class JunctionPipeline():
         self.tsl                     = kwargs['maximum_transcript_support_level']
         self.normal_sample_name      = kwargs.pop('normal_sample_name', None)
         self.save_gtf                = kwargs['save_gtf']
-    
+        fasta_basename = os.path.basename(self.fasta_path)
+        alt_fasta_path = os.path.join(self.output_dir, f'{fasta_basename.split(".")[0]}_alt.{".".join(fasta_basename.split(".")[1:])}')
+        self.personalized_fasta_object = create_personal_fasta(self.fasta_path, alt_fasta_path, self.annotated_vcf, self.sample_name)
+            
     def execute(self):
         self.load_gtf_data()
         self.filter_regtools_results()
         self.vcf_to_tsv()
-        self.create_fastas()
         self.combine_inputs()
         self.junction_to_fasta()
         self.fasta_to_kmers()
@@ -57,28 +58,6 @@ class JunctionPipeline():
             self.gtf_df = gtf_data.execute()
             print('Completed')
 
-    def create_fastas(self):
-        fasta_basename = os.path.basename(self.fasta_path)
-        alt_fasta_path = os.path.join(self.output_dir, f'{fasta_basename.split(".")[0]}_alt.{".".join(fasta_basename.split(".")[1:])}')
-        print("Building alternative fasta")
-        size1 = os.path.getsize(self.fasta_path)
-        if not os.path.exists(alt_fasta_path):
-            shutil.copy(self.fasta_path, alt_fasta_path)
-            size2 = os.path.getsize(alt_fasta_path)
-            if os.path.exists(alt_fasta_path) and size1 == size2:
-                print('Completed')
-        elif os.path.exists(alt_fasta_path) and size1 != os.path.getsize(alt_fasta_path):
-            print('Fasta transfer is incomplete. Trying again.')
-            shutil.copy(self.fasta_path, alt_fasta_path)
-            size2 = os.path.getsize(alt_fasta_path)
-            if size1 == size2:
-                print('Completed')
-        elif os.path.exists(alt_fasta_path) and size1 == os.path.getsize(alt_fasta_path):
-            print('Alternative fasta already exists. Skipping.')
-        print('Creating fasta objects')
-        self.personalized_fasta = pyfaidx.FastaVariant(alt_fasta_path, self.annotated_vcf, sample=self.sample_name)
-        print('Completed')
-
     def create_file_path(self, key):
         inputs = {
             'gtf'       : '_gtf.tsv',
@@ -102,11 +81,13 @@ class JunctionPipeline():
             'distance'    : self.variant_distance,
         }
         filter = FilterRegtoolsResults(**filter_params)
-        self.filter_df = filter.execute()
+        filter_df = filter.execute()
         # creating test files
         #self.filter_df.to_csv(os.path.join(self.output_dir, 'Test.{}_{}_filtered.tsv'.format(self.junction_score, self.variant_distance)), sep='\t', index=False)
         print('Completed')
+        return filter_df
 
+    # needs testing
     # creates annotated file
     def vcf_to_tsv(self):
         print('Converting .vcf to TSV')
@@ -127,27 +108,28 @@ class JunctionPipeline():
     def combine_inputs(self):
         print('Combining junction and variant information')
         combine_params = {
-            'junctions_df' : self.filter_df,
+            'junctions_df' : self.filter_regtools_results(),
             'variant_file' : self.create_file_path('annotated'),
             'output_dir'   : self.output_dir,
             'output_file'  : self.create_file_path('combined'),
-            
         }
         combined = CombineInputs(**combine_params)
-        self.combined_df = combined.execute()
+        combined_df = combined.execute()
         print('Completed')
+        return combined_df
 
-    # needs unittesting
+    # needs testing
     # creates transcripts.fa
     def junction_to_fasta(self):
-        print('Assembling tumor-specific splicing junctions')   
-        for i in self.combined_df.index.to_list():
+        print('Assembling tumor-specific splicing junctions')
+        combined_df = self.combine_inputs() 
+        for i in combined_df.index.to_list():
             print(i)
-            junction = self.combined_df.loc[[i], :]         
+            junction = combined_df.loc[[i], :]         
             for row in junction.itertuples():
                 junction_params = {
-                    'fasta'          : self.personalized_fasta,
-                    'junction_df'    : self.combined_df,
+                    'alt_fasta_object' : self.personalized_fasta_object,
+                    'junction_df'    : combined_df,
                     'gtf_df'         : self.gtf_df,
                     'tscript_id'     : row.transcript_id,
                     'chrom'          : row.junction_chrom,
@@ -163,7 +145,6 @@ class JunctionPipeline():
                     'sample_name'    : self.sample_name,
                     'vcf'            : self.annotated_vcf,
                 }
-                print(junction_params)
                 junctions = JunctionToFasta(**junction_params)
                 wt = junctions.create_wt_df()
                 if wt.empty:
@@ -180,15 +161,15 @@ class JunctionPipeline():
                 junctions.create_sequence_fasta(wt_aa, alt_aa)
                 # also editing the combined_df to include the following columns and drop any junctions that don't produce a protein 
                 # df[row, col]
-                self.combined_df.loc[i, 'wt_protein_length'] = len(wt_aa)
-                self.combined_df.loc[i, 'alt_protein_length'] = len(alt_aa)
-                self.combined_df.loc[i, 'frameshift_event'] = alt_fs
+                combined_df.loc[i, 'wt_protein_length'] = len(wt_aa)
+                combined_df.loc[i, 'alt_protein_length'] = len(alt_aa)
+                combined_df.loc[i, 'frameshift_event'] = alt_fs
         # creates testing error! don't change this file after its created in combine_inputs
         #self.combined_df = self.combined_df.dropna(subset=['wt_protein_length', 'alt_protein_length', 'frameshift_event'])
         #self.combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
         print('Completed')
 
-    # needs unittesting
+    # needs testing
     # creates kmer fasta files for input into prediction pipeline
     def fasta_to_kmers(self):
         print('Generating peptides from novel junction sequences')
