@@ -3,6 +3,7 @@
   "vaf_clonal": 0.571,
   "vaf_subclonal": 0.286,
   "binding_threshold": 500,
+  "aggregate_inclusion_binding_threshold": 5000,
   "trna_vaf": 0.25,
   "trna_cov": 10,
   "allele_expr_threshold": 2.5,

@@ -206,6 +206,7 @@ class AggregateAllEpitopes:
                 'vaf_clonal': round(vaf_clonal, 3),
                 'vaf_subclonal': round(vaf_clonal/2, 3),
                 'binding_threshold': self.binding_threshold,
+                'aggregate_inclusion_binding_threshold': self.aggregate_inclusion_binding_threshold,
                 'trna_vaf': self.trna_vaf,
                 'trna_cov': self.trna_cov,
                 'allele_expr_threshold': self.allele_expr_threshold,
@@ -236,13 +237,30 @@ class AggregateAllEpitopes:
 
 
 class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, maximum_transcript_support_level=1, percentile_threshold=None, allele_specific_binding_thresholds=False, top_score_metric="median", allele_specific_anchors=False, anchor_contribution_threshold=0.8):
+    def __init__(
+            self,
+            input_file,
+            output_file,
+            tumor_purity=None,
+            binding_threshold=500,
+            trna_vaf=0.25,
+            trna_cov=10,
+            expn_val=1,
+            maximum_transcript_support_level=1,
+            percentile_threshold=None,
+            allele_specific_binding_thresholds=False,
+            top_score_metric="median",
+            allele_specific_anchors=False,
+            anchor_contribution_threshold=0.8,
+            aggregate_inclusion_binding_threshold=5000,
+        ):
         self.input_file = input_file
         self.output_file = output_file
         self.tumor_purity = tumor_purity
         self.binding_threshold = binding_threshold
         self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.percentile_threshold = percentile_threshold
+        self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         self.allele_expr_threshold = trna_vaf * expn_val * 10
         self.trna_cov = trna_cov
         self.trna_vaf = trna_vaf
@@ -463,11 +481,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             selection = []
             for index, row in df.iterrows():
                 threshold = self.binding_thresholds[row['HLA Allele']]
-                if row["{} MT IC50 Score".format(self.mt_top_score_metric)] < 5000:
+                if row["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold:
                     selection.append(index)
             return df[df.index.isin(selection)]
         else:
-            return df[df["{} MT IC50 Score".format(self.mt_top_score_metric)] < 5000]
+            return df[df["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold]
 
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
@@ -665,12 +683,21 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
 
 class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, binding_threshold=500, percentile_threshold=None, allele_specific_binding_thresholds=False,top_score_metric="median"):
+    def __init__(self,
+            input_file,
+            output_file,
+            binding_threshold=500,
+            percentile_threshold=None,
+            allele_specific_binding_thresholds=False,
+            top_score_metric="median",
+            aggregate_inclusion_binding_threshold=5000,
+        ):
         self.input_file = input_file
         self.output_file = output_file
         self.binding_threshold = binding_threshold
         self.percentile_threshold = percentile_threshold
         self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         if top_score_metric == 'median':
             self.top_score_metric = "Median"
         else:
@@ -715,11 +742,11 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             selection = []
             for index, row in df.iterrows():
                 threshold = self.binding_thresholds[row['HLA Allele']]
-                if row["{} IC50 Score".format(self.top_score_metric)] < 5000:
+                if row["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold:
                     selection.append(index)
             return df[df.index.isin(selection)]
         else:
-            return df[df["{} IC50 Score".format(self.top_score_metric)] < 5000]
+            return df[df["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold]
 
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
