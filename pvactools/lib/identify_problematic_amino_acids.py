@@ -36,7 +36,10 @@ class IdentifyProblematicAminoAcids:
                 if self.filter_type == 'hard' and len(problematic_positions) == 0:
                     writer.writerow(line)
                 elif self.filter_type == 'soft':
-                    line["Problematic Positions"] = ','.join(problematic_positions)
+                    if len(problematic_positions) == 0:
+                        line["Problematic Positions"] = 'None'
+                    else:
+                        line["Problematic Positions"] = ','.join(problematic_positions)
                     writer.writerow(line)
 
     @classmethod
