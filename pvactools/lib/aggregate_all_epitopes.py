@@ -347,7 +347,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         #subset tsl dataframe to only include entries with no problematic positions
         if self.problematic_positions_exist():
-            prob_pos_df = tsl_df[tsl_df['Problematic Positions'] == ""]
+            prob_pos_df = tsl_df[tsl_df['Problematic Positions'] == "None"]
             #if this results in an empty dataframe, reset to previous dataframe
             if prob_pos_df.shape[0] == 0:
                 prob_pos_df = tsl_df
@@ -602,7 +602,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         allele_expr = self.calculate_allele_expr(best)
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
-        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else ''
+        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
         tsl = best['Transcript Support Level'] if best['Transcript Support Level'] in ["NA", "Not Supported"] else round(best['Transcript Support Level'])
 
         out_dict = { 'ID': key }
@@ -774,7 +774,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
         gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
         transcript = best['Transcript'] if 'Transcript' in best else 'NA'
-        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else ''
+        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
         out_dict.update({
             'Gene': gene,
             'AA Change': self.get_best_aa_change(best),
