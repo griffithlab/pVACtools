@@ -79,6 +79,7 @@ class PostProcessor:
                 top_score_metric=self.top_score_metric,
                 allele_specific_anchors=self.allele_specific_anchors,
                 anchor_contribution_threshold=self.anchor_contribution_threshold,
+                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
             ).execute()
         else:
             UnmatchedSequenceAggregateAllEpitopes(
@@ -88,6 +89,7 @@ class PostProcessor:
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 percentile_threshold=self.percentile_threshold,
                 top_score_metric=self.top_score_metric,
+                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
             ).execute()
         print("Completed")
 
