@@ -16,6 +16,10 @@
     "HLA-A*02:01": 255.0,
     "HLA-B*35:01": 348.0
   },
+  "is_allele_specific_binding_cutoff": {
+    "HLA-A*02:01": true,
+    "HLA-B*35:01": true
+  },
   "2-217498305-217498305-T-TGCTGCC": {
     "good_binders": {
       "Transcript Set 1": {

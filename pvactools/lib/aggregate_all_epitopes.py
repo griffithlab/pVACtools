@@ -15,13 +15,21 @@ class AggregateAllEpitopes:
     def __init__(self):
         self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
         binding_thresholds = {}
+        is_allele_specific_binding_cutoff = {}
         for hla_type in self.hla_types:
             if self.allele_specific_binding_thresholds:
                 threshold = PredictionClass.cutoff_for_allele(hla_type)
-                binding_thresholds[hla_type] = self.binding_threshold if threshold is None else float(threshold)
+                if threshold is None:
+                    binding_thresholds[hla_type] = self.binding_threshold
+                    is_allele_specific_binding_cutoff[hla_type] = False
+                else:
+                    binding_thresholds[hla_type] = float(threshold)
+                    is_allele_specific_binding_cutoff[hla_type] = True
             else:
                 binding_thresholds[hla_type] = self.binding_threshold
+                is_allele_specific_binding_cutoff[hla_type] = False
         self.binding_thresholds = binding_thresholds
+        self.is_allele_specific_binding_cutoff = is_allele_specific_binding_cutoff
 
     @abstractmethod
     def get_list_unique_mutation_keys(self):
@@ -216,6 +224,7 @@ class AggregateAllEpitopes:
                 'mt_top_score_metric': self.mt_top_score_metric,
                 'wt_top_score_metric': self.wt_top_score_metric,
                 'binding_cutoffs': self.binding_thresholds,
+                'is_allele_specific_binding_cutoff': self.is_allele_specific_binding_cutoff,
             }
         else:
             metrics = {}
