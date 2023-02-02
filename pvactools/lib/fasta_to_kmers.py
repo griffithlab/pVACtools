@@ -14,12 +14,11 @@ class FastaToKmers():
         self.class_i_hla   = kwargs['class_i_hla']
         self.class_ii_hla  = kwargs['class_ii_hla']
         self.sample_name   = kwargs['sample_name']
-        # cumulative dict with all unique kmers from each transcript
-        self.unique_kmers  = {}
         self.final_lengths = self.choose_final_lengths()
 
     def create_kmers(self, seq_name):
         kmer_dict = {}
+        # using personalized fasta
         sequence = str(self.tscript_fasta[seq_name])
         # loop over entire sequence (doing this for WT and ALT) i == position in peptide
         for i in range(len(sequence)):
@@ -34,6 +33,7 @@ class FastaToKmers():
                 if not match and len(k) == x:
                     # add entry to dictionary
                     kmer_dict[k] = final_seq_name
+
         return kmer_dict
 
     def create_unique_kmer_dict(self, wt_name, mt_name):
@@ -41,43 +41,45 @@ class FastaToKmers():
         wt_dict = self.create_kmers(wt_name)
         mut_dict = self.create_kmers(mt_name)
         # all kmers not in wt kmers
-        final_kmers = {k: v for k, v in mut_dict.items() if k not in list(wt_dict.keys())}
-        # for print statement
-        junction_name = ' '.join(wt_name.split('.')[1:])
+        final_kmers = {k: v.replace('ALT.', '') for k, v in mut_dict.items() if k not in list(wt_dict.keys())}
         if len(final_kmers) == 0:
-            print(f'{junction_name} does not produce any tumor-specific kmers.')
             final_kmers = {}
         return final_kmers
 
     def loop_through_tscripts(self):
+        unique_kmers = {}
         # all fasta headers (WT and ALT)
         fasta_keys = list(self.tscript_fasta.keys())
         # take off WT. and ALT. prefixes from fasta_keys to de-duplicate
-        unique_keys = set([x.split('.', 1)[1] for x in fasta_keys])
+        unique_keys = sorted(set([x.split('.', 1)[1] for x in fasta_keys]))
         for key in unique_keys:
             # selecting WT and ALT for each seq pair (bc calling fasta_keys not unique_keys)
-            names = [x for x in fasta_keys if key in x]
+            wt_name, alt_name = [x for x in fasta_keys if key in x]
             # get final mutated kmer list from save_kmer_dicts()
-            final_kmers = self.create_unique_kmer_dict(names[0], names[1])
+            final_kmers = self.create_unique_kmer_dict(wt_name, alt_name)
             if not final_kmers:
+                print(f'No unique kmers found for {key}')
                 continue
+            
             # create master dict of unique kmers: index(es)
             for k,v in final_kmers.items():
-                de_dup_v = v.replace('ALT.', '')
-                if k not in self.unique_kmers.keys():
-                    self.unique_kmers[k] = [de_dup_v]
-                elif de_dup_v not in self.unique_kmers[k]:
-                    self.unique_kmers[k].append(de_dup_v)
+                if k not in unique_kmers.keys():
+                    unique_kmers[k] = [v]
+                else:
+                    unique_kmers[k].append(v)
+        return unique_kmers
 
-    def create_index_file(self):
+
+    def create_index_file(self, kmers_dict):
+        #sorted_unique_kmers = {print(k, v) for k,v in self.unique_kmers if len(v) > 1}
         # joined indexes for each unique kmer - to format for df since lists are dif sizes
-        fasta_info = {k:','.join(v) for k,v in self.unique_kmers.items()}
+        fasta_info = {k:','.join(sorted(v)) for k,v in kmers_dict.items()}
         # add header cols
-        headers_dict = {'peptide': fasta_info.keys(), 'name': fasta_info.values()}
+        headers_dict = {'peptide': fasta_info.keys(), 'name': fasta_info.values()} # maybe sort here before turned into df
         # convert to df
-        self.fasta_df = pd.DataFrame.from_dict(headers_dict)
+        fasta_df = pd.DataFrame.from_dict(headers_dict) # peptide, name made into a df
         # save to sep dictionary
-        index_df = self.fasta_df.copy()
+        index_df = fasta_df.copy()
         # convert string to list and explode so each index is on a sep line
         index_df['name'] = index_df['name'].str.split(',')
         index_df = index_df.explode('name')
@@ -86,24 +88,25 @@ class FastaToKmers():
         index_df['name'] = index_df['name'].str.replace(';', '.')
         # I don't think I need to save this file
         # create a tsv file
-        # if os.path.exists(f'{self.output_dir}/kmer_index.tsv'):
-        #    print('Kmer index already exists. Skipping.')
-        # else:
-        index_df.to_csv(f'{self.output_dir}/kmer_index.tsv', sep='\t', index=False)
-        print('Kmer index file - complete')
+        index_df.to_csv(f'{self.output_dir}/{self.sample_name}.kmer_index.tsv', sep='\t', index=False)
+
+        return fasta_df
 
     def choose_final_lengths(self):
         if not self.class_i_hla:
             lengths = self.class_ii_epitope_length
         elif not self.class_ii_hla:
             lengths = self.class_i_epitope_length
+        else:
+            lengths = self.class_i_epitope_length + self.class_ii_epitope_length
         return lengths
 
-    def create_epitope_fastas(self):
-        self.fasta_df['name'] = self.fasta_df['name'].str.replace(';', '.')
+    def create_epitope_fastas(self, fasta_df):
+        fasta_df['name'] = fasta_df['name'].str.replace(';', '.')
+        # sort the names
         # for only 1 length at a time
         for x in self.final_lengths:
-            len_subset = self.fasta_df[self.fasta_df['peptide'].str.len() == x].sort_values(by=['name'])
+            len_subset = fasta_df[fasta_df['peptide'].str.len() == x].sort_values(by=['name'])
             # 1 file per kmer length
             output_file = f'{self.output_dir}/{self.sample_name}.{x}.fa'
             # loop over rows in subset df
@@ -112,15 +115,17 @@ class FastaToKmers():
                 write_str = f'>{row.name}\n{row.peptide}\n'
                 # don't duplicate entries
                 if os.path.exists(output_file):
-                    dup_content = re.search(row.peptide, open(output_file, "r").read())
-                    if dup_content == None:
-                        with open(output_file, "a") as f:
+                    with open(output_file, "r+") as f:
+                        dup_content = re.search(row.peptide, f.read())
+                        if dup_content == None:
                             f.write(write_str)
                 else:
-                    with open(output_file, "a") as f:
-                        f.write(write_str)
+                    with open(output_file, "w") as e:
+                        e.write(write_str)
     
     def execute(self):
-        self.loop_through_tscripts()
-        self.create_index_file()
-        self.create_epitope_fastas()
+        unique_kmers = self.loop_through_tscripts()
+        # key: peptide value: list of ids
+        fasta_df = self.create_index_file(unique_kmers)
+        self.create_epitope_fastas(fasta_df)
+
