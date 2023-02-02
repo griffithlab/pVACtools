@@ -18,30 +18,28 @@ class JunctionToFastaTests(unittest.TestCase):
         cls.python = sys.executable
         cls.executable = os.path.join(pvactools_directory(), "pvactools", "tools", "pvacsplice", "junction_to_fasta.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice")
-        # inputs
-        cls.combined_df = pd.read_csv(os.path.join(cls.test_data_dir, 'results', 'Test.combined.tsv'), sep='\t')
-        cls.gtf_df = pd.read_csv(os.path.join(cls.test_data_dir, 'results', 'Test.gtf_1.tsv'), sep='\t')
-        cls.annotated_vcf = os.path.join(pvactools_directory(), cls.test_data_dir, 'inputs', 'annotated.expression_chr1.vcf.gz')
-        cls.sample_name = 'HCC1395_TUMOR_DNA'
-        cls.personalized_fasta = create_personal_fasta(os.path.join(cls.test_data_dir, 'inputs', 'all_sequences_chr1.fa'), os.path.join(cls.test_data_dir, 'results', 'all_sequences_chr1_alt.fa'), cls.annotated_vcf, cls.sample_name)
 
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
     # using GBM data instead? - how about i run one with current gtf and fa - one of every type going through the pipeline
     def test_junction_to_fasta_runs_and_produces_expected_output(self):
-        # inputs
-        output_dir = tempfile.TemporaryDirectory() #output_dir.name
+        combined_df   = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.combined.tsv'), sep='\t')
+        gtf_df        = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.gtf_1.tsv'), sep='\t')
+        annotated_vcf = os.path.join(pvactools_directory(), self.test_data_dir, 'inputs', 'annotated.expression_chr1.vcf.gz')
+        sample_name   = 'HCC1395_TUMOR_DNA'
+        personalized_fasta = create_personal_fasta(os.path.join(self.test_data_dir, 'inputs', 'all_sequences_chr1.fa'), os.path.join(self.test_data_dir, 'results', 'Test.all_sequences_chr1_alt.fa'), annotated_vcf, sample_name)
+        output_dir  = tempfile.TemporaryDirectory() #output_dir.name
         output_file = os.path.join(output_dir.name, 'sample_transcripts.fa')
        
-        for i in self.combined_df.index.to_list():
+        for i in combined_df.index.to_list():
             print(i)
-            junction = self.combined_df.loc[[i], :]         
+            junction = combined_df.loc[[i], :]         
             for row in junction.itertuples():
                 junction_params = {
-                    'alt_fasta_object' : self.personalized_fasta,
-                    'junction_df'    : self.combined_df,
-                    'gtf_df'         : self.gtf_df,
+                    'alt_fasta_object' : personalized_fasta,
+                    'junction_df'    : combined_df,
+                    'gtf_df'         : gtf_df,
                     'tscript_id'     : row.transcript_id,
                     'chrom'          : row.junction_chrom,
                     'junction_name'  : row.name,
@@ -52,9 +50,9 @@ class JunctionToFastaTests(unittest.TestCase):
                     'strand'         : row.strand,
                     'gene_name'      : row.gene_name,
                     'output_file'    : output_file,
-                    'output_dir'     : output_dir,
-                    'sample_name'    : self.sample_name,
-                    'vcf'            : self.annotated_vcf,
+                    'output_dir'     : output_dir.name,
+                    'sample_name'    : sample_name,
+                    'vcf'            : annotated_vcf,
                 }
                 junctions = JunctionToFasta(**junction_params)
                 wt = junctions.create_wt_df()

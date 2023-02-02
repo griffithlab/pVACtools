@@ -16,6 +16,7 @@ class FilterRegtoolsResultsTests(unittest.TestCase):
         cls.python = sys.executable
         cls.executable = os.path.join(pvactools_directory(), "pvactools", "tools", "pvacsplice", "filter_regtools_results.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice")
+        # inputs
 
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
