@@ -960,6 +960,8 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                 self.add_pretty_row(row, mt_scores, method, pretty_method, 'Score')
                 self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
+            if self.add_sample_name:
+                row['Sample Name'] = self.sample_name
             tsv_writer.writerow(row)
 
         tmp_output_filehandle.close()
