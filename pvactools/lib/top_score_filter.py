@@ -53,7 +53,10 @@ class TopScoreFilter:
                     median_score = float(line['Median MT IC50 Score'])
                     best_score = float(line['Best MT IC50 Score'])
                 else:
-                    index = line['Mutation']
+                    if self.file_type == 'pVACsplice':
+                        index = line['Index']
+                    else:
+                        index = line['Mutation']
                     if index not in top_per_variant_transcript:
                         top_per_variant_transcript[index] = line
                     top_median_score = float(top_per_variant_transcript[index]['Median IC50 Score'])
@@ -75,7 +78,10 @@ class TopScoreFilter:
                     index = '%s.%s.%s.%s.%s' % (chromosome, start, stop, ref, var)
                     epitope = line['MT Epitope Seq']
                 else:
-                    index = line['Mutation']
+                    if self.file_type == 'pVACsplice':
+                        index = line['Index']
+                    else:
+                        index = line['Mutation']
                     epitope = line['Epitope Seq']
                 if index not in top_per_variant:
                     top_per_variant[index] = {epitope:  [line]}
@@ -104,8 +110,10 @@ class TopScoreFilter:
 
             if self.file_type == 'pVACseq':
                 sorted_rows = pvactools.lib.sort.default_sort(filtered_lines, self.top_score_metric)
-            else:
+            elif self.file_type == 'pVACbind':
                 sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric)
+            elif self.file_type == 'pVACsplice':
+                sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric)
             writer.writerows(sorted_rows)
 
     @classmethod

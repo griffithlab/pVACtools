@@ -744,3 +744,69 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
     def copy_pvacview_r_files(self):
         pass
+
+
+class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
+    def __init__(self, input_file, output_file, tumor_purity=None, binding_threshold=500, trna_vaf=0.25, trna_cov=10, expn_val=1, percentile_threshold=None, allele_specific_binding_thresholds=False, top_score_metric="median"):
+        self.input_file = input_file
+        self.output_file = output_file
+        self.tumor_purity = tumor_purity
+        self.binding_threshold = binding_threshold
+        self.relaxed_binding_threshold = self.binding_threshold * 2
+        self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.percentile_threshold = percentile_threshold
+        self.relaxed_percentile_threshold = None if percentile_threshold is None else percentile_threshold * 2
+        self.allele_expr_threshold = trna_vaf * expn_val * 10
+        self.relaxed_allele_expr_threshold = trna_vaf * expn_val * 5
+        self.trna_cov = trna_cov
+        self.trna_vaf = trna_vaf
+        if top_score_metric == 'median':
+            self.top_score_metric = "Median"
+        else:
+            self.top_score_metric = "Best"
+        self.metrics_file = output_file.replace('.tsv', '.metrics.json')
+    
+    # pvacbind w/ Index instead of Mutation
+    def get_list_unique_mutation_keys(self):
+        key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=["Index"], dtype={"Index": str})
+        keys = key_df["Index"].values.tolist()
+        return sorted(list(set(keys)))
+
+    # pvacbind w/ Index instead of Mutation
+    def read_input_file(self, key, used_columns, dtypes):
+        df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Index": str})
+                [lambda x: (x['Index'] == key)])
+        return (df, key)
+
+    # pvacbind w/ vaf and expression info included
+    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
+        allele_expr = self.calculate_allele_expr(best)
+        tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
+
+        out_dict = { 'ID': key }
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
+        if 'Gene Name' in best:
+            gene = best['Gene Name']
+        else:
+            gene = 'NA'
+        out_dict.update({
+            'Gene': gene,
+            'AA Change': self.get_best_aa_change(best),
+            'Num Passing Transcripts': anno_count,
+            'Best Peptide': best["Epitope Seq"],
+            'Pos': "NA",
+            'Num Passing Peptides': peptide_count,
+            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
+            'IC50 WT': "NA",
+            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
+            '%ile WT': "NA",
+            'RNA Expr': best["Gene Expression"],
+            'RNA VAF': best["Tumor RNA VAF"],
+            'Allele Expr': allele_expr,
+            'RNA Depth': best["Tumor RNA Depth"],
+            'DNA VAF': best["Tumor DNA VAF"],
+            'Tier': tier,
+            'Evaluation': 'Pending',
+            'ID':key,
+        })
+        return out_dict

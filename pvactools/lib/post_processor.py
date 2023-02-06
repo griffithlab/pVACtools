@@ -2,7 +2,7 @@ import tempfile
 import shutil
 
 from pvactools.lib.identify_problematic_amino_acids import IdentifyProblematicAminoAcids
-from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, UnmatchedSequenceAggregateAllEpitopes
+from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, UnmatchedSequenceAggregateAllEpitopes, PvacspliceAggregateAllEpitopes
 from pvactools.lib.binding_filter import BindingFilter
 from pvactools.lib.filter import Filter, FilterCriterion
 from pvactools.lib.top_score_filter import TopScoreFilter
@@ -76,6 +76,18 @@ class PostProcessor:
                 trna_cov=self.trna_cov,
                 expn_val=self.expn_val,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
+                top_score_metric=self.top_score_metric,
+            ).execute()
+        elif self.file_type == 'pVACsplice':
+            PvacspliceAggregateAllEpitopes(
+                self.input_file,
+                self.aggregate_report,
+                binding_threshold=self.binding_threshold,
+                percentile_threshold=self.percentile_threshold,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                trna_vaf=self.trna_vaf,
+                trna_cov=self.trna_cov,
+                expn_val=self.expn_val,
                 top_score_metric=self.top_score_metric,
             ).execute()
         else:
