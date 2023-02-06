@@ -453,6 +453,216 @@ class VcfConverter(InputFileConverter):
 
         self.close_filehandles()
 
+class PvacspliceVcfConverter(VcfConverter):
+    def output_headers(self):
+        return[
+            'chromosome_name',
+            'start',
+            'stop',
+            'reference',
+            'variant',
+            'gene_name',
+            'transcript_name',
+            'transcript_support_level',
+            'transcript_length',
+            'biotype',
+            'amino_acid_change',
+            'codon_change',
+            'ensembl_gene_id',
+            'hgvsc',
+            'hgvsp',
+            #'wildtype_amino_acid_sequence',
+            #'frameshift_amino_acid_sequence',
+            #'fusion_amino_acid_sequence',
+            'variant_type',
+            'protein_position',
+            'transcript_expression',
+            'gene_expression',
+            'normal_depth',
+            'normal_vaf',
+            'tdna_depth',
+            'tdna_vaf',
+            'trna_depth',
+            'trna_vaf',
+            #'index',
+            'protein_length_change',
+        ]
+
+    def execute(self):
+        # indexes = []
+        # count = 1
+        while True:
+            try:
+                entry = next(self.vcf_reader)
+            except StopIteration:
+                break
+            except ValueError as e:
+                raise Exception("VCF is truncated in the middle of an entry near string '{}'".format(str(e).split("'")[1]))
+            except IndexError as e:
+                raise Exception("VCF is truncated at the end of the file")
+            except Exception as e:
+                raise Exception("Error while reading VCF entry: {}".format(str(e)))
+            chromosome = entry.CHROM
+            start      = entry.affected_start
+            stop       = entry.affected_end
+            reference  = entry.REF
+            alts       = entry.ALT
+
+            genotype = entry.call_for_sample[self.sample_name]
+            if not genotype.called:
+                #The genotype is uncalled or hom_ref
+                print('genotype filter 1 - skipped')
+                continue
+
+            filt = entry.FILTER
+            if self.pass_only and not (filt is None or len(filt) == 0 or filt == ['PASS']):
+                print('pass only filter - skipped')
+                continue
+
+            if 'CSQ' not in entry.INFO:
+                continue
+
+            alleles_dict = self.csq_parser.resolve_alleles(entry)
+            for alt in alts:
+                alt = alt.value
+                if genotype.gt_bases and alt not in genotype.gt_bases:
+                    print('genotype filter 2 - skipped')
+                    continue
+                    
+                coverage_for_entry = self.calculate_coverage_for_entry(entry, reference, alt, genotype)
+
+                transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)
+                if len(transcripts) == 0:
+                    csq_allele = alleles_dict[alt]
+                    transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], csq_allele)
+                if len(transcripts) == 0 and self.is_deletion(reference, alt):
+                    transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], 'deletion')
+
+                for transcript in transcripts:
+                    if '/' in transcript['Protein_position']:
+                        protein_position = transcript['Protein_position'].split('/')[0]
+                        if protein_position == '-':
+                            protein_position = transcript['Protein_position'].split('/')[1]
+                    else:
+                        protein_position = transcript['Protein_position']
+                    # if protein_position == '-' or protein_position == '':
+                    #     print("Variant doesn't have protein position information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                    #     continue
+                    transcript_name = transcript['Feature']
+                    consequence = transcript['Consequence']
+                    #consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
+                    # if consequence is None:
+                    #     continue
+                    # if consequence == 'FS':
+                        # if transcript['FrameshiftSequence'] == '':
+                        #     print("frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        #     continue
+                        # else:
+                    #     amino_acid_change_position = "%s%s/%s" % (protein_position, entry.REF, alt)
+                    # else:
+                        # if transcript['Amino_acids'] == '':
+                        #     print("Transcript does not contain Amino_acids change information. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                        #     continue
+                        # else:
+                        # amino_acid_change_position = protein_position + transcript['Amino_acids']
+                    gene_name = transcript['SYMBOL']
+                    # index = pvactools.lib.run_utils.construct_index(count, gene_name, transcript_name, consequence, amino_acid_change_position)
+                    # if index in indexes:
+                    #     sys.exit("Warning: TSV index already exists: {}".format(index))
+                    # else:
+                    #     indexes.append(index)
+                    #     count += 1
+
+                    # if self.proximal_variants_vcf:
+                    #     self.write_proximal_variant_entries(entry, alt, transcript_name, index)
+
+                    ensembl_gene_id = transcript['Gene']
+                    hgvsc = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSc']) if 'HGVSc' in transcript else 'NA'
+                    hgvsp = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSp']) if 'HGVSp' in transcript else 'NA'
+                    if 'TSL' in transcript and transcript['TSL'] is not None and transcript['TSL'] != '':
+                        tsl = transcript['TSL']
+                    else:
+                        tsl = 'NA'
+                    
+
+                    if 'BIOTYPE' in transcript and transcript['BIOTYPE'] is not None and transcript['BIOTYPE'] != '':
+                        biotype = transcript['BIOTYPE']
+                    else:
+                        biotype = 'NA'
+
+                    wildtype_amino_acid_sequence = transcript['WildtypeProtein']
+                    # if '*' in wildtype_amino_acid_sequence:
+                    #     logging.warning("Transcript WildtypeProtein sequence contains internal stop codon. These can occur in Ensembl transcripts of the biotype polymorphic_pseudogene. Skipping.\n{} {} {} {} {}".format(entry.CHROM, entry.POS, entry.REF, alt, transcript['Feature']))
+                    #     continue
+
+                    if transcript['FrameshiftSequence'] != '':
+                        wt_len = len(wildtype_amino_acid_sequence)
+                        mt_len = len(transcript['FrameshiftSequence'])
+                        if mt_len > wt_len:
+                            protein_length_change = "+{}".format(mt_len - wt_len)
+                        elif mt_len < wt_len:
+                            protein_length_change = "-{}".format(wt_len - mt_len)
+                        else:
+                            protein_length_change = "0"
+                    else:
+                        protein_length_change = ""
+
+                    if len(entry.REF) > len(alt):
+                        start = entry.affected_start + 1
+                    else:
+                        start = entry.affected_start
+                    output_row = {
+                        'chromosome_name'                : entry.CHROM,
+                        'start'                          : start,
+                        'stop'                           : entry.affected_end,
+                        'reference'                      : entry.REF,
+                        'variant'                        : alt,
+                        'gene_name'                      : gene_name,
+                        'transcript_name'                : transcript_name,
+                        'transcript_support_level'       : tsl,
+                        'transcript_length'              : len(wildtype_amino_acid_sequence),
+                        'biotype'                        : biotype,
+                        'ensembl_gene_id'                : ensembl_gene_id,
+                        'hgvsc'                          : hgvsc,
+                        'hgvsp'                          : hgvsp,
+                        #'wildtype_amino_acid_sequence'   : wildtype_amino_acid_sequence,
+                        #'frameshift_amino_acid_sequence' : transcript['FrameshiftSequence'],
+                        #'fusion_amino_acid_sequence'     : '',
+                        'variant_type'                   : consequence,
+                        'protein_position'               : protein_position,
+                        #'index'                          : index,
+                        'protein_length_change'          : protein_length_change,
+                    }
+                    if transcript['Amino_acids']:
+                        output_row['amino_acid_change'] = transcript['Amino_acids']
+
+                    if transcript['Codons']:
+                        output_row['codon_change'] =  transcript['Codons']
+                    else:
+                        output_row['codon_change'] = 'NA'
+
+                    for (tag, key, comparison_fields) in zip(['TX', 'GX'], ['transcript_expression', 'gene_expression'], [[transcript_name], [ensembl_gene_id, gene_name]]):
+                        if tag in self.vcf_reader.header.format_ids():
+                            if tag in genotype.data:
+                                expressions = genotype.data[tag]
+                                if isinstance(expressions, list):
+                                    for expression in expressions:
+                                        (item, value) = expression.split('|')
+                                        for comparison_field in comparison_fields:
+                                            if item == comparison_field:
+                                                output_row[key] = value
+                                elif expressions is not None:
+                                    (item, value) = expressions.split('|')
+                                    for comparison_field in comparison_fields:
+                                        if item == comparison_field:
+                                            output_row[key] = value
+
+                    output_row.update(coverage_for_entry)
+
+                    self.tsv_writer.writerow(output_row)
+
+        self.close_filehandles()
+
 class FusionInputConverter(InputFileConverter):
     def determine_fusion_sequence(self, full_sequence, variant_type):
         if '*' not in full_sequence:

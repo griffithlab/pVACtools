@@ -52,6 +52,7 @@ setup(
         "pvactools.tools.pvacvector",
         "pvactools.tools.pvacseq",
         "pvactools.tools.pvacview",
+        "pvactools.tools.pvacsplice",
         "pvactools.lib",
     ],
     entry_points={
@@ -62,6 +63,7 @@ setup(
             "pvacfuse = pvactools.tools.pvacfuse.main:main",
             "pvacvector = pvactools.tools.pvacvector.main:main",
             "pvacview = pvactools.tools.pvacview.main:main",
+            "pvacsplice = pvactools.tools.pvacsplice.main:main",
         ]
     },
     install_requires=[
@@ -81,7 +83,8 @@ setup(
         'vaxrank>=1.1.0',
         'mhcnuggets==2.4.0',
         'mhcflurry==2.0.6',
-        'testfixtures'
+        'testfixtures',
+        'pyfaidx'
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,

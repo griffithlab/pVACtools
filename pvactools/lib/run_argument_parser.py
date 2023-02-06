@@ -183,6 +183,98 @@ class PvacbindRunArgumentParser(PredictionRunArgumentParser):
         input_file_help = "A FASTA file"
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
 
+class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
+    def __init__(self):
+        tool_name = "pvacsplice"
+        input_file_help = "RegTools junctions output file (option: -o)"
+        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.parser.add_argument(
+            "ref_fasta",
+            help="A reference FASTA file to identify transcript sequences from GTF coordinates."
+        )
+        self.parser.add_argument(
+            "annotated_vcf",
+            help="A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
+            +"Wildtype protein sequence, and Downstream protein sequence information."
+            +"The VCF may be gzipped (requires tabix index)."
+            +"The VCF is an input to RegTools and subsequently used here. Another option is to use the -v option " 
+            +"of RegTools to extract only putative regulatory splicing variants from the original VCF file."
+        )
+        self.parser.add_argument(
+            "gtf_file",
+            help="Reference GTF file. Note: make sure to use the same file used for Regtools analysis."
+        )
+        self.parser.add_argument(
+            "-tsl", "--maximum-transcript-support-level", type=int,
+            help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
+            +"Keep all epitopes with a transcript support level <= to this cutoff.",
+            default=1,
+            choices=[1,2,3,4,5]
+        )
+        self.parser.add_argument(
+            "-j", "--junction_score", type=int,
+            help="Junction Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
+            default=10
+        )
+        self.parser.add_argument(
+            "-v", "--variant_distance", type=int,
+            help="Regulatory variants can lie inside or outside of splicing junction."
+            +"Maximum distance window (upstream and downstream) for a variant outside the junction.",
+            default=100
+        )
+        self.parser.add_argument(
+            "-g", "--save_gtf",
+            help="Save a tsv file from the uploaded filtered GTF data."
+            +"Use this option to bypass GTF data upload time for multiple pVACsplice runs.",
+            default=False,
+            action='store_true'
+        )
+        self.parser.add_argument(
+            "--anchor_types", type=lambda s:[a for a in s.split(',')],
+            choices=['A','D','NDA','DA','N'],
+            help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list.",
+            default=['A','D','NDA'],
+        )
+        self.parser.add_argument(
+            '--normal-sample-name',
+            help="In a multi-sample VCF, the name of the matched normal sample."
+        )
+        self.parser.add_argument(
+            '--normal-cov', type=int,
+            help="Normal Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
+            default=5
+        )
+        self.parser.add_argument(
+            '--tdna-cov', type=int,
+            help="Tumor DNA Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
+            default=10
+        )
+        self.parser.add_argument(
+            '--trna-cov', type=int,
+            help="Tumor RNA Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
+            default=10
+        )
+        self.parser.add_argument(
+            '--normal-vaf', type=float_range(0.0,1.0),
+            help="Normal VAF Cutoff. Only sites BELOW this cutoff in normal will be considered.",
+            default=0.02
+        )
+        self.parser.add_argument(
+            '--tdna-vaf', type=float_range(0.0,1.0),
+            help="Tumor DNA VAF Cutoff. Only sites above this cutoff will be considered.",
+            default=0.25
+        )
+        self.parser.add_argument(
+            '--trna-vaf', type=float_range(0.0,1.0),
+            help="Tumor RNA VAF Cutoff. Only sites above this cutoff will be considered.",
+            default=0.25
+        )
+        self.parser.add_argument(
+            '--expn-val', type=float,
+            default=1.0,
+            help="Gene and Transcript Expression cutoff. Only sites above this cutoff will be considered.",
+        )
+
 class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser):
     def __init__(self, tool_name, input_file_help):
         PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
