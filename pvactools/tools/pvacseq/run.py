@@ -80,7 +80,7 @@ def main(args_input = sys.argv[1:]):
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
-        'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
+        'allele_specific_binding_thresholds': args.allele_specific_binding_thresholds,
         'minimum_fold_change'       : args.minimum_fold_change,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
@@ -107,6 +107,8 @@ def main(args_input = sys.argv[1:]):
         'blastp_db'                 : args.blastp_db,
         'tumor_purity'              : args.tumor_purity,
         'problematic_amino_acids'   : args.problematic_amino_acids,
+        'exclude_NAs'               : args.exclude_NAs,
+        'peptide_fasta'             : args.peptide_fasta,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:

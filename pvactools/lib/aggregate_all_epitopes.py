@@ -20,7 +20,11 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def read_input_file(self, key, used_columns, dtypes):
+    def read_input_file(self, used_columns, dtypes):
+        raise Exception("Must implement method in child class")
+    
+    @abstractmethod
+    def get_sub_df(self, df, key):
         raise Exception("Must implement method in child class")
 
     @abstractmethod
@@ -197,8 +201,9 @@ class AggregateAllEpitopes:
             metrics = {}
 
         data = []
+        all_epitopes_df = self.read_input_file(used_columns, dtypes)
         for key in keys:
-            (df, key_str) = self.read_input_file(key, used_columns, dtypes)
+            (df, key_str) = self.get_sub_df(all_epitopes_df, key)
             (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, hla_types, prediction_algorithms, el_algorithms, vaf_clonal)
             data.append(best_mut_line)
             metrics[key_str] = metrics_for_key
@@ -263,10 +268,12 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             print("Tumor clonal VAF estimated as {} (estimated from Tumor DNA VAF data). Assuming variants with VAF < {} are subclonal".format(round(vaf_clonal, 3), round(vaf_clonal/2, 3)))
             return vaf_clonal
 
-    def read_input_file(self, key, used_columns, dtypes):
+    def read_input_file(self, used_columns, dtypes):
+        return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, usecols=used_columns, dtype=dtypes)
+
+    def get_sub_df(self, all_epitopes_df, key):
         key_str = "{}-{}-{}-{}-{}".format(key[0], key[1], key[2], key[3], key[4])
-        df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, usecols=used_columns, dtype=dtypes)
-                [lambda x: (x['Chromosome'] == key[0]) & (x['Start'] == key[1]) & (x['Stop'] == key[2]) & (x['Reference'] == key[3]) & (x['Variant'] == key[4])])
+        df = (all_epitopes_df[lambda x: (x['Chromosome'] == key[0]) & (x['Start'] == key[1]) & (x['Stop'] == key[2]) & (x['Reference'] == key[3]) & (x['Variant'] == key[4])]).copy()
         df.fillna(value={"Tumor RNA Depth": 0, "Tumor RNA VAF": 0, "Tumor DNA VAF": 0, "Gene Expression": 0}, inplace=True)
         df['Variant Type'] = df['Variant Type'].cat.add_categories('NA')
         df['Mutation Position'] = df['Mutation Position'].cat.add_categories('NA')
@@ -619,9 +626,11 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     def calculate_clonal_vaf(self):
         return None
 
-    def read_input_file(self, key, used_columns, dtypes):
-        df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Mutation": str})
-                [lambda x: (x['Mutation'] == key)])
+    def read_input_file(self, used_columns, dtypes):
+        return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Mutation": str})
+
+    def get_sub_df(self, all_epitopes_df, key):
+        df = (all_epitopes_df[lambda x: (x['Mutation'] == key)]).copy()
         return (df, key)
 
     def get_best_binder(self, df):
