@@ -1,5 +1,6 @@
 from gtfparse import read_gtf
 import pandas as pd
+import polars
 import sys 
 
 class LoadGtfData():
@@ -12,7 +13,7 @@ class LoadGtfData():
     def execute(self):
         print('Converting gtf file to dataframe')
 
-        gtf_df_all = read_gtf(self.gtf_file, usecols=['feature', 'seqname', 'start', 'end', 'transcript_id', 'transcript_biotype', 'transcript_version', 'transcript_support_level', 'exon_number', 'gene_name', 'gene_id'])
+        gtf_df_all = read_gtf(self.gtf_file, usecols=['feature', 'seqname', 'start', 'end', 'transcript_id', 'transcript_biotype', 'transcript_version', 'transcript_support_level', 'exon_number', 'gene_name', 'gene_id'], result_type='pandas')
 
         # .isin([list])
         gtf_df_all = gtf_df_all[gtf_df_all['transcript_support_level'].isin(['1','2','3','4','5'])]
