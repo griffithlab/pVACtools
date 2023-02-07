@@ -28,7 +28,7 @@ class JunctionToFastaTests(unittest.TestCase):
         gtf_df        = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.gtf_1.tsv'), sep='\t')
         annotated_vcf = os.path.join(pvactools_directory(), self.test_data_dir, 'inputs', 'annotated.expression_chr1.vcf.gz')
         sample_name   = 'HCC1395_TUMOR_DNA'
-        personalized_fasta = create_personal_fasta(os.path.join(self.test_data_dir, 'inputs', 'all_sequences_chr1.fa'), os.path.join(self.test_data_dir, 'results', 'Test.all_sequences_chr1_alt.fa'), annotated_vcf, sample_name)
+        personalized_fasta = create_personal_fasta(os.path.join(self.test_data_dir, 'inputs', 'all_sequences_chr1.fa.gz'), os.path.join(self.test_data_dir, 'results', 'Test.all_sequences_chr1_alt.fa.gz'), annotated_vcf, sample_name)
         output_dir  = tempfile.TemporaryDirectory() #output_dir.name
         output_file = os.path.join(output_dir.name, 'sample_transcripts.fa')
        
