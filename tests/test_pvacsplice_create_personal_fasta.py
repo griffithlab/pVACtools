@@ -18,7 +18,7 @@ class CreatePersonalFastaTests(unittest.TestCase):
         cls.executable = os.path.join(pvactools_directory(), "pvactools", "lib", "create_personal_fasta.py")
         cls.test_data_dir= os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice")
         # inputs
-        cls.fasta_path = os.path.join(cls.test_data_dir, 'inputs', 'all_sequences_chr1.fa')
+        cls.fasta_path = os.path.join(cls.test_data_dir, 'inputs', 'all_sequences_chr1.fa.gz')
         cls.annotated_vcf = os.path.join(cls.test_data_dir, 'inputs', 'annotated.expression_chr1.vcf.gz')
 
     def module_compiles(self):
@@ -26,8 +26,8 @@ class CreatePersonalFastaTests(unittest.TestCase):
 
     def test_create_personal_fasta_runs_and_produces_expected_output(self):
         output_dir = tempfile.TemporaryDirectory()
-        output_file = os.path.join(output_dir.name, 'all_sequences_chr1_alt.fa')
-        expected_file = os.path.join(self.test_data_dir, 'results', 'Test.all_sequences_chr1_alt.fa')
+        output_file = os.path.join(output_dir.name, 'sample_alt.fa.gz')
+        expected_file = os.path.join(self.test_data_dir, 'results', 'Test.all_sequences_chr1_alt.fa.gz')
         
         # test building from scratch
         create_personal_fasta(self.fasta_path, output_file, self.annotated_vcf, 'HCC1395_TUMOR_DNA')
