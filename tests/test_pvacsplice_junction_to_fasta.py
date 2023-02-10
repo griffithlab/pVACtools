@@ -5,10 +5,9 @@ import tempfile
 from filecmp import cmp
 import py_compile
 import pandas as pd
-from pyfaidx import Fasta
+from pyfaidx import FastaVariant
 
 from pvactools.lib.junction_to_fasta import JunctionToFasta
-from pvactools.lib.create_personal_fasta import create_personal_fasta
 from tests.utils import *
 
 #python -m unittest tests/test_pvacsplice_junction_to_fasta.py
@@ -28,7 +27,7 @@ class JunctionToFastaTests(unittest.TestCase):
         gtf_df        = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.gtf_1.tsv'), sep='\t')
         annotated_vcf = os.path.join(pvactools_directory(), self.test_data_dir, 'inputs', 'annotated.expression_chr1.vcf.gz')
         sample_name   = 'HCC1395_TUMOR_DNA'
-        personalized_fasta = create_personal_fasta(os.path.join(self.test_data_dir, 'inputs', 'all_sequences_chr1.fa.gz'), os.path.join(self.test_data_dir, 'results', 'Test.all_sequences_chr1_alt.fa.gz'), annotated_vcf, sample_name)
+        fasta_path = os.path.join(self.test_data_dir, 'inputs', 'all_sequences_chr1.fa')
         output_dir  = tempfile.TemporaryDirectory() #output_dir.name
         output_file = os.path.join(output_dir.name, 'sample_transcripts.fa')
        
@@ -37,7 +36,7 @@ class JunctionToFastaTests(unittest.TestCase):
             junction = combined_df.loc[[i], :]         
             for row in junction.itertuples():
                 junction_params = {
-                    'alt_fasta_object' : personalized_fasta,
+                    'fasta_path'     : fasta_path,
                     'junction_df'    : combined_df,
                     'gtf_df'         : gtf_df,
                     'tscript_id'     : row.transcript_id,
@@ -61,8 +60,8 @@ class JunctionToFastaTests(unittest.TestCase):
                 alt = junctions.create_alt_df()
                 if alt.empty:
                     continue
-                wt_aa, wt_fs = junctions.get_aa_sequence(wt, 'wt')
-                alt_aa, alt_fs = junctions.get_aa_sequence(alt, 'alt')
+                wt_aa, wt_fs = junctions.get_aa_sequence(wt)
+                alt_aa, alt_fs = junctions.get_aa_sequence(alt)
                 if wt_aa == '' or alt_aa == '':
                     print('No amino acid sequence was produced. Skipping.')
                     continue
@@ -72,9 +71,9 @@ class JunctionToFastaTests(unittest.TestCase):
         expected_file = os.path.join(self.test_data_dir, 'results', 'Test.transcripts.fa')
         
         self.assertTrue(cmp(
-            output_file, 
-            expected_file), 
-            "files don't match {} - {}".format(output_file, expected_file)
+                output_file, 
+                expected_file), 
+                "files don't match {} - {}".format(output_file, expected_file)
             )
 
         output_dir.cleanup()

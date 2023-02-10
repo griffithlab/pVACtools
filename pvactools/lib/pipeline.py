@@ -36,7 +36,7 @@ class Pipeline(metaclass=ABCMeta):
            setattr(self, k, v)
         self.flurry_state                = self.get_flurry_state()
         self.proximal_variants_file      = None
-        self.splice_output_dir             = kwargs.pop('splice_output_dir', None)
+        self.splice_output_dir           = kwargs.pop('splice_output_dir', None)
         self.tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(self.tmp_dir, exist_ok=True)
 

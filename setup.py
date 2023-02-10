@@ -70,7 +70,7 @@ setup(
         'vcfpy',
         'requests',
         'PyYAML>=5.1',
-        'biopython==1.76',
+        'biopython',
         'networkx',
         'simanneal',
         'pandas',

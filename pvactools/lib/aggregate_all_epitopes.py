@@ -765,7 +765,7 @@ class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, meta
         else:
             self.top_score_metric = "Best"
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
-    
+
     # pvacbind w/ Index instead of Mutation
     def get_list_unique_mutation_keys(self):
         key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=["Index"], dtype={"Index": str})
@@ -773,9 +773,12 @@ class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, meta
         return sorted(list(set(keys)))
 
     # pvacbind w/ Index instead of Mutation
-    def read_input_file(self, key, used_columns, dtypes):
-        df = (pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Index": str})
-                [lambda x: (x['Index'] == key)])
+    def read_input_file(self, used_columns, dtypes):
+        return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Index": str})
+
+    # pvacbind w/ Index instead of Mutation
+    def get_sub_df(self, all_epitopes_df, key):
+        df = (all_epitopes_df[lambda x: (x['Index'] == key)]).copy()
         return (df, key)
 
     # pvacbind w/ vaf and expression info included
@@ -791,10 +794,10 @@ class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, meta
             gene = 'NA'
         out_dict.update({
             'Gene': gene,
-            'AA Change': self.get_best_aa_change(best),
-            'Num Passing Transcripts': anno_count,
+            #'AA Change': best['Amino Acid Change'],
+            #'Num Passing Transcripts': 1 if tier != 'Poor' else 0,
             'Best Peptide': best["Epitope Seq"],
-            'Pos': "NA",
+            'Pos': best['Transcript Position'],
             'Num Passing Peptides': peptide_count,
             'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
             'IC50 WT': "NA",

@@ -114,7 +114,7 @@ def main(args_input = sys.argv[1:]):
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
-        'allele_specific_cutoffs'   : args.allele_specific_binding_thresholds,
+        'allele_specific_binding_thresholds': args.allele_specific_binding_thresholds,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
         'additional_report_columns' : args.additional_report_columns,
@@ -131,6 +131,9 @@ def main(args_input = sys.argv[1:]):
         'trna_cov'                  : args.trna_cov,
         'trna_vaf'                  : args.trna_vaf,
         'expn_val'                  : args.expn_val,
+        'run_post_processor'        : True,
+        'exclude_NAs'               : args.exclude_NAs,
+        'peptide_fasta'             : args.peptide_fasta,
     }
     pvacsplice_arguments.update(additional_args)
 

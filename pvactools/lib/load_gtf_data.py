@@ -1,6 +1,5 @@
-from gtfparse import read_gtf
+import gtfparse
 import pandas as pd
-import polars
 import sys 
 
 class LoadGtfData():
@@ -11,13 +10,13 @@ class LoadGtfData():
         self.tsl         = kwargs['tsl']
 
     def execute(self):
-        print('Converting gtf file to dataframe')
+        print('Converting GTF file to dataframe')
+        
+        # make sure running pandas not polars
+        gtf_df_all = gtfparse.read_gtf(self.gtf_file, usecols=['feature', 'seqname', 'start', 'end', 'transcript_id', 'transcript_biotype', 'transcript_version', 'transcript_support_level', 'exon_number', 'gene_name', 'gene_id'], result_type='pandas')
 
-        gtf_df_all = read_gtf(self.gtf_file, usecols=['feature', 'seqname', 'start', 'end', 'transcript_id', 'transcript_biotype', 'transcript_version', 'transcript_support_level', 'exon_number', 'gene_name', 'gene_id'], result_type='pandas')
-
-        # .isin([list])
         gtf_df_all = gtf_df_all[gtf_df_all['transcript_support_level'].isin(['1','2','3','4','5'])]
-
+        
         gtf_df_all['transcript_support_level'] = gtf_df_all['transcript_support_level'].astype('int64')
 
         # print('GTF all df')
@@ -38,10 +37,12 @@ class LoadGtfData():
         gtf_df = gtf_df.rename(columns={'start': 'cds_start', 'end': 'cds_stop', 'seqname': 'cds_chrom'})
 
         if gtf_df.empty:
-            sys.exit('The GTF dataframe is empty. Please check you input file.')
+            sys.exit('The GTF dataframe is empty. Please check your input file.')
         
         if self.save_gtf:
             gtf_df.to_csv(self.output_file, sep='\t', index=False)
             print(f'GTF TSV output file has been saved as: {self.output_file}')
+
+        print('Completed')
 
         return gtf_df

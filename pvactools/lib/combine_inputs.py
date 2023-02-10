@@ -64,9 +64,6 @@ class CombineInputs():
         
         # cols for frameshift info
         merged_df[['wt_protein_length', 'alt_protein_length', 'frameshift_event']] = pd.NA
-        
-        # create final file
-        merged_df.to_csv(self.output_file, sep='\t', index=False)
 
         return merged_df
 
