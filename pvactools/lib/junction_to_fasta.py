@@ -1,13 +1,12 @@
 import os
 import re
 import pandas as pd
-from Bio.Seq import Seq
 import pyfaidx
-import pdb
+from Bio.Seq import Seq
 
 class JunctionToFasta():
     def __init__(self, **kwargs):
-        self.personalized_fasta = kwargs['alt_fasta_object']
+        self.fasta_path     = kwargs['fasta_path']
         self.tscript_id     = kwargs['tscript_id']
         self.chrom          = kwargs['chrom']
         self.gtf_df         = kwargs['gtf_df']
@@ -35,6 +34,7 @@ class JunctionToFasta():
             self.wt_row   = "cds_stop"
             self.alt_row  = "cds_start"
             self.reverse  = False
+        self.personal_fasta = pyfaidx.FastaVariant(self.fasta_path, self.vcf_file, sample=self.sample_name)
 
     def load_gtf_data(self):
         # subset df by transcript_id, get coding coordinates
@@ -152,15 +152,16 @@ class JunctionToFasta():
             self.alt_df = self.alt_df.drop(index_list)
         return self.alt_df
 
-    def get_aa_sequence(self, dataframe, type:str):
+    def get_aa_sequence(self, dataframe):
         # create coding_coors column for fasta indexing
         dataframe["coding_coors"] = dataframe["cds_start"].astype(str) + "," + dataframe["cds_stop"].astype(str)
         coordinates = dataframe["coding_coors"].tolist()
         # generate AA sequence from coding exon coordinates (pyfaidx)
+        # taking a lot longer when using a gzipped personal fasta - why?
         final_seq = ''
         for x in coordinates:
             start = int(x.split(',')[0]); end = int(x.split(',')[1])
-            seq = self.personalized_fasta.get_seq(self.chrom, start, end)
+            seq = self.personal_fasta.get_seq(self.chrom, start, end)
             final_seq += str(seq)
         # using Seq from Bio.Seq to translate str_seq
         # positive strand

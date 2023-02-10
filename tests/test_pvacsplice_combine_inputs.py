@@ -29,14 +29,16 @@ class CombineInputsTests(unittest.TestCase):
             'junctions_df' : self.junctions_df,
             'variant_file' : self.variant_file,
             'output_file'  : output_file,
-            'output_dir'   : output_dir
+            'output_dir'   : output_dir.name,
         }
-        CombineInputs(**params).execute()
+        combined_df = CombineInputs(**params).execute()
+        combined_df.to_csv(output_file, sep='\t', index=False)
+        
         expected_file = os.path.join(self.test_data_dir, 'Test.combined.tsv')
         self.assertTrue(cmp(
-            output_file, 
-            expected_file), 
-            "files don't match {} - {}".format(output_file, expected_file)
+                output_file, 
+                expected_file), 
+                "files don't match {} - {}".format(output_file, expected_file)
             )
 
         output_dir.cleanup()
