@@ -1,6 +1,5 @@
-
-##### SERVER 
-rowCallback <- function(hla_count, row_num) {
+## server side callback functions
+rowcallback <- function(hla_count, row_num) {
   gsub("15", hla_count+8,
   gsub("13", hla_count+6,
   c(
@@ -13,13 +12,16 @@ rowCallback <- function(hla_count, row_num) {
   ))
 )}
 
-callBack <- function(hla_count, score_mode) {
+callback <- function(hla_count, score_mode) {
   c(
   "var tips = ['Gene - The Ensembl gene name of the affected gene.',",
   "        'AA Change - The amino acid change for the mutation. Note that FS indicates a frameshift variant.',",
-  "        'Num Passing Transcripts - The number of transcripts for this mutation that resulted in at least one well-binding peptide (median mutant binding affinity < 1000).',",
-  "        'Best Peptide - The best-binding mutant epitope sequence (lowest median mutant binding affinity).',",
+  "        'Num Passing Transcripts - The number of transcripts for this mutation that resulted in at least one well-binding peptide.',",
+  "        'Best Peptide - The best-binding mutant epitope sequence (lowest mutant binding affinity) prioritizing epitope sequences that resulted from a protein_coding transcript with a TSL below the maximum transcript support level and having no problematic positions.',",
+  "        'Best Transcript - Transcript corresponding to the best peptide with the lowest TSL and shortest length.',",
+  "        'TSL - Transcript support level of the best peptide.',",
   "        'Pos - The one-based position of the start of the mutation within the epitope sequence. 0 if the start of the mutation is before the epitope (as can occur downstream of frameshift mutations).',",
+  "        'Prob Pos - Problematic positions within the best peptide.',",
   "        'Num Passing Peptides - The number of unique well-binding peptides for this mutation.',",
   gsub("X", score_mode,"      'IC50 MT - X IC50 binding affinity of the best-binding mutant epitope across all prediction algorithms used.', "),
   "        'IC50 WT - IC50 binding affinity of the corresponding wildtype epitope.',",
@@ -33,14 +35,26 @@ callBack <- function(hla_count, score_mode) {
   "        'Tier - A tier suggesting the suitability of variants for use in vaccines.',",
   "        'Eval - User-selected evaluation of neoantigen candidate. Options include: Accept, Reject, Review. (Default: Pending)'],",
   "header = table.columns().header();",
-  gsub("7", hla_count,"for (var i = 7; i-7 < tips.length; i++) {"),
-  gsub("7", hla_count,"$(header[i]).attr('title', tips[i-7]);"),
+  gsub("7", hla_count, "for (var i = 7; i-7 < tips.length; i++) {"),
+  gsub("7", hla_count, "$(header[i]).attr('title', tips[i-7]);"),
   "}"
 )
 }
 
 
-#### UI 
+#### ui side styling settings
+csscode <- HTML("
+.sidebar-mini.sidebar-collapse .shiny-bound-input.action-button {
+  margin: 6px 6px 6px 3px;
+  max-width: 85%;
+}
+.sidebar-mini.sidebar-collapse .fa {
+  font-size: initial;
+}
+.sidebar-mini.sidebar-collapse #tohide {
+  display: none;
+}
+")
 
 css <- "
 table.dataTable tbody tr td.zero {background-color: #00FF00 !important}
