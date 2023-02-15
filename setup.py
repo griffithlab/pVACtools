@@ -70,7 +70,7 @@ setup(
         'vcfpy',
         'requests',
         'PyYAML>=5.1',
-        'biopython',
+        'biopython==1.76',
         'networkx',
         'simanneal',
         'pandas',
@@ -84,7 +84,10 @@ setup(
         'mhcnuggets==2.4.0',
         'mhcflurry==2.0.6',
         'testfixtures',
-        'pyfaidx'
+        'gtfparse==2.0.1'
+        'pyfaidx==0.7.1',
+        'packaging',
+        'pyarrow',
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,

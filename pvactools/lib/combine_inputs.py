@@ -50,15 +50,20 @@ class CombineInputs():
         # if protein change/seq is NA in var_df, go ahead and remove the lines bc if there is no protein change, then can't create alt transcript
         j_df['transcript_version'] = j_df['transcript_version'].astype('int64')
 
-        merged_df = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'gene_name', 'gene_id', 'variant_info'])
+        # removed gene_name, gene_id - do these need to be skipped?
+        merged_df = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'variant_info'])
 
-        left_merge = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'gene_name', 'gene_id', 'variant_info'], how='left', indicator=True)
+        # check that everything is merging
+        left_merge = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'variant_info'], how='left', indicator=True)
         not_merged_lines = left_merge.loc[left_merge['_merge'] != 'both']
         if not not_merged_lines.empty:
             # warning: if there are any that don't merge
-            print(not_merged_lines[['chromosome_name', 'start', 'stop', 'variant_info', 'transcript_id', 'transcript_version', 'gene_name', 'gene_id']])
-            sys.exit('This variant(s) is linked to alternative junctions via RegTools but is not present in the somatic VCF. Please double check inputs - the VCF and GTF files should be the same used in the initial RegTools analysis.')
-
+            print(not_merged_lines[['variant_info', 'transcript_id', 'transcript_version']])
+            # make this back into a warning
+            print(
+                'Warning: The above variant/transcript combination is present in the junctions file, but not in the VEP-annotated VCF. Skipping.'
+            )
+    
         # create index to match with kmers
         merged_df['index'] = merged_df['gene_name'] + '.' + merged_df['transcript_id'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
         
