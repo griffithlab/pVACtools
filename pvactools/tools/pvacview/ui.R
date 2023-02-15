@@ -305,120 +305,120 @@ tutorial_tab <- tabItem("tutorial",
         p(strong("Low Expression Criteria: "), code("(allele expr > 0) OR ((gene expr == 0) AND (RNA Depth > RNA Coverage Cutoff) AND (RNA VAF > RNA vaf cutoff))"))
     ),
     tabPanel("Transcript Level",
-        h3(" "),
-        fluidRow(
-            column(width = 6,
-                h4("Transcript Set Table", style = "font-weight: bold; text-decoration: underline;"),
-                p("Upon selecting a variant for investigation, you may have multiple transcripts covering the region.", br(), br(),
-                "These transcripts are first grouped into ", strong("Trancripts Sets"), " , which is based on the good binding peptides
+             h3(" "),
+             fluidRow(
+               column(width = 6,
+                      h4("Transcript Set Table", style = "font-weight: bold; text-decoration: underline;"),
+                      p("Upon selecting a variant for investigation, you may have multiple transcripts covering the region.", br(), br(),
+                        "These transcripts are first grouped into ", strong("Trancripts Sets"), " , which is based on the good binding peptides
                 produced. Transcripts that produce the exact same set of peptides are put into the same group.", br(), br(),
-                "The table also lists the number of transcripts and corresponding peptides in each set (each pair of WT and MT peptides are considered 1 when
+                        "The table also lists the number of transcripts and corresponding peptides in each set (each pair of WT and MT peptides are considered 1 when
                 counting).", br(), " A sum of the total expression across all transcripts in each set is also shown.", br(), " A light green color is used to
                 highlight the ", strong("Transcript Set"), " producing the Best Peptide for the variant in question.")
-            ),
-            column(width = 6,
-                img(src = "Explore - Transcript Set.png",
-                align = "center", height = "300px", width = "500px"),
-            )
-        ),
-        fluidRow(
-            column(width = 3,
-                h4("Transcript Set Detailed Data", style = "font-weight: bold; text-decoration: underline;"),
-                p("Upon selecting a specific transcript set, you can now look in more detail which exact transcripts are included.", br(), br(),
-                "The ", strong("Transcripts in Set"), "table lists all information regarding each transcript including:", br(), br(),
-                "Transcript ID, Gene Name, Amino Acid Change, Mutation Position, individual transcript expression, transcript support level, biotype and transcript length.", br(), br(),
-                " A light green color is used to highlight the ", strong("Transcript in Selected Set"), " that produced the Best Peptide for the variant in question.")
-            ),
-            column(width = 9,
-                img(src = "Explore - Transcript in Set.png",
-                align = "center", height = "300px", width = "1200px"),
-            )
-        )
+               ),
+               column(width = 6,
+                      img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Transcript_Set.png?raw=true",
+                          align = "center", height = "300px", width = "500px"),
+               )
+             ),
+             fluidRow(
+               column(width = 3,
+                      h4("Transcript Set Detailed Data", style = "font-weight: bold; text-decoration: underline;"),
+                      p("Upon selecting a specific transcript set, you can now look in more detail which exact transcripts are included.", br(), br(),
+                        "The ", strong("Transcripts in Set"), "table lists all information regarding each transcript including:", br(), br(),
+                        "Transcript ID, Gene Name, Amino Acid Change, Mutation Position, individual transcript expression, transcript support level, biotype and transcript length.", br(), br(),
+                        " A light green color is used to highlight the ", strong("Transcript in Selected Set"), " that produced the Best Peptide for the variant in question.")
+               ),
+               column(width = 9,
+                      img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Transcript_in_Set.png?raw=true",
+                          align = "center", height = "300px", width = "1200px"),
+               )
+             )
     ),
     tabPanel("Peptide Level",
-        h4(" "),
-        fluidRow(
-            column(width = 12,
-                h4("Peptide Table", style = "font-weight: bold; text-decoration: underline;"),
-                p("Upon selecting a specific transcript set, you can also now look in detail which good-binding peptides are produced from this set.", br(), br(),
-                "Both mutant (", code("MT"), ") and wildtype (", code("WT"), ") sequences are shown, along with ", code("lowest"), " or ", code("median"),
-                " binding affinities, depending on how you generated the aggregate report.", br(), br(),
-                "An ", code("X"), "is marked for binding affinities higher than the ", code("aggregate_inclusion_binding_threshold"), " set when generating the aggregate report.", br(), br(),
-                "We also include two extra columns, one specifying the mutation and position and another providing information on any problematic amino acids.", br(),
-                "Note that if users wish to utlitize the ", strong("problematic positions"), " feature, they should run the standalone command ", code("pvacseq identify_problematic_amino_acids"),
-                " or run pVACseq with the ", code("--problematic-amino-acids"), " option enabled to generate the needed information."
-                )
-            )
-        ),
-        fluidRow(
-            column(width = 12,
-                img(src = "Explore - Peptide Table.png",
-                align = "center", height = "400px", width = "1500px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 4,
-                h4("Additional Information",  style = "font-weight: bold; text-decoration: underline;"),
-                h5("IC50 Plot", style = "font-weight: bold;"),
-                p("By clicking on each MT/WT peptide pair, you can then assess the peptides in more detail by navigating to the ", strong("Additional Peptide Information"), " tab.", br(), br(),
-                "There’s five different tabs in this section of the app, providing peptide-level details on the MT/WT peptide pair that you have selected", br(),
-                "The ", strong("IC50 Plot"), "tab shows violin plots of the individual IC50-based binding affinity predictions of the MT and WT peptides for HLA
+             h4(" "),
+             fluidRow(
+               column(width = 12,
+                      h4("Peptide Table", style = "font-weight: bold; text-decoration: underline;"),
+                      p("Upon selecting a specific transcript set, you can also now look in detail which good-binding peptides are produced from this set.", br(), br(),
+                        "Both mutant (", code("MT"), ") and wildtype (", code("WT"), ") sequences are shown, along with ", code("lowest"), " or ", code("median"),
+                        " binding affinities, depending on how you generated the aggregate report.", br(), br(),
+                        "An ", code("X"), "is marked for binding affinities higher than the ", code("aggregate_inclusion_binding_threshold"), " set when generating the aggregate report.", br(), br(),
+                        "We also include two extra columns, one specifying the mutation and position and another providing information on any problematic amino acids.", br(),
+                        "Note that if users wish to utlitize the ", strong("problematic positions"), " feature, they should run the standalone command ", code("pvacseq identify_problematic_amino_acids"),
+                        " or run pVACseq with the ", code("--problematic-amino-acids"), " option enabled to generate the needed information."
+                      )
+               )
+             ),
+             fluidRow(
+               column(width = 12,
+                      img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Peptide_Table.png?raw=true",
+                          align = "center", height = "400px", width = "1500px"), br(), br()
+               )
+             ),
+             fluidRow(
+               column(width = 4,
+                      h4("Additional Information",  style = "font-weight: bold; text-decoration: underline;"),
+                      h5("IC50 Plot", style = "font-weight: bold;"),
+                      p("By clicking on each MT/WT peptide pair, you can then assess the peptides in more detail by navigating to the ", strong("Additional Peptide Information"), " tab.", br(), br(),
+                        "There’s five different tabs in this section of the app, providing peptide-level details on the MT/WT peptide pair that you have selected", br(),
+                        "The ", strong("IC50 Plot"), "tab shows violin plots of the individual IC50-based binding affinity predictions of the MT and WT peptides for HLA
                 alleles were the MT binds well to. These peptides each have up to 8 binding algorithm scores (for Class I alleles with pVACseq version 3.0) or up
                 to 4 algorithm scores (for Class II alleles with pvacseq version 3.0).", br())
-            ),
-            column(width = 8,
-                img(src = "Explore - IC50 Plots.png",
-                align = "center", height = "350px", width = "700px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 4,
-                h5("%ile Plot", style = "font-weight: bold;"),
-                p("The ", strong("%ile Plot"), "tab shows violin plots of the individual percentile-based binding affinity predictions of the MT and WT peptides
+               ),
+               column(width = 8,
+                      img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_IC50_Plots.png?raw=true",
+                          align = "center", height = "350px", width = "700px"), br(), br()
+               )
+             ),
+             fluidRow(
+               column(width = 4,
+                      h5("%ile Plot", style = "font-weight: bold;"),
+                      p("The ", strong("%ile Plot"), "tab shows violin plots of the individual percentile-based binding affinity predictions of the MT and WT peptides
                 for HLA alleles were the MT binds well to.", br())
-            ),
-            column(width = 8,
-                img(src = "Explore - Percentile Plots.png",
-                align = "center", height = "350px", width = "700px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 4,
-                h5("Binding Data", style = "font-weight: bold;"),
-                p("The ", strong("Binding Data"), "tab shows the specific IC50 and percentile binding affinity predictions generated from each individual algorithm.
+               ),
+               column(width = 8,
+                      img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png?raw=true",
+                          align = "center", height = "350px", width = "700px"), br(), br()
+               )
+             ),
+             fluidRow(
+               column(width = 4,
+                      h5("Binding Data", style = "font-weight: bold;"),
+                      p("The ", strong("Binding Data"), "tab shows the specific IC50 and percentile binding affinity predictions generated from each individual algorithm.
                 Each cell shows the IC50 prediction followed by the percentile predictions in parenthesis.", br())
-            ),
-            column(width = 8,
-                img(src = "Explore - Binding Data.png",
-                align = "center", height = "350px", width = "720px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 4,
-                h5("Elution Table", style = "font-weight: bold;"),
-                p("The ", strong("Elution Table"), "tab shows prediction results based on algorithms trained from peptide elution data. This includes algorithms
+               ),
+               column(width = 8,
+                      img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Binding_Data.png?raw=true",
+                          align = "center", height = "350px", width = "720px"), br(), br()
+               )
+             ),
+             fluidRow(
+               column(width = 4,
+                      h5("Elution Table", style = "font-weight: bold;"),
+                      p("The ", strong("Elution Table"), "tab shows prediction results based on algorithms trained from peptide elution data. This includes algorithms
                 such as NetMHCpanEL/NetMHCIIpanEL, MHCflurryELProcessing and MHCflurryELPresentation.", br())
-            ),
-            column(width = 8,
-                img(src = "Explore - Elution Data.png",
-                align = "center", height = "350px", width = "720px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 4,
-                h5("Anchor Heatmap", style = "font-weight: bold;"),
-                p("The ", strong("Anchor Heatmap"), "tab shows the top 30 MT/WT peptide pairs from the peptide table with anchor probabilities overlaying as a heatmap.
+               ),
+               column(width = 8,
+                      img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Elution_Data.png?raw=true",
+                          align = "center", height = "350px", width = "720px"), br(), br()
+               )
+             ),
+             fluidRow(
+               column(width = 4,
+                      h5("Anchor Heatmap", style = "font-weight: bold;"),
+                      p("The ", strong("Anchor Heatmap"), "tab shows the top 30 MT/WT peptide pairs from the peptide table with anchor probabilities overlaying as a heatmap.
                 The anchor probabilities shown are both allele and peptide length specific. The mutated amino acid is marked in red (for missense mutations) and each 
                 MT/WT pair are separated from others using a dotted line. ", br(),
-                "For peptide sequences with no overlaying heatmap, we currently do not have allele-specific predictions for them in our database.", br(), br(),
-                "For more details and explanations regarding anchor positions and its influence on neoantigen prediction and prioritization, please refer to the next section: ",
-                strong("Advanced Options: Anchor Contribution"))
-            ),
-            column(width = 8,
-                img(src = "Explore - Anchor Heatmap.png",
-                align = "center", height = "350px", width = "720px"), br(), br()
+                        "For peptide sequences with no overlaying heatmap, we currently do not have allele-specific predictions for them in our database.", br(), br(),
+                        "For more details and explanations regarding anchor positions and its influence on neoantigen prediction and prioritization, please refer to the next section: ",
+                        strong("Advanced Options: Anchor Contribution"))
+               ),
+               column(width = 8,
+                      img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Anchor_Heatmap.png?raw=trueg",
+                          align = "center", height = "350px", width = "720px"), br(), br()
+               )
             )
-        )
     )
   )
 )
