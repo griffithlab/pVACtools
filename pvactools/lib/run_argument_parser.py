@@ -80,6 +80,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true',
         )
         parser.add_argument(
+            '--aggregate-inclusion-binding-threshold', type=int,
+            help="Threshold for including epitopes when creating the aggregate report",
+            default=5000,
+        )
+        parser.add_argument(
             '-m', '--top-score-metric',
             choices=['lowest', 'median'],
             default='median',
