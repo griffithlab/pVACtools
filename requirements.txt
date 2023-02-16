@@ -82,7 +82,7 @@ urllib3==1.26.8
 varcode==1.0.3
 vaxrank==1.4.0
 vcfpy==0.13.3
-Werkzeug==2.0.3
+Werkzeug==2.2.3
 wget==3.2
 wrapt==1.13.3
 xlrd==2.0.1
