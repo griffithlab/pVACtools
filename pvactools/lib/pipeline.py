@@ -32,50 +32,8 @@ def status_message(msg):
 
 class Pipeline(metaclass=ABCMeta):
     def __init__(self, **kwargs):
-        self.input_file                  = kwargs['input_file']
-        self.input_file_type             = kwargs['input_file_type']
-        self.sample_name                 = kwargs['sample_name']
-        self.alleles                     = kwargs['alleles']
-        self.prediction_algorithms       = kwargs['prediction_algorithms']
-        self.output_dir                  = kwargs['output_dir']
-        self.epitope_lengths             = kwargs['epitope_lengths']
-        self.iedb_executable             = kwargs.pop('iedb_executable', None)
-        self.phased_proximal_variants_vcf = kwargs.pop('phased_proximal_variants_vcf', None)
-        self.net_chop_fasta              = kwargs.pop('net_chop_fasta', None)
-        self.net_chop_method             = kwargs.pop('net_chop_method', None)
-        self.net_chop_threshold          = kwargs.pop('net_chop_threshold', 0.5)
-        self.netmhc_stab                 = kwargs.pop('netmhc_stab', False)
-        self.top_score_metric            = kwargs.pop('top_score_metric', 'median')
-        self.binding_threshold           = kwargs.pop('binding_threshold', 500)
-        self.percentile_threshold        = kwargs.pop('percentile_threshold', None)
-        self.allele_specific_binding_thresholds = kwargs.pop('allele_specific_cutoffs', False)
-        self.minimum_fold_change         = kwargs.pop('minimum_fold_change', 0)
-        self.normal_cov                  = kwargs.pop('normal_cov', None)
-        self.normal_vaf                  = kwargs.pop('normal_vaf', None)
-        self.tdna_cov                    = kwargs.pop('tdna_cov', None)
-        self.tdna_vaf                    = kwargs.pop('tdna_vaf', None)
-        self.trna_cov                    = kwargs.pop('trna_cov', None)
-        self.trna_vaf                    = kwargs.pop('trna_vaf', None)
-        self.expn_val                    = kwargs.pop('expn_val', None)
-        self.maximum_transcript_support_level = kwargs.pop('maximum_transcript_support_level', None)
-        self.additional_report_columns   = kwargs.pop('additional_report_columns', None)
-        self.fasta_size                  = kwargs.pop('fasta_size', 200)
-        self.iedb_retries                = kwargs.pop('iedb_retries', 5)
-        self.downstream_sequence_length  = kwargs.pop('downstream_sequence_length', 1000)
-        self.keep_tmp_files              = kwargs.pop('keep_tmp_files', False)
-        self.exclude_NAs                 = kwargs.pop('exclude_NAs', False)
-        self.pass_only                   = kwargs.pop('pass_only', False)
-        self.normal_sample_name          = kwargs.pop('normal_sample_name', None)
-        self.n_threads                   = kwargs.pop('n_threads', 1)
-        self.spacers                     = kwargs.pop('spacers', None)
-        self.species                     = kwargs.pop('species', 'human')
-        self.run_reference_proteome_similarity = kwargs.pop('run_reference_proteome_similarity', False)
-        self.blastp_path                 = kwargs.pop('blastp_path', None)
-        self.blastp_db                   = kwargs.pop('blastp_db', 'refseq_select_prot')
-        self.peptide_fasta               = kwargs.pop('peptide_fasta', None)
-        self.tumor_purity                = kwargs.pop('tumor_purity', None)
-        self.run_post_processor          = kwargs.pop('run_post_processor', True)
-        self.problematic_amino_acids     = kwargs.pop('problematic_amino_acids', None)
+        for (k,v) in kwargs.items():
+           setattr(self, k, v)
         self.flurry_state                = self.get_flurry_state()
         self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
