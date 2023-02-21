@@ -152,6 +152,7 @@ def main(args_input = sys.argv[1:]):
         'problematic_amino_acids'   : args.problematic_amino_acids,
         'exclude_NAs'               : args.exclude_NAs,
         'peptide_fasta'             : args.peptide_fasta,
+        'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
     }
 
     if args.iedb_install_directory:
