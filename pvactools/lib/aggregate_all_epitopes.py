@@ -76,14 +76,6 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def get_best_aa_change(self, best):
-        raise Exception("Must implement method in child class")
-
-    @abstractmethod
-    def calculate_allele_expr(self, line):
-        raise Exception("Must implement method in child class")
-
-    @abstractmethod
     def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
         raise Exception("Must implement method in child class")
 
@@ -734,18 +726,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
         return df.iloc[0]
 
-    def get_tier(self, mutation, vaf_clonal):
-        binding_threshold = self.binding_thresholds[mutation['HLA Allele']]
-
-        if mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
-            if self.percentile_threshold:
-                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
-                    return "Pass"
-            else:
-                return "Pass"
-
-        return "Poor"
-
     def get_good_binders(self, df):
         if self.allele_specific_binding_thresholds:
             selection = []
@@ -769,46 +749,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     def get_default_annotation_count(self):
         return "NA"
 
-    def get_best_aa_change(self, best):
-        return 'NA'
-
-    def calculate_allele_expr(self, line):
-        return 'NA'
-
-    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
-        allele_expr = self.calculate_allele_expr(best)
-        tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
-
-        out_dict = { 'ID': key }
-        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
-        gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
-        transcript = best['Transcript'] if 'Transcript' in best else 'NA'
-        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
-        out_dict.update({
-            'Gene': gene,
-            'AA Change': self.get_best_aa_change(best),
-            'Num Passing Transcripts': anno_count,
-            'Best Peptide': best["Epitope Seq"],
-            'Best Transcript': transcript,
-            'Allele': best['HLA Allele'],
-            'Pos': "NA",
-            'Problematic Pos': problematic_positions,
-            'Num Passing Peptides': peptide_count,
-            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
-            'IC50 WT': "NA",
-            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
-            '%ile WT': "NA",
-            'RNA Expr': "NA",
-            'RNA VAF': "NA",
-            'Allele Expr': allele_expr,
-            'RNA Depth': "NA",
-            'DNA VAF': "NA",
-            'Tier': tier,
-            'Evaluation': 'Pending',
-            'ID':key,
-        })
-        return out_dict
-
     def get_metrics(self, df, peptides, best):
         return None
 
@@ -830,3 +770,135 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
     def copy_pvacview_r_files(self):
         pass
+
+class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
+    def __init__(
+        self,
+        input_file,
+        output_file,
+        binding_threshold=500,
+        percentile_threshold=None,
+        allele_specific_binding_thresholds=False,
+        top_score_metric="median",
+        read_support=5,
+        expn_val=0.1,
+        aggregate_inclusion_binding_threshold=5000
+    ):
+        UnmatchedSequenceAggregateAllEpitopes.__init__(
+            self,
+            input_file,
+            output_file,
+            binding_threshold=binding_threshold,
+            percentile_threshold=percentile_threshold,
+            allele_specific_binding_thresholds=allele_specific_binding_thresholds,
+            top_score_metric=top_score_metric,
+            aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold
+        )
+        self.read_support = read_support
+        self.expn_val = expn_val
+
+    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
+        tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
+
+        out_dict = { 'ID': key }
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
+        gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
+        transcript = best['Transcript'] if 'Transcript' in best else 'NA'
+        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
+        out_dict.update({
+            'Gene': gene,
+            'Best Peptide': best["Epitope Seq"],
+            'Best Transcript': transcript,
+            'Allele': best['HLA Allele'],
+            'Pos': "NA",
+            'Prob Pos': problematic_positions,
+            'Num Passing Peptides': peptide_count,
+            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
+            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
+            'Expr': best['Expression'],
+            'Read Support': best['Read Support'],
+            'Tier': tier,
+            'Evaluation': 'Pending',
+        })
+        return out_dict
+
+    def get_tier(self, mutation, vaf_clonal):
+        if self.allele_specific_binding_thresholds:
+            threshold = PredictionClass.cutoff_for_allele(mutation['HLA Allele'])
+            binding_threshold = self.binding_threshold if threshold is None else float(threshold)
+        else:
+            binding_threshold = self.binding_threshold
+
+        low_read_support = False
+        if mutation['Read Support'] != 'NA' and mutation['Read Support'] < self.read_support:
+            low_read_support = True
+
+        low_expr = False
+        if mutation['Expression'] != 'NA' and mutation['Expression'] < self.expn_val:
+            low_expr = True
+
+        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+          not low_read_support and
+          not low_expr):
+            if self.percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
+                    return "Pass"
+            else:
+                return "Pass"
+
+        #low read support
+        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+          low_read_support and
+          not low_expr):
+            if self.percentile_threshold:
+                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
+                    return "LowReadSupport"
+            else:
+                return "LowReadSupport"
+
+        #low expression
+        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+          not low_read_support and
+          low_expr):
+            if self.percentile_threshold:
+                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
+                    return "LowExpr"
+            else:
+                return "LowExpr"
+
+        return "Poor"
+
+
+class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
+    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
+        tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
+
+        out_dict = { 'ID': key }
+        out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
+        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
+        out_dict.update({
+            'Best Peptide': best["Epitope Seq"],
+            'Prob Pos': problematic_positions,
+            'Num Passing Peptides': peptide_count,
+            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
+            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
+            'Tier': tier,
+            'Evaluation': 'Pending',
+        })
+        return out_dict
+
+    def get_tier(self, mutation, vaf_clonal):
+        if self.allele_specific_binding_thresholds:
+            threshold = PredictionClass.cutoff_for_allele(mutation['HLA Allele'])
+            binding_threshold = self.binding_threshold if threshold is None else float(threshold)
+        else:
+            binding_threshold = self.binding_threshold
+
+        if mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
+            if self.percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
+                    return "Pass"
+            else:
+                return "Pass"
+
+        return "Poor"

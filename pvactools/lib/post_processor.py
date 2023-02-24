@@ -2,7 +2,7 @@ import tempfile
 import shutil
 
 from pvactools.lib.identify_problematic_amino_acids import IdentifyProblematicAminoAcids
-from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, UnmatchedSequenceAggregateAllEpitopes
+from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes
 from pvactools.lib.binding_filter import BindingFilter
 from pvactools.lib.filter import Filter, FilterCriterion
 from pvactools.lib.top_score_filter import TopScoreFilter
@@ -81,8 +81,20 @@ class PostProcessor:
                 anchor_contribution_threshold=self.anchor_contribution_threshold,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
             ).execute()
-        else:
-            UnmatchedSequenceAggregateAllEpitopes(
+        elif self.file_type == 'pVACfuse':
+            PvacfuseAggregateAllEpitopes(
+                self.input_file,
+                self.aggregate_report,
+                binding_threshold=self.binding_threshold,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                percentile_threshold=self.percentile_threshold,
+                top_score_metric=self.top_score_metric,
+                read_support=self.read_support,
+                expn_val=self.expn_val,
+                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
+            ).execute()
+        elif self.file_type == 'pVACbind':
+            PvacbindAggregateAllEpitopes(
                 self.input_file,
                 self.aggregate_report,
                 binding_threshold=self.binding_threshold,
@@ -122,14 +134,18 @@ class PostProcessor:
         if self.run_coverage_filter:
             print("Running Coverage Filters")
             filter_criteria = []
-            filter_criteria.append(FilterCriterion("Normal Depth", '>=', self.normal_cov, exclude_nas=self.exclude_NAs))
-            filter_criteria.append(FilterCriterion("Normal VAF", '<=', self.normal_vaf, exclude_nas=self.exclude_NAs))
-            filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', self.tdna_cov, exclude_nas=self.exclude_NAs))
-            filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', self.tdna_vaf, exclude_nas=self.exclude_NAs))
-            filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', self.trna_cov, exclude_nas=self.exclude_NAs))
-            filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf, exclude_nas=self.exclude_NAs))
-            filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
-            filter_criteria.append(FilterCriterion("Transcript Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
+            if self.file_type == 'pVACseq':
+                filter_criteria.append(FilterCriterion("Normal Depth", '>=', self.normal_cov, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Normal VAF", '<=', self.normal_vaf, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', self.tdna_cov, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', self.tdna_vaf, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', self.trna_cov, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Transcript Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
+            elif self.file_type == 'pVACfuse':
+                filter_criteria.append(FilterCriterion("Read Support", '>=', self.read_support, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
             Filter(self.binding_filter_fh.name, self.coverage_filter_fh.name, filter_criteria).execute()
             print("Completed")
         else:

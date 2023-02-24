@@ -2,7 +2,7 @@ import sys
 import argparse
 import tempfile
 
-from pvactools.lib.aggregate_all_epitopes import UnmatchedSequenceAggregateAllEpitopes
+from pvactools.lib.aggregate_all_epitopes import PvacbindAggregateAllEpitopes
 
 def define_parser():
     parser = argparse.ArgumentParser(
@@ -61,7 +61,7 @@ def main(args_input = sys.argv[1:]):
     tmp_fh = tempfile.NamedTemporaryFile()
 
     print("Creating Aggreggated Report")
-    UnmatchedSequenceAggregateAllEpitopes(
+    PvacbindAggregateAllEpitopes(
         args.input_file,
         args.output_file,
         binding_threshold=args.binding_threshold,
