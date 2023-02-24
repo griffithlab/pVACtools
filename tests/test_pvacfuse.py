@@ -190,7 +190,8 @@ class PvacfuseTests(unittest.TestCase):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
-            test_data_directory()
+            test_data_directory(),
+            'agfusion',
         ))) as mock_request, unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
@@ -231,11 +232,44 @@ class PvacfuseTests(unittest.TestCase):
 
             output_dir.cleanup()
 
+    def test_pvacfuse_pipeline_arriba(self):
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            test_data_directory(),
+            'arriba',
+        ))) as mock_request, unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+
+            run.main([
+                os.path.join(self.test_data_directory, "arriba_fusions.tsv"),
+                'sample.name',
+                'HLA-A*29:02',
+                'NetMHC',
+                output_dir.name,
+                '-e1', '9',
+            ])
+            close_mock_fhs()
+
+            for file_name in (
+                'sample.name.fasta',
+                'sample.name.all_epitopes.tsv',
+                'sample.name.filtered.tsv',
+                'sample.name.all_epitopes.aggregated.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'arriba_fusions', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
+                self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
+
+            output_dir.cleanup()
+
+
     def test_pvacfuse_combine_and_condense_steps(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
-            test_data_directory()
+            test_data_directory(),
+            'agfusion',
         ))) as mock_request, unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
             run.main([

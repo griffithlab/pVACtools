@@ -18,13 +18,13 @@ from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 def define_parser():
     parser = argparse.ArgumentParser(
         "pvacfuse generate_protein_fasta",
-        description="Generate an annotated fasta file from AGFusion output.",
+        description="Generate an annotated fasta file from AGFusion or Arriba output.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
         "input",
-        help="An AGfusion output directory."
+        help="An AGFusion output directory or Arriba fusion.tsv output file."
     )
     parser.add_argument(
         "flanking_sequence_length", type=int,
