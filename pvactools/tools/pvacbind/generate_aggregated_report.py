@@ -39,6 +39,11 @@ def define_parser():
              + "when the mutant allele has percentile scores below double this value.",
     )
     parser.add_argument(
+        '--aggregate-inclusion-binding-threshold', type=int,
+        help="Threshold for including epitopes when creating the aggregate report",
+        default=5000,
+    )
+    parser.add_argument(
         '-m', '--top-score-metric',
         choices=['lowest', 'median'],
         default='median',
@@ -63,6 +68,7 @@ def main(args_input = sys.argv[1:]):
         allele_specific_binding_thresholds=args.allele_specific_binding_thresholds,
         percentile_threshold=args.percentile_threshold,
         top_score_metric=args.top_score_metric,
+        aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,
     ).execute()
     print("Completed")
 

@@ -77,6 +77,9 @@ class PostProcessor:
                 expn_val=self.expn_val,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
                 top_score_metric=self.top_score_metric,
+                allele_specific_anchors=self.allele_specific_anchors,
+                anchor_contribution_threshold=self.anchor_contribution_threshold,
+                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
             ).execute()
         elif self.file_type == 'pVACfuse':
             PvacfuseAggregateAllEpitopes(
@@ -88,6 +91,7 @@ class PostProcessor:
                 top_score_metric=self.top_score_metric,
                 read_support=self.read_support,
                 expn_val=self.expn_val,
+                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
             ).execute()
         elif self.file_type == 'pVACbind':
             PvacbindAggregateAllEpitopes(
@@ -97,6 +101,7 @@ class PostProcessor:
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 percentile_threshold=self.percentile_threshold,
                 top_score_metric=self.top_score_metric,
+                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
             ).execute()
         print("Completed")
 
