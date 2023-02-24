@@ -454,12 +454,12 @@ class VcfConverter(InputFileConverter):
         self.close_filehandles()
 
 class FusionInputConverter(InputFileConverter):
-    def determine_fusion_sequence(self, full_sequence, variant_type):
-        if '*' not in full_sequence:
-            sys.exit("Fusion position marker '*' not found in fusion sequence. Please rerun AGFusion using the `--middlestar` option.")
+    def determine_fusion_sequence(self, full_sequence, separator):
+        if separator not in full_sequence:
+            sys.exit("Fusion position marker '*' not found in fusion sequence. If running with AGFusion results, please rerun AGFusion using the `--middlestar` option.")
         else:
-            fusion_position = full_sequence.find('*')
-            sequence = full_sequence.replace('*', '')
+            fusion_position = full_sequence.find(separator)
+            sequence = full_sequence.replace(separator, '')
             return (fusion_position, sequence)
 
     def parse_exon_file(self, input_file):
@@ -488,6 +488,61 @@ class FusionInputConverter(InputFileConverter):
         three_prime_end = max(three_prime_positions)
         return (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end)
 
+    def parse_arriba_file(self):
+        if not os.path.exists(self.input_file):
+            raise Exception("Input file {} doesn't exist. Please provide a valid Arriba result file path. Aborting.".format(self.input_file))
+
+        output_rows = []
+        count = 1
+        with open(self.input_file, 'r') as fh:
+            reader = csv.DictReader(fh, delimiter="\t")
+            for record in reader:
+                (five_prime_chr, five_prime_start) = record['breakpoint1'].split(':')
+                (three_prime_chr, three_prime_start) = record['breakpoint2'].split(':')
+                if record['peptide_sequence'] == '.':
+                    continue
+                (fusion_position, fusion_amino_acid_sequence) = self.determine_fusion_sequence(record['peptide_sequence'], '|')
+                gene_name = "{}-{}".format(record['#gene1'], record['gene2'])
+                transcript_name = "{}-{}".format(record['transcript_id1'], record['transcript_id1'])
+                if record['reading_frame'] == 'in-frame':
+                    variant_type = 'inframe_fusion'
+                elif record['reading_frame'] == 'out-of-frame':
+                    variant_type = 'frameshift_fusion'
+                else:
+                    continue
+                output_row = {
+                    'chromosome_name'            : "{} / {}".format(five_prime_chr, three_prime_chr),
+                    'start'                      : "{} / {}".format(five_prime_start, three_prime_start),
+                    'stop'                       : "NA",
+                    'reference'                  : 'fusion',
+                    'variant'                    : 'fusion',
+                    'gene_name'                  : gene_name,
+                    'wildtype_amino_acid_sequence'   : '',
+                    'frameshift_amino_acid_sequence' : '',
+                    'protein_length_change'      : '',
+                    'amino_acid_change'          : 'NA',
+                    'codon_change'               : 'NA',
+                    'ensembl_gene_id'            : 'NA',
+                    'amino_acid_change'          : 'NA',
+                    'transcript_expression'      : 'NA',
+                    'gene_expression'            : 'NA',
+                    'normal_depth'               : 'NA',
+                    'normal_vaf'                 : 'NA',
+                    'tdna_depth'                 : 'NA',
+                    'tdna_vaf'                   : 'NA',
+                    'trna_depth'                 : 'NA',
+                    'trna_vaf'                   : 'NA',
+                    'variant_type'               : variant_type,
+                    'protein_position'           : fusion_position,
+                    'fusion_amino_acid_sequence' : fusion_amino_acid_sequence.replace("*", "").upper(),
+                    'transcript_name'            : transcript_name,
+                    'index'                      : pvactools.lib.run_utils.construct_index(count, gene_name, transcript_name, variant_type, fusion_position)
+                }
+                output_rows.append(output_row)
+                count += 1
+        return output_rows
+
+
     def parse_agfusion_files(self):
         if not os.path.exists(self.input_file):
             raise Exception("Input directory {} doesn't exist. Please provide a valid AGFusion result directory path. Aborting.".format(self.input_file))
@@ -507,7 +562,7 @@ class FusionInputConverter(InputFileConverter):
                 else:
                     sys.exit('Effect "{}" not supported'.format(record_info['effect']))
 
-                (fusion_position, fusion_amino_acid_sequence) = self.determine_fusion_sequence(str(record.seq), variant_type)
+                (fusion_position, fusion_amino_acid_sequence) = self.determine_fusion_sequence(str(record.seq), '*')
                 output_row = {
                     'chromosome_name'            : "{} / {}".format(five_prime_chr, three_prime_chr),
                     'start'                      : "{} / {}".format(five_prime_start, three_prime_start),
@@ -544,6 +599,9 @@ class FusionInputConverter(InputFileConverter):
         writer = open(self.output_file, 'w')
         tsv_writer = csv.DictWriter(writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         tsv_writer.writeheader()
-        output_rows = self.parse_agfusion_files()
+        if os.path.isfile(self.input_file):
+            output_rows = self.parse_arriba_file()
+        elif os.path.isdir(self.input_file):
+            output_rows = self.parse_agfusion_files()
         tsv_writer.writerows(output_rows)
         writer.close()

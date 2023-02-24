@@ -301,7 +301,7 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
 class PvacfuseRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
     def __init__(self):
         tool_name = "pvacfuse"
-        input_file_help = "An AGfusion output directory."
+        input_file_help="An AGFusion output directory or Arriba fusion.tsv output file."
         PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
 
 class PvacvectorRunArgumentParser(RunArgumentParser):
