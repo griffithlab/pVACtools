@@ -22,4 +22,16 @@ This release also fixes the following problem(s):
 - For very large result sets the filtering steps would stall or be killed
   because the steps would run out of memory. This release fixes this issue.
 - This release adds better handling of timeout errors while running
+
+Version 3.1.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- The ``--exclude-NAs`` flag was not being passed along correctly to the main
+  pipeline and didn't have any effect on downstream filtering.
+- The aggregate report creation step had some inefficiencies which caused its
+  runtime to be much longer than necessary.
   NetMHCstabpan and/or NetChop.
+- An unneeded import statement for the PyVCF package had the potential to
+  cause errors while running the pVACseq pipeline.
