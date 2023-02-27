@@ -9,8 +9,10 @@ from pvactools.lib.run_argument_parser import *
 from pvactools.lib.input_file_converter import PvacspliceVcfConverter
 from pvactools.lib.load_gtf_data import *
 
-class JunctionPipeline():
+
+class JunctionPipeline:
     def __init__(self, **kwargs):
+        self.gtf_df = None
         self.input_file              = kwargs['input_file']
         self.sample_name             = kwargs['sample_name']
         self.output_dir              = kwargs['base_output_dir']
@@ -26,8 +28,6 @@ class JunctionPipeline():
         self.tsl                     = kwargs['maximum_transcript_support_level']
         self.normal_sample_name      = kwargs.pop('normal_sample_name', None)
         self.save_gtf                = kwargs['save_gtf']
-        #fasta_basename = os.path.basename(self.fasta_path)
-        #self.alt_fasta_path = os.path.join(self.output_dir, f'{fasta_basename.split(".")[0]}_alt.{".".join(fasta_basename.split(".")[1:])}')
             
     def execute(self):
         self.load_gtf_data()
@@ -52,7 +52,7 @@ class JunctionPipeline():
             'tsl'         : self.tsl,
             }
             gtf_data = LoadGtfData(**gtf_params)
-            self.gtf_df = gtf_data.execute()
+            self.gtf_df = gtf_data.execute
 
     def create_file_path(self, key):
         inputs = {
@@ -75,8 +75,8 @@ class JunctionPipeline():
             'score'       : self.junction_score,
             'distance'    : self.variant_distance,
         }
-        filter = FilterRegtoolsResults(**filter_params)
-        filter_df = filter.execute()
+        filter_object = FilterRegtoolsResults(**filter_params)
+        filter_df = filter_object.execute()
         # creating test files
         #self.filter_df.to_csv(os.path.join(self.output_dir, 'Test.{}_{}_filtered.tsv'.format(self.junction_score, self.variant_distance)), sep='\t', index=False)
         return filter_df

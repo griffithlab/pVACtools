@@ -454,6 +454,9 @@ class VcfConverter(InputFileConverter):
         self.close_filehandles()
 
 class PvacspliceVcfConverter(VcfConverter):
+    def __init__(self, **kwargs):
+        VcfConverter.__init__(self, **kwargs)
+
     def output_headers(self):
         return[
             'chromosome_name',

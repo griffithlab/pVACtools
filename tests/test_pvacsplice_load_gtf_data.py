@@ -21,7 +21,7 @@ class LoadGtfDataTests(unittest.TestCase):
 
     def test_load_gtf_data_runs_and_produces_expected_output(self):
         output_dir = tempfile.TemporaryDirectory()
-        for tsl in [1,3,5]:
+        for tsl in [1, 3, 5]:
             output_file = os.path.join(output_dir.name, f'sample_gtf_{tsl}.tsv')
             params = {
                 'gtf_file'   : self.gtf_file,

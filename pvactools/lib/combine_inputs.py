@@ -1,6 +1,7 @@
 import sys
 import pandas as pd
 
+
 class CombineInputs():
     def __init__(self, **kwargs):
         self.junctions_df = kwargs['junctions_df']
@@ -51,17 +52,17 @@ class CombineInputs():
         j_df['transcript_version'] = j_df['transcript_version'].astype('int64')
 
         # removed gene_name, gene_id - do these need to be skipped?
-        merged_df = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'variant_info'])
+        merged_df = j_df.merge(var_df, on=['gene_name', 'transcript_id', 'transcript_version', 'variant_info'])
 
         # check that everything is merging
-        left_merge = j_df.merge(var_df, on=['transcript_id', 'transcript_version', 'variant_info'], how='left', indicator=True)
+        left_merge = j_df.merge(var_df, on=['variant_info', 'gene_name', 'transcript_id', 'transcript_version', ], how='left', indicator=True)
         not_merged_lines = left_merge.loc[left_merge['_merge'] != 'both']
         if not not_merged_lines.empty:
-            # warning: if there are any that don't merge
-            print(not_merged_lines[['variant_info', 'transcript_id', 'transcript_version']])
+            # warning: if there are any that don't merge,
+            print(not_merged_lines[['variant_info', 'gene_name', 'transcript_id', 'transcript_version']])
             # make this back into a warning
             print(
-                'Warning: The above variant/transcript combination is present in the junctions file, but not in the VEP-annotated VCF. Skipping.'
+                'Warning: The above variant/transcript/gene combination is present in the junctions file, but not in the VEP-annotated VCF. Skipping.'
             )
     
         # create index to match with kmers

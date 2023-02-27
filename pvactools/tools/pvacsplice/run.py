@@ -12,6 +12,7 @@ from pvactools.lib.run_utils import *
 def define_parser():
     return PvacspliceRunArgumentParser().parser
 
+
 def create_combined_reports(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
@@ -71,6 +72,7 @@ def combine_reports_per_class(base_output_dir, args, mhc_class):
         
     print('Begin post processor')
     PostProcessor(**post_processing_params).execute()
+
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
@@ -160,8 +162,8 @@ def main(args_input = sys.argv[1:]):
             class_i_arguments['output_dir']              = output_dir
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
             
-            pipeline = PvacsplicePipeline(**class_i_arguments)
-            pipeline.execute()
+            #pipeline = PvacsplicePipeline(**class_i_arguments)
+            #pipeline.execute()
 
         combine_reports_per_class(base_output_dir, args, 'I')
 

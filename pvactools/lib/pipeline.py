@@ -42,7 +42,7 @@ class Pipeline(metaclass=ABCMeta):
 
     def log_dir(self):
         dir = os.path.join(self.output_dir, 'log')
-        os.makedirs(dir, exist_ok=True)
+        os.makedirs(dir, exist_ok=True),
         return dir
 
     def print_log(self):
@@ -180,7 +180,7 @@ class Pipeline(metaclass=ABCMeta):
             convert_params['flanking_bases'] = max(self.epitope_lengths) * 4
 
         converter = self.converter(convert_params)
-        converter.execute()
+        converter.execute
         print("Completed")
 
     def tsv_entry_count(self):
@@ -259,7 +259,7 @@ class Pipeline(metaclass=ABCMeta):
                 generate_fasta_params['spacers'] = self.spacers
                 status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
                 fasta_generator = self.fasta_generator(generate_fasta_params)
-                fasta_generator.execute()
+                fasta_generator.execute
             else:
                 for epitope_length in self.epitope_lengths:
                     split_fasta_file_path = "{}_{}".format(self.split_fasta_basename(epitope_length), fasta_chunk)
@@ -274,7 +274,7 @@ class Pipeline(metaclass=ABCMeta):
                     generate_fasta_params['output_key_file'] = split_fasta_key_file_path
                     status_message("Generating Variant Peptide FASTA and Key Files - Epitope Length {} - Entries {}".format(epitope_length, fasta_chunk))
                     fasta_generator = self.fasta_generator(generate_fasta_params)
-                    fasta_generator.execute()
+                    fasta_generator.execute
         status_message("Completed")
 
     def split_fasta_basename(self, epitope_length):
@@ -412,7 +412,7 @@ class Pipeline(metaclass=ABCMeta):
                         if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                             params['add_sample_name_column'] = True 
                         parser = self.output_parser(params)
-                        parser.execute()
+                        parser.execute
                         status_message("Parsing prediction file for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, epl, fasta_chunk))
 
                         split_parsed_output_files.append(split_parsed_file_path)
@@ -717,7 +717,7 @@ class PvacbindPipeline(Pipeline):
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['add_sample_name_column'] = True 
                     parser = self.output_parser(params)
-                    parser.execute() 
+                    parser.execute
                     status_message("Parsing prediction file for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, length, fasta_chunk))
 
                     split_parsed_output_files.append(split_parsed_file_path)
