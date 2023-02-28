@@ -109,6 +109,9 @@ def main(args_input = sys.argv[1:]):
         'problematic_amino_acids'   : args.problematic_amino_acids,
         'exclude_NAs'               : args.exclude_NAs,
         'peptide_fasta'             : args.peptide_fasta,
+        'allele_specific_anchors'   : args.allele_specific_anchors,
+        'anchor_contribution_threshold' : args.anchor_contribution_threshold,
+        'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
