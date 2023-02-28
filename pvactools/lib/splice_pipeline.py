@@ -12,7 +12,7 @@ from pvactools.lib.load_gtf_data import *
 
 class JunctionPipeline:
     def __init__(self, **kwargs):
-        self.gtf_df = None
+        self.gtf_df = pd.DataFrame()
         self.input_file              = kwargs['input_file']
         self.sample_name             = kwargs['sample_name']
         self.output_dir              = kwargs['base_output_dir']
@@ -52,7 +52,8 @@ class JunctionPipeline:
             'tsl'         : self.tsl,
             }
             gtf_data = LoadGtfData(**gtf_params)
-            self.gtf_df = gtf_data.execute
+            self.gtf_df = gtf_data.execute()
+
 
     def create_file_path(self, key):
         inputs = {
@@ -71,7 +72,7 @@ class JunctionPipeline:
         filter_params = {
             'input_file'  : self.input_file,
             'output_file' : self.create_file_path('filtered'),
-            'gtf_df'      : self.gtf_df,
+            'gtf_data'    : self.gtf_df,
             'score'       : self.junction_score,
             'distance'    : self.variant_distance,
         }
