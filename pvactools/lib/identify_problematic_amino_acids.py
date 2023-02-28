@@ -36,7 +36,10 @@ class IdentifyProblematicAminoAcids:
                 if self.filter_type == 'hard' and len(problematic_positions) == 0:
                     writer.writerow(line)
                 elif self.filter_type == 'soft':
-                    line["Problematic Positions"] = ','.join(problematic_positions)
+                    if len(problematic_positions) == 0:
+                        line["Problematic Positions"] = 'None'
+                    else:
+                        line["Problematic Positions"] = ','.join(problematic_positions)
                     writer.writerow(line)
 
     @classmethod
@@ -93,7 +96,7 @@ class IdentifyProblematicAminoAcids:
         )
         parser.add_argument(
             '--filter-type', '-f', choices=['soft', 'hard'], default="soft",
-            help="Set the type of filtering done. Choosing `soft` will add a new column \"Problematic Positions\t that lists positions in the epitope with problematic amino acids. "
+            help="Set the type of filtering done. Choosing `soft` will add a new column \"Problematic Positions\" that lists positions in the epitope with problematic amino acids. "
                + "Choosing `hard` will remove epitope entries with problematic amino acids."
         )
         return parser

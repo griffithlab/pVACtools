@@ -23,6 +23,13 @@ def define_parser():
     )
     binding_filter_parser.set_defaults(func=binding_filter)
 
+    coverage_filter_parser = subparsers.add_parser(
+        "coverage_filter",
+        help="Filter variants processed by IEDB by read support and expression",
+        add_help=False
+    )
+    coverage_filter_parser.set_defaults(func=coverage_filter)
+
     top_score_filter_parser = subparsers.add_parser(
         "top_score_filter",
         help="Pick the best neoepitope for each variant",
@@ -53,7 +60,7 @@ def define_parser():
 
     generate_protein_fasta_parser = subparsers.add_parser(
         "generate_protein_fasta",
-        help="Generate an annotated fasta file from AGFusion output",
+        help="Generate an annotated fasta file from AGFusion or Arriba output",
         add_help=False,
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)

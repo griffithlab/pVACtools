@@ -1,0 +1,71 @@
+5'_gene,3'_gene,5'_transcript,3'_transcript,5'_strand,3'_strand,5'_transcript_biotype,3'_transcript_biotype,Fusion_effect,Protein_length,Protein_weight_(kD)
+EIF3K,CYP39A1,ENST00000593149,ENST00000275016,+,-,protein_coding,protein_coding,in-frame (with mutation),444,51.458386900000015
+EIF3K,CYP39A1,ENST00000593149,ENST00000489657,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000593149,ENST00000476076,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000593149,ENST00000480804,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000593149,ENST00000619708,+,-,protein_coding,protein_coding,out-of-frame,82,9.576812699999994
+EIF3K,CYP39A1,ENST00000248342,ENST00000275016,+,-,protein_coding,protein_coding,in-frame (with mutation),531,61.3998095000001
+EIF3K,CYP39A1,ENST00000248342,ENST00000489657,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000248342,ENST00000476076,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000248342,ENST00000480804,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000248342,ENST00000619708,+,-,protein_coding,protein_coding,out-of-frame,169,19.518235299999997
+EIF3K,CYP39A1,ENST00000586932,ENST00000275016,+,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000586932,ENST00000489657,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000586932,ENST00000476076,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000586932,ENST00000480804,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000586932,ENST00000619708,+,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000593062,ENST00000275016,+,-,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000593062,ENST00000489657,+,-,processed_transcript,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000593062,ENST00000476076,+,-,processed_transcript,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000593062,ENST00000480804,+,-,processed_transcript,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000593062,ENST00000619708,+,-,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000538434,ENST00000275016,+,-,protein_coding,protein_coding,in-frame (with mutation),444,51.458386900000015
+EIF3K,CYP39A1,ENST00000538434,ENST00000489657,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000538434,ENST00000476076,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000538434,ENST00000480804,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000538434,ENST00000619708,+,-,protein_coding,protein_coding,out-of-frame,82,9.576812699999994
+EIF3K,CYP39A1,ENST00000588934,ENST00000275016,+,-,protein_coding,protein_coding,out-of-frame,126,14.80592479999998
+EIF3K,CYP39A1,ENST00000588934,ENST00000489657,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000588934,ENST00000476076,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000588934,ENST00000480804,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000588934,ENST00000619708,+,-,protein_coding,protein_coding,intron-intron,NA,NA
+EIF3K,CYP39A1,ENST00000545173,ENST00000275016,+,-,protein_coding,protein_coding,in-frame (with mutation),531,61.3998095000001
+EIF3K,CYP39A1,ENST00000545173,ENST00000489657,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000545173,ENST00000476076,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000545173,ENST00000480804,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000545173,ENST00000619708,+,-,protein_coding,protein_coding,out-of-frame,169,19.518235299999997
+EIF3K,CYP39A1,ENST00000588422,ENST00000275016,+,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000588422,ENST00000489657,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000588422,ENST00000476076,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000588422,ENST00000480804,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000588422,ENST00000619708,+,-,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000586513,ENST00000275016,+,-,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000586513,ENST00000489657,+,-,processed_transcript,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000586513,ENST00000476076,+,-,processed_transcript,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000586513,ENST00000480804,+,-,processed_transcript,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000586513,ENST00000619708,+,-,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000591409,ENST00000275016,+,-,protein_coding,protein_coding,exon-exon,NA,NA
+EIF3K,CYP39A1,ENST00000591409,ENST00000489657,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000591409,ENST00000476076,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000591409,ENST00000480804,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000591409,ENST00000619708,+,-,protein_coding,protein_coding,exon-intron,NA,NA
+EIF3K,CYP39A1,ENST00000592558,ENST00000275016,+,-,protein_coding,protein_coding,in-frame (with mutation),505,58.40330390000002
+EIF3K,CYP39A1,ENST00000592558,ENST00000489657,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000592558,ENST00000476076,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000592558,ENST00000480804,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000592558,ENST00000619708,+,-,protein_coding,protein_coding,intron-intron,NA,NA
+EIF3K,CYP39A1,ENST00000588299,ENST00000275016,+,-,retained_intron,protein_coding,exon-exon,NA,NA
+EIF3K,CYP39A1,ENST00000588299,ENST00000489657,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000588299,ENST00000476076,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000588299,ENST00000480804,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000588299,ENST00000619708,+,-,retained_intron,protein_coding,exon-intron,NA,NA
+EIF3K,CYP39A1,ENST00000590134,ENST00000275016,+,-,retained_intron,protein_coding,exon-exon,NA,NA
+EIF3K,CYP39A1,ENST00000590134,ENST00000489657,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000590134,ENST00000476076,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000590134,ENST00000480804,+,-,retained_intron,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000590134,ENST00000619708,+,-,retained_intron,protein_coding,exon-intron,NA,NA
+EIF3K,CYP39A1,ENST00000614624,ENST00000275016,+,-,protein_coding,protein_coding,in-frame (with mutation),498,57.62064250000003
+EIF3K,CYP39A1,ENST00000614624,ENST00000489657,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000614624,ENST00000476076,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000614624,ENST00000480804,+,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+EIF3K,CYP39A1,ENST00000614624,ENST00000619708,+,-,protein_coding,protein_coding,out-of-frame,136,15.739068299999992
