@@ -18,13 +18,13 @@ from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 def define_parser():
     parser = argparse.ArgumentParser(
         "pvacfuse generate_protein_fasta",
-        description="Generate an annotated fasta file from AGFusion output.",
+        description="Generate an annotated fasta file from AGFusion or Arriba output.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
         "input",
-        help="An AGfusion output directory."
+        help="An AGFusion output directory or Arriba fusion.tsv output file."
     )
     parser.add_argument(
         "flanking_sequence_length", type=int,
@@ -46,12 +46,13 @@ def define_parser():
     )
     return parser
 
-def convert_fusion_input(input_file, temp_dir):
+def convert_fusion_input(input_file, temp_dir, starfusion_file):
     print("Converting Fusion file to TSV")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     convert_params = {
         'input_file' : input_file,
         'output_file': tsv_file,
+        'starfusion_file': starfusion_file
     }
     converter = FusionInputConverter(**convert_params)
     converter.execute()
@@ -110,7 +111,7 @@ def parse_files(output_file, temp_dir, input_tsv):
     SeqIO.write(output_records, output_file, "fasta")
     print("Completed")
 
-def main(args_input = sys.argv[1:], save_tsv_file=False):
+def main(args_input = sys.argv[1:], save_tsv_file=False, starfusion_file=None):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
@@ -122,7 +123,7 @@ def main(args_input = sys.argv[1:], save_tsv_file=False):
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
     temp_dir = tempfile.mkdtemp()
-    convert_fusion_input(args.input, temp_dir)
+    convert_fusion_input(args.input, temp_dir, starfusion_file)
     generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file)
     parse_files(args.output_file, temp_dir, args.input_tsv)
     shutil.rmtree(temp_dir, ignore_errors=True)
