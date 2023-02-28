@@ -2,11 +2,11 @@ import os
 import sys
 import pandas as pd
 
-class FilterRegtoolsResults():
+class FilterRegtoolsResults:
     def __init__(self, **kwargs):
         self.input_file  = kwargs['input_file']
         self.output_file = kwargs['output_file']
-        self.gtf_df      = kwargs['gtf_df']
+        self.gtf_data      = kwargs['gtf_data']
         self.score       = kwargs['score'] #10 reads, 100, 500 -j (cohort stats combined junction tsv filters out junctions with <= 5 reads).  
         self.distance    = kwargs['distance'] #50, 100 bp, 150 -v
 
@@ -43,7 +43,7 @@ class FilterRegtoolsResults():
         for k,v in tscript_dict.items():
 
             # subset df by transcript_id
-            gtf_transcripts = self.gtf_df[(self.gtf_df['feature'] == 'transcript') & (self.gtf_df['transcript_id'].isin(v['transcripts'].split(',')))]
+            gtf_transcripts = self.gtf_data[(self.gtf_data['feature'] == 'transcript') & (self.gtf_data['transcript_id'].isin(v['transcripts'].split(',')))]
 
             if not gtf_transcripts.empty:
                 # add to df
@@ -66,16 +66,16 @@ class FilterRegtoolsResults():
 
     def merge_and_write(self, pc_junctions, explode_junctions):
         # merge dfs - explode_junctions from filtered file and pc_junctions from gtf file, all gtf info is based on tscript
-        #try:
+        # try:
         merged_df = explode_junctions.merge(pc_junctions, on='transcript_id').drop_duplicates()
-        #except KeyError:
+        # except KeyError:
         #    sys.exit('The GTF dataframe is empty.')
         # drop repetitive or unneeded cols
         merged_df = merged_df.drop(columns=['gene_names', 'gene_ids', 'variant_start', 'exon_number'])
         # remove spaces from col names
-        #merged_df.columns = merged_df.columns.str.replace(r'\s+', '_', regex=True)
+        # merged_df.columns = merged_df.columns.str.replace(r'\s+', '_', regex=True)
         # switch strand to numeral
-        merged_df['strand'] = merged_df['strand'].replace(['+','-'], [1,-1])
+        merged_df['strand'] = merged_df['strand'].replace(['+', '-'], [1, -1])
         # create filtered tsv file
         merged_df.to_csv(self.output_file, sep='\t', index=False)
 
