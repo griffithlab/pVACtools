@@ -35,6 +35,7 @@ class Pipeline(metaclass=ABCMeta):
         for (k,v) in kwargs.items():
            setattr(self, k, v)
         self.flurry_state                = self.get_flurry_state()
+        self.starfusion_file             = kwargs.pop('starfusion_file', None)
         self.proximal_variants_file      = None
         self.splice_output_dir           = kwargs.pop('splice_output_dir', None)
         self.tmp_dir = os.path.join(self.output_dir, 'tmp')

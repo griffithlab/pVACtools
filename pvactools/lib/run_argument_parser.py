@@ -80,6 +80,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true',
         )
         parser.add_argument(
+            '--aggregate-inclusion-binding-threshold', type=int,
+            help="Threshold for including epitopes when creating the aggregate report",
+            default=5000,
+        )
+        parser.add_argument(
             '-m', '--top-score-metric',
             choices=['lowest', 'median'],
             default='median',
@@ -354,6 +359,25 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
             choices=[1,2,3,4,5]
         )
         self.parser.add_argument(
+            "--allele-specific-anchors",
+            help="Use allele-specific anchor positions when tiering epitopes in the aggregate report. This option "
+                 + "is available for 8, 9, 10, and 11mers and only for HLA-A, B, and C alleles. If this option is "
+                 + "not enabled or as a fallback for unsupported lengths and alleles, the default positions of 1, "
+                 + "2, epitope length - 1, and epitope length are used. Please see https://doi.org/10.1101/2020.12.08.416271 "
+                 + "for more details.",
+            default=False,
+            action='store_true',
+        )
+        self.parser.add_argument(
+            "--anchor-contribution-threshold", type=float,
+            help="For determining allele-specific anchors, each position is assigned a score based on how binding is "
+                 + "influenced by mutations. From these scores, the relative contribution of each position to the "
+                 + "overall binding is calculated. Starting with the highest relative contribution, positions whose "
+                 + "score together account for the selected contribution threshold are assigned as anchor locations. "
+                 + " As a result, a higher threshold leads to the inclusion of more positions to be considered anchors.",
+            default=0.8
+        )
+        self.parser.add_argument(
             '--pass-only',
             help="Only process VCF entries with a PASS status.",
             default=False,
@@ -369,8 +393,23 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
 class PvacfuseRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
     def __init__(self):
         tool_name = "pvacfuse"
-        input_file_help = "An AGfusion output directory."
+        input_file_help="An AGFusion output directory or Arriba fusion.tsv output file."
         PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
+        self.parser.add_argument(
+            '--starfusion-file',
+            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from. Only used when running with AGFusion data."
+        )
+        self.parser.add_argument(
+            '--read-support', type=int,
+            help="Read Support Cutoff. Sites above this cutoff will be considered.",
+            default=5
+        )
+        self.parser.add_argument(
+            '--expn-val', type=float,
+            help="Expression Cutoff. Expression is meassured as FFPM (fusion fragments per million total reads). Sites above this cutoff will be considered.",
+            default=0.1
+        )
+
 
 class PvacvectorRunArgumentParser(RunArgumentParser):
     def __init__(self):
