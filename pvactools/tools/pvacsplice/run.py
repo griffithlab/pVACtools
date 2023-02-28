@@ -162,8 +162,8 @@ def main(args_input = sys.argv[1:]):
             class_i_arguments['output_dir']              = output_dir
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
             
-            #pipeline = PvacsplicePipeline(**class_i_arguments)
-            #pipeline.execute()
+            pipeline = PvacsplicePipeline(**class_i_arguments)
+            pipeline.execute()
 
         combine_reports_per_class(base_output_dir, args, 'I')
 
