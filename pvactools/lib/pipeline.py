@@ -181,7 +181,7 @@ class Pipeline(metaclass=ABCMeta):
             convert_params['flanking_bases'] = max(self.epitope_lengths) * 4
 
         converter = self.converter(convert_params)
-        converter.execute
+        converter.execute()
         print("Completed")
 
     def tsv_entry_count(self):
@@ -363,7 +363,7 @@ class Pipeline(metaclass=ABCMeta):
         split_parsed_output_files = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
-            if self.input_file_type == 'fasta':
+            if self.input_file_type in ['fasta', 'junctions']:
                 fasta_chunk = tsv_chunk
             else:
                 fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
@@ -413,7 +413,7 @@ class Pipeline(metaclass=ABCMeta):
                         if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                             params['add_sample_name_column'] = True 
                         parser = self.output_parser(params)
-                        parser.execute
+                        parser.execute()
                         status_message("Parsing prediction file for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, epl, fasta_chunk))
 
                         split_parsed_output_files.append(split_parsed_file_path)
@@ -432,6 +432,8 @@ class Pipeline(metaclass=ABCMeta):
         ]
         if self.input_file_type == 'fasta':
             params.extend(['--file-type', 'pVACbind'])
+        elif self.input_file_type == 'junctions':
+            params.extend(['--file-type', 'pVACsplice'])
         pvactools.lib.combine_parsed_outputs.main(params)
         status_message("Completed")
 
@@ -718,7 +720,7 @@ class PvacbindPipeline(Pipeline):
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['add_sample_name_column'] = True 
                     parser = self.output_parser(params)
-                    parser.execute
+                    parser.execute()
                     status_message("Parsing prediction file for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, length, fasta_chunk))
 
                     split_parsed_output_files.append(split_parsed_file_path)
@@ -767,8 +769,8 @@ class PvacbindPipeline(Pipeline):
             shutil.rmtree(self.tmp_dir, ignore_errors=True)
 
 class PvacsplicePipeline(PvacbindPipeline):
-    def execute(self):
 
+    def execute(self):
         #mv fasta file to MHC temp dir
         shutil.copy(self.input_file, os.path.join(self.tmp_dir, os.path.basename(self.input_file)))
         # mv tsv file too
