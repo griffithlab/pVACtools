@@ -902,3 +902,90 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
                 return "Pass"
 
         return "Poor"
+
+    class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
+        def __init__(self,
+                     input_file,
+                     output_file,
+                     #tumor_purity=None,
+                     binding_threshold=500,
+                     percentile_threshold=None,
+                     allele_specific_binding_thresholds=False,
+                     aggregate_inclusion_binding_threshold=5000,
+                     trna_vaf=0.25,
+                     trna_cov=10,
+                     expn_val=1,
+                     top_score_metric="median",
+                     #allele_specific_anchors=False,
+                     #anchor_contribution_threshold=0.8,
+                     ):
+            self.input_file = input_file
+            self.output_file = output_file
+            self.binding_threshold = binding_threshold
+            self.relaxed_binding_threshold = self.binding_threshold * 2
+            self.percentile_threshold = percentile_threshold
+            self.relaxed_percentile_threshold = None if percentile_threshold is None else percentile_threshold * 2
+            self.allele_expr_threshold = trna_vaf * expn_val * 10
+            self.relaxed_allele_expr_threshold = trna_vaf * expn_val * 5
+            self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
+            self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
+            self.trna_cov = trna_cov
+            self.trna_vaf = trna_vaf
+            self.expn_val = expn_val
+            if top_score_metric == 'median':
+                self.top_score_metric = "Median"
+            else:
+                self.top_score_metric = "Best"
+            self.metrics_file = output_file.replace('.tsv', '.metrics.json')
+            super().__init__()
+
+        # pvacbind w/ Index instead of Mutation
+        def get_list_unique_mutation_keys(self):
+            key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=["Index"], dtype={"Index": str})
+            keys = key_df["Index"].values.tolist()
+            return sorted(list(set(keys)))
+
+        # pvacbind w/ Index instead of Mutation
+        def read_input_file(self, used_columns, dtypes):
+            return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False,
+                               na_values="NA", keep_default_na=False, dtype={"Index": str})
+
+        # pvacbind w/ Index instead of Mutation
+        def get_sub_df(self, all_epitopes_df, key):
+            df = (all_epitopes_df[lambda x: (x['Index'] == key)]).copy()
+            return (df, key)
+
+        # pvacbind w/ vaf and expression info included
+        def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
+            allele_expr = self.calculate_allele_expr(best)
+            tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
+
+            out_dict = {'ID': key}
+            out_dict.update({k.replace('HLA-', ''): v for k, v in sorted(hla.items())})
+            problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
+            if 'Gene Name' in best:
+                gene = best['Gene Name']
+            else:
+                gene = 'NA'
+            out_dict.update({
+                'Gene': gene,
+                'Prob Pos': problematic_positions,
+                # 'AA Change': best['Amino Acid Change'],
+                'Num Passing Transcripts': 1 if tier not in ['Relaxed', 'Poor'] else 0,
+                'Best Peptide': best["Epitope Seq"],
+                'Pos': best['Transcript Position'],
+                'Num Passing Peptides': peptide_count,
+                'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
+                'IC50 WT': "NA",
+                '%ile MT': best["{} Percentile".format(self.top_score_metric)],
+                '%ile WT': "NA",
+                'RNA Expr': best["Gene Expression"],
+                'RNA VAF': best["Tumor RNA VAF"],
+                'Allele Expr': allele_expr,
+                'RNA Depth': best["Tumor RNA Depth"],
+                'DNA VAF': best["Tumor DNA VAF"],
+                'Tier': tier,
+                'Evaluation': 'Pending',
+                'ID': key,
+            })
+            return out_dict
