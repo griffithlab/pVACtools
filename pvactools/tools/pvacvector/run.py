@@ -12,7 +12,6 @@ import random
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
 import itertools
 
 from pvactools.lib.optimal_peptide import OptimalPeptide
@@ -330,13 +329,13 @@ def shorten_problematic_peptides(input_file, problematic_start, problematic_end,
     records = []
     for record in SeqIO.parse(input_file, "fasta"):
         if record.id in problematic_start and record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)[1:-1], IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': True}))
+            record_new = SeqRecord(Seq(str(record.seq)[1:-1]), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': True}))
         elif record.id in problematic_start:
-            record_new = SeqRecord(Seq(str(record.seq)[1:], IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': False}))
+            record_new = SeqRecord(Seq(str(record.seq)[1:]), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': False}))
         elif record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)[:-1], IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': True}))
+            record_new = SeqRecord(Seq(str(record.seq)[:-1]), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': True}))
         else:
-            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': False}))
+            record_new = SeqRecord(Seq(str(record.seq)), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': False}))
         records.append(record_new)
     os.makedirs(output_dir, exist_ok=True)
     new_input_file = os.path.join(output_dir, "vector_input.fa")
@@ -348,13 +347,13 @@ def mark_problematic_peptides_in_fasta(input_file, problematic_start, problemati
     records = []
     for record in SeqIO.parse(input_file, "fasta"):
         if record.id in problematic_start and record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': True}))
+            record_new = SeqRecord(Seq(str(record.seq)), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': True}))
         elif record.id in problematic_start:
-            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': False}))
+            record_new = SeqRecord(Seq(str(record.seq)), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': False}))
         elif record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': True}))
+            record_new = SeqRecord(Seq(str(record.seq)), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': True}))
         else:
-            record_new = SeqRecord(Seq(str(record.seq), IUPAC.protein), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': False}))
+            record_new = SeqRecord(Seq(str(record.seq)), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': False}))
         records.append(record_new)
     os.makedirs(output_dir, exist_ok=True)
     new_input_file = os.path.join(output_dir, "vector_input.fa")
@@ -406,7 +405,7 @@ def create_dna_backtranslation(results_file, dna_results_file):
     dna_sequence = ""
     for amino_acid in peptide:
         dna_sequence += get_codon_for_amino_acid(amino_acid)
-    output_record = SeqRecord(Seq(dna_sequence, IUPAC.unambiguous_dna), id=str(seq_num), description=str(seq_num))
+    output_record = SeqRecord(Seq(dna_sequence), id=str(seq_num), description=str(seq_num))
     SeqIO.write([output_record], dna_results_file, 'fasta')
 
 def main(args_input=sys.argv[1:]):

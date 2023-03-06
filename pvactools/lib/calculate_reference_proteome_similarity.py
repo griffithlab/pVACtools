@@ -6,7 +6,6 @@ from Bio.Blast import NCBIXML
 from Bio import SeqIO, SearchIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-#from Bio.Alphabet import IUPAC
 import shutil
 import re
 import os
@@ -251,7 +250,7 @@ class CalculateReferenceProteomeSimilarity:
         if self.blastp_path is not None: # if blastp installed locally, perform BLAST with it
 
             # create a SeqRecord of full_peptide and write it to a tmp file
-            record = SeqRecord(Seq(full_peptide, IUPAC.protein), id="1", description="")
+            record = SeqRecord(Seq(full_peptide), id="1", description="")
             tmp_peptide_fh = tempfile.NamedTemporaryFile('w', delete=False)
             SeqIO.write([record], tmp_peptide_fh.name, "fasta")
 

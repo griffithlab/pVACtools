@@ -110,7 +110,7 @@ class TopScoreFilter:
 
             if self.file_type == 'pVACseq':
                 sorted_rows = pvactools.lib.sort.default_sort(filtered_lines, self.top_score_metric)
-            elif self.file_type == 'pVACbind':
+            elif self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                 sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric)
             elif self.file_type == 'pVACsplice':
                 sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric)

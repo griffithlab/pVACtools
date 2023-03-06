@@ -9,7 +9,6 @@ from collections import OrderedDict
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
 
 from pvactools.lib.fasta_generator import FastaGenerator
 from pvactools.lib.input_file_converter import VcfConverter
