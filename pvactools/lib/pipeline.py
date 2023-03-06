@@ -13,7 +13,6 @@ from threading import Lock
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
 from collections import OrderedDict
 import logging
 
@@ -260,7 +259,7 @@ class Pipeline(metaclass=ABCMeta):
                 generate_fasta_params['spacers'] = self.spacers
                 status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
                 fasta_generator = self.fasta_generator(generate_fasta_params)
-                fasta_generator.execute
+                fasta_generator.execute()
             else:
                 for epitope_length in self.epitope_lengths:
                     split_fasta_file_path = "{}_{}".format(self.split_fasta_basename(epitope_length), fasta_chunk)
@@ -275,7 +274,7 @@ class Pipeline(metaclass=ABCMeta):
                     generate_fasta_params['output_key_file'] = split_fasta_key_file_path
                     status_message("Generating Variant Peptide FASTA and Key Files - Epitope Length {} - Entries {}".format(epitope_length, fasta_chunk))
                     fasta_generator = self.fasta_generator(generate_fasta_params)
-                    fasta_generator.execute
+                    fasta_generator.execute()
         status_message("Completed")
 
     def split_fasta_basename(self, epitope_length):
@@ -518,7 +517,7 @@ class PvacbindPipeline(Pipeline):
         uniq_records = []
         keys = {}
         for sequence, ids in fasta_sequences.items():
-            record = SeqRecord(Seq(sequence, IUPAC.protein), id=str(count), description=str(count))
+            record = SeqRecord(Seq(sequence), id=str(count), description=str(count))
             uniq_records.append(record)
             keys[count] = ids
             count += 1
@@ -537,7 +536,7 @@ class PvacbindPipeline(Pipeline):
                 logging.warning("Record {} contains unsupported amino acids. Skipping.".format(record.id))
                 continue
             if len(sequence) >= length:
-                record.seq = Seq(sequence, IUPAC.protein)
+                record.seq = Seq(sequence)
                 records.append(record)
         SeqIO.write(records, self.fasta_basename(length), "fasta")
 

@@ -14,7 +14,6 @@ import numpy as np
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-#from Bio.Alphabet import IUPAC
 
 import pvactools.lib.run_utils
 from pvactools.lib.prediction_class import MHCI
@@ -74,7 +73,7 @@ class NetMHCStab:
                         records = []
                         for index, line in chunk.iterrows():
                             sequence_id = ('%010x'%x)[-10:]
-                            record_new = SeqRecord(Seq(line[self.epitope_seq_column_name], IUPAC.protein), id=sequence_id, description=sequence_id)
+                            record_new = SeqRecord(Seq(line[self.epitope_seq_column_name]), id=sequence_id, description=sequence_id)
                             records.append(record_new)
                             current_buffer[sequence_id] = line.to_dict()
                             x+=1
@@ -187,7 +186,7 @@ class NetMHCStab:
         valid_alleles = []
         for allele in alleles:
             staging_file = tempfile.NamedTemporaryFile(mode='w+')
-            records = [SeqRecord(Seq("ASTPGHTIIYEAVCLHNDRTTIP", IUPAC.protein), id="0", description="0")]
+            records = [SeqRecord(Seq("ASTPGHTIIYEAVCLHNDRTTIP"), id="0", description="0")]
             SeqIO.write(records, staging_file.name, "fasta")
             staging_file.seek(0)
             response = self.query_netmhcstabpan_server(staging_file, 9, allele.replace("*", ""))
