@@ -172,7 +172,7 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
                         transcript = "{}.{}".format(record_id_parts[3], record_id_parts[4])
                         aa_change = record_id_parts[6]
                     elif len(record_id_parts) == 6:
-                        #transcript wihtout version number
+                        #transcript without version number
                         transcript = record_id_parts[3]
                         aa_change = record_id_parts[5]
                     else:
@@ -184,9 +184,6 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
                         position = m.group(1)
                         matches = [i for i in tsv_indexes if i['Gene'] == gene and i['Best Transcript'] == transcript and position in i['AA Change'] and i['Evaluation'] in aggregate_report_evaluation]
                         if len(matches) == 0:
-                            matches = [i for i in tsv_indexes if i['Gene'] == gene]
-                            import pdb
-                            pdb.set_trace()
                             continue
                     else:
                         raise Exception("Unexpected amino acid format: {}".format(aa_change))
