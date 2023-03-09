@@ -1,12 +1,15 @@
 import sys
 import os
 import pandas as pd
+from pathlib import Path
+
 from pvactools.lib.splice_pipeline import *
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import *
 from pvactools.lib.run_argument_parser import *
 from pvactools.lib.post_processor import *
 from pvactools.lib.run_utils import *
+from pvactools.lib.print_log import *
 
 
 def define_parser():
@@ -46,18 +49,18 @@ def combine_reports_per_class(base_output_dir, args, mhc_class):
         print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
     combined_files = [os.path.join(m, f'{args.sample_name}.all_epitopes.tsv') for m in mhc_dirs]
 
-    combined_name = os.path.join(output_dir, f'{args.sample_name}.all_epitopes.tsv')
-    filtered_name = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
+    combined_file = os.path.join(output_dir, f'{args.sample_name}.all_epitopes.tsv')
+    filtered_file = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
 
-    combine_class_reports(combined_files, combined_name)
+    combine_class_reports(combined_files, combined_file)
 
     post_processing_params = vars(args)
-    post_processing_params['input_file'] = combined_name
-    post_processing_params['file_type'] = 'pVACsplice'
-    post_processing_params['filtered_report_file'] = filtered_name
+    post_processing_params['input_file'] = combined_file
+    post_processing_params['filtered_report_file'] = filtered_file
     post_processing_params['run_coverage_filter'] = True
-    post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['minimum_fold_change'] = None
+    post_processing_params['file_type'] = 'pVACsplice'
+    post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_manufacturability_metrics'] = True
     post_processing_params['run_reference_proteome_similarity'] = False
     if args.net_chop_method:
@@ -78,8 +81,26 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
+    # fasta
+    if Path(args.ref_fasta).suffix not in ['.fa', '.fasta']:
+        sys.exit('The fasta input path does not point to a fasta file.')
+    elif Path(args.ref_fasta).suffix == '.gz':
+        sys.exit('pVACsplice does not currently support gzipped fasta files.')
+    # gtf
+    if Path(args.gtf_file).suffix not in ['.gtf', '.gz']:
+        sys.exit('The gtf input path does not point to a gtf file.')
+    # vcf
+    if Path(args.annotated_vcf).suffix not in ['.vcf', '.gz']:
+        sys.exit('The vcf input path does not point to a vcf file.')
+    # vcf gz.tbi index file
+    if not Path(f'{args.annotated_vcf}.tbi'):
+        sys.exit('Gzipped VCF files must be indexed. (tabix -p vcf <vcf_file>)')
+    # iedb retries - default 5
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
+
+    # input file check
+    print_log()
 
     base_output_dir = os.path.abspath(args.output_dir) # junctions dir
     os.makedirs(base_output_dir, exist_ok=True)
@@ -88,7 +109,8 @@ def main(args_input = sys.argv[1:]):
     (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
 
     junction_arguments = {
-        'input_file'                       : args.input_file, 
+        'input_file_type'                  : 'junctions',
+        'input_file'                       : args.input_file,
         'gtf_file'                         : args.gtf_file,
         'sample_name'                      : args.sample_name,
         'base_output_dir'                  : base_output_dir,
@@ -110,9 +132,8 @@ def main(args_input = sys.argv[1:]):
 
     pvacsplice_arguments = junction_arguments.copy()
     additional_args = {
-        'input_file_type'           : 'junctions',
         'splice_output_dir'         : base_output_dir,
-        'output_dir'                : os.path.join(base_output_dir, 'MHC_Class_I'),
+        'output_dir'                : os.path.join(base_output_dir, 'MHC_Class_I'), # need I and II dirs? BEFORE THEY'RE CREATED?
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
@@ -172,7 +193,6 @@ def main(args_input = sys.argv[1:]):
     elif len(class_i_alleles) == 0:
         print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
 
-
     if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         if args.iedb_install_directory:
             iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
@@ -205,7 +225,6 @@ def main(args_input = sys.argv[1:]):
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
     elif len(class_ii_alleles) == 0:
         print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
-
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
