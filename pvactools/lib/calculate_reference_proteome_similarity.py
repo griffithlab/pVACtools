@@ -243,7 +243,8 @@ class CalculateReferenceProteomeSimilarity:
                 mt_amino_acids = line['Mutation'].split('/')[1]
                 if mt_amino_acids == '-':
                     mt_amino_acids = ''
-                peptide = self.extract_n_mer(full_peptide, int(line['Sub-peptide Position']), int(line['Mutation Position']), len(mt_amino_acids))
+                mt_pos = int(line['Mutation Position'].split('-')[0])
+                peptide = self.extract_n_mer(full_peptide, int(line['Sub-peptide Position']), mt_pos, len(mt_amino_acids))
         return peptide, full_peptide
 
 
