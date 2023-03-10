@@ -50,11 +50,11 @@ class IEDB(metaclass=ABCMeta):
     def check_length_valid_for_allele(self, length, allele):
         return True
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
         if iedb_executable_path is not None:
             arguments = [sys.executable]
             arguments.extend(self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length))
-            response_fh = tempfile.TemporaryFile()
+            response_fh = tempfile.TemporaryFile(dir=tmp_dir)
             response = run(arguments, stdout=response_fh, check=True)
             response_fh.seek(0)
             response_text = self.filter_response(response_fh.read())
@@ -96,11 +96,13 @@ class MHCnuggets(metaclass=ABCMeta):
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, class_type):
-        tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, class_type, tmp_dir=None):
+        tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
         script = os.path.join(os.path.dirname(os.path.realpath(__file__)), "call_mhcnuggets.py")
         arguments = ["python", script, input_file, allele, str(epitope_length), class_type, tmp_output_file.name]
-        stderr_fh = tempfile.NamedTemporaryFile('w', delete=False)
+        if tmp_dir:
+            arguments.extend(['--tmp-dir', tmp_dir])
+        stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
         try:
             response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
         except:
@@ -305,7 +307,7 @@ class MHCflurry(MHCI):
             epitopes[i+1] = sequence[i:i+length]
         return epitopes
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
@@ -316,10 +318,10 @@ class MHCflurry(MHCI):
 
         all_epitopes = list(set(all_epitopes))
         if len(all_epitopes) > 0:
-            tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+            tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
             arguments = ["mhcflurry-predict", "--alleles", allele, "--out", tmp_output_file.name, "--peptides"]
             arguments.extend(all_epitopes)
-            stderr_fh = tempfile.NamedTemporaryFile('w', delete=False)
+            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
                 response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
             except:
@@ -363,8 +365,8 @@ class MHCnuggetsI(MHCI, MHCnuggets):
     def mhcnuggets_allele(self, allele):
         return allele.replace('*', '')
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
-        return MHCnuggets.predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, 'I')
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
+        return MHCnuggets.predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, 'I', tmp_dir=tmp_dir)
 
 class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
     @property
@@ -457,8 +459,8 @@ class MHCnuggetsII(MHCII, MHCnuggets):
     def mhcnuggets_allele(self,allele):
         return "HLA-{}".format(allele).replace('*', '')
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries):
-        return MHCnuggets.predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, 'II')
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
+        return MHCnuggets.predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, 'II', tmp_dir=tmp_dir)
 
 class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
     @property
