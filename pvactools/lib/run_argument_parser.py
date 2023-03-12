@@ -299,15 +299,15 @@ class RunArgumentParser(metaclass=ABCMeta):
         self.parser.add_argument(
             "annotated_vcf",
             help="A VEP-annotated single- or multi-sample VCF containing genotype and transcript information."
-            +"The VCF may be gzipped (requires tabix index)."
+            + "The VCF may be gzipped (requires tabix index)."
         )
         self.parser.add_argument(
             "ref_fasta",
-            help="A reference FASTA file to identify transcript sequences from GTF coordinates."
+            help="A reference FASTA file. Note: this input should be the same as the RegTools vcf input."
         )
         self.parser.add_argument(
             "gtf_file",
-            help="Reference GTF file. Note: make sure to use the same file used for Regtools analysis."
+            help="A reference GTF file. Note: this input should be the same as the RegTools gtf input."
         )
         self.parser.add_argument(
             "-j", "--junction_score", type=int,
@@ -331,7 +331,7 @@ class RunArgumentParser(metaclass=ABCMeta):
             "--anchor_types", type=lambda s:[a for a in s.split(',')],
             help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list.",
             default=['A','D','NDA'],
-            ## choices=['A','D','NDA','DA','N'] # todo how to add choices to parser
+            choices=['A','D','NDA','DA','N']  # todo how to add choices to anchor types parameter
         )
 
     def pvacvector(self):
@@ -376,8 +376,9 @@ class PvacspliceRunArgumentParser(RunArgumentParser):
         input_file_help = "RegTools junctions output TSV file"
         RunArgumentParser.__init__(self, tool_name, input_file_help)
         self.prediction_args()
-        self.expression_coverage_args()
         self.pvacsplice()
+        self.expression_coverage_args()
+
 
 class PvacseqRunArgumentParser(RunArgumentParser):
     def __init__(self):
