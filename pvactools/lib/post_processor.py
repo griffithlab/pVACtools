@@ -114,7 +114,7 @@ class PostProcessor:
                 trna_vaf=self.trna_vaf,
                 trna_cov=self.trna_cov,
                 expn_val=self.expn_val,
-                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold, # todo add this parameter
+                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
             ).execute()
         print("Completed")
 
