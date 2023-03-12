@@ -15,7 +15,6 @@ from pvactools.lib.print_log import *
 def define_parser():
     return PvacspliceRunArgumentParser().parser
 
-
 def create_combined_reports(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
@@ -29,53 +28,9 @@ def create_combined_reports(base_output_dir, args):
         if not os.path.exists(file2):
             print("File {} doesn't exist. Aborting.".format(file2))
             return
-        output_file = os.path.join(output_dir, f"{args.sample_name}.{x}.tsv")
-        combine_reports([file1, file2], output_file)
-
-
-def combine_class_reports(file_list, file_final_name):
-    if len(file_list) > 1:
-        combine_reports(file_list, file_final_name)
-    elif len(file_list) == 1:
-        os.rename(file_list[0], file_final_name)
-
-
-def combine_reports_per_class(base_output_dir, args, mhc_class):
-    output_dir = os.path.join(base_output_dir, f'MHC_Class_{mhc_class}')
-
-    mhc_dirs = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.startswith(f'MHC_Class_{mhc_class}')]
-
-    if not mhc_dirs:
-        print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
-    combined_files = [os.path.join(m, f'{args.sample_name}.all_epitopes.tsv') for m in mhc_dirs]
-
-    combined_file = os.path.join(output_dir, f'{args.sample_name}.all_epitopes.tsv')
-    filtered_file = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
-
-    combine_class_reports(combined_files, combined_file)
-
-    post_processing_params = vars(args)
-    post_processing_params['input_file'] = combined_file
-    post_processing_params['filtered_report_file'] = filtered_file
-    post_processing_params['run_coverage_filter'] = True
-    post_processing_params['minimum_fold_change'] = None
-    post_processing_params['file_type'] = 'pVACsplice'
-    post_processing_params['run_transcript_support_level_filter'] = False
-    post_processing_params['run_manufacturability_metrics'] = True
-    post_processing_params['run_reference_proteome_similarity'] = False
-    if args.net_chop_method:
-        post_processing_params['net_chop_fasta'] = args.net_chop_fasta
-        post_processing_params['run_net_chop'] = True
-    else:
-        post_processing_params['run_net_chop'] = False
-    if args.netmhc_stab:
-        post_processing_params['run_netmhc_stab'] = True
-    else:
-        post_processing_params['run_netmhc_stab'] = False
-        
-    print('Begin post processor')
-    PostProcessor(**post_processing_params).execute()
-
+    combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+    pvactools.lib.run_utils.combine_reports([file1, file2], combined_output_file)
+    filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
@@ -99,14 +54,14 @@ def main(args_input = sys.argv[1:]):
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
 
-    # input file check
-    print_log()
-
     base_output_dir = os.path.abspath(args.output_dir) # junctions dir
     os.makedirs(base_output_dir, exist_ok=True)
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
+
+    # input file check
+    print_log(os.path.join(base_output_dir, 'log'), vars(args))
 
     junction_arguments = {
         'input_file_type'                  : 'junctions',
@@ -121,6 +76,7 @@ def main(args_input = sys.argv[1:]):
         'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
+        'anchor_types'                     : args.anchor_types,
         'save_gtf'                         : args.save_gtf,
         'normal_sample_name'               : args.normal_sample_name,
         'class_i_hla'                      : class_i_alleles,
@@ -133,11 +89,12 @@ def main(args_input = sys.argv[1:]):
     pvacsplice_arguments = junction_arguments.copy()
     additional_args = {
         'splice_output_dir'         : base_output_dir,
-        'output_dir'                : os.path.join(base_output_dir, 'MHC_Class_I'), # need I and II dirs? BEFORE THEY'RE CREATED?
+        'output_dir'                : os.path.join(base_output_dir, 'MHC_Class_I'), # todo remove 'I' and make compatible for both classes
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
         'allele_specific_binding_thresholds': args.allele_specific_binding_thresholds,
+        'aggregate_inclusion_binding_threshold' : args.aggregate_inclusion_binding_threshold,
         'net_chop_method'           : args.net_chop_method,
         'net_chop_threshold'        : args.net_chop_threshold,
         'additional_report_columns' : args.additional_report_columns,
@@ -147,6 +104,9 @@ def main(args_input = sys.argv[1:]):
         'n_threads'                 : args.n_threads,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
+        'blastp_db'                 : args.blast_dp, # todo add these to run_args_parser
+        'blastp_path'               : args.blastp_path,
+        'problematic_amino_acids'   : args.problematic_amino_acids,
         'normal_cov'                : args.normal_cov,
         'normal_vaf'                : args.normal_vaf,
         'tdna_cov'                  : args.tdna_cov,
@@ -186,7 +146,7 @@ def main(args_input = sys.argv[1:]):
             pipeline = PvacsplicePipeline(**class_i_arguments)
             pipeline.execute()
 
-        combine_reports_per_class(base_output_dir, args, 'I')
+        combine_reports_per_class(base_output_dir, args, 'I', class_i_prediction_algorithms)
 
     elif len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
@@ -219,7 +179,7 @@ def main(args_input = sys.argv[1:]):
             pipeline = PvacsplicePipeline(**class_ii_arguments)
             pipeline.execute()
 
-        combine_reports_per_class(base_output_dir, args, 'II')
+        combine_reports_per_class(base_output_dir, args, 'II', class_ii_prediction_algorithms)
 
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
