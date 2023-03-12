@@ -4,14 +4,13 @@ import yaml
 import pkg_resources
 from pvactools.lib.run_argument_parser import *
 
-args_input = sys.argv[1:]
-parser = PvacspliceRunArgumentParser().parser
-args = parser.parse_args(args_input)
+#args_input = sys.argv[1:]
+#parser = PvacspliceRunArgumentParser().parser
+#args = parser.parse_args(args_input)
 
-# Additional input: fasta_path - /Users/mrichters/Documents/git/pVACtools/tests/test_data/pvacsplice/inputs/all_sequences_chr1.fa
-def print_log(log_dir='/Users/mrichters/Documents/current_testing/log', args_dict=vars(args)):
+def print_log(log_dir, args_dict):
     os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, 'inputs.yaml')
+    log_file = os.path.join(log_dir, 'inputs.yml')
     if os.path.exists(log_file):
         with open(log_file, 'r') as log_fh:
             past_inputs = yaml.load(log_fh, Loader=yaml.FullLoader)
@@ -34,7 +33,6 @@ def print_log(log_dir='/Users/mrichters/Documents/current_testing/log', args_dic
                         "Aborting."
                     )
                 elif current_inputs[key] != past_inputs[key]:
-                    print('key values dont match')
                     sys.exit(
                         "Restart inputs are different from past inputs: \n" +
                         "Past input: %s - %s\n" % (key, past_inputs[key]) +
@@ -47,5 +45,5 @@ def print_log(log_dir='/Users/mrichters/Documents/current_testing/log', args_dic
             inputs['pvactools_version'] = pkg_resources.get_distribution("pvactools").version
             yaml.dump(inputs, log_fh, default_flow_style=False)
 
-if __name__ == '__main__':
-    print_log()
+#if __name__ == '__main__':
+#    print_log()
