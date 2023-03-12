@@ -13,7 +13,6 @@ class RunArgumentParser(metaclass=ABCMeta):
             description="Run the {} pipeline".format(tool_name.replace('vac', 'VAC')),
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
-
         parser.add_argument(
             "input_file",
             help=input_file_help
@@ -109,9 +108,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         )
         self.parser = parser
 
-class PredictionRunArgumentParser(RunArgumentParser):
-    def __init__(self, tool_name, input_file_help):
-        RunArgumentParser.__init__(self, tool_name, input_file_help)
+    def prediction_args(self):
         self.parser.add_argument(
             '--net-chop-method',
             choices=pvactools.lib.net_chop.methods,
@@ -182,139 +179,18 @@ class PredictionRunArgumentParser(RunArgumentParser):
             action='store_true'
         )
 
-class PvacbindRunArgumentParser(PredictionRunArgumentParser):
-    def __init__(self):
-        tool_name = "pvacbind"
-        input_file_help = "A FASTA file"
-        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
-
-class PvacspliceRunArgumentParser(PredictionRunArgumentParser):
-    def __init__(self):
-        tool_name = "pvacsplice"
-        input_file_help = "RegTools junctions output file (option: -o)"
-        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
-        self.parser.add_argument(
-            "ref_fasta",
-            help="A reference FASTA file to identify transcript sequences from GTF coordinates."
-        )
-        self.parser.add_argument(
-            "annotated_vcf",
-            help="A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
-            +"Wildtype protein sequence, and Downstream protein sequence information."
-            +"The VCF may be gzipped (requires tabix index)."
-            +"The VCF is an input to RegTools and subsequently used here. Another option is to use the -v option " 
-            +"of RegTools to extract only putative regulatory splicing variants from the original VCF file."
-        )
-        self.parser.add_argument(
-            "gtf_file",
-            help="Reference GTF file. Note: make sure to use the same file used for Regtools analysis."
-        )
-        self.parser.add_argument(
-            "-tsl", "--maximum-transcript-support-level", type=int,
-            help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
-            +"Keep all epitopes with a transcript support level <= to this cutoff.",
-            default=1,
-            choices=[1,2,3,4,5]
-        )
-        self.parser.add_argument(
-            "-j", "--junction_score", type=int,
-            help="Junction Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
-            default=10
-        )
-        self.parser.add_argument(
-            "-v", "--variant_distance", type=int,
-            help="Regulatory variants can lie inside or outside of splicing junction."
-            +"Maximum distance window (upstream and downstream) for a variant outside the junction.",
-            default=100
-        )
-        self.parser.add_argument(
-            "-g", "--save_gtf",
-            help="Save a tsv file from the uploaded filtered GTF data."
-            +"Use this option to bypass GTF data upload time for multiple pVACsplice runs.",
-            default=False,
-            action='store_true'
-        )
-        self.parser.add_argument(
-            "--anchor_types", type=lambda s:[a for a in s.split(',')],
-            choices=['A','D','NDA','DA','N'],
-            help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list.",
-            default=['A','D','NDA'],
-        )
-        self.parser.add_argument(
-            '--normal-sample-name',
-            help="In a multi-sample VCF, the name of the matched normal sample."
-        )
-        self.parser.add_argument(
-            '--normal-cov', type=int,
-            help="Normal Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
-            default=5
-        )
-        self.parser.add_argument(
-            '--tdna-cov', type=int,
-            help="Tumor DNA Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
-            default=10
-        )
-        self.parser.add_argument(
-            '--trna-cov', type=int,
-            help="Tumor RNA Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
-            default=10
-        )
-        self.parser.add_argument(
-            '--normal-vaf', type=float_range(0.0,1.0),
-            help="Normal VAF Cutoff. Only sites BELOW this cutoff in normal will be considered.",
-            default=0.02
-        )
-        self.parser.add_argument(
-            '--tdna-vaf', type=float_range(0.0,1.0),
-            help="Tumor DNA VAF Cutoff. Only sites above this cutoff will be considered.",
-            default=0.25
-        )
-        self.parser.add_argument(
-            '--trna-vaf', type=float_range(0.0,1.0),
-            help="Tumor RNA VAF Cutoff. Only sites above this cutoff will be considered.",
-            default=0.25
-        )
-        self.parser.add_argument(
-            '--expn-val', type=float,
-            default=1.0,
-            help="Gene and Transcript Expression cutoff. Only sites above this cutoff will be considered.",
-        )
-
-class PredictionRunWithFastaGenerationArgumentParser(PredictionRunArgumentParser):
-    def __init__(self, tool_name, input_file_help):
-        PredictionRunArgumentParser.__init__(self, tool_name, input_file_help)
+    def fasta_generation(self):
         self.parser.add_argument(
             "-d", "--downstream-sequence-length",
             default='1000',
             help="Cap to limit the downstream sequence length for frameshifts when creating the FASTA file. "
-                + "Use 'full' to include the full downstream sequence."
+                 + "Use 'full' to include the full downstream sequence."
         )
 
-class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
-    def __init__(self):
-        tool_name = "pvacseq"
-        input_file_help = (
-            "A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
-            "Wildtype protein sequence, and Downstream protein sequence information."
-            "The VCF may be gzipped (requires tabix index)."
-        )
-        PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
-
+    def expression_coverage_args(self):
         self.parser.add_argument(
             '--normal-sample-name',
             help="In a multi-sample VCF, the name of the matched normal sample."
-        )
-        self.parser.add_argument(
-            "-p", "--phased-proximal-variants-vcf",
-            help="A VCF with phased proximal variant information. Must be gzipped and tabix indexed."
-        )
-        self.parser.add_argument(
-            "-c", "--minimum-fold-change", type=float,
-            default=0.0,
-            help="Minimum fold change between mutant (MT) binding score and wild-type (WT) score (fold change = WT/MT). "
-                 + "The default is 0, which filters no results, but 1 is often a sensible choice "
-                 + "(requiring that binding is better to the MT than WT peptide). "
-                 + "This fold change is sometimes referred to as a differential agretopicity index.",
         )
         self.parser.add_argument(
             '--normal-cov', type=int,
@@ -332,17 +208,17 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
             default=10
         )
         self.parser.add_argument(
-            '--normal-vaf', type=float_range(0.0,1.0),
+            '--normal-vaf', type=float_range(0.0, 1.0),
             help="Normal VAF Cutoff in decimal format. Only sites BELOW this cutoff in normal will be considered.",
             default=0.02
         )
         self.parser.add_argument(
-            '--tdna-vaf', type=float_range(0.0,1.0),
+            '--tdna-vaf', type=float_range(0.0, 1.0),
             help="Tumor DNA VAF Cutoff in decimal format. Only sites above this cutoff will be considered.",
             default=0.25
         )
         self.parser.add_argument(
-            '--trna-vaf', type=float_range(0.0,1.0),
+            '--trna-vaf', type=float_range(0.0, 1.0),
             help="Tumor RNA VAF Cutoff in decimal format. Only sites above this cutoff will be considered.",
             default=0.25
         )
@@ -354,9 +230,39 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
         self.parser.add_argument(
             "--maximum-transcript-support-level", type=int,
             help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
-            +"Keep all epitopes with a transcript support level <= to this cutoff.",
+                 + "Keep all epitopes with a transcript support level <= to this cutoff.",
             default=1,
-            choices=[1,2,3,4,5]
+            choices=[1, 2, 3, 4, 5]
+        )
+
+    def pvacfuse(self):
+        self.parser.add_argument(
+            '--starfusion-file',
+            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from. Only used when running with AGFusion data."
+        )
+        self.parser.add_argument(
+            '--read-support', type=int,
+            help="Read Support Cutoff. Sites above this cutoff will be considered.",
+            default=5
+        )
+        self.parser.add_argument(
+            '--expn-val', type=float,
+            help="Expression Cutoff. Expression is meassured as FFPM (fusion fragments per million total reads). Sites above this cutoff will be considered.",
+            default=0.1
+        )
+
+    def pvacseq(self):
+        self.parser.add_argument(
+            "-p", "--phased-proximal-variants-vcf",
+            help="A VCF with phased proximal variant information. Must be gzipped and tabix indexed."
+        )
+        self.parser.add_argument(
+            "-c", "--minimum-fold-change", type=float,
+            default=0.0,
+            help="Minimum fold change between mutant (MT) binding score and wild-type (WT) score (fold change = WT/MT). "
+                 + "The default is 0, which filters no results, but 1 is often a sensible choice "
+                 + "(requiring that binding is better to the MT than WT peptide). "
+                 + "This fold change is sometimes referred to as a differential agretopicity index.",
         )
         self.parser.add_argument(
             "--allele-specific-anchors",
@@ -389,33 +295,46 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
             type=float,
         )
 
-
-class PvacfuseRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
-    def __init__(self):
-        tool_name = "pvacfuse"
-        input_file_help="An AGFusion output directory or Arriba fusion.tsv output file."
-        PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
+    def pvacsplice(self):
         self.parser.add_argument(
-            '--starfusion-file',
-            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from. Only used when running with AGFusion data."
+            "annotated_vcf",
+            help="A VEP-annotated single- or multi-sample VCF containing genotype and transcript information."
+            +"The VCF may be gzipped (requires tabix index)."
         )
         self.parser.add_argument(
-            '--read-support', type=int,
-            help="Read Support Cutoff. Sites above this cutoff will be considered.",
-            default=5
+            "ref_fasta",
+            help="A reference FASTA file to identify transcript sequences from GTF coordinates."
         )
         self.parser.add_argument(
-            '--expn-val', type=float,
-            help="Expression Cutoff. Expression is meassured as FFPM (fusion fragments per million total reads). Sites above this cutoff will be considered.",
-            default=0.1
+            "gtf_file",
+            help="Reference GTF file. Note: make sure to use the same file used for Regtools analysis."
+        )
+        self.parser.add_argument(
+            "-j", "--junction_score", type=int,
+            help="Junction Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
+            default=10
+        )
+        self.parser.add_argument(
+            "-v", "--variant_distance", type=int,
+            help="Regulatory variants can lie inside or outside of splicing junction."
+            +"Maximum distance window (upstream and downstream) for a variant outside the junction.",
+            default=100
+        )
+        self.parser.add_argument(
+            "-g", "--save_gtf",
+            help="Save a tsv file from the uploaded filtered GTF data."
+            +"Use this option to bypass GTF data upload time for multiple pVACsplice runs.",
+            default=False,
+            action='store_true'
+        )
+        self.parser.add_argument(
+            "--anchor_types", type=lambda s:[a for a in s.split(',')],
+            help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list.",
+            default=['A','D','NDA'],
+            ## choices=['A','D','NDA','DA','N'] # todo how to add choices to parser
         )
 
-
-class PvacvectorRunArgumentParser(RunArgumentParser):
-    def __init__(self):
-        tool_name = 'pvacvector'
-        input_file_help = "A .fa file with peptides or a pVACseq .tsv file with epitopes to use for vector design."
-        RunArgumentParser.__init__(self, tool_name, input_file_help)
+    def pvacvector(self):
         self.parser.add_argument(
             '-v', "--input_vcf",
             help="Path to original pVACseq input VCF file. Required if input file is a pVACseq TSV."
@@ -434,3 +353,50 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
             help="Number of amino acids to permit clipping from the start and/or end of peptides in order to test novel junction epitopes when the first pass on the full peptide fails.",
             default=3,
         )
+
+class PvacbindRunArgumentParser(RunArgumentParser):
+    def __init__(self):
+        tool_name = "pvacbind"
+        input_file_help = "A FASTA file"
+        RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.prediction_args()
+
+class PvacfuseRunArgumentParser(RunArgumentParser):
+    def __init__(self):
+        tool_name = "pvacfuse"
+        input_file_help="An AGFusion output directory or Arriba fusion.tsv output file."
+        RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.prediction_args()
+        self.fasta_generation()
+        self.pvacfuse()
+
+class PvacspliceRunArgumentParser(RunArgumentParser):
+    def __init__(self):
+        tool_name = "pvacsplice"
+        input_file_help = "RegTools junctions output TSV file"
+        RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.prediction_args()
+        self.expression_coverage_args()
+        self.pvacsplice()
+
+class PvacseqRunArgumentParser(RunArgumentParser):
+    def __init__(self):
+        tool_name = "pvacseq"
+        input_file_help = (
+            "A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
+            "Wildtype protein sequence, and Downstream protein sequence information."
+            "The VCF may be gzipped (requires tabix index)."
+        )
+        RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.prediction_args()
+        self.expression_coverage_args()
+        self.fasta_generation()
+        self.pvacseq()
+
+class PvacvectorRunArgumentParser(RunArgumentParser):
+    def __init__(self):
+        tool_name = 'pvacvector'
+        input_file_help = "A .fa file with peptides or a pVACseq .tsv file with epitopes to use for vector design."
+        RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.pvacvector()
+
