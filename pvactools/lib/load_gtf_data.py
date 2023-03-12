@@ -10,7 +10,6 @@ class LoadGtfData:
         self.tsl         = kwargs['tsl']
 
     def execute(self):
-        print('Converting GTF file to dataframe')
 
         # make sure running pandas not polars
         gtf_df_all = gtfparse.read_gtf(self.gtf_file, usecols=[
@@ -45,7 +44,5 @@ class LoadGtfData:
         if self.save_gtf:
             gtf_df.to_csv(self.output_file, sep='\t', index=False)
             print(f'GTF TSV output file has been saved as: {self.output_file}')
-
-        print('Completed')
 
         return gtf_df
