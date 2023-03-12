@@ -341,6 +341,7 @@ class Pipeline(metaclass=ABCMeta):
                             '-r', str(self.iedb_retries),
                             '-e', self.iedb_executable,
                             '-l', str(epl),
+                            '--tmp-dir', self.tmp_dir,
                         ]
                         argument_sets.append(arguments)
 

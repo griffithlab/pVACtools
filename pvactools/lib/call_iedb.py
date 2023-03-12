@@ -28,16 +28,18 @@ def main(args_input = sys.argv[1:]):
         "-e", "--iedb-executable-path",
         help="The executable path of the local IEDB install"
     )
+    parser.add_argument('--tmp-dir',
+                        help="Location to write tmp files to")
     args = parser.parse_args(args_input)
 
     prediction_class = getattr(sys.modules[__name__], args.method)
     prediction_class_object = prediction_class()
 
     try:
-        (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries)
+        (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries, tmp_dir=args.tmp_dir)
     except Exception as err:
         if str(err) == 'len(peptide_list) != len(scores)':
-            (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries)
+            (response_text, output_mode) = prediction_class_object.predict(args.input_file, args.allele, args.epitope_length, args.iedb_executable_path, args.iedb_retries, tmp_dir=args.tmp_dir)
         else:
             raise err
 
