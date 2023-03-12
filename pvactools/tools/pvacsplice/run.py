@@ -53,6 +53,9 @@ def main(args_input = sys.argv[1:]):
     # iedb retries - default 5
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
+    # fasta size
+    if args.fasta_size % 2 != 0:
+        sys.exit("The fasta size needs to be an even number")
 
     base_output_dir = os.path.abspath(args.output_dir) # junctions dir
     os.makedirs(base_output_dir, exist_ok=True)
@@ -106,6 +109,7 @@ def main(args_input = sys.argv[1:]):
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_db'                 : args.blast_dp, # todo add these to run_args_parser
         'blastp_path'               : args.blastp_path,
+        'peptide_fasta'             : args.peptide_fasta,
         'problematic_amino_acids'   : args.problematic_amino_acids,
         'normal_cov'                : args.normal_cov,
         'normal_vaf'                : args.normal_vaf,
@@ -116,7 +120,6 @@ def main(args_input = sys.argv[1:]):
         'expn_val'                  : args.expn_val,
         'run_post_processor'        : True,
         'exclude_NAs'               : args.exclude_NAs,
-        'peptide_fasta'             : args.peptide_fasta,
     }
     pvacsplice_arguments.update(additional_args)
 
@@ -128,7 +131,7 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_i_executable = None
         
-        for x in args.class_i_epitope_length:
+        for x in args.class_i_epitope_length: # todo reformat loops here after comparing to pvacfuse run
 
             print(f'Executing MHC Class I predictions for {x}mers')
             output_dir = os.path.join(base_output_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
