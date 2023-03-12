@@ -2,7 +2,7 @@ import tempfile
 import shutil
 
 from pvactools.lib.identify_problematic_amino_acids import IdentifyProblematicAminoAcids
-from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes
+from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes, PvacspliceAggregateAllEpitopes
 from pvactools.lib.binding_filter import BindingFilter
 from pvactools.lib.filter import Filter, FilterCriterion
 from pvactools.lib.top_score_filter import TopScoreFilter
@@ -102,6 +102,19 @@ class PostProcessor:
                 percentile_threshold=self.percentile_threshold,
                 top_score_metric=self.top_score_metric,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
+            ).execute()
+        elif self.file_type == 'pVACsplice':
+            PvacspliceAggregateAllEpitopes(
+                self.input_file,
+                self.aggregate_report,
+                binding_threshold=self.binding_threshold,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                percentile_threshold=self.percentile_threshold,
+                top_score_metric=self.top_score_metric,
+                trna_vaf=self.trna_vaf,
+                trna_cov=self.trna_cov,
+                expn_val=self.expn_val,
+                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold, # todo add this parameter
             ).execute()
         print("Completed")
 
