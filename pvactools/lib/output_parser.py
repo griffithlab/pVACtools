@@ -22,8 +22,6 @@ class OutputParser(metaclass=ABCMeta):
         self.sample_name             = kwargs['sample_name']
         self.add_sample_name         = kwargs.get('add_sample_name_column')
         self.flurry_state            = kwargs.get('flurry_state')
-        # for pvacsplice
-        #self.kmer_index_file         = kwargs.pop('kmer_index_file', None)
 
     def parse_input_tsv_file(self):
         with open(self.input_tsv_file, 'r') as reader:
@@ -1054,7 +1052,7 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             'WT Protein Length',
             'ALT Protein Length',
             'Frameshift Event',
-            'Transcript Position', # start position of peptide in alt transcript
+            'Protein Position', # start position of peptide in alt protein
             'HLA Allele',
             'Peptide Length',
             'Epitope Seq',
@@ -1104,7 +1102,7 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             median_mt_percentile,
         ) in iedb_results:
             # get unique index
-            tscript_position = tsv_index.split('.')[-1]
+            protein_position = tsv_index.split('.')[-1]
             final_index = '.'.join(tsv_index.split('.')[:-1])
             tsv_entry = tsv_entries[final_index]
             row = {
@@ -1126,13 +1124,12 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Ensembl Gene ID'     : tsv_entry['gene_name'],
                 'Variant Type'        : tsv_entry['variant_type'],
                 'Amino Acid Change'   : tsv_entry['amino_acid_change'],
-                'Transcript Position' : tscript_position,
-                'Gene Name'           : tsv_entry['gene_name'], 
+                'Protein Position' : protein_position,
+                'Gene Name'           : tsv_entry['gene_name'],
                 'HGVSc'               : tsv_entry['hgvsc'],
                 'HGVSp'               : tsv_entry['hgvsp'],
                 'Index'               : tsv_index,
                 'Fasta Key'           : fasta_id,
-                'Transcript Position' : tscript_position,
                 'WT Protein Length' : tsv_entry['wt_protein_length'],
                 'ALT Protein Length': tsv_entry['alt_protein_length'],
                 'Frameshift Event'     : tsv_entry['frameshift_event'],
@@ -1159,11 +1156,18 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                     if tsv_entry[tsv_key] == 'NA':
                         row[row_key] = 'NA'
                     else:
-                        row[row_key] = round(float(tsv_entry[tsv_key]), 3)
+                        # no --normal-sample-name parameter causes ValueError here bc tries to convert empty string to float
+                        if 'normal' in tsv_key and tsv_entry[tsv_key] == '':
+                            row[row_key] = 'NA'
+                        else:
+                            row[row_key] = round(float(tsv_entry[tsv_key]), 3)
 
             for (tsv_key, row_key) in zip(['normal_depth', 'tdna_depth', 'trna_depth'], ['Normal Depth', 'Tumor DNA Depth', 'Tumor RNA Depth']):
                 if tsv_key in tsv_entry:
                     row[row_key] = tsv_entry[tsv_key]
+                elif 'normal' in tsv_key and tsv_entry[tsv_key] == '':
+                    row[row_key] = 'NA'
+
             if self.add_sample_name:
                 row['Sample Name'] = self.sample_name
             tsv_writer.writerow(row)
