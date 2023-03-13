@@ -89,7 +89,7 @@ def main(args_input = sys.argv[1:]):
     pipeline = JunctionPipeline(**junction_arguments)
     pipeline.execute()
 
-    pvacsplice_arguments = junction_arguments.copy()
+    splice_arguments = junction_arguments.copy()
     additional_args = {
         'splice_output_dir'         : base_output_dir,
         'output_dir'                : os.path.join(base_output_dir, 'MHC_Class_I'), # todo remove 'I' and make compatible for both classes
@@ -121,7 +121,7 @@ def main(args_input = sys.argv[1:]):
         'run_post_processor'        : True,
         'exclude_NAs'               : args.exclude_NAs,
     }
-    pvacsplice_arguments.update(additional_args)
+    splice_arguments.update(additional_args)
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
         if args.iedb_install_directory:
@@ -137,7 +137,7 @@ def main(args_input = sys.argv[1:]):
             output_dir = os.path.join(base_output_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
             os.makedirs(output_dir, exist_ok=True)
 
-            class_i_arguments = pvacsplice_arguments.copy()
+            class_i_arguments = splice_arguments.copy()
             class_i_arguments['input_file']              = f'{base_output_dir}/{args.sample_name}.{x}.fa'
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
@@ -170,7 +170,7 @@ def main(args_input = sys.argv[1:]):
             output_dir = os.path.join(base_output_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
             os.makedirs(output_dir, exist_ok=True)
 
-            class_ii_arguments = pvacsplice_arguments.copy()
+            class_ii_arguments = splice_arguments.copy()
             class_ii_arguments['input_file']              = f'{base_output_dir}/{args.sample_name}.{y}.fa'
             class_ii_arguments['alleles']                 = class_ii_alleles
             class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
