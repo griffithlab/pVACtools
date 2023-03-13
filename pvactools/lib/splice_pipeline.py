@@ -172,22 +172,22 @@ class JunctionPipeline:
             combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
             print('Completed')
 
-    def fasta_to_kmers(self):
-        if self.file_exists(self.create_file_path('fasta'), 'Peptide fasta'):
-            pass
-        else:
-            print('Generating peptides from novel junction sequences')
-            kmer_params = {
-                'fasta'           : self.create_file_path('fasta'),
-                'output_dir'      : self.output_dir,
-                'class_i_epitope_length' : self.class_i_epitope_length,
-                'class_ii_epitope_length': self.class_ii_epitope_length,
-                'class_i_hla'     : self.class_i_hla,
-                'class_ii_hla'    : self.class_ii_hla,
-                'sample_name'     : self.sample_name,
-            }
-            fasta = FastaToKmers(**kmer_params)
-            fasta.execute()
-            print('Completed')
+    def fasta_to_kmers(self): # todo fix file exists if statement
+        # if self.file_exists(os.path.join(self.output_dir, f'{self.sample_name}.{ep_len}), f'Epitope fastas'):
+        #     pass
+        # else:
+        print('Generating peptides from novel junction sequences')
+        kmer_params = {
+            'fasta'           : self.create_file_path('fasta'),
+            'output_dir'      : self.output_dir,
+            'class_i_epitope_length' : self.class_i_epitope_length,
+            'class_ii_epitope_length': self.class_ii_epitope_length,
+            'class_i_hla'     : self.class_i_hla,
+            'class_ii_hla'    : self.class_ii_hla,
+            'sample_name'     : self.sample_name,
+        }
+        fasta = FastaToKmers(**kmer_params)
+        fasta.execute()
+        print('Completed')
      
         
