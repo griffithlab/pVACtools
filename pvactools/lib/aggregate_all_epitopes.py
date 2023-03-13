@@ -225,6 +225,8 @@ class AggregateAllEpitopes:
                 'wt_top_score_metric': self.wt_top_score_metric,
                 'binding_cutoffs': self.binding_thresholds,
                 'is_allele_specific_binding_cutoff': self.is_allele_specific_binding_cutoff,
+                'allele_specific_anchors': self.allele_specific_anchors,
+                'anchor_contribution_threshold': self.anchor_contribution_threshold,
             }
         else:
             metrics = {}
