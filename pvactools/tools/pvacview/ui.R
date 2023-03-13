@@ -235,16 +235,19 @@ tutorial_tab <- tabItem("tutorial",
     tabPanel("Variant Level",
         ## Aggregate Report Column Descriptions"
         h3("Main table full column descriptions"),
-        p("If using pVACview with pVACtools output, the user is required to at least provide two files: ",
+        p("If using pVACview with pVACtools output, the user is required to provide at least the following two files: ",
         code("all_epitopes.aggregated.tsv"), code("all_epitopes.aggregated.metrics.json")), br(),
         p("The ", code("all_epitopes.aggregated.tsv"),
         "file is an aggregated version of the all_epitopes TSV. 
-        It presents the best-scoring (lowest binding affinity) epitope for each variant, and outputs 
+        It presents the best-scoring (lowest binding affinity) epitope for each variant, along with 
         additional binding affinity, expression, and coverage information for that epitope. 
         It also gives information about the total number of well-scoring epitopes for each variant, 
-        the number of transcripts covered by those epitopes, as well as the HLA alleles that those 
-        epitopes are well-binding to. Lastly, the report will bin variants into tiers that offer 
-        suggestions as to the suitability of variants for use in vaccines."), br(),
+        the number of transcripts covered by those epitopes, and the HLA alleles that those 
+        epitopes are well-binding to. Here, a well-binding or well-scoring epitope is any epitope that has a stronger 
+        binding affinity than the ", code("aggregate_inclusion_binding_threshold"), "described below. The report then bins variants into 
+        tiers that offer suggestions about the suitability of variants for use in vaccines."), br(),
+        p("The ", code("all_epitopes.aggregated.metrics.json"),
+        "complements the ", code("all_epitopes_aggregated.tsv"), "and is required for the tool's proper functioning."), br(),
         p(strong("Column Names : Description")),
         p(code("ID"), " : ", "A unique identifier for the variant"),
         p(code("HLA Alleles"), " : ", "For each HLA allele in the run, the number of this variant’s 
@@ -255,7 +258,7 @@ tutorial_tab <- tabItem("tutorial",
         p(code("Num Passing Transcripts"), " : ", "The number of transcripts 
         for this mutation that resulted in at least one well-binding peptide (", code("lowest"), " or ",
         code("median"), " mutant binding affinity < ", code("aggregate_inclusion_binding_threshold"), ")"),
-        p(code("Best Peptide"), " : ", "The best-binding mutant epitope sequence (lowest mutant binding affinity) 
+        p(code("Best Peptide"), " : ", "The best-binding mutant epitope sequence (lowest binding affinity) 
         prioritizing epitope sequences that resulted from a protein_coding transcript with a TSL below the 
         maximum transcript support level and having no problematic positions."),
         p(code("Best Transcript"), " : ", "Transcript corresponding to the best peptide with the lowest TSL and shortest length."),
@@ -278,11 +281,9 @@ tutorial_tab <- tabItem("tutorial",
         p(code("DNA VAF"), " : ", "Tumor DNA variant allele frequency (VAF) at this position."),
         p(code("Tier"), " : ", "A tier suggesting the suitability of variants for use in vaccines."),
         p(code("Evaluation"), " : ", "Column to store the evaluation of each variant when evaluating the run in pVACview.
-        Either ", code("Accept"), " ", code("Reject"), "  or ", code("Review"), "."),
+        Can be ", code("Accept,"), " ", code("Reject"), "  or ", code("Review"), "."),
         ## Tiering Explained ##
         h3("How is the Tiering column determined / How are the Tiers assigned?"), br(),
-        p("Note that if a percentile threshold has been provided, then the ", code("%ile MT"), " column is also required to be lower than
-        the given threshold to qualify for tiers, including Pass, Anchor, Subclonal and LowExpr."), br(),
         p(strong("Tier : Criteria")),
         p(code("Pass"), " : ", code(("(MT binding < binding threshold) AND allele expr filter pass AND vaf clonal filter pass 
         AND tsl filter pass AND anchor residue filter pass"))),
@@ -302,7 +303,9 @@ tutorial_tab <- tabItem("tutorial",
         strong("1. "), code("(Mutation(s) is at anchor(s)) AND
         ((WT binding < binding threshold) OR (WT percentile < percentile threshold))"), br(),
         strong("    OR"), br(), strong("2. "), code("Mutation(s) not or not entirely at anchor(s)")),
-        p(strong("Low Expression Criteria: "), code("(allele expr > 0) OR ((gene expr == 0) AND (RNA Depth > RNA Coverage Cutoff) AND (RNA VAF > RNA vaf cutoff))"))
+        p(strong("Low Expression Criteria: "), code("(allele expr > 0) OR ((gene expr == 0) AND (RNA Depth > RNA Coverage Cutoff) AND (RNA VAF > RNA vaf cutoff))")),br(),
+        p("Note that if a percentile threshold has been provided, then the ", code("%ile MT"), " column is also required to be lower than
+        the given threshold to qualify for tiers, including Pass, Anchor, Subclonal and LowExpr.") 
     ),
     tabPanel("Transcript Level",
         h3(" "),
@@ -310,8 +313,8 @@ tutorial_tab <- tabItem("tutorial",
             column(width = 6,
                 h4("Transcript Set Table", style = "font-weight: bold; text-decoration: underline;"),
                 p("Upon selecting a variant for investigation, you may have multiple transcripts covering the region.", br(), br(),
-                "These transcripts are first grouped into ", strong("Trancripts Sets"), " , which is based on the good binding peptides
-                produced. Transcripts that produce the exact same set of peptides are put into the same group.", br(), br(),
+                "These transcripts are grouped into ", strong("Trancripts Sets"), " , based on the good-binding peptides
+                produced. (Transcripts that produce the exact same set of peptides are grouped together.)", br(), br(),
                 "The table also lists the number of transcripts and corresponding peptides in each set (each pair of WT and MT peptides are considered 1 when
                 counting).", br(), " A sum of the total expression across all transcripts in each set is also shown.", br(), " A light green color is used to
                 highlight the ", strong("Transcript Set"), " producing the Best Peptide for the variant in question.")
@@ -324,10 +327,10 @@ tutorial_tab <- tabItem("tutorial",
         fluidRow(
             column(width = 3,
                 h4("Transcript Set Detailed Data", style = "font-weight: bold; text-decoration: underline;"),
-                p("Upon selecting a specific transcript set, you can now look in more detail which exact transcripts are included.", br(), br(),
+                p("Upon selecting a specific transcript set, you can see more details about the exact transcripts that are included.", br(), br(),
                 "The ", strong("Transcripts in Set"), "table lists all information regarding each transcript including:", br(), br(),
                 "Transcript ID, Gene Name, Amino Acid Change, Mutation Position, individual transcript expression, transcript support level, biotype and transcript length.", br(), br(),
-                " A light green color is used to highlight the ", strong("Transcript in Selected Set"), " that produced the Best Peptide for the variant in question.")
+                " A light green color is used to highlight the specific", strong("Transcript in Selected Set"), " that produced the Best Peptide for the variant in question.")
             ),
             column(width = 9,
                 img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Transcript_in_Set.png?raw=true",
@@ -340,11 +343,11 @@ tutorial_tab <- tabItem("tutorial",
         fluidRow(
             column(width = 12,
                 h4("Peptide Table", style = "font-weight: bold; text-decoration: underline;"),
-                p("Upon selecting a specific transcript set, you can also now look in detail which good-binding peptides are produced from this set.", br(), br(),
-                "Both mutant (", code("MT"), ") and wildtype (", code("WT"), ") sequences are shown, along with ", code("lowest"), " or ", code("median"),
+                p("Upon selecting a specific transcript set, you can also visualize which good-binding peptides are produced from this set.", br(), br(),
+                "Both, mutant (", code("MT"), ") and wildtype (", code("WT"), ") sequences are shown, along with either the", code("lowest"), " or ", code("median"),
                 " binding affinities, depending on how you generated the aggregate report.", br(), br(),
                 "An ", code("X"), "is marked for binding affinities higher than the ", code("aggregate_inclusion_binding_threshold"), " set when generating the aggregate report.", br(), br(),
-                "We also include two extra columns, one specifying the mutation and position and another providing information on any problematic amino acids.", br(),
+                "We also include two extra columns, one specifying the mutation and position and another providing information on any problematic amino acids in the mutant sequence.", br(),
                 "Note that if users wish to utlitize the ", strong("problematic positions"), " feature, they should run the standalone command ", code("pvacseq identify_problematic_amino_acids"),
                 " or run pVACseq with the ", code("--problematic-amino-acids"), " option enabled to generate the needed information."
                 )
@@ -361,9 +364,9 @@ tutorial_tab <- tabItem("tutorial",
                 h4("Additional Information",  style = "font-weight: bold; text-decoration: underline;"),
                 h5("IC50 Plot", style = "font-weight: bold;"),
                 p("By clicking on each MT/WT peptide pair, you can then assess the peptides in more detail by navigating to the ", strong("Additional Peptide Information"), " tab.", br(), br(),
-                "There’s five different tabs in this section of the app, providing peptide-level details on the MT/WT peptide pair that you have selected", br(),
+                "There are five different tabs in this section of the app, providing peptide-level details on the MT/WT peptide pair that you have selected.", br(),
                 "The ", strong("IC50 Plot"), "tab shows violin plots of the individual IC50-based binding affinity predictions of the MT and WT peptides for HLA
-                alleles were the MT binds well to. These peptides each have up to 8 binding algorithm scores (for Class I alleles with pVACseq version 3.0) or up
+                alleles that the MT binds well to. These peptides each have up to 8 binding algorithm scores (for Class I alleles with pVACseq version 3.0) or up
                 to 4 algorithm scores (for Class II alleles with pvacseq version 3.0).", br())
             ),
             column(width = 8,
@@ -375,7 +378,7 @@ tutorial_tab <- tabItem("tutorial",
             column(width = 4,
                 h5("%ile Plot", style = "font-weight: bold;"),
                 p("The ", strong("%ile Plot"), "tab shows violin plots of the individual percentile-based binding affinity predictions of the MT and WT peptides
-                for HLA alleles were the MT binds well to.", br())
+                for HLA alleles that the MT binds well to.", br())
             ),
             column(width = 8,
                 img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png?raw=true",
@@ -407,7 +410,7 @@ tutorial_tab <- tabItem("tutorial",
         fluidRow(
             column(width = 4,
                 h5("Anchor Heatmap", style = "font-weight: bold;"),
-                p("The ", strong("Anchor Heatmap"), "tab shows the top 30 MT/WT peptide pairs from the peptide table with anchor probabilities overlaying as a heatmap.
+                p("The ", strong("Anchor Heatmap"), "tab shows the top 30 MT/WT peptide pairs from the peptide table with anchor probabilities overlayed as a heatmap.
                 The anchor probabilities shown are both allele and peptide length specific. The mutated amino acid is marked in red (for missense mutations) and each 
                 MT/WT pair are separated from others using a dotted line. ", br(),
                 "For peptide sequences with no overlaying heatmap, we currently do not have allele-specific predictions for them in our database.", br(), br(),
@@ -425,7 +428,7 @@ tutorial_tab <- tabItem("tutorial",
         fluidRow(
             column(width = 6,
                 h4("Anchor vs Mutation Posiions", style = "font-weight: bold; text-decoration: underline;"),
-                p("Neoantigen identification and prioritization relies on correctly predicting whether the presenting 
+                p("Neoantigen identification and prioritization relies on correctly predicting whether the presented 
                 peptide sequence can successfully induce an immune response. As the majority of somatic mutations are single nucleotide variants,
                 changes between wildtype and mutated peptides are typically subtle and require cautious interpretation. ", br(), br(),
                 "In the context of neoantigen presentation by specific MHC alleles, researchers have noted that a subset of 
@@ -436,8 +439,8 @@ tutorial_tab <- tabItem("tutorial",
                 "Examples of the four distinct possible scenarios for a predicted strong MHC binding peptide involving these factors are illustrated
                 in the figure on the right. There are other possible scenarios where the MT is a poor binder, however those are not listed as 
                 they would not pertain to our goal of neoantigen identification.", br(), br(),
-                strong("Scenario 1"), "shows the cases where the WT is a poor binder and the MT peptide, a strong binder,
-                contains a mutation at an anchor location. Here, the mutation results in a tighter binding of the MHC and allows for
+                strong("Scenario 1"), "shows the case where the WT is a poor binder and the MT peptide is a strong binder,
+                containing a mutation at an anchor location. Here, the mutation results in a tighter binding of the MHC and allows for
                 better presentation and potential for recognition by the TCR. As the WT does not bind (or is a poor binder), this neoantigen 
                 remains a good candidate since the sequence presented to the TCR is novel.", br(), br(),
                 strong("Scenario 2"), " and ", strong("Scenario 3"), " both have strong binding WT and MT peptides. In ", strong("Scenario 2"),
@@ -485,7 +488,7 @@ tutorial_tab <- tabItem("tutorial",
             column(width = 6,
                 h4("Reassigning Tiers for all variants after adjusting parameters", style = "font-weight: bold; text-decoration: underline;"),
                 p("The Tier column generated by pVACtools is aimed at helping users group and prioritize neoantigens in a more efficient manner.
-                If you would like to first understand how Tiering is done, please refer to the Variant Level tutorial tab where we break down each
+                For details on how Tiering is done, please refer to the Variant Level tutorial tab where we break down each
                 specific Tier and its criteria.", br(), br(),
                 "While we try to provide a set of reasonable default parameters, we fully understand the need for flexible changes to the
                 parameters used in the underlying Tiering algorithm. Thus, we provide an Advanced Options tab in our app where users can change the following
@@ -494,16 +497,16 @@ tutorial_tab <- tabItem("tutorial",
                 in place, those will stay the same and not overwritten by this parameter value change."), br(),
                 code("Percentile Threshold"), p("Percentile cutoff for a peptide to be considered a strong binder."), br(),
                 code("Clonal DNA VAF"), p("VAF cutoff that is taken into account when deciding subclonal variants. Note that variants with a DNA VAF lower
-                than half of the clonal vaf cutoff will be considered subclonal (e.g. setting a 0.6 clonal vaf cutoff means anything under 0.3 vaf is subclonal)."), br(),
+                than half of the clonal VAF cutoff will be considered subclonal (e.g. setting a 0.6 clonal VAF cutoff means anything under 0.3 VAF is subclonal)."), br(),
                 code("Allele Expr"), p("Allele expression cutoff for a peptide to be considered expressed. Note for each variant, the allele expression
                 is calculated by multiplying gene expression and RNA VAF."), br(),
                 code("Default Anchors vs Allele-specific Anchors"), br(),
-                "By default, pVACtools considers positions 1, 2, n-1, and n to be anchors for an n-mer allele. However, recent study has shown that anchors should be
+                "By default, pVACtools considers positions 1, 2, n-1, and n to be anchors for an n-mer allele. However, a recent study has shown that anchors should be
                 considered on an allele-specific basis and different anchor patterns exist among HLA alleles.",
                 "Here, we provide users with the option to utilize allele-specific anchors when generating the Anchor Tier. However, to objectively determine
-                which positions are anchors for each individual allele, the users need to set a contribution percentage threshold X.",
+                which positions are anchors for each individual allele, the users need to set a contribution percentage threshold (X).",
                 "Per anchor calculation results from the described computational workflow in the cited paper, each position of the n-mer peptide is assigned a
-                score based on how binding to a certain HLA allele was influenced by mutations. These scores can then be used to calculate the relative
+                score based on how its binding to a certain HLA allele was influenced by mutations. These scores can then be used to calculate the relative
                 contribution of each position to the overall binding affinity of the peptide. Given the contribution threshold X, we rank the normalized score
                 across the peptide in descending order (e.g. [2,9,1,3,2,8,7,6,5] for a 9-mer peptide) and start summing the scores from top to bottom.
                 Positions that together account for X% of the overall binding affinity change (e.g. 2,9,1) will be assigned as anchor locations for tiering purposes.", br(), br(),
