@@ -39,6 +39,8 @@ def main(args_input = sys.argv[1:]):
                         help="Class I or class II")
     parser.add_argument('output_file',
                         help="Output file from iedb")
+    parser.add_argument('--tmp-dir',
+                        help="Location to write tmp files to")
     args = parser.parse_args(args_input)
 
     epitope_seq_nums = defaultdict(list)
@@ -50,12 +52,12 @@ def main(args_input = sys.argv[1:]):
             for start in starts:
                 epitope_seq_nums[epitope].append((seq_num, start))
 
-    tmp_file = tempfile.NamedTemporaryFile('w', delete=False)
+    tmp_file = tempfile.NamedTemporaryFile('w', dir=args.tmp_dir, delete=False)
     for epitope in epitope_seq_nums.keys():
         tmp_file.write("{}\n".format(epitope))
     tmp_file.close()
 
-    tmp_output_file = tempfile.NamedTemporaryFile('r', delete=False)
+    tmp_output_file = tempfile.NamedTemporaryFile('w', dir=args.tmp_dir, delete=False)
     predict(args.class_type, tmp_file.name, mhcnuggets_allele(args.allele, args.class_type), output=tmp_output_file.name, rank_output=True)
     os.unlink(tmp_file.name)
     tmp_output_file.close()

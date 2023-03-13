@@ -5,6 +5,7 @@ import os
 import shutil
 import yaml
 import csv
+import re
 from collections import OrderedDict
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -38,7 +39,7 @@ def define_parser():
     )
     parser.add_argument(
         "--input-tsv",
-        help = "A pVACseq all_epitopes or filtered TSV file with epitopes to use for subsetting the input VCF to peptides of interest. Only the peptide sequences for the epitopes in the TSV will be used when creating the FASTA."
+        help = "A pVACseq all_epitopes, filtered, or aggregated TSV file with epitopes to use for subsetting the input VCF to peptides of interest. Only the peptide sequences for the epitopes in the TSV will be used when creating the FASTA."
     )
     parser.add_argument(
         "-p", "--phased-proximal-variants-vcf",
@@ -55,6 +56,13 @@ def define_parser():
         help="Only output mutant peptide sequences",
         default=False,
         action='store_true',
+    )
+    parser.add_argument(
+        "--aggregate-report-evaluation",
+        help="When running with an aggregate report input TSV, only include variants with this evaluation. Specifiy multiple times to include multiple evaluation states.",
+        nargs="*",
+        default=['Accept'],
+        choices=["Pending", "Accept", "Reject", "Review"]
     )
     parser.add_argument(
         "-d", "--downstream-sequence-length",
@@ -111,15 +119,30 @@ def generate_fasta(flanking_sequence_length, downstream_sequence_length, temp_di
 
 def parse_input_tsv(input_tsv):
     if input_tsv is None:
-        return None
-    indexes = []
+        return (None, None)
     with open(input_tsv, 'r') as fh:
         reader = csv.DictReader(fh, delimiter = "\t")
-        for line in reader:
-            indexes.append(line['Index'])
+        if 'Index' in reader.fieldnames:
+            indexes = parse_full_input_tsv(reader)
+            file_type = 'full'
+        else:
+            indexes = parse_aggregated_input_tsv(reader)
+            file_type = 'aggregated'
+    return (indexes, file_type)
+
+def parse_full_input_tsv(reader):
+    indexes = []
+    for line in reader:
+        indexes.append(line['Index'])
     return indexes
 
-def parse_files(output_file, temp_dir, mutant_only, input_tsv):
+def parse_aggregated_input_tsv(reader):
+    indexes = []
+    for line in reader:
+        indexes.append(line)
+    return indexes
+
+def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_evaluation):
     print("Parsing the Variant Peptide FASTA and Key File")
     fasta_file_path = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file_path = os.path.join(temp_dir, 'tmp.fasta.key')
@@ -127,7 +150,7 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv):
     with open(fasta_key_file_path, 'r') as fasta_key_file:
         keys = yaml.load(fasta_key_file, Loader=yaml.FullLoader)
 
-    tsv_indexes = parse_input_tsv(input_tsv)
+    (tsv_indexes, tsv_file_type) = parse_input_tsv(input_tsv)
 
     dataframe = OrderedDict()
     output_records = []
@@ -137,9 +160,33 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv):
             if mutant_only and record_id.startswith('WT.'):
                 continue
             if tsv_indexes is not None:
-                sequence_type, index = record_id.split('.', 1)
-                if index not in tsv_indexes:
-                    continue
+                if tsv_file_type == 'full':
+                    sequence_type, index = record_id.split('.', 1)
+                    if index not in tsv_indexes:
+                        continue
+                else:
+                    record_id_parts = record_id.split('.')
+                    gene = record_id_parts[2]
+                    if len(record_id_parts) == 7:
+                        #transcript includes version number
+                        transcript = "{}.{}".format(record_id_parts[3], record_id_parts[4])
+                        aa_change = record_id_parts[6]
+                    elif len(record_id_parts) == 6:
+                        #transcript without version number
+                        transcript = record_id_parts[3]
+                        aa_change = record_id_parts[5]
+                    else:
+                        raise Exception("Unexpected record_id format: {}".format(record_id))
+                    regex = '^([0-9]+[\-]{0,1}[0-9]*)([A-Z|\-]*)\/([A-Z|\-]*)$'
+                    p = re.compile(regex)
+                    m = p.match(aa_change)
+                    if m:
+                        position = m.group(1)
+                        matches = [i for i in tsv_indexes if i['Gene'] == gene and i['Best Transcript'] == transcript and position in i['AA Change'] and i['Evaluation'] in aggregate_report_evaluation]
+                        if len(matches) == 0:
+                            continue
+                    else:
+                        raise Exception("Unexpected amino acid format: {}".format(aa_change))
             new_record = SeqRecord(record.seq, id=record_id, description=record_id)
             output_records.append(new_record)
 
@@ -160,7 +207,7 @@ def main(args_input = sys.argv[1:]):
     temp_dir = tempfile.mkdtemp()
     proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only)
     generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir, proximal_variants_tsv)
-    parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv)
+    parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv, args.aggregate_report_evaluation)
     shutil.rmtree(temp_dir, ignore_errors=True)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")
