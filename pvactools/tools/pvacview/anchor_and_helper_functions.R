@@ -137,7 +137,7 @@ calculate_mutation_info <- function(metrics_data_row) {
   return(diff_positions)
 }
 ##Generate Tiering for given variant with specific cutoffs
-tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode = "allele-specific") {
+tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode) {
   mt_binding <- as.numeric(variant_info["IC50 MT"])
   wt_binding <- as.numeric(variant_info["IC50 WT"])
   mt_percent <- as.numeric(variant_info["%ile MT"])
@@ -255,7 +255,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   return("Poor")
 }
 #Determine the Tier Count for given variant with specific cutoffs
-tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode = "allele-specific") {
+tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode) {
   mt_binding <- as.numeric(variant_info["IC50 MT"])
   wt_binding <- as.numeric(variant_info["IC50 WT"])
   mt_percent <- as.numeric(variant_info["%ile MT"])
