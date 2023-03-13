@@ -20,6 +20,21 @@ scale_binding_affinity <- function(binding_cutoffs, is_specific, binding_thresho
   }
 }
 
+#for custom table formatting
+get_group_inds <- function(reformat_data, group_inds){
+  group_data <- as.data.frame(group_inds[[1]])
+  group_data$group_id <- rownames(group_data)
+  colnames(group_data)[colnames(group_data) == 'group_inds[[1]]'] <- 'inds'
+  rownames(group_data) <- NULL
+  return(group_data)
+}
+
+get_current_group_info <- function(peptide_features, metricsData, fullData, selectedRow){
+  subset_data <- fullData[ ,peptide_features]
+  inds <- metricsData[metricsData$group_id == selectedRow, ]$inds
+  current_peptide_data <- data.frame(subset_data[unlist(inds), ])
+  return(current_peptide_data)
+}
 
 #reformat table for display
 table_formatting <- function(x, y) {
@@ -136,8 +151,9 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   trna_vaf <- as.numeric(meta_data["trna_vaf"])
   trna_cov <- as.numeric(meta_data["trna_cov"])
   percentile_filter <- FALSE
-  if (!is.null(meta_data["percentile_threshold"])) {
-    percentile_threshold <- as.numeric(meta_data["percentile_threshold"])
+  percentile_threshold <- NULL
+  if (!is.null(meta_data[["percentile_threshold"]])) {
+    percentile_threshold <- as.numeric(meta_data[["percentile_threshold"]])
     percentile_filter <- TRUE
   }
   tsl_max <- as.numeric(meta_data["maximum_transcript_support_level"])
@@ -253,8 +269,9 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
   trna_vaf <- as.numeric(meta_data["trna_vaf"])
   trna_cov <- as.numeric(meta_data["trna_cov"])
   percentile_filter <- FALSE
-  if (!is.null(meta_data["percentile_threshold"])) {
-    percentile_threshold <- as.numeric(meta_data["percentile_threshold"])
+  percentile_threshold <- NULL
+  if (!is.null(meta_data[["percentile_threshold"]])) {
+    percentile_threshold <- as.numeric(meta_data[["percentile_threshold"]])
     percentile_filter <- TRUE
   }
   tsl_max <- as.numeric(meta_data["maximum_transcript_support_level"])
