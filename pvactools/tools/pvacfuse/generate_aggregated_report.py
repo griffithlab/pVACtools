@@ -2,7 +2,7 @@ import sys
 import argparse
 import tempfile
 
-from pvactools.lib.aggregate_all_epitopes import UnmatchedSequenceAggregateAllEpitopes
+from pvactools.lib.aggregate_all_epitopes import PvacfuseAggregateAllEpitopes
 
 def define_parser():
     parser = argparse.ArgumentParser(
@@ -51,6 +51,16 @@ def define_parser():
              + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
              + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
     )
+    parser.add_argument(
+        '--read-support', type=int,
+        help="Read Support Cutoff. When failing this cutoff, sites will be binned in a \"LowReadSupport\" tier.",
+        default=5
+    )
+    parser.add_argument(
+        '--expn-val', type=float,
+        help="Expression Cutoff. Expression is meassured as FFPM (fusion fragments per million total reads). When failing this cutoff sites will be binned in the \"LowExpr\" tier.",
+        default=0.1
+    )
 
     return parser
 
@@ -61,13 +71,15 @@ def main(args_input = sys.argv[1:]):
     tmp_fh = tempfile.NamedTemporaryFile()
 
     print("Creating Aggreggated Report")
-    UnmatchedSequenceAggregateAllEpitopes(
+    PvacfuseAggregateAllEpitopes(
         args.input_file,
         args.output_file,
         binding_threshold=args.binding_threshold,
         allele_specific_binding_thresholds=args.allele_specific_binding_thresholds,
         percentile_threshold=args.percentile_threshold,
         top_score_metric=args.top_score_metric,
+        read_support=args.read_support,
+        expn_val=args.expn_val,
         aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,
     ).execute()
     print("Completed")

@@ -35,6 +35,7 @@ class Pipeline(metaclass=ABCMeta):
         for (k,v) in kwargs.items():
            setattr(self, k, v)
         self.flurry_state                = self.get_flurry_state()
+        self.starfusion_file             = kwargs.pop('starfusion_file', None)
         self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
@@ -337,6 +338,7 @@ class Pipeline(metaclass=ABCMeta):
                             '-r', str(self.iedb_retries),
                             '-e', self.iedb_executable,
                             '-l', str(epl),
+                            '--tmp-dir', self.tmp_dir,
                         ]
                         argument_sets.append(arguments)
 
