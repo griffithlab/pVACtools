@@ -558,7 +558,7 @@ server <- shinyServer(function(input, output, session) {
         }
       }
       incProgress(0.5)
-      datatable(GB_transcripts, selection = list(mode = "single", selected = "1")) %>%
+      datatable(GB_transcripts, selection = list(mode = "single", selected = "1"), style="bootstrap") %>%
         formatStyle("Transcripts Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
     })
   })
@@ -589,7 +589,7 @@ server <- shinyServer(function(input, output, session) {
       incProgress(0.5)
       names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
       incProgress(0.5)
-      datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "N/A", targets = c(3)), list(visible = FALSE, targets = c(-1))))) %>%
+      datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "N/A", targets = c(3)), list(visible = FALSE, targets = c(-1)))), style="bootstrap") %>%
         formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
     })
   })
@@ -637,7 +637,8 @@ server <- shinyServer(function(input, output, session) {
                             "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
         ),
-        selection = list(mode = "single", selected = "1")) %>%
+        selection = list(mode = "single", selected = "1"),
+        style="bootstrap") %>%
           formatStyle("Type", fontWeight = styleEqual("MT", "bold")) %>%
           formatStyle(c("Peptide Sequence"), "Has ProbPos", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
           formatStyle(c("Problematic Positions"), "Has ProbPos", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
@@ -646,7 +647,7 @@ server <- shinyServer(function(input, output, session) {
         dtable
       }else {
         incProgress(1)
-        datatable(data.frame("Peptide Datatable" = character()), selection = list(mode = "single", selected = "1"))
+        datatable(data.frame("Peptide Datatable" = character()), selection = list(mode = "single", selected = "1"), style="bootstrap")
       }
     })
   })

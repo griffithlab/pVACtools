@@ -578,8 +578,7 @@ ui <- dashboardPage(
   body = dashboardBody(
     use_theme(mytheme),
     tags$head(
-      tags$style(HTML(css)),
-      tags$style(HTML("table.dataTable tr.selected td, table.dataTable td.hover {background-color: #EAF2F8 !important;}")),
+      tags$style(HTML("table.dataTable tr.active td, table.dataTable td.active {color: black !important}")),
       tags$style(HTML("table.dataTable { border-collapse: collapse;}")),
       tags$style(HTML("table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
                               background-color: #92c8f0 !important; } ")),
