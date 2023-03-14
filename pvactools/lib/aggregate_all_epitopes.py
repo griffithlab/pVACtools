@@ -552,7 +552,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         individual_el_percentile_calls[peptide_type] = el_percentile_calls
                     results[peptide]['hla_types'] = sorted(self.hla_types)
                     results[peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
-                    results[peptide]['problematic_positions'] = str(good_binders_peptide_annotation.iloc[0]['Problematic Positions']) if 'Problematic Positions' in good_binders_peptide_annotation.iloc[0] else ''
+                    results[peptide]['problematic_positions'] = str(good_binders_peptide_annotation.iloc[0]['Problematic Positions']) if 'Problematic Positions' in good_binders_peptide_annotation.iloc[0] else 'None'
                     results[peptide]['individual_ic50_calls'] = individual_ic50_calls
                     results[peptide]['individual_percentile_calls'] = individual_percentile_calls
                     results[peptide]['individual_el_calls'] = individual_el_calls
@@ -567,7 +567,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         elif variant_type == 'inframe_deletion':
                             wt_peptide = 'DEL-NA'
                     results[peptide]['wt_peptide'] = wt_peptide
-            peptides[set_name]['peptides'] = results
+            peptides[set_name]['peptides'] = self.sort_peptides(results)
             peptides[set_name]['transcripts'] = self.sort_transcripts(annotations, good_binders)
             peptides[set_name]['transcript_expr'] = [good_binders[good_binders["annotation"] == x]['Transcript Expression'].iloc[0] for x in annotations]
             tsls = [good_binders[good_binders["annotation"] == x]['Transcript Support Level'].iloc[0] for x in annotations]
@@ -581,6 +581,16 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         anno_count = len(good_transcripts)
 
         return (peptides, anno_count)
+
+    def sort_peptides(self, results):
+        for k, v in results.items():
+            v['problematic_positions_sort'] = 1 if v['problematic_positions'] == 'None' else 2
+            v['best_ic50s_MT'] = min([ic50 for ic50 in v['ic50s_MT'] if ic50 != 'X'])
+        sorted_results = dict(sorted(results.items(), key=lambda x:(x[1]['problematic_positions_sort'],x[1]['best_ic50s_MT'])))
+        for k, v in sorted_results.items():
+            v.pop('problematic_positions_sort')
+            v.pop('best_ic50s_MT')
+        return sorted_results
 
     def sort_transcripts(self, annotations, good_binders):
         transcript_table = pd.DataFrame()
