@@ -243,8 +243,8 @@ server <- shinyServer(function(input, output, session) {
       if (input$use_anchor) {
         df$anchor_mode <- "allele-specific"
         df$anchor_contribution <- input$anchor_contribution
-        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15]), df$anchor_mode)
-        df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15]), df$anchor_mode)
+        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
+        df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
       }else {
         df$anchor_mode <- "default"
         df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
