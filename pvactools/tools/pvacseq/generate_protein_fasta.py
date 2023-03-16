@@ -157,6 +157,7 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
     for record in SeqIO.parse(fasta_file_path, "fasta"):
         ids = keys[int(record.id)]
         for record_id in ids:
+            print(record_id)
             if mutant_only and record_id.startswith('WT.'):
                 continue
             if tsv_indexes is not None:
