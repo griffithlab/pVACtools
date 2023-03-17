@@ -370,7 +370,7 @@ server <- shinyServer(function(input, output, session) {
       escape = FALSE, callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)), class = "stripe",
       options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
       columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
-      list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(-1:-12)),
+      list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
       list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
       initComplete = htmlwidgets::JS(
                      "function(settings, json) {",
