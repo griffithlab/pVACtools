@@ -341,7 +341,10 @@ class CalculateReferenceProteomeSimilarity:
             for line in reader:
                 peptide, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
 
-                results = processed_peptides[full_peptide]
+                if self.peptide_fasta:
+                    results = processed_peptides[peptide]
+                else:
+                    results = processed_peptides[full_peptide]
 
                 if self.peptide_fasta:
                     reference_match_dict = self._generate_reference_match_dict_from_peptide_fasta_results(results, peptide, line['Transcript'])
@@ -367,8 +370,11 @@ class CalculateReferenceProteomeSimilarity:
         with open(self.input_file) as input_fh:
             reader = csv.DictReader(input_fh, delimiter='\t')
             for line in reader:
-                _, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
-                unique_peptides.add(full_peptide)
+                peptide, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
+                if self.peptide_fasta:
+                    unique_peptides.add(peptide)
+                else:
+                    unique_peptides.add(full_peptide)
 
         return list(unique_peptides)
 
