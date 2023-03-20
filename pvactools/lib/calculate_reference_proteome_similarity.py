@@ -58,7 +58,7 @@ class CalculateReferenceProteomeSimilarity:
 
     Methods
     -------
-    reference_match_headers()
+    reference_match_headers(fieldnames)
         Returns the header for match result
 
     get_mt_peptides()
@@ -160,10 +160,12 @@ class CalculateReferenceProteomeSimilarity:
         }
 
 
-    def reference_match_headers(self):
-        return [
-            'Reference Match',
-        ]
+    def reference_match_headers(self, fieldnames):
+        if self._input_tsv_type(fieldnames) == 'aggregated':
+            fieldnames.insert(len(fieldnames)-1, 'Ref Match')
+        else:
+            fieldnames.insert(len(fieldnames), 'Reference Match')
+        return fieldnames
 
 
     def get_mt_peptides(self):
@@ -398,7 +400,7 @@ class CalculateReferenceProteomeSimilarity:
 
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh, open(self.metric_file, 'w') as metric_fh:
             reader = csv.DictReader(input_fh, delimiter="\t")
-            writer = csv.DictWriter(output_fh, delimiter="\t", fieldnames=reader.fieldnames + self.reference_match_headers(), extrasaction='ignore')
+            writer = csv.DictWriter(output_fh, delimiter="\t", fieldnames=self.reference_match_headers(reader.fieldnames.copy()), extrasaction='ignore')
             metric_writer = csv.DictWriter(metric_fh, delimiter="\t", fieldnames=self.metric_headers(), extrasaction='ignore')
             writer.writeheader()
             metric_writer.writeheader()
@@ -424,7 +426,10 @@ class CalculateReferenceProteomeSimilarity:
                     reference_match_dict = self._generate_reference_match_dict_from_blast_records(results, peptide)
 
                 if peptide in reference_match_dict:
-                    line['Reference Match'] = True
+                    if self._input_tsv_type(line) == 'aggregated':
+                        line['Ref Match'] = True
+                    else:
+                        line['Reference Match'] = True
                     metric_line = line.copy()
                     if self._input_tsv_type(line) == 'aggregated' and self.file_type == 'pVACseq':
                         (chromosome, start, stop, ref, alt) = line['ID'].split('-')
@@ -439,8 +444,10 @@ class CalculateReferenceProteomeSimilarity:
                         metric_writer.writerow(metric_line)
 
                 else:
-                    line['Reference Match'] = False
-
+                    if self._input_tsv_type(line) == 'aggregated':
+                        line['Ref Match'] = False
+                    else:
+                        line['Reference Match'] = False
                 writer.writerow(line)
 
     def _get_unique_peptides(self, mt_records_dict, wt_records_dict):
