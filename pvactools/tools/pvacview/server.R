@@ -243,8 +243,8 @@ server <- shinyServer(function(input, output, session) {
       if (input$use_anchor) {
         df$anchor_mode <- "allele-specific"
         df$anchor_contribution <- input$anchor_contribution
-        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15]), df$anchor_mode)
-        df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15]), df$anchor_mode)
+        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
+        df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
       }else {
         df$anchor_mode <- "default"
         df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
@@ -370,7 +370,7 @@ server <- shinyServer(function(input, output, session) {
       escape = FALSE, callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)), class = "stripe",
       options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
       columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
-      list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(-1:-12)),
+      list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
       list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
       initComplete = htmlwidgets::JS(
                      "function(settings, json) {",
