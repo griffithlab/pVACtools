@@ -12,6 +12,9 @@ import yaml
 import datetime
 from mock import patch
 import argparse
+from urllib.request import urlopen
+from shutil import copyfileobj
+from tempfile import NamedTemporaryFile
 
 from pvactools.tools.pvacfuse import *
 import pvactools.tools.pvacfuse.main as pvacfuse_main
@@ -30,6 +33,15 @@ class PvacfuseTests(unittest.TestCase):
     def setUpClass(cls):
         cls.pvactools_directory = pvactools_directory()
         cls.test_data_directory = test_data_directory()
+        url = "http://ftp.ensembl.org/pub/release-106/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz"
+        with urlopen(url) as fsrc, NamedTemporaryFile(delete=False) as fdst:
+            copyfileobj(fsrc, fdst)
+            fdst.close()
+            cls.peptide_fasta = fdst
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.peptide_fasta.name)
 
     def test_pvacfuse_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -208,7 +220,7 @@ class PvacfuseTests(unittest.TestCase):
             files,
             test_data_directory(),
             'agfusion',
-        ))) as mock_request, unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+        ))) as mock_request:
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
@@ -221,6 +233,7 @@ class PvacfuseTests(unittest.TestCase):
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
+                '--peptide-fasta', self.peptide_fasta.name,
             ])
             close_mock_fhs()
 
@@ -327,7 +340,7 @@ class PvacfuseTests(unittest.TestCase):
             files,
             test_data_directory(),
             'agfusion',
-        ))) as mock_request, unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+        ))) as mock_request:
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
             run.main([
                 os.path.join(self.test_data_directory, "agfusion"),
@@ -340,6 +353,7 @@ class PvacfuseTests(unittest.TestCase):
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
+                '--peptide-fasta', self.peptide_fasta.name,
             ])
             close_mock_fhs()
 
