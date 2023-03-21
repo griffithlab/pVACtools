@@ -16,6 +16,7 @@ from subprocess import run, DEVNULL, STDOUT
 import tempfile
 from time import sleep
 import pymp
+from itertools import groupby
 
 class CalculateReferenceProteomeSimilarity:
     '''
@@ -366,11 +367,11 @@ class CalculateReferenceProteomeSimilarity:
                                             'Hit Definition': alignment.hit_def,
                                             'Query Sequence': hsp.query,
                                             'Query Window'  : window,
-                                            'Match Sequence': hsp.match,
-                                            'Match Start': hsp.sbjct_start,
-                                            'Match Stop': hsp.sbjct_end,
+                                            'Match Sequence': match,
+                                            'Match Start': match.index(window) + 1 ,
+                                            'Match Stop': match.index(window) + 1 + len(window),
                                         })
-        return reference_match_dict
+        return self._combine_reference_match_entries(reference_match_dict)
 
 
     def _generate_reference_match_dict_from_peptide_fasta_results_for_pvacbind(self, results, peptide):
@@ -385,7 +386,7 @@ class CalculateReferenceProteomeSimilarity:
                 'Match Start': match_start + 1,
                 'Match Stop': match_start + len(epitope) + 1,
             })
-        return reference_match_dict
+        return self._combine_reference_match_entries(reference_match_dict)
 
     def _generate_reference_match_dict_from_peptide_fasta_results(self, results, peptide, transcript):
         reference_match_dict = defaultdict(list)
@@ -402,7 +403,34 @@ class CalculateReferenceProteomeSimilarity:
                 'Match Start': match_start + 1,
                 'Match Stop': match_start + len(epitope) + 1,
             })
-        return reference_match_dict
+        return self._combine_reference_match_entries(reference_match_dict)
+
+    def _combine_reference_match_entries(self, reference_match_dict):
+        combined_reference_matches = {}
+        for peptide, reference_matches in reference_match_dict.items():
+            combined_matches = []
+            for hit_id, hit_reference_matches in groupby(reference_matches,key=lambda x:x['Hit ID']):
+                hit_reference_matches = sorted(list(hit_reference_matches), key=lambda d: d['Match Start'])
+                first_match = None
+                for index, match in enumerate(hit_reference_matches):
+                    if first_match is None:
+                        combined_match = match.copy()
+                        match_start = combined_match['Match Start']
+                        first_match = match_start
+                    if index == len(hit_reference_matches) - 1:
+                        match_stop = hit_reference_matches[index]['Match Stop']
+                        combined_match['Match Stop'] = match_stop
+                        combined_match['Query Window'] = match['Match Sequence'][match_start-1:match_stop-1]
+                        combined_matches.append(combined_match)
+                    elif hit_reference_matches[index+1]['Match Start'] != match['Match Start'] + 1:
+                        match_stop = match['Match Stop']
+                        combined_match['Match Stop'] = match_stop
+                        combined_match['Query Window'] = match['Match Sequence'][match_start-1:match_stop-1]
+                        combined_matches.append(combined_match)
+                        first_match = None
+            unique_combined_matches = [dict(s) for s in set(frozenset(d.items()) for d in combined_matches)]
+            combined_reference_matches[peptide] = sorted(unique_combined_matches, key=lambda x: (x['Match Stop'] - x['Match Start'], x['Hit ID'], x['Match Start']), reverse=True)
+        return combined_reference_matches
 
 
     def _write_outputs(self, processed_peptides, mt_records_dict, wt_records_dict):
@@ -448,6 +476,9 @@ class CalculateReferenceProteomeSimilarity:
                         metric_line['Reference'] = ref
                         metric_line['Variant'] = alt
                     metric_line['Peptide'] = peptide
+                    if self._input_tsv_type(line) == 'aggregated':
+                        epitope_seq_header = 'MT Epitope Seq' if self.file_type == 'pVACseq' else 'Epitope Seq'
+                        metric_line[epitope_seq_header] = line['Best Peptide']
                     for alignment in reference_match_dict[peptide]:
                         metric_line.update(alignment)
                         metric_writer.writerow(metric_line)
