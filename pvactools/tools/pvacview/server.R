@@ -544,22 +544,26 @@ server <- shinyServer(function(input, output, session) {
           "# Peptides" = df$metricsData[[selectedID()]]$peptide_counts,
           "Total Expr" = df$metricsData[[selectedID()]]$set_expr
         )
+        names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
+        best_transcript_set <- NULL
+        incProgress(0.5)
+        for (i in 1:length(df$metricsData[[selectedID()]]$sets)){
+          transcript_set <- df$metricsData[[selectedID()]]$good_binders[[df$metricsData[[selectedID()]]$sets[i]]]$`transcripts`
+          transcript_set <- lapply(transcript_set, function(x) strsplit(x, "-")[[1]][1])
+          if (best_transcript %in% transcript_set) {
+            best_transcript_set <- df$metricsData[[selectedID()]]$sets[i]
+          }
+        }
+        incProgress(0.5)
+        datatable(GB_transcripts, selection = list(mode = "single", selected = "1"), style="bootstrap") %>%
+          formatStyle("Transcripts Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
       }else {
         GB_transcripts <- data.frame("Transcript Sets" = character(), "# Transcripts" = character(), "# Peptides" = character(), "Total Expr" = character())
+        names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
+        incProgress(0.5)
+        datatable(GB_transcripts)
+        incProgress(0.5)
       }
-      incProgress(0.5)
-      names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
-      best_transcript_set <- NULL
-      for (i in 1:length(df$metricsData[[selectedID()]]$sets)){
-        transcript_set <- df$metricsData[[selectedID()]]$good_binders[[df$metricsData[[selectedID()]]$sets[i]]]$`transcripts`
-        transcript_set <- lapply(transcript_set, function(x) strsplit(x, "-")[[1]][1])
-        if (best_transcript %in% transcript_set) {
-          best_transcript_set <- df$metricsData[[selectedID()]]$sets[i]
-        }
-      }
-      incProgress(0.5)
-      datatable(GB_transcripts, selection = list(mode = "single", selected = "1"), style="bootstrap") %>%
-        formatStyle("Transcripts Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
     })
   })
   ##update selected transcript set id
@@ -578,19 +582,23 @@ server <- shinyServer(function(input, output, session) {
       best_transcript <- df$mainTable[df$mainTable$ID == selectedID(), ]$`Best Transcript`
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
         GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`,
-                                      "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
-                                      "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`,
-                                      "Biotype" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`biotype`,
-                                      "Length" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_length`)
+                                     "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
+                                     "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`,
+                                     "Biotype" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`biotype`,
+                                     "Length" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_length`)
         GB_transcripts$`Best Transcript` <- apply(GB_transcripts, 1, function(x) grepl(best_transcript, x["Transcripts"], fixed = TRUE))
+        incProgress(0.5)
+        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
+        incProgress(0.5)
+        datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "N/A", targets = c(3)), list(visible = FALSE, targets = c(-1))))) %>%
+          formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
       }else {
         GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character(), "Biotype" = character(), "Length" = character())
+        incProgress(0.5)
+        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
+        incProgress(0.5)
+        datatable(GB_transcripts)
       }
-      incProgress(0.5)
-      names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
-      incProgress(0.5)
-      datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "N/A", targets = c(3)), list(visible = FALSE, targets = c(-1)))), style="bootstrap") %>%
-        formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
     })
   })
 
