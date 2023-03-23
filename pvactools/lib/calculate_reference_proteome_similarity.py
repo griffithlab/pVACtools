@@ -515,8 +515,8 @@ class CalculateReferenceProteomeSimilarity:
                             if len(genes) > 0:
                                 matches.append({
                                     'Matched Peptide': query_window,
-                                    'Genes': ", ".join(list(set(genes))),
-                                    'Transcripts': ", ".join(list(set(transcripts))),
+                                    'Genes': ", ".join(sorted(list(set(genes)))),
+                                    'Transcripts': ", ".join(sorted(list(set(transcripts)))),
                                     'Hit IDs': [l['Hit ID'] for l in hit_reference_matches],
                                 })
                             else:
@@ -536,6 +536,12 @@ class CalculateReferenceProteomeSimilarity:
                 else:
                     if self._input_tsv_type(line) == 'aggregated':
                         line['Ref Match'] = False
+                        if self.aggregate_metrics_file:
+                            self.aggregate_metrics[line['ID']]['reference_matches'] = {
+                                'count': 0,
+                                'query_peptide': peptide,
+                                'matches': []
+                            }
                     else:
                         line['Reference Match'] = False
                 writer.writerow(line)

@@ -135,7 +135,9 @@ explore_tab <- tabItem(
                     tabPanel("Transcript Sets of Selected Variant",
                         DTOutput("transcriptSetsTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
                     tabPanel("Reference Matches",
-                        h4("List of reference matches of the peptide"),
+                        h4("List of exact reference matches of the peptide"),
+                        span("Hits: ", verbatimTextOutput("referenceMatchHitCount")),
+                        span("Query Sequence: ", verbatimTextOutput("referenceMatchQuerySequence")),
                         DTOutput(outputId = "referenceMatchDatatable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
                     ),
                     tabPanel("Additional Data",
