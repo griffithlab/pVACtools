@@ -193,17 +193,32 @@ class PostProcessor:
     def calculate_reference_proteome_similarity(self):
         if self.run_reference_proteome_similarity:
             print("Calculating Reference Proteome Similarity")
-            CalculateReferenceProteomeSimilarity(
-                self.aggregate_report,
-                self.fasta,
-                self.reference_similarity_fh.name,
-                species=self.species,
-                file_type=self.file_type,
-                n_threads=self.n_threads,
-                blastp_path=self.blastp_path,
-                blastp_db=self.blastp_db,
-                peptide_fasta=self.peptide_fasta
-            ).execute()
+            if self.file_type == 'pVACseq':
+                aggregate_metrics_file = self.aggregate_report.replace('.tsv', '.metrics.json')
+                CalculateReferenceProteomeSimilarity(
+                    self.aggregate_report,
+                    self.fasta,
+                    self.reference_similarity_fh.name,
+                    species=self.species,
+                    file_type=self.file_type,
+                    n_threads=self.n_threads,
+                    blastp_path=self.blastp_path,
+                    blastp_db=self.blastp_db,
+                    peptide_fasta=self.peptide_fasta,
+                    aggregate_metrics_file=aggregate_metrics_file,
+                ).execute()
+            else:
+                CalculateReferenceProteomeSimilarity(
+                    self.aggregate_report,
+                    self.fasta,
+                    self.reference_similarity_fh.name,
+                    species=self.species,
+                    file_type=self.file_type,
+                    n_threads=self.n_threads,
+                    blastp_path=self.blastp_path,
+                    blastp_db=self.blastp_db,
+                    peptide_fasta=self.peptide_fasta,
+                ).execute()
             shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.aggregate_report))
             print("Completed")
         else:
