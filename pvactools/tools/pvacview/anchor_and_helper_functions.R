@@ -197,7 +197,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   if ((tsl == "Not Supported")) {
     tsl_pass <- TRUE
   }
-  if ((tsl == "NA") || as.numeric(tsl) > tsl_max) {
+  else if ((tsl == "NA") || as.numeric(tsl) > tsl_max) {
     tsl_pass <- FALSE
   }
   allele_expr_pass <- TRUE
@@ -318,7 +318,7 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
   if ((tsl == "Not Supported")) {
     tsl_pass <- TRUE
   }
-  if ((tsl == "NA") || as.numeric(tsl) > tsl_max) {
+  else if ((tsl == "NA") || as.numeric(tsl) > tsl_max) {
     tsl_pass <- FALSE
   }
   allele_expr_pass <- TRUE
