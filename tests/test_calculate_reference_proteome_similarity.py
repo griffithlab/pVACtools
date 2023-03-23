@@ -69,10 +69,20 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
 
     def test_calculate_self_similarity_with_aggregated_tsv_and_peptide_fasta(self):
         input_file = os.path.join(self.test_data_dir, 'Test.all_epitopes.aggregated.tsv')
+        input_aggregated_metrics_file = os.path.join(self.test_data_dir, 'Test.all_epitopes.aggregated.tsv.metrics.json')
+        tmp_aggregated_metrics_file = tempfile.NamedTemporaryFile()
+        import shutil
+        shutil.copy(input_aggregated_metrics_file, tmp_aggregated_metrics_file.name)
         input_fasta = os.path.join(self.test_data_dir, 'Test.fasta')
         output_file = tempfile.NamedTemporaryFile()
         metric_file = "{}.reference_matches".format(output_file.name)
-        self.assertFalse(CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, peptide_fasta=self.peptide_fasta.name).execute())
+        self.assertFalse(CalculateReferenceProteomeSimilarity(
+            input_file,
+            input_fasta,
+            output_file.name,
+            peptide_fasta=self.peptide_fasta.name,
+            aggregate_metrics_file=tmp_aggregated_metrics_file.name,
+        ).execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "output.aggregated.peptide_fasta.tsv"),
@@ -80,6 +90,10 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         self.assertTrue(cmp(
             metric_file,
             os.path.join(self.test_data_dir, "output.aggregated.peptide_fasta.tsv.reference_matches"),
+        ))
+        self.assertTrue(cmp(
+            tmp_aggregated_metrics_file.name,
+            os.path.join(self.test_data_dir, "output.aggregated.peptide_fasta.tsv.metrics.json"),
         ))
         os.remove(metric_file)
 

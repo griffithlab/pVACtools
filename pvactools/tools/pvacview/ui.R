@@ -134,6 +134,10 @@ explore_tab <- tabItem(
                 tabBox(width = 6, title = " ",
                     tabPanel("Transcript Sets of Selected Variant",
                         DTOutput("transcriptSetsTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
+                    tabPanel("Reference Matches",
+                        h4("List of reference matches of the peptide"),
+                        DTOutput(outputId = "referenceMatchDatatable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
+                    ),
                     tabPanel("Additional Data",
                         span("Additional Data Type: ", verbatimTextOutput("type_text")),
                         span("Median MT IC50: ", verbatimTextOutput("addData_IC50")),

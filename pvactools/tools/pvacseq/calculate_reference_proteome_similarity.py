@@ -19,7 +19,8 @@ def main(args_input = sys.argv[1:]):
         blastp_path=args.blastp_path,
         blastp_db=args.blastp_db,
         peptide_fasta=args.peptide_fasta,
-        n_threads=args.n_threads
+        n_threads=args.n_threads,
+        aggregate_metrics_file=args.aggregate_metrics_file,
     ).execute()
 
 if __name__ == "__main__":
