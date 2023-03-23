@@ -272,7 +272,7 @@ class CalculateReferenceProteomeSimilarity:
                 else:
                     parsed_aa_change = "{}{}{}".format(m.group(2), m.group(1), m.group(3))
                 if line['Gene'] == gene and line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
-                    return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, m.group(3))
+                    return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, m.group(3), m.group(2))
             else:
                 raise Exception("Unexpected amino acid format: {}".format(aa_change))
         raise Exception("Unable to find full_peptide for variant {}".format(line['ID']))
@@ -288,7 +288,7 @@ class CalculateReferenceProteomeSimilarity:
         else:
             if self._input_tsv_type(line) == 'aggregated':
                 epitope = line['Best Peptide']
-                (full_peptide, wt_peptide, variant_type, mt_amino_acids) = self._get_full_peptide(line, mt_records_dict, wt_records_dict)
+                (full_peptide, wt_peptide, variant_type, mt_amino_acids, wt_amino_acids) = self._get_full_peptide(line, mt_records_dict, wt_records_dict)
                 mt_pos = int(line['Pos'].split('-')[0])
             else:
                 epitope = line['MT Epitope Seq']
@@ -297,7 +297,7 @@ class CalculateReferenceProteomeSimilarity:
                 variant_type = line['Variant Type']
                 mt_pos = int(line['Mutation Position'].split('-')[0])
                 if variant_type != 'FS':
-                    mt_amino_acids = line['Mutation'].split('/')[1]
+                    (wt_amino_acids, mt_amino_acids) = line['Mutation'].split('/')
 
             # get peptide
             subpeptide_position = full_peptide.index(epitope)
@@ -306,7 +306,15 @@ class CalculateReferenceProteomeSimilarity:
             else:
                 if mt_amino_acids == '-':
                     mt_amino_acids = ''
-                peptide = self.extract_n_mer(full_peptide, subpeptide_position, mt_pos, len(mt_amino_acids))
+                if len(mt_amino_acids) == len(wt_amino_acids) and len(mt_amino_acids) > 1:
+                    #remove leading and trailing identical amino acids
+                    shortened_mt_amino_acids = ""
+                    for mt_aa, wt_aa in zip(mt_amino_acids, wt_amino_acids):
+                        if wt_aa != mt_aa:
+                            shortened_mt_amino_acids += mt_aa
+                else:
+                    shortened_mt_amino_acids = mt_amino_acids
+                peptide = self.extract_n_mer(full_peptide, subpeptide_position, mt_pos, len(shortened_mt_amino_acids))
         return peptide, full_peptide
 
 
