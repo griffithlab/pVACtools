@@ -74,8 +74,9 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         import shutil
         shutil.copy(input_aggregated_metrics_file, tmp_aggregated_metrics_file.name)
         input_fasta = os.path.join(self.test_data_dir, 'Test.fasta')
-        output_file = tempfile.NamedTemporaryFile()
+        output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
         metric_file = "{}.reference_matches".format(output_file.name)
+        output_aggregated_metrics_file = output_file.name.replace(".tsv", ".metrics.json")
         self.assertFalse(CalculateReferenceProteomeSimilarity(
             input_file,
             input_fasta,
@@ -92,7 +93,7 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "output.aggregated.peptide_fasta.tsv.reference_matches"),
         ))
         self.assertTrue(cmp(
-            tmp_aggregated_metrics_file.name,
+            output_aggregated_metrics_file,
             os.path.join(self.test_data_dir, "output.aggregated.peptide_fasta.tsv.metrics.json"),
         ))
         os.remove(metric_file)

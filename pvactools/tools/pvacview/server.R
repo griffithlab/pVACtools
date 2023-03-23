@@ -945,30 +945,24 @@ server <- shinyServer(function(input, output, session) {
 
   ##updating reference matches for selected peptide
   referenceMatchData <- reactive({
-    if (length(df$metricsData[[selectedID()]]$reference_matches) != 0) {
+    if (length(df$metricsData[[selectedID()]]$reference_matches$matches) != 0) {
       as.data.frame(df$metricsData[[selectedID()]]$reference_matches$matches, check.names = False)
     }else {
       return()
     }
   })
+  output$referenceMatchHitCount <- reactive({df$metricsData[[selectedID()]]$reference_matches$count})
+  output$referenceMatchQuerySequence <- reactive({df$metricsData[[selectedID()]]$reference_matches$query_peptide})
   output$referenceMatchDatatable <- renderDT({
     withProgress(message = "Loading reference match datatable", value = 0, {
-        if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-            reference_match_data <- referenceMatchData()
-            if (!is.null(reference_match_data)) {
-                incProgress(1)
-                dtable <- datatable(reference_match_data, options = list(
-                    pageLength = 10,
-                    lengthMenu = c(10)
-                    #rowCallback = JS("function(row, data, index, rowId) {",
-                    #               "console.log(rowId)","if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
-                    #               'row.style.backgroundColor = "#E0E0E0";', "}", "}")
-                ))
-                dtable
-            } else {
-                incProgress(1)
-                datatable(data.frame("Reference Matches Datatable" = character()))
-            }
+        reference_match_data <- referenceMatchData()
+        if (!is.null(reference_match_data)) {
+            incProgress(1)
+            dtable <- datatable(reference_match_data, options = list(
+                pageLength = 10,
+                lengthMenu = c(10)
+            ))
+            dtable
         } else {
             incProgress(1)
             datatable(data.frame("Reference Matches Datatable" = character()))
