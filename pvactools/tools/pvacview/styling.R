@@ -1,14 +1,12 @@
 ## server side callback functions
 rowcallback <- function(hla_count, row_num) {
-  gsub("15", hla_count + 8,
-  gsub("13", hla_count + 6,
-  c("function(row, data, displayNum, displayIndex){",
-  gsub("0", row_num, "  if (displayIndex == 0){"),
-  "  $('td',row).css('border-top','3px solid #0390fc');",
-  "  $('td',row).css('border-bottom','3px solid #0390fc');",
-  "  }",
-  "}"
-  )))
+  c(
+    "function(row, data, displayNum, displayIndex){",
+    gsub("0", row_num, "  if (displayIndex == 0){"),
+    "  $('td',row).css('border-top','3px solid #0390fc');",
+    "  $('td',row).css('border-bottom','3px solid #0390fc');",
+    "  }",
+    "}")
 }
 
 callback <- function(hla_count, score_mode) {
