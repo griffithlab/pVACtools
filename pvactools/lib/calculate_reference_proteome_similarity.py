@@ -496,17 +496,39 @@ class CalculateReferenceProteomeSimilarity:
                         metric_line_alignment.update(alignment)
                         metric_lines.append(metric_line_alignment)
                     if self.aggregate_metrics_file:
+                        matches = []
+                        for query_window, hit_reference_matches in groupby(metric_lines,key=lambda x:x['Query Window']):
+                            hit_reference_matches = list(hit_reference_matches)
+                            gene_regex = '^.*gene_symbol:([0-9|A-Z]+).*$'
+                            transcript_regex = '^.*transcript:(ENST[0-9|.]+).*$'
+                            gene_p = re.compile(gene_regex)
+                            transcript_p = re.compile(transcript_regex)
+                            genes = []
+                            transcripts = []
+                            for definition in [l['Hit Definition'] for l in hit_reference_matches]:
+                                m = gene_p.match(definition)
+                                if m:
+                                    genes.append(m.group(1))
+                                m = transcript_p.match(definition)
+                                if m:
+                                    transcripts.append(m.group(1))
+                            if len(genes) > 0:
+                                matches.append({
+                                    'Matched Peptide': query_window,
+                                    'Genes': ", ".join(list(set(genes))),
+                                    'Transcripts': ", ".join(list(set(transcripts))),
+                                    'Hit IDs': [l['Hit ID'] for l in hit_reference_matches],
+                                })
+                            else:
+                                matches.append({
+                                    'Matched Peptide': query_window,
+                                    'Hit IDs': [l['Hit ID'] for l in hit_reference_matches],
+                                    'Hit Definitions': [l['Hit Definition'] for l in hit_reference_matches],
+                                })
                         m = {
                             'count': len(metric_lines),
                             'query_peptide': metric_lines[0]['Query Sequence'],
-                            'matches': [{
-                                'Matched Query Window': l['Query Window'],
-                                'Hit ID': l['Hit ID'],
-                                'Hit Definition': l['Hit Definition'],
-                                'Hit Start': l['Match Start'],
-                                'Hit Stop': l['Match Stop'],
-                                'Hit Sequence': l['Match Sequence'],
-                            } for l in metric_lines],
+                            'matches': matches
                         }
                         self.aggregate_metrics[metric_lines[0]['ID']]['reference_matches'] = m
                     metric_writer.writerows(metric_lines)
