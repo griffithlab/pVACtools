@@ -249,24 +249,12 @@ class CalculateReferenceProteomeSimilarity:
 
     def _get_full_peptide(self, line, mt_records_dict, wt_records_dict):
         for record_id in mt_records_dict.keys():
-            record_id_parts = record_id.split('.')
-            gene = record_id_parts[1]
-            if len(record_id_parts) == 7:
-                #transcript includes version number and gene contains a dot
-                gene = "{}.{}".format(record_id_parts[1], record_id_parts[2])
-                transcript = "{}.{}".format(record_id_parts[3], record_id_parts[4])
-                variant_type = record_id_parts[5]
-                aa_change = record_id_parts[6]
-            elif len(record_id_parts) == 6:
-                #transcript includes version number
-                transcript = "{}.{}".format(record_id_parts[2], record_id_parts[3])
-                variant_type = record_id_parts[4]
-                aa_change = record_id_parts[5]
-            elif len(record_id_parts) == 5:
-                #transcript without version number
-                transcript = record_id_parts[2]
-                variant_type = record_id_parts[3]
-                aa_change = record_id_parts[4]
+            (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
+            transcript_regex = '^.*(ENST[0-9|.]+)$'
+            transcript_p = re.compile(transcript_regex)
+            m = transcript_p.match(rest_record_id)
+            if m:
+                transcript = m.group(1)
             else:
                 raise Exception("Unexpected record_id format: {}".format(record_id))
             regex = '^([0-9]+[\-]{0,1}[0-9]*)([A-Z|\-]*)\/([A-Z|\-]*)$'
@@ -277,7 +265,7 @@ class CalculateReferenceProteomeSimilarity:
                     parsed_aa_change = "FS{}".format(m.group(1))
                 else:
                     parsed_aa_change = "{}{}{}".format(m.group(2), m.group(1), m.group(3))
-                if line['Gene'] == gene and line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
+                if line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
                     return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, m.group(3), m.group(2))
             else:
                 raise Exception("Unexpected amino acid format: {}".format(aa_change))
