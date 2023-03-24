@@ -967,12 +967,10 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)) {
       return()
     }
-    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval") & !(colnames(df$mainTable) == "Select")
-                         & !(colnames(df$mainTable) == "Scaled BA") & !(colnames(df$mainTable) == "Scaled percentile") & !(colnames(df$mainTable) == "Tier Count")
-                         & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Gene of Interest") & !(colnames(df$mainTable) == "Bad TSL")
-                         & !(colnames(df$mainTable) == "Col RNA Expr") & !(colnames(df$mainTable) == "Col RNA VAF") & !(colnames(df$mainTable) == "Col Allele Expr")
-                         & !(colnames(df$mainTable) == "Col RNA Depth") & !(colnames(df$mainTable) == "Col DNA VAF") & !(colnames(df$mainTable) == "Percentile Fail")
-                         & !(colnames(df$mainTable) == "Has Prob Pos")]
+    colsToDrop = colnames(df$mainTable) %in% c("Evaluation", "Eval", "Select", "Scaled BA", "Scaled percentile", "Tier Count", "Bad TSL",
+                                               "Comments", "Gene of Interest", "Bad TSL", "Col RNA Expr", "Col RNA VAF", "Col Allele Expr",
+                                               "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos")
+    data <- df$mainTable[, !(colsToDrop)]
     col_names <- colnames(data)
     data <- data.frame(data, Evaluation = shinyValue("selecter_", nrow(df$mainTable), df$mainTable))
     colnames(data) <- c(col_names, "Evaluation")
