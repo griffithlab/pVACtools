@@ -952,6 +952,13 @@ server <- shinyServer(function(input, output, session) {
   })
 
   ##updating reference matches for selected peptide
+  output$hasReferenceMatchData <- reactive({
+    if (is.null(df$metricsData[[selectedID()]]$reference_matches)) {
+        "Reference Similarity not run"
+    } else {
+        ""
+    }
+  })
   referenceMatchData <- reactive({
     if (length(df$metricsData[[selectedID()]]$reference_matches$matches) != 0) {
       as.data.frame(df$metricsData[[selectedID()]]$reference_matches$matches, check.names = False)
@@ -959,8 +966,20 @@ server <- shinyServer(function(input, output, session) {
       return()
     }
   })
-  output$referenceMatchHitCount <- reactive({df$metricsData[[selectedID()]]$reference_matches$count})
-  output$referenceMatchQuerySequence <- reactive({df$metricsData[[selectedID()]]$reference_matches$query_peptide})
+  output$referenceMatchHitCount <- reactive({
+    if (is.null(df$metricsData[[selectedID()]]$reference_matches)) {
+        "N/A"
+    } else {
+        df$metricsData[[selectedID()]]$reference_matches$count
+    }
+  })
+  output$referenceMatchQuerySequence <- reactive({
+    if (is.null(df$metricsData[[selectedID()]]$reference_matches)) {
+        "N/A"
+    } else {
+        df$metricsData[[selectedID()]]$reference_matches$query_peptide
+    }
+  })
   output$referenceMatchDatatable <- renderDT({
     withProgress(message = "Loading reference match datatable", value = 0, {
         reference_match_data <- referenceMatchData()
