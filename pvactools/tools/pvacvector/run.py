@@ -14,6 +14,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 import itertools
+import json
 
 from pvactools.lib.optimal_peptide import OptimalPeptide
 from pvactools.lib.vector_visualization import VectorVisualization
