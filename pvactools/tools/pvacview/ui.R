@@ -114,8 +114,8 @@ explore_tab <- tabItem(
                 status = "primary", solidHeader = TRUE, collapsible = TRUE,
                 textAreaInput("comments", "Please add/update your comments for the variant you are currently examining", value = ""),
                 actionButton("comment", "Update Comment Section"),
-                h5("Comment:"), verbatimTextOutput("comment_text"),
-                style = "overflow-x: scroll;font-size:100%")
+                h5("Comment:"), htmlOutput("comment_text"),
+                style = "font-size:100%")
         ),
         fluidRow(
             box(width = 12,
