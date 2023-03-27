@@ -16,6 +16,8 @@ from subprocess import run, DEVNULL, STDOUT
 import tempfile
 from time import sleep
 import pymp
+from itertools import groupby
+import json
 
 class CalculateReferenceProteomeSimilarity:
     '''
@@ -107,7 +109,7 @@ class CalculateReferenceProteomeSimilarity:
         Peforms the calculation of reference proteome similarity. The only method that should be 
         called from outside of the class
     '''
-    def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='pVACseq', blastp_path=None, blastp_db='refseq_select_prot', peptide_fasta=None, n_threads=1):
+    def __init__(self, input_file, input_fasta, output_file, match_length=8, species='human', file_type='pVACseq', blastp_path=None, blastp_db='refseq_select_prot', peptide_fasta=None, n_threads=1, aggregate_metrics_file=None):
         self.input_file = input_file
         self.input_fasta = input_fasta
         output_dir = os.path.dirname(output_file)
@@ -123,6 +125,11 @@ class CalculateReferenceProteomeSimilarity:
         if self.blastp_db == 'refseq_select_prot' and self.species != 'human' and self.species != 'mouse':
             raise Exception("refseq_select_prot blastp database is only compatible with human and mouse species.")
         self.peptide_fasta = peptide_fasta
+        self.aggregate_metrics_file = aggregate_metrics_file
+        self.output_aggregate_metrics_file = output_file.replace('.tsv', '.metrics.json')
+        if self.aggregate_metrics_file:
+            with open(self.aggregate_metrics_file, 'r') as fh:
+                self.aggregate_metrics = json.loads(fh.read())
         self.species_to_organism = {
             'human': 'Homo sapiens',
             'atlantic salmon': 'Salmo salar',
@@ -242,24 +249,12 @@ class CalculateReferenceProteomeSimilarity:
 
     def _get_full_peptide(self, line, mt_records_dict, wt_records_dict):
         for record_id in mt_records_dict.keys():
-            record_id_parts = record_id.split('.')
-            gene = record_id_parts[1]
-            if len(record_id_parts) == 7:
-                #transcript includes version number and gene contains a dot
-                gene = "{}.{}".format(record_id_parts[1], record_id_parts[2])
-                transcript = "{}.{}".format(record_id_parts[3], record_id_parts[4])
-                variant_type = record_id_parts[5]
-                aa_change = record_id_parts[6]
-            elif len(record_id_parts) == 6:
-                #transcript includes version number
-                transcript = "{}.{}".format(record_id_parts[2], record_id_parts[3])
-                variant_type = record_id_parts[4]
-                aa_change = record_id_parts[5]
-            elif len(record_id_parts) == 5:
-                #transcript without version number
-                transcript = record_id_parts[2]
-                variant_type = record_id_parts[3]
-                aa_change = record_id_parts[4]
+            (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
+            transcript_regex = '^.*(ENST[0-9|.]+)$'
+            transcript_p = re.compile(transcript_regex)
+            m = transcript_p.match(rest_record_id)
+            if m:
+                transcript = m.group(1)
             else:
                 raise Exception("Unexpected record_id format: {}".format(record_id))
             regex = '^([0-9]+[\-]{0,1}[0-9]*)([A-Z|\-]*)\/([A-Z|\-]*)$'
@@ -270,8 +265,8 @@ class CalculateReferenceProteomeSimilarity:
                     parsed_aa_change = "FS{}".format(m.group(1))
                 else:
                     parsed_aa_change = "{}{}{}".format(m.group(2), m.group(1), m.group(3))
-                if line['Gene'] == gene and line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
-                    return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, m.group(3))
+                if line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
+                    return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, m.group(3), m.group(2))
             else:
                 raise Exception("Unexpected amino acid format: {}".format(aa_change))
         raise Exception("Unable to find full_peptide for variant {}".format(line['ID']))
@@ -287,7 +282,7 @@ class CalculateReferenceProteomeSimilarity:
         else:
             if self._input_tsv_type(line) == 'aggregated':
                 epitope = line['Best Peptide']
-                (full_peptide, wt_peptide, variant_type, mt_amino_acids) = self._get_full_peptide(line, mt_records_dict, wt_records_dict)
+                (full_peptide, wt_peptide, variant_type, mt_amino_acids, wt_amino_acids) = self._get_full_peptide(line, mt_records_dict, wt_records_dict)
                 mt_pos = int(line['Pos'].split('-')[0])
             else:
                 epitope = line['MT Epitope Seq']
@@ -296,7 +291,7 @@ class CalculateReferenceProteomeSimilarity:
                 variant_type = line['Variant Type']
                 mt_pos = int(line['Mutation Position'].split('-')[0])
                 if variant_type != 'FS':
-                    mt_amino_acids = line['Mutation'].split('/')[1]
+                    (wt_amino_acids, mt_amino_acids) = line['Mutation'].split('/')
 
             # get peptide
             subpeptide_position = full_peptide.index(epitope)
@@ -305,7 +300,15 @@ class CalculateReferenceProteomeSimilarity:
             else:
                 if mt_amino_acids == '-':
                     mt_amino_acids = ''
-                peptide = self.extract_n_mer(full_peptide, subpeptide_position, mt_pos, len(mt_amino_acids))
+                if len(mt_amino_acids) == len(wt_amino_acids) and len(mt_amino_acids) > 1:
+                    #remove leading and trailing identical amino acids
+                    shortened_mt_amino_acids = ""
+                    for mt_aa, wt_aa in zip(mt_amino_acids, wt_amino_acids):
+                        if wt_aa != mt_aa:
+                            shortened_mt_amino_acids += mt_aa
+                else:
+                    shortened_mt_amino_acids = mt_amino_acids
+                peptide = self.extract_n_mer(full_peptide, subpeptide_position, mt_pos, len(shortened_mt_amino_acids))
         return peptide, full_peptide
 
 
@@ -347,8 +350,7 @@ class CalculateReferenceProteomeSimilarity:
 
 
     def _generate_reference_match_dict_from_blast_records(self, blast_records, peptide):
-
-        reference_match_dict = defaultdict(list)
+        reference_match_dict = []
         for blast_record in blast_records:
             if len(blast_record.alignments) > 0: # if there is at least one alignment
                 for alignment in blast_record.alignments:
@@ -361,22 +363,22 @@ class CalculateReferenceProteomeSimilarity:
                                 windows = [match[i:i+self.match_length] for i in range(len(match)-(self.match_length-1))]
                                 for window in windows: 
                                     if window in peptide:
-                                        reference_match_dict[peptide].append({
+                                        reference_match_dict.append({
                                             'Hit ID': alignment.hit_id,
                                             'Hit Definition': alignment.hit_def,
                                             'Query Sequence': hsp.query,
                                             'Query Window'  : window,
-                                            'Match Sequence': hsp.match,
-                                            'Match Start': hsp.sbjct_start,
-                                            'Match Stop': hsp.sbjct_end,
+                                            'Match Sequence': match,
+                                            'Match Start': match.index(window) + 1 ,
+                                            'Match Stop': match.index(window) + 1 + len(window),
                                         })
-        return reference_match_dict
+        return self._combine_reference_match_entries(reference_match_dict)
 
 
     def _generate_reference_match_dict_from_peptide_fasta_results_for_pvacbind(self, results, peptide):
-        reference_match_dict = defaultdict(list)
+        reference_match_dict = []
         for transcript_seq, epitope, match_start in results:
-            reference_match_dict[peptide].append({
+            reference_match_dict.append({
                 'Hit ID': transcript_seq.id,
                 'Hit Definition': transcript_seq.description,
                 'Query Sequence': peptide,
@@ -385,14 +387,14 @@ class CalculateReferenceProteomeSimilarity:
                 'Match Start': match_start + 1,
                 'Match Stop': match_start + len(epitope) + 1,
             })
-        return reference_match_dict
+        return self._combine_reference_match_entries(reference_match_dict)
 
     def _generate_reference_match_dict_from_peptide_fasta_results(self, results, peptide, transcript):
-        reference_match_dict = defaultdict(list)
+        reference_match_dict = []
         for transcript_seq, epitope, match_start in results:
             if transcript in transcript_seq.description:
                 continue
-            reference_match_dict[peptide].append({
+            reference_match_dict.append({
                 'Transcript': transcript,
                 'Hit ID': transcript_seq.id,
                 'Hit Definition': transcript_seq.description,
@@ -402,7 +404,32 @@ class CalculateReferenceProteomeSimilarity:
                 'Match Start': match_start + 1,
                 'Match Stop': match_start + len(epitope) + 1,
             })
-        return reference_match_dict
+        return self._combine_reference_match_entries(reference_match_dict)
+
+    def _combine_reference_match_entries(self, reference_match_dict):
+        combined_matches = []
+        for hit_id, hit_reference_matches in groupby(reference_match_dict,key=lambda x:x['Hit ID']):
+            hit_reference_matches = sorted(list(hit_reference_matches), key=lambda d: d['Match Start'])
+            first_match = None
+            for index, match in enumerate(hit_reference_matches):
+                if first_match is None:
+                    combined_match = match.copy()
+                    match_start = combined_match['Match Start']
+                    first_match = match_start
+                if index == len(hit_reference_matches) - 1:
+                    match_stop = hit_reference_matches[index]['Match Stop']
+                    combined_match['Match Stop'] = match_stop
+                    combined_match['Query Window'] = match['Match Sequence'][match_start-1:match_stop-1]
+                    combined_matches.append(combined_match)
+                elif hit_reference_matches[index+1]['Match Start'] != match['Match Start'] + 1:
+                    match_stop = match['Match Stop']
+                    combined_match['Match Stop'] = match_stop
+                    combined_match['Query Window'] = match['Match Sequence'][match_start-1:match_stop-1]
+                    combined_matches.append(combined_match)
+                    first_match = None
+        unique_combined_matches = [dict(s) for s in set(frozenset(d.items()) for d in combined_matches)]
+        combined_reference_matches = sorted(unique_combined_matches, key=lambda x: (x['Match Stop'] - x['Match Start'], x['Hit ID'], x['Match Start']), reverse=True)
+        return combined_reference_matches
 
 
     def _write_outputs(self, processed_peptides, mt_records_dict, wt_records_dict):
@@ -428,13 +455,13 @@ class CalculateReferenceProteomeSimilarity:
                             transcript = line['Transcript']
                         else:
                             transcript = line['Best Transcript']
-                        reference_match_dict = self._generate_reference_match_dict_from_peptide_fasta_results(results, peptide, transcript)
+                        reference_matches = self._generate_reference_match_dict_from_peptide_fasta_results(results, peptide, transcript)
                     else:
-                        reference_match_dict = self._generate_reference_match_dict_from_peptide_fasta_results_for_pvacbind(results, peptide)
+                        reference_matches = self._generate_reference_match_dict_from_peptide_fasta_results_for_pvacbind(results, peptide)
                 else:
-                    reference_match_dict = self._generate_reference_match_dict_from_blast_records(results, peptide)
+                    reference_matches = self._generate_reference_match_dict_from_blast_records(results, peptide)
 
-                if peptide in reference_match_dict:
+                if len(reference_matches) > 0:
                     if self._input_tsv_type(line) == 'aggregated':
                         line['Ref Match'] = True
                     else:
@@ -448,16 +475,67 @@ class CalculateReferenceProteomeSimilarity:
                         metric_line['Reference'] = ref
                         metric_line['Variant'] = alt
                     metric_line['Peptide'] = peptide
-                    for alignment in reference_match_dict[peptide]:
-                        metric_line.update(alignment)
-                        metric_writer.writerow(metric_line)
+                    if self._input_tsv_type(line) == 'aggregated':
+                        epitope_seq_header = 'MT Epitope Seq' if self.file_type == 'pVACseq' else 'Epitope Seq'
+                        metric_line[epitope_seq_header] = line['Best Peptide']
+                    metric_lines = []
+                    for alignment in reference_matches:
+                        metric_line_alignment = metric_line.copy()
+                        metric_line_alignment.update(alignment)
+                        metric_lines.append(metric_line_alignment)
+                    if self.aggregate_metrics_file:
+                        matches = []
+                        for query_window, hit_reference_matches in groupby(metric_lines,key=lambda x:x['Query Window']):
+                            hit_reference_matches = list(hit_reference_matches)
+                            gene_regex = '^.*gene_symbol:([0-9|A-Z]+).*$'
+                            transcript_regex = '^.*transcript:(ENST[0-9|.]+).*$'
+                            gene_p = re.compile(gene_regex)
+                            transcript_p = re.compile(transcript_regex)
+                            genes = []
+                            transcripts = []
+                            for definition in [l['Hit Definition'] for l in hit_reference_matches]:
+                                m = gene_p.match(definition)
+                                if m:
+                                    genes.append(m.group(1))
+                                m = transcript_p.match(definition)
+                                if m:
+                                    transcripts.append(m.group(1))
+                            if len(genes) > 0:
+                                matches.append({
+                                    'Matched Peptide': query_window,
+                                    'Genes': ", ".join(sorted(list(set(genes)))),
+                                    'Transcripts': ", ".join(sorted(list(set(transcripts)))),
+                                    'Hit IDs': [l['Hit ID'] for l in hit_reference_matches],
+                                })
+                            else:
+                                matches.append({
+                                    'Matched Peptide': query_window,
+                                    'Hit IDs': [l['Hit ID'] for l in hit_reference_matches],
+                                    'Hit Definitions': [l['Hit Definition'] for l in hit_reference_matches],
+                                })
+                        m = {
+                            'count': len(metric_lines),
+                            'query_peptide': metric_lines[0]['Query Sequence'],
+                            'matches': matches
+                        }
+                        self.aggregate_metrics[metric_lines[0]['ID']]['reference_matches'] = m
+                    metric_writer.writerows(metric_lines)
 
                 else:
                     if self._input_tsv_type(line) == 'aggregated':
                         line['Ref Match'] = False
+                        if self.aggregate_metrics_file:
+                            self.aggregate_metrics[line['ID']]['reference_matches'] = {
+                                'count': 0,
+                                'query_peptide': peptide,
+                                'matches': []
+                            }
                     else:
                         line['Reference Match'] = False
                 writer.writerow(line)
+        if self.aggregate_metrics_file:
+            with open(self.output_aggregate_metrics_file, 'w') as fh:
+                json.dump(self.aggregate_metrics, fh, indent=2, separators=(',', ': '))
 
     def _get_unique_peptides(self, mt_records_dict, wt_records_dict):
         unique_peptides = set()
@@ -556,4 +634,10 @@ class CalculateReferenceProteomeSimilarity:
             default=1,
             help="Number of threads to use for parallelizing BLAST calls.",
         )
+        if tool == 'pvacseq':
+            parser.add_argument(
+                "-m", "--aggregate-metrics-file",
+                help="When running with the aggregate report as an input tsv, optionally provide the metrics.json "
+                    + "file to update with detailed reference match data for display in pVACview."
+            )
         return parser
