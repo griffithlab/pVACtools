@@ -568,12 +568,12 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                             wt_peptide = 'DEL-NA'
                     results[peptide]['wt_peptide'] = wt_peptide
             peptides[set_name]['peptides'] = self.sort_peptides(results)
-            peptides[set_name]['transcripts'] = self.sort_transcripts(annotations, good_binders)
-            peptides[set_name]['transcript_expr'] = [good_binders[good_binders["annotation"] == x]['Transcript Expression'].iloc[0] for x in annotations]
-            tsls = [good_binders[good_binders["annotation"] == x]['Transcript Support Level'].iloc[0] for x in annotations]
-            peptides[set_name]['tsl'] = [x if x == 'NA' or x == 'Not Supported' else round(float(x)) for x in tsls]
-            peptides[set_name]['biotype'] = [good_binders[good_binders["annotation"] == x]['Biotype'].iloc[0] for x in annotations]
-            peptides[set_name]['transcript_length'] = [int(good_binders[good_binders["annotation"] == x]['Transcript Length'].iloc[0]) for x in annotations]
+            sorted_transcripts = self.sort_transcripts(annotations, good_binders)
+            peptides[set_name]['transcripts'] = list(sorted_transcripts.Annotation)
+            peptides[set_name]['transcript_expr'] = list(sorted_transcripts.Expr)
+            peptides[set_name]['tsl'] = list(sorted_transcripts.TSL)
+            peptides[set_name]['biotype'] = list(sorted_transcripts.Biotype)
+            peptides[set_name]['transcript_length'] = list(sorted_transcripts.Length)
             peptides[set_name]['transcript_count'] = len(annotations)
             peptides[set_name]['peptide_count'] = len(peptide_set)
             peptides[set_name]['total_expr'] = sum([0 if x == 'NA' else (float(x)) for x in peptides[set_name]['transcript_expr']])
@@ -601,14 +601,14 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 'Biotype': line['Biotype'],
                 'TSL': line['Transcript Support Level'],
                 'Length': line['Transcript Length'],
+                'Expr': line['Transcript Expression'],
             }
             transcript_table = transcript_table.append(data, ignore_index=True)
         transcript_table['Biotype Sort'] = transcript_table.Biotype.map(lambda x: 1 if x == 'protein_coding' else 2)
         tsl_sort_criteria = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 'NA': 6, 'Not Supported': 6}
         transcript_table['TSL Sort'] = transcript_table.TSL.map(tsl_sort_criteria)
         transcript_table.sort_values(by=["Biotype Sort", "TSL Sort", "Length"], inplace=True, ascending=[True, True, False])
-        sorted_annotations = list(transcript_table.Annotation)
-        return sorted_annotations
+        return transcript_table
 
     def calculate_unique_peptide_count(self, good_binders):
         return len(good_binders["MT Epitope Seq"].unique())
