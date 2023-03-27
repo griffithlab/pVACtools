@@ -24,7 +24,7 @@ class PostProcessor:
         self.net_chop_fh = tempfile.NamedTemporaryFile()
         self.netmhc_stab_fh = tempfile.NamedTemporaryFile()
         self.manufacturability_fh = tempfile.NamedTemporaryFile()
-        self.reference_similarity_fh = tempfile.NamedTemporaryFile()
+        self.reference_similarity_fh = tempfile.NamedTemporaryFile(suffix='.tsv')
         self.file_type = kwargs.pop('file_type', None)
         self.fasta = kwargs.pop('fasta', None)
         self.net_chop_fasta = kwargs.pop('net_chop_fasta', None)
