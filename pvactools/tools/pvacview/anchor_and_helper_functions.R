@@ -79,8 +79,8 @@ peptide_coloring <- function(hla_allele, peptide_row) {
 }
 #calculate anchor list for specific peptide length and HLA allele combo given contribution cutoff
 calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution) {
-  anchor_raw_data <- as.numeric(anchor_data[[peptide_length]][anchor_data[[peptide_length]]["HLA"] == hla_allele][2:(peptide_length + 1)])
-  if (any(is.na(anchor_raw_data))) {
+  anchor_raw_data <- tryCatch(return(as.numeric(anchor_data[[peptide_length]][anchor_data[[peptide_length]]["HLA"] == hla_allele][2:(peptide_length + 1)])), error = function(e) { return("NA") })
+  if (any(is.na(anchor_raw_data)) | (anchor_raw_data == "NA")) {
     return("NA")
   }
   names(anchor_raw_data) <- as.character(1:length(anchor_raw_data))
