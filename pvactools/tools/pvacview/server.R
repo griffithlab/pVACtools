@@ -94,17 +94,22 @@ server <- shinyServer(function(input, output, session) {
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
     hla <- names(df$metricsData$binding_cutoffs)
+    if (!("Ref Match" %in% colnames(df$mainTable))) {
+      df$mainTable$`Ref Match` <- "Not Run"
+    }
     columns_needed <- c("ID", hla, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
-                        "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF", "Allele Expr",
-                        "RNA Depth", "DNA VAF",	"Tier",	"Evaluation", "Eval", "Select", "Comments")
-    df$mainTable <- df$mainTable[, columns_needed]
-    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
-    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+                        "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
+                        "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
     if ("Comments" %in% colnames(df$mainTable)) {
+      columns_needed <- c(columns_needed, "Comments")
       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
     }else {
       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
     }
+    df$mainTable <- df$mainTable[, columns_needed]
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
+    browser()
+    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     rownames(df$comments) <- df$mainTable$ID
     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
     df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
