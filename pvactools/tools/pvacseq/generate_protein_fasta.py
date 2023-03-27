@@ -165,24 +165,12 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
                     if index not in tsv_indexes:
                         continue
                 else:
-                    record_id_parts = record_id.split('.')
-                    gene = record_id_parts[2]
-                    if len(record_id_parts) == 8:
-                        #transcript includes version number and gene contains a dot
-                        gene = "{}.{}".format(record_id_parts[2], record_id_parts[3])
-                        transcript = "{}.{}".format(record_id_parts[4], record_id_parts[5])
-                        variant_type = record_id_parts[6]
-                        aa_change = record_id_parts[7]
-                    elif len(record_id_parts) == 7:
-                        #transcript includes version number
-                        transcript = "{}.{}".format(record_id_parts[3], record_id_parts[4])
-                        variant_type = record_id_parts[5]
-                        aa_change = record_id_parts[6]
-                    elif len(record_id_parts) == 6:
-                        #transcript without version number
-                        transcript = record_id_parts[3]
-                        variant_type = record_id_parts[4]
-                        aa_change = record_id_parts[5]
+                    (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
+                    transcript_regex = '^.*(ENST[0-9|.]+)$'
+                    transcript_p = re.compile(transcript_regex)
+                    m = transcript_p.match(rest_record_id)
+                    if m:
+                        transcript = m.group(1)
                     else:
                         raise Exception("Unexpected record_id format: {}".format(record_id))
                     regex = '^([0-9]+[\-]{0,1}[0-9]*)([A-Z|\-]*)\/([A-Z|\-]*)$'
@@ -193,7 +181,7 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
                             parsed_aa_change = "FS{}".format(m.group(1))
                         else:
                             parsed_aa_change = "{}{}{}".format(m.group(2), m.group(1), m.group(3))
-                        matches = [i for i in tsv_indexes if i['Gene'] == gene and i['Best Transcript'] == transcript and i['AA Change'] == parsed_aa_change and i['Evaluation'] in aggregate_report_evaluation]
+                        matches = [i for i in tsv_indexes if i['Best Transcript'] == transcript and i['AA Change'] == parsed_aa_change and i['Evaluation'] in aggregate_report_evaluation]
                         if len(matches) == 0:
                             continue
                     else:
