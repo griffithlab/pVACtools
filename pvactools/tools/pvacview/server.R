@@ -93,6 +93,11 @@ server <- shinyServer(function(input, output, session) {
     df$allele_expr <- df$metricsData$allele_expr_threshold
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
+    hla <- names(df$metricsData$binding_cutoffs)
+    columns_needed <- c("ID", hla, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+                        "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF", "Allele Expr",
+                        "RNA Depth", "DNA VAF",	"Tier",	"Evaluation", "Eval", "Select", "Comments")
+    df$mainTable <- df$mainTable[, columns_needed]
     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     if ("Comments" %in% colnames(df$mainTable)) {
@@ -340,11 +345,11 @@ server <- shinyServer(function(input, output, session) {
       "Binding Cutoffs" = unlist(lapply(names(df$metricsData$binding_cutoffs), function(x) df$metricsData$binding_cutoffs[[x]]))
     )
   )
-  output$comment_text <- renderText({
+  output$comment_text <- renderUI({
     if (is.null(df$mainTable)) {
-      return("N/A")
+      return(HTML("N/A"))
     }
-    df$comments[selectedID(), 1]
+    HTML(paste(df$comments[selectedID(), 1]))
   })
   observeEvent(input$page_length, {
     if (is.null(df$mainTable)) {
@@ -967,7 +972,7 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)) {
       return()
     }
-    colsToDrop = colnames(df$mainTable) %in% c("Evaluation", "Eval", "Select", "Scaled BA", "Scaled percentile", "Tier Count", "Bad TSL",
+    colsToDrop <- colnames(df$mainTable) %in% c("Evaluation", "Eval", "Select", "Scaled BA", "Scaled percentile", "Tier Count", "Bad TSL",
                                                "Comments", "Gene of Interest", "Bad TSL", "Col RNA Expr", "Col RNA VAF", "Col Allele Expr",
                                                "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos")
     data <- df$mainTable[, !(colsToDrop)]
