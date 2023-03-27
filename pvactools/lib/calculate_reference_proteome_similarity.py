@@ -181,7 +181,7 @@ class CalculateReferenceProteomeSimilarity:
 
         # Create mt record dictionary
         if self.file_type == 'pVACseq':
-            records_dict = {x.id.replace('MT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
+            records_dict = {re.sub('^%s' % "MT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
         else:
             records_dict = {x.id: str(x.seq) for x in records}
         return records_dict
@@ -193,7 +193,7 @@ class CalculateReferenceProteomeSimilarity:
             records = list(SeqIO.parse(self.input_fasta, "fasta"))
 
             # Create wt record dictionary
-            records_dict = {x.id.replace('WT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('WT.'), records)}
+            records_dict = {re.sub('^%s' % "WT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('WT.'), records)}
         else:
             return {}
         return records_dict
