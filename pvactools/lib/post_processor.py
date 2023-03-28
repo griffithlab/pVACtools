@@ -24,7 +24,7 @@ class PostProcessor:
         self.net_chop_fh = tempfile.NamedTemporaryFile()
         self.netmhc_stab_fh = tempfile.NamedTemporaryFile()
         self.manufacturability_fh = tempfile.NamedTemporaryFile()
-        self.reference_similarity_fh = tempfile.NamedTemporaryFile()
+        self.reference_similarity_fh = tempfile.NamedTemporaryFile(suffix='.tsv')
         self.file_type = kwargs.pop('file_type', None)
         self.fasta = kwargs.pop('fasta', None)
         self.net_chop_fasta = kwargs.pop('net_chop_fasta', None)
@@ -49,7 +49,8 @@ class PostProcessor:
         self.call_net_chop()
         self.call_netmhc_stab()
         self.calculate_reference_proteome_similarity()
-        shutil.copy(self.reference_similarity_fh.name, self.filtered_report_file)
+        shutil.copy(self.reference_similarity_fh.name, self.aggregate_report)
+        shutil.copy(self.netmhc_stab_fh.name, self.filtered_report_file)
         self.close_filehandles()
         print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
 
@@ -192,21 +193,36 @@ class PostProcessor:
     def calculate_reference_proteome_similarity(self):
         if self.run_reference_proteome_similarity:
             print("Calculating Reference Proteome Similarity")
-            CalculateReferenceProteomeSimilarity(
-                self.netmhc_stab_fh.name,
-                self.fasta,
-                self.reference_similarity_fh.name,
-                species=self.species,
-                file_type=self.file_type,
-                n_threads=self.n_threads,
-                blastp_path=self.blastp_path,
-                blastp_db=self.blastp_db,
-                peptide_fasta=self.peptide_fasta
-            ).execute()
-            shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.filtered_report_file))
+            if self.file_type == 'pVACseq':
+                aggregate_metrics_file = self.aggregate_report.replace('.tsv', '.metrics.json')
+                CalculateReferenceProteomeSimilarity(
+                    self.aggregate_report,
+                    self.fasta,
+                    self.reference_similarity_fh.name,
+                    species=self.species,
+                    file_type=self.file_type,
+                    n_threads=self.n_threads,
+                    blastp_path=self.blastp_path,
+                    blastp_db=self.blastp_db,
+                    peptide_fasta=self.peptide_fasta,
+                    aggregate_metrics_file=aggregate_metrics_file,
+                ).execute()
+            else:
+                CalculateReferenceProteomeSimilarity(
+                    self.aggregate_report,
+                    self.fasta,
+                    self.reference_similarity_fh.name,
+                    species=self.species,
+                    file_type=self.file_type,
+                    n_threads=self.n_threads,
+                    blastp_path=self.blastp_path,
+                    blastp_db=self.blastp_db,
+                    peptide_fasta=self.peptide_fasta,
+                ).execute()
+            shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.aggregate_report))
             print("Completed")
         else:
-            shutil.copy(self.netmhc_stab_fh.name, self.reference_similarity_fh.name)
+            shutil.copy(self.aggregate_report, self.reference_similarity_fh.name)
 
     def close_filehandles(self):
         self.binding_filter_fh.close()
