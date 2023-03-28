@@ -395,7 +395,7 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Allele")],
+      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments")],
       escape = FALSE, callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)), class = "stripe",
       options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
       columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
@@ -560,6 +560,14 @@ server <- shinyServer(function(input, output, session) {
   ##display of MT percentile from additional data file
   output$addData_percentile <- renderText({
     df$additionalData[df$additionalData$ID == selectedID(), ]$`%ile MT`
+  })
+  ##display of Best Peptide from additional data file
+  output$addData_peptide <- renderText({
+    df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Peptide`
+  })
+  ##display of Corresponding HLA allele from additional data file
+  output$addData_allele <- renderText({
+    df$additionalData[df$additionalData$ID == selectedID(), ]$`Allele`
   })
   ##transcripts sets table displaying sets of transcripts with the same consequence
   output$transcriptSetsTable <- renderDT({
