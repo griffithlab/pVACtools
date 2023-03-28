@@ -1464,7 +1464,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          325
+          325.0
         ],
         "transcript_count": 1,
         "peptide_count": 12,
@@ -2096,7 +2096,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          372
+          372.0
         ],
         "transcript_count": 1,
         "peptide_count": 5,
@@ -2370,7 +2370,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          1640
+          1640.0
         ],
         "transcript_count": 1,
         "peptide_count": 2,
@@ -2670,7 +2670,7 @@
           "IG_V_gene"
         ],
         "transcript_length": [
-          148
+          148.0
         ],
         "transcript_count": 1,
         "peptide_count": 2,
@@ -2829,7 +2829,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          377
+          377.0
         ],
         "transcript_count": 1,
         "peptide_count": 1,
@@ -3735,7 +3735,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          820
+          820.0
         ],
         "transcript_count": 1,
         "peptide_count": 7,
@@ -4022,7 +4022,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          639
+          639.0
         ],
         "transcript_count": 1,
         "peptide_count": 2,
@@ -4181,7 +4181,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          2365
+          2365.0
         ],
         "transcript_count": 1,
         "peptide_count": 1,
@@ -4915,7 +4915,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          2223
+          2223.0
         ],
         "transcript_count": 1,
         "peptide_count": 6,
@@ -5074,7 +5074,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          780
+          780.0
         ],
         "transcript_count": 1,
         "peptide_count": 1,
@@ -5233,7 +5233,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          780
+          780.0
         ],
         "transcript_count": 1,
         "peptide_count": 1,
@@ -6011,7 +6011,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          2253
+          2253.0
         ],
         "transcript_count": 1,
         "peptide_count": 6,
@@ -6961,7 +6961,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          677
+          677.0
         ],
         "transcript_count": 1,
         "peptide_count": 7,
@@ -7580,7 +7580,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          1819
+          1819.0
         ],
         "transcript_count": 1,
         "peptide_count": 5,
@@ -7911,7 +7911,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          593
+          593.0
         ],
         "transcript_count": 1,
         "peptide_count": 2,
@@ -8415,7 +8415,7 @@
           "protein_coding"
         ],
         "transcript_length": [
-          384
+          384.0
         ],
         "transcript_count": 1,
         "peptide_count": 4,
