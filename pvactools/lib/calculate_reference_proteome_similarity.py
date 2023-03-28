@@ -126,8 +126,12 @@ class CalculateReferenceProteomeSimilarity:
             raise Exception("refseq_select_prot blastp database is only compatible with human and mouse species.")
         self.peptide_fasta = peptide_fasta
         self.aggregate_metrics_file = aggregate_metrics_file
-        self.output_aggregate_metrics_file = output_file.replace('.tsv', '.metrics.json')
         if self.aggregate_metrics_file:
+            (dir_name, full_file_name) = os.path.split(output_file)
+            (file_name, extension) = os.path.splitext(full_file_name)
+            if extension != '.tsv':
+                raise Exception("Output file name is expected to be a .tsv file.")
+            self.output_aggregate_metrics_file = output_file.replace('.tsv', '.metrics.json')
             with open(self.aggregate_metrics_file, 'r') as fh:
                 self.aggregate_metrics = json.loads(fh.read())
         self.species_to_organism = {
