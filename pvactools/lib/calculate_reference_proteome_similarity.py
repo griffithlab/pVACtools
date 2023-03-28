@@ -203,16 +203,22 @@ class CalculateReferenceProteomeSimilarity:
         return records_dict
 
 
-    def extract_n_mer(self, full_peptide, subpeptide_position, mutation_position, mt_length):
+    def extract_n_mer(self, full_peptide, subpeptide_position, mutation_position, mt_length, variant_type):
         #For non-frameshifts this ensures that we only test match_length epitopes that overlap the mutation
         #If we extract a larger region, we will get false-positive matches against the reference proteome
         #from the native wildtype portion of the peptide
         flanking_sequence_length = self.match_length - 1
-        mt_start = subpeptide_position + (mutation_position-1)
+        if variant_type == 'inframe_del':
+            mt_start = subpeptide_position + (mutation_position)
+        else:
+            mt_start = subpeptide_position + (mutation_position-1)
         start = mt_start - flanking_sequence_length
         if start < 0:
             start = 0
-        end = mt_start + mt_length + flanking_sequence_length
+        if variant_type == 'inframe_del':
+            end = mt_start + flanking_sequence_length
+        else:
+            end = mt_start + mt_length + flanking_sequence_length
         return full_peptide[start:end]
 
 
@@ -312,7 +318,7 @@ class CalculateReferenceProteomeSimilarity:
                             shortened_mt_amino_acids += mt_aa
                 else:
                     shortened_mt_amino_acids = mt_amino_acids
-                peptide = self.extract_n_mer(full_peptide, subpeptide_position, mt_pos, len(shortened_mt_amino_acids))
+                peptide = self.extract_n_mer(full_peptide, subpeptide_position, mt_pos, len(shortened_mt_amino_acids), variant_type)
         return peptide, full_peptide
 
 
