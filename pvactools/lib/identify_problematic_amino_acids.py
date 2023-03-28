@@ -30,7 +30,7 @@ class IdentifyProblematicAminoAcids:
                 problematic_positions = []
                 for (aa, position) in self.problematic_amino_acids:
                     if position is None and aa in sequence:
-                        problematic_positions.append(str(sequence.index(aa) + 1))
+                        problematic_positions.extend([str(m.start()+1) for m in re.finditer(aa, sequence)])
                     elif position is not None and aa in sequence and sequence.index(aa) + 1 == position:
                         problematic_positions.append(str(position))
                 if self.filter_type == 'hard' and len(problematic_positions) == 0:
