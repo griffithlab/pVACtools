@@ -569,6 +569,10 @@ server <- shinyServer(function(input, output, session) {
   output$addData_allele <- renderText({
     df$additionalData[df$additionalData$ID == selectedID(), ]$`Allele`
   })
+  ##display of Best Transcript from additional data file
+  output$addData_transcript <- renderText({
+    df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Transcript`
+  })
   ##transcripts sets table displaying sets of transcripts with the same consequence
   output$transcriptSetsTable <- renderDT({
     withProgress(message = "Loading Transcript Sets Table", value = 0, {
