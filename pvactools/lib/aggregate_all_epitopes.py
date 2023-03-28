@@ -573,7 +573,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             peptides[set_name]['transcript_expr'] = list(sorted_transcripts.Expr)
             peptides[set_name]['tsl'] = list(sorted_transcripts.TSL)
             peptides[set_name]['biotype'] = list(sorted_transcripts.Biotype)
-            peptides[set_name]['transcript_length'] = list(sorted_transcripts.Length)
+            peptides[set_name]['transcript_length'] = [int(l) for l in list(sorted_transcripts.Length)]
             peptides[set_name]['transcript_count'] = len(annotations)
             peptides[set_name]['peptide_count'] = len(peptide_set)
             peptides[set_name]['total_expr'] = sum([0 if x == 'NA' else (float(x)) for x in peptides[set_name]['transcript_expr']])
