@@ -94,10 +94,11 @@ server <- shinyServer(function(input, output, session) {
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
     hla <- names(df$metricsData$binding_cutoffs)
+    converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
     if (!("Ref Match" %in% colnames(df$mainTable))) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
-    columns_needed <- c("ID", hla, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+    columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                         "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
     if ("Comments" %in% colnames(df$mainTable)) {
@@ -168,6 +169,21 @@ server <- shinyServer(function(input, output, session) {
      df$allele_expr <- df$metricsData$allele_expr_threshold
      df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
      df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
+     hla <- names(df$metricsData$binding_cutoffs)
+     converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
+     if (!("Ref Match" %in% colnames(df$mainTable))) {
+       df$mainTable$`Ref Match` <- "Not Run"
+     }
+     columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+                         "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
+                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
+     if ("Comments" %in% colnames(df$mainTable)) {
+       columns_needed <- c(columns_needed, "Comments")
+       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
+     }else {
+       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
+     }
+     df$mainTable <- df$mainTable[, columns_needed]
      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
      df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
      if ("Comments" %in% colnames(df$mainTable)) {
