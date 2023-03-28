@@ -94,7 +94,11 @@ server <- shinyServer(function(input, output, session) {
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
     hla <- names(df$metricsData$binding_cutoffs)
-    converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
+    if (input$hla_class == "class_i"){
+      converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
+    } else if (input$hla_class == "class_ii"){
+      converted_hla_names <- hla
+    }
     if (!("Ref Match" %in% colnames(df$mainTable))) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
