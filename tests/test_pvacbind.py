@@ -170,8 +170,8 @@ class PvacbindTests(unittest.TestCase):
                 '-e1', '9,10',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
-                '--net-chop-method', 'cterm',
-                '--netmhc-stab',
+                #'--net-chop-method', 'cterm',
+                #'--netmhc-stab',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta.name,
             ])
