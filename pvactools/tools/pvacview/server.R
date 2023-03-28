@@ -113,7 +113,6 @@ server <- shinyServer(function(input, output, session) {
     }
     df$mainTable <- df$mainTable[, columns_needed]
     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
-    browser()
     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     rownames(df$comments) <- df$mainTable$ID
     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
@@ -281,8 +280,8 @@ server <- shinyServer(function(input, output, session) {
         df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
       }
       df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
-      df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
-      if (is.null(df$percentile_threshold)) {
+      df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse((is.null(df$percentile_threshold) || is.na(df$percentile_threshold)), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
+      if (is.null(df$percentile_threshold) || is.na(df$percentile_threshold)) {
         df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
       }else {
         df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
