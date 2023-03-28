@@ -113,7 +113,6 @@ server <- shinyServer(function(input, output, session) {
     }
     df$mainTable <- df$mainTable[, columns_needed]
     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
-    browser()
     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     rownames(df$comments) <- df$mainTable$ID
     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
@@ -281,8 +280,8 @@ server <- shinyServer(function(input, output, session) {
         df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
       }
       df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
-      df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
-      if (is.null(df$percentile_threshold)) {
+      df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse((is.null(df$percentile_threshold) || is.na(df$percentile_threshold)), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
+      if (is.null(df$percentile_threshold) || is.na(df$percentile_threshold)) {
         df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
       }else {
         df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
@@ -396,7 +395,7 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Allele")],
+      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments")],
       escape = FALSE, callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)), class = "stripe",
       options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
       columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
@@ -561,6 +560,18 @@ server <- shinyServer(function(input, output, session) {
   ##display of MT percentile from additional data file
   output$addData_percentile <- renderText({
     df$additionalData[df$additionalData$ID == selectedID(), ]$`%ile MT`
+  })
+  ##display of Best Peptide from additional data file
+  output$addData_peptide <- renderText({
+    df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Peptide`
+  })
+  ##display of Corresponding HLA allele from additional data file
+  output$addData_allele <- renderText({
+    df$additionalData[df$additionalData$ID == selectedID(), ]$`Allele`
+  })
+  ##display of Best Transcript from additional data file
+  output$addData_transcript <- renderText({
+    df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Transcript`
   })
   ##transcripts sets table displaying sets of transcripts with the same consequence
   output$transcriptSetsTable <- renderDT({

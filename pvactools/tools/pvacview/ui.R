@@ -144,7 +144,10 @@ explore_tab <- tabItem(
                     tabPanel("Additional Data",
                         span("Additional Data Type: ", verbatimTextOutput("type_text")),
                         span("Median MT IC50: ", verbatimTextOutput("addData_IC50")),
-                        span("Median MT Percentile: ", verbatimTextOutput("addData_percentile")))
+                        span("Median MT Percentile: ", verbatimTextOutput("addData_percentile")),
+                        span("Best Peptide: ", verbatimTextOutput("addData_peptide")),
+                        span("Corresponding HLA allele: ", verbatimTextOutput("addData_allele")),
+                        span("Best Transcript: ", verbatimTextOutput("addData_transcript")))
                 ),
                 box(width = 4, solidHeader = TRUE, title = "Variant & Gene Info",
                     span("DNA VAF", verbatimTextOutput("metricsTextDNA")),
