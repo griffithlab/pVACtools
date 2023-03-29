@@ -325,6 +325,7 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.tsv_1-24',
                 'sample.name.fasta',
                 'sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.all_epitopes.aggregated.metrics.json',
                 'sample.name.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
@@ -375,6 +376,7 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.tsv_1-24',
                 'sample.name.fasta',
                 'sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.all_epitopes.aggregated.metrics.json',
                 'sample.name.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
