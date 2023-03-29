@@ -3634,8 +3634,8 @@
     "DNA VAF": 0.053,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "AVRPLELVY",
-    "best_peptide_wt": "AVRPLELAY",
+    "best_peptide_mt": "RPLELVYCL",
+    "best_peptide_wt": "RPLELAYCL",
     "best_hla_allele": "HLA-B*35:01"
   },
   "22-19175521-19175522-G-T": {
@@ -4642,8 +4642,8 @@
     "DNA VAF": 0.1,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "SVNEALNNL",
-    "best_peptide_wt": "SVNEALNHL",
+    "best_peptide_mt": "ALNNLLTEE",
+    "best_peptide_wt": "ALNHLLTEE",
     "best_hla_allele": "HLA-A*02:01"
   },
   "22-20709231-20709232-G-C": {
@@ -14708,9 +14708,9 @@
     "DNA VAF": 0.233,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "YSYGLLHIY",
-    "best_peptide_wt": "YSYGLLHTY",
-    "best_hla_allele": "HLA-B*35:01"
+    "best_peptide_mt": "YSYGLLHIYG",
+    "best_peptide_wt": "YSYGLLHTYG",
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-50555769-50555770-G-A": {
     "good_binders": {},
@@ -16321,8 +16321,8 @@
     "DNA VAF": 0.959,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "ALGWEFLAFT",
-    "best_peptide_wt": "ALGWEFLAST",
+    "best_peptide_mt": "FLAFTRLTSE",
+    "best_peptide_wt": "FLASTRLTSE",
     "best_hla_allele": "HLA-A*02:01"
   },
   "22-50682229-50682230-T-C": {
@@ -17444,9 +17444,9 @@
     "DNA VAF": 0.686,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "SLFGALVRS",
-    "best_peptide_wt": "SLFGALVHS",
-    "best_hla_allele": "HLA-A*02:01"
+    "best_peptide_mt": "GALVRSRTY",
+    "best_peptide_wt": "GALVHSRTY",
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-50869713-50869714-C-A": {
     "good_binders": {
@@ -19592,8 +19592,8 @@
     "DNA VAF": 0.158,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "TLSRTLLLA",
-    "best_peptide_wt": "TLSRTLLAA",
+    "best_peptide_mt": "TLSRTLLLAA",
+    "best_peptide_wt": "TLSRTLLAAA",
     "best_hla_allele": "HLA-A*02:01"
   }
 }
