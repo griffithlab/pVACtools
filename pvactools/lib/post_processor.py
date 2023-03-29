@@ -207,6 +207,8 @@ class PostProcessor:
                     peptide_fasta=self.peptide_fasta,
                     aggregate_metrics_file=aggregate_metrics_file,
                 ).execute()
+                aggregate_metrics_output_file = self.reference_similarity_fh.name.replace('.tsv', '.metrics.json')
+                shutil.move(aggregate_metrics_output_file, aggregate_metrics_file)
             else:
                 CalculateReferenceProteomeSimilarity(
                     self.aggregate_report,
