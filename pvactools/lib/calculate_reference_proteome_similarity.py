@@ -173,9 +173,11 @@ class CalculateReferenceProteomeSimilarity:
 
     def reference_match_headers(self, fieldnames):
         if self._input_tsv_type(fieldnames) == 'aggregated':
-            fieldnames.insert(len(fieldnames)-1, 'Ref Match')
+            if 'Ref Match' not in fieldnames:
+                fieldnames.insert(len(fieldnames)-1, 'Ref Match')
         else:
-            fieldnames.insert(len(fieldnames), 'Reference Match')
+            if 'Reference Match' not in fieldnames:
+                fieldnames.insert(len(fieldnames), 'Reference Match')
         return fieldnames
 
 
