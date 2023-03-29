@@ -357,26 +357,17 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         else:
             prob_pos_df = tsl_df
 
+        #subset prob_pos dataframe to only include entries that pass the anchor position check
+        prob_pos_df['anchor_residue_pass'] = prob_pos_df.apply(lambda x: self.is_anchor_residue_pass(x), axis=1)
+        anchor_residue_pass_df = prob_pos_df[prob_pos_df['anchor_residue_pass']]
+        if anchor_residue_pass_df.shape[0] == 0:
+            anchor_residue_pass_df = prob_pos_df
+
         #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
         prob_pos_df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "Transcript Length".format(self.wt_top_score_metric)], inplace=True, ascending=[True, True, False])
         return prob_pos_df.iloc[0].to_dict()
 
-    def get_anchor_positions(self, hla_allele, epitope_length):
-        if self.allele_specific_anchors and epitope_length in self.anchor_probabilities and hla_allele in self.anchor_probabilities[epitope_length]:
-            probs = self.anchor_probabilities[epitope_length][hla_allele]
-            positions = []
-            total_prob = 0
-            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
-                total_prob += float(prob)
-                positions.append(pos)
-                if total_prob > self.anchor_contribution_threshold:
-                    return positions
-
-        return [1, 2, epitope_length - 1 , epitope_length]
-
-
-    #assign mutations to a "Classification" based on their favorability
-    def get_tier(self, mutation, vaf_clonal):
+    def is_anchor_residue_pass(self, mutation):
         binding_threshold = self.binding_thresholds[mutation['HLA Allele']]
 
         anchor_residue_pass = True
@@ -396,6 +387,27 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     anchor_residue_pass = False
                 elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
                     anchor_residue_pass = False
+        return anchor_residue_pass
+
+    def get_anchor_positions(self, hla_allele, epitope_length):
+        if self.allele_specific_anchors and epitope_length in self.anchor_probabilities and hla_allele in self.anchor_probabilities[epitope_length]:
+            probs = self.anchor_probabilities[epitope_length][hla_allele]
+            positions = []
+            total_prob = 0
+            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
+                total_prob += float(prob)
+                positions.append(pos)
+                if total_prob > self.anchor_contribution_threshold:
+                    return positions
+
+        return [1, 2, epitope_length - 1 , epitope_length]
+
+
+    #assign mutations to a "Classification" based on their favorability
+    def get_tier(self, mutation, vaf_clonal):
+        binding_threshold = self.binding_thresholds[mutation['HLA Allele']]
+
+        anchor_residue_pass = self.is_anchor_residue_pass(mutation)
 
         tsl_pass = True
         if mutation["Transcript Support Level"] == "Not Supported":
