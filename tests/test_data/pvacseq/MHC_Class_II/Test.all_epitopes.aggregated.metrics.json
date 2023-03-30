@@ -42,6 +42,7 @@
             ],
             "mutation_position": "5-6",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -110,6 +111,7 @@
             ],
             "mutation_position": "4-5",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -178,6 +180,7 @@
             ],
             "mutation_position": "2-3",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -246,6 +249,7 @@
             ],
             "mutation_position": "3-4",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -314,6 +318,7 @@
             ],
             "mutation_position": "1-2",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -382,6 +387,7 @@
             ],
             "mutation_position": "6-7",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -450,6 +456,7 @@
             ],
             "mutation_position": "7-8",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -518,6 +525,7 @@
             ],
             "mutation_position": "8-9",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -586,6 +594,7 @@
             ],
             "mutation_position": "9-10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -654,6 +663,7 @@
             ],
             "mutation_position": "10-11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -722,6 +732,7 @@
             ],
             "mutation_position": "11-12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1302,6 +1313,7 @@
             ],
             "mutation_position": "3",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1370,6 +1382,7 @@
             ],
             "mutation_position": "4",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1438,6 +1451,7 @@
             ],
             "mutation_position": "2",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1506,6 +1520,7 @@
             ],
             "mutation_position": "5",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1574,6 +1589,7 @@
             ],
             "mutation_position": "6",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1642,6 +1658,7 @@
             ],
             "mutation_position": "1",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1710,6 +1727,7 @@
             ],
             "mutation_position": "7",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1778,6 +1796,7 @@
             ],
             "mutation_position": "9",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1846,6 +1865,7 @@
             ],
             "mutation_position": "8",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1914,6 +1934,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -1982,6 +2003,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2050,6 +2072,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2118,6 +2141,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2271,6 +2295,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2339,6 +2364,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2407,6 +2433,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2543,6 +2570,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2611,6 +2639,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2679,6 +2708,7 @@
             ],
             "mutation_position": "14",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2747,6 +2777,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2815,6 +2846,7 @@
             ],
             "mutation_position": "15",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2883,6 +2915,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -2991,142 +3024,6 @@
     "good_binders": {
       "Transcript Set 1": {
         "peptides": {
-          "HGGVSLSKIERSTDQ": {
-            "ic50s_MT": [
-              203.3000030517578
-            ],
-            "percentiles_MT": [
-              15.0
-            ],
-            "ic50s_WT": [
-              232.4
-            ],
-            "percentiles_WT": [
-              16.0
-            ],
-            "hla_types": [
-              "HLA-DRB1*11:01"
-            ],
-            "mutation_position": "1",
-            "problematic_positions": "None",
-            "individual_ic50_calls": {
-              "algorithms": [
-                "NNalign"
-              ],
-              "MT": {
-                "HLA-DRB1*11:01": [
-                  203.3000030517578
-                ]
-              },
-              "WT": {
-                "HLA-DRB1*11:01": [
-                  232.4
-                ]
-              }
-            },
-            "individual_percentile_calls": {
-              "algorithms": [
-                "NNalign"
-              ],
-              "MT": {
-                "HLA-DRB1*11:01": [
-                  15.0
-                ]
-              },
-              "WT": {
-                "HLA-DRB1*11:01": [
-                  16.0
-                ]
-              }
-            },
-            "individual_el_calls": {
-              "algorithms": [],
-              "MT": {
-                "HLA-DRB1*11:01": []
-              },
-              "WT": {
-                "HLA-DRB1*11:01": []
-              }
-            },
-            "individual_el_percentile_calls": {
-              "algorithms": [],
-              "MT": {
-                "HLA-DRB1*11:01": []
-              },
-              "WT": {
-                "HLA-DRB1*11:01": []
-              }
-            },
-            "wt_peptide": "PGGVSLSKIERSTDQ"
-          },
-          "KHGGVSLSKIERSTD": {
-            "ic50s_MT": [
-              243.8000030517578
-            ],
-            "percentiles_MT": [
-              17.0
-            ],
-            "ic50s_WT": [
-              292.1
-            ],
-            "percentiles_WT": [
-              19.0
-            ],
-            "hla_types": [
-              "HLA-DRB1*11:01"
-            ],
-            "mutation_position": "2",
-            "problematic_positions": "None",
-            "individual_ic50_calls": {
-              "algorithms": [
-                "NNalign"
-              ],
-              "MT": {
-                "HLA-DRB1*11:01": [
-                  243.8000030517578
-                ]
-              },
-              "WT": {
-                "HLA-DRB1*11:01": [
-                  292.1
-                ]
-              }
-            },
-            "individual_percentile_calls": {
-              "algorithms": [
-                "NNalign"
-              ],
-              "MT": {
-                "HLA-DRB1*11:01": [
-                  17.0
-                ]
-              },
-              "WT": {
-                "HLA-DRB1*11:01": [
-                  19.0
-                ]
-              }
-            },
-            "individual_el_calls": {
-              "algorithms": [],
-              "MT": {
-                "HLA-DRB1*11:01": []
-              },
-              "WT": {
-                "HLA-DRB1*11:01": []
-              }
-            },
-            "individual_el_percentile_calls": {
-              "algorithms": [],
-              "MT": {
-                "HLA-DRB1*11:01": []
-              },
-              "WT": {
-                "HLA-DRB1*11:01": []
-              }
-            },
-            "wt_peptide": "KPGGVSLSKIERSTD"
-          },
           "GKHGGVSLSKIERST": {
             "ic50s_MT": [
               282.5
@@ -3145,6 +3042,7 @@
             ],
             "mutation_position": "3",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3213,6 +3111,7 @@
             ],
             "mutation_position": "4",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3281,6 +3180,7 @@
             ],
             "mutation_position": "5",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3349,6 +3249,7 @@
             ],
             "mutation_position": "9",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3417,6 +3318,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3485,6 +3387,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3553,6 +3456,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3621,6 +3525,7 @@
             ],
             "mutation_position": "8",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3689,6 +3594,7 @@
             ],
             "mutation_position": "7",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3757,6 +3663,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3825,6 +3732,7 @@
             ],
             "mutation_position": "6",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -3874,6 +3782,144 @@
               }
             },
             "wt_peptide": "DLIGKPGGVSLSKIE"
+          },
+          "HGGVSLSKIERSTDQ": {
+            "ic50s_MT": [
+              203.3000030517578
+            ],
+            "percentiles_MT": [
+              15.0
+            ],
+            "ic50s_WT": [
+              232.4
+            ],
+            "percentiles_WT": [
+              16.0
+            ],
+            "hla_types": [
+              "HLA-DRB1*11:01"
+            ],
+            "mutation_position": "1",
+            "problematic_positions": "None",
+            "anchor_fails": "HLA-DRB1*11:01",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  203.3000030517578
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  232.4
+                ]
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  15.0
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  16.0
+                ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "wt_peptide": "PGGVSLSKIERSTDQ"
+          },
+          "KHGGVSLSKIERSTD": {
+            "ic50s_MT": [
+              243.8000030517578
+            ],
+            "percentiles_MT": [
+              17.0
+            ],
+            "ic50s_WT": [
+              292.1
+            ],
+            "percentiles_WT": [
+              19.0
+            ],
+            "hla_types": [
+              "HLA-DRB1*11:01"
+            ],
+            "mutation_position": "2",
+            "problematic_positions": "None",
+            "anchor_fails": "HLA-DRB1*11:01",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  243.8000030517578
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  292.1
+                ]
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  17.0
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  19.0
+                ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "wt_peptide": "KPGGVSLSKIERSTD"
           }
         },
         "transcripts": [
@@ -3942,6 +3988,7 @@
             ],
             "mutation_position": "2",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4059,6 +4106,7 @@
             ],
             "mutation_position": "15",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4127,6 +4175,7 @@
             ],
             "mutation_position": "14",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4195,6 +4244,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4263,6 +4313,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4380,6 +4431,7 @@
             ],
             "mutation_position": "15",
             "problematic_positions": "None",
+            "anchor_fails": "HLA-DRB1*11:01",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4497,6 +4549,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4565,6 +4618,7 @@
             ],
             "mutation_position": "14",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4633,6 +4687,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4701,6 +4756,7 @@
             ],
             "mutation_position": "15",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4769,6 +4825,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4904,6 +4961,7 @@
             ],
             "mutation_position": "3",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -4972,6 +5030,7 @@
             ],
             "mutation_position": "4",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5040,6 +5099,7 @@
             ],
             "mutation_position": "2",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5108,6 +5168,7 @@
             ],
             "mutation_position": "5",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5176,6 +5237,7 @@
             ],
             "mutation_position": "6",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5244,6 +5306,7 @@
             ],
             "mutation_position": "1",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5312,6 +5375,7 @@
             ],
             "mutation_position": "7",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5411,142 +5475,6 @@
     "good_binders": {
       "Transcript Set 1": {
         "peptides": {
-          "QYHVASVLCQRAKVE": {
-            "ic50s_MT": [
-              202.1999969482422
-            ],
-            "percentiles_MT": [
-              15.0
-            ],
-            "ic50s_WT": [
-              164.8
-            ],
-            "percentiles_WT": [
-              13.0
-            ],
-            "hla_types": [
-              "HLA-DRB1*11:01"
-            ],
-            "mutation_position": "15",
-            "problematic_positions": "None",
-            "individual_ic50_calls": {
-              "algorithms": [
-                "NNalign"
-              ],
-              "MT": {
-                "HLA-DRB1*11:01": [
-                  202.1999969482422
-                ]
-              },
-              "WT": {
-                "HLA-DRB1*11:01": [
-                  164.8
-                ]
-              }
-            },
-            "individual_percentile_calls": {
-              "algorithms": [
-                "NNalign"
-              ],
-              "MT": {
-                "HLA-DRB1*11:01": [
-                  15.0
-                ]
-              },
-              "WT": {
-                "HLA-DRB1*11:01": [
-                  13.0
-                ]
-              }
-            },
-            "individual_el_calls": {
-              "algorithms": [],
-              "MT": {
-                "HLA-DRB1*11:01": []
-              },
-              "WT": {
-                "HLA-DRB1*11:01": []
-              }
-            },
-            "individual_el_percentile_calls": {
-              "algorithms": [],
-              "MT": {
-                "HLA-DRB1*11:01": []
-              },
-              "WT": {
-                "HLA-DRB1*11:01": []
-              }
-            },
-            "wt_peptide": "QYHVASVLCQRAKVA"
-          },
-          "YHVASVLCQRAKVEM": {
-            "ic50s_MT": [
-              466.70001220703125
-            ],
-            "percentiles_MT": [
-              24.0
-            ],
-            "ic50s_WT": [
-              309.9
-            ],
-            "percentiles_WT": [
-              19.0
-            ],
-            "hla_types": [
-              "HLA-DRB1*11:01"
-            ],
-            "mutation_position": "14",
-            "problematic_positions": "None",
-            "individual_ic50_calls": {
-              "algorithms": [
-                "NNalign"
-              ],
-              "MT": {
-                "HLA-DRB1*11:01": [
-                  466.70001220703125
-                ]
-              },
-              "WT": {
-                "HLA-DRB1*11:01": [
-                  309.9
-                ]
-              }
-            },
-            "individual_percentile_calls": {
-              "algorithms": [
-                "NNalign"
-              ],
-              "MT": {
-                "HLA-DRB1*11:01": [
-                  24.0
-                ]
-              },
-              "WT": {
-                "HLA-DRB1*11:01": [
-                  19.0
-                ]
-              }
-            },
-            "individual_el_calls": {
-              "algorithms": [],
-              "MT": {
-                "HLA-DRB1*11:01": []
-              },
-              "WT": {
-                "HLA-DRB1*11:01": []
-              }
-            },
-            "individual_el_percentile_calls": {
-              "algorithms": [],
-              "MT": {
-                "HLA-DRB1*11:01": []
-              },
-              "WT": {
-                "HLA-DRB1*11:01": []
-              }
-            },
-            "wt_peptide": "YHVASVLCQRAKVAM"
-          },
           "HVASVLCQRAKVEMS": {
             "ic50s_MT": [
               770.7000122070312
@@ -5565,6 +5493,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5633,6 +5562,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5701,6 +5631,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5769,6 +5700,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5837,6 +5769,7 @@
             ],
             "mutation_position": "9",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5905,6 +5838,7 @@
             ],
             "mutation_position": "8",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -5973,6 +5907,7 @@
             ],
             "mutation_position": "7",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6022,6 +5957,144 @@
               }
             },
             "wt_peptide": "CQRAKVAMSHFEPNE"
+          },
+          "QYHVASVLCQRAKVE": {
+            "ic50s_MT": [
+              202.1999969482422
+            ],
+            "percentiles_MT": [
+              15.0
+            ],
+            "ic50s_WT": [
+              164.8
+            ],
+            "percentiles_WT": [
+              13.0
+            ],
+            "hla_types": [
+              "HLA-DRB1*11:01"
+            ],
+            "mutation_position": "15",
+            "problematic_positions": "None",
+            "anchor_fails": "HLA-DRB1*11:01",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  202.1999969482422
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  164.8
+                ]
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  15.0
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  13.0
+                ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "wt_peptide": "QYHVASVLCQRAKVA"
+          },
+          "YHVASVLCQRAKVEM": {
+            "ic50s_MT": [
+              466.70001220703125
+            ],
+            "percentiles_MT": [
+              24.0
+            ],
+            "ic50s_WT": [
+              309.9
+            ],
+            "percentiles_WT": [
+              19.0
+            ],
+            "hla_types": [
+              "HLA-DRB1*11:01"
+            ],
+            "mutation_position": "14",
+            "problematic_positions": "None",
+            "anchor_fails": "HLA-DRB1*11:01",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  466.70001220703125
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  309.9
+                ]
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  24.0
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  19.0
+                ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "wt_peptide": "YHVASVLCQRAKVAM"
           }
         },
         "transcripts": [
@@ -6090,6 +6163,7 @@
             ],
             "mutation_position": "14",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6158,6 +6232,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6226,6 +6301,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6294,6 +6370,7 @@
             ],
             "mutation_position": "15",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6362,6 +6439,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6430,6 +6508,7 @@
             ],
             "mutation_position": "1",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6498,6 +6577,7 @@
             ],
             "mutation_position": "2",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6566,6 +6646,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6634,6 +6715,7 @@
             ],
             "mutation_position": "8",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6702,6 +6784,7 @@
             ],
             "mutation_position": "9",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6770,6 +6853,7 @@
             ],
             "mutation_position": "3",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6887,6 +6971,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -6955,6 +7040,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7023,6 +7109,7 @@
             ],
             "mutation_position": "9",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7091,6 +7178,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7159,6 +7247,7 @@
             ],
             "mutation_position": "8",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7227,6 +7316,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7295,6 +7385,7 @@
             ],
             "mutation_position": "7",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7363,6 +7454,7 @@
             ],
             "mutation_position": "14",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7431,6 +7523,7 @@
             ],
             "mutation_position": "15",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7499,6 +7592,7 @@
             ],
             "mutation_position": "6",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7567,6 +7661,7 @@
             ],
             "mutation_position": "5",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7684,6 +7779,7 @@
             ],
             "mutation_position": "7",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7752,6 +7848,7 @@
             ],
             "mutation_position": "6",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7820,6 +7917,7 @@
             ],
             "mutation_position": "8",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7888,6 +7986,7 @@
             ],
             "mutation_position": "5",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -7956,6 +8055,7 @@
             ],
             "mutation_position": "9",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8024,6 +8124,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8092,6 +8193,7 @@
             ],
             "mutation_position": "4",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8160,6 +8262,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8228,6 +8331,7 @@
             ],
             "mutation_position": "1",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8296,6 +8400,7 @@
             ],
             "mutation_position": "2",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8364,6 +8469,7 @@
             ],
             "mutation_position": "3",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8432,6 +8538,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8500,6 +8607,7 @@
             ],
             "mutation_position": "15",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8568,6 +8676,7 @@
             ],
             "mutation_position": "14",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8685,6 +8794,7 @@
             ],
             "mutation_position": "7",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8753,6 +8863,7 @@
             ],
             "mutation_position": "6",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8821,6 +8932,7 @@
             ],
             "mutation_position": "8",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8889,6 +9001,7 @@
             ],
             "mutation_position": "9",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -8957,6 +9070,7 @@
             ],
             "mutation_position": "5",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9025,6 +9139,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9093,6 +9208,7 @@
             ],
             "mutation_position": "4",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9161,6 +9277,7 @@
             ],
             "mutation_position": "3",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9229,6 +9346,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9297,6 +9415,7 @@
             ],
             "mutation_position": "2",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9365,6 +9484,7 @@
             ],
             "mutation_position": "15",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9433,6 +9553,7 @@
             ],
             "mutation_position": "14",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9501,6 +9622,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9569,6 +9691,7 @@
             ],
             "mutation_position": "1",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9637,6 +9760,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9754,6 +9878,7 @@
             ],
             "mutation_position": "8",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9822,6 +9947,7 @@
             ],
             "mutation_position": "9",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9890,6 +10016,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -9958,6 +10085,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10026,6 +10154,7 @@
             ],
             "mutation_position": "7",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10094,6 +10223,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10162,6 +10292,7 @@
             ],
             "mutation_position": "6",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10230,6 +10361,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10298,6 +10430,7 @@
             ],
             "mutation_position": "1",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10366,6 +10499,7 @@
             ],
             "mutation_position": "2",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10434,6 +10568,7 @@
             ],
             "mutation_position": "3",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10502,6 +10637,7 @@
             ],
             "mutation_position": "14",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10570,6 +10706,7 @@
             ],
             "mutation_position": "4",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10638,6 +10775,7 @@
             ],
             "mutation_position": "5",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -10706,6 +10844,7 @@
             ],
             "mutation_position": "15",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11025,6 +11164,7 @@
             ],
             "mutation_position": "7",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11093,6 +11233,7 @@
             ],
             "mutation_position": "6",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11161,6 +11302,7 @@
             ],
             "mutation_position": "8",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11229,6 +11371,7 @@
             ],
             "mutation_position": "5",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11297,6 +11440,7 @@
             ],
             "mutation_position": "9",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11365,6 +11509,7 @@
             ],
             "mutation_position": "11",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11433,6 +11578,7 @@
             ],
             "mutation_position": "10",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11501,6 +11647,7 @@
             ],
             "mutation_position": "12",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11569,6 +11716,7 @@
             ],
             "mutation_position": "13",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11637,6 +11785,7 @@
             ],
             "mutation_position": "4",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11705,6 +11854,7 @@
             ],
             "mutation_position": "14",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11773,6 +11923,7 @@
             ],
             "mutation_position": "3",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
@@ -11841,6 +11992,7 @@
             ],
             "mutation_position": "15",
             "problematic_positions": "None",
+            "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
                 "NNalign"
