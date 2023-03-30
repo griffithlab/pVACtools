@@ -509,6 +509,34 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$ID[df$selectedRow]
     }
   })
+  output$selectedPeptide <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`Best Peptide`[1]
+    }else {
+      df$mainTable$`Best Peptide`[df$selectedRow]
+    }
+  })
+  output$selectedAAChange <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`AA Change`[1]
+    }else {
+      df$mainTable$`AA Change`[df$selectedRow]
+    }
+  })
+  output$selectedPos <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`Pos`[1]
+    }else {
+      df$mainTable$`Pos`[df$selectedRow]
+    }
+  })
+  output$selectedGene <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`Gene`[1]
+    }else {
+      df$mainTable$`Gene`[df$selectedRow]
+    }
+  })
   ## Update comments section based on selected row
   observeEvent(input$comment, {
     if (is.null(df$mainTable)) {
