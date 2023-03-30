@@ -51,6 +51,7 @@ table_formatting <- function(x, y) {
   colnames(ic50_mt)[colnames(ic50_mt) == "Mutant"] <- "Peptide Sequence"
   ic50_mt <- add_column(ic50_mt, Type = "MT", .after = "Peptide Sequence")
   ic50_mt <- add_column(ic50_mt, `Problematic Positions` = peptide_columns$problematic_positions[[1]])
+  ic50_mt <- add_column(ic50_mt, `Anchor Residue Fail` = peptide_columns$anchor_fails[[1]])
   peptide_columns_wt <- peptide_columns
   peptide_columns_wt$Mutant <- NULL
   ic50_wt <- dcast(peptide_columns_wt, wt_peptide ~ hla_types, value.var = "ic50s_WT")
@@ -58,10 +59,12 @@ table_formatting <- function(x, y) {
   colnames(ic50_wt)[colnames(ic50_wt) == "wt_peptide"] <- "Peptide Sequence"
   ic50_wt <- add_column(ic50_wt, Type = "WT", .after = "Peptide Sequence")
   ic50_wt <- add_column(ic50_wt, `Problematic Positions` = "")
+  ic50_wt <- add_column(ic50_wt, `Anchor Residue Fail` = "")
   combined_data <- rbind(ic50_mt, ic50_wt)
   combined_data$`Mutation Position` <- peptide_columns$mutation_position[[1]]
-  reordered_data <- combined_data %>% select(-one_of("Problematic Positions"), one_of("Problematic Positions"))
+  reordered_data <- combined_data %>% select(-one_of("Problematic Positions"), -one_of("Anchor Residue Fail"), one_of("Problematic Positions"), one_of("Anchor Residue Fail"))
   reordered_data$`Has ProbPos` <- apply(reordered_data, 1, function(x) (x["Problematic Positions"] != "") & (x["Problematic Positions"] != "None"))
+  reordered_data$`Has AnchorResidueFail` <- apply(reordered_data, 1, function(x) (x["Anchor Residue Fail"] != "") & (x["Anchor Residue Fail"] != "None"))
   reordered_data
 }
 #generate peptide coloring for hla allele

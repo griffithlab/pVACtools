@@ -709,7 +709,7 @@ server <- shinyServer(function(input, output, session) {
           columnDefs = list(list(defaultContent = "X",
             targets = c(2:hla_count() + 1)),
             list(orderable = TRUE, targets = 0),
-            list(visible = FALSE, targets = c(-1))),
+            list(visible = FALSE, targets = c(-1, -2))),
           rowCallback = JS("function(row, data, index, rowId) {",
                             "console.log(rowId)",
                             "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
@@ -720,6 +720,8 @@ server <- shinyServer(function(input, output, session) {
           formatStyle("Type", fontWeight = styleEqual("MT", "bold")) %>%
           formatStyle(c("Peptide Sequence"), "Has ProbPos", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
           formatStyle(c("Problematic Positions"), "Has ProbPos", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
+          formatStyle(c("Peptide Sequence"), "Has AnchorResidueFail", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
+          formatStyle(c("Anchor Residue Fail"), "Has AnchorResidueFail", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
           formatStyle("Peptide Sequence", backgroundColor = styleEqual(c(best_peptide), c("#98FF98")))
         dtable$x$data[[1]] <- as.numeric(dtable$x$data[[1]])
         dtable
