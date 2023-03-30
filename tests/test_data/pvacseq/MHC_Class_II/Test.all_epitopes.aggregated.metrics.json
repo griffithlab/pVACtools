@@ -3911,8 +3911,8 @@
     "DNA VAF": 0.179,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "HGGVSLSKIERSTDQ",
-    "best_peptide_wt": "PGGVSLSKIERSTDQ",
+    "best_peptide_mt": "GKHGGVSLSKIERST",
+    "best_peptide_wt": "GKPGGVSLSKIERST",
     "best_hla_allele": "HLA-DRB1*11:01",
     "reference_matches": {
       "count": 0,
@@ -6059,8 +6059,8 @@
     "DNA VAF": 0.044,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "QYHVASVLCQRAKVE",
-    "best_peptide_wt": "QYHVASVLCQRAKVA",
+    "best_peptide_mt": "HVASVLCQRAKVEMS",
+    "best_peptide_wt": "HVASVLCQRAKVAMS",
     "best_hla_allele": "HLA-DRB1*11:01",
     "reference_matches": {
       "count": 0,
