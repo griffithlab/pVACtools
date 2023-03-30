@@ -447,9 +447,10 @@ server <- shinyServer(function(input, output, session) {
     %>% formatStyle(c("IC50 WT", "Pos", "Allele Expr"), "Tier Count", fontWeight = styleEqual(c("21"), c("bold")), border = styleEqual(c("21"), c("2px solid red")))
     %>% formatStyle(c("Allele Expr"), "Tier Count", fontWeight = styleEqual(c("20"), c("bold")), border = styleEqual(c("20"), c("2px solid red")))
     %>% formatStyle(c("Gene"), "Gene of Interest", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid green")))
-    %>% formatStyle(c("TSL"), "Bad TSL", border = styleEqual(c(TRUE), c("2px solid red")))
+    %>% formatStyle(c("TSL"), "Bad TSL", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red")))
     %>% formatStyle(c("%ile MT"), "Percentile Fail", border = styleEqual(c(TRUE), c("2px solid red")))
     %>% formatStyle(c("Prob Pos"), "Has Prob Pos", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red")))
+    %>% formatStyle(c("Ref Match"), "Ref Match", fontWeight = styleEqual(c("True"), c("bold")), border = styleEqual(c("True"), c("2px solid red")))
     , server = FALSE)
   #help menu for main table
   observeEvent(input$help, {
