@@ -175,9 +175,9 @@ class AggregateAllEpitopes:
             "Variant Type": "category",
             "Mutation Position": "category",
             "Median MT IC50 Score": "float32",
-            "Median MT Percentile": "float16",
+            "Median MT Percentile": "float32",
             "Best MT IC50 Score": "float32",
-            "Best MT Percentile": "float16",
+            "Best MT Percentile": "float32",
             "Protein Position": "str",
             "Transcript Length": "int32",
         }
@@ -185,7 +185,7 @@ class AggregateAllEpitopes:
             if algorithm == 'SMM' or algorithm == 'SMMPMBEC':
                 continue
             dtypes["{} MT Score".format(algorithm)] = "float32"
-            dtypes["{} MT Percentile".format(algorithm)] = "float16"
+            dtypes["{} MT Percentile".format(algorithm)] = "float32"
         return dtypes
 
     def execute(self):
@@ -624,7 +624,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 'Length': line['Transcript Length'],
                 'Expr': line['Transcript Expression'],
             }
-            transcript_table = transcript_table.append(data, ignore_index=True)
+            transcript_table = pd.concat([transcript_table, pd.DataFrame.from_records(data, index=[0])], ignore_index=True)
         transcript_table['Biotype Sort'] = transcript_table.Biotype.map(lambda x: 1 if x == 'protein_coding' else 2)
         tsl_sort_criteria = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 'NA': 6, 'Not Supported': 6}
         transcript_table['TSL Sort'] = transcript_table.TSL.map(tsl_sort_criteria)
