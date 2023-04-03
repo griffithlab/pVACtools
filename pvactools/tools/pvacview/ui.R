@@ -136,25 +136,27 @@ explore_tab <- tabItem(
                         DTOutput("transcriptSetsTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
                     tabPanel("Reference Matches",
                         h4("Best Peptide Data"),
-                        column(4,
-                            span("Best Peptide: ", verbatimTextOutput("selectedPeptide"))
+                        column(6,
+                            span("Best Peptide: "),
+                            plotOutput(outputId = "referenceMatchPlot", height="20px")
                         ),
-                        column(3,
+                        column(2,
                             span("AA Change: ", verbatimTextOutput("selectedAAChange"))
                         ),
                         column(2,
                             span("Pos: ", verbatimTextOutput("selectedPos"))
                         ),
-                        column(3,
+                        column(2,
                             span("Gene: ", verbatimTextOutput("selectedGene"))
                         ),
                         h4("Query Data"),
                         h5(uiOutput("hasReferenceMatchData")),
-                        column(9,
-                            span("Query Sequence: ", verbatimTextOutput("referenceMatchQuerySequence")),
+                        column(10,
+                            span("Query Sequence: "),
+                            plotOutput(outputId = "referenceMatchQueryPlot", height="20px")
                         ),
-                        column(3,
-                            span("Hits: ", verbatimTextOutput("referenceMatchHitCount")),
+                        column(2,
+                            span("Hits: ", verbatimTextOutput("referenceMatchHitCount"))
                         ),
                         h4("Hits"),
                         DTOutput(outputId = "referenceMatchDatatable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
