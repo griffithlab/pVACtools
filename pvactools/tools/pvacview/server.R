@@ -1134,11 +1134,9 @@ server <- shinyServer(function(input, output, session) {
       #the query peptide
       if (mutation_pos[1] > 8) {
         offset <- mutation_pos[1] - 8
-        cat(file=stderr(), "offset ", offset , "\n")
         selectedPeptide <- substr(selectedPeptide, offset + 1, nchar(selectedPeptide))
         mutation_pos <- mutation_pos - offset
       }
-      cat(file=stderr(), "selected peptide substring", selectedPeptide, "\n")
       if (!is.null(df$metricsData[[selectedID()]]$reference_matches)) {
         queryPeptide <- df$metricsData[[selectedID()]]$reference_matches$query_peptide
         peptide_length <- nchar(queryPeptide)
