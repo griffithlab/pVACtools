@@ -1172,10 +1172,22 @@ server <- shinyServer(function(input, output, session) {
           coord_fixed() +
           theme_void() + theme(legend.position = "none", panel.border = element_blank(), plot.margin = margin(0, 0, 0, 0, "pt"))
         p3 <- p3 + scale_color_manual("mutation", values = c("not_mutated" = "#000000", "mutated" = "#e74c3c"))
+        incProgress(1)
+        print(p3)
+      } else {
+        p3 <- ggplot() + annotate(geom = "text", x = 0, y = 0, label = "N/A", size = 5) +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        incProgress(1)
         print(p3)
       }
     })
-  }, height = 20, width = function(){ nchar(df$metricsData[[selectedID()]]$reference_matches$query_peptide) * 20 } )
+  }, height = 20, width = function(){
+    if (is.null(df$metricsData[[selectedID()]]$reference_matches$query_peptide)) {
+      return(40)
+    } else {
+      return(nchar(df$metricsData[[selectedID()]]$reference_matches$query_peptide) * 20)
+    }
+  } )
 ##############################EXPORT TAB##############################################
   #evalutation overview table
   output$checked <- renderTable({
