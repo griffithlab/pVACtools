@@ -69,12 +69,12 @@ def main(args_input = sys.argv[1:]):
     for index, row in df.iterrows():
         seq_nums = epitope_seq_nums[row['peptide']]
         for seq_num, start in seq_nums:
-            new_row = row.copy()
+            new_row = row.copy().to_dict()
             new_row['seq_num'] = seq_num
             new_row['start'] = start
             new_row['allele'] = args.allele
             new_row['percentile'] = float(row['human_proteome_rank']) * 100
-            processed_df = processed_df.append(new_row)
+            processed_df = pd.concat([processed_df, pd.DataFrame.from_records(new_row, index=[0])], ignore_index=True)
     processed_df['start'] = pd.to_numeric(processed_df['start'], downcast='integer')
     processed_df = processed_df[['peptide', 'ic50', 'percentile', 'seq_num', 'start', 'allele']]
     processed_df.to_csv(args.output_file, index=False)

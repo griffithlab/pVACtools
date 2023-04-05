@@ -7,6 +7,7 @@ library(tibble)
 library(tidyr)
 library(plyr)
 library(dplyr)
+library("stringr")
 
 source("anchor_and_helper_functions.R", local = TRUE)
 source("styling.R")
@@ -447,9 +448,10 @@ server <- shinyServer(function(input, output, session) {
     %>% formatStyle(c("IC50 WT", "Pos", "Allele Expr"), "Tier Count", fontWeight = styleEqual(c("21"), c("bold")), border = styleEqual(c("21"), c("2px solid red")))
     %>% formatStyle(c("Allele Expr"), "Tier Count", fontWeight = styleEqual(c("20"), c("bold")), border = styleEqual(c("20"), c("2px solid red")))
     %>% formatStyle(c("Gene"), "Gene of Interest", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid green")))
-    %>% formatStyle(c("TSL"), "Bad TSL", border = styleEqual(c(TRUE), c("2px solid red")))
+    %>% formatStyle(c("TSL"), "Bad TSL", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red")))
     %>% formatStyle(c("%ile MT"), "Percentile Fail", border = styleEqual(c(TRUE), c("2px solid red")))
     %>% formatStyle(c("Prob Pos"), "Has Prob Pos", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red")))
+    %>% formatStyle(c("Ref Match"), "Ref Match", fontWeight = styleEqual(c("True"), c("bold")), border = styleEqual(c("True"), c("2px solid red")))
     , server = FALSE)
   #help menu for main table
   observeEvent(input$help, {
@@ -506,6 +508,34 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$ID[1]
     }else {
       df$mainTable$ID[df$selectedRow]
+    }
+  })
+  output$selectedPeptide <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`Best Peptide`[1]
+    }else {
+      df$mainTable$`Best Peptide`[df$selectedRow]
+    }
+  })
+  output$selectedAAChange <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`AA Change`[1]
+    }else {
+      df$mainTable$`AA Change`[df$selectedRow]
+    }
+  })
+  output$selectedPos <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`Pos`[1]
+    }else {
+      df$mainTable$`Pos`[df$selectedRow]
+    }
+  })
+  output$selectedGene <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`Gene`[1]
+    }else {
+      df$mainTable$`Gene`[df$selectedRow]
     }
   })
   ## Update comments section based on selected row
@@ -680,7 +710,7 @@ server <- shinyServer(function(input, output, session) {
           columnDefs = list(list(defaultContent = "X",
             targets = c(2:hla_count() + 1)),
             list(orderable = TRUE, targets = 0),
-            list(visible = FALSE, targets = c(-1))),
+            list(visible = FALSE, targets = c(-1, -2))),
           rowCallback = JS("function(row, data, index, rowId) {",
                             "console.log(rowId)",
                             "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
@@ -691,6 +721,8 @@ server <- shinyServer(function(input, output, session) {
           formatStyle("Type", fontWeight = styleEqual("MT", "bold")) %>%
           formatStyle(c("Peptide Sequence"), "Has ProbPos", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
           formatStyle(c("Problematic Positions"), "Has ProbPos", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
+          formatStyle(c("Peptide Sequence"), "Has AnchorResidueFail", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
+          formatStyle(c("Anchor Residue Fail"), "Has AnchorResidueFail", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
           formatStyle("Peptide Sequence", backgroundColor = styleEqual(c(best_peptide), c("#98FF98")))
         dtable$x$data[[1]] <- as.numeric(dtable$x$data[[1]])
         dtable
@@ -1037,6 +1069,125 @@ server <- shinyServer(function(input, output, session) {
         }
     })
   })
+  ##Best Peptide with mutated positions marked
+  output$referenceMatchPlot <- renderPlot({
+    withProgress(message = "Loading Reference Match Best Peptide Plot", value = 0, {
+      selectedPosition <- if (is.null(df$selectedRow)) {
+        df$mainTable$`Pos`[1]
+      }else {
+        df$mainTable$`Pos`[df$selectedRow]
+      }
+      selectedPeptide <- if (is.null(df$selectedRow)) {
+        df$mainTable$`Best Peptide`[1]
+      }else {
+        df$mainTable$`Best Peptide`[df$selectedRow]
+      }
+      #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
+      mutation_pos <- range_str_to_seq(selectedPosition)
+      peptide_length <- nchar(selectedPeptide)
+      mutation_pos <- mutation_pos[mutation_pos <= peptide_length]
+      #create dataframes
+      df_peptide <- data.frame("aa" = unlist(strsplit(selectedPeptide, "", fixed = TRUE)), "x_pos" = c(1:nchar(selectedPeptide)))
+      df_peptide$mutation <- "not_mutated"
+      df_peptide$type <- "mt"
+      df_peptide$y_pos <- 1.05
+      df_peptide$x_pos <- seq(0.05, peptide_length*0.1+0.05, length.out=peptide_length)
+      df_peptide$length <- peptide_length
+      df_peptide[mutation_pos, "mutation"] <- "mutated"
+      ref_match_colors <- rep("white", peptide_length)
+      x1_bins = seq(0, peptide_length*0.1, length.out=peptide_length)
+      x2_start = peptide_length*0.1/(peptide_length-1)
+      x2_bins = seq(x2_start, peptide_length*0.1+x2_start, length.out=peptide_length)
+      ref_match_color_pos <- data.frame(d = df_peptide, x1 = x1_bins, x2 = x2_bins, y1 = rep(1, peptide_length), y2 = rep(1.1, peptide_length), colors = ref_match_colors)
+      p2 <- ggplot() +
+        geom_rect(data = ref_match_color_pos, aes(xmin = x1, xmax = x2, ymin = y1, ymax = y2, fill = colors), color = "black", alpha = 1) +
+        geom_text(data = df_peptide, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 5) +
+        scale_fill_identity() +
+        coord_fixed() +
+        theme_void() + theme(legend.position = "none", panel.border = element_blank(), plot.margin = margin(0, 0, 0, 0, "pt"))
+      p2 <- p2 + scale_color_manual("mutation", values = c("not_mutated" = "#000000", "mutated" = "#e74c3c"))
+      print(p2)
+    })
+  }, height = 20, width = function(){
+      selectedPeptide <- if (is.null(df$selectedRow)) {
+        df$mainTable$`Best Peptide`[1]
+      }else {
+        df$mainTable$`Best Peptide`[df$selectedRow]
+      }
+      nchar(selectedPeptide) * 20
+  } )
+  ##Best Peptide with best peptide highlighted and mutated positions marked
+  output$referenceMatchQueryPlot <- renderPlot({
+    withProgress(message = "Loading Reference Match Query Peptide Plot", value = 0, {
+      selectedPosition <- if (is.null(df$selectedRow)) {
+        df$mainTable$`Pos`[1]
+      }else {
+        df$mainTable$`Pos`[df$selectedRow]
+      }
+      selectedPeptide <- if (is.null(df$selectedRow)) {
+        df$mainTable$`Best Peptide`[1]
+      }else {
+        df$mainTable$`Best Peptide`[df$selectedRow]
+      }
+      mutation_pos <- range_str_to_seq(selectedPosition)
+      #remove leading amino acids from the selectedPeptide that don't occur in
+      #the query peptide
+      if (mutation_pos[1] > 8) {
+        offset <- mutation_pos[1] - 8
+        selectedPeptide <- substr(selectedPeptide, offset + 1, nchar(selectedPeptide))
+        mutation_pos <- mutation_pos - offset
+      }
+      if (!is.null(df$metricsData[[selectedID()]]$reference_matches)) {
+        queryPeptide <- df$metricsData[[selectedID()]]$reference_matches$query_peptide
+        peptide_length <- nchar(queryPeptide)
+        ref_match_colors <- rep("white", peptide_length)
+        #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
+        bestPeptidePos <- str_locate(queryPeptide, fixed(selectedPeptide))
+        #if the selectedPeptide is not found in the queryPeptide there are
+        #trailing amino acids that don't occur in the queryPeptide - remove them
+        while (is.na(bestPeptidePos[, 1])) {
+          selectedPeptide <- substr(selectedPeptide, 1, nchar(selectedPeptide) - 1)
+          bestPeptidePos <- str_locate(queryPeptide, fixed(selectedPeptide))
+        }
+        best_peptide_positions <- seq(bestPeptidePos[, 1], bestPeptidePos[, 2])
+        mutation_pos <- mutation_pos + bestPeptidePos[, 1] - 1
+        mutation_pos <- mutation_pos[mutation_pos <= peptide_length]
+        ref_match_colors[best_peptide_positions] <- "yellow"
+        #create dataframes
+        df_peptide <- data.frame("aa" = unlist(strsplit(queryPeptide, "", fixed = TRUE)), "x_pos" = c(1:nchar(queryPeptide)))
+        df_peptide$mutation <- "not_mutated"
+        df_peptide$type <- "mt"
+        df_peptide$y_pos <- 1.05
+        df_peptide$x_pos <- seq(0.05, peptide_length*0.1+0.05, length.out=peptide_length)
+        df_peptide$length <- peptide_length
+        df_peptide[mutation_pos, "mutation"] <- "mutated"
+        x1_bins = seq(0, peptide_length*0.1, length.out=peptide_length)
+        x2_start = peptide_length*0.1/(peptide_length-1)
+        x2_bins = seq(x2_start, peptide_length*0.1+x2_start, length.out=peptide_length)
+        ref_match_color_pos <- data.frame(d = df_peptide, x1 = x1_bins, x2 = x2_bins, y1 = rep(1, peptide_length), y2 = rep(1.1, peptide_length), colors = ref_match_colors)
+        p3 <- ggplot() +
+          geom_rect(data = ref_match_color_pos, aes(xmin = x1, xmax = x2, ymin = y1, ymax = y2, fill = colors), color = "black", alpha = 1) +
+          geom_text(data = df_peptide, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 5) +
+          scale_fill_identity() +
+          coord_fixed() +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank(), plot.margin = margin(0, 0, 0, 0, "pt"))
+        p3 <- p3 + scale_color_manual("mutation", values = c("not_mutated" = "#000000", "mutated" = "#e74c3c"))
+        incProgress(1)
+        print(p3)
+      } else {
+        p3 <- ggplot() + annotate(geom = "text", x = 0, y = 0, label = "N/A", size = 5) +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        incProgress(1)
+        print(p3)
+      }
+    })
+  }, height = 20, width = function(){
+    if (is.null(df$metricsData[[selectedID()]]$reference_matches$query_peptide)) {
+      return(40)
+    } else {
+      return(nchar(df$metricsData[[selectedID()]]$reference_matches$query_peptide) * 20)
+    }
+  } )
 ##############################EXPORT TAB##############################################
   #evalutation overview table
   output$checked <- renderTable({
