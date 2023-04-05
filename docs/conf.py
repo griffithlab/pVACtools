@@ -59,7 +59,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pVACtools'
-copyright = '2018-2021 Washington University in St. Louis'
+copyright = '2018-2023 Washington University in St. Louis'
 author = 'Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Yang-Yang Feng, Christopher A. Miller, Aaron Graubert, Alex Wollam, Amber Wollam, Connor Liu, Jonas Neichin, Megan Neveau, Jason Walker, Elaine R. Mardis, Obi L. Griffith, Malachi Griffith'
 
 # The version info for the project you're documenting, acts as replacement for
