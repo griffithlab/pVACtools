@@ -1,4 +1,4 @@
-allele	seq_num	start	end	length	peptide	ic50	rank
+allele	seq_num	start	end	length	peptide	ic50	percentile_rank
 HLA-A*02:01	32	1596	1604	9	SQWKKHWFV	52.53	0.9
 HLA-A*02:01	32	925	933	9	LLFQDLPRA	62.29	1.2
 HLA-A*02:01	1	8	16	9	LLPLLLLLL	78.78	1.4
