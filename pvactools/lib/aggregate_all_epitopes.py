@@ -175,9 +175,9 @@ class AggregateAllEpitopes:
             "Variant Type": "category",
             "Mutation Position": "category",
             "Median MT IC50 Score": "float32",
-            "Median MT Percentile": "float16",
+            "Median MT Percentile": "float32",
             "Best MT IC50 Score": "float32",
-            "Best MT Percentile": "float16",
+            "Best MT Percentile": "float32",
             "Protein Position": "str",
             "Transcript Length": "int32",
         }
@@ -185,7 +185,7 @@ class AggregateAllEpitopes:
             if algorithm == 'SMM' or algorithm == 'SMMPMBEC':
                 continue
             dtypes["{} MT Score".format(algorithm)] = "float32"
-            dtypes["{} MT Percentile".format(algorithm)] = "float16"
+            dtypes["{} MT Percentile".format(algorithm)] = "float32"
         return dtypes
 
     def execute(self):
@@ -531,6 +531,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     individual_percentile_calls = { 'algorithms': prediction_algorithms }
                     individual_el_calls = { 'algorithms': el_algorithms }
                     individual_el_percentile_calls = { 'algorithms': el_algorithms }
+                    anchor_fails = []
                     for peptide_type, top_score_metric in zip(['MT', 'WT'], [self.mt_top_score_metric, self.wt_top_score_metric]):
                         ic50s = {}
                         percentiles = {}
@@ -545,6 +546,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                             percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
                             el_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in el_algorithms]
                             el_percentile_calls[line['HLA Allele']] = ['NA' if algorithm == 'MHCflurryEL Processing' else line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in el_algorithms]
+                            if peptide_type == 'MT' and not self.is_anchor_residue_pass(line):
+                                anchor_fails.append(line['HLA Allele'])
                         sorted_ic50s = []
                         sorted_percentiles = []
                         for hla_type in sorted(self.hla_types):
@@ -565,6 +568,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     results[peptide]['hla_types'] = sorted(self.hla_types)
                     results[peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
                     results[peptide]['problematic_positions'] = str(good_binders_peptide_annotation.iloc[0]['Problematic Positions']) if 'Problematic Positions' in good_binders_peptide_annotation.iloc[0] else 'None'
+                    if len(anchor_fails) > 0:
+                        results[peptide]['anchor_fails'] = ', '.join(anchor_fails)
+                    else:
+                        results[peptide]['anchor_fails'] = 'None'
                     results[peptide]['individual_ic50_calls'] = individual_ic50_calls
                     results[peptide]['individual_percentile_calls'] = individual_percentile_calls
                     results[peptide]['individual_el_calls'] = individual_el_calls
@@ -597,10 +604,12 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def sort_peptides(self, results):
         for k, v in results.items():
             v['problematic_positions_sort'] = 1 if v['problematic_positions'] == 'None' else 2
+            v['anchor_fail_sort'] = 1 if v['anchor_fails'] == 'None' else 2
             v['best_ic50s_MT'] = min([ic50 for ic50 in v['ic50s_MT'] if ic50 != 'X'])
-        sorted_results = dict(sorted(results.items(), key=lambda x:(x[1]['problematic_positions_sort'],x[1]['best_ic50s_MT'])))
+        sorted_results = dict(sorted(results.items(), key=lambda x:(x[1]['problematic_positions_sort'],x[1]['anchor_fail_sort'],x[1]['best_ic50s_MT'])))
         for k, v in sorted_results.items():
             v.pop('problematic_positions_sort')
+            v.pop('anchor_fail_sort')
             v.pop('best_ic50s_MT')
         return sorted_results
 
@@ -615,7 +624,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 'Length': line['Transcript Length'],
                 'Expr': line['Transcript Expression'],
             }
-            transcript_table = transcript_table.append(data, ignore_index=True)
+            transcript_table = pd.concat([transcript_table, pd.DataFrame.from_records(data, index=[0])], ignore_index=True)
         transcript_table['Biotype Sort'] = transcript_table.Biotype.map(lambda x: 1 if x == 'protein_coding' else 2)
         tsl_sort_criteria = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 'NA': 6, 'Not Supported': 6}
         transcript_table['TSL Sort'] = transcript_table.TSL.map(tsl_sort_criteria)
