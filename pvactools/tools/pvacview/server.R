@@ -452,6 +452,7 @@ server <- shinyServer(function(input, output, session) {
     %>% formatStyle(c("%ile MT"), "Percentile Fail", border = styleEqual(c(TRUE), c("2px solid red")))
     %>% formatStyle(c("Prob Pos"), "Has Prob Pos", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red")))
     %>% formatStyle(c("Ref Match"), "Ref Match", fontWeight = styleEqual(c("True"), c("bold")), border = styleEqual(c("True"), c("2px solid red")))
+    %>% formatStyle("Best Peptide", fontFamily="monospace")
     , server = FALSE)
   #help menu for main table
   observeEvent(input$help, {
@@ -723,7 +724,8 @@ server <- shinyServer(function(input, output, session) {
           formatStyle(c("Problematic Positions"), "Has ProbPos", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
           formatStyle(c("Peptide Sequence"), "Has AnchorResidueFail", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
           formatStyle(c("Anchor Residue Fail"), "Has AnchorResidueFail", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
-          formatStyle("Peptide Sequence", backgroundColor = styleEqual(c(best_peptide), c("#98FF98")))
+          formatStyle("Peptide Sequence", backgroundColor = styleEqual(c(best_peptide), c("#98FF98"))) %>%
+          formatStyle("Peptide Sequence", fontFamily="monospace")
         dtable$x$data[[1]] <- as.numeric(dtable$x$data[[1]])
         dtable
       }else {
@@ -1061,7 +1063,9 @@ server <- shinyServer(function(input, output, session) {
             dtable <- datatable(reference_match_data, options = list(
                 pageLength = 10,
                 lengthMenu = c(10)
-            ))
+            ),
+            style="bootstrap") %>%
+              formatStyle("Matched Peptide", fontFamily="monospace")
             dtable
         } else {
             incProgress(1)
