@@ -56,12 +56,10 @@ New in Release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- The ``--exclude-NAs`` flag was not being passed along correctly to the main
-  pipeline and didn't have any effect on downstream filtering.
-- The aggregate report creation step had some inefficiencies which caused its
-  runtime to be much longer than necessary.
-- An unneeded import statement for the PyVCF package had the potential to
-  cause errors while running the pVACseq pipeline.
+- It fixes an issue with parsing class II IEDB output files when running
+  pVACfuse or pVACbind, which resulted in the wrong binding prediction scores
+  being associated with certain epitopes.
+- It adds missing import statements to pVACvector.
 
 New in Version |version|
 ------------------------

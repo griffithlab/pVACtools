@@ -7,6 +7,7 @@ library(tibble)
 library(tidyr)
 library(plyr)
 library(dplyr)
+library("stringr")
 
 source("anchor_and_helper_functions.R", local = TRUE)
 source("styling.R")
@@ -93,13 +94,27 @@ server <- shinyServer(function(input, output, session) {
     df$allele_expr <- df$metricsData$allele_expr_threshold
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
-    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
-    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+    hla <- names(df$metricsData$binding_cutoffs)
+    if (input$hla_class == "class_i"){
+      converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
+    } else if (input$hla_class == "class_ii"){
+      converted_hla_names <- hla
+    }
+    if (!("Ref Match" %in% colnames(df$mainTable))) {
+      df$mainTable$`Ref Match` <- "Not Run"
+    }
+    columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+                        "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
+                        "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
     if ("Comments" %in% colnames(df$mainTable)) {
+      columns_needed <- c(columns_needed, "Comments")
       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
     }else {
       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
     }
+    df$mainTable <- df$mainTable[, columns_needed]
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
+    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     rownames(df$comments) <- df$mainTable$ID
     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
     df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
@@ -158,6 +173,21 @@ server <- shinyServer(function(input, output, session) {
      df$allele_expr <- df$metricsData$allele_expr_threshold
      df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
      df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
+     hla <- names(df$metricsData$binding_cutoffs)
+     converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
+     if (!("Ref Match" %in% colnames(df$mainTable))) {
+       df$mainTable$`Ref Match` <- "Not Run"
+     }
+     columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+                         "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
+                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
+     if ("Comments" %in% colnames(df$mainTable)) {
+       columns_needed <- c(columns_needed, "Comments")
+       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
+     }else {
+       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
+     }
+     df$mainTable <- df$mainTable[, columns_needed]
      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
      df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
      if ("Comments" %in% colnames(df$mainTable)) {
@@ -243,16 +273,16 @@ server <- shinyServer(function(input, output, session) {
       if (input$use_anchor) {
         df$anchor_mode <- "allele-specific"
         df$anchor_contribution <- input$anchor_contribution
-        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15]), df$anchor_mode)
-        df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15]), df$anchor_mode)
+        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
+        df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
       }else {
         df$anchor_mode <- "default"
         df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
         df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
       }
       df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
-      df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
-      if (is.null(df$percentile_threshold)) {
+      df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse((is.null(df$percentile_threshold) || is.na(df$percentile_threshold)), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
+      if (is.null(df$percentile_threshold) || is.na(df$percentile_threshold)) {
         df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
       }else {
         df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
@@ -340,11 +370,11 @@ server <- shinyServer(function(input, output, session) {
       "Binding Cutoffs" = unlist(lapply(names(df$metricsData$binding_cutoffs), function(x) df$metricsData$binding_cutoffs[[x]]))
     )
   )
-  output$comment_text <- renderText({
+  output$comment_text <- renderUI({
     if (is.null(df$mainTable)) {
-      return("N/A")
+      return(HTML("N/A"))
     }
-    df$comments[selectedID(), 1]
+    HTML(paste(df$comments[selectedID(), 1]))
   })
   observeEvent(input$page_length, {
     if (is.null(df$mainTable)) {
@@ -366,11 +396,11 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Allele")],
+      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments")],
       escape = FALSE, callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)), class = "stripe",
       options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
       columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
-      list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(-1:-12)),
+      list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
       list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
       initComplete = htmlwidgets::JS(
                      "function(settings, json) {",
@@ -418,9 +448,10 @@ server <- shinyServer(function(input, output, session) {
     %>% formatStyle(c("IC50 WT", "Pos", "Allele Expr"), "Tier Count", fontWeight = styleEqual(c("21"), c("bold")), border = styleEqual(c("21"), c("2px solid red")))
     %>% formatStyle(c("Allele Expr"), "Tier Count", fontWeight = styleEqual(c("20"), c("bold")), border = styleEqual(c("20"), c("2px solid red")))
     %>% formatStyle(c("Gene"), "Gene of Interest", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid green")))
-    %>% formatStyle(c("TSL"), "Bad TSL", border = styleEqual(c(TRUE), c("2px solid red")))
+    %>% formatStyle(c("TSL"), "Bad TSL", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red")))
     %>% formatStyle(c("%ile MT"), "Percentile Fail", border = styleEqual(c(TRUE), c("2px solid red")))
     %>% formatStyle(c("Prob Pos"), "Has Prob Pos", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red")))
+    %>% formatStyle(c("Ref Match"), "Ref Match", fontWeight = styleEqual(c("True"), c("bold")), border = styleEqual(c("True"), c("2px solid red")))
     , server = FALSE)
   #help menu for main table
   observeEvent(input$help, {
@@ -479,6 +510,34 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$ID[df$selectedRow]
     }
   })
+  output$selectedPeptide <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`Best Peptide`[1]
+    }else {
+      df$mainTable$`Best Peptide`[df$selectedRow]
+    }
+  })
+  output$selectedAAChange <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`AA Change`[1]
+    }else {
+      df$mainTable$`AA Change`[df$selectedRow]
+    }
+  })
+  output$selectedPos <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`Pos`[1]
+    }else {
+      df$mainTable$`Pos`[df$selectedRow]
+    }
+  })
+  output$selectedGene <- reactive({
+    if (is.null(df$selectedRow)) {
+      df$mainTable$`Gene`[1]
+    }else {
+      df$mainTable$`Gene`[df$selectedRow]
+    }
+  })
   ## Update comments section based on selected row
   observeEvent(input$comment, {
     if (is.null(df$mainTable)) {
@@ -532,6 +591,18 @@ server <- shinyServer(function(input, output, session) {
   output$addData_percentile <- renderText({
     df$additionalData[df$additionalData$ID == selectedID(), ]$`%ile MT`
   })
+  ##display of Best Peptide from additional data file
+  output$addData_peptide <- renderText({
+    df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Peptide`
+  })
+  ##display of Corresponding HLA allele from additional data file
+  output$addData_allele <- renderText({
+    df$additionalData[df$additionalData$ID == selectedID(), ]$`Allele`
+  })
+  ##display of Best Transcript from additional data file
+  output$addData_transcript <- renderText({
+    df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Transcript`
+  })
   ##transcripts sets table displaying sets of transcripts with the same consequence
   output$transcriptSetsTable <- renderDT({
     withProgress(message = "Loading Transcript Sets Table", value = 0, {
@@ -544,22 +615,26 @@ server <- shinyServer(function(input, output, session) {
           "# Peptides" = df$metricsData[[selectedID()]]$peptide_counts,
           "Total Expr" = df$metricsData[[selectedID()]]$set_expr
         )
+        names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
+        best_transcript_set <- NULL
+        incProgress(0.5)
+        for (i in 1:length(df$metricsData[[selectedID()]]$sets)){
+          transcript_set <- df$metricsData[[selectedID()]]$good_binders[[df$metricsData[[selectedID()]]$sets[i]]]$`transcripts`
+          transcript_set <- lapply(transcript_set, function(x) strsplit(x, "-")[[1]][1])
+          if (best_transcript %in% transcript_set) {
+            best_transcript_set <- df$metricsData[[selectedID()]]$sets[i]
+          }
+        }
+        incProgress(0.5)
+        datatable(GB_transcripts, selection = list(mode = "single", selected = "1"), style="bootstrap") %>%
+          formatStyle("Transcripts Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
       }else {
         GB_transcripts <- data.frame("Transcript Sets" = character(), "# Transcripts" = character(), "# Peptides" = character(), "Total Expr" = character())
+        names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
+        incProgress(0.5)
+        datatable(GB_transcripts)
+        incProgress(0.5)
       }
-      incProgress(0.5)
-      names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
-      best_transcript_set <- NULL
-      for (i in 1:length(df$metricsData[[selectedID()]]$sets)){
-        transcript_set <- df$metricsData[[selectedID()]]$good_binders[[df$metricsData[[selectedID()]]$sets[i]]]$`transcripts`
-        transcript_set <- lapply(transcript_set, function(x) strsplit(x, "-")[[1]][1])
-        if (best_transcript %in% transcript_set) {
-          best_transcript_set <- df$metricsData[[selectedID()]]$sets[i]
-        }
-      }
-      incProgress(0.5)
-      datatable(GB_transcripts, selection = list(mode = "single", selected = "1"), style="bootstrap") %>%
-        formatStyle("Transcripts Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
     })
   })
   ##update selected transcript set id
@@ -578,19 +653,23 @@ server <- shinyServer(function(input, output, session) {
       best_transcript <- df$mainTable[df$mainTable$ID == selectedID(), ]$`Best Transcript`
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
         GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`,
-                                      "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
-                                      "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`,
-                                      "Biotype" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`biotype`,
-                                      "Length" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_length`)
+                                     "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
+                                     "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`,
+                                     "Biotype" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`biotype`,
+                                     "Length" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_length`)
         GB_transcripts$`Best Transcript` <- apply(GB_transcripts, 1, function(x) grepl(best_transcript, x["Transcripts"], fixed = TRUE))
+        incProgress(0.5)
+        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
+        incProgress(0.5)
+        datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "N/A", targets = c(3)), list(visible = FALSE, targets = c(-1))))) %>%
+          formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
       }else {
         GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character(), "Biotype" = character(), "Length" = character())
+        incProgress(0.5)
+        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
+        incProgress(0.5)
+        datatable(GB_transcripts)
       }
-      incProgress(0.5)
-      names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
-      incProgress(0.5)
-      datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "N/A", targets = c(3)), list(visible = FALSE, targets = c(-1)))), style="bootstrap") %>%
-        formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
     })
   })
 
@@ -631,7 +710,7 @@ server <- shinyServer(function(input, output, session) {
           columnDefs = list(list(defaultContent = "X",
             targets = c(2:hla_count() + 1)),
             list(orderable = TRUE, targets = 0),
-            list(visible = FALSE, targets = c(-1))),
+            list(visible = FALSE, targets = c(-1, -2))),
           rowCallback = JS("function(row, data, index, rowId) {",
                             "console.log(rowId)",
                             "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
@@ -642,6 +721,8 @@ server <- shinyServer(function(input, output, session) {
           formatStyle("Type", fontWeight = styleEqual("MT", "bold")) %>%
           formatStyle(c("Peptide Sequence"), "Has ProbPos", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
           formatStyle(c("Problematic Positions"), "Has ProbPos", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
+          formatStyle(c("Peptide Sequence"), "Has AnchorResidueFail", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
+          formatStyle(c("Anchor Residue Fail"), "Has AnchorResidueFail", border = styleEqual(c(TRUE), c("2px solid red"))) %>%
           formatStyle("Peptide Sequence", backgroundColor = styleEqual(c(best_peptide), c("#98FF98")))
         dtable$x$data[[1]] <- as.numeric(dtable$x$data[[1]])
         dtable
@@ -942,6 +1023,171 @@ server <- shinyServer(function(input, output, session) {
       }
     })
   })
+
+  ##updating reference matches for selected peptide
+  output$hasReferenceMatchData <- reactive({
+    if (is.null(df$metricsData[[selectedID()]]$reference_matches)) {
+        "Reference Similarity not run"
+    } else {
+        ""
+    }
+  })
+  referenceMatchData <- reactive({
+    if (length(df$metricsData[[selectedID()]]$reference_matches$matches) != 0) {
+      as.data.frame(df$metricsData[[selectedID()]]$reference_matches$matches, check.names = False)
+    }else {
+      return()
+    }
+  })
+  output$referenceMatchHitCount <- reactive({
+    if (is.null(df$metricsData[[selectedID()]]$reference_matches)) {
+        "N/A"
+    } else {
+        df$metricsData[[selectedID()]]$reference_matches$count
+    }
+  })
+  output$referenceMatchQuerySequence <- reactive({
+    if (is.null(df$metricsData[[selectedID()]]$reference_matches)) {
+        "N/A"
+    } else {
+        df$metricsData[[selectedID()]]$reference_matches$query_peptide
+    }
+  })
+  output$referenceMatchDatatable <- renderDT({
+    withProgress(message = "Loading reference match datatable", value = 0, {
+        reference_match_data <- referenceMatchData()
+        if (!is.null(reference_match_data)) {
+            incProgress(1)
+            dtable <- datatable(reference_match_data, options = list(
+                pageLength = 10,
+                lengthMenu = c(10)
+            ))
+            dtable
+        } else {
+            incProgress(1)
+            datatable(data.frame("Reference Matches Datatable" = character()))
+        }
+    })
+  })
+  ##Best Peptide with mutated positions marked
+  output$referenceMatchPlot <- renderPlot({
+    withProgress(message = "Loading Reference Match Best Peptide Plot", value = 0, {
+      selectedPosition <- if (is.null(df$selectedRow)) {
+        df$mainTable$`Pos`[1]
+      }else {
+        df$mainTable$`Pos`[df$selectedRow]
+      }
+      selectedPeptide <- if (is.null(df$selectedRow)) {
+        df$mainTable$`Best Peptide`[1]
+      }else {
+        df$mainTable$`Best Peptide`[df$selectedRow]
+      }
+      #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
+      mutation_pos <- range_str_to_seq(selectedPosition)
+      peptide_length <- nchar(selectedPeptide)
+      mutation_pos <- mutation_pos[mutation_pos <= peptide_length]
+      #create dataframes
+      df_peptide <- data.frame("aa" = unlist(strsplit(selectedPeptide, "", fixed = TRUE)), "x_pos" = c(1:nchar(selectedPeptide)))
+      df_peptide$mutation <- "not_mutated"
+      df_peptide$type <- "mt"
+      df_peptide$y_pos <- 1.05
+      df_peptide$x_pos <- seq(0.05, peptide_length*0.1+0.05, length.out=peptide_length)
+      df_peptide$length <- peptide_length
+      df_peptide[mutation_pos, "mutation"] <- "mutated"
+      ref_match_colors <- rep("white", peptide_length)
+      x1_bins = seq(0, peptide_length*0.1, length.out=peptide_length)
+      x2_start = peptide_length*0.1/(peptide_length-1)
+      x2_bins = seq(x2_start, peptide_length*0.1+x2_start, length.out=peptide_length)
+      ref_match_color_pos <- data.frame(d = df_peptide, x1 = x1_bins, x2 = x2_bins, y1 = rep(1, peptide_length), y2 = rep(1.1, peptide_length), colors = ref_match_colors)
+      p2 <- ggplot() +
+        geom_rect(data = ref_match_color_pos, aes(xmin = x1, xmax = x2, ymin = y1, ymax = y2, fill = colors), color = "black", alpha = 1) +
+        geom_text(data = df_peptide, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 5) +
+        scale_fill_identity() +
+        coord_fixed() +
+        theme_void() + theme(legend.position = "none", panel.border = element_blank(), plot.margin = margin(0, 0, 0, 0, "pt"))
+      p2 <- p2 + scale_color_manual("mutation", values = c("not_mutated" = "#000000", "mutated" = "#e74c3c"))
+      print(p2)
+    })
+  }, height = 20, width = function(){
+      selectedPeptide <- if (is.null(df$selectedRow)) {
+        df$mainTable$`Best Peptide`[1]
+      }else {
+        df$mainTable$`Best Peptide`[df$selectedRow]
+      }
+      nchar(selectedPeptide) * 20
+  } )
+  ##Best Peptide with best peptide highlighted and mutated positions marked
+  output$referenceMatchQueryPlot <- renderPlot({
+    withProgress(message = "Loading Reference Match Query Peptide Plot", value = 0, {
+      selectedPosition <- if (is.null(df$selectedRow)) {
+        df$mainTable$`Pos`[1]
+      }else {
+        df$mainTable$`Pos`[df$selectedRow]
+      }
+      selectedPeptide <- if (is.null(df$selectedRow)) {
+        df$mainTable$`Best Peptide`[1]
+      }else {
+        df$mainTable$`Best Peptide`[df$selectedRow]
+      }
+      mutation_pos <- range_str_to_seq(selectedPosition)
+      #remove leading amino acids from the selectedPeptide that don't occur in
+      #the query peptide
+      if (mutation_pos[1] > 8) {
+        offset <- mutation_pos[1] - 8
+        selectedPeptide <- substr(selectedPeptide, offset + 1, nchar(selectedPeptide))
+        mutation_pos <- mutation_pos - offset
+      }
+      if (!is.null(df$metricsData[[selectedID()]]$reference_matches)) {
+        queryPeptide <- df$metricsData[[selectedID()]]$reference_matches$query_peptide
+        peptide_length <- nchar(queryPeptide)
+        ref_match_colors <- rep("white", peptide_length)
+        #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
+        bestPeptidePos <- str_locate(queryPeptide, fixed(selectedPeptide))
+        #if the selectedPeptide is not found in the queryPeptide there are
+        #trailing amino acids that don't occur in the queryPeptide - remove them
+        while (is.na(bestPeptidePos[, 1])) {
+          selectedPeptide <- substr(selectedPeptide, 1, nchar(selectedPeptide) - 1)
+          bestPeptidePos <- str_locate(queryPeptide, fixed(selectedPeptide))
+        }
+        best_peptide_positions <- seq(bestPeptidePos[, 1], bestPeptidePos[, 2])
+        mutation_pos <- mutation_pos + bestPeptidePos[, 1] - 1
+        mutation_pos <- mutation_pos[mutation_pos <= peptide_length]
+        ref_match_colors[best_peptide_positions] <- "yellow"
+        #create dataframes
+        df_peptide <- data.frame("aa" = unlist(strsplit(queryPeptide, "", fixed = TRUE)), "x_pos" = c(1:nchar(queryPeptide)))
+        df_peptide$mutation <- "not_mutated"
+        df_peptide$type <- "mt"
+        df_peptide$y_pos <- 1.05
+        df_peptide$x_pos <- seq(0.05, peptide_length*0.1+0.05, length.out=peptide_length)
+        df_peptide$length <- peptide_length
+        df_peptide[mutation_pos, "mutation"] <- "mutated"
+        x1_bins = seq(0, peptide_length*0.1, length.out=peptide_length)
+        x2_start = peptide_length*0.1/(peptide_length-1)
+        x2_bins = seq(x2_start, peptide_length*0.1+x2_start, length.out=peptide_length)
+        ref_match_color_pos <- data.frame(d = df_peptide, x1 = x1_bins, x2 = x2_bins, y1 = rep(1, peptide_length), y2 = rep(1.1, peptide_length), colors = ref_match_colors)
+        p3 <- ggplot() +
+          geom_rect(data = ref_match_color_pos, aes(xmin = x1, xmax = x2, ymin = y1, ymax = y2, fill = colors), color = "black", alpha = 1) +
+          geom_text(data = df_peptide, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 5) +
+          scale_fill_identity() +
+          coord_fixed() +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank(), plot.margin = margin(0, 0, 0, 0, "pt"))
+        p3 <- p3 + scale_color_manual("mutation", values = c("not_mutated" = "#000000", "mutated" = "#e74c3c"))
+        incProgress(1)
+        print(p3)
+      } else {
+        p3 <- ggplot() + annotate(geom = "text", x = 0, y = 0, label = "N/A", size = 5) +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        incProgress(1)
+        print(p3)
+      }
+    })
+  }, height = 20, width = function(){
+    if (is.null(df$metricsData[[selectedID()]]$reference_matches$query_peptide)) {
+      return(40)
+    } else {
+      return(nchar(df$metricsData[[selectedID()]]$reference_matches$query_peptide) * 20)
+    }
+  } )
 ##############################EXPORT TAB##############################################
   #evalutation overview table
   output$checked <- renderTable({
@@ -959,7 +1205,10 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)) {
       return()
     }
-    data <- df$mainTable[, !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Eval") & !(colnames(df$mainTable) == "Select") & !(colnames(df$mainTable) == "Scaled BA") & !(colnames(df$mainTable) == "Scaled percentile") & !(colnames(df$mainTable) == "Tier Count") & !(colnames(df$mainTable) == "Comments") & !(colnames(df$mainTable) == "Gene of Interest") & !(colnames(df$mainTable) == "Allele") & !(colnames(df$mainTable) == "Bad TSL")]
+    colsToDrop <- colnames(df$mainTable) %in% c("Evaluation", "Eval", "Select", "Scaled BA", "Scaled percentile", "Tier Count", "Bad TSL",
+                                               "Comments", "Gene of Interest", "Bad TSL", "Col RNA Expr", "Col RNA VAF", "Col Allele Expr",
+                                               "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos")
+    data <- df$mainTable[, !(colsToDrop)]
     col_names <- colnames(data)
     data <- data.frame(data, Evaluation = shinyValue("selecter_", nrow(df$mainTable), df$mainTable))
     colnames(data) <- c(col_names, "Evaluation")

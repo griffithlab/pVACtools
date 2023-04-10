@@ -13,6 +13,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import itertools
+import json
 
 from pvactools.lib.optimal_peptide import OptimalPeptide
 from pvactools.lib.vector_visualization import VectorVisualization

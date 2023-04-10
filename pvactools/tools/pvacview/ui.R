@@ -114,8 +114,8 @@ explore_tab <- tabItem(
                 status = "primary", solidHeader = TRUE, collapsible = TRUE,
                 textAreaInput("comments", "Please add/update your comments for the variant you are currently examining", value = ""),
                 actionButton("comment", "Update Comment Section"),
-                h5("Comment:"), verbatimTextOutput("comment_text"),
-                style = "overflow-x: scroll;font-size:100%")
+                h5("Comment:"), htmlOutput("comment_text"),
+                style = "font-size:100%")
         ),
         fluidRow(
             box(width = 12,
@@ -134,10 +134,40 @@ explore_tab <- tabItem(
                 tabBox(width = 6, title = " ",
                     tabPanel("Transcript Sets of Selected Variant",
                         DTOutput("transcriptSetsTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
+                    tabPanel("Reference Matches",
+                        h4("Best Peptide Data"),
+                        column(6,
+                            span("Best Peptide: "),
+                            plotOutput(outputId = "referenceMatchPlot", height="20px")
+                        ),
+                        column(2,
+                            span("AA Change: ", verbatimTextOutput("selectedAAChange"))
+                        ),
+                        column(2,
+                            span("Pos: ", verbatimTextOutput("selectedPos"))
+                        ),
+                        column(2,
+                            span("Gene: ", verbatimTextOutput("selectedGene"))
+                        ),
+                        h4("Query Data"),
+                        h5(uiOutput("hasReferenceMatchData")),
+                        column(10,
+                            span("Query Sequence: "),
+                            plotOutput(outputId = "referenceMatchQueryPlot", height="20px")
+                        ),
+                        column(2,
+                            span("Hits: ", verbatimTextOutput("referenceMatchHitCount"))
+                        ),
+                        h4("Hits"),
+                        DTOutput(outputId = "referenceMatchDatatable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
+                    ),
                     tabPanel("Additional Data",
                         span("Additional Data Type: ", verbatimTextOutput("type_text")),
                         span("Median MT IC50: ", verbatimTextOutput("addData_IC50")),
-                        span("Median MT Percentile: ", verbatimTextOutput("addData_percentile")))
+                        span("Median MT Percentile: ", verbatimTextOutput("addData_percentile")),
+                        span("Best Peptide: ", verbatimTextOutput("addData_peptide")),
+                        span("Corresponding HLA allele: ", verbatimTextOutput("addData_allele")),
+                        span("Best Transcript: ", verbatimTextOutput("addData_transcript")))
                 ),
                 box(width = 4, solidHeader = TRUE, title = "Variant & Gene Info",
                     span("DNA VAF", verbatimTextOutput("metricsTextDNA")),
