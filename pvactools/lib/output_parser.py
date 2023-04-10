@@ -807,7 +807,9 @@ class UnmatchedSequencesOutputParser(OutputParser):
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
                         continue
                     protein_label  = int(line['seq_num'])
-                    if 'core_peptide' in line:
+                    if 'core_peptide' in line and int(line['end']) - int(line['start']) == 8:
+                        #Start and end refer to the position of the core peptide
+                        #Infer the (start) position of the peptide from the positions of the core peptide
                         position   = str(int(line['start']) - line['peptide'].find(line['core_peptide']))
                     else:
                         position   = line['start']

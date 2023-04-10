@@ -51,6 +51,7 @@ table_formatting <- function(x, y) {
   colnames(ic50_mt)[colnames(ic50_mt) == "Mutant"] <- "Peptide Sequence"
   ic50_mt <- add_column(ic50_mt, Type = "MT", .after = "Peptide Sequence")
   ic50_mt <- add_column(ic50_mt, `Problematic Positions` = peptide_columns$problematic_positions[[1]])
+  ic50_mt <- add_column(ic50_mt, `Anchor Residue Fail` = peptide_columns$anchor_fails[[1]])
   peptide_columns_wt <- peptide_columns
   peptide_columns_wt$Mutant <- NULL
   ic50_wt <- dcast(peptide_columns_wt, wt_peptide ~ hla_types, value.var = "ic50s_WT")
@@ -58,10 +59,12 @@ table_formatting <- function(x, y) {
   colnames(ic50_wt)[colnames(ic50_wt) == "wt_peptide"] <- "Peptide Sequence"
   ic50_wt <- add_column(ic50_wt, Type = "WT", .after = "Peptide Sequence")
   ic50_wt <- add_column(ic50_wt, `Problematic Positions` = "")
+  ic50_wt <- add_column(ic50_wt, `Anchor Residue Fail` = "")
   combined_data <- rbind(ic50_mt, ic50_wt)
   combined_data$`Mutation Position` <- peptide_columns$mutation_position[[1]]
-  reordered_data <- combined_data %>% select(-one_of("Problematic Positions"), one_of("Problematic Positions"))
+  reordered_data <- combined_data %>% select(-one_of("Problematic Positions"), -one_of("Anchor Residue Fail"), one_of("Problematic Positions"), one_of("Anchor Residue Fail"))
   reordered_data$`Has ProbPos` <- apply(reordered_data, 1, function(x) (x["Problematic Positions"] != "") & (x["Problematic Positions"] != "None"))
+  reordered_data$`Has AnchorResidueFail` <- apply(reordered_data, 1, function(x) (x["Anchor Residue Fail"] != "") & (x["Anchor Residue Fail"] != "None"))
   reordered_data
 }
 #generate peptide coloring for hla allele
@@ -79,22 +82,25 @@ peptide_coloring <- function(hla_allele, peptide_row) {
 }
 #calculate anchor list for specific peptide length and HLA allele combo given contribution cutoff
 calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution) {
-  anchor_raw_data <- as.numeric(anchor_data[[peptide_length]][anchor_data[[peptide_length]]["HLA"] == hla_allele][2:(peptide_length + 1)])
-  if (any(is.na(anchor_raw_data))) {
-    return("NA")
-  }
-  names(anchor_raw_data) <- as.character(1:length(anchor_raw_data))
-  anchor_raw_data <- anchor_raw_data[order(unlist(anchor_raw_data), decreasing = TRUE)]
-  count <- 0
-  anchor_list <- list()
-  for (i in 1:length(anchor_raw_data)) {
-    if (count >= anchor_contribution) {
-      return(anchor_list)
-    }else {
-      count <- count + anchor_raw_data[[i]]
-      anchor_list <- append(anchor_list, names(anchor_raw_data[i]))
+  result <- tryCatch({
+      anchor_raw_data <- as.numeric(anchor_data[[peptide_length]][anchor_data[[peptide_length]]["HLA"] == hla_allele][2:(peptide_length + 1)])
+    if (any(is.na(anchor_raw_data))) {
+      return("NA")
     }
-  }
+    names(anchor_raw_data) <- as.character(1:length(anchor_raw_data))
+    anchor_raw_data <- anchor_raw_data[order(unlist(anchor_raw_data), decreasing = TRUE)]
+    count <- 0
+    anchor_list <- list()
+    for (i in 1:length(anchor_raw_data)) {
+      if (count >= anchor_contribution) {
+        return(anchor_list)
+      }else {
+        count <- count + anchor_raw_data[[i]]
+        anchor_list <- append(anchor_list, names(anchor_raw_data[i]))
+      }
+    }
+    return(anchor_list)
+    }, error = function(e) { return("NA") })
 }
 
 #converts string range (e.g. '2-4', '6') to associated list
@@ -197,7 +203,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   if ((tsl == "Not Supported")) {
     tsl_pass <- TRUE
   }
-  if ((tsl == "NA") || as.numeric(tsl) > tsl_max) {
+  else if ((tsl == "NA") || as.numeric(tsl) > tsl_max) {
     tsl_pass <- FALSE
   }
   allele_expr_pass <- TRUE
@@ -318,7 +324,7 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
   if ((tsl == "Not Supported")) {
     tsl_pass <- TRUE
   }
-  if ((tsl == "NA") || as.numeric(tsl) > tsl_max) {
+  else if ((tsl == "NA") || as.numeric(tsl) > tsl_max) {
     tsl_pass <- FALSE
   }
   allele_expr_pass <- TRUE

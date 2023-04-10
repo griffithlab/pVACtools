@@ -35,3 +35,13 @@ This is a bugfix release. It fixes the following problem(s):
   NetMHCstabpan and/or NetChop.
 - An unneeded import statement for the PyVCF package had the potential to
   cause errors while running the pVACseq pipeline.
+
+Version 3.1.2
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- It fixes an issue with parsing class II IEDB output files when running
+  pVACfuse or pVACbind, which resulted in the wrong binding prediction scores
+  being associated with certain epitopes.
+- It adds missing import statements to pVACvector.
