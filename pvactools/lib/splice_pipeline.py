@@ -1,3 +1,5 @@
+import pandas as pd
+
 from pvactools.lib.filter_regtools_results import *
 from pvactools.lib.junction_to_fasta import *
 from pvactools.lib.fasta_to_kmers import *
@@ -24,10 +26,11 @@ class JunctionPipeline:
         self.tsl                     = kwargs['maximum_transcript_support_level']
         self.normal_sample_name      = kwargs.pop('normal_sample_name', None)
         self.save_gtf                = kwargs['save_gtf']
+        self.gtf_data                = self.load_gtf_data()
 
     @staticmethod
     def file_exists(file_path: str, file_type: str):
-        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+        if os.path.exists(file_path) and not os.path.getsize(file_path) > 0:
             print(f"{file_type} file already exists. Skipping.")
             exists = True
         else:
@@ -35,7 +38,6 @@ class JunctionPipeline:
         return exists
 
     def execute(self):
-        self.load_gtf_data()
         self.vcf_to_tsv()
         self.junction_to_fasta()
         self.fasta_to_kmers()
@@ -79,7 +81,7 @@ class JunctionPipeline:
             filter_params = {
                 'input_file'  : self.input_file,
                 'output_file' : self.create_file_path('filtered'),
-                'gtf_data'    : self.gtf_df,
+                'gtf_data'    : self.gtf_data,
                 'score'       : self.junction_score,
                 'distance'    : self.variant_distance,
             }
@@ -108,13 +110,13 @@ class JunctionPipeline:
         if self.file_exists(self.create_file_path('combined'), 'Combined junction'):
             combined_df = pd.read_csv(self.create_file_path('combined'), sep='\t')
         else:
+            print('Merging junction and variant info')
             combine_params = {
                 'junctions_df' : self.filter_regtools_results(),
                 'variant_file' : self.create_file_path('annotated'),
                 'output_dir'   : self.output_dir,
                 'output_file'  : self.create_file_path('combined'),
             }
-            print('Merging junction and variant info')
             combined = CombineInputs(**combine_params)
             combined_df = combined.execute()
             print('Completed')
@@ -134,7 +136,7 @@ class JunctionPipeline:
                     junction_params = {
                         'fasta_path'     : self.fasta_path,
                         'junction_df'    : combined_df,
-                        'gtf_df'         : self.load_gtf_data(),
+                        'gtf_df'         : self.gtf_data,
                         'tscript_id'     : row.transcript_id,
                         'chrom'          : row.junction_chrom,
                         'junction_name'  : row.name,
@@ -172,22 +174,25 @@ class JunctionPipeline:
             combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
             print('Completed')
 
-    def fasta_to_kmers(self): # todo fix file exists if statement
-        # if self.file_exists(os.path.join(self.output_dir, f'{self.sample_name}.{ep_len}), f'Epitope fastas'):
-        #     pass
-        # else:
-        print('Generating peptides from novel junction sequences')
-        kmer_params = {
-            'fasta'           : self.create_file_path('fasta'),
-            'output_dir'      : self.output_dir,
-            'class_i_epitope_length' : self.class_i_epitope_length,
-            'class_ii_epitope_length': self.class_ii_epitope_length,
-            'class_i_hla'     : self.class_i_hla,
-            'class_ii_hla'    : self.class_ii_hla,
-            'sample_name'     : self.sample_name,
-        }
-        fasta = FastaToKmers(**kmer_params)
-        fasta.execute()
-        print('Completed')
+    def fasta_to_kmers(self):
+        for l in self.class_i_epitope_length + self.class_ii_epitope_length:
+            fasta_file = f'{self.output_dir}.{self.sample_name}.{l}.fa'
+            if os.path.exists(fasta_file):
+                print(f'{l}mer fasta already exists. Skipping.')
+                continue
+            else:
+                print(f'Generating {l}mer peptides from novel junction sequences')
+                kmer_params = {
+                    'fasta'           : self.create_file_path('fasta'),
+                    'output_dir'      : self.output_dir,
+                    'class_i_epitope_length' : self.class_i_epitope_length,
+                    'class_ii_epitope_length': self.class_ii_epitope_length,
+                    'class_i_hla'     : self.class_i_hla,
+                    'class_ii_hla'    : self.class_ii_hla,
+                    'sample_name'     : self.sample_name,
+                }
+                fasta = FastaToKmers(**kmer_params)
+                fasta.execute()
+                print('Completed')
      
         
