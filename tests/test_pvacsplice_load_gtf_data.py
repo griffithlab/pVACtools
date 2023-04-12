@@ -29,9 +29,8 @@ class LoadGtfDataTests(unittest.TestCase):
                 'save_gtf'   : True,
                 'tsl'        : tsl
             }
-            LoadGtfData(**params).execute
+            LoadGtfData(**params).execute()
             expected_file = os.path.join(self.test_data_path, 'results', f'Test.gtf_{tsl}.tsv')
-            
             self.assertTrue(cmp(
                         output_file,
                         expected_file,

@@ -33,11 +33,11 @@ class CombineInputsTests(unittest.TestCase):
         }
         combined_df = CombineInputs(**params).execute()
         combined_df.to_csv(output_file, sep='\t', index=False)
-        
+
         expected_file = os.path.join(self.test_data_dir, 'Test.combined.tsv')
         self.assertTrue(cmp(
-                output_file, 
-                expected_file), 
+                output_file,
+                expected_file),
                 "files don't match {} - {}".format(output_file, expected_file)
             )
 
