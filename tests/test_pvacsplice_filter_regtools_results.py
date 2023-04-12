@@ -33,7 +33,7 @@ class FilterRegtoolsResultsTests(unittest.TestCase):
                 params = {
                     'input_file'  : input_file,
                     'output_file' : output_file,
-                    'gtf_df'      : gtf_df,
+                    'gtf_data'    : gtf_df,
                     'score'       : score,
                     'distance'    : distance,
                 }

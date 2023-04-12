@@ -2,6 +2,8 @@ import unittest
 import os
 import sys
 import tempfile
+import gzip
+import shutil
 from filecmp import cmp
 import py_compile
 import pandas as pd
@@ -27,16 +29,19 @@ class JunctionToFastaTests(unittest.TestCase):
         gtf_df        = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.gtf_1.tsv'), sep='\t')
         annotated_vcf = os.path.join(pvactools_directory(), self.test_data_dir, 'inputs', 'annotated.expression_chr1.vcf.gz')
         sample_name   = 'HCC1395_TUMOR_DNA'
-        fasta_path = os.path.join(self.test_data_dir, 'inputs', 'all_sequences_chr1.fa')
+        fasta_path = os.path.join(self.test_data_dir, 'inputs', 'all_sequences_chr1.fa.gz')
+        unzipped_fasta_file = tempfile.NamedTemporaryFile()
+        with gzip.open(fasta_path, 'rb') as f_in, open(unzipped_fasta_file.name, 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
         output_dir  = tempfile.TemporaryDirectory() #output_dir.name
         output_file = os.path.join(output_dir.name, 'sample_transcripts.fa')
-       
+
         for i in combined_df.index.to_list():
             print(i)
-            junction = combined_df.loc[[i], :]         
+            junction = combined_df.loc[[i], :]
             for row in junction.itertuples():
                 junction_params = {
-                    'fasta_path'     : fasta_path,
+                    'fasta_path'     : unzipped_fasta_file.name,
                     'junction_df'    : combined_df,
                     'gtf_df'         : gtf_df,
                     'tscript_id'     : row.transcript_id,
@@ -69,7 +74,7 @@ class JunctionToFastaTests(unittest.TestCase):
                 junctions.create_sequence_fasta(wt_aa, alt_aa)
 
         expected_file = os.path.join(self.test_data_dir, 'results', 'Test.transcripts.fa')
-        
+
         self.assertTrue(cmp(
                 output_file, 
                 expected_file), 
@@ -77,5 +82,3 @@ class JunctionToFastaTests(unittest.TestCase):
             )
 
         output_dir.cleanup()
-
-    

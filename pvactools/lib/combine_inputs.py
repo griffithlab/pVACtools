@@ -37,9 +37,9 @@ class CombineInputs():
         # insertions
         var_df.loc[var_df['variant_category'] == 'INS', 'variant_start'] = var_df['start']
         var_df.loc[var_df['variant_category'] == 'INS', 'variant_stop'] = var_df['start']
-        
+
         # MNV support (exploded variants now in SNV notation)
-        
+
         var_df = var_df.rename(columns={'ensembl_gene_id': 'gene_id'}).drop(columns=['transcript_support_level'])
 
         # format junction variant info to match vcf
@@ -47,15 +47,15 @@ class CombineInputs():
 
         return var_df
 
-    def merge_and_write(self, j_df, var_df):        
+    def merge_and_write(self, j_df, var_df):
         # if protein change/seq is NA in var_df, go ahead and remove the lines bc if there is no protein change, then can't create alt transcript
         j_df['transcript_version'] = j_df['transcript_version'].astype('int64')
 
         # removed gene_name, gene_id - do these need to be skipped?
-        merged_df = j_df.merge(var_df, on=['gene_name', 'transcript_id', 'transcript_version', 'variant_info'])
+        merged_df = j_df.merge(var_df, on=['gene_name', 'transcript_id', 'transcript_version', 'variant_info', 'gene_id'])
 
         # check that everything is merging
-        left_merge = j_df.merge(var_df, on=['variant_info', 'gene_name', 'transcript_id', 'transcript_version', ], how='left', indicator=True)
+        left_merge = j_df.merge(var_df, on=['variant_info', 'gene_name', 'transcript_id', 'transcript_version', 'gene_id'], how='left', indicator=True)
         not_merged_lines = left_merge.loc[left_merge['_merge'] != 'both']
         if not not_merged_lines.empty:
             # warning: if there are any that don't merge,
@@ -64,10 +64,10 @@ class CombineInputs():
             print(
                 'Warning: The above variant/transcript/gene combination is present in the junctions file, but not in the VEP-annotated VCF. Skipping.'
             )
-    
+
         # create index to match with kmers
         merged_df['index'] = merged_df['gene_name'] + '.' + merged_df['transcript_id'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
-        
+
         # cols for frameshift info
         merged_df[['wt_protein_length', 'alt_protein_length', 'frameshift_event']] = pd.NA
 
@@ -78,5 +78,5 @@ class CombineInputs():
         variant_df = self.add_junction_coordinates_to_variants()
         # merge dfs and create associated combined file
         combined_df = self.merge_and_write(self.junctions_df, variant_df)
-        
+
         return combined_df
