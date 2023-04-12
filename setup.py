@@ -2,10 +2,10 @@ from setuptools import setup
 import os
 
 import sys
-if (sys.version_info.major, sys.version_info.minor) < (3,6):
+if (sys.version_info.major, sys.version_info.minor) < (3,7):
     print("This python version is not supported:")
     print(sys.version)
-    print("pVACtools requires python 3.6 or greater")
+    print("pVACtools requires python 3.7 or greater")
     sys.exit(1)
 
 pvacseq_data_files = []
