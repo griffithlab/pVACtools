@@ -128,7 +128,6 @@ class JunctionPipeline:
         else:
             print('Assembling tumor-specific splicing junctions')
             for i in combined_df.index.to_list():
-                print(i)
                 junction = combined_df.loc[[i], :]
                 for row in junction.itertuples():
                     junction_params = {

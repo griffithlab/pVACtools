@@ -197,7 +197,6 @@ class JunctionToFasta():
         else:
             with open(self.output_file, 'w') as e:
                 e.write(write_str)
-        print("WT and ALT AA sequence written to file")
 
 # GBM examples #
 # ex 1: KLHL5 A (+, 1) FS # 
