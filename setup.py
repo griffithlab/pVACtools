@@ -2,10 +2,10 @@ from setuptools import setup
 import os
 
 import sys
-if (sys.version_info.major, sys.version_info.minor) < (3,6):
+if (sys.version_info.major, sys.version_info.minor) < (3,7):
     print("This python version is not supported:")
     print(sys.version)
-    print("pVACtools requires python 3.6 or greater")
+    print("pVACtools requires python 3.7 or greater")
     sys.exit(1)
 
 pvacseq_data_files = []
@@ -68,7 +68,7 @@ setup(
         'vcfpy',
         'requests',
         'PyYAML>=5.1',
-        'biopython==1.76',
+        'biopython==1.77',
         'networkx',
         'simanneal',
         'pandas',
@@ -79,7 +79,7 @@ setup(
         'mock',
         'setuptools==57',
         'vaxrank>=1.1.0',
-        'mhcnuggets==2.4.0',
+        'mhcnuggets==2.4.1',
         'mhcflurry==2.0.6',
         'testfixtures'
     ],
