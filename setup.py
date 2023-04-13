@@ -68,7 +68,7 @@ setup(
         'vcfpy',
         'requests',
         'PyYAML>=5.1',
-        'biopython==1.76',
+        'biopython==1.77',
         'networkx',
         'simanneal',
         'pandas',
@@ -79,7 +79,7 @@ setup(
         'mock',
         'setuptools==57',
         'vaxrank>=1.1.0',
-        'mhcnuggets==2.4.0',
+        'mhcnuggets==2.4.1',
         'mhcflurry==2.0.6',
         'testfixtures'
     ],
