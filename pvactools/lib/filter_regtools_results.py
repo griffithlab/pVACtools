@@ -65,15 +65,9 @@ class FilterRegtoolsResults:
         return explode_junctions
 
     def merge_and_write(self, pc_junctions, explode_junctions):
-        # merge dfs - explode_junctions from filtered file and pc_junctions from gtf file, all gtf info is based on tscript
-        # try:
         merged_df = explode_junctions.merge(pc_junctions, on='transcript_id').drop_duplicates()
-        # except KeyError:
-        #    sys.exit('The GTF dataframe is empty.')
         # drop repetitive or unneeded cols
         merged_df = merged_df.drop(columns=['gene_names', 'gene_ids', 'variant_start', 'exon_number'])
-        # remove spaces from col names
-        # merged_df.columns = merged_df.columns.str.replace(r'\s+', '_', regex=True)
         # switch strand to numeral
         merged_df['strand'] = merged_df['strand'].replace(['+', '-'], [1, -1])
         # create filtered tsv file
