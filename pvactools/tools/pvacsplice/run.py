@@ -2,7 +2,6 @@ import sys
 import os
 import pandas as pd
 from pathlib import Path
-
 from pvactools.lib.splice_pipeline import *
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import *
@@ -15,10 +14,15 @@ from pvactools.lib.print_log import *
 def define_parser():
     return PvacspliceRunArgumentParser().parser
 
-def create_combined_reports(base_output_dir, args):
+def combine_epitope_len_reports(file_list, file_final_name):
+    if len(file_list) > 1:
+        combine_reports(file_list, file_final_name)
+    elif len(file_list) == 1:
+        os.rename(file_list[0], file_final_name)
+
+def create_combined_report(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
-
     for x in ['all_epitopes', 'filtered']:
         file1 = os.path.join(base_output_dir, 'MHC_Class_I', f"{args.sample_name}.{x}.tsv")
         file2 = os.path.join(base_output_dir, 'MHC_Class_II', f"{args.sample_name}.{x}.tsv")
@@ -28,9 +32,43 @@ def create_combined_reports(base_output_dir, args):
         if not os.path.exists(file2):
             print("File {} doesn't exist. Aborting.".format(file2))
             return
-    combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
-    pvactools.lib.run_utils.combine_reports([file1, file2], combined_output_file)
-    filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+        output_file = os.path.join(output_dir, f"{args.sample_name}.{x}.tsv")
+        combine_reports([file1, file2], output_file)
+
+# can i add choices for defaults?
+def combine_reports_per_class(base_output_dir, args, mhc_class):
+    output_dir = os.path.join(base_output_dir, f'MHC_Class_{mhc_class}')
+    mhc_dirs = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.startswith(f'MHC_Class_{mhc_class}')]
+    if not mhc_dirs:
+        print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
+    combined_files = [os.path.join(m, f'{args.sample_name}.all_epitopes.tsv') for m in mhc_dirs]
+
+    combined_name = os.path.join(output_dir, f'{args.sample_name}.all_epitopes.tsv')
+    filtered_name = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
+
+    combine_epitope_len_reports(combined_files, combined_name)
+
+    post_processing_params = vars(args)
+    post_processing_params['input_file'] = combined_name
+    post_processing_params['file_type'] = 'pVACsplice'
+    post_processing_params['filtered_report_file'] = filtered_name
+    post_processing_params['run_coverage_filter'] = True
+    post_processing_params['run_transcript_support_level_filter'] = False
+    post_processing_params['minimum_fold_change'] = None
+    post_processing_params['run_manufacturability_metrics'] = True
+    post_processing_params['run_reference_proteome_similarity'] = False
+    if args.net_chop_method:
+        post_processing_params['net_chop_fasta'] = args.net_chop_fasta
+        post_processing_params['run_net_chop'] = True
+    else:
+        post_processing_params['run_net_chop'] = False
+    if args.netmhc_stab:
+        post_processing_params['run_netmhc_stab'] = True
+    else:
+        post_processing_params['run_netmhc_stab'] = False
+
+    print('Begin post processor')
+    PostProcessor(**post_processing_params).execute()
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
@@ -39,8 +77,11 @@ def main(args_input = sys.argv[1:]):
     # fasta
     if Path(args.ref_fasta).suffix not in ['.fa', '.fasta']:
         sys.exit('The fasta input path does not point to a fasta file.')
-    elif Path(args.ref_fasta).suffix == '.gz':
+    if is_gz_file(Path(args.ref_fasta)):
         sys.exit('pVACsplice does not currently support gzipped fasta files.')
+    # supplied fasta size length should be even
+    if args.fasta_size%2 != 0:
+        sys.exit("The fasta size needs to be an even number")
     # gtf
     if Path(args.gtf_file).suffix not in ['.gtf', '.gz']:
         sys.exit('The gtf input path does not point to a gtf file.')
@@ -52,10 +93,10 @@ def main(args_input = sys.argv[1:]):
         sys.exit('Gzipped VCF files must be indexed. (tabix -p vcf <vcf_file>)')
     # iedb retries - default 5
     if args.iedb_retries > 100:
-        sys.exit("The number of IEDB retries must be less than or equal to 100")
+        sys.exit("The number of IEDB retries must be less than or equal to 100.")
     # fasta size
     if args.fasta_size % 2 != 0:
-        sys.exit("The fasta size needs to be an even number")
+        sys.exit("The fasta size needs to be an even number.")
 
     base_output_dir = os.path.abspath(args.output_dir) # junctions dir
     os.makedirs(base_output_dir, exist_ok=True)
@@ -86,8 +127,8 @@ def main(args_input = sys.argv[1:]):
         'class_ii_hla'                     : class_ii_alleles,
     }
 
-    pipeline = JunctionPipeline(**junction_arguments)
-    pipeline.execute()
+    #pipeline = JunctionPipeline(**junction_arguments)
+    #pipeline.execute()
 
     splice_arguments = junction_arguments.copy()
     additional_args = {
@@ -107,7 +148,7 @@ def main(args_input = sys.argv[1:]):
         'n_threads'                 : args.n_threads,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
-        'blastp_db'                 : args.blast_dp, # todo add these to run_args_parser
+        'blastp_db'                 : args.blastp_db,
         'blastp_path'               : args.blastp_path,
         'peptide_fasta'             : args.peptide_fasta,
         'problematic_amino_acids'   : args.problematic_amino_acids,
@@ -166,7 +207,7 @@ def main(args_input = sys.argv[1:]):
 
         for y in args.class_ii_epitope_length:
 
-            print(f'Executing MHC Class II predictions for {y}mers')
+            print(f'Executing MHC Class II predictions for (y)mers')
             output_dir = os.path.join(base_output_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
             os.makedirs(output_dir, exist_ok=True)
 
@@ -191,7 +232,7 @@ def main(args_input = sys.argv[1:]):
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
-        combine_class_reports(base_output_dir, args)
+        create_combined_report(base_output_dir, args)
 
     change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
