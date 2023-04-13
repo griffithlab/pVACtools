@@ -2,7 +2,7 @@ import sys
 import pandas as pd
 
 
-class CombineInputs():
+class CombineInputs:
     def __init__(self, **kwargs):
         self.junctions_df = kwargs['junctions_df']
         self.variants     = kwargs['variant_file']
