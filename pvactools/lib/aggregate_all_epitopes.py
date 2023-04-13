@@ -953,7 +953,7 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         return "Poor"
 
 
-class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
+class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABCMeta):
     def __init__(
         self,
         input_file,
@@ -967,7 +967,7 @@ class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, meta
         trna_cov=10,
         expn_val=1,
     ):
-        UnmatchedSequenceAggregateAllEpitopes.__init__(
+        PvacbindAggregateAllEpitopes.__init__(
             self,
             input_file,
             output_file,
@@ -993,9 +993,9 @@ class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, meta
                            na_values="NA", keep_default_na=False, dtype={"Index": str})
 
     # pvacbind w/ Index instead of Mutation
-    def get_sub_df(self, all_epitopes_df, key):
-        df = (all_epitopes_df[lambda x: (x['Index'] == key)]).copy()
-        return (df, key)
+    def get_sub_df(self, all_epitopes_df, df_key):
+        df = (all_epitopes_df[lambda x: (x['Index'] == df_key)]).copy()
+        return df, df_key
 
     # pvacbind w/ vaf and expression info included
     def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
@@ -1010,7 +1010,7 @@ class PvacspliceAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, meta
             'Transcript': transcript,
             'AA Change': best['Amino Acid Change'],
             'Best Peptide': best["Epitope Seq"],
-            'Pos': best['Transcript Position'],
+            'Pos': best['Protein Position'],
             'Num Passing Peptides': peptide_count,
             'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
             '%ile MT': best["{} Percentile".format(self.top_score_metric)],
