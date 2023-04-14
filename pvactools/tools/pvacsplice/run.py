@@ -20,12 +20,12 @@ def combine_epitope_len_reports(file_list, file_final_name):
     elif len(file_list) == 1:
         os.rename(file_list[0], file_final_name)
 
-def create_combined_report(base_output_dir, args):
-    output_dir = os.path.join(base_output_dir, 'combined')
+def create_combined_report(junctions_dir, args):
+    output_dir = os.path.join(junctions_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
     for x in ['all_epitopes', 'filtered']:
-        file1 = os.path.join(base_output_dir, 'MHC_Class_I', f"{args.sample_name}.{x}.tsv")
-        file2 = os.path.join(base_output_dir, 'MHC_Class_II', f"{args.sample_name}.{x}.tsv")
+        file1 = os.path.join(output_dir, 'MHC_Class_I', f"{args.sample_name}.{x}.tsv")
+        file2 = os.path.join(output_dir, 'MHC_Class_II', f"{args.sample_name}.{x}.tsv")
         if not os.path.exists(file1):
             print("File {} doesn't exist. Aborting.".format(file1))
             return
@@ -35,40 +35,14 @@ def create_combined_report(base_output_dir, args):
         output_file = os.path.join(output_dir, f"{args.sample_name}.{x}.tsv")
         combine_reports([file1, file2], output_file)
 
-# can i add choices for defaults?
-def combine_reports_per_class(base_output_dir, args, mhc_class):
-    output_dir = os.path.join(base_output_dir, f'MHC_Class_{mhc_class}')
+def combine_reports_per_class(class_output_dir, args, mhc_class):
+    output_dir = os.path.join(class_output_dir, f'MHC_Class_{mhc_class}')
     mhc_dirs = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.startswith(f'MHC_Class_{mhc_class}')]
     if not mhc_dirs:
         print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
     combined_files = [os.path.join(m, f'{args.sample_name}.all_epitopes.tsv') for m in mhc_dirs]
-
-    combined_name = os.path.join(output_dir, f'{args.sample_name}.all_epitopes.tsv')
-    filtered_name = os.path.join(output_dir, f'{args.sample_name}.filtered.tsv')
-
-    combine_epitope_len_reports(combined_files, combined_name)
-
-    post_processing_params = vars(args)
-    post_processing_params['input_file'] = combined_name
-    post_processing_params['file_type'] = 'pVACsplice'
-    post_processing_params['filtered_report_file'] = filtered_name
-    post_processing_params['run_coverage_filter'] = True
-    post_processing_params['run_transcript_support_level_filter'] = False
-    post_processing_params['minimum_fold_change'] = None
-    post_processing_params['run_manufacturability_metrics'] = True
-    post_processing_params['run_reference_proteome_similarity'] = False
-    if args.net_chop_method:
-        post_processing_params['net_chop_fasta'] = args.net_chop_fasta
-        post_processing_params['run_net_chop'] = True
-    else:
-        post_processing_params['run_net_chop'] = False
-    if args.netmhc_stab:
-        post_processing_params['run_netmhc_stab'] = True
-    else:
-        post_processing_params['run_netmhc_stab'] = False
-
-    print('Begin post processor')
-    PostProcessor(**post_processing_params).execute()
+    combined_fn = os.path.join(output_dir, f'{args.sample_name}.all_epitopes.tsv')
+    combine_epitope_len_reports(combined_files, combined_fn)
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
@@ -98,21 +72,22 @@ def main(args_input = sys.argv[1:]):
     if args.fasta_size % 2 != 0:
         sys.exit("The fasta size needs to be an even number.")
 
-    base_output_dir = os.path.abspath(args.output_dir) # junctions dir
-    os.makedirs(base_output_dir, exist_ok=True)
+    # pvacsplice output dir (from args)
+    junctions_dir = os.path.abspath(args.output_dir)
+    os.makedirs(junctions_dir, exist_ok=True)
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
 
-    # input file check
-    print_log(os.path.join(base_output_dir, 'log'), vars(args))
+    # all input file check
+    print_log(os.path.join(junctions_dir, 'log'), vars(args))
 
     junction_arguments = {
         'input_file_type'                  : 'junctions',
+        'junctions_dir'                    : junctions_dir,
         'input_file'                       : args.input_file,
         'gtf_file'                         : args.gtf_file,
         'sample_name'                      : args.sample_name,
-        'base_output_dir'                  : base_output_dir,
         'ref_fasta'                        : args.ref_fasta,
         'annotated_vcf'                    : args.annotated_vcf,
         'class_i_epitope_length'           : args.class_i_epitope_length,
@@ -127,13 +102,12 @@ def main(args_input = sys.argv[1:]):
         'class_ii_hla'                     : class_ii_alleles,
     }
 
-    #pipeline = JunctionPipeline(**junction_arguments)
-    #pipeline.execute()
+    pipeline = JunctionPipeline(**junction_arguments)
+    pipeline.execute()
+
 
     splice_arguments = junction_arguments.copy()
     additional_args = {
-        'splice_output_dir'         : base_output_dir,
-        'output_dir'                : os.path.join(base_output_dir, 'MHC_Class_I'), # todo remove 'I' and make compatible for both classes
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
@@ -172,25 +146,28 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_i_executable = None
         
-        for x in args.class_i_epitope_length: # todo reformat loops here after comparing to pvacfuse run
+        for x in args.class_i_epitope_length:
 
             print(f'Executing MHC Class I predictions for {x}mers')
-            output_dir = os.path.join(base_output_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
-            os.makedirs(output_dir, exist_ok=True)
+            output_len_dir = os.path.join(junctions_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
+            os.makedirs(output_len_dir, exist_ok=True)
 
             class_i_arguments = splice_arguments.copy()
-            class_i_arguments['input_file']              = f'{base_output_dir}/{args.sample_name}.{x}.fa'
+            class_i_arguments['input_file']              = f'{output_len_dir}/{args.sample_name}.{x}.fa'
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
             class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
-            class_i_arguments['output_dir']              = output_dir
+            class_i_arguments['output_dir']              = output_len_dir
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
-            
+
+            # all pipeline args i input check
+            print_log(os.path.join(junctions_dir, 'log'), class_i_arguments)
+
             pipeline = PvacsplicePipeline(**class_i_arguments)
             pipeline.execute()
 
-        combine_reports_per_class(base_output_dir, args, 'I', class_i_prediction_algorithms)
+        combine_reports_per_class(junctions_dir, args, 'I')
 
     elif len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
@@ -208,22 +185,25 @@ def main(args_input = sys.argv[1:]):
         for y in args.class_ii_epitope_length:
 
             print(f'Executing MHC Class II predictions for (y)mers')
-            output_dir = os.path.join(base_output_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
-            os.makedirs(output_dir, exist_ok=True)
+            output_len_dir = os.path.join(junctions_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
+            os.makedirs(output_len_dir, exist_ok=True)
 
             class_ii_arguments = splice_arguments.copy()
-            class_ii_arguments['input_file']              = f'{base_output_dir}/{args.sample_name}.{y}.fa'
+            class_ii_arguments['input_file']              = f'{output_len_dir}/{args.sample_name}.{y}.fa'
             class_ii_arguments['alleles']                 = class_ii_alleles
             class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
             class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
             class_ii_arguments['epitope_lengths']         = y
-            class_ii_arguments['output_dir']              = output_dir
+            class_ii_arguments['output_dir']              = output_len_dir
             class_ii_arguments['netmhc_stab']             = False
-            
+
+            # all pipeline args ii input check
+            print_log(os.path.join(junctions_dir, 'log'), class_ii_arguments)
+
             pipeline = PvacsplicePipeline(**class_ii_arguments)
             pipeline.execute()
 
-        combine_reports_per_class(base_output_dir, args, 'II', class_ii_prediction_algorithms)
+        combine_reports_per_class(junctions_dir, args, 'II')
 
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
@@ -232,9 +212,9 @@ def main(args_input = sys.argv[1:]):
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
-        create_combined_report(base_output_dir, args)
+        create_combined_report(junctions_dir, args)
 
-    change_permissions_recursive(base_output_dir, 0o755, 0o644)
+    change_permissions_recursive(junctions_dir, 0o755, 0o644)
 
 if __name__ == '__main__':
     main()
