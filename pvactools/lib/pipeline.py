@@ -36,7 +36,6 @@ class Pipeline(metaclass=ABCMeta):
         self.flurry_state                = self.get_flurry_state()
         self.starfusion_file             = kwargs.pop('starfusion_file', None)
         self.proximal_variants_file      = None
-        self.splice_output_dir           = kwargs.pop('splice_output_dir', None)
         self.tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(self.tmp_dir, exist_ok=True)
 
@@ -97,7 +96,7 @@ class Pipeline(metaclass=ABCMeta):
         if self.input_file_type == 'pvacvector_input_fasta':
             return self.input_file
         elif self.input_file_type == 'junctions':
-            return os.path.join(self.splice_output_dir, f'{self.sample_name}_combined.tsv')
+            return os.path.join(self.junctions_dir, f'{self.sample_name}_combined.tsv')
         else:
             tsv_file = self.sample_name + '.tsv'
             return os.path.join(self.output_dir, tsv_file)
@@ -715,7 +714,6 @@ class PvacbindPipeline(Pipeline):
                     }
                     if self.input_file_type == 'junctions':
                         params['input_tsv_file'] = self.tsv_file_path()
-                        params['kmer_index_file'] = os.path.join(self.splice_output_dir, 'kmer_index.tsv')
                     params['sample_name'] = self.sample_name
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['add_sample_name_column'] = True 
@@ -779,7 +777,7 @@ class PvacsplicePipeline(PvacbindPipeline):
         chunks = self.split_fasta_file(self.epitope_lengths)
         self.call_iedb(chunks, self.epitope_lengths)
         # parse iedb output files
-        split_parsed_output_files.extend(self.parse_outputs(chunks, self.epitope_lengths)) # chunks - list of lists
+        split_parsed_output_files.extend(self.parse_outputs(chunks, self.epitope_lengths))  # chunks - list of lists
 
         if len(split_parsed_output_files) == 0:
             status_message("No output files were created. Aborting.")
@@ -791,6 +789,7 @@ class PvacsplicePipeline(PvacbindPipeline):
         if not self.run_post_processor:
             return
 
+        # run postprocessor
         post_processing_params = vars(self)
         post_processing_params['input_file'] = self.combined_parsed_path()
         post_processing_params['filtered_report_file'] = self.final_path()
@@ -799,6 +798,7 @@ class PvacsplicePipeline(PvacbindPipeline):
         post_processing_params['file_type'] = 'pVACsplice'
         post_processing_params['run_transcript_support_level_filter'] = False
         post_processing_params['run_manufacturability_metrics'] = True
+        post_processing_params['run_reference_proteome_similarity'] = False
         if self.net_chop_method:
             post_processing_params['net_chop_fasta'] = self.net_chop_fasta
             post_processing_params['run_net_chop'] = True
@@ -809,15 +809,15 @@ class PvacsplicePipeline(PvacbindPipeline):
         else:
             post_processing_params['run_netmhc_stab'] = False
 
+        print('Begin post processor')
+        PostProcessor(**post_processing_params).execute()
+
         # create pipeline log
-        log_file = os.path.join(self.splice_output_dir, 'log', 'pipeline_outputs.yml')
-        with open(log_file, 'w') as log_fh:
+        pp_file = os.path.join(self.junctions_dir, 'log', 'post_processor_inputs.yml')
+        with open(pp_file, 'w') as log_fh:
             inputs = post_processing_params
             inputs['pvactools_version'] = pkg_resources.get_distribution("pvactools").version
             yaml.dump(inputs, log_fh, default_flow_style=False)
-
-        print('Begin post processor')
-        PostProcessor(**post_processing_params).execute()
 
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir, ignore_errors=True)
