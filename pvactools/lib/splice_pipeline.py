@@ -9,26 +9,27 @@ from pvactools.lib.load_gtf_data import *
 
 class JunctionPipeline:
     def __init__(self, **kwargs):
-        self.input_file              = kwargs['input_file']
-        self.sample_name             = kwargs['sample_name']
-        self.output_dir              = kwargs['base_output_dir']
-        self.fasta_path              = kwargs['ref_fasta']        
-        self.annotated_vcf           = kwargs['annotated_vcf']
-        self.gtf_file                = kwargs['gtf_file']
-        self.class_i_epitope_length  = kwargs['class_i_epitope_length']
+        self.input_file = kwargs['input_file']
+        self.sample_name = kwargs['sample_name']
+        # default pvacsplice output dir (where splice files are currently)
+        self.output_dir = kwargs['junctions_dir']
+        self.fasta_path = kwargs['ref_fasta']
+        self.annotated_vcf = kwargs['annotated_vcf']
+        self.gtf_file = kwargs['gtf_file']
+        self.class_i_epitope_length = kwargs['class_i_epitope_length']
         self.class_ii_epitope_length = kwargs['class_ii_epitope_length']
-        self.class_i_hla             = kwargs['class_i_hla']
-        self.class_ii_hla            = kwargs['class_ii_hla']
-        self.junction_score          = kwargs['junction_score']
-        self.variant_distance        = kwargs['variant_distance']
-        self.tsl                     = kwargs['maximum_transcript_support_level']
-        self.normal_sample_name      = kwargs.pop('normal_sample_name', None)
-        self.save_gtf                = kwargs['save_gtf']
-        self.gtf_data                = self.load_gtf_data()
+        self.class_i_hla = kwargs['class_i_hla']
+        self.class_ii_hla = kwargs['class_ii_hla']
+        self.junction_score = kwargs['junction_score']
+        self.variant_distance = kwargs['variant_distance']
+        self.tsl = kwargs['maximum_transcript_support_level']
+        self.normal_sample_name = kwargs.pop('normal_sample_name', None)
+        self.save_gtf = kwargs['save_gtf']
+        self.gtf_data = self.load_gtf_data()
 
     @staticmethod
     def file_exists(file_path: str, file_type: str):
-        if os.path.exists(file_path) and not os.path.getsize(file_path) > 0:
+        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
             print(f"{file_type} file already exists. Skipping.")
             exists = True
         else:
@@ -50,10 +51,11 @@ class JunctionPipeline:
         else:
             print('Converting GTF file to TSV')
             gtf_params = {
-            'gtf_file'    : self.gtf_file,
-            'output_file' : self.create_file_path('gtf'),
-            'save_gtf'    : self.save_gtf, # default no but option to save for running cohorts processed with the same reference data
-            'tsl'         : self.tsl,
+                'gtf_file': self.gtf_file,
+                'output_file': self.create_file_path('gtf'),
+                'save_gtf': self.save_gtf,
+                # default no but option to save for running cohorts processed with the same reference data
+                'tsl': self.tsl,
             }
             gtf_data = LoadGtfData(**gtf_params)
             gtf_df = gtf_data.execute()
@@ -62,11 +64,11 @@ class JunctionPipeline:
 
     def create_file_path(self, key):
         inputs = {
-            'gtf'       : '_gtf.tsv',
-            'annotated' : '_annotated.tsv',
-            'filtered'  : '_filtered.tsv',
-            'combined'  : '_combined.tsv',
-            'fasta'     : '.transcripts.fa',
+            'gtf': '_gtf.tsv',
+            'annotated': '_annotated.tsv',
+            'filtered': '_filtered.tsv',
+            'combined': '_combined.tsv',
+            'fasta': '.transcripts.fa',
         }
         file_name = os.path.join(self.output_dir, self.sample_name + inputs[key])
         return file_name
@@ -77,11 +79,11 @@ class JunctionPipeline:
         else:
             print('Filtering regtools results')
             filter_params = {
-                'input_file'  : self.input_file,
-                'output_file' : self.create_file_path('filtered'),
-                'gtf_data'    : self.gtf_data,
-                'score'       : self.junction_score,
-                'distance'    : self.variant_distance,
+                'input_file': self.input_file,
+                'output_file': self.create_file_path('filtered'),
+                'gtf_data': self.gtf_data,
+                'score': self.junction_score,
+                'distance': self.variant_distance,
             }
             filter_object = FilterRegtoolsResults(**filter_params)
             filter_df = filter_object.execute()
@@ -94,9 +96,9 @@ class JunctionPipeline:
         else:
             print('Converting VCF to TSV')
             convert_params = {
-                'input_file'  : self.annotated_vcf,
-                'output_file' : self.create_file_path('annotated'),
-                'sample_name' : self.sample_name,
+                'input_file': self.annotated_vcf,
+                'output_file': self.create_file_path('annotated'),
+                'sample_name': self.sample_name,
             }
             if self.normal_sample_name:
                 convert_params['normal_sample_name'] = self.normal_sample_name
@@ -110,10 +112,10 @@ class JunctionPipeline:
         else:
             print('Merging junction and variant info')
             combine_params = {
-                'junctions_df' : self.filter_regtools_results(),
-                'variant_file' : self.create_file_path('annotated'),
-                'output_dir'   : self.output_dir,
-                'output_file'  : self.create_file_path('combined'),
+                'junctions_df': self.filter_regtools_results(),
+                'variant_file': self.create_file_path('annotated'),
+                'output_dir': self.output_dir,
+                'output_file': self.create_file_path('combined'),
             }
             combined = CombineInputs(**combine_params)
             combined_df = combined.execute()
@@ -131,22 +133,22 @@ class JunctionPipeline:
                 junction = combined_df.loc[[i], :]
                 for row in junction.itertuples():
                     junction_params = {
-                        'fasta_path'     : self.fasta_path,
-                        'junction_df'    : combined_df,
-                        'gtf_df'         : self.gtf_data,
-                        'tscript_id'     : row.transcript_id,
-                        'chrom'          : row.junction_chrom,
-                        'junction_name'  : row.name,
-                        'junction_coors' : [row.junction_start, row.junction_stop],
-                        'fasta_index'    : row.index,
-                        'variant_info'   : row.variant_info,
-                        'anchor'         : row.anchor,
-                        'strand'         : row.strand,
-                        'gene_name'      : row.gene_name,
-                        'output_file'    : self.create_file_path('fasta'),
-                        'output_dir'     : self.output_dir,
-                        'sample_name'    : self.sample_name,
-                        'vcf'            : self.annotated_vcf,
+                        'fasta_path': self.fasta_path,
+                        'junction_df': combined_df,
+                        'gtf_df': self.gtf_data,
+                        'tscript_id': row.transcript_id,
+                        'chrom': row.junction_chrom,
+                        'junction_name': row.name,
+                        'junction_coors': [row.junction_start, row.junction_stop],
+                        'fasta_index': row.index,
+                        'variant_info': row.variant_info,
+                        'anchor': row.anchor,
+                        'strand': row.strand,
+                        'gene_name': row.gene_name,
+                        'output_file': self.create_file_path('fasta'),
+                        'output_dir': self.output_dir,
+                        'sample_name': self.sample_name,
+                        'vcf': self.annotated_vcf,
                     }
                     junctions = JunctionToFasta(**junction_params)
                     wt = junctions.create_wt_df()
@@ -180,13 +182,13 @@ class JunctionPipeline:
             else:
                 print(f'Generating {l}mer peptides from novel junction sequences')
                 kmer_params = {
-                    'fasta'           : self.create_file_path('fasta'),
-                    'output_dir'      : self.output_dir,
-                    'class_i_epitope_length' : self.class_i_epitope_length,
+                    'fasta': self.create_file_path('fasta'),
+                    'output_dir': self.output_dir,
+                    'class_i_epitope_length': self.class_i_epitope_length,
                     'class_ii_epitope_length': self.class_ii_epitope_length,
-                    'class_i_hla'     : self.class_i_hla,
-                    'class_ii_hla'    : self.class_ii_hla,
-                    'sample_name'     : self.sample_name,
+                    'class_i_hla': self.class_i_hla,
+                    'class_ii_hla': self.class_ii_hla,
+                    'sample_name': self.sample_name,
                 }
                 fasta = FastaToKmers(**kmer_params)
                 fasta.execute()
