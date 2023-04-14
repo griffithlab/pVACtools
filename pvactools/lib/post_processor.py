@@ -112,10 +112,10 @@ class PostProcessor:
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 percentile_threshold=self.percentile_threshold,
                 top_score_metric=self.top_score_metric,
+                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
                 trna_vaf=self.trna_vaf,
                 trna_cov=self.trna_cov,
                 expn_val=self.expn_val,
-                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
             ).execute()
         print("Completed")
 
