@@ -27,17 +27,6 @@ def make_success_response(data, files, path):
     reader.close()
     return response_obj
 
-def make_response(data, files, path, test_file):
-    reader = open(os.path.join(
-        path,
-        test_file
-    ), mode='rb')
-    response_obj = lambda :None
-    response_obj.status_code = 200
-    response_obj.content = reader.read()
-    reader.close()
-    return response_obj
-
 def make_rejected_response(data, files, path, self):
     if self.rejected:
         reader = open(os.path.join(
@@ -95,11 +84,12 @@ class NetChopTest(unittest.TestCase):
         self.assertTrue(compiled_script_path)
 
     def test_netmhc_stab_runs(self):
-        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_success_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
-            self.test_data_directory
-           ))), unittest.mock.patch('pvactools.lib.netmhc_stab.NetMHCStab.valid_alleles', side_effect=default_alleles):
+            self.test_data_directory,
+            "Netmhcstab.{}.html".format(data['allele'])
+        ))), unittest.mock.patch('pvactools.lib.netmhc_stab.NetMHCStab.valid_alleles', side_effect=default_alleles):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
@@ -112,12 +102,12 @@ class NetChopTest(unittest.TestCase):
             ))
 
     def test_netmhc_stab_fail(self):
-        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
             self.test_data_directory,
-            'Netmhcstab.fail.html'
-           ))), self.assertRaises(Exception) as context, unittest.mock.patch('pvactools.lib.netmhc_stab.NetMHCStab.valid_alleles', side_effect=default_alleles):
+            "Netmhcstab.fail.html"
+        ))), self.assertRaises(Exception) as context, unittest.mock.patch('pvactools.lib.netmhc_stab.NetMHCStab.valid_alleles', side_effect=default_alleles):
             output_file = tempfile.NamedTemporaryFile()
             NetMHCStab(
                 os.path.join(self.test_data_directory, 'Test_filtered.tsv'),
@@ -147,7 +137,7 @@ class NetChopTest(unittest.TestCase):
             l.check_present(('root', 'WARNING', S("Too many jobs submitted to NetMHCstabpan server. Waiting to retry.")))
 
     def test_netmhc_stab_cannot_open_file_error_retry(self):
-        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
             self.test_data_directory,
@@ -163,7 +153,7 @@ class NetChopTest(unittest.TestCase):
 
     #This is to ensure that we catch error cases that are not explicitly handled
     def test_netmhc_stab_other_error(self):
-        with patch('pvactools.lib.netmhc_stab.requests.post',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
+        with patch('pvactools.lib.netmhc_stab.requests.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
             self.test_data_directory,

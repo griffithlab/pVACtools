@@ -21,6 +21,17 @@ def mock_ncbiwww_qblast(algorithm, reference, peptide, entrez_query, word_size, 
     mock_fhs.append(fh)
     return fh
 
+def mock_netchop_netmhcstabpan(data, files, path, test_file):
+    reader = open(os.path.join(
+        path,
+        test_file
+    ), mode='rb')
+    response_obj = lambda :None
+    response_obj.status_code = 200
+    response_obj.content = reader.read()
+    reader.close()
+    return response_obj
+
 def close_mock_fhs():
     for fh in mock_fhs:
         fh.close()
