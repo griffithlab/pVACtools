@@ -153,11 +153,21 @@ class PvacbindTests(unittest.TestCase):
         output_dir.cleanup()
 
     def test_pvacbind_pipeline(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, timeout=None, files=None: make_response(
+        with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             test_data_directory()
-            ))) as mock_request:
+        ))) as mock_request, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+            data,
+            files,
+            self.test_data_directory,
+            'net_chop.html'
+        ))), patch('pvactools.lib.netmhc_stab.NetMHCStab.query_netmhcstabpan_server',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+            data,
+            files,
+            self.test_data_directory,
+            'Netmhcstab.html'
+        ))):
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
@@ -170,8 +180,8 @@ class PvacbindTests(unittest.TestCase):
                 '-e1', '9,10',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
-                #'--net-chop-method', 'cterm',
-                #'--netmhc-stab',
+                '--net-chop-method', 'cterm',
+                '--netmhc-stab',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta.name,
             ])
