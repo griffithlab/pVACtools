@@ -51,7 +51,7 @@ def make_invalid_allele_response(data, files, path):
     reader.close()
     return response_obj
 
-class NetChopTest(unittest.TestCase):
+class NetMHCstabPanTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.script_path = os.path.join(
