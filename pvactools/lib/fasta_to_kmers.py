@@ -60,7 +60,6 @@ class FastaToKmers():
             if not final_kmers:
                 print(f'No unique kmers found for {key}')
                 continue
-            
             # create master dict of unique kmers: index(es)
             for k,v in final_kmers.items():
                 if k not in unique_kmers.keys():
@@ -88,7 +87,7 @@ class FastaToKmers():
         index_df['name'] = index_df['name'].str.replace(';', '.')
         # I don't think I need to save this file
         # create a tsv file
-        index_df.to_csv(f'{self.output_dir}/{self.sample_name}.kmer_index.tsv', sep='\t', index=False)
+        #index_df.to_csv(f'{self.output_dir}/{self.sample_name}.kmer_index.tsv', sep='\t', index=False)
 
         return fasta_df
 
@@ -128,4 +127,3 @@ class FastaToKmers():
         # key: peptide value: list of ids
         fasta_df = self.create_index_file(unique_kmers)
         self.create_epitope_fastas(fasta_df)
-
