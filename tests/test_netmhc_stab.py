@@ -16,17 +16,6 @@ from tests.utils import *
 def default_alleles(alleles):
     return ['HLA-G*01:09', 'HLA-E*01:01']
 
-def make_success_response(data, files, path):
-    reader = open(os.path.join(
-        path,
-        "Netmhcstab.{}.html".format(data['allele'])
-    ), mode='rb')
-    response_obj = lambda :None
-    response_obj.status_code = 200
-    response_obj.content = reader.read()
-    reader.close()
-    return response_obj
-
 def make_rejected_response(data, files, path, self):
     if self.rejected:
         reader = open(os.path.join(
