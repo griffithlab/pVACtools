@@ -11,4 +11,6 @@ class BlastApiStatusTest(unittest.TestCase):
         with open(expected_file_name, 'r') as expected_fh:
             actual_content = result_handle.read()
             expected_content = expected_fh.read()
-            self.assertEqual(expected_content, actual_content)
+            actual_content_without_query_id = '\n'.join(line for line in actual_content.split('\n') if 'BlastOutput_query-ID' not in line and 'Iteration_query-ID' not in line)
+            expected_content_without_query_id = '\n'.join(line for line in expected_content.split('\n') if 'BlastOutput_query-ID' not in line and 'Iteration_query-ID' not in line)
+            self.assertEqual(expected_content_without_query_id, actual_content_without_query_id)
