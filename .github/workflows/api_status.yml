@@ -36,7 +36,7 @@ jobs:
         run: |
           pip list
       - name: Run tests
-        run: python -m unittest tests/api_status/test_iedb.py
+        run: python -m unittest api_status_tests/test_iedb.py
   netchop:
     name: "Check NetChop API"
 
@@ -67,7 +67,7 @@ jobs:
         run: |
           pip list
       - name: Run tests
-        run: python -m unittest tests/api_status/test_netchop.py
+        run: python -m unittest api_status_tests/test_netchop.py
   netmhcstabpan:
     name: "Check NetMHCstabpan API"
 
@@ -98,7 +98,7 @@ jobs:
         run: |
           pip list
       - name: Run tests
-        run: python -m unittest tests/api_status/test_netmhc_stab.py
+        run: python -m unittest api_status_tests/test_netmhc_stab.py
   blast:
     name: "Check Blast API"
 
@@ -129,4 +129,4 @@ jobs:
         run: |
           pip list
       - name: Run tests
-        run: python -m unittest tests/api_status/test_blast.py
+        run: python -m unittest api_status_tests/test_blast.py
