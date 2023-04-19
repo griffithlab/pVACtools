@@ -14,7 +14,7 @@ from pvactools.lib.netmhc_stab import NetMHCStab
 class PostProcessor:
     def __init__(self, **kwargs):
         for (k,v) in kwargs.items():
-           setattr(self, k, v)
+            setattr(self, k, v)
         self.aggregate_report = self.input_file.replace('.tsv', '.aggregated.tsv')
         self.identify_problematic_amino_acids_fh = tempfile.NamedTemporaryFile()
         self.binding_filter_fh = tempfile.NamedTemporaryFile()

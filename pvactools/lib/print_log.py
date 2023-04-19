@@ -4,13 +4,10 @@ import yaml
 import pkg_resources
 from pvactools.lib.run_argument_parser import *
 
-#args_input = sys.argv[1:]
-#parser = PvacspliceRunArgumentParser().parser
-#args = parser.parse_args(args_input)
 
-def print_log(log_dir, args_dict):
+def print_log(log_dir, args_dict, output_file_prefix):
     os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, 'inputs.yml')
+    log_file = os.path.join(log_dir, f'{output_file_prefix}.yml')
     if os.path.exists(log_file):
         with open(log_file, 'r') as log_fh:
             past_inputs = yaml.load(log_fh, Loader=yaml.FullLoader)
@@ -44,6 +41,3 @@ def print_log(log_dir, args_dict):
             inputs = args_dict
             inputs['pvactools_version'] = pkg_resources.get_distribution("pvactools").version
             yaml.dump(inputs, log_fh, default_flow_style=False)
-
-#if __name__ == '__main__':
-#    print_log()
