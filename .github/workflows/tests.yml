@@ -28,7 +28,6 @@ jobs:
           sudo apt-get install -y ghostscript
           sudo apt-get install -y gcc
           sudo apt-get install -y pandoc
-          pip install setuptools==57
           pip install pypandoc==1.7.2
           pip install coverage
           pip install coveralls
