@@ -28,8 +28,22 @@ class PostProcessor:
         self.file_type = kwargs.pop('file_type', None)
         self.fasta = kwargs.pop('fasta', None)
         self.net_chop_fasta = kwargs.pop('net_chop_fasta', None)
+        if not hasattr(self, 'flurry_state'):
+            self.flurry_state = self.get_flurry_state()
         self.el_only = all([self.is_el(a) for a in self.prediction_algorithms])
 
+    def get_flurry_state(self):
+        if 'MHCflurry' in self.prediction_algorithms and 'MHCflurryEL' in self.prediction_algorithms:
+            self.prediction_algorithms.remove('MHCflurryEL')
+            return 'both'
+        elif 'MHCflurry' in self.prediction_algorithms:
+            return 'BA_only'
+        elif 'MHCflurryEL' in self.prediction_algorithms:
+            pred_idx = self.prediction_algorithms.index('MHCflurryEL')
+            self.prediction_algorithms[pred_idx] = 'MHCflurry'
+            return 'EL_only'
+        else:
+            return None
 
     def is_el(self, algorithm):
         if algorithm == 'MHCflurry' and self.flurry_state == 'EL_only':
