@@ -4,9 +4,10 @@ import pandas as pd
 import numpy as np
 from pyfaidx import Fasta
 
-class FastaToKmers():
+
+class FastaToKmers:
     def __init__(self, **kwargs):
-        self.tscript_fasta   = Fasta(kwargs['fasta'])
+        self.tscript_fasta = Fasta(kwargs['fasta'])
         self.fasta_path    = kwargs['fasta']
         self.output_dir    = kwargs['output_dir']
         self.class_i_epitope_length  = kwargs['class_i_epitope_length']
@@ -28,7 +29,7 @@ class FastaToKmers():
                 # grab kmer sequence
                 k = sequence[i:x+i]
                 # if kmer matches target len
-                # if k seq doies not include X (any aa); continue
+                # if k seq does not include X (any aa); continue
                 match = re.search('X', k)
                 if not match and len(k) == x:
                     # add entry to dictionary
@@ -85,9 +86,8 @@ class FastaToKmers():
         # now split each index into index, pos, len
         index_df[['junction_index', 'transcript_position']] = index_df['name'].str.split(';', expand=True)
         index_df['name'] = index_df['name'].str.replace(';', '.')
-        # I don't think I need to save this file
         # create a tsv file
-        #index_df.to_csv(f'{self.output_dir}/{self.sample_name}.kmer_index.tsv', sep='\t', index=False)
+        # index_df.to_csv(f'{self.output_dir}/{self.sample_name}.kmer_index.tsv', sep='\t', index=False)
 
         return fasta_df
 
@@ -116,7 +116,7 @@ class FastaToKmers():
                 if os.path.exists(output_file):
                     with open(output_file, "r+") as f:
                         dup_content = re.search(row.peptide, f.read())
-                        if dup_content == None:
+                        if not dup_content:
                             f.write(write_str)
                 else:
                     with open(output_file, "w") as e:
