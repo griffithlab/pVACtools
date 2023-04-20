@@ -99,7 +99,7 @@ There are three separate boxes in this section as shown, from left to right you 
 
 
 :large:`Transcript Set Detailed Data (Peptide Information)`
-____________________________
+___________________________________________________________
 
 Upon selecting the transcript set for further examination, users can navigate to this table which displays
 all peptide sequences (from your selected transcript set in the transcripts table) that were predicted to be good binders

@@ -39,6 +39,7 @@ extensions = [
     'sphinx.ext.coverage',
     #'sphinxarg.ext',
     'sphinxcontrib.programoutput',
+    'linuxdoc.rstFlatTable',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
