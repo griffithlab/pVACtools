@@ -43,19 +43,33 @@ Binding Filter
 The binding filter removes variants that don't pass the chosen binding threshold.
 The user can chose whether to apply this filter to the ``lowest`` or the ``median`` binding
 affinity score by setting the ``--top-score-metric`` flag. The ``lowest`` binding
-affinity score is recorded in the ``Best MT Score`` column and represents the lowest
+affinity score is recorded in the ``Best MT IC50 Score`` column and represents the lowest
 ic50 score of all prediction algorithms that were picked during the previous pVACseq run.
-The ``median`` binding affinity score is recorded in the ``Median MT Score`` column and
+The ``median`` binding affinity score is recorded in the ``Median MT IC50 Score`` column and
 corresponds to the median ic50 score of all prediction algorithms used to create the report.
 Be default, the binding filter runs on the ``median`` binding affinity.
+
+When the ``--allele-specific-binding-thresholds`` flag is set, binding cutoffs specific to each
+prediction's HLA allele are used instead of the value set via the ``--binding-threshold`` parameters.
+For HLA alleles where no allele-specific binding threshold is available, the
+binding threshold is used as a fallback. Alleles with allele-specific
+threshold as well as the value of those thresholds can be printed by executing
+the ``pvacseq allele_specific_cutoffs`` command.
 
 The binding filter also offers the option to filter on ``Fold Change`` columns, which contain
 the ratio of the MT score to the WT Score. This option can be activated by setting the
 ``--minimum-fold-change`` threshold (to require that the mutant peptide is a better binder 
 than the corresponding wild type peptide). If the ``--top-score-metric`` option is set to ``lowest``, 
-the ``Corresponding Fold Change`` column will be used (``Corresponding WT Score``/``Best MT Score``).
+the ``Corresponding Fold Change`` column will be used (``Corresponding WT IC50 Score``/``Best MT IC50 Score``).
 If the ``--top-score-metric`` option is set to ``median``, the ``Median Fold Change`` column
-will be used (``Median WT Score``/``Median MT Score``).
+will be used (``Median WT IC50 Score``/``Median MT IC50 Score``).
+
+In addition to being able to filter on the IC50 score columns, the binding
+filter also offers to ability to filter on the percentile score using the
+``--percentile-threshold`` parameter. When the ``--top-score-metric`` is set
+to ``lowest``, this threshold is applied to the ``Best MT Percentile`` column. When
+it is set to ``median``, the threshold is applied to the ``Median MT
+Percentile`` column.
 
 By default, entries with ``NA`` values will be included in the output. This
 behavior can be turned off by using the ``--exclude-NAs`` flag.
@@ -95,8 +109,8 @@ only transcripts with a `transcript support level (TSL) <https://useast.ensembl.
 of <=1 are kept. This threshold can be adjusted using the ``--maximum-transcript-support-level``
 parameter. 
 
-By default, entries with ``NA`` values will be included in the output. This
-behavior can be turned off by using the ``--exclude-NAs`` flag.
+By default, entries with ``Not Supported`` values will be included in the output. These occur if VEP was run
+without the ``--tsl`` flag or if data is aligned to GRCh37 or older.
 
 Top Score Filter
 ----------------
@@ -110,7 +124,7 @@ the same variant.
 In order to account for different splice sites among the transcripts of a
 variant that would lead to different peptides, this filter also takes into
 account the different transcripts returned by VEP and will return
-the top epitope for all transcripts if they are non-identical. If the
+the top epitope for each transcript if they are non-identical. If the
 resulting list of top epitopes for the transcripts of a variant is identical,
 the epitope for the transcript with the highest expression is returned. If
 this information is not available, the transcript with the lowest Ensembl ID is returned.

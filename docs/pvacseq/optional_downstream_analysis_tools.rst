@@ -26,7 +26,21 @@ used in the annotated VCF. The alteration in the VCF (e.g. a somatic missense SN
 protein sequence returned (if possible). If the variant is near the beginning or end of the CDS, it will
 be as close to center as possible while returning the desired protein sequence length. If the variant
 causes a frameshift, the full downstream protein sequence will be returned unless the user specifies otherwise 
-as described above. 
+as described above. The ``flanking_sequence_length`` positional parameter
+controls how many amino acids will be included on either side of the mutation.
+
+To incorporate proximal variants in the final sequence, use the
+``--phased-proximal-variants-vcf`` argument. Please see the :ref:`phased_vcf`
+section of the documentation on how to create this VCF.
+
+The output may be limited to PASS variants only by setting the ``--pass`` only
+flag and to mutant sequences by setting the ``--mutant-only`` flag.
+
+The output can be further limited to only certain variants by providing
+pVACseq report file to the ``--input-tsv`` argument.Only the peptide sequences for the epitopes in the TSV
+will be used when creating the FASTA. If this argument is an aggregated TSV
+file, use the ``--aggregate-report-evaluation`` parameter to only include
+peptide sequences for epitopes matching the chosen Evaluation(s).
 
 Generate Aggregated Report
 --------------------------
@@ -82,3 +96,8 @@ filtered output TSV when specified.  This tool provides a way to manually run th
 filtered/all_epitopes TSV files so that you can add this information when not present if desired.
 You can view more about these columns for pVACseq in
 the :ref:`output file documentation <all_ep_and_filtered>`.
+
+Identify Problematic Amino Acids
+--------------------------------
+
+.. program-output:: pvacseq identify_problematic_amino_acids -h

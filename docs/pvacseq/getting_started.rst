@@ -15,7 +15,7 @@ The example data output can be reproduced by running the following command:
    <example_data_dir>/input.vcf \
    Test \
    HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
-   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
+   all \
    <output_dir> \
    -e1 8,9,10 \
    -e2 15
