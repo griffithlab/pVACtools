@@ -77,8 +77,8 @@ setup(
         'Pillow',
         'pymp-pypi',
         'mock',
-        'setuptools==57',
         'vaxrank>=1.1.0',
+        'varcode>=1.1.0',
         'mhcnuggets==2.4.1',
         'mhcflurry==2.0.6',
         'testfixtures'
