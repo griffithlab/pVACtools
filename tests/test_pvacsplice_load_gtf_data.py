@@ -7,11 +7,12 @@ import py_compile
 from pvactools.lib.load_gtf_data import LoadGtfData
 from tests.utils import *
 
-#python -m unittest tests/test_pvacsplice_load_gtf_data.py
+
+# python -m unittest tests/test_pvacsplice_load_gtf_data.py
 class LoadGtfDataTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        #locate the bin and test_data directories
+        # locate the bin and test_data directories
         cls.load_gtf_data_path = os.path.join(pvactools_directory(), "pvactools", "lib", "load_gtf_data.py")
         cls.test_data_path= os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice")
         cls.gtf_file = os.path.join(cls.test_data_path, 'inputs', 'Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz')

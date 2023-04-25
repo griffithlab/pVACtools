@@ -317,21 +317,21 @@ class RunArgumentParser(metaclass=ABCMeta):
         self.parser.add_argument(
             "-v", "--variant_distance", type=int,
             help="Regulatory variants can lie inside or outside of splicing junction."
-            +"Maximum distance window (upstream and downstream) for a variant outside the junction.",
+            + "Maximum distance window (upstream and downstream) for a variant outside the junction.",
             default=100
         )
         self.parser.add_argument(
             "-g", "--save_gtf",
             help="Save a tsv file from the uploaded filtered GTF data."
-            +"Use this option to bypass GTF data upload time for multiple pVACsplice runs.",
+            + "Use this option to bypass GTF data upload time for multiple pVACsplice runs.",
             default=False,
             action='store_true'
         )
         self.parser.add_argument(
             "--anchor_types", type=lambda s:[a for a in s.split(',')],
-            help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list.",
-            default=['A','D','NDA'],
-            choices=['A','D','NDA','DA','N']  # todo how to add choices to anchor types parameter
+            help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list."
+            + "Choices: A, D, NDA, D, N",
+            default=['A', 'D', 'NDA']
         )
 
     def pvacvector(self):
@@ -400,4 +400,3 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
         input_file_help = "A .fa file with peptides or a pVACseq .tsv file with epitopes to use for vector design."
         RunArgumentParser.__init__(self, tool_name, input_file_help)
         self.pvacvector()
-
