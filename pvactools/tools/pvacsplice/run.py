@@ -51,6 +51,7 @@ def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
     post_processing_params['file_type'] = 'pVACsplice'
     post_processing_params['input_file'] = combined_fn
     post_processing_params['filtered_report_file'] = filtered_fn
+    post_processing_params['minimum_fold_change'] = None
     # methods in pp class
     post_processing_params['run_manufacturability_metrics'] = True
     post_processing_params['run_coverage_filter'] = True
@@ -105,17 +106,14 @@ def main(args_input = sys.argv[1:]):
     (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
 
     # all input file check
-<<<<<<< HEAD
-    print_log(os.path.join(junctions_dir, 'log'), vars(args))
-=======
     print_log(os.path.join(junctions_dir, 'log'), vars(args), 'inputs')
->>>>>>> f080bd76 (update post processor to run once in run.py with combined epitopes lens file)
 
     junction_arguments = {
         'input_file_type'                  : 'junctions',
         'junctions_dir'                    : junctions_dir,
         'input_file'                       : args.input_file,
         'gtf_file'                         : args.gtf_file,
+        'save_gtf'                         : args.save_gtf,
         'sample_name'                      : args.sample_name,
         'ref_fasta'                        : args.ref_fasta,
         'annotated_vcf'                    : args.annotated_vcf,
@@ -179,13 +177,8 @@ def main(args_input = sys.argv[1:]):
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
             os.makedirs(output_len_dir, exist_ok=True)
 
-<<<<<<< HEAD
-            class_i_arguments = splice_arguments.copy()
-            class_i_arguments['input_file']              = f'{output_len_dir}/{args.sample_name}.{x}.fa'
-=======
             class_i_arguments = junction_arguments.copy()
             class_i_arguments['input_file']              = f'{junctions_dir}/{args.sample_name}.{x}.fa'
->>>>>>> f080bd76 (update post processor to run once in run.py with combined epitopes lens file)
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
@@ -193,12 +186,6 @@ def main(args_input = sys.argv[1:]):
             class_i_arguments['output_dir']              = output_len_dir
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
 
-<<<<<<< HEAD
-            # all pipeline args i input check
-            print_log(os.path.join(junctions_dir, 'log'), class_i_arguments)
-
-=======
->>>>>>> f080bd76 (update post processor to run once in run.py with combined epitopes lens file)
             pipeline = PvacsplicePipeline(**class_i_arguments)
             pipeline.execute()
 
@@ -232,12 +219,6 @@ def main(args_input = sys.argv[1:]):
             class_ii_arguments['output_dir']              = output_len_dir
             class_ii_arguments['netmhc_stab']             = False
 
-<<<<<<< HEAD
-            # all pipeline args ii input check
-            print_log(os.path.join(junctions_dir, 'log'), class_ii_arguments)
-
-=======
->>>>>>> f080bd76 (update post processor to run once in run.py with combined epitopes lens file)
             pipeline = PvacsplicePipeline(**class_ii_arguments)
             pipeline.execute()
 
