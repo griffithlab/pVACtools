@@ -1,4 +1,4 @@
-Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHC Score	NetMHC Percentile
+Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHC IC50 Score	NetMHC Percentile
 MT.SUMF2.G23A|HHHC|MT.FAT3.R4848T	H-2-Kb	4	SSYLPPHL	12.01	12.01	NetMHC	0.1	0.1	NetMHC	12.01	0.1
 MT.ACSL3.S345N|HHAA|MT.TP53.R157H	H-2-Kb	7	LSLRAAYL	25.44	25.44	NetMHC	0.2	0.2	NetMHC	25.44	0.2
 MT.PRDM15.G654W|HHC|MT.CASP10.S654R	H-2-Kb	7	LSLRHHHL	34.13	34.13	NetMHC	0.3	0.3	NetMHC	34.13	0.3
