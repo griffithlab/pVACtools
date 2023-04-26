@@ -246,9 +246,9 @@ class CalculateReferenceProteomeSimilarity:
     def metric_headers(self):
         epitope_seq = 'MT Epitope Seq' if self.file_type == 'pVACseq' else 'Epitope Seq'
         if self.file_type == 'pVACseq':
-            return ['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', epitope_seq, 'Peptide', 'Hit ID', 'Hit Definition', 'Query Sequence', 'Query Window', 'Match Sequence', 'Match Start', 'Match Stop']
+            return ['Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 'Transcript', epitope_seq, 'Peptide', 'Hit ID', 'Hit Definition', 'Match Window', 'Match Sequence', 'Match Start', 'Match Stop']
         else:
-            return ['ID', epitope_seq, 'Peptide', 'Hit ID', 'Hit Definition', 'Query Sequence', 'Query Window', 'Match Sequence', 'Match Start', 'Match Stop']
+            return ['ID', epitope_seq, 'Peptide', 'Hit ID', 'Hit Definition', 'Match Window', 'Match Sequence', 'Match Start', 'Match Stop']
 
 
     def _input_tsv_type(self, line):
@@ -378,8 +378,7 @@ class CalculateReferenceProteomeSimilarity:
                                         reference_match_dict.append({
                                             'Hit ID': alignment.hit_id,
                                             'Hit Definition': alignment.hit_def,
-                                            'Query Sequence': hsp.query,
-                                            'Query Window'  : window,
+                                            'Match Window'  : window,
                                             'Match Sequence': match,
                                             'Match Start': match.index(window) + 1 ,
                                             'Match Stop': match.index(window) + 1 + len(window),
@@ -393,8 +392,7 @@ class CalculateReferenceProteomeSimilarity:
             reference_match_dict.append({
                 'Hit ID': transcript_seq.id,
                 'Hit Definition': transcript_seq.description,
-                'Query Sequence': peptide,
-                'Query Window'  : epitope,
+                'Match Window'  : epitope,
                 'Match Sequence': str(transcript_seq.seq),
                 'Match Start': match_start + 1,
                 'Match Stop': match_start + len(epitope) + 1,
@@ -410,8 +408,7 @@ class CalculateReferenceProteomeSimilarity:
                 'Transcript': transcript,
                 'Hit ID': transcript_seq.id,
                 'Hit Definition': transcript_seq.description,
-                'Query Sequence': peptide,
-                'Query Window'  : epitope,
+                'Match Window'  : epitope,
                 'Match Sequence': str(transcript_seq.seq),
                 'Match Start': match_start + 1,
                 'Match Stop': match_start + len(epitope) + 1,
@@ -431,12 +428,12 @@ class CalculateReferenceProteomeSimilarity:
                 if index == len(hit_reference_matches) - 1:
                     match_stop = hit_reference_matches[index]['Match Stop']
                     combined_match['Match Stop'] = match_stop
-                    combined_match['Query Window'] = match['Match Sequence'][match_start-1:match_stop-1]
+                    combined_match['Match Window'] = match['Match Sequence'][match_start-1:match_stop-1]
                     combined_matches.append(combined_match)
                 elif hit_reference_matches[index+1]['Match Start'] != match['Match Start'] + 1:
                     match_stop = match['Match Stop']
                     combined_match['Match Stop'] = match_stop
-                    combined_match['Query Window'] = match['Match Sequence'][match_start-1:match_stop-1]
+                    combined_match['Match Window'] = match['Match Sequence'][match_start-1:match_stop-1]
                     combined_matches.append(combined_match)
                     first_match = None
         unique_combined_matches = [dict(s) for s in set(frozenset(d.items()) for d in combined_matches)]
@@ -497,7 +494,7 @@ class CalculateReferenceProteomeSimilarity:
                         metric_lines.append(metric_line_alignment)
                     if self.aggregate_metrics_file:
                         matches = []
-                        for query_window, hit_reference_matches in groupby(metric_lines,key=lambda x:x['Query Window']):
+                        for query_window, hit_reference_matches in groupby(metric_lines,key=lambda x:x['Match Window']):
                             hit_reference_matches = list(hit_reference_matches)
                             gene_regex = '^.*gene_symbol:([0-9|A-Z]+).*$'
                             transcript_regex = '^.*transcript:(ENST[0-9|.]+).*$'
@@ -527,7 +524,7 @@ class CalculateReferenceProteomeSimilarity:
                                 })
                         m = {
                             'count': len(metric_lines),
-                            'query_peptide': metric_lines[0]['Query Sequence'],
+                            'query_peptide': metric_lines[0]['Peptide'],
                             'matches': matches
                         }
                         self.aggregate_metrics[metric_lines[0]['ID']]['reference_matches'] = m
