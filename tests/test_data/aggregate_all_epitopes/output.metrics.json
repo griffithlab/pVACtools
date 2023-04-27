@@ -9,16 +9,12 @@
   "allele_expr_threshold": 2.5,
   "maximum_transcript_support_level": 1,
   "percentile_threshold": null,
-  "allele_specific_binding_thresholds": false,
+  "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Median",
   "wt_top_score_metric": "Median",
-  "binding_cutoffs": {
-    "HLA-A*02:01": 500,
-    "HLA-B*35:01": 500
-  },
-  "is_allele_specific_binding_cutoff": {
-    "HLA-A*02:01": false,
-    "HLA-B*35:01": false
+  "allele_specific_binding_thresholds": {
+    "HLA-A*02:01": 255.0,
+    "HLA-B*35:01": 348.0
   },
   "allele_specific_anchors": false,
   "anchor_contribution_threshold": 0.8,
