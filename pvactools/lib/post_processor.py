@@ -5,7 +5,7 @@ from pvactools.lib.identify_problematic_amino_acids import IdentifyProblematicAm
 from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes
 from pvactools.lib.binding_filter import BindingFilter
 from pvactools.lib.filter import Filter, FilterCriterion
-from pvactools.lib.top_score_filter import TopScoreFilter
+from pvactools.lib.top_score_filter import PvacseqTopScoreFilter, PvacfuseTopScoreFilter, PvacbindTopScoreFilter
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.calculate_reference_proteome_similarity import CalculateReferenceProteomeSimilarity
 from pvactools.lib.net_chop import NetChop
@@ -185,7 +185,29 @@ class PostProcessor:
             shutil.copy(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name)
             return
         print("Running Top Score Filter")
-        TopScoreFilter(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name, self.top_score_metric, self.file_type).execute()
+        if self.file_type == 'pVACseq':
+            PvacseqTopScoreFilter(
+                self.transcript_support_level_filter_fh.name,
+                self.top_score_filter_fh.name,
+                top_score_metric=self.top_score_metric,
+                binding_threshold=self.binding_threshold,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                maximum_transcript_support_level=self.maximum_transcript_support_level,
+                allele_specific_anchors=self.allele_specific_anchors,
+                anchor_contribution_threshold=self.anchor_contribution_threshold,
+            ).execute()
+        elif self.file_type == 'pVACfuse':
+            PvacfuseTopScoreFilter(
+                self.transcript_support_level_filter_fh.name,
+                self.top_score_filter_fh.name,
+                top_score_metric = self.top_score_metric,
+            ).execute()
+        elif self.file_type == 'pVACbind':
+            PvacbindTopScoreFilter(
+                self.transcript_support_level_filter_fh.name,
+                self.top_score_filter_fh.name,
+                top_score_metric = self.top_score_metric,
+            ).execute()
         print("Completed")
 
     def call_net_chop(self):
