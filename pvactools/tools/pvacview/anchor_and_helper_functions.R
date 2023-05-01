@@ -11,7 +11,7 @@ anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/griffith
 #get binding affinity colors cutoffs given HLA
 
 scale_binding_affinity <- function(allele_specific_binding_thresholds, use_allele_specific_binding_thresholds, binding_threshold, hla, current_ba) {
-  if (use_allele_specific_binding_thresholds) {
+  if (use_allele_specific_binding_thresholds && hla %in% names(allele_specific_binding_thresholds[hla])) {
     threshold <- as.numeric(allele_specific_binding_thresholds[hla])
     return(as.numeric(current_ba) / threshold)
   }else {
@@ -153,7 +153,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   rna_vaf <- as.numeric(variant_info["RNA VAF"])
   rna_depth <- as.numeric(variant_info["RNA Depth"])
   allele_expr <- as.numeric(variant_info["Allele Expr"])
-  if (use_allele_specific_binding_thresholds) {
+  if (use_allele_specific_binding_thresholds && hla_allele %in% names(meta_data[["allele_specific_binding_thresholds"]][hla_allele])) {
     binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
   }
   trna_vaf <- as.numeric(meta_data["trna_vaf"])
@@ -276,7 +276,7 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
   rna_vaf <- as.numeric(variant_info["RNA VAF"])
   rna_depth <- as.numeric(variant_info["RNA Depth"])
   allele_expr <- as.numeric(variant_info["Allele Expr"])
-  if (use_allele_specific_binding_thresholds) {
+  if (use_allele_specific_binding_thresholds && hla_allele %in% names(meta_data[["allele_specific_binding_thresholds"]][hla_allele])) {
       binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
   }
   trna_vaf <- as.numeric(meta_data["trna_vaf"])

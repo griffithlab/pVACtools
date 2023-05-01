@@ -12,11 +12,12 @@
   "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Best",
   "wt_top_score_metric": "Corresponding",
-  "allele_specific_binding_thresholds": {
-    "HLA-E*01:01": 500,
-    "HLA-G*01:09": 500
-  },
+  "allele_specific_binding_thresholds": {},
   "allele_specific_anchors": false,
+  "alleles": [
+    "HLA-E*01:01",
+    "HLA-G*01:09"
+  ],
   "anchor_contribution_threshold": 0.8,
   "2-217498305-217498305-T-TGCTGCC": {
     "good_binders": {
