@@ -17,9 +17,7 @@ class AggregateAllEpitopes:
         allele_specific_binding_thresholds = {}
         for hla_type in self.hla_types:
             threshold = PredictionClass.cutoff_for_allele(hla_type)
-            if threshold is None:
-                allele_specific_binding_thresholds[hla_type] = self.binding_threshold
-            else:
+            if threshold is not None:
                 allele_specific_binding_thresholds[hla_type] = float(threshold)
         self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
 
@@ -209,6 +207,7 @@ class AggregateAllEpitopes:
                 'wt_top_score_metric': self.wt_top_score_metric,
                 'allele_specific_binding_thresholds': self.allele_specific_binding_thresholds,
                 'allele_specific_anchors': self.allele_specific_anchors,
+                'alleles': self.hla_types.tolist(),
                 'anchor_contribution_threshold': self.anchor_contribution_threshold,
             }
         else:

@@ -95,12 +95,8 @@ server <- shinyServer(function(input, output, session) {
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
-    hla <- names(df$metricsData$allele_specific_binding_thresholds)
-    if (input$hla_class == "class_i"){
-      converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
-    } else if (input$hla_class == "class_ii"){
-      converted_hla_names <- hla
-    }
+    hla <- df$metricsData$alleles
+    converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
     if (!("Ref Match" %in% colnames(df$mainTable))) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
@@ -175,7 +171,7 @@ server <- shinyServer(function(input, output, session) {
      df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
      df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
      df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
-     hla <- names(df$metricsData$allele_specific_binding_thresholds)
+     hla <- df$metricsData$alleles
      converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
      if (!("Ref Match" %in% colnames(df$mainTable))) {
        df$mainTable$`Ref Match` <- "Not Run"
@@ -395,13 +391,19 @@ server <- shinyServer(function(input, output, session) {
   output$bindingParamTable <- renderTable(
     if (df$metricsData$use_allele_specific_binding_thresholds) {
       data <- data.frame(
-        "HLA Alleles" = names(df$metricsData$allele_specific_binding_thresholds),
-        "Binding Cutoffs" = unlist(lapply(names(df$metricsData$allele_specific_binding_thresholds), function(x) df$metricsData$allele_specific_binding_thresholds[[x]]))
-      )
+        "HLA Alleles" = df$metricsData$alleles,
+        "Binding Cutoffs" = unlist(lapply(df$metricsData$alleles, function(x) {
+            if (x %in% names(df$metricsData$allele_specific_binding_thresholds)) {
+                df$metricsData$allele_specific_binding_thresholds[[x]]
+            } else {
+                df$metricsData$binding_threshold
+            }
+        }
+      )))
     } else {
       data <- data.frame(
-        "HLA Alleles" = names(df$metricsData$allele_specific_binding_thresholds),
-        "Binding Cutoffs" = unlist(lapply(names(df$metricsData$allele_specific_binding_thresholds), function(x) df$metricsData$binding_threshold))
+        "HLA Alleles" = df$metricsData$alleles,
+        "Binding Cutoffs" = unlist(lapply(df$metricsData$alleles, function(x) df$metricsData$binding_threshold))
       )
     }
   )
