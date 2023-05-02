@@ -572,8 +572,8 @@ class OutputParser(metaclass=ABCMeta):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            headers.append("%s WT Score" % pretty_method)
-            headers.append("%s MT Score" % pretty_method)
+            headers.append("%s WT IC50 Score" % pretty_method)
+            headers.append("%s MT IC50 Score" % pretty_method)
             headers.append("%s WT Percentile" % pretty_method)
             headers.append("%s MT Percentile" % pretty_method)
         if self.add_sample_name:
@@ -708,8 +708,8 @@ class OutputParser(metaclass=ABCMeta):
                 row['Median WT Percentile'] = 'NA' if median_wt_percentile == 'NA' else round(median_wt_percentile, 3)
                 for method in self.prediction_methods():
                     pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-                    self.add_pretty_row(row, wt_scores, method, pretty_method, 'WT Score')
-                    self.add_pretty_row(row, mt_scores, method, pretty_method, 'MT Score')
+                    self.add_pretty_row(row, wt_scores, method, pretty_method, 'WT IC50 Score')
+                    self.add_pretty_row(row, mt_scores, method, pretty_method, 'MT IC50 Score')
                     self.add_pretty_row(row, wt_percentiles, method, pretty_method, 'WT Percentile')
                     self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'MT Percentile')
 
@@ -912,7 +912,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 elif self.flurry_state == 'both':
                     self.flurry_headers(headers)
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            headers.append("%s Score" % pretty_method)
+            headers.append("%s IC50 Score" % pretty_method)
             headers.append("%s Percentile" % pretty_method)
         if self.add_sample_name:
             headers.append("Sample Name")
@@ -958,7 +958,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
             row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-                self.add_pretty_row(row, mt_scores, method, pretty_method, 'Score')
+                self.add_pretty_row(row, mt_scores, method, pretty_method, 'IC50 Score')
                 self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
             if self.add_sample_name:
                 row['Sample Name'] = self.sample_name

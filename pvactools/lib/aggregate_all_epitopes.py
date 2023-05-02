@@ -128,7 +128,7 @@ class AggregateAllEpitopes:
         for algorithm in potential_algorithms:
             if algorithm == 'NetMHCpanEL' or algorithm == 'NetMHCIIpanEL':
                 continue
-            if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
+            if "{} MT IC50 Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
 
@@ -157,7 +157,7 @@ class AggregateAllEpitopes:
             "Best MT IC50 Score", "Corresponding WT IC50 Score", "Best MT Percentile", "Corresponding WT Percentile",
         ]
         for algorithm in itertools.chain(prediction_algorithms, el_algorithms):
-            used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm)])
+            used_columns.extend(["{} WT IC50 Score".format(algorithm), "{} MT IC50 Score".format(algorithm)])
             if algorithm != "MHCflurryEL Processing":
                 used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
         if self.problematic_positions_exist():
@@ -541,7 +541,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         for index, line in good_binders_peptide_annotation.to_dict(orient='index').items():
                             ic50s[line['HLA Allele']] = line['{} {} IC50 Score'.format(top_score_metric, peptide_type)]
                             percentiles[line['HLA Allele']] = line['{} {} Percentile'.format(top_score_metric, peptide_type)]
-                            ic50_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
+                            ic50_calls[line['HLA Allele']] = [line["{} {} IC50 Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
                             percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
                             el_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in el_algorithms]
                             el_percentile_calls[line['HLA Allele']] = ['NA' if algorithm == 'MHCflurryEL Processing' else line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in el_algorithms]
