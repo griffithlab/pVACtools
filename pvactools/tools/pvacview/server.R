@@ -86,6 +86,7 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$metricsDataInput, {
     df$metricsData <- fromJSON(input$metricsDataInput$datapath)
     df$binding_threshold <- df$metricsData$`binding_threshold`
+    df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
     df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
     df$percentile_threshold <- df$metricsData$`percentile_threshold`
     df$binding_cutoffs <- df$metricsData$`binding_cutoffs`
@@ -93,6 +94,7 @@ server <- shinyServer(function(input, output, session) {
     df$dna_cutoff <- df$metricsData$vaf_clonal
     df$allele_expr <- df$metricsData$allele_expr_threshold
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
+    df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
     hla <- names(df$metricsData$binding_cutoffs)
     if (input$hla_class == "class_i"){
@@ -165,6 +167,7 @@ server <- shinyServer(function(input, output, session) {
      metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/pvacview/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
      df$metricsData <- fromJSON(txt = metricsdata)
      df$binding_threshold <- df$metricsData$`binding_threshold`
+     df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
      df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
      df$percentile_threshold <- df$metricsData$`percentile_threshold`
      df$binding_cutoffs <- df$metricsData$`binding_cutoffs`
@@ -172,6 +175,7 @@ server <- shinyServer(function(input, output, session) {
      df$dna_cutoff <- df$metricsData$vaf_clonal
      df$allele_expr <- df$metricsData$allele_expr_threshold
      df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
+     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
      df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
      hla <- names(df$metricsData$binding_cutoffs)
      converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
@@ -245,10 +249,32 @@ server <- shinyServer(function(input, output, session) {
     updateTabItems(session, "tabs", "explore")
   })
   ##Parameter UIs
+  output$allele_specific_anchors_ui <- renderUI({
+    current_is_allele_specific_anchors_set <- df$allele_specific_anchors
+    checkboxInput(
+      "use_anchor",
+      "If you want to use allele-specific anchor calculations, please check this box. Otherwise anchors will be calculated as 1,2 and n-1,n for n-mer peptides.",
+      value = current_is_allele_specific_anchors_set,
+      width = NULL
+    )
+  })
+  output$anchor_contribution_ui <- renderUI({
+    current_anchor_contribution_threshold <- df$anchor_contribution
+    sliderInput("anchor_contribution", "Contribution cutoff for determining anchor locations", 0.5, 0.9, current_anchor_contribution_threshold, step = 0.1, width = 400)
+  })
   output$binding_threshold_ui <- renderUI({
     current_binding <- df$binding_threshold
     max_cutoff <- df$aggregate_inclusion_binding_threshold
     numericInput("binding_threshold", "Binding Threshold", current_binding, min = 0, max = max_cutoff, step = 10, width = 500)
+  })
+  output$allele_specific_binding_ui <- renderUI({
+    current_is_allele_specific_binding_set <- df$allele_specific_binding_thresholds
+    checkboxInput(
+      "allele_specific_binding",
+      "If you want to use allele-specific binding thresholds for tiering purposes please check this box.",
+      value = current_is_allele_specific_binding_set,
+      width = NULL
+    )
   })
   output$percentile_threshold_ui <- renderUI({
     current_percentile <- df$percentile_threshold
@@ -266,9 +292,12 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$submit, {
       session$sendCustomMessage("unbind-DT", "mainTable")
       df$binding_threshold <- input$binding_threshold
+      df$allele_specific_binding_thresholds <- input$allele_specific_binding
       df$percentile_threshold <- input$percentile_threshold
       df$dna_cutoff <- input$dna_cutoff
       df$allele_expr <- input$allele_expr
+      df$allele_specific_anchors <- input$use_anchor
+      df$anchor_contribution <- input$anchor_contribution
       df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
       if (input$use_anchor) {
         df$anchor_mode <- "allele-specific"
@@ -305,10 +334,12 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$reset_params, {
     session$sendCustomMessage("unbind-DT", "mainTable")
     df$binding_threshold <- df$metricsData$`binding_threshold`
+    df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
     df$percentile_threshold <- df$metricsData$`percentile_threshold`
     df$dna_cutoff <- df$metricsData$`vaf_clonal`
     df$allele_expr <- df$metricsData$`allele_expr`
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
+    df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
     df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
     df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
