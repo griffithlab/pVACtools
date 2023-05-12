@@ -354,7 +354,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             anchor_residue_pass_df = prob_pos_df
 
         #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
-        anchor_residue_pass_df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "Transcript Length".format(self.wt_top_score_metric)], inplace=True, ascending=[True, True, False])
+        anchor_residue_pass_df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "Transcript Length"], inplace=True, ascending=[True, True, False])
         return anchor_residue_pass_df.iloc[0].to_dict()
 
     def is_anchor_residue_pass(self, mutation):
