@@ -19,6 +19,8 @@ import pymp
 from itertools import groupby
 import json
 
+from pvactools.lib.run_utils import *
+
 class CalculateReferenceProteomeSimilarity:
     '''
     Peforms blast search on the neoantigens found in the pipeline execution. 
@@ -269,18 +271,9 @@ class CalculateReferenceProteomeSimilarity:
                 transcript = m.group(1)
             else:
                 raise Exception("Unexpected record_id format: {}".format(record_id))
-            regex = '^([0-9]+[\-]{0,1}[0-9]*)([A-Z|\-]*)\/([A-Z|\-]*)$'
-            p = re.compile(regex)
-            m = p.match(aa_change)
-            if m:
-                if variant_type == 'FS':
-                    parsed_aa_change = "FS{}".format(m.group(1))
-                else:
-                    parsed_aa_change = "{}{}{}".format(m.group(2), m.group(1), m.group(3))
-                if line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
-                    return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, m.group(3), m.group(2))
-            else:
-                raise Exception("Unexpected amino acid format: {}".format(aa_change))
+            (parsed_aa_change, pos, wt_aa, mt_aa) = index_to_aggregate_report_aa_change(aa_change, variant_type)
+            if line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
+                return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, mt_aa, wt_aa)
         raise Exception("Unable to find full_peptide for variant {}".format(line['ID']))
 
     def _get_peptide(self, line, mt_records_dict, wt_records_dict):
