@@ -5,7 +5,7 @@ import py_compile
 import tempfile
 from filecmp import cmp
 
-from pvactools.lib.top_score_filter import TopScoreFilter
+from pvactools.lib.top_score_filter import PvacseqTopScoreFilter, PvacfuseTopScoreFilter, PvacbindTopScoreFilter
 from tests.utils import *
 
 class TopScoreFilterTests(unittest.TestCase):
@@ -23,7 +23,7 @@ class TopScoreFilterTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_dir, 'input.tsv')
         output_file = tempfile.NamedTemporaryFile()
 
-        TopScoreFilter(input_file, output_file.name, 'median').execute()
+        PvacseqTopScoreFilter(input_file, output_file.name).execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_median.tsv')
         self.assertTrue(cmp(output_file.name, expected_output_file))
@@ -32,7 +32,7 @@ class TopScoreFilterTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_dir, 'input.tsv')
         output_file = tempfile.NamedTemporaryFile()
 
-        TopScoreFilter(input_file, output_file.name, 'lowest').execute()
+        PvacseqTopScoreFilter(input_file, output_file.name, top_score_metric='lowest').execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_lowest.tsv')
         self.assertTrue(cmp(output_file.name, expected_output_file))
@@ -41,7 +41,7 @@ class TopScoreFilterTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_dir, 'input_fusion.tsv')
         output_file = tempfile.NamedTemporaryFile()
 
-        TopScoreFilter(input_file, output_file.name, 'median').execute()
+        PvacfuseTopScoreFilter(input_file, output_file.name, top_score_metric='median').execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_fusion.tsv')
         self.assertTrue(cmp(output_file.name, expected_output_file))
@@ -50,7 +50,7 @@ class TopScoreFilterTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_dir, 'input_pvacbind.tsv')
         output_file = tempfile.NamedTemporaryFile()
 
-        TopScoreFilter(input_file, output_file.name, 'median', 'pVACbind').execute()
+        PvacbindTopScoreFilter(input_file, output_file.name, top_score_metric='median').execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_pvacbind.tsv')
         self.assertTrue(cmp(output_file.name, expected_output_file))
