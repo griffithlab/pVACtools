@@ -15,6 +15,7 @@ from Bio.Alphabet import IUPAC
 from pvactools.lib.fasta_generator import FastaGenerator
 from pvactools.lib.input_file_converter import VcfConverter
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
+from pvactools.lib.run_utils import *
 
 def define_parser():
     parser = argparse.ArgumentParser(
@@ -173,19 +174,10 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
                         transcript = m.group(1)
                     else:
                         raise Exception("Unexpected record_id format: {}".format(record_id))
-                    regex = '^([0-9]+[\-]{0,1}[0-9]*)([A-Z|\-]*)\/([A-Z|\-]*)$'
-                    p = re.compile(regex)
-                    m = p.match(aa_change)
-                    if m:
-                        if variant_type == 'FS':
-                            parsed_aa_change = "FS{}".format(m.group(1))
-                        else:
-                            parsed_aa_change = "{}{}{}".format(m.group(2), m.group(1), m.group(3))
-                        matches = [i for i in tsv_indexes if i['Best Transcript'] == transcript and i['AA Change'] == parsed_aa_change and i['Evaluation'] in aggregate_report_evaluation]
-                        if len(matches) == 0:
-                            continue
-                    else:
-                        raise Exception("Unexpected amino acid format: {}".format(aa_change))
+                    (parsed_aa_change, _, _, _) = index_to_aggregate_report_aa_change(aa_change, variant_type)
+                    matches = [i for i in tsv_indexes if i['Best Transcript'] == transcript and i['AA Change'] == parsed_aa_change and i['Evaluation'] in aggregate_report_evaluation]
+                    if len(matches) == 0:
+                        continue
             new_record = SeqRecord(record.seq, id=record_id, description=record_id)
             output_records.append(new_record)
 
