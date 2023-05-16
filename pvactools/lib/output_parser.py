@@ -603,14 +603,13 @@ class OutputParser(metaclass=ABCMeta):
             # st = score type, s = score
             for st, s in entries[prediction_method].items():
                 if st == 'mhcflurry_presentation_score':
-                    row['MHCflurryEL Presentation %s' % suffix] = s
+                    row['MHCflurryEL Presentation %s' % suffix.replace("IC50 ", "")] = s
                 elif st == 'mhcflurry_processing_score':
-                    row['MHCflurryEL Processing %s' % suffix] = s
+                    row['MHCflurryEL Processing %s' % suffix.replace("IC50 ", "")] = s
                 elif st == 'mhcflurry_presentation_percentile':
-                    row['MHCflurryEL Presentation %s' % suffix] = s
+                    row['MHCflurryEL Presentation %s' % suffix.replace("IC50 ", "")] = s
                 else:
                     row['%s %s' % (pretty_method, suffix)] = s
-                
         else:
             # This covers cases where the allele/length of the result row is not supported by the prediction algorithm
             row['%s %s' % (pretty_method, suffix)] = 'NA'
