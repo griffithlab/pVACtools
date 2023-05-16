@@ -315,7 +315,7 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=10
         )
         self.parser.add_argument(
-            "-v", "--variant_distance", type=int,
+            "-v", "--variant-distance", type=int,
             help="Regulatory variants can lie inside or outside of splicing junction."
             + "Maximum distance window (upstream and downstream) for a variant outside the junction.",
             default=100
