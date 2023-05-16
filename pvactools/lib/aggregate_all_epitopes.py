@@ -119,7 +119,7 @@ class AggregateAllEpitopes:
         for algorithm in potential_algorithms:
             if algorithm == 'NetMHCpanEL' or algorithm == 'NetMHCIIpanEL':
                 continue
-            if "{} MT IC50 Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
+            if "{} MT IC50 Score".format(algorithm) in headers or "{} IC50 Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
 
@@ -147,8 +147,11 @@ class AggregateAllEpitopes:
             "Median MT IC50 Score", "Median WT IC50 Score", "Median MT Percentile", "Median WT Percentile",
             "Best MT IC50 Score", "Corresponding WT IC50 Score", "Best MT Percentile", "Corresponding WT Percentile",
         ]
-        for algorithm in itertools.chain(prediction_algorithms, el_algorithms):
+        for algorithm in prediction_algorithms:
             used_columns.extend(["{} WT IC50 Score".format(algorithm), "{} MT IC50 Score".format(algorithm)])
+            used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
+        for algorithm in el_algorithms:
+            used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm)])
             if algorithm != "MHCflurryEL Processing":
                 used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
         if self.problematic_positions_exist():

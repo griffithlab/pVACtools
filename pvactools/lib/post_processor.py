@@ -63,7 +63,8 @@ class PostProcessor:
         self.call_net_chop()
         self.call_netmhc_stab()
         self.calculate_reference_proteome_similarity()
-        shutil.copy(self.reference_similarity_fh.name, self.aggregate_report)
+        if not self.el_only:
+            shutil.copy(self.reference_similarity_fh.name, self.aggregate_report)
         shutil.copy(self.netmhc_stab_fh.name, self.filtered_report_file)
         self.close_filehandles()
         print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
@@ -227,6 +228,8 @@ class PostProcessor:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
 
     def calculate_reference_proteome_similarity(self):
+        if self.el_only:
+            return
         if self.run_reference_proteome_similarity:
             print("Calculating Reference Proteome Similarity")
             if self.file_type == 'pVACseq':
