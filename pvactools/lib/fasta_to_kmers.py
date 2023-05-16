@@ -71,7 +71,6 @@ class FastaToKmers:
 
 
     def create_index_file(self, kmers_dict):
-        #sorted_unique_kmers = {print(k, v) for k,v in self.unique_kmers if len(v) > 1}
         # joined indexes for each unique kmer - to format for df since lists are dif sizes
         fasta_info = {k:','.join(sorted(v)) for k,v in kmers_dict.items()}
         # add header cols
