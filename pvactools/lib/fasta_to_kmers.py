@@ -86,7 +86,6 @@ class FastaToKmers:
         index_df[['junction_index', 'transcript_position']] = index_df['name'].str.split(';', expand=True)
         index_df['name'] = index_df['name'].str.replace(';', '.')
         # create a tsv file
-        # index_df.to_csv(f'{self.output_dir}/{self.sample_name}.kmer_index.tsv', sep='\t', index=False)
 
         return fasta_df
 
