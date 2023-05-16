@@ -310,7 +310,7 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="A reference GTF file. Note: this input should be the same as the RegTools gtf input."
         )
         self.parser.add_argument(
-            "-j", "--junction_score", type=int,
+            "-j", "--junction-score", type=int,
             help="Junction Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
             default=10
         )
