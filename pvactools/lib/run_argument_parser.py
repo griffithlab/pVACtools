@@ -321,7 +321,7 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=100
         )
         self.parser.add_argument(
-            "-g", "--save_gtf",
+            "-g", "--save-gtf",
             help="Save a tsv file from the uploaded filtered GTF data."
             + "Use this option to bypass GTF data upload time for multiple pVACsplice runs.",
             default=False,
