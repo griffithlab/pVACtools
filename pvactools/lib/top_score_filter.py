@@ -160,22 +160,20 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                     variant, consequence = line['Index'].split('.', 1)
                     variant_tracker[consequence].add(variant)
                 transcripts_with_same_epitopes = defaultdict(list)
-                for transcript, lines in groupby(lines, key = itemgetter('Transcript')):
-                    lines = list(lines)
-                    epitopes = ','.join(sorted([x['MT Epitope Seq'] for x in lines]))
+                for transcript, transcript_lines in groupby(lines, key = itemgetter('Transcript')):
+                    transcript_lines = list(transcript_lines)
+                    epitopes = ','.join(sorted([x['MT Epitope Seq'] for x in transcript_lines]))
                     transcripts_with_same_epitopes[epitopes].append(transcript)
-                    for transcripts in transcripts_with_same_epitopes.values():
-                        transcript_set_lines = []
-                        for transcript in transcripts:
-                            transcript_set_lines.extend([x for x in lines if x['Transcript'] == transcript])
-                        best_line = self.find_best_line(transcript_set_lines)
-                        filtered_lines.append(best_line)
-                        best_line_variant, best_line_consequence = best_line['Index'].split('.', 1)
-                        for variant in variant_tracker[best_line_consequence]:
-                            if variant != best_line_variant:
-                                duplicate_variant_line = best_line.copy()
-                                duplicate_variant_line['Index'] = "{}.{}".format(variant, best_line_consequence)
-                                filtered_lines.append(duplicate_variant_line)
+                for transcripts in transcripts_with_same_epitopes.values():
+                    transcript_set_lines = [x for x in lines if x['Transcript'] in transcripts]
+                    best_line = self.find_best_line(transcript_set_lines)
+                    filtered_lines.append(best_line)
+                    best_line_variant, best_line_consequence = best_line['Index'].split('.', 1)
+                    for variant in variant_tracker[best_line_consequence]:
+                        if variant != best_line_variant:
+                            duplicate_variant_line = best_line.copy()
+                            duplicate_variant_line['Index'] = "{}.{}".format(variant, best_line_consequence)
+                            filtered_lines.append(duplicate_variant_line)
 
 
             sorted_rows = pvactools.lib.sort.default_sort(filtered_lines, self.top_score_metric)
@@ -287,22 +285,20 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                     variant, consequence = line['Mutation'].split('.', 1)
                     variant_tracker[consequence].add(variant)
                 transcripts_with_same_epitopes = defaultdict(list)
-                for transcript, lines in groupby(lines, key = itemgetter('Transcript')):
-                    lines = list(lines)
-                    epitopes = ','.join(sorted([x['Epitope Seq'] for x in lines]))
+                for transcript, transcript_lines in groupby(lines, key = itemgetter('Transcript')):
+                    transcript_lines = list(transcript_lines)
+                    epitopes = ','.join(sorted([x['Epitope Seq'] for x in transcript_lines]))
                     transcripts_with_same_epitopes[epitopes].append(transcript)
-                    for transcripts in transcripts_with_same_epitopes.values():
-                        transcript_set_lines = []
-                        for transcript in transcripts:
-                            transcript_set_lines.extend([x for x in lines if x['Transcript'] == transcript])
-                        best_line = self.find_best_line(transcript_set_lines)
-                        filtered_lines.append(best_line)
-                        best_line_variant, best_line_consequence = best_line['Mutation'].split('.', 1)
-                        for variant in variant_tracker[best_line_consequence]:
-                            if variant != best_line_variant:
-                                duplicate_variant_line = best_line.copy()
-                                duplicate_variant_line['Mutation'] = "{}.{}".format(variant, best_line_consequence)
-                                filtered_lines.append(duplicate_variant_line)
+                for transcripts in transcripts_with_same_epitopes.values():
+                    transcript_set_lines = [x for x in lines if x['Transcript'] in transcripts]
+                    best_line = self.find_best_line(transcript_set_lines)
+                    filtered_lines.append(best_line)
+                    best_line_variant, best_line_consequence = best_line['Mutation'].split('.', 1)
+                    for variant in variant_tracker[best_line_consequence]:
+                        if variant != best_line_variant:
+                            duplicate_variant_line = best_line.copy()
+                            duplicate_variant_line['Mutation'] = "{}.{}".format(variant, best_line_consequence)
+                            filtered_lines.append(duplicate_variant_line)
 
             sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric)
             writer.writerows(sorted_rows)
