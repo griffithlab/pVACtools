@@ -571,8 +571,12 @@ class OutputParser(metaclass=ABCMeta):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            headers.append("%s WT IC50 Score" % pretty_method)
-            headers.append("%s MT IC50 Score" % pretty_method)
+            if method == 'netmhcpan_el' or method == 'netmhciipan_el':
+                headers.append("%s WT Score" % pretty_method)
+                headers.append("%s MT Score" % pretty_method)
+            else:
+                headers.append("%s WT IC50 Score" % pretty_method)
+                headers.append("%s MT IC50 Score" % pretty_method)
             headers.append("%s WT Percentile" % pretty_method)
             headers.append("%s MT Percentile" % pretty_method)
         if self.add_sample_name:
@@ -608,6 +612,8 @@ class OutputParser(metaclass=ABCMeta):
                     row['MHCflurryEL Processing %s' % suffix.replace("IC50 ", "")] = s
                 elif st == 'mhcflurry_presentation_percentile':
                     row['MHCflurryEL Presentation %s' % suffix.replace("IC50 ", "")] = s
+                elif pretty_method == 'NetMHCpanEL' or pretty_method == 'NetMHCIIpanEl':
+                    row['%s %s' % (pretty_method, suffix.replace("IC50 ", ""))] = s
                 else:
                     row['%s %s' % (pretty_method, suffix)] = s
         else:
@@ -909,7 +915,10 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 elif self.flurry_state == 'both':
                     self.flurry_headers(headers)
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            headers.append("%s IC50 Score" % pretty_method)
+            if method == 'netmhcpan_el' or method == 'netmhciipan_el':
+                headers.append("%s Score" % pretty_method)
+            else:
+                headers.append("%s IC50 Score" % pretty_method)
             headers.append("%s Percentile" % pretty_method)
         if self.add_sample_name:
             headers.append("Sample Name")
