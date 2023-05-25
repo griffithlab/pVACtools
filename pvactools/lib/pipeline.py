@@ -1,29 +1,20 @@
-import sys
-from abc import ABCMeta, abstractmethod
-import os
-import csv
-import datetime
-import time
-import shutil
 import copy
-import yaml
+import logging
+import shutil
+import sys
+from collections import OrderedDict
+
 import pkg_resources
 import pymp
-from threading import Lock
-from Bio import SeqIO
+import yaml
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from collections import OrderedDict
-import logging
 
-from pvactools.lib.prediction_class import *
-from pvactools.lib.input_file_converter import VcfConverter
-from pvactools.lib.fasta_generator import FastaGenerator, VectorFastaGenerator
-from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser, PvacspliceOutputParser
-from pvactools.lib.post_processor import PostProcessor
-from pvactools.lib.run_utils import *
 import pvactools.lib.call_iedb
 import pvactools.lib.combine_parsed_outputs
+from pvactools.lib.post_processor import PostProcessor
+from pvactools.lib.run_utils import *
+
 
 def status_message(msg):
     print(msg)
@@ -785,9 +776,6 @@ class PvacsplicePipeline(PvacbindPipeline):
 
         # creates all_epitopes.tsv
         self.combined_parsed_outputs(split_parsed_output_files)
-
-        # get_flurry_state()
-
 
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir, ignore_errors=True)
