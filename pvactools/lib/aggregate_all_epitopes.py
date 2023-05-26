@@ -310,6 +310,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 vaf_clonal = 0.6
             else:
                 vaf_clonal = vafs_clonal[0]
+                if vaf_clonal > 0.5:
+                    vaf_clonal = 0.5
             print("Tumor clonal VAF estimated as {} (estimated from Tumor DNA VAF data). Assuming variants with VAF < {} are subclonal".format(round(vaf_clonal, 3), round(vaf_clonal/2, 3)))
             return vaf_clonal
 
