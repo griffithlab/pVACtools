@@ -90,10 +90,10 @@ explore_tab <- tabItem(
                 "Current version of pVACseq results defaults to positions 1, 2, n-1 and n (for a n-mer peptide) when determining anchor positions.
                 If you would like to use our allele specific anchor results and regenerate the tiering results for your variants,
                 please specify your contribution cutoff and submit for recalculation. ", tags$a(href = "https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1", "More details can be found here.", target = "_blank"), br(),
-                checkboxInput("use_anchor", "If you want to use allele-specific anchor calculations, please check this box. Otherwise anchors will be calculated as 1,2 and n-1,n for n-mer peptides.", value = FALSE, width = NULL),
-                sliderInput("anchor_contribution", "Contribution cutoff for determining anchor locations", 0.5, 0.9, 0.8, step = 0.1, width = 400),
+                uiOutput("allele_specific_anchors_ui"),
+                uiOutput("anchor_contribution_ui"),
                 uiOutput("binding_threshold_ui"),
-                checkboxInput("allele_specific_binding", "If you want to use allele-specific binding thresholds for tiering purposes please check this box.", value = FALSE, width = NULL),
+                uiOutput("allele_specific_binding_ui"),
                 uiOutput("percentile_threshold_ui"),
                 uiOutput("dna_cutoff_ui"),
                 uiOutput("allele_expr_ui"),

@@ -275,7 +275,7 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true',
         )
         self.parser.add_argument(
-            "--anchor-contribution-threshold", type=float,
+            "--anchor-contribution-threshold", type=float_range(0.5,0.9),
             help="For determining allele-specific anchors, each position is assigned a score based on how binding is "
                  + "influenced by mutations. From these scores, the relative contribution of each position to the "
                  + "overall binding is calculated. Starting with the highest relative contribution, positions whose "
@@ -310,18 +310,18 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="A reference GTF file. Note: this input should be the same as the RegTools gtf input."
         )
         self.parser.add_argument(
-            "-j", "--junction_score", type=int,
+            "-j", "--junction-score", type=int,
             help="Junction Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
             default=10
         )
         self.parser.add_argument(
-            "-v", "--variant_distance", type=int,
+            "-v", "--variant-distance", type=int,
             help="Regulatory variants can lie inside or outside of splicing junction."
             + "Maximum distance window (upstream and downstream) for a variant outside the junction.",
             default=100
         )
         self.parser.add_argument(
-            "-g", "--save_gtf",
+            "-g", "--save-gtf",
             help="Save a tsv file from the uploaded filtered GTF data."
             + "Use this option to bypass GTF data upload time for multiple pVACsplice runs.",
             default=False,

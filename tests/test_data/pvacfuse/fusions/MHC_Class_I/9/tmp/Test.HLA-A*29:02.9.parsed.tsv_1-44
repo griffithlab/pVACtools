@@ -1,4 +1,4 @@
-Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHC Score	NetMHC Percentile
+Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHC IC50 Score	NetMHC Percentile
 11.DNAJC7-CDK17.ENST00000457167-ENST00000261211.frameshift_fusion.25	HLA-A*29:02	8	KSFTIKGFK	19957.34	19957.34	NetMHC	18.0	18.0	NetMHC	19957.34	18.0
 24.SAAL1-HNRNPC.ENST00000524803-ENST00000554455.frameshift_fusion.346	HLA-A*29:02	8	EKWPATLPT	29958.87	29958.87	NetMHC	36.0	36.0	NetMHC	29958.87	36.0
 21.PHTF1-YARS.ENST00000369604-ENST00000373477.inframe_fusion.15	HLA-A*29:02	8	KESKIDLLD	34941.39	34941.39	NetMHC	53.0	53.0	NetMHC	34941.39	53.0
