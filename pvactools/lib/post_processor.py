@@ -162,7 +162,7 @@ class PostProcessor:
         if self.run_coverage_filter:
             print("Running Coverage Filters")
             filter_criteria = []
-            if self.file_type == 'pVACseq' or self.file_type == 'pVACsplice':
+            if self.file_type == 'pVACseq':
                 filter_criteria.append(FilterCriterion("Normal Depth", '>=', self.normal_cov, exclude_nas=self.exclude_NAs))
                 filter_criteria.append(FilterCriterion("Normal VAF", '<=', self.normal_vaf, exclude_nas=self.exclude_NAs))
                 filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', self.tdna_cov, exclude_nas=self.exclude_NAs))
@@ -171,6 +171,15 @@ class PostProcessor:
                 filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf, exclude_nas=self.exclude_NAs))
                 filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
                 filter_criteria.append(FilterCriterion("Transcript Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
+            # excluding transcript expression filter for pvacsplice
+            elif self.file_type == 'pVACsplice':
+                filter_criteria.append(FilterCriterion("Normal Depth", '>=', self.normal_cov, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Normal VAF", '<=', self.normal_vaf, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', self.tdna_cov, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', self.tdna_vaf, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', self.trna_cov, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
             elif self.file_type == 'pVACfuse':
                 filter_criteria.append(FilterCriterion("Read Support", '>=', self.read_support, exclude_nas=self.exclude_NAs))
                 filter_criteria.append(FilterCriterion("Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))

@@ -89,14 +89,11 @@ def main(args_input = sys.argv[1:]):
     if Path(args.annotated_vcf).suffix != '.vcf' and not is_gz_file(args.annotated_vcf):
         sys.exit('The vcf input path does not point to a vcf file.')
     # vcf gz.tbi index file
-    if not Path(f'{args.annotated_vcf}.tbi'):
+    if is_gz_file(args.annotated_vcf) and not Path(f'{args.annotated_vcf}.tbi'):
         sys.exit('Gzipped VCF files must be indexed. (tabix -p vcf <vcf_file>)')
     # iedb retries - default 5
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100.")
-    # fasta size
-    if args.fasta_size % 2 != 0:
-        sys.exit("The fasta size needs to be an even number.")
 
     # pvacsplice output dir (from args)
     junctions_dir = os.path.abspath(args.output_dir)
@@ -126,6 +123,7 @@ def main(args_input = sys.argv[1:]):
         'normal_sample_name'               : args.normal_sample_name,
         'class_i_hla'                      : class_i_alleles,
         'class_ii_hla'                     : class_ii_alleles,
+        'keep_tmp_files'                   : args.keep_tmp_files,
     }
 
     pipeline = JunctionPipeline(**junction_arguments)
@@ -143,7 +141,6 @@ def main(args_input = sys.argv[1:]):
         'additional_report_columns' : args.additional_report_columns,
         'fasta_size'                : args.fasta_size,
         'iedb_retries'              : args.iedb_retries,
-        'keep_tmp_files'            : args.keep_tmp_files,
         'n_threads'                 : args.n_threads,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
@@ -178,7 +175,7 @@ def main(args_input = sys.argv[1:]):
             os.makedirs(output_len_dir, exist_ok=True)
 
             class_i_arguments = junction_arguments.copy()
-            class_i_arguments['input_file']              = f'{junctions_dir}/{args.sample_name}.{x}.fa'
+            class_i_arguments['input_file']              = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{x}.fa')
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
@@ -206,12 +203,12 @@ def main(args_input = sys.argv[1:]):
 
         for y in args.class_ii_epitope_length:
 
-            print(f'Executing MHC Class II predictions for (y)mers')
+            print(f'Executing MHC Class II predictions for {y}mers')
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
             os.makedirs(output_len_dir, exist_ok=True)
 
             class_ii_arguments = junction_arguments.copy()
-            class_ii_arguments['input_file']              = f'{output_len_dir}/{args.sample_name}.{y}.fa'
+            class_ii_arguments['input_file']              = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{y}.fa')
             class_ii_arguments['alleles']                 = class_ii_alleles
             class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
             class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
@@ -229,9 +226,12 @@ def main(args_input = sys.argv[1:]):
     elif len(class_ii_alleles) == 0:
         print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
 
-    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
-        print("Creating combined reports")
-        create_combined_report(junctions_dir, args)
+    # if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+    #     print("Creating combined reports")
+    #     create_combined_report(junctions_dir, args)
+
+    if args.save_gtf is False:
+        shutil.rmtree(os.path.join(junctions_dir, 'tmp'), ignore_errors=True)
 
     change_permissions_recursive(junctions_dir, 0o755, 0o644)
 
