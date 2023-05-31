@@ -201,9 +201,14 @@ class CalculateReferenceProteomeSimilarity:
         #This catches cases where the start position would cause too many leading wildtype amino acids, which would result
         #in false-positive reference matches
         if len(full_peptide) > len(wt_peptide):
-            diff_position = [i for i in range(len(wt_peptide)) if wt_peptide[i] != full_peptide[i]][0]
+            diffs = [i for i in range(len(wt_peptide)) if wt_peptide[i] != full_peptide[i]]
+            if diffs == []:
+                diffs = [len(wt_peptide)]
         else:
-            diff_position = [i for i in range(len(full_peptide)) if wt_peptide[i] != full_peptide[i]][0]
+            diffs = [i for i in range(len(full_peptide)) if wt_peptide[i] != full_peptide[i]]
+            if diffs == []:
+                diffs = [len(full_peptide)]
+        diff_position = diffs[0]
         min_start = diff_position - self.match_length + 1 
         if min_start > start:
             start = min_start
