@@ -987,6 +987,20 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         keys = key_df["Index"].values.tolist()
         return sorted(list(set(keys)))
 
+    # this needs to match the junction index
+    # def get_list_unique_mutation_keys(self):
+    #     key_columns = {
+    #         'Gene Name': str,
+    #         'Transcript': str,
+    #         'Junction': str,
+    #         'Variant': str,
+    #         'Junction Anchor': str,
+    #     }
+    #     key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=key_columns.keys(), dtype=key_columns)
+    #     keys = key_df[['Gene Name', 'Transcript', 'Junction', 'Variant', 'Junction Anchor']].values.tolist()
+    #     keys = [list(i) for i in set(tuple(i) for i in keys)]
+    #     return sorted(keys)
+
     # pvacbind w/ Index instead of Mutation
     def read_input_file(self, used_columns, dtypes):
         return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False,
@@ -1008,13 +1022,14 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         out_dict.update({
             'Gene': gene,
             'Transcript': transcript,
+            'Junction Name': best['Junction'],
             'AA Change': best['Amino Acid Change'],
             'Best Peptide': best["Epitope Seq"],
             'Pos': best['Protein Position'],
             'Num Passing Peptides': peptide_count,
             'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
             '%ile MT': best["{} Percentile".format(self.top_score_metric)],
-            'RNA Expr': best["Gene Expression"],
+            'Gene Expr': best["Gene Expression"],
             'RNA VAF': best["Tumor RNA VAF"],
             'RNA Depth': best["Tumor RNA Depth"],
             'DNA VAF': best["Tumor DNA VAF"],

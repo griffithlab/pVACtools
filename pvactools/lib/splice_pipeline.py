@@ -1,3 +1,4 @@
+import shutil
 from pvactools.lib.filter_regtools_results import *
 from pvactools.lib.junction_to_fasta import *
 from pvactools.lib.fasta_to_kmers import *
@@ -25,7 +26,10 @@ class JunctionPipeline:
         self.tsl = kwargs['maximum_transcript_support_level']
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
         self.save_gtf = kwargs['save_gtf']
+        self.keep_tmp_files = kwargs['keep_tmp_files']
         self.gtf_data = self.load_gtf_data()
+        self.tmp_dir = os.path.join(self.output_dir, 'tmp')
+        os.makedirs(self.tmp_dir, exist_ok=True)
 
     @staticmethod
     def file_exists(file_path: str, file_type: str):
@@ -40,6 +44,12 @@ class JunctionPipeline:
         self.vcf_to_tsv()
         self.junction_to_fasta()
         self.fasta_to_kmers()
+
+# if self.save_gtf --> should not have a gtf tsv file present
+# if self.save_gtf == True:
+    # save gtf file in output dir
+# elif False:
+    # write gtf_file to tmp_dir
 
     def load_gtf_data(self):
         # option 1: load from preexisting gtf tsv
@@ -62,7 +72,7 @@ class JunctionPipeline:
             print('Completed')
         return gtf_df
 
-    def create_file_path(self, key):
+    def create_file_path(self, key, temp=False):
         inputs = {
             'gtf': '_gtf.tsv',
             'annotated': '_annotated.tsv',
@@ -70,17 +80,21 @@ class JunctionPipeline:
             'combined': '_combined.tsv',
             'fasta': '.transcripts.fa',
         }
-        file_name = os.path.join(self.output_dir, self.sample_name + inputs[key])
+        if temp:
+            file_name = os.path.join(self.tmp_dir, self.sample_name + inputs[key])
+        else:
+            file_name = os.path.join(self.output_dir, self.sample_name + inputs[key])
+
         return file_name
 
     def filter_regtools_results(self):
-        if self.file_exists(self.create_file_path('filtered'), 'Filtered'):
-            filter_df = pd.read_csv(self.create_file_path('filtered'), sep='\t')
+        if self.file_exists(self.create_file_path('filtered', temp=True), 'Filtered'):
+            filter_df = pd.read_csv(self.create_file_path('filtered', temp=True), sep='\t')
         else:
             print('Filtering regtools results')
             filter_params = {
                 'input_file': self.input_file,
-                'output_file': self.create_file_path('filtered'),
+                'output_file': self.create_file_path('filtered', temp=True),
                 'gtf_data': self.gtf_data,
                 'score': self.junction_score,
                 'distance': self.variant_distance,
@@ -91,13 +105,13 @@ class JunctionPipeline:
         return filter_df
 
     def vcf_to_tsv(self):
-        if self.file_exists(self.create_file_path('annotated'), 'VCF TSV'):
+        if self.file_exists(self.create_file_path('annotated', temp=True), 'VCF TSV'):
             pass
         else:
             print('Converting VCF to TSV')
             convert_params = {
                 'input_file': self.annotated_vcf,
-                'output_file': self.create_file_path('annotated'),
+                'output_file': self.create_file_path('annotated', temp=True),
                 'sample_name': self.sample_name,
             }
             if self.normal_sample_name:
@@ -113,7 +127,7 @@ class JunctionPipeline:
             print('Merging junction and variant info')
             combine_params = {
                 'junctions_df': self.filter_regtools_results(),
-                'variant_file': self.create_file_path('annotated'),
+                'variant_file': self.create_file_path('annotated', temp=True),
                 'output_dir': self.output_dir,
                 'output_file': self.create_file_path('combined'),
             }
@@ -174,16 +188,16 @@ class JunctionPipeline:
             print('Completed')
 
     def fasta_to_kmers(self):
-        for l in self.class_i_epitope_length + self.class_ii_epitope_length:
-            fasta_file = f'{self.output_dir}.{self.sample_name}.{l}.fa'
+        for el in self.class_i_epitope_length + self.class_ii_epitope_length:
+            fasta_file = f'{self.output_dir}.{self.sample_name}.{el}.fa'
             if os.path.exists(fasta_file):
-                print(f'{l}mer fasta already exists. Skipping.')
+                print(f'{el}mer fasta already exists. Skipping.')
                 continue
             else:
-                print(f'Generating {l}mer peptides from novel junction sequences')
+                print(f'Generating {el}mer peptides from novel junction sequences')
                 kmer_params = {
                     'fasta': self.create_file_path('fasta'),
-                    'output_dir': self.output_dir,
+                    'output_dir': self.tmp_dir,
                     'class_i_epitope_length': self.class_i_epitope_length,
                     'class_ii_epitope_length': self.class_ii_epitope_length,
                     'class_i_hla': self.class_i_hla,

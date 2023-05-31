@@ -223,11 +223,6 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=0.25
         )
         self.parser.add_argument(
-            '--expn-val', type=float,
-            default=1.0,
-            help="Gene and Transcript Expression cutoff. Only sites above this cutoff will be considered.",
-        )
-        self.parser.add_argument(
             "--maximum-transcript-support-level", type=int,
             help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
                  + "Keep all epitopes with a transcript support level <= to this cutoff.",
@@ -294,6 +289,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used during aggregate report creation for a simple estimation of whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.",
             type=float,
         )
+        self.parser.add_argument(
+            '--expn-val', type=float,
+            default=1.0,
+            help="Gene and Transcript Expression cutoff. Only sites above this cutoff will be considered.",
+        )
 
     def pvacsplice(self):
         self.parser.add_argument(
@@ -302,11 +302,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             + "The VCF may be gzipped (requires tabix index)."
         )
         self.parser.add_argument(
-            "ref_fasta",
+            "ref-fasta",
             help="A reference FASTA file. Note: this input should be the same as the RegTools vcf input."
         )
         self.parser.add_argument(
-            "gtf_file",
+            "gtf-file",
             help="A reference GTF file. Note: this input should be the same as the RegTools gtf input."
         )
         self.parser.add_argument(
@@ -328,15 +328,22 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true'
         )
         self.parser.add_argument(
-            "--anchor_types", type=lambda s:[a for a in s.split(',')],
+            "--anchor-types", nargs="*",
             help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list."
-            + "Choices: A, D, NDA, D, N",
-            default=['A', 'D', 'NDA']
+            + "Choices: A, D, NDA, DA, N",
+            default=['A', 'D', 'NDA'],
+            choices=['A', 'D', 'NDA', 'DA', 'N']
+        )
+        # pvacsplice - filter on gene expression only (but keep txpn value in output)
+        self.parser.add_argument(
+            '--expn-val', type=float,
+            default=1.0,
+            help="Gene Expression cutoff. Only sites above this cutoff will be considered.",
         )
 
     def pvacvector(self):
         self.parser.add_argument(
-            '-v', "--input_vcf",
+            '-v', "--input-vcf",
             help="Path to original pVACseq input VCF file. Required if input file is a pVACseq TSV."
         )
         self.parser.add_argument(
@@ -375,9 +382,9 @@ class PvacspliceRunArgumentParser(RunArgumentParser):
         tool_name = "pvacsplice"
         input_file_help = "RegTools junctions output TSV file"
         RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.expression_coverage_args()
         self.prediction_args()
         self.pvacsplice()
-        self.expression_coverage_args()
 
 
 class PvacseqRunArgumentParser(RunArgumentParser):
