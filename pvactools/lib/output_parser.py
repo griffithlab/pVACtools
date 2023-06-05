@@ -612,7 +612,7 @@ class OutputParser(metaclass=ABCMeta):
                     row['MHCflurryEL Processing %s' % suffix.replace("IC50 ", "")] = s
                 elif st == 'mhcflurry_presentation_percentile':
                     row['MHCflurryEL Presentation %s' % suffix.replace("IC50 ", "")] = s
-                elif pretty_method == 'NetMHCpanEL' or pretty_method == 'NetMHCIIpanEl':
+                elif pretty_method == 'NetMHCpanEL' or pretty_method == 'NetMHCIIpanEL':
                     row['%s %s' % (pretty_method, suffix.replace("IC50 ", ""))] = s
                 else:
                     row['%s %s' % (pretty_method, suffix)] = s
