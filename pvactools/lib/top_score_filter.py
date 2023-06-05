@@ -144,6 +144,8 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             writer.writeheader()
             lines_per_variant = defaultdict(list)
             for line in reader:
+                if line["{} MT IC50 Score".format(self.mt_top_score_metric)] == 'NA':
+                    continue
                 chromosome = line['Chromosome']
                 start = line['Start']
                 stop = line['Stop']
@@ -271,6 +273,8 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             writer.writeheader()
             lines_per_variant = defaultdict(list)
             for line in reader:
+                if line["{} IC50 Score".format(self.formatted_top_score_metric)] == 'NA':
+                    continue
                 chromosome = line['Chromosome']
                 start = line['Start']
                 stop = line['Stop']
@@ -329,6 +333,8 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             writer.writeheader()
             lines_per_variant = defaultdict(list)
             for line in reader:
+                if line["{} IC50 Score".format(self.formatted_top_score_metric)] == 'NA':
+                    continue
                 lines_per_variant[line['Mutation']].append(line)
 
             filtered_lines = []
