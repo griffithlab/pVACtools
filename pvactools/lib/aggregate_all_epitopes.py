@@ -490,7 +490,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if self.use_allele_specific_binding_thresholds:
             selection = []
             for index, row in df.iterrows():
-                if row["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold:
+                if row['HLA Allele'] in self.allele_specific_binding_thresholds:
+                    binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
+                else:
+                    binding_threshold = self.binding_threshold
+                if row["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold:
                     selection.append(index)
             return df[df.index.isin(selection)]
         else:
@@ -777,7 +781,11 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         if self.use_allele_specific_binding_thresholds:
             selection = []
             for index, row in df.iterrows():
-                if row["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold:
+                if row['HLA Allele'] in self.allele_specific_binding_thresholds:
+                    binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
+                else:
+                    binding_threshold = self.binding_threshold
+                if row["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
                     selection.append(index)
             return df[df.index.isin(selection)]
         else:
