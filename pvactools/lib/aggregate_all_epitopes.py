@@ -187,9 +187,6 @@ class AggregateAllEpitopes:
         used_columns = self.determine_columns_used_for_aggregation(prediction_algorithms, el_algorithms)
         dtypes = self.set_column_types(prediction_algorithms)
 
-        ## get a list of unique mutations
-        keys = self.get_list_unique_mutation_keys()
-
         ##do a crude estimate of clonal vaf/purity
         vaf_clonal = self.calculate_clonal_vaf()
 
@@ -218,6 +215,10 @@ class AggregateAllEpitopes:
 
         data = []
         all_epitopes_df = self.read_input_file(used_columns, dtypes)
+
+        ## get a list of unique mutations
+        keys = self.get_list_unique_mutation_keys(all_epitopes_df)
+
         for key in keys:
             (df, key_str) = self.get_sub_df(all_epitopes_df, key)
             (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, prediction_algorithms, el_algorithms, vaf_clonal)
@@ -284,16 +285,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.anchor_contribution_threshold = anchor_contribution_threshold
         super().__init__()
 
-    def get_list_unique_mutation_keys(self):
-        key_columns = {
-            'Chromosome': str,
-            'Start': "int32",
-            'Stop': "int32",
-            'Reference': str,
-            'Variant': str
-        }
-        key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=key_columns.keys(), dtype=key_columns)
-        keys = key_df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].values.tolist()
+    def get_list_unique_mutation_keys(self, df):
+        keys = df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].values.tolist()
         keys = [list(i) for i in set(tuple(i) for i in keys)]
         return sorted(keys)
 
@@ -316,7 +309,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             return vaf_clonal
 
     def read_input_file(self, used_columns, dtypes):
-        return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, usecols=used_columns, dtype=dtypes)
+        df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, usecols=used_columns, dtype=dtypes)
+        df = df.dropna(subset=["{} MT IC50 Score".format(self.mt_top_score_metric)]).reset_index()
+        df = df.astype({"{} MT IC50 Score".format(self.mt_top_score_metric):'float'})
+        return df
 
     def get_sub_df(self, all_epitopes_df, key):
         key_str = "{}-{}-{}-{}-{}".format(key[0], key[1], key[2], key[3], key[4])
@@ -496,7 +492,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if self.use_allele_specific_binding_thresholds:
             selection = []
             for index, row in df.iterrows():
-                if row["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold:
+                if row['HLA Allele'] in self.allele_specific_binding_thresholds:
+                    binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
+                else:
+                    binding_threshold = self.binding_threshold
+                if row["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold:
                     selection.append(index)
             return df[df.index.isin(selection)]
         else:
@@ -758,16 +758,18 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         super().__init__()
 
 
-    def get_list_unique_mutation_keys(self):
-        key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=["Mutation"], dtype={"Mutation": str})
-        keys = key_df["Mutation"].values.tolist()
+    def get_list_unique_mutation_keys(self, df):
+        keys = df["Mutation"].values.tolist()
         return sorted(list(set(keys)))
 
     def calculate_clonal_vaf(self):
         return None
 
     def read_input_file(self, used_columns, dtypes):
-        return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Mutation": str})
+        df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Mutation": str})
+        df = df[df["{} IC50 Score".format(self.top_score_metric)] != 'NA']
+        df = df.astype({"{} IC50 Score".format(self.top_score_metric):'float'})
+        return df
 
     def get_sub_df(self, all_epitopes_df, key):
         df = (all_epitopes_df[lambda x: (x['Mutation'] == key)]).copy()
@@ -781,7 +783,11 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         if self.use_allele_specific_binding_thresholds:
             selection = []
             for index, row in df.iterrows():
-                if row["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold:
+                if row['HLA Allele'] in self.allele_specific_binding_thresholds:
+                    binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
+                else:
+                    binding_threshold = self.binding_threshold
+                if row["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
                     selection.append(index)
             return df[df.index.isin(selection)]
         else:
