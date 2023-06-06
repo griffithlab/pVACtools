@@ -1,7 +1,7 @@
 {
   "tumor_purity": null,
-  "vaf_clonal": 0.571,
-  "vaf_subclonal": 0.286,
+  "vaf_clonal": 0.5,
+  "vaf_subclonal": 0.25,
   "binding_threshold": 500,
   "aggregate_inclusion_binding_threshold": 5000,
   "trna_vaf": 0.25,
