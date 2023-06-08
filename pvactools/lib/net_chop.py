@@ -49,7 +49,6 @@ class NetChop:
 
     def execute(self):
         chosen_method = str(methods.index(self.method))
-        jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
         result_delimiter = re.compile(r'-{20,}')
 
         fail_searcher = re.compile(r'(Failed run|Problematic input:|Unrecognized parameter:)')
@@ -92,7 +91,7 @@ class NetChop:
                     seqs_start_diff[sequence_id] = (start_diff, len(epitope))
                     x+=1
                 staging_file.seek(0)
-                response = self.query_netchop_server(http, staging_file, chosen_method, self.threshold, jobid_searcher)
+                response = self.query_netchop_server(http, staging_file, chosen_method, self.threshold)
 
                 if fail_searcher.search(response.content.decode()):
                     raise Exception("NetChop encountered an error during processing.\n{}".format(response.content.decode()))
@@ -101,7 +100,7 @@ class NetChop:
                     logging.warning("Too many jobs submitted to NetChop server. Waiting to retry.")
                     sleep(random.randint(5, 10))
                     staging_file.seek(0)
-                    response = self.query_netchop_server(http, staging_file, chosen_method, self.threshold, jobid_searcher)
+                    response = self.query_netchop_server(http, staging_file, chosen_method, self.threshold)
 
                 if success_searcher.search(response.content.decode()):
                     results = [item.strip() for item in result_delimiter.split(response.content.decode())]
@@ -168,7 +167,8 @@ class NetChop:
         http.mount("http://", adapter)
         return http
 
-    def query_netchop_server(self, http, staging_file, chosen_method, threshold, jobid_searcher):
+    def query_netchop_server(self, http, staging_file, chosen_method, threshold):
+        jobid_searcher = re.compile(r'<!-- jobid: [0-9a-fA-F]*? status: (queued|active)')
         try:
             response = self.post_query(http, staging_file, chosen_method, threshold)
         except Timeout:
