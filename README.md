@@ -1,6 +1,7 @@
-[![Build Status](https://travis-ci.org/griffithlab/pVACtools.svg?branch=master)](https://travis-ci.org/griffithlab/pVACtools)
+![Test Status](https://github.com/griffithlab/pVACtools/actions/workflows/tests.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/griffithlab/pVACtools/badge.svg?branch=master)](https://coveralls.io/github/griffithlab/pVACtools?branch=master)
 [![Docs](https://readthedocs.org/projects/pvactools/badge/?version=latest)](http://pvactools.readthedocs.io/en/latest/?badge=latest)
+![External APIs Status](https://github.com/griffithlab/pVACtools/actions/workflows/api_status.yml/badge.svg)
 <a href="https://pypi.python.org/pypi/pvactools/">
     <img src="https://img.shields.io/pypi/v/pvactools.svg?maxAge=1000" alt="PyPI" />
 </a>

@@ -42,7 +42,7 @@ jobs:
       - name: Run tests
         env:
           TEST_FLAG: 1
-        run: coverage run --source=pvactools.lib,pvactools.tools -m unittest discover -v
+        run: coverage run --source=pvactools.lib,pvactools.tools -m unittest discover -v -s tests
       - name: Coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
