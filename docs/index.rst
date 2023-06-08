@@ -56,10 +56,8 @@ New in Release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- It fixes an issue with parsing class II IEDB output files when running
-  pVACfuse or pVACbind, which resulted in the wrong binding prediction scores
-  being associated with certain epitopes.
-- It adds missing import statements to pVACvector.
+- It fixes an issue with the reference proteome match step where stop lost
+  mutations would throw a fatal error.
 
 New in Version |version|
 ------------------------
