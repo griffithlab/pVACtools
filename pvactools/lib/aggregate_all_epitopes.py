@@ -390,7 +390,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             total_prob = 0
             for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
                 total_prob += float(prob)
-                positions.append(pos)
+                positions.append(int(pos))
                 if total_prob > self.anchor_contribution_threshold:
                     return positions
 
