@@ -196,8 +196,6 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
         anchor_residue_pass <- FALSE
       }else if (wt_binding < binding_threshold) {
         anchor_residue_pass <- FALSE
-      }else if (!is.null(percentile_threshold) && (wt_percent) < percentile_threshold) {
-        anchor_residue_pass <- FALSE
       }
     }
   }
