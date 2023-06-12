@@ -750,7 +750,6 @@ server <- shinyServer(function(input, output, session) {
             list(orderable = TRUE, targets = 0),
             list(visible = FALSE, targets = c(-1, -2))),
           rowCallback = JS("function(row, data, index, rowId) {",
-                            "console.log(rowId)",
                             "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
         ),
@@ -983,7 +982,6 @@ server <- shinyServer(function(input, output, session) {
           pageLength = 10,
           lengthMenu = c(10),
           rowCallback = JS("function(row, data, index, rowId) {",
-                           "console.log(rowId)",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                            'row.style.backgroundColor = "#E0E0E0";', "}", "}")
         )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
@@ -1048,7 +1046,7 @@ server <- shinyServer(function(input, output, session) {
             pageLength = 10,
             lengthMenu = c(10),
             rowCallback = JS("function(row, data, index, rowId) {",
-                           "console.log(rowId)","if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
+                           "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                            'row.style.backgroundColor = "#E0E0E0";', "}", "}")
           )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
           dtable
