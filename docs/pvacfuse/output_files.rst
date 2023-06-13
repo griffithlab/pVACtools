@@ -48,6 +48,7 @@ The filtered.tsv file is the all_epitopes file with the following filters
 applied (in order):
 
 - Binding Filter
+- Coverage Filter
 - Top Score Filter
 
 Please see the :ref:`Standalone Filter Commands<pvacfuse_filter_commands>`
@@ -78,6 +79,13 @@ percentile rank:
 The following prediction algorithms do not provide a percentile rank:
 
 - MHCnuggets
+
+Prediction Algorithms Supporting Elution Scores
+_______________________________________________
+
+- MHCflurryEL
+- NetMHCpanEL
+- NetMHCIIpanEL
 
 all_epitopes.tsv and filtered.tsv Report Columns
 ------------------------------------------------
@@ -111,11 +119,11 @@ pVACfuse.
      - The one-based position of the epitope in the protein sequence used to make the prediction
    * - ``Epitope Seq``
      - Epitope sequence
-   * - ``Median Score``
+   * - ``Median IC50 Score``
      - Median ic50 binding affinity of the epitope of all prediction algorithms used
-   * - ``Best Score``
+   * - ``Best IC50 Score``
      - Lowest ic50 binding affinity of all prediction algorithms used
-   * - ``Best Score Method``
+   * - ``Best IC50 Score Method``
      - Prediction algorithm with the lowest ic50 binding affinity for this epitope
    * - ``Median Percentile``
      - Median binding affinity percentile rank of the epitope across all prediction algorithms used (those that provide percentile output)
@@ -123,8 +131,23 @@ pVACfuse.
      - Lowest percentile rank of this epitope's ic50 binding affinity of all prediction algorithms used (those that provide percentile output)
    * - ``Best Percentile Method``
      - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
-   * - ``Individual Prediction Algorithm WT and MT Scores and Percentiles`` (multiple)
-     - ic50 binding affintity and percentile ranks for the ``MT Epitope Seq`` for the individual prediction algorithms used
+   * - ``Individual Prediction Algorithm Scores and Percentiles`` (multiple)
+     - ic50 binding affintity and percentile ranks for the ``Epitope Seq`` for the individual prediction algorithms used
+   * - ``MHCflurryEL Processing Scores and Presentation Scores and Percentiles`` (optional)
+     - MHCflurry elution processing score and presentation score and percentiles
+       for the ``Epitope Seq`` if the run included
+       MHCflurryEL as one of the prediction algorithms
+   * - ``Read Support``
+     - The sum of spanning and encompassing reads over the fusion position.
+       ``NA`` if the run was made with AGFusion data and without a
+       ``--starfusion-file`` input.
+   * - ``Expression``
+     - The number of fusion-supporting RNA-seq fragments as FFPM (fusion fragments per million total reads). ``NA`` if the run was made
+       wihtout a ``--starfusion-file`` input.
+   * - ``Problematic Positions`` (optional)
+     - A list of positions in the ``Epitope Seq`` that match the
+       problematic amino acids defined by the ``--problematic-amino-acids``
+       parameter
    * - ``cterm_7mer_gravy_score``
      - Mean hydropathy of last 7 residues on the C-terminus of the peptide
    * - ``max_7mer_gravy_score``
