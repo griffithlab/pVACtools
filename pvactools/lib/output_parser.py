@@ -73,35 +73,58 @@ class OutputParser(metaclass=ABCMeta):
         else:
             return len(aac[1]) - len(aac[0]) + 1
 
-    def find_ins_mut_position(self, wt_epitope_seq, mt_epitope_seq, aa_change):
-        mt_pos = None
-        for i,(wt_aa,mt_aa) in enumerate(zip(wt_epitope_seq,mt_epitope_seq)):
-            if wt_aa != mt_aa and mt_pos == None:
-                mt_pos = i+1
-                continue
-            if mt_pos != None:
-                matches = True
-                for j, mt_aa in enumerate(mt_epitope_seq[i:]):
-                    if mt_aa != wt_epitope_seq[mt_pos-1+j]:
-                        matches = False
-                        break
-                if matches:
-                    if mt_pos != i:
-                        return (mt_pos, i)
-                    else:
-                        aal = self.aa_ins_change_len(aa_change)
-                        return (mt_pos, mt_pos+aal-1) if aal > 1 else (mt_pos,)
-        if mt_pos != None:
-            mt_len = len(mt_epitope_seq)
-            if self.aa_ins_change_len(aa_change) == mt_len-mt_pos+1:
-                if mt_pos == mt_len:
-                    return (mt_pos,)
-                else:
-                    return (mt_pos, mt_len)
+    def determine_ins_mut_position_from_previous_result(self, previous_result, mt_epitope_seq, result):
+        previous_mutation_position = self.position_to_tuple(previous_result['mutation_position'])
+        aa_ins_change_len = self.aa_ins_change_len(result['amino_acid_change'])
+        if len(previous_mutation_position) == 2:
+            if previous_mutation_position[1] == len(mt_epitope_seq)+1 and aa_ins_change_len > previous_mutation_position[1]-previous_mutation_position[0]+1:
+                return '{}-{}'.format(previous_mutation_position[0]-1, previous_mutation_position[1])
+            elif previous_mutation_position[0] > 1:
+                return '{}-{}'.format(previous_mutation_position[0]-1, previous_mutation_position[1]-1)
             else:
-                return (mt_pos, mt_len+1)
+                if previous_mutation_position[1] > 2:
+                    return '1-{}'.format(previous_mutation_position[1]-1)
+                else:
+                    return '1' # choose '1' over '1-1' format
         else:
-            return (0,)
+            if previous_mutation_position[0] > 1:
+                if aa_ins_change_len > 1:
+                    end = (previous_mutation_position[0] - 1) + (aa_ins_change_len - 1)
+                    if end > len(mt_epitope_seq):
+                        end = len(mt_epitope_seq)
+                    return '{}-{}'.format(previous_mutation_position[0]-1, end)
+                else:
+                    return '{}'.format(previous_mutation_position[0]-1)
+            else:
+                return '1'
+
+    def find_ins_mut_position(self, wt_epitope_seq, mt_epitope_seq, aa_change, match_direction):
+        if mt_epitope_seq == wt_epitope_seq:
+            return None
+        aal = self.aa_ins_change_len(aa_change)
+        mt_start_pos = None
+        mt_end_pos = None
+        if match_direction == 'left':
+            for i,(wt_aa,mt_aa) in enumerate(zip(wt_epitope_seq,mt_epitope_seq)):
+                if wt_aa != mt_aa:
+                    mt_start_pos = i+1
+                    break
+            mt_end_pos = mt_start_pos + aal - 1
+        elif match_direction == 'right':
+            for i,(wt_aa,mt_aa) in enumerate(zip(wt_epitope_seq[::-1],mt_epitope_seq[::-1])):
+                if wt_aa != mt_aa:
+                    mt_end_pos = i+1
+                    break
+            mt_start_pos = mt_end_pos - aal + 1
+
+        if mt_end_pos > len(mt_epitope_seq):
+            mt_end_pos = len(mt_epitope_seq)
+        if mt_start_pos < 1:
+            mt_start_pos = 1
+        if mt_start_pos == mt_end_pos:
+            return (mt_start_pos,)
+        else:
+            return (mt_start_pos, mt_end_pos)
 
     def get_percentiles(self, line, method):
         if method.lower() == 'mhcflurry':
@@ -209,10 +232,10 @@ class OutputParser(metaclass=ABCMeta):
             previous_mutation_position = self.position_to_tuple(previous_result['mutation_position'])
             if previous_mutation_position == 'NA':
                 result['mutation_position'] = 'NA'
-            elif previous_mutation_position[0] > 0:
-                result['mutation_position'] = '{}-{}'.format(previous_mutation_position[0]-1, peptide_length+1)
+            elif previous_mutation_position[0] == 1:
+                result['mutation_position'] = '1-{}'.format(peptide_length)
             else:
-                result['mutation_position'] = '0-{}'.format(peptide_length+1)
+                result['mutation_position'] = '{}-{}'.format(previous_mutation_position[0]-1, peptide_length)
             return
 
         mt_epitope_seq = result['mt_epitope_seq']
@@ -241,10 +264,10 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_scores']      = self.format_match_na(result, 'score')
                 result['wt_percentiles'] = self.format_match_na(result, 'percentile')
             mutation_position = self.find_mutation_position(wt_epitope_seq, mt_epitope_seq)
-            if mutation_position == 1 and previous_result is not None and self.position_to_tuple(previous_result['mutation_position'])[0] <= 1:
-                #The true mutation position is to the left of the current MT eptiope
-                mutation_position = 0
-            result['mutation_position'] = '{}-{}'.format(mutation_position, peptide_length+1)
+            if mutation_position == peptide_length:
+                result['mutation_position'] = mutation_position
+            else:
+                result['mutation_position'] = '{}-{}'.format(mutation_position, peptide_length)
             result['wt_epitope_position'] = match_position
 
     def match_wildtype_and_mutant_entry_for_inframe_indel(self, result, mt_position, wt_results, previous_result, iedb_results_for_wt_iedb_result_key):
@@ -254,22 +277,7 @@ class OutputParser(metaclass=ABCMeta):
             best_match_position           = previous_result['wt_epitope_position'] + 1
             result['wt_epitope_position'] = best_match_position
             result['match_direction']     = 'right'
-            previous_mutation_position = self.position_to_tuple(previous_result['mutation_position'])
-            if len(previous_mutation_position) == 2:
-                if previous_mutation_position[1] == len(mt_epitope_seq)+1 and self.aa_ins_change_len(result['amino_acid_change']) > previous_mutation_position[1]-previous_mutation_position[0]+1:
-                    result['mutation_position'] = '{}-{}'.format(previous_mutation_position[0]-1, previous_mutation_position[1])
-                elif previous_mutation_position[0] > 0:
-                    result['mutation_position'] = '{}-{}'.format(previous_mutation_position[0]-1, previous_mutation_position[1]-1)
-                else:
-                    if previous_mutation_position[1] > 1:
-                        result['mutation_position'] = '0-{}'.format(previous_mutation_position[1]-1)
-                    else:
-                        result['mutation_position'] = '0' # choose '0' over '0-0' format
-            else:
-                if previous_mutation_position[0] > 0:
-                    result['mutation_position'] = '{}'.format(previous_mutation_position[0]-1)
-                else:
-                    result['mutation_position'] = '0'
+            result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
 
             #We need to ensure that the matched WT eptiope has enough overlapping amino acids with the MT epitope
             best_match_wt_result = wt_results[str(best_match_position)]
@@ -286,7 +294,6 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_epitope_seq'] = 'NA'
                 result['wt_scores']      = self.format_match_na(result, 'score')
                 result['wt_percentiles'] = self.format_match_na(result, 'percentile')
-
             return
 
         #In all other cases the WT epitope at the same position is used as the baseline match
@@ -300,22 +307,7 @@ class OutputParser(metaclass=ABCMeta):
             result['wt_percentiles'] = self.format_match_na(result, 'percentile')
             #We then infer the mutation position and match direction from the previous MT epitope
             result['match_direction'] = previous_result['match_direction']
-            previous_mutation_position = self.position_to_tuple(previous_result['mutation_position'])
-            if len(previous_mutation_position) == 2:
-                if previous_mutation_position[1] == len(mt_epitope_seq)+1 and self.aa_ins_change_len(result['amino_acid_change']) > previous_mutation_position[1]-previous_mutation_position[0]+1:
-                    result['mutation_position'] = '{}-{}'.format(previous_mutation_position[0]-1, previous_mutation_position[1])
-                elif previous_mutation_position[0] > 0:
-                    result['mutation_position'] = '{}-{}'.format(previous_mutation_position[0]-1, previous_mutation_position[1]-1)
-                else:
-                    if previous_mutation_position[1] > 1:
-                        result['mutation_position'] = '0-{}'.format(previous_mutation_position[1]-1)
-                    else:
-                        result['mutation_position'] = '0' # choose '0' over '0-0' format
-            else:
-                if previous_mutation_position[0] > 0:
-                    result['mutation_position'] = '{}'.format(previous_mutation_position[0]-1)
-                else:
-                    result['mutation_position'] = '0'
+            result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
             return
 
         baseline_best_match_wt_result      = wt_results[baseline_best_match_position]
@@ -374,8 +366,17 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_percentiles'] = self.format_match_na(result, 'percentile')
 
             if result['variant_type'] == 'inframe_ins':
-                mutation_position = self.find_ins_mut_position(baseline_best_match_wt_epitope_seq, mt_epitope_seq, result['amino_acid_change'])
-                result['mutation_position']   = '{}-{}'.format(mutation_position[0], mutation_position[1]) if len(mutation_position)==2 else '{}'.format(mutation_position[0])
+                mutation_position = self.find_ins_mut_position(baseline_best_match_wt_epitope_seq, mt_epitope_seq, result['amino_acid_change'], match_direction)
+                if mutation_position is None:
+                    result['mutation_position'] = None
+                else:
+                    if previous_result is None:
+                        result['mutation_position'] = '{}-{}'.format(mutation_position[0], mutation_position[1]) if len(mutation_position)==2 else '{}'.format(mutation_position[0])
+                    else:
+                        if previous_result['mutation_position'] is None:
+                            result['mutation_position'] = '{}-{}'.format(mutation_position[0], mutation_position[1]) if len(mutation_position)==2 else '{}'.format(mutation_position[0])
+                        else:
+                            result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
             elif result['variant_type'] == 'inframe_del':
                 mutation_position = self.find_mutation_position(baseline_best_match_wt_epitope_seq, mt_epitope_seq)
                 result['mutation_position']   = '{}-{}'.format(mutation_position-1, mutation_position)
@@ -571,8 +572,12 @@ class OutputParser(metaclass=ABCMeta):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            headers.append("%s WT Score" % pretty_method)
-            headers.append("%s MT Score" % pretty_method)
+            if method == 'netmhcpan_el' or method == 'netmhciipan_el':
+                headers.append("%s WT Score" % pretty_method)
+                headers.append("%s MT Score" % pretty_method)
+            else:
+                headers.append("%s WT IC50 Score" % pretty_method)
+                headers.append("%s MT IC50 Score" % pretty_method)
             headers.append("%s WT Percentile" % pretty_method)
             headers.append("%s MT Percentile" % pretty_method)
         if self.add_sample_name:
@@ -603,14 +608,15 @@ class OutputParser(metaclass=ABCMeta):
             # st = score type, s = score
             for st, s in entries[prediction_method].items():
                 if st == 'mhcflurry_presentation_score':
-                    row['MHCflurryEL Presentation %s' % suffix] = s
+                    row['MHCflurryEL Presentation %s' % suffix.replace("IC50 ", "")] = s
                 elif st == 'mhcflurry_processing_score':
-                    row['MHCflurryEL Processing %s' % suffix] = s
+                    row['MHCflurryEL Processing %s' % suffix.replace("IC50 ", "")] = s
                 elif st == 'mhcflurry_presentation_percentile':
-                    row['MHCflurryEL Presentation %s' % suffix] = s
+                    row['MHCflurryEL Presentation %s' % suffix.replace("IC50 ", "")] = s
+                elif pretty_method == 'NetMHCpanEL' or pretty_method == 'NetMHCIIpanEL':
+                    row['%s %s' % (pretty_method, suffix.replace("IC50 ", ""))] = s
                 else:
                     row['%s %s' % (pretty_method, suffix)] = s
-                
         else:
             # This covers cases where the allele/length of the result row is not supported by the prediction algorithm
             row['%s %s' % (pretty_method, suffix)] = 'NA'
@@ -707,8 +713,8 @@ class OutputParser(metaclass=ABCMeta):
                 row['Median WT Percentile'] = 'NA' if median_wt_percentile == 'NA' else round(median_wt_percentile, 3)
                 for method in self.prediction_methods():
                     pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-                    self.add_pretty_row(row, wt_scores, method, pretty_method, 'WT Score')
-                    self.add_pretty_row(row, mt_scores, method, pretty_method, 'MT Score')
+                    self.add_pretty_row(row, wt_scores, method, pretty_method, 'WT IC50 Score')
+                    self.add_pretty_row(row, mt_scores, method, pretty_method, 'MT IC50 Score')
                     self.add_pretty_row(row, wt_percentiles, method, pretty_method, 'WT Percentile')
                     self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'MT Percentile')
 
@@ -910,7 +916,10 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 elif self.flurry_state == 'both':
                     self.flurry_headers(headers)
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            headers.append("%s Score" % pretty_method)
+            if method == 'netmhcpan_el' or method == 'netmhciipan_el':
+                headers.append("%s Score" % pretty_method)
+            else:
+                headers.append("%s IC50 Score" % pretty_method)
             headers.append("%s Percentile" % pretty_method)
         if self.add_sample_name:
             headers.append("Sample Name")
@@ -956,7 +965,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
             row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-                self.add_pretty_row(row, mt_scores, method, pretty_method, 'Score')
+                self.add_pretty_row(row, mt_scores, method, pretty_method, 'IC50 Score')
                 self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
             if self.add_sample_name:
                 row['Sample Name'] = self.sample_name

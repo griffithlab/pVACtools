@@ -1,4 +1,4 @@
-Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHC Score	NetMHC Percentile
+Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHC IC50 Score	NetMHC Percentile
 7.EIF3K_CYP39A1.ENST00000588934_ENST00000275016.frameshift_fusion.118	HLA-A*29:02	3	HFQAFWHQF	257.23	257.23	NetMHC	0.73	0.73	NetMHC	257.23	0.73
 7.EIF3K_CYP39A1.ENST00000588934_ENST00000275016.frameshift_fusion.118	HLA-A*29:02	6	AFWHQFQRM	434.18	434.18	NetMHC	1.0	1.0	NetMHC	434.18	1.0
 7.EIF3K_CYP39A1.ENST00000588934_ENST00000275016.frameshift_fusion.118	HLA-A*29:02	4	FQAFWHQFQ	2477.53	2477.53	NetMHC	2.7	2.7	NetMHC	2477.53	2.7

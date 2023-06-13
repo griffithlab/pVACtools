@@ -10,9 +10,9 @@ anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/griffith
 
 #get binding affinity colors cutoffs given HLA
 
-scale_binding_affinity <- function(binding_cutoffs, is_specific, binding_threshold, hla, current_ba) {
-  if (is_specific[[hla]]) {
-    threshold <- as.numeric(binding_cutoffs[hla])
+scale_binding_affinity <- function(allele_specific_binding_thresholds, use_allele_specific_binding_thresholds, binding_threshold, hla, current_ba) {
+  if (use_allele_specific_binding_thresholds && hla %in% names(allele_specific_binding_thresholds[hla])) {
+    threshold <- as.numeric(allele_specific_binding_thresholds[hla])
     return(as.numeric(current_ba) / threshold)
   }else {
     threshold <- as.numeric(binding_threshold)
@@ -143,7 +143,7 @@ calculate_mutation_info <- function(metrics_data_row) {
   return(diff_positions)
 }
 ##Generate Tiering for given variant with specific cutoffs
-tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode) {
+tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode, use_allele_specific_binding_thresholds, binding_threshold) {
   mt_binding <- as.numeric(variant_info["IC50 MT"])
   wt_binding <- as.numeric(variant_info["IC50 WT"])
   mt_percent <- as.numeric(variant_info["%ile MT"])
@@ -153,7 +153,9 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   rna_vaf <- as.numeric(variant_info["RNA VAF"])
   rna_depth <- as.numeric(variant_info["RNA Depth"])
   allele_expr <- as.numeric(variant_info["Allele Expr"])
-  binding_threshold <- as.numeric(meta_data[["binding_cutoffs"]][hla_allele])
+  if (use_allele_specific_binding_thresholds && hla_allele %in% names(meta_data[["allele_specific_binding_thresholds"]][hla_allele])) {
+    binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
+  }
   trna_vaf <- as.numeric(meta_data["trna_vaf"])
   trna_cov <- as.numeric(meta_data["trna_cov"])
   percentile_filter <- FALSE
@@ -193,8 +195,6 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
       if (is.na(wt_binding)) {
         anchor_residue_pass <- FALSE
       }else if (wt_binding < binding_threshold) {
-        anchor_residue_pass <- FALSE
-      }else if (!is.null(percentile_threshold) && (wt_percent) < percentile_threshold) {
         anchor_residue_pass <- FALSE
       }
     }
@@ -264,7 +264,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   return("Poor")
 }
 #Determine the Tier Count for given variant with specific cutoffs
-tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode) {
+tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode, allele_specific_binding_thresholds, use_allele_specific_binding_thresholds, binding_threshold) {
   mt_binding <- as.numeric(variant_info["IC50 MT"])
   wt_binding <- as.numeric(variant_info["IC50 WT"])
   mt_percent <- as.numeric(variant_info["%ile MT"])
@@ -274,7 +274,9 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
   rna_vaf <- as.numeric(variant_info["RNA VAF"])
   rna_depth <- as.numeric(variant_info["RNA Depth"])
   allele_expr <- as.numeric(variant_info["Allele Expr"])
-  binding_threshold <- as.numeric(meta_data[["binding_cutoffs"]][hla_allele])
+  if (use_allele_specific_binding_thresholds && hla_allele %in% names(meta_data[["allele_specific_binding_thresholds"]][hla_allele])) {
+      binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
+  }
   trna_vaf <- as.numeric(meta_data["trna_vaf"])
   trna_cov <- as.numeric(meta_data["trna_cov"])
   percentile_filter <- FALSE

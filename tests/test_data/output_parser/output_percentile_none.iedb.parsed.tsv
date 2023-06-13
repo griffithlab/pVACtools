@@ -1,4 +1,4 @@
-Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHCpan Score	NetMHCpan Percentile
+Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHCpan IC50 Score	NetMHCpan Percentile
 MT.PEX1.V356I|AAL|MT.SUMF2.G23A	HLA-C*03:03	6	AVGTLPTSG	37878.2	37878.2	NetMHCpan	NA	NA	NA	37878.2	NA
 MT.POM121C.G3107R|HH|MT.CASP10.S654R	HLA-C*03:03	1	GPQQQTFAC	31402.6	31402.6	NetMHCpan	NA	NA	NA	31402.6	NA
 MT.CASP10.S654R|HHHD|MT.ACSL3.S345N	HLA-C*03:03	2	PYEESSVYG	47686.8	47686.8	NetMHCpan	NA	NA	NA	47686.8	NA

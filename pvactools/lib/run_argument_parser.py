@@ -277,11 +277,11 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
             action='store_true',
         )
         self.parser.add_argument(
-            "--anchor-contribution-threshold", type=float,
+            "--anchor-contribution-threshold", type=float_range(0.5,0.9),
             help="For determining allele-specific anchors, each position is assigned a score based on how binding is "
                  + "influenced by mutations. From these scores, the relative contribution of each position to the "
                  + "overall binding is calculated. Starting with the highest relative contribution, positions whose "
-                 + "score together account for the selected contribution threshold are assigned as anchor locations. "
+                 + "scores together account for the selected contribution threshold are assigned as anchor locations. "
                  + " As a result, a higher threshold leads to the inclusion of more positions to be considered anchors.",
             default=0.8
         )
@@ -305,7 +305,7 @@ class PvacfuseRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
         PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
         self.parser.add_argument(
             '--starfusion-file',
-            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from. Only used when running with AGFusion data."
+            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from. When used with Arriba data, only expression information will be incorporated (read support information will be incorporated from Arriba output)."
         )
         self.parser.add_argument(
             '--read-support', type=int,
