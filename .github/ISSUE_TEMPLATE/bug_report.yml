@@ -17,13 +17,13 @@ body:
   - type: input
     attributes:
       label: pVACtools Version / Docker Image
-      description: If you're running pVACtools standalone, which version do you have installed? If you are using Docker, which Docker container are you using?
+      description: If you're running pVACtools standalone, which version do you have installed (`pvactools -v`)? If you are using Docker, which Docker container are you running (e.g. `griffithlab/pvactools:3.1.3-slim`)?
     validations:
       required: true
   - type: input
     attributes:
       label: Python Version
-      description: If you're running pVACtools standalone, which Python version are you using?
+      description: If you're running pVACtools standalone, which Python version are you using (`python -V`)?
   - type: input
     attributes:
       label: Operating System
