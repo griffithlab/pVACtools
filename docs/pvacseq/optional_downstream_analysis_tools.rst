@@ -37,7 +37,7 @@ The output may be limited to PASS variants only by setting the ``--pass`` only
 flag and to mutant sequences by setting the ``--mutant-only`` flag.
 
 The output can be further limited to only certain variants by providing
-pVACseq report file to the ``--input-tsv`` argument.Only the peptide sequences for the epitopes in the TSV
+a pVACseq report file to the ``--input-tsv`` argument. Only the peptide sequences for the epitopes in the TSV
 will be used when creating the FASTA. If this argument is an aggregated TSV
 file, use the ``--aggregate-report-evaluation`` parameter to only include
 peptide sequences for epitopes matching the chosen Evaluation(s).
@@ -61,14 +61,24 @@ Calculate Reference Proteome Similarity
 
 .. program-output:: pvacseq calculate_reference_proteome_similarity -h
 
-This tool will Blast peptides against the relative reference proteome and return the results in an output
-TSV & reference_match file pair, given a pVACseq run's fasta and filtered/all_epitopes TSV.  Typically, this
-can be done as part of the pVACseq run pipeline for the filtered output TSV if specified.  This tool,
-however, provides a standalone way to run this on pVACseq's generated filtered/all_epitopes TSV files.  For
-instance, this may be desired if pvacseq was originally run without this specified and one wished to perform
-this additional step after the fact for the filtered TSV—or perhaps instead the results of this were desired
-for the all_epitopes TSV which does not have this step performed.
-For a closer look at the generated reference_match file,
+This tool will find matches of the epitope candidates in the reference proteome and return the results in an output
+TSV & reference_match file pair. It requires the input of a pVACseq run's fasta file in order to look up the larger
+peptide sequence the epitope was derived from. Any substring of that peptide
+sequence that matches against the reference proteome and is at least as long as the specified match length, will be
+considered a hit. This tool also requires the user to provide a filtered.tsv,
+all_epitopes.tsv or aggregated.tsv pVACseq report file as an input and any
+candidates in this input file will be searched for.
+
+This tool may be either run with BLASTp using either the ``refseq_select_prot`` or ``refseq_protein``. Users are
+required to :ref:`independently install BLASTp <blast>`. Alternatively, users
+may provide a reference proteome fasta file and this tool will string match on
+the entries of this fasta file directly. This approach is recommended, because
+it is significantly faster than BLASTp. Reference proteome fasta files may be
+downloaded from Ensembl. For example, the latest reference proteome fasta for human
+can be downloaded from `this
+link <https://ftp.ensembl.org/pub/current_fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz>`_.
+
+For more details on the  generated reference_match file,
 see the pVACseq :ref:`output file documentation <reference_matches>`.
 
 NetChop Predict Cleavage Sites
@@ -101,3 +111,32 @@ Identify Problematic Amino Acids
 --------------------------------
 
 .. program-output:: pvacseq identify_problematic_amino_acids -h
+
+This tool is used to identify positions in an epitope with an amino acid that
+is problematic for downstream processing, e.g. vaccine manufacturing. Since
+this can differ from case to case, this tool requires the user to specify which
+amino acid(s) to consider problematic. This can be specified in one of three
+formats:
+
+.. list-table::
+
+ * - ``amino_acid(s)``
+   - One or more one-letter amino acid codes. Any occurrence of this amino acid string,
+     regardless of the position in the epitope, is problematic. When specifying more than
+     one amino acid, they will need to occur together in the specified order.
+ * - ``amino_acid:position``
+   - A one letter amino acid code, followed by a colon separator, followed by a positive
+     integer position (one-based). The occurrence of this amino acid at the position
+     specified is problematic., E.g. G:2 would check for a Glycine at the second position
+     of the epitope. The N-terminus is defined as position 1.
+ * - ``amino_acid:-position``
+   - A one letter amino acid code, followed by a colon separator, followed by a negative
+     integer position. The occurrence of this amino acid at the specified position from
+     the end of the epitope is problematic. E.g., G:-3 would check for a Glycine at the
+     third position from the end of the epitope. The C-terminus is defined as position -1.
+
+You may specify any number of these problematic amino acid(s), in any
+combination, by providing them as a comma-separated list.
+
+This tool may be used with any filtered.tsv or all_epitopes.tsv pVACseq report
+file.

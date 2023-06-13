@@ -123,31 +123,49 @@ the same variant.
 
 In order to account for different splice sites among the transcripts of a
 variant that would lead to different peptides, this filter also takes into
-account the different transcripts returned by VEP and will return
-the top epitope for each transcript if they are non-identical. If the
-resulting list of top epitopes for the transcripts of a variant is identical,
-the epitope for the transcript with the highest expression is returned. If
-this information is not available, the transcript with the lowest Ensembl ID is returned.
+account the different transcripts returned by VEP and bins the ones resulting
+in the same set of epitopes together into a transcript set. For each transcript
+set the filter will return the top epitope similar to how the Best Peptide is
+determined in the :ref:`aggregated report <aggregated>`:
 
-By default the
-``--top-score-metric`` option is set to ``median`` which will apply this
-filter to the ``Median MT Score`` column and pick the epitope with the lowest
-median mutant ic50 score for each variant. If the ``--top-score-metric``
-option is set to ``lowest``, the ``Best MT Score`` column is instead used to
-make this determination.
+- Pick all entries with a variant transcript that have a ``protein_coding`` Biotype
+- Of the remaining entries, pick the ones with a variant transcript having
+  a Transcript Support Level <= maximum_transcript_support_level
+- Of the remaining entries, pick the entries with no Problematic Positions
+- Of the remaining entries, pick the ones passing the Anchor Criteria (see
+  details below)
+- Of the remaining entries, pick the one with the lowest median/best MT IC50
+  score, lowest Transcript Support Level, and longest transcript.
 
+By default the ``--top-score-metric`` option is set to ``median`` which will apply this
+filter to the ``Median MT IC50 Score`` column. If the ``--top-score-metric``
+option is set to ``lowest``, the ``Best MT IC50  Score`` column is used
+instead.
+
+**Anchor Criteria**
+
+This criteria is failed if all mutated amino acids of the entry (``Mutation
+Position``) are at an anchor position and the WT peptide has good binding
+``(Best/Median WT IC50 Score < binding_threshold)``.
+
+When the ``--allele-specific-binding-thresholds`` flag is set, binding cutoffs specific to each
+prediction's HLA allele are used instead of the value set via the ``--binding-threshold`` parameters.
+For HLA alleles where no allele-specific binding threshold is available, the
+binding threshold is used as a fallback. Alleles with allele-specific
+threshold as well as the value of those thresholds can be printed by executing
+the ``pvacseq allele_specific_cutoffs`` command.
+
+**Additional Considerations**
 
 It is important to note that there are several reasons why a particular variant can lead to multiple peptides
 with different predicted binding affinities. The following can result in multiple peptides and/or binding predictions for a single
 variant:
 
-1. Different epitope lengths: specifying multiple epitope lengths results in similar but non-identical epitope sequences for each 
-variant (e.g. KLPEPCPS, KLPEPCPST, KLPEPCPSTT, KLPEPCPSTTP).
-2. Different registers: pVACseq will test epitopes where the mutation is in every position (e.g. EPCPSTTP, PEPCPSTT, LPEPCPST, KLPEPCPS, ...).
-3. Different transcripts: in some case the peptide sequence surrounding a variant will depend on the reference transcript sequence, particularly
-if there are alternative splice sites near the variant position.
-4. Different HLA alleles: the HLA allele that produces the best predicted binding affinity is chosen.
-5. A homozygous somatic variant with heterozygous proximal variants nearby may produce multiple different peptides.
+#. Different epitope lengths: specifying multiple epitope lengths results in similar but non-identical epitope sequences for each variant (e.g. KLPEPCPS, KLPEPCPST, KLPEPCPSTT, KLPEPCPSTTP).
+#. Different registers: pVACseq will test epitopes where the mutation is in every position (e.g. EPCPSTTP, PEPCPSTT, LPEPCPST, KLPEPCPS, ...).
+#. Different transcripts: in some case the peptide sequence surrounding a variant will depend on the reference transcript sequence, particularly if there are alternative splice sites near the variant position.
+#. Different HLA alleles: the HLA allele that produces the best predicted binding affinity is chosen.
+#. A homozygous somatic variant with heterozygous proximal variants nearby may produce multiple different peptides.
 
 The significance of choosing a single representative peptide can depend on your experimental or clinical aims.
 For example, if you are planning to use short peptide sequences exactly as they were assessed 

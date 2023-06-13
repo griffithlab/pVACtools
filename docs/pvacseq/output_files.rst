@@ -152,7 +152,7 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Sub-peptide Position``
      - The one-based position of the epitope within the protein sequence used to make the prediction
    * - ``Mutation Position``
-     - The one-based positional range (inclusive) of the mutation within the epitope sequence.  If the mutation is a deletion, the amino acids flanking the deletion are recorded. ``0`` represents that some or all of the mutation is before the epitope, ``length+1`` represents some or all of the mutation is after the epitope, otherwise it indexes specific amino acid(s) within the epitope.  Note that in the case of ambiguous amino acid changes, this reflects the change that is left-aligned, starting from the first changed amino acid; this may differ from the ``Mutation`` column.
+     - The one-based positional range (inclusive) of the mutation within the epitope sequence. If the mutation is a deletion, the amino acids flanking the deletion are recorded. Note that in the case of ambiguous amino acid changes, this reflects the change that is left-aligned, starting from the first changed amino acid; this may differ from the ``Mutation`` column.
    * - ``MT Epitope Seq``
      - The mutant epitope sequence
    * - ``WT Epitope Seq``
