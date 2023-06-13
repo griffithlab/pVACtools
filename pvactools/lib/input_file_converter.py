@@ -501,7 +501,16 @@ class FusionInputConverter(InputFileConverter):
             reader = csv.DictReader(fh, delimiter="\t")
             return list(reader)
 
-    def parse_arriba_file(self):
+    def find_matching_starfusion_entry_for_arriba(self, starfusion_entries, five_prime_chr, five_prime_start, three_prime_chr, three_prime_start):
+        for starfusion_entry in starfusion_entries:
+            (sf_five_prime_chr, five_prime_pos, five_prime_strand) = starfusion_entry['LeftBreakpoint'].split(':')
+            (sf_three_prime_chr, three_prime_pos, three_prime_strand) = starfusion_entry['RightBreakpoint'].split(':')
+            if (sf_five_prime_chr.replace("chr", "") == five_prime_chr.replace("chr", "")
+                and sf_three_prime_chr.replace("chr", "") == three_prime_chr.replace("chr", "")):
+                if five_prime_pos == five_prime_start and three_prime_pos == three_prime_start:
+                    return starfusion_entry
+
+    def parse_arriba_file(self, starfusion_entries):
         if not os.path.exists(self.input_file):
             raise Exception("Input file {} doesn't exist. Please provide a valid Arriba result file path. Aborting.".format(self.input_file))
 
@@ -523,6 +532,10 @@ class FusionInputConverter(InputFileConverter):
                     variant_type = 'frameshift_fusion'
                 else:
                     continue
+                if starfusion_entries is not None:
+                    starfusion_entry = self.find_matching_starfusion_entry_for_arriba(starfusion_entries, five_prime_chr, five_prime_start, three_prime_chr, three_prime_start)
+                else:
+                    starfusion_entry = None
                 output_row = {
                     'chromosome_name'            : "{} / {}".format(five_prime_chr, three_prime_chr),
                     'start'                      : "{} / {}".format(five_prime_start, three_prime_start),
@@ -551,14 +564,17 @@ class FusionInputConverter(InputFileConverter):
                     'transcript_name'            : transcript_name,
                     'index'                      : pvactools.lib.run_utils.construct_index(count, gene_name, transcript_name, variant_type, fusion_position),
                     'fusion_read_support'        : int(record['split_reads1']) + int(record['split_reads2']) + int(record['discordant_mates']),
-                    'fusion_expression'          : 'NA'
                 }
+                if starfusion_entry is not None:
+                    output_row['fusion_expression']   = starfusion_entry['FFPM']
+                else:
+                    output_row['fusion_expression'] = 'NA'
                 output_rows.append(output_row)
                 count += 1
         return output_rows
 
 
-    def find_matching_starfusion_entry(self, starfusion_entries, five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end):
+    def find_matching_starfusion_entry_for_agfusion(self, starfusion_entries, five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end):
         for starfusion_entry in starfusion_entries:
             (sf_five_prime_chr, five_prime_pos, five_prime_strand) = starfusion_entry['LeftBreakpoint'].split(':')
             (sf_three_prime_chr, three_prime_pos, three_prime_strand) = starfusion_entry['RightBreakpoint'].split(':')
@@ -591,7 +607,7 @@ class FusionInputConverter(InputFileConverter):
         for input_file in sorted(glob.glob(os.path.join(self.input_file, '*', '*_protein.fa'))):
             (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end) = self.parse_exon_file(input_file)
             if starfusion_entries is not None:
-                starfusion_entry = self.find_matching_starfusion_entry(starfusion_entries, five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end)
+                starfusion_entry = self.find_matching_starfusion_entry_for_agfusion(starfusion_entries, five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end)
             else:
                 starfusion_entry = None
             for record in SeqIO.parse(input_file, "fasta"):
@@ -650,7 +666,7 @@ class FusionInputConverter(InputFileConverter):
         if self.starfusion_file:
             starfusion_entries = self.parse_starfusion_file()
         if os.path.isfile(self.input_file):
-            output_rows = self.parse_arriba_file()
+            output_rows = self.parse_arriba_file(starfusion_entries)
         elif os.path.isdir(self.input_file):
             output_rows = self.parse_agfusion_files(starfusion_entries)
         tsv_writer.writerows(output_rows)

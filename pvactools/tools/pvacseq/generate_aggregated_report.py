@@ -90,11 +90,11 @@ def define_parser():
         action='store_true',
     )
     parser.add_argument(
-        "--anchor-contribution-threshold", type=float,
+        "--anchor-contribution-threshold", type=float_range(0.5,0.9),
         help="For determining allele-specific anchors, each position is assigned a score based on how binding is "
              + "influenced by mutations. From these scores, the relative contribution of each position to the "
              + "overall binding is calculated. Starting with the highest relative contribution, positions whose "
-             + "score together account for the selected contribution threshold are assigned as anchor locations. "
+             + "scores together account for the selected contribution threshold are assigned as anchor locations. "
              + " As a result, a higher threshold leads to the inclusion of more positions to be considered anchors.",
         default=0.8
     )

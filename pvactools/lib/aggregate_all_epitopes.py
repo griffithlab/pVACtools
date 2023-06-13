@@ -14,22 +14,12 @@ from pvactools.lib.prediction_class import PredictionClass
 class AggregateAllEpitopes:
     def __init__(self):
         self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
-        binding_thresholds = {}
-        is_allele_specific_binding_cutoff = {}
+        allele_specific_binding_thresholds = {}
         for hla_type in self.hla_types:
-            if self.allele_specific_binding_thresholds:
-                threshold = PredictionClass.cutoff_for_allele(hla_type)
-                if threshold is None:
-                    binding_thresholds[hla_type] = self.binding_threshold
-                    is_allele_specific_binding_cutoff[hla_type] = False
-                else:
-                    binding_thresholds[hla_type] = float(threshold)
-                    is_allele_specific_binding_cutoff[hla_type] = True
-            else:
-                binding_thresholds[hla_type] = self.binding_threshold
-                is_allele_specific_binding_cutoff[hla_type] = False
-        self.binding_thresholds = binding_thresholds
-        self.is_allele_specific_binding_cutoff = is_allele_specific_binding_cutoff
+            threshold = PredictionClass.cutoff_for_allele(hla_type)
+            if threshold is not None:
+                allele_specific_binding_thresholds[hla_type] = float(threshold)
+        self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
 
     @abstractmethod
     def get_list_unique_mutation_keys(self):
@@ -129,7 +119,7 @@ class AggregateAllEpitopes:
         for algorithm in potential_algorithms:
             if algorithm == 'NetMHCpanEL' or algorithm == 'NetMHCIIpanEL':
                 continue
-            if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
+            if "{} MT IC50 Score".format(algorithm) in headers or "{} IC50 Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
 
@@ -157,7 +147,10 @@ class AggregateAllEpitopes:
             "Median MT IC50 Score", "Median WT IC50 Score", "Median MT Percentile", "Median WT Percentile",
             "Best MT IC50 Score", "Corresponding WT IC50 Score", "Best MT Percentile", "Corresponding WT Percentile",
         ]
-        for algorithm in itertools.chain(prediction_algorithms, el_algorithms):
+        for algorithm in prediction_algorithms:
+            used_columns.extend(["{} WT IC50 Score".format(algorithm), "{} MT IC50 Score".format(algorithm)])
+            used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
+        for algorithm in el_algorithms:
             used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm)])
             if algorithm != "MHCflurryEL Processing":
                 used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
@@ -194,9 +187,6 @@ class AggregateAllEpitopes:
         used_columns = self.determine_columns_used_for_aggregation(prediction_algorithms, el_algorithms)
         dtypes = self.set_column_types(prediction_algorithms)
 
-        ## get a list of unique mutations
-        keys = self.get_list_unique_mutation_keys()
-
         ##do a crude estimate of clonal vaf/purity
         vaf_clonal = self.calculate_clonal_vaf()
 
@@ -212,12 +202,12 @@ class AggregateAllEpitopes:
                 'allele_expr_threshold': self.allele_expr_threshold,
                 'maximum_transcript_support_level': self.maximum_transcript_support_level,
                 'percentile_threshold': self.percentile_threshold,
-                'allele_specific_binding_thresholds': self.allele_specific_binding_thresholds,
+                'use_allele_specific_binding_thresholds': self.use_allele_specific_binding_thresholds,
                 'mt_top_score_metric': self.mt_top_score_metric,
                 'wt_top_score_metric': self.wt_top_score_metric,
-                'binding_cutoffs': self.binding_thresholds,
-                'is_allele_specific_binding_cutoff': self.is_allele_specific_binding_cutoff,
+                'allele_specific_binding_thresholds': self.allele_specific_binding_thresholds,
                 'allele_specific_anchors': self.allele_specific_anchors,
+                'alleles': self.hla_types.tolist(),
                 'anchor_contribution_threshold': self.anchor_contribution_threshold,
             }
         else:
@@ -225,6 +215,10 @@ class AggregateAllEpitopes:
 
         data = []
         all_epitopes_df = self.read_input_file(used_columns, dtypes)
+
+        ## get a list of unique mutations
+        keys = self.get_list_unique_mutation_keys(all_epitopes_df)
+
         for key in keys:
             (df, key_str) = self.get_sub_df(all_epitopes_df, key)
             (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, prediction_algorithms, el_algorithms, vaf_clonal)
@@ -261,7 +255,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.output_file = output_file
         self.tumor_purity = tumor_purity
         self.binding_threshold = binding_threshold
-        self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.percentile_threshold = percentile_threshold
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         self.allele_expr_threshold = trna_vaf * expn_val * 10
@@ -291,16 +285,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.anchor_contribution_threshold = anchor_contribution_threshold
         super().__init__()
 
-    def get_list_unique_mutation_keys(self):
-        key_columns = {
-            'Chromosome': str,
-            'Start': "int32",
-            'Stop': "int32",
-            'Reference': str,
-            'Variant': str
-        }
-        key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=key_columns.keys(), dtype=key_columns)
-        keys = key_df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].values.tolist()
+    def get_list_unique_mutation_keys(self, df):
+        keys = df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].values.tolist()
         keys = [list(i) for i in set(tuple(i) for i in keys)]
         return sorted(keys)
 
@@ -317,11 +303,16 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 vaf_clonal = 0.6
             else:
                 vaf_clonal = vafs_clonal[0]
+                if vaf_clonal > 0.5:
+                    vaf_clonal = 0.5
             print("Tumor clonal VAF estimated as {} (estimated from Tumor DNA VAF data). Assuming variants with VAF < {} are subclonal".format(round(vaf_clonal, 3), round(vaf_clonal/2, 3)))
             return vaf_clonal
 
     def read_input_file(self, used_columns, dtypes):
-        return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, usecols=used_columns, dtype=dtypes)
+        df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, usecols=used_columns, dtype=dtypes)
+        df = df.dropna(subset=["{} MT IC50 Score".format(self.mt_top_score_metric)]).reset_index()
+        df = df.astype({"{} MT IC50 Score".format(self.mt_top_score_metric):'float'})
+        return df
 
     def get_sub_df(self, all_epitopes_df, key):
         key_str = "{}-{}-{}-{}-{}".format(key[0], key[1], key[2], key[3], key[4])
@@ -364,11 +355,14 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             anchor_residue_pass_df = prob_pos_df
 
         #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
-        anchor_residue_pass_df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "Transcript Length".format(self.wt_top_score_metric)], inplace=True, ascending=[True, True, False])
+        anchor_residue_pass_df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "Transcript Length"], inplace=True, ascending=[True, True, False])
         return anchor_residue_pass_df.iloc[0].to_dict()
 
     def is_anchor_residue_pass(self, mutation):
-        binding_threshold = self.binding_thresholds[mutation['HLA Allele']]
+        if self.use_allele_specific_binding_thresholds and mutation['HLA Allele'] in self.allele_specific_binding_thresholds:
+            binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
+        else:
+            binding_threshold = self.binding_threshold
 
         anchor_residue_pass = True
         anchors = self.get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']))
@@ -396,7 +390,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             total_prob = 0
             for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
                 total_prob += float(prob)
-                positions.append(pos)
+                positions.append(int(pos))
                 if total_prob > self.anchor_contribution_threshold:
                     return positions
 
@@ -405,7 +399,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
-        binding_threshold = self.binding_thresholds[mutation['HLA Allele']]
+        if self.use_allele_specific_binding_thresholds and mutation['HLA Allele'] in self.allele_specific_binding_thresholds:
+            binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
+        else:
+            binding_threshold = self.binding_threshold
 
         anchor_residue_pass = self.is_anchor_residue_pass(mutation)
 
@@ -492,11 +489,14 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return "Poor"
 
     def get_good_binders(self, df):
-        if self.allele_specific_binding_thresholds:
+        if self.use_allele_specific_binding_thresholds:
             selection = []
             for index, row in df.iterrows():
-                threshold = self.binding_thresholds[row['HLA Allele']]
-                if row["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold:
+                if row['HLA Allele'] in self.allele_specific_binding_thresholds:
+                    binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
+                else:
+                    binding_threshold = self.binding_threshold
+                if row["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold:
                     selection.append(index)
             return df[df.index.isin(selection)]
         else:
@@ -542,7 +542,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         for index, line in good_binders_peptide_annotation.to_dict(orient='index').items():
                             ic50s[line['HLA Allele']] = line['{} {} IC50 Score'.format(top_score_metric, peptide_type)]
                             percentiles[line['HLA Allele']] = line['{} {} Percentile'.format(top_score_metric, peptide_type)]
-                            ic50_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
+                            ic50_calls[line['HLA Allele']] = [line["{} {} IC50 Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
                             percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
                             el_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in el_algorithms]
                             el_percentile_calls[line['HLA Allele']] = ['NA' if algorithm == 'MHCflurryEL Processing' else line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in el_algorithms]
@@ -748,7 +748,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         self.output_file = output_file
         self.binding_threshold = binding_threshold
         self.percentile_threshold = percentile_threshold
-        self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         if top_score_metric == 'median':
             self.top_score_metric = "Median"
@@ -758,16 +758,18 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         super().__init__()
 
 
-    def get_list_unique_mutation_keys(self):
-        key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=["Mutation"], dtype={"Mutation": str})
-        keys = key_df["Mutation"].values.tolist()
+    def get_list_unique_mutation_keys(self, df):
+        keys = df["Mutation"].values.tolist()
         return sorted(list(set(keys)))
 
     def calculate_clonal_vaf(self):
         return None
 
     def read_input_file(self, used_columns, dtypes):
-        return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Mutation": str})
+        df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Mutation": str})
+        df = df[df["{} IC50 Score".format(self.top_score_metric)] != 'NA']
+        df = df.astype({"{} IC50 Score".format(self.top_score_metric):'float'})
+        return df
 
     def get_sub_df(self, all_epitopes_df, key):
         df = (all_epitopes_df[lambda x: (x['Mutation'] == key)]).copy()
@@ -778,11 +780,14 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return df.iloc[0]
 
     def get_good_binders(self, df):
-        if self.allele_specific_binding_thresholds:
+        if self.use_allele_specific_binding_thresholds:
             selection = []
             for index, row in df.iterrows():
-                threshold = self.binding_thresholds[row['HLA Allele']]
-                if row["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold:
+                if row['HLA Allele'] in self.allele_specific_binding_thresholds:
+                    binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
+                else:
+                    binding_threshold = self.binding_threshold
+                if row["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
                     selection.append(index)
             return df[df.index.isin(selection)]
         else:
@@ -874,9 +879,8 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         return out_dict
 
     def get_tier(self, mutation, vaf_clonal):
-        if self.allele_specific_binding_thresholds:
-            threshold = PredictionClass.cutoff_for_allele(mutation['HLA Allele'])
-            binding_threshold = self.binding_threshold if threshold is None else float(threshold)
+        if self.use_allele_specific_binding_thresholds and mutation['HLA Allele'] in self.allele_specific_binding_thresholds:
+            binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
         else:
             binding_threshold = self.binding_threshold
 
@@ -939,9 +943,8 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         return out_dict
 
     def get_tier(self, mutation, vaf_clonal):
-        if self.allele_specific_binding_thresholds:
-            threshold = PredictionClass.cutoff_for_allele(mutation['HLA Allele'])
-            binding_threshold = self.binding_threshold if threshold is None else float(threshold)
+        if self.use_allele_specific_binding_thresholds and mutation['HLA Allele'] in self.allele_specific_binding_thresholds:
+            binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
         else:
             binding_threshold = self.binding_threshold
 
