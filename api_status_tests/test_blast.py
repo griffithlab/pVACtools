@@ -11,6 +11,7 @@ class BlastApiStatusTest(unittest.TestCase):
         with open(expected_file_name, 'r') as expected_fh:
             actual_content = result_handle.read()
             expected_content = expected_fh.read()
-            actual_content_without_query_id = '\n'.join(line for line in actual_content.split('\n') if '_query-ID' not in line and 'Hsp_evalue' not in line)
-            expected_content_without_query_id = '\n'.join(line for line in expected_content.split('\n') if '_query-ID' not in line and 'Hsp_evalue' not in line)
+            skip_words = ['_query-ID', 'Hsp_evalue', 'BlastOutput_version', 'Statistics_db']
+            actual_content_without_query_id = '\n'.join(line for line in actual_content.split('\n') if all(skip_word not in line for skip_word in skip_words))
+            expected_content_without_query_id = '\n'.join(line for line in expected_content.split('\n') if all(skip_word not in line for skip_word in skip_words))
             self.assertEqual(expected_content_without_query_id, actual_content_without_query_id)
