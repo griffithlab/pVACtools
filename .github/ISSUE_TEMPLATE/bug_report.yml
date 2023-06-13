@@ -1,0 +1,57 @@
+name: Bug Report
+description: Create a report to help us fix an error you are encountering
+title: "[Bug report title]"
+labels: ["bug report / hotfix PR"]
+
+body:
+  - type: dropdown
+    attributes:
+      label: Installation Type
+      description: Are you running pVACtools standalone or using a Docker container?
+      multiple: false
+      options:
+        - Standalone 
+        - Docker
+    validations:
+      required: true
+  - type: input
+    attribute:
+      label: pVACtools Version / Docker Image
+      description: If you're running pVACtools standalone, which version do you have installed? If you are using Docker, which Docker container are you using?
+    validations:
+      required: true
+  - type: input
+    attribute:
+      label: Python Version
+      description: If you're running pVACtools standalone, which Python version are you using?
+  - type: input
+    attribute:
+      label: Operating System
+      description: If you're running pVACtools standalone, what operating system are you running on?
+  - type: textarea
+    attribute:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    attribute:
+      label: How to reproduce this bug
+      description: What is the pVACtools command you ran?
+      render: Shell
+    validations:
+      required: true
+  - type: textarea
+    attribute:
+      label: Input files
+      description: Please attach any input files that can be used to reproduce this problem.
+  - type: textarea
+    attribute:
+      label: Log output
+      description: The log that gets written to standard out
+    validations:
+      required: true
+  - type: textarea
+    attribute:
+      label: Output files
+      description: If your bug is related to the contents of an output file, please attach the output file(s) here.
