@@ -248,60 +248,9 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - The % rank stability of the pMHC-I complex
    * - ``NetMHCstab allele`` (optional)
      - Nearest neighbor to the ``HLA Allele``. Used for NetMHCstab prediction
-   * - ``Reference Match`` (T/F) (optional)
-     - Was there a BLAST or reference fasta match of the mutated peptide sequence to the
-       reference proteome?
 
 .. image:: ../images/output_file_columns.png
     :alt: pVACseq ouput file columns illustration
-
-.. _reference_matches:
-
-filtered.tsv.reference_matches Report Columns
----------------------------------------------
-
-This file is only generated when the ``--run-reference-proteome-similarity``
-option is chosen.
-
-.. flat-table::
-   :header-rows: 1
-
-   * - Column Name
-     - Description (BLAST)
-     - Description (reference fasta)
-   * - ``Chromosome``
-     - :cspan:`2` The chromosome of this variant
-   * - ``Start``
-     - :cspan:`2` The start position of this variant in the zero-based, half-open coordinate system
-   * - ``Stop``
-     - :cspan:`2` The stop position of this variant in the zero-based, half-open coordinate system
-   * - ``Reference``
-     - :cspan:`2` The reference allele
-   * - ``Variant``
-     - :cspan:`2` The alt allele
-   * - ``Transcript``
-     - :cspan:`2` The Ensembl ID of the affected transcript
-   * - ``MT Epitope Seq``
-     - :cspan:`2` The mutant peptide sequence for the epitope candidate
-   * - ``Peptide``
-     - The peptide sequence submitted to BLAST
-     - The peptide sequence to search for in the reference proteome
-   * - ``Hit ID``
-     - The BLAST alignment hit ID (reference proteome sequence ID)
-     - The FASTA header ID of the entry where the match was made
-   * - ``Hit Definition``
-     - The BLAST alignment hit definition (reference proteome sequence name)
-     - The FASTA header description of the entry where the match was made
-   * - ``Match Window``
-     - :cspan:`2` The substring of the ``Peptide`` that was found in the ``Match
-       Sequence``
-   * - ``Match Sequence``
-     - The BLAST match sequence
-     - The FASTA sequence of the entry where the match was made
-   * - ``Match Start``
-     - :cspan:`2` The match start position of the ``Match Window`` in the ``Match Sequence``
-   * - ``Match Stop``
-     - :cspan:`2` The match stop position of the ``Match Window`` in the ``Match Sequence``
 
 .. _aggregated:
 
@@ -359,7 +308,7 @@ Whether the median or the lowest binding affinity metrics are output in the ``IC
        start of the mutation is before the epitope (as can occur downstream of frameshift mutations)
    * - ``Prob Pos``
      - A list of positions in the Best Peptide that are problematic.
-       Determined only if the ``--problematic-pos`` parameter was set during
+       ``None`` if the ``--problematic-pos`` parameter was not set during
        the pVACseq run
    * - ``Num Passing Peptides``
      - The number of unique well-binding peptides for this mutation.
@@ -384,8 +333,7 @@ Whether the median or the lowest binding affinity metrics are output in the ``IC
    * - ``Tier``
      - A tier suggesting the suitability of variants for use in vaccines.
    * - ``Ref Match`` (T/F) (optional)
-     - Was there a BLAST or reference fasta match of the mutated peptide sequence to the
-       reference proteome?
+     - Was there a match of the mutated peptide sequence to the reference proteome?
    * - ``Evaluation``
      - Column to store the evaluation of each variant when evaluating the run in pVACview. Either ``Accept``, ``Reject``, or ``Review``.
 
@@ -516,3 +464,52 @@ Criteria Details
    * - Anchor Criteria
      - Fail if all mutated amino acids of the Best Peptide (``Pos``) are at an anchor position and the WT peptide has good binding ``(IC50 WT < binding_threshold)``
      -
+
+.. _reference_matches:
+
+aggregated.tsv.reference_matches Report Columns
+-----------------------------------------------
+
+This file is only generated when the ``--run-reference-proteome-similarity``
+option is chosen.
+
+.. flat-table::
+   :header-rows: 1
+
+   * - Column Name
+     - Description (BLAST)
+     - Description (reference fasta)
+   * - ``Chromosome``
+     - :cspan:`2` The chromosome of this variant
+   * - ``Start``
+     - :cspan:`2` The start position of this variant in the zero-based, half-open coordinate system
+   * - ``Stop``
+     - :cspan:`2` The stop position of this variant in the zero-based, half-open coordinate system
+   * - ``Reference``
+     - :cspan:`2` The reference allele
+   * - ``Variant``
+     - :cspan:`2` The alt allele
+   * - ``Transcript``
+     - :cspan:`2` The Ensembl ID of the affected transcript
+   * - ``MT Epitope Seq``
+     - :cspan:`2` The mutant peptide sequence for the epitope candidate
+   * - ``Peptide``
+     - The peptide sequence submitted to BLAST
+     - The peptide sequence to search for in the reference proteome
+   * - ``Hit ID``
+     - The BLAST alignment hit ID (reference proteome sequence ID)
+     - The FASTA header ID of the entry where the match was made
+   * - ``Hit Definition``
+     - The BLAST alignment hit definition (reference proteome sequence name)
+     - The FASTA header description of the entry where the match was made
+   * - ``Match Window``
+     - :cspan:`2` The substring of the ``Peptide`` that was found in the ``Match
+       Sequence``
+   * - ``Match Sequence``
+     - The BLAST match sequence
+     - The FASTA sequence of the entry where the match was made
+   * - ``Match Start``
+     - :cspan:`2` The match start position of the ``Match Window`` in the ``Match Sequence``
+   * - ``Match Stop``
+     - :cspan:`2` The match stop position of the ``Match Window`` in the ``Match Sequence``
+

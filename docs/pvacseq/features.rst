@@ -41,7 +41,11 @@ binding prediction tools.
 
 **MHC Class I and Class II predictions**
 
-Both MHC Class I and Class II predictions are supported. Simply choose the desired prediction algorithms and HLA alleles during processing and Class I and Class II prediction results will be written to their own respective subdirectories in your output directory. pVACseq supports binding affinity algorithms as well as elution algortihms.
+Both MHC Class I and Class II predictions are supported. Simply choose the desired
+prediction algorithms and HLA alleles during processing and Class I and Class II
+prediction results will be written to their own respective subdirectories in your
+output directory. pVACseq supports binding affinity algorithms as well as elution
+algortihms.
 
 By using the IEDB RESTful web interface, pVACseq leverages their extensive support of different prediction algorithms.
 
