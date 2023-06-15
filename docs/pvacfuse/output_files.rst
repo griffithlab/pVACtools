@@ -183,7 +183,7 @@ all_epitopes.aggregated.tsv Report Columns
 --------------------------------------------
 
 The ``all_epitopes.aggregated.tsv`` file is an aggregated version of the all_epitopes TSV.
-It shows the :ref:`best-scoring epitope <pvacfuse_best_peptide>`
+It shows the best-scoring epitope
 for each variant, and outputs additional binding affinity, expression, and
 coverage information for that epitope. It also gives information about the
 total number of well-scoring epitopes for each variant as well as the HLA alleles that those
@@ -212,9 +212,9 @@ Whether the median or the lowest binding affinity metrics are output in the
    * - ``Gene``
      - The Ensembl gene names of the affected genes
    * - ``Best Peptide``
-     - The best-binding epitope sequence (see Best Peptide Criteria below for more details on how this is determined)
+     - The best-binding epitope sequence (lowest ``IC50 MT`` score)
    * - ``Best Transcript``
-     - The best transcripts of all fusion transcripts coding for the Best Peptide (see Best Peptide Criteria below for more details on how this is determined)
+     - The fusion transcripts coding for the Best Peptide
    * - ``Allele``
      - The Allele that the Best Peptide is binding to
    * - ``Prob Pos``
@@ -222,9 +222,9 @@ Whether the median or the lowest binding affinity metrics are output in the
    * - ``Num Passing Peptides``
      - The number of unique well-binding peptides for this fusion
    * - ``IC50 MT``
-     - Median IC50 binding affinity of the best-binding epitope across all prediction algorithms used
+     - Median or lowest IC50 binding affinity of the best-binding epitope across all prediction algorithms used
    * - ``%ile MT``
-     - Median binding affinity percentile rank of the best-binding epitope across all prediction algorithms used (those that provide percentile output)
+     - Median or lowest binding affinity percentile rank of the best-binding epitope across all prediction algorithms used (those that provide percentile output)
    * - ``Expr``
      - The number of fusion-supporting RNA-seq fragments as FFPM (fusion fragments per million total reads). ``NA`` if the run was made without a ``--starfusion-file`` input.
    * - ``Read Support``
@@ -236,22 +236,80 @@ Whether the median or the lowest binding affinity metrics are output in the
    * - ``Evaluation``
      - Column to store the evaluation of each fusion. Either ``Accept``, ``Reject``, or ``Review``.
 
-.. _pvacfuse_best_peptide:
+The pVACfuse Aggregate Report Tiers
+___________________________________
 
-Best Peptide Criteria
-_____________________
+Tiering Parameters
+******************
 
-To determine the Best Peptide, all peptides meeting the
-``--aggregate-inclusion-threshold`` are evaluated as follows:
+To tier the Best Peptide, several cutoffs can be adjusted using parameters
+provided to the pVACfuse run:
 
-- Pick all entries with a variant transcript that have a ``protein_coding`` Biotype
-- Of the remaining entries, pick the ones with a variant transcript having
-  a Transcript Support Level <= maximum_transcript_support_level
-- Of the remaining entries, pick the entries with no Problematic Positions
-- Of the remaining entries, pick the ones passing the Anchor Criteria (see
-  Criteria Details section below)
-- Of the remaining entries, pick the one with the lowest median/best MT IC50
-  score, lowest Transcript Support Level, and longest transcript.
+.. list-table::
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Default
+   * - ``--binding-threshold``
+     - The threshold used for filtering epitopes on the IC50 MT binding affinity.
+     - 500
+   * - ``--allele-specific-binding-thresholds``
+     - Instead of the hard cutoff set by the ``--binding-threshold``, use
+       allele-specific binding thresholds. For alleles where no
+       allele-specific binding threshold is available, use the
+       ``--binding-threshold`` as a fallback. To print a list of alleles that have
+       specific binding thresholds and the value of those thresholds, run ``pvacfuse allele_specific_cutoffs``.
+     - False
+   * - ``--percentile-threshold``
+     - When set, use this threshold to filter epitopes on the %ile MT score in addition to having to meet the binding threshold.
+     - None
+   * - ``--read-support``
+     - The threshold used for filtering epitopes on the Read Support.
+     - 5
+   * - ``--expn-val``
+     - The threshold used for filtering epitopes on the Expr.
+     - 0.1
+
+Tiers
+*****
+
+Given the thresholds provided above, the Best Peptide is evaluated and binned
+into tiers as follows:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Tier
+     - Criteria
+   * - ``Pass``
+     - Best Peptide passes the binding, read support, and expression criteria
+   * - ``LowReadSupport``
+     - Best Peptide fails the read support criteria but passes the binding and
+       expression criteria
+   * - ``LowExpr``
+     - Best Peptide fails the expression criteria but passes the binding and
+       read support criteria
+   * - ``Poor``
+     - Best Peptide doesn't fit any of the above tiers, usually if it fails two
+       or more criteria or if it fails the binding criteria
+
+Criteria Details
+****************
+
+.. list-table::
+
+   * - Binding Criteria
+     - Pass if Best Peptide is strong binder
+     - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
+       (if ``--percentile-threshold`` parameter is set)
+   * - Read Support Criteria
+     - Pass if the variant has read support
+     - ``Read Support < read_support``
+   * - Expression Criteria
+     - Pass if Best Transcript is expressed
+     - ``Expr < expn_val``
+
 
 .. _pvacfuse_reference_matches:
 

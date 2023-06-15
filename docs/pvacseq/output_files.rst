@@ -367,11 +367,11 @@ To tier the Best Peptide, several cutoffs can be adjusted using arguments provid
 .. list-table::
    :header-rows: 1
 
-   * - Parameters
+   * - Parameter
      - Description
      - Default
    * - ``--binding-threshold``
-     - Tier epitopes in the "Pass" tier when the mutant allele has a IC50 MT binding affinity below this value.
+     - The threshold used for filtering epitopes on the IC50 MT binding affinity.
      - 500
    * - ``--allele-specific-binding-thresholds``
      - Instead of the hard cutoff set by the ``--binding-threshold``, use
@@ -381,7 +381,7 @@ To tier the Best Peptide, several cutoffs can be adjusted using arguments provid
        specific binding thresholds and the value of those thresholds, run ``pvacseq allele_specific_cutoffs``.
      - False
    * - ``--percentile-threshold``
-     - When set, tier epitopes in the "Pass" tier when the mutant allele has a %ile MT score below the set value in addition to having to meet the binding threshold.
+     - When set, use this threshold to filter epitopes on the %ile MT score in addition to having to meet the binding threshold.
      - None
    * - ``--tumor-purity``
      - Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used for a simple estimation of
