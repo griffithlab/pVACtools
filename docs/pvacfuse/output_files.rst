@@ -90,10 +90,6 @@ _______________________________________________
 all_epitopes.tsv and filtered.tsv Report Columns
 ------------------------------------------------
 
-In order to keep the outputs consistent, pVACfuse uses the same output columns
-as pVACseq but some of the values will be ``NA`` if a column doesn't apply to
-pVACfuse.
-
 .. list-table::
    :header-rows: 1
 
@@ -133,7 +129,7 @@ pVACfuse.
      - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
    * - ``Individual Prediction Algorithm Scores and Percentiles`` (multiple)
      - ic50 binding affintity and percentile ranks for the ``Epitope Seq`` for the individual prediction algorithms used
-   * - ``MHCflurryEL Processing Scores and Presentation Scores and Percentiles`` (optional)
+   * - ``MHCflurryEL Processing Score and Presentation Score and Percentile`` (optional)
      - MHCflurry elution processing score and presentation score and percentiles
        for the ``Epitope Seq`` if the run included
        MHCflurryEL as one of the prediction algorithms
@@ -143,7 +139,7 @@ pVACfuse.
        ``--starfusion-file`` input.
    * - ``Expression``
      - The number of fusion-supporting RNA-seq fragments as FFPM (fusion fragments per million total reads). ``NA`` if the run was made
-       wihtout a ``--starfusion-file`` input.
+       without a ``--starfusion-file`` input.
    * - ``Problematic Positions`` (optional)
      - A list of positions in the ``Epitope Seq`` that match the
        problematic amino acids defined by the ``--problematic-amino-acids``
@@ -180,49 +176,6 @@ pVACfuse.
      - The % rank stability of the pMHC-I complex
    * - ``NetMHCstab allele`` (optional)
      - Nearest neighbor to the ``HLA Allele``. Used for NetMHCstab prediction
-   * - ``Reference Match`` (T/F) (optional)
-     - Was there a BLAST match of the mutated peptide sequence to the
-       reference proteome?
-
-.. _pvacfuse_reference_matches:
-
-filtered.tsv.reference_matches Report Columns
----------------------------------------------
-
-This file is only generated when the ``--run-reference-proteome-similarity``
-option is chosen.
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column Name
-     - Description
-   * - ``Chromosome``
-     - The chromosome of this variant
-   * - ``Start``
-     - The start position of this variant in the zero-based, half-open coordinate system
-   * - ``Stop``
-     - The stop position of this variant in the zero-based, half-open coordinate system
-   * - ``Reference``
-     - The reference allele
-   * - ``Variant``
-     - The alt allele
-   * - ``Transcript``
-     - The Ensembl ID of the affected transcript
-   * - ``Peptide``
-     - The peptide sequence submitted to BLAST
-   * - ``Hit ID``
-     - The BLAST alignment hit ID (reference proteome sequence ID)
-   * - ``Hit Definition``
-     - The BLAST alignment hit definition (reference proteome sequence name)
-   * - ``Query Sequence``
-     - The BLAST query sequence
-   * - ``Match Sequence``
-     - The BLAST match sequence
-   * - ``Match Start``
-     - The match start position in the matched reference proteome sequence
-   * - ``Match Stop``
-     - The match stop position in the matched reference proteome sequence
 
 .. _pvacfuse_aggregated:
 
@@ -230,13 +183,21 @@ all_epitopes.aggregated.tsv Report Columns
 --------------------------------------------
 
 The ``all_epitopes.aggregated.tsv`` file is an aggregated version of the all_epitopes TSV.
-Like the all_epitopes.tsv and filtered.tsv reports, in order to keep the outputs consistent,
-pVACfuse uses the same output columns as pVACseq for this file but some of the values will
-be ``NA`` if a column doesn't apply to pVACfuse.
-This report presents the best-scoring (lowest binding affinity)
-epitope for each variant and outputs additional binding affinity for that epitope.
-It also gives information about the total number of well-scoring epitopes for each variant,
-as well as the HLA alleles that those epitopes are well-binding to.
+It shows the :ref:`best-scoring epitope <pvacfuse_best_peptide>`
+for each variant, and outputs additional binding affinity, expression, and
+coverage information for that epitope. It also gives information about the
+total number of well-scoring epitopes for each variant as well as the HLA alleles that those
+epitopes are well-binding to. Lastly, the report will bin variants into tiers
+that offer suggestions as to the suitability of variants for use in vaccines.
+Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
+Whether the median or the lowest binding affinity metrics are output in the ``IC50 MT``,
+``IC50 WT``, ``%ile MT``, and ``%ile WT`` columns is controlled by the
+``--top-score-metric`` parameter.
+
+Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
+Whether the median or the lowest binding affinity metrics are output in the
+``IC50 MT`` and ``%ile MT`` columns is controlled by the
+``--top-score-metric`` parameter.
 
 .. list-table::
    :header-rows: 1
@@ -250,35 +211,93 @@ as well as the HLA alleles that those epitopes are well-binding to.
        to the HLA allele (with median binding affinity < 1000)
    * - ``Gene``
      - The Ensembl gene names of the affected genes
-   * - ``AA Change``
-     - ``NA``
-   * - ``Num Passing Transcripts``
-     - ``NA``
    * - ``Best Peptide``
-     - The best-binding epitope sequence (lowest median binding affinity)
-   * - ``Pos``
-     - ``NA``
+     - The best-binding epitope sequence (see Best Peptide Criteria below for more details on how this is determined)
+   * - ``Best Transcript``
+     - The best transcripts of all fusion transcripts coding for the Best Peptide (see Best Peptide Criteria below for more details on how this is determined)
+   * - ``Allele``
+     - The Allele that the Best Peptide is binding to
+   * - ``Prob Pos``
+     - A list of positions in the Best Peptide that are problematic. None if the --problematic-pos parameter was not set during the pVACfuse run
    * - ``Num Passing Peptides``
      - The number of unique well-binding peptides for this fusion
    * - ``IC50 MT``
      - Median IC50 binding affinity of the best-binding epitope across all prediction algorithms used
-   * - ``IC50 WT``
-     - ``NA``
    * - ``%ile MT``
      - Median binding affinity percentile rank of the best-binding epitope across all prediction algorithms used (those that provide percentile output)
-   * - ``%ile WT``
-     - ``NA``
-   * - ``RNA Expr``
-     - ``NA``
-   * - ``RNA VAF``
-     - ``NA``
-   * - ``Allele Expr``
-     - ``NA``
-   * - ``RNA Depth``
-     - ``NA``
-   * - ``DNA VAF``
-     - ``NA``
+   * - ``Expr``
+     - The number of fusion-supporting RNA-seq fragments as FFPM (fusion fragments per million total reads). ``NA`` if the run was made without a ``--starfusion-file`` input.
+   * - ``Read Support``
+     - The sum of spanning and encompassing reads over the fusion position. ``NA`` if the run was made with AGFusion data and without a ``--starfusion-file`` input.
    * - ``Tier``
-     - ``NA``
+     - A tier suggesting the suitability of variants for use in vaccines.
+   * - ``Ref Match`` (T/F) (optional)
+     - Was there a match of the peptide sequence to the reference proteome?
    * - ``Evaluation``
      - Column to store the evaluation of each fusion. Either ``Accept``, ``Reject``, or ``Review``.
+
+.. _pvacfuse_best_peptide:
+
+Best Peptide Criteria
+_____________________
+
+To determine the Best Peptide, all peptides meeting the
+``--aggregate-inclusion-threshold`` are evaluated as follows:
+
+- Pick all entries with a variant transcript that have a ``protein_coding`` Biotype
+- Of the remaining entries, pick the ones with a variant transcript having
+  a Transcript Support Level <= maximum_transcript_support_level
+- Of the remaining entries, pick the entries with no Problematic Positions
+- Of the remaining entries, pick the ones passing the Anchor Criteria (see
+  Criteria Details section below)
+- Of the remaining entries, pick the one with the lowest median/best MT IC50
+  score, lowest Transcript Support Level, and longest transcript.
+
+.. _pvacfuse_reference_matches:
+
+aggregated.tsv.reference_matches Report Columns
+-----------------------------------------------
+
+This file is only generated when the ``--run-reference-proteome-similarity``
+option is chosen.
+
+.. flat-table::
+   :header-rows: 1
+
+   * - Column Name
+     - Description (BLAST)
+     - Description (reference fasta)
+   * - ``Chromosome``
+     - :cspan:`2` The chromosome of this variant
+   * - ``Start``
+     - :cspan:`2` The start position of this variant in the zero-based, half-open coordinate system
+   * - ``Stop``
+     - :cspan:`2` The stop position of this variant in the zero-based, half-open coordinate system
+   * - ``Reference``
+     - :cspan:`2` The reference allele
+   * - ``Variant``
+     - :cspan:`2` The alt allele
+   * - ``Transcript``
+     - :cspan:`2` The Ensembl ID of the affected transcript
+   * - ``MT Epitope Seq``
+     - :cspan:`2` The mutant peptide sequence for the epitope candidate
+   * - ``Peptide``
+     - The peptide sequence submitted to BLAST
+     - The peptide sequence to search for in the reference proteome
+   * - ``Hit ID``
+     - The BLAST alignment hit ID (reference proteome sequence ID)
+     - The FASTA header ID of the entry where the match was made
+   * - ``Hit Definition``
+     - The BLAST alignment hit definition (reference proteome sequence name)
+     - The FASTA header description of the entry where the match was made
+   * - ``Match Window``
+     - :cspan:`2` The substring of the ``Peptide`` that was found in the ``Match
+       Sequence``
+   * - ``Match Sequence``
+     - The BLAST match sequence
+     - The FASTA sequence of the entry where the match was made
+   * - ``Match Start``
+     - :cspan:`2` The match start position of the ``Match Window`` in the ``Match Sequence``
+   * - ``Match Stop``
+     - :cspan:`2` The match stop position of the ``Match Window`` in the ``Match Sequence``
+
