@@ -51,35 +51,55 @@ Contents
    contact
    mailing_list
 
-New in Release |release|
-------------------------
-
-This is a bugfix release. It fixes the following problem(s):
-
-- It fixes an issue with the reference proteome match step where stop lost
-  mutations would throw a fatal error.
-
 New in Version |version|
 ------------------------
 
-This release adds the following new features:
+This version adds the following features, outlined below. Please note that
+pVACtools 4.0 is not backwards-compatible and certain changes will break old
+workflows.
 
-- When running the pipelines with the ``--netmhc-stab`` flag enabled, the
-  ``NetMHCstab allele`` column now also reports the distance of the
-  NetMHCstabpan allele when that allele is not identical to the ``HLA Allele``
-  of the original result.
-- When running the pipelines with a set of individual class II alleles, the pipeline now
-  also auto-generates valid combinations of these alleles so that users no
-  longer need to explicitly provide these combinations.
+Breaking Changes
+________________
 
-This release also fixes the following problem(s):
+- pVACseq|pVACfuse|pVACbind report files have been reformatted to add some
+  additional information and, in the case of pVACfuse and pVACbind, remove
+  columns where all values were ``NA``. Existing output files will no longer
+  work with the standalone commands as well as pVACview.
+- The format of the Mutation Position column has been updated to no longer use
+  0 and n+1 to denote mutations starting beofre or ending after the epitope.
+  This column now only shows the acutally mutated positions.
 
-- Some class I alleles are not supported by NetMHCstabpan and will lead to an
-  error when attempt to make predictions with them. This release will skip
-  such alleles for the stability prediction step.
-- For very large result sets the filtering steps would stall or be killed
-  because the steps would run out of memory. This release fixes this issue.
-- This release adds better handling of timeout errors while running
+New Features
+____________
+
+- We now support MHCflurry and NetMHCpanEL elution algorithms.
+- Users are now able to specific amino acids that would be problematic for
+  vaccine manufacturing and have the pipelines mark epitopes with such amnio
+  acids.
+- The aggregate report now takes into account many command line thresholds
+  when tiering candidates. We also refined the way we determine the Best
+  Peptide to take into account the biotype and TSL of the transcripts coding
+  for the peptide, and whether or not the candidate has any problematic
+  positions or fails the anchor criteria. Please see the :ref:`output file
+  section <pvacseq_best_peptide>` of the documentation for more details.
+- pVACview has been updated with a host of new features
+
+  - Users may adjust a wider variety of thresholds for retiering.
+  - Users are now able to reset the tiering thresholds to the ones originally
+    used when running pVACview.
+  - Transcripts resulting in the same set of epitope candidates are now
+    grouped together to make it easier to identify unique candidates.
+  - Elution data is displayed in the epitope details section of pVACview.
+  - Reference match details are displayed in the transcript set details
+    section of pVACview.
+
+- pVACfuse now supports output files from Arriba for fusion peptide
+  predictions.
+- Users may provide an optional STAR-fusion output files to their pVACfuse run
+  in order to extract expression and read support data for their candidates.
+  These will be used for filtering, as well as for tiering in the aggregate
+  report. Please see the :ref:`output file section <pvacfuse_output_files>` of the documention for
+  more details.
 
 Past release notes can be found on our :ref:`releases` page.
 
