@@ -18,7 +18,8 @@ candidates. For example, if pVACfuse was run to predict nonamers (9-mers) that a
 the user wishes to select long peptide (e.g. 24-mer) sequences that contain the nonamer for synthesis
 or encoding in a DNA vector. The fusion position will be centered in the protein sequence returned (if possible).
 If the fusion causes a frameshift, the full downstream protein sequence will be returned unless the user specifies otherwise
-as described above.
+as described above. The ``flanking_sequence_length`` positional parameter
+controls how many amino acids will be included on either side of the mutation.
 
 The output can be limited to only certain variants by providing
 a pVACfuse filtered.tsv report file to the ``--input-tsv`` argument. Only the peptide sequences for the epitopes in the TSV

@@ -65,7 +65,7 @@ If the ``--top-score-metric`` option is set to ``median``, the ``Median Fold Cha
 will be used (``Median WT IC50 Score``/``Median MT IC50 Score``).
 
 In addition to being able to filter on the IC50 score columns, the binding
-filter also offers to ability to filter on the percentile score using the
+filter also offers the ability to filter on the percentile score using the
 ``--percentile-threshold`` parameter. When the ``--top-score-metric`` is set
 to ``lowest``, this threshold is applied to the ``Best MT Percentile`` column. When
 it is set to ``median``, the threshold is applied to the ``Median MT
