@@ -32,14 +32,28 @@ Binding Filter
 
 .. program-output:: pvacbind binding_filter -h
 
-The binding filter removes variants that don't pass the chosen binding threshold.
+The binding filter filters out variants that don't pass the chosen binding threshold.
 The user can chose whether to apply this filter to the ``lowest`` or the ``median`` binding
 affinity score by setting the ``--top-score-metric`` flag. The ``lowest`` binding
-affinity score is recorded in the ``Best MT Score`` column and represents the lowest
+affinity score is recorded in the ``Best IC50 Score`` column and represents the lowest
 ic50 score of all prediction algorithms that were picked during the previous pVACseq run.
-The ``median`` binding affinity score is recorded in the ``Median MT Score`` column and
+The ``median`` binding affinity score is recorded in the ``Median IC50 Score`` column and
 corresponds to the median ic50 score of all prediction algorithms used to create the report.
 Be default, the binding filter runs on the ``median`` binding affinity.
+
+When the ``--allele-specific-binding-thresholds`` flag is set, binding cutoffs specific to each
+prediction's HLA allele are used instead of the value set via the ``--binding-threshold`` parameters.
+For HLA alleles where no allele-specific binding threshold is available, the
+binding threshold is used as a fallback. Alleles with allele-specific
+threshold as well as the value of those thresholds can be printed by executing
+the ``pvacbind allele_specific_cutoffs`` command.
+
+In addition to being able to filter on the IC50 score columns, the binding
+filter also offers the ability to filter on the percentile score using the
+``--percentile-threshold`` parameter. When the ``--top-score-metric`` is set
+to ``lowest``, this threshold is applied to the ``Best Percentile`` column. When
+it is set to ``median``, the threshold is applied to the ``Median
+Percentile`` column.
 
 By default, entries with ``NA`` values will be included in the output. This
 behavior can be turned off by using the ``--exclude-NAs`` flag.

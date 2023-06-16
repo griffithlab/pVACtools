@@ -48,7 +48,7 @@ threshold as well as the value of those thresholds can be printed by executing
 the ``pvacfuse allele_specific_cutoffs`` command.
 
 In addition to being able to filter on the IC50 score columns, the binding
-filter also offers to ability to filter on the percentile score using the
+filter also offers the ability to filter on the percentile score using the
 ``--percentile-threshold`` parameter. When the ``--top-score-metric`` is set
 to ``lowest``, this threshold is applied to the ``Best Percentile`` column. When
 it is set to ``median``, the threshold is applied to the ``Median

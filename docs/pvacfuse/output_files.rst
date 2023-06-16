@@ -189,10 +189,6 @@ coverage information for that epitope. It also gives information about the
 total number of well-scoring epitopes for each variant as well as the HLA alleles that those
 epitopes are well-binding to. Lastly, the report will bin variants into tiers
 that offer suggestions as to the suitability of variants for use in vaccines.
-Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
-Whether the median or the lowest binding affinity metrics are output in the ``IC50 MT``,
-``IC50 WT``, ``%ile MT``, and ``%ile WT`` columns is controlled by the
-``--top-score-metric`` parameter.
 
 Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
 Whether the median or the lowest binding affinity metrics are output in the
@@ -218,7 +214,7 @@ Whether the median or the lowest binding affinity metrics are output in the
    * - ``Allele``
      - The Allele that the Best Peptide is binding to
    * - ``Prob Pos``
-     - A list of positions in the Best Peptide that are problematic. None if the --problematic-pos parameter was not set during the pVACfuse run
+     - A list of positions in the Best Peptide that are problematic. ``None`` if the ``--problematic-pos`` parameter was not set during the pVACfuse run
    * - ``Num Passing Peptides``
      - The number of unique well-binding peptides for this fusion
    * - ``IC50 MT``
