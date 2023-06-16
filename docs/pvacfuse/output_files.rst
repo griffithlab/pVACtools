@@ -2,6 +2,8 @@
     :align: right
     :alt: pVACfuse logo
 
+.. _pvacfuse_output_files:
+
 Output Files
 ============
 
