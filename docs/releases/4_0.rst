@@ -13,15 +13,15 @@ ________________
   columns where all values were ``NA``. Existing output files will no longer
   work with the standalone commands as well as pVACview.
 - The format of the Mutation Position column has been updated to no longer use
-  0 and n+1 to denote mutations starting beofre or ending after the epitope.
-  This column now only shows the acutally mutated positions.
+  0 and n+1 to denote mutations starting before or ending after the epitope.
+  This column now only shows the actually mutated positions.
 
 New Features
 ____________
 
 - We now support MHCflurry and NetMHCpanEL elution algorithms.
-- Users are now able to specific amino acids that would be problematic for
-  vaccine manufacturing and have the pipelines mark epitopes with such amnio
+- Users are now able to select specific amino acids that would be problematic for
+  vaccine manufacturing and have the pipelines mark epitopes with such amino
   acids.
 - The aggregate report now takes into account many command line thresholds
   when tiering candidates. We also refined the way we determine the Best
@@ -42,7 +42,7 @@ ____________
 
 - pVACfuse now supports output files from Arriba for fusion peptide
   predictions.
-- Users may provide an optional STAR-fusion output files to their pVACfuse run
+- Users may provide an optional STAR-fusion output file to their pVACfuse run
   in order to extract expression and read support data for their candidates.
   These will be used for filtering, as well as for tiering in the aggregate
   report. Please see the :ref:`output file section <pvacfuse_output_files>` of the documention for
