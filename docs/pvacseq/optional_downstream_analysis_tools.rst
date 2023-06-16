@@ -69,8 +69,8 @@ considered a hit. This tool also requires the user to provide a filtered.tsv,
 all_epitopes.tsv or aggregated.tsv pVACseq report file as an input and any
 candidates in this input file will be searched for.
 
-This tool may be either run with BLASTp using either the ``refseq_select_prot`` or ``refseq_protein``. Users are
-required to :ref:`independently install BLASTp <blast>`. Alternatively, users
+This tool may be either run with BLASTp using either the ``refseq_select_prot`` or ``refseq_protein`` database.
+By default this option uses the BLAST API but users may :ref:`independently install BLASTp <blast>`. Alternatively, users
 may provide a reference proteome fasta file and this tool will string match on
 the entries of this fasta file directly. This approach is recommended, because
 it is significantly faster than BLASTp. Reference proteome fasta files may be
