@@ -50,6 +50,6 @@ To the right of the additional information box, we provide a graphical guide reg
 
 :bold:`I'm getting an error for the anchor heatmap tab saying "Error:polygon edge not found", what do I do?`
 
-Users have occasionally ran into the problem where their anchor heatmap does not display and instead shows an error saying "polygon edge not found". After investigation
+Users have occasionally run into the problem where their anchor heatmap does not display and instead shows an error saying "polygon edge not found". After investigation
 we believe this may be related to your arial font file. This stackoverflow page describes the detailed steps to resolving this issue:
 `https://stackoverflow.com/questions/10581440/error-in-grid-calll-textbounds-as-graphicsannotxlabel-xx-xy-polygon <https://stackoverflow.com/questions/10581440/error-in-grid-calll-textbounds-as-graphicsannotxlabel-xx-xy-polygon>`_ .

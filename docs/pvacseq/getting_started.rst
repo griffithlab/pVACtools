@@ -13,12 +13,13 @@ The example data output can be reproduced by running the following command:
 
    pvacseq run \
    <example_data_dir>/input.vcf \
-   Test \
-   HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
+   HCC1395_TUMOR_DNA \
+   HLA-A*29:02,HLA-B*45:01,DRB1*04:05 \
    all \
    <output_dir> \
    -e1 8,9,10 \
-   -e2 15
+   -e2 15 \
+   --normal-sample-name HCC1395_NORMAL_DNA
 
 A detailed description of all command options can be found on the :ref:`Usage <pvacseq_run>` page.
 
