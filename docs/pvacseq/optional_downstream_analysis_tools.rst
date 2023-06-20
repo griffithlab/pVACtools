@@ -40,7 +40,9 @@ The output can be further limited to only certain variants by providing
 a pVACseq report file to the ``--input-tsv`` argument. Only the peptide sequences for the epitopes in the TSV
 will be used when creating the FASTA. If this argument is an aggregated TSV
 file, use the ``--aggregate-report-evaluation`` parameter to only include
-peptide sequences for epitopes matching the chosen Evaluation(s).
+peptide sequences for epitopes matching the chosen Evaluation(s). This is
+useful when creating a peptide fasta for vaccine ordering after using pVACview
+to select vaccine candidates and exporting the results to a new TSV.
 
 Generate Aggregated Report
 --------------------------
