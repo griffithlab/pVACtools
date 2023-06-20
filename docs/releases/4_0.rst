@@ -23,6 +23,9 @@ ____________
 - Users are now able to select specific amino acids that would be problematic for
   vaccine manufacturing and have the pipelines mark epitopes with such amino
   acids.
+- When running the reference proteome similarity step, users are now able to
+  specify a peptide fasta to search against instead of using BLAST. Any exact
+  matches against the entries in the peptide fasta are counted as a hit.
 - The aggregate report now takes into account many command line thresholds
   when tiering candidates. We also refined the way we determine the Best
   Peptide to take into account the biotype and TSL of the transcripts coding
@@ -47,4 +50,15 @@ ____________
   These will be used for filtering, as well as for tiering in the aggregate
   report. Please see the :ref:`output file section <pvacfuse_output_files>` of the documention for
   more details.
+- When running the ``pvacseq generate_protein_fasta`` command, users are now
+  able to specify an aggregated report as the ``--input-tsv``. When using such
+  a TSV, they can also use the ``--aggregate-report-evaluation`` to specify
+  Evaluation statuses to include in the protein fasta. This is useful when creating
+  a peptide fasta for vaccine ordering after using pVACview
+  to select vaccine candidates and exporting the results to a new TSV.
 
+Minor Changes
+_____________
+
+- The reference proteome step is now run on the aggregated report instead of
+  the filtered report.
