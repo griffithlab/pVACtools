@@ -115,6 +115,8 @@ _____________
 
 - The reference proteome step is now run on the aggregated report instead of
   the filtered report.
+- A new parameter ``--aggregate-inclusion-binding-threshold`` controls which
+  epitope candidates are included in the aggregate report.
 
 Past release notes can be found on our :ref:`releases` page.
 
