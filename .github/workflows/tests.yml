@@ -34,6 +34,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install polars==0.16.18
+          pip install pypandoc==1.7.2
           pip install -e .
           mhcflurry-downloads fetch
       - name: List installed packages
