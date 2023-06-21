@@ -8,9 +8,12 @@ if (sys.version_info.major, sys.version_info.minor) < (3,7):
     print("pVACtools requires python 3.7 or greater")
     sys.exit(1)
 
-import pypandoc
-pypandoc.download_pandoc()
-long_description = pypandoc.convert_file('README.md', 'rst')
+try:
+    import pypandoc
+    pypandoc.download_pandoc()
+    long_description = pypandoc.convert_file('README.md', 'rst')
+except:
+    long_description = ""
 
 pvacseq_data_files = []
 for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/example_data"):
