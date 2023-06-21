@@ -58,3 +58,37 @@ filtered output TSV when specified.  This tool provides a way to manually run th
 filtered/all_epitopes TSV files so that you can add this information when not present if desired.
 You can view more about these columns for pVACbind in
 the :ref:`output file documentation <pvacbind_all_ep_and_filtered>`.
+
+Identify Problematic Amino Acids
+--------------------------------
+
+.. program-output:: pvacbind identify_problematic_amino_acids -h
+
+This tool is used to identify positions in an epitope with an amino acid that
+is problematic for downstream processing, e.g. vaccine manufacturing. Since
+this can differ from case to case, this tool requires the user to specify which
+amino acid(s) to consider problematic. This can be specified in one of three
+formats:
+
+.. list-table::
+
+ * - ``amino_acid(s)``
+   - One or more one-letter amino acid codes. Any occurrence of this amino acid string,
+     regardless of the position in the epitope, is problematic. When specifying more than
+     one amino acid, they will need to occur together in the specified order.
+ * - ``amino_acid:position``
+   - A one letter amino acid code, followed by a colon separator, followed by a positive
+     integer position (one-based). The occurrence of this amino acid at the position
+     specified is problematic., E.g. G:2 would check for a Glycine at the second position
+     of the epitope. The N-terminus is defined as position 1.
+ * - ``amino_acid:-position``
+   - A one letter amino acid code, followed by a colon separator, followed by a negative
+     integer position. The occurrence of this amino acid at the specified position from
+     the end of the epitope is problematic. E.g., G:-3 would check for a Glycine at the
+     third position from the end of the epitope. The C-terminus is defined as position -1.
+
+You may specify any number of these problematic amino acid(s), in any
+combination, by providing them as a comma-separated list.
+
+This tool may be used with any filtered.tsv or all_epitopes.tsv pVACbind report
+file.

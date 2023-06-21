@@ -426,6 +426,8 @@ class InputFileConverterTests(unittest.TestCase):
         convert_vcf_params = {
             'input_file'        : convert_vcf_input_file,
             'output_file'       : convert_vcf_output_file.name,
+            'sample_name'       : 'H_NJ-HCC1395-HCC1395',
+            'normal_sample_name': 'H_NJ-HCC1395-HCC1395_BL',
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -474,6 +476,52 @@ class InputFileConverterTests(unittest.TestCase):
 
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_agfusion.tsv')
+        self.assertTrue(compare(convert_output_file.name, expected_output_file))
+
+    def test_agfusion_plus_starfusion_input_generates_expected_tsv(self):
+        convert_input_file      = os.path.join(self.test_data_dir, 'agfusion_HCC1395')
+        convert_starfusion_file = os.path.join(self.test_data_dir, 'star-fusion.fusion_predictions.abridged.tsv')
+        convert_output_file     = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'                 : convert_input_file,
+            'output_file'                : convert_output_file.name,
+            'starfusion_file'            : convert_starfusion_file,
+        }
+        converter = FusionInputConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_agfusion_starfusion.tsv')
+        self.assertTrue(compare(convert_output_file.name, expected_output_file))
+
+    def test_arriba_plus_starfusion_input_generates_expected_tsv(self):
+        convert_input_file  = os.path.join(self.test_data_dir, 'arriba_fusions.tsv')
+        convert_starfusion_file = os.path.join(self.test_data_dir, 'star-fusion.fusion_predictions.abridged.tsv')
+        convert_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'                 : convert_input_file,
+            'output_file'                : convert_output_file.name,
+            'starfusion_file'            : convert_starfusion_file,
+        }
+        converter = FusionInputConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_arriba_starfusion.tsv')
+        self.assertTrue(compare(convert_output_file.name, expected_output_file))
+
+    def test_arriba_input_generates_expected_tsv(self):
+        convert_input_file  = os.path.join(self.test_data_dir, 'arriba_fusions.tsv')
+        convert_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'                 : convert_input_file,
+            'output_file'                : convert_output_file.name,
+        }
+        converter = FusionInputConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_arriba.tsv')
         self.assertTrue(compare(convert_output_file.name, expected_output_file))
 
     def test_proximal_variants_input(self):

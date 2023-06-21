@@ -9,6 +9,7 @@ __all__ = [
     'netmhc_stab',
     'calculate_reference_proteome_similarity',
     'generate_aggregated_report',
+    'identify_problematic_amino_acids',
 ]
 
 from . import *

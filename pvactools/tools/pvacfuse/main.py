@@ -23,6 +23,13 @@ def define_parser():
     )
     binding_filter_parser.set_defaults(func=binding_filter)
 
+    coverage_filter_parser = subparsers.add_parser(
+        "coverage_filter",
+        help="Filter variants processed by IEDB by read support and expression",
+        add_help=False
+    )
+    coverage_filter_parser.set_defaults(func=coverage_filter)
+
     top_score_filter_parser = subparsers.add_parser(
         "top_score_filter",
         help="Pick the best neoepitope for each variant",
@@ -53,7 +60,7 @@ def define_parser():
 
     generate_protein_fasta_parser = subparsers.add_parser(
         "generate_protein_fasta",
-        help="Generate an annotated fasta file from AGFusion output",
+        help="Generate an annotated fasta file from AGFusion or Arriba output",
         add_help=False,
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
@@ -71,6 +78,13 @@ def define_parser():
         add_help=False
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
+
+    identify_problematic_amino_acids_parser = subparsers.add_parser(
+        "identify_problematic_amino_acids",
+        help="Mark problematic amino acid positions in each epitope or filter entries that have problematic amino acids.",
+        add_help = False
+        )
+    identify_problematic_amino_acids_parser.set_defaults(func=identify_problematic_amino_acids)
 
     allele_specific_cutoffs_parser = subparsers.add_parser(
         "allele_specific_cutoffs",

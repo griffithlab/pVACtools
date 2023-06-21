@@ -60,12 +60,11 @@ class CoverageFilterTests(unittest.TestCase):
             self.executable,
             os.path.join(
                 self.test_data_dir,
-                'Test.all_epitopes.tsv'
+                'Test.all_epitopes.GRCh37.tsv'
             ),
             output_file.name,
-            '--exclude-NAs',
         ], shell=False))
         self.assertTrue(cmp(
             output_file.name,
-            os.path.join(self.test_data_dir, "Test.filtered.exclude_nas.tsv"),
+            os.path.join(self.test_data_dir, "Test.all_epitopes.GRCh37.tsv"),
         ))

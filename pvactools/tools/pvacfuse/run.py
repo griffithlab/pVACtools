@@ -25,7 +25,7 @@ def create_net_class_report(files, all_epitopes_output_file, filtered_report_fil
     post_processing_params['input_file'] = all_epitopes_output_file
     post_processing_params['filtered_report_file'] = filtered_report_file
     post_processing_params['minimum_fold_change'] = None
-    post_processing_params['run_coverage_filter'] = False
+    post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_manufacturability_metrics'] = True
     if run_params['net_chop_method']:
@@ -52,7 +52,7 @@ def create_combined_reports(files, all_epitopes_output_file, filtered_report_fil
     post_processing_params['input_file'] = all_epitopes_output_file
     post_processing_params['filtered_report_file'] = filtered_report_file
     post_processing_params['minimum_fold_change'] = None
-    post_processing_params['run_coverage_filter'] = False
+    post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = False
@@ -79,7 +79,7 @@ def generate_fasta(args, output_dir, epitope_length, epitope_flank_length=0, net
         params.extend(["-d", str(args.downstream_sequence_length)])
     else:
         params.extend(["-d", 'full'])
-    pvactools.tools.pvacfuse.generate_protein_fasta.main(params, save_tsv_file=True)
+    pvactools.tools.pvacfuse.generate_protein_fasta.main(params, save_tsv_file=True, starfusion_file=args.starfusion_file)
     os.unlink("{}.manufacturability.tsv".format(output_file))
     return (output_file, per_epitope_output_dir)
 
@@ -92,7 +92,7 @@ def append_columns(intermediate_output_file, tsv_file, output_file):
 
     with open(intermediate_output_file, 'r') as input_fh, open(output_file, 'w') as output_fh:
         reader = csv.DictReader(input_fh, delimiter="\t")
-        fieldnames = ['Chromosome', 'Start', 'Stop', 'Transcript', 'Gene Name', 'Variant Type'] + reader.fieldnames
+        fieldnames = ['Chromosome', 'Start', 'Stop', 'Transcript', 'Gene Name', 'Variant Type'] + reader.fieldnames + ['Read Support', 'Expression']
         writer = csv.DictWriter(output_fh, delimiter="\t", fieldnames=fieldnames)
         writer.writeheader()
         for line in reader:
@@ -103,6 +103,8 @@ def append_columns(intermediate_output_file, tsv_file, output_file):
             line['Transcript'] = matching_line['transcript_name']
             line['Gene Name'] = matching_line['gene_name']
             line['Variant Type'] = matching_line['variant_type']
+            line['Read Support'] = matching_line['fusion_read_support']
+            line['Expression'] = matching_line['fusion_expression']
             writer.writerow(line)
 
 def main(args_input = sys.argv[1:]):
@@ -149,7 +151,13 @@ def main(args_input = sys.argv[1:]):
         'blastp_path'               : args.blastp_path,
         'blastp_db'                 : args.blastp_db,
         'run_post_processor'        : False,
+        'problematic_amino_acids'   : args.problematic_amino_acids,
+        'starfusion_file'           : args.starfusion_file,
+        'read_support'              : args.read_support,
+        'expn_val'                  : args.expn_val,
         'exclude_NAs'               : args.exclude_NAs,
+        'peptide_fasta'             : args.peptide_fasta,
+        'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
     }
 
     if args.iedb_install_directory:

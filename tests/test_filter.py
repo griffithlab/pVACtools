@@ -4,7 +4,7 @@ import tempfile
 from filecmp import cmp
 import py_compile
 
-from pvactools.lib.filter import Filter
+from pvactools.lib.filter import Filter, FilterCriterion
 from tests.utils import *
 
 class FilterTests(unittest.TestCase):
@@ -24,12 +24,12 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            [{
-                'column': "Median MT Score",
-                'operator': "<",
-                'threshold': "500",
-                'exclude_nas': False
-            }],
+            [FilterCriterion(
+                "Median MT IC50 Score",
+                "<",
+                "500",
+                exclude_nas=False
+            )],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -45,12 +45,12 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            [{
-                'column': "Median MT Score",
-                'operator': "<=",
-                'threshold': "500",
-                'exclude_nas': False
-            }],
+            [FilterCriterion(
+                "Median MT IC50 Score",
+                "<=",
+                "500",
+                exclude_nas=False
+            )],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -66,12 +66,12 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            [{
-                'column': "Median MT Score",
-                'operator': "==",
-                'threshold': "500",
-                'exclude_nas': False
-            }],
+            [FilterCriterion(
+                "Median MT IC50 Score",
+                "==",
+                "500",
+                exclude_nas=False
+            )],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -87,12 +87,12 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            [{
-                'column': "Median MT Score",
-                'operator': ">=",
-                'threshold': "500",
-                'exclude_nas': False
-            }],
+            [FilterCriterion(
+                "Median MT IC50 Score",
+                ">=",
+                "500",
+                exclude_nas=False
+            )],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -108,12 +108,12 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            [{
-                'column': "Median MT Score",
-                'operator': ">",
-                'threshold': "500",
-                'exclude_nas': False
-            }],
+            [FilterCriterion(
+                "Median MT IC50 Score",
+                ">",
+                "500",
+                exclude_nas=False
+            )],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -129,12 +129,12 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            [{
-                'column': "Tumor RNA Depth",
-                'operator': ">",
-                'threshold': "100",
-                'exclude_nas': False
-            }],
+            [FilterCriterion(
+                "Tumor RNA Depth",
+                ">",
+                "100",
+                exclude_nas=False
+            )],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -150,12 +150,12 @@ class FilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            [{
-                'column': "Tumor RNA Depth",
-                'operator': ">",
-                'threshold': "100",
-                'exclude_nas': True
-            }],
+            [FilterCriterion(
+                "Tumor RNA Depth",
+                ">",
+                "100",
+                exclude_nas=True
+            )],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -171,12 +171,12 @@ class FilterTests(unittest.TestCase):
                 'input.inf.tsv'
             ),
             output_file.name,
-            [{
-                'column': "Corresponding Fold Change",
-                'operator': ">",
-                'threshold': "100",
-                'exclude_nas': True
-            }],
+            [FilterCriterion(
+                "Corresponding Fold Change",
+                ">",
+                "100",
+                exclude_nas=True
+            )],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,

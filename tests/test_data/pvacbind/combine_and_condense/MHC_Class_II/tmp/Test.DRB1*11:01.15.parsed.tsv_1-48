@@ -1,4 +1,4 @@
-Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median Score	Best Score	Best Score Method	Median Percentile	Best Percentile	Best Percentile Method	NNalign Score	NNalign Percentile
+Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NNalign Score	NNalign Percentile
 30	HLA-DRB1*11:01	1359	EGVWARVPSLDWEGL	62.1	62.1	NNalign	10.0	10.0	NNalign	62.1	10.0
 3	HLA-DRB1*11:01	9	AAAAAAVIPTVSTPP	13148.4	13148.4	NNalign	87.39	87.39	NNalign	13148.4	87.39
 30	HLA-DRB1*11:01	2101	KDKRFTSGKYQDVYV	126.0	126.0	NNalign	15.77	15.77	NNalign	126.0	15.77

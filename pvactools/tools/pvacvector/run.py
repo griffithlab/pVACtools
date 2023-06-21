@@ -115,10 +115,10 @@ def write_min_scores(min_scores_rows, directory, args):
                 'allele': row['HLA Allele'],
             }
             if args.top_score_metric == 'lowest':
-                new_row['junction_score'] = float(row['Best Score'])
-                new_row['method'] = row['Best Score Method']
+                new_row['junction_score'] = float(row['Best IC50 Score'])
+                new_row['method'] = row['Best IC50 Score Method']
             elif args.top_score_metric == 'median':
-                new_row['junction_score'] = float(row['Median Score'])
+                new_row['junction_score'] = float(row['Median IC50 Score'])
                 new_row['method'] = 'median'
             rows.append(new_row)
         sorted_rows = sorted(rows, key=lambda k: k['junction_score'])
@@ -159,9 +159,9 @@ def find_min_scores(parsed_output_files, current_output_dir, args, old_min_score
                 reprocessed_indexes.append(index)
 
                 if args.top_score_metric == 'lowest':
-                    score = float(row['Best Score'])
+                    score = float(row['Best IC50 Score'])
                 elif args.top_score_metric == 'median':
-                    score = float(row['Median Score'])
+                    score = float(row['Median IC50 Score'])
                 if args.allele_specific_binding_thresholds:
                     allele = row['HLA Allele']
                     threshold = PredictionClass.cutoff_for_allele(allele)

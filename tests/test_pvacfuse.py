@@ -12,6 +12,9 @@ import yaml
 import datetime
 from mock import patch
 import argparse
+from urllib.request import urlopen
+from shutil import copyfileobj
+from tempfile import NamedTemporaryFile
 
 from pvactools.tools.pvacfuse import *
 import pvactools.tools.pvacfuse.main as pvacfuse_main
@@ -30,6 +33,15 @@ class PvacfuseTests(unittest.TestCase):
     def setUpClass(cls):
         cls.pvactools_directory = pvactools_directory()
         cls.test_data_directory = test_data_directory()
+        url = "http://ftp.ensembl.org/pub/release-106/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz"
+        with urlopen(url) as fsrc, NamedTemporaryFile(delete=False) as fdst:
+            copyfileobj(fsrc, fdst)
+            fdst.close()
+            cls.peptide_fasta = fdst
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.peptide_fasta.name)
 
     def test_pvacfuse_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -58,6 +70,7 @@ class PvacfuseTests(unittest.TestCase):
             "run",
             "allele_specific_cutoffs",
             "binding_filter",
+            "coverage_filter",
             "valid_alleles",
             "download_example_data",
             "net_chop",
@@ -65,6 +78,7 @@ class PvacfuseTests(unittest.TestCase):
             "calculate_reference_proteome_similarity",
             "top_score_filter",
             "generate_aggregated_report",
+            'identify_problematic_amino_acids',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -113,6 +127,21 @@ class PvacfuseTests(unittest.TestCase):
         output_file = tempfile.NamedTemporaryFile()
         binding_filter.main([input_file, output_file.name])
 
+    def test_coverage_filter_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            "pvactools",
+            "tools",
+            "pvacfuse",
+            "coverage_filter.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_binding_filter_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        coverage_filter.main([input_file, output_file.name])
+
     def test_download_example_data_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,
@@ -157,6 +186,21 @@ class PvacfuseTests(unittest.TestCase):
         output_file = tempfile.NamedTemporaryFile()
         generate_aggregated_report.main([input_file, output_file.name])
 
+    def test_identify_problematic_amino_acids_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacfuse",
+            "identify_problematic_amino_acids.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_identify_problematic_amino_acids_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
+
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,
@@ -174,8 +218,9 @@ class PvacfuseTests(unittest.TestCase):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
-            test_data_directory()
-        ))) as mock_request, unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+            test_data_directory(),
+            'agfusion',
+        ))) as mock_request:
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
@@ -188,6 +233,7 @@ class PvacfuseTests(unittest.TestCase):
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
+                '--peptide-fasta', self.peptide_fasta.name,
             ])
             close_mock_fhs()
 
@@ -215,12 +261,86 @@ class PvacfuseTests(unittest.TestCase):
 
             output_dir.cleanup()
 
+    def test_pvacfuse_pipeline_agfusion_starfusion(self):
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            test_data_directory(),
+            'agfusion_starfusion',
+        ))) as mock_request:
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+
+            run.main([
+                os.path.join(self.test_data_directory, "agfusion_HCC1395"),
+                'sample.name',
+                'HLA-A*29:02',
+                'NetMHC',
+                output_dir.name,
+                '-e1', '9',
+                '--keep-tmp-files',
+                '--starfusion-file', os.path.join(self.test_data_directory, 'star-fusion.fusion_predictions.abridged.tsv')
+            ])
+            close_mock_fhs()
+
+            for file_name in (
+                'sample.name.fasta',
+                'sample.name.all_epitopes.tsv',
+                'sample.name.filtered.tsv',
+                'sample.name.all_epitopes.aggregated.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'fusions_agfusion_starfusion', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
+                self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
+
+            for file_name in (
+                'sample.name.ann.HLA-A*29:02.9.tsv_1-30',
+                'sample.name.HLA-A*29:02.9.parsed.tsv_1-30',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '9', 'tmp', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'fusions_agfusion_starfusion', 'MHC_Class_I', '9', 'tmp', file_name.replace('sample.name', 'Test'))
+                self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+
+            output_dir.cleanup()
+
+    def test_pvacfuse_pipeline_arriba(self):
+        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            test_data_directory(),
+            'arriba',
+        ))) as mock_request:
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+
+            run.main([
+                os.path.join(self.test_data_directory, "arriba_fusions.tsv"),
+                'sample.name',
+                'HLA-A*29:02',
+                'NetMHC',
+                output_dir.name,
+                '-e1', '9',
+            ])
+            close_mock_fhs()
+
+            for file_name in (
+                'sample.name.fasta',
+                'sample.name.all_epitopes.tsv',
+                'sample.name.filtered.tsv',
+                'sample.name.all_epitopes.aggregated.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'arriba_fusions', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
+                self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
+
+            output_dir.cleanup()
+
+
     def test_pvacfuse_combine_and_condense_steps(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
-            test_data_directory()
-        ))) as mock_request, unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+            test_data_directory(),
+            'agfusion',
+        ))) as mock_request:
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
             run.main([
                 os.path.join(self.test_data_directory, "agfusion"),
@@ -233,6 +353,7 @@ class PvacfuseTests(unittest.TestCase):
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
+                '--peptide-fasta', self.peptide_fasta.name,
             ])
             close_mock_fhs()
 

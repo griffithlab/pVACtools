@@ -13,17 +13,6 @@ from filecmp import cmp
 from tests.utils import *
 from pvactools.lib.net_chop import NetChop
 
-def make_response(data, files, path, test_file):
-    reader = open(os.path.join(
-        path,
-        test_file
-    ), mode='rb')
-    response_obj = lambda :None
-    response_obj.status_code = 200
-    response_obj.content = reader.read()
-    reader.close()
-    return response_obj
-
 def make_rejected_response(data, files, path, self):
     if self.rejected:
         reader = open(os.path.join(
@@ -66,7 +55,7 @@ class NetChopTest(unittest.TestCase):
 
     def test_net_chop_cterm_runs(self):
         for method in ['cterm', '20s']:
-            with patch('requests.sessions.Session.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
+            with patch('requests.sessions.Session.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
                 data,
                 files,
                 self.test_data_directory,
@@ -85,7 +74,7 @@ class NetChopTest(unittest.TestCase):
                 ))
 
     def test_net_chop_without_cleavage_scores(self):
-        with patch('requests.sessions.Session.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
+        with patch('requests.sessions.Session.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
             self.test_data_directory,
@@ -104,7 +93,7 @@ class NetChopTest(unittest.TestCase):
             ))
 
     def test_net_chop_fail(self):
-        with patch('requests.sessions.Session.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
+        with patch('requests.sessions.Session.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
             self.test_data_directory,
@@ -121,7 +110,7 @@ class NetChopTest(unittest.TestCase):
 
     #This is to ensure that we catch error cases that are not explicitly handled
     def test_net_chop_other_error(self):
-        with patch('requests.sessions.Session.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: make_response(
+        with patch('requests.sessions.Session.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
             self.test_data_directory,

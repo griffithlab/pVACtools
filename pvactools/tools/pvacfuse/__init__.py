@@ -1,6 +1,7 @@
 __all__ = [
     'run',
     'binding_filter',
+    'coverage_filter',
     'valid_alleles',
     'allele_specific_cutoffs',
     'download_example_data',
@@ -10,6 +11,7 @@ __all__ = [
     'calculate_reference_proteome_similarity',
     'generate_protein_fasta',
     "generate_aggregated_report",
+    'identify_problematic_amino_acids',
 ]
 
 from . import *

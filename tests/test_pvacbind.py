@@ -11,6 +11,9 @@ from filecmp import cmp
 import yaml
 import datetime
 from mock import patch
+from urllib.request import urlopen
+from shutil import copyfileobj
+from tempfile import NamedTemporaryFile
 
 from pvactools.lib.pipeline import PvacbindPipeline
 from pvactools.tools.pvacbind import *
@@ -40,6 +43,15 @@ class PvacbindTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
+        url = "http://ftp.ensembl.org/pub/release-106/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz"
+        with urlopen(url) as fsrc, NamedTemporaryFile(delete=False) as fdst:
+            copyfileobj(fsrc, fdst)
+            fdst.close()
+            cls.peptide_fasta = fdst
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.peptide_fasta.name)
 
     def test_pvacbind_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -71,6 +83,7 @@ class PvacbindTests(unittest.TestCase):
             "calculate_reference_proteome_similarity",
             'top_score_filter',
             'generate_aggregated_report',
+            'identify_problematic_amino_acids',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -106,6 +119,21 @@ class PvacbindTests(unittest.TestCase):
         output_file = tempfile.NamedTemporaryFile()
         generate_aggregated_report.main([input_file, output_file.name])
 
+    def test_identify_problematic_amino_acids_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacbind",
+            "identify_problematic_amino_acids.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_identify_problematic_amino_acids_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
+
     def test_process_stops(self):
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
         params = {
@@ -125,11 +153,21 @@ class PvacbindTests(unittest.TestCase):
         output_dir.cleanup()
 
     def test_pvacbind_pipeline(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, timeout=None, files=None: make_response(
+        with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             test_data_directory()
-        ))) as mock_request, unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+        ))) as mock_request, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+            data,
+            files,
+            self.test_data_directory,
+            'net_chop.html'
+        ))), patch('pvactools.lib.netmhc_stab.NetMHCStab.query_netmhcstabpan_server',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+            data,
+            files,
+            self.test_data_directory,
+            'Netmhcstab.html'
+        ))):
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
@@ -145,6 +183,7 @@ class PvacbindTests(unittest.TestCase):
                 '--net-chop-method', 'cterm',
                 '--netmhc-stab',
                 '--run-reference-proteome-similarity',
+                '--peptide-fasta', self.peptide_fasta.name,
             ])
 
             run.main([
@@ -157,6 +196,7 @@ class PvacbindTests(unittest.TestCase):
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
+                '--peptide-fasta', self.peptide_fasta.name,
             ])
             close_mock_fhs()
 
@@ -253,6 +293,7 @@ class PvacbindTests(unittest.TestCase):
                     '-e2', '15',
                     '--keep-tmp-files',
                     '--run-reference-proteome-similarity',
+                    '--peptide-fasta', self.peptide_fasta.name,
                 ])
             self.assertEqual(
                 str(cm.exception),
@@ -295,7 +336,7 @@ class PvacbindTests(unittest.TestCase):
             l.check_present(('root', 'WARNING', S("Record 1 contains unsupported amino acids. Skipping.")))
 
     def test_pvacbind_combine_and_condense_steps(self):
-        with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+        #with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
             for subdir in ['MHC_Class_I', 'MHC_Class_II']:
                 path = os.path.join(output_dir.name, subdir)
@@ -318,6 +359,7 @@ class PvacbindTests(unittest.TestCase):
                 '--keep-tmp-files',
                 '--allele-specific-binding-thresholds',
                 '--run-reference-proteome-similarity',
+                '--peptide-fasta', self.peptide_fasta.name,
             ])
             close_mock_fhs()
 

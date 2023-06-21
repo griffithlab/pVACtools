@@ -110,7 +110,10 @@ class CallIEDBClassITests(CallIEDBTests):
             self.allele,
             '-l', str(self.epitope_length)
         ])
-        expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
+        if (sys.version_info.major, sys.version_info.minor) == (3, 6):
+            expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.python36.tsv')
+        else:
+            expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
@@ -121,10 +124,6 @@ class CallIEDBClassIITests(CallIEDBTests):
         cls.input_file     = os.path.join(cls.test_data_dir, 'input_31.fasta')
         cls.allele         = 'H2-IAb'
         cls.methods = ['nn_align']
-        cls.request_mock = unittest.mock.Mock(side_effect = (
-            make_response(method, cls.test_data_dir) for method in cls.methods
-        ))
-        pvactools.lib.call_iedb.requests.post = cls.request_mock
 
     def test_iedb_methods_generate_expected_files(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
@@ -159,7 +158,10 @@ class CallIEDBClassIITests(CallIEDBTests):
             'DPA1*01:03',
             '-l', '15',
         ])
-        expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
+        if (sys.version_info.major, sys.version_info.minor) == (3, 6):
+            expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.python36.tsv')
+        else:
+            expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)

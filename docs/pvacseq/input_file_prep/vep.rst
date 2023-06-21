@@ -43,7 +43,7 @@ Running VEP
 
    ./vep \
    --input_file <input VCF> --output_file <output VCF> \
-   --format vcf --vcf --symbol --terms SO --tsl\
+   --format vcf --vcf --symbol --terms SO --tsl --biotype \
    --hgvs --fasta <reference build FASTA file location> \
    --offline --cache [--dir_cache <VEP cache directory>] \
    --plugin Frameshift --plugin Wildtype \
@@ -59,6 +59,7 @@ ____________________
    --symbol
    --terms SO
    --tsl
+   --biotype
    --hgvs
    --fasta <reference build FASTA location>
    --offline
@@ -73,6 +74,8 @@ ____________________
   for the consequences.
 - The ``--tsl`` option adds transcript support level information to the
   annotation.
+- The ``--biotype`` option adds biotype of the transcript or regulatory
+  feature to the annotation.
 - The ``--hgvs`` option will result in HGVS identifiers being added to the
   annotation.
 - Using the ``--hgvs`` option requires the usage of the ``--fasta`` argument to

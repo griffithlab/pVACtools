@@ -95,6 +95,26 @@ class GenerateFastaTests(unittest.TestCase):
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
+    def test_input_aggregated_tsv(self):
+        generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
+        generate_protein_fasta_input_tsv   = os.path.join(self.test_data_dir, 'input.aggregated.tsv')
+        generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            generate_protein_fasta_input_file,
+            self.flanking_sequence_length,
+            generate_protein_fasta_output_file.name,
+            '-d', 'full',
+            '--input-tsv', generate_protein_fasta_input_tsv,
+            '--aggregate-report-evaluation', 'Accept',
+            '--aggregate-report-evaluation', 'Pending',
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output.fasta')
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
     def test_phase_proximal_variants_vcf(self):
         generate_protein_fasta_input_file = os.path.join(self.test_data_dir, 'input_somatic.vcf.gz')
         generate_protein_fasta_phased_proximal_variants_vcf = os.path.join(self.test_data_dir, 'phased.vcf.gz')
