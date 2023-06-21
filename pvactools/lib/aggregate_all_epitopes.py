@@ -866,7 +866,6 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             'Best Peptide': best["Epitope Seq"],
             'Best Transcript': transcript,
             'Allele': best['HLA Allele'],
-            'Pos': "NA",
             'Prob Pos': problematic_positions,
             'Num Passing Peptides': peptide_count,
             'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],

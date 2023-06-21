@@ -39,33 +39,47 @@ binding prediction tools.
 
 Both MHC Class I and Class II predictions are supported. Simply choose the desired prediction algorithms and HLA alleles during processing and Class I and Class II prediction results will be written to their own respective subdirectories in your output directory.
 
-By using the IEDB RESTful web interface, pVACseq leverages their extensive support of different prediction algorithms.
+By using the IEDB RESTful web interface, pVACbind leverages their extensive support of different prediction algorithms.
 
 In addition to IEDB-supported prediction algorithms, we've also added support
 for `MHCflurry <http://www.biorxiv.org/content/early/2017/08/09/174243>`_ and
 `MHCnuggets <http://karchinlab.org/apps/appMHCnuggets.html>`_.
 
-================================= =======
-MHC Class I Prediction Algorithm  Version
-================================= =======
-NetMHCpan                         4.1
-NetMHC                            4.0
-NetMHCcons                        1.1
-PickPocket                        1.1
-SMM                               1.0
-SMMPMBEC                          1.0
-MHCflurry
-MHCnuggets
-================================= =======
+================================================= ======= ========================
+MHC Class I Binding Affinity Prediction Algorithm Version Supports Percentile Rank
+================================================= ======= ========================
+NetMHCpan                                         4.1     yes
+NetMHC                                            4.0     yes
+NetMHCcons                                        1.1     yes
+PickPocket                                        1.1     yes
+SMM                                               1.0     yes
+SMMPMBEC                                          1.0     yes
+MHCflurry                                                 yes
+MHCnuggets                                                no
+================================================= ======= ========================
 
-================================= =======
-MHC Class II Prediction Algorithm Version
-================================= =======
-NetMHCIIpan                       4.0
-SMMalign                          1.1
-NNalign                           2.3
-MHCnuggets
-================================= =======
+================================================== ======= ========================
+MHC Class II Binding Affinity Prediction Algorithm Version Supports Percentile Rank
+================================================== ======= ========================
+NetMHCIIpan                                        4.1     yes
+SMMalign                                           1.1     yes
+NNalign                                            2.3     yes
+MHCnuggets                                                 no
+================================================== ======= ========================
+
+======================================== ======= ========================
+MHC Class I Elution Prediction Algorithm Version Supports Percentile Rank
+======================================== ======= ========================
+NetMHCpanEL                              4.1     yes
+MHCflurryEL                                      | Processing Score: no;
+                                                 | Presentation Score: yes
+======================================== ======= ========================
+
+========================================= ======= ========================
+MHC Class II Elution Prediction Algorithm Version Supports Percentile Rank
+========================================= ======= ========================
+NetMHCIIpanEL                             4.1     yes
+========================================= ======= ========================
 
 **Comprehensive filtering**
 
@@ -91,5 +105,12 @@ Stability predictions can be added if desired by the user. These predictions are
 **Reference proteome similarity analysis**
 
 This optional feature will search for an epitope in the reference proteome
-using BLAST to determine if the epitope occurs elsewhere in the proteome and
+using BLAST or a reference proteome FASTA file to determine if the epitope occurs elsewhere in the proteome and
 is, therefore, not tumor-specific.
+
+**Problematic amino acids**
+
+This optional feature allows users to specify a list of amino acids that would
+be considered problematic to occur either everywhere or at specific positions
+in a neoepitope. This can be useful when certain amino acids would be
+problematic during peptide manufacturing.
