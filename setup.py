@@ -90,7 +90,6 @@ setup(
         'mhcflurry==2.0.6',
         'testfixtures',
         'polars==0.16.18',
-        'protobuf==3.20.0',
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,
