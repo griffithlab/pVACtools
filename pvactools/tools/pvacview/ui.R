@@ -378,7 +378,7 @@ tutorial_tab <- tabItem("tutorial",
                 "Both, mutant (", code("MT"), ") and wildtype (", code("WT"), ") sequences are shown, along with either the", code("lowest"), " or ", code("median"),
                 " binding affinities, depending on how you generated the aggregate report.", br(), br(),
                 "An ", code("X"), "is marked for binding affinities higher than the ", code("aggregate_inclusion_binding_threshold"), " set when generating the aggregate report.", br(), br(),
-                "We also include two extra columns, one specifying the mutation and position and another providing information on any problematic amino acids in the mutant sequence.", br(),
+                "We also include three extra columns, one specifying the mutated position(s) in the peptide, one providing information on any problematic amino acids in the mutant sequence, and one identifying whether the peptide failed the anchor criteria for any of the HLA alleles.", br(),
                 "Note that if users wish to utlitize the ", strong("problematic positions"), " feature, they should run the standalone command ", code("pvacseq identify_problematic_amino_acids"),
                 " or run pVACseq with the ", code("--problematic-amino-acids"), " option enabled to generate the needed information."
                 )
@@ -397,8 +397,8 @@ tutorial_tab <- tabItem("tutorial",
                 p("By clicking on each MT/WT peptide pair, you can then assess the peptides in more detail by navigating to the ", strong("Additional Peptide Information"), " tab.", br(), br(),
                 "There are five different tabs in this section of the app, providing peptide-level details on the MT/WT peptide pair that you have selected.", br(),
                 "The ", strong("IC50 Plot"), "tab shows violin plots of the individual IC50-based binding affinity predictions of the MT and WT peptides for HLA
-                alleles that the MT binds well to. These peptides each have up to 8 binding algorithm scores (for Class I alleles with pVACseq version 3.0) or up
-                to 4 algorithm scores (for Class II alleles with pvacseq version 3.0).", br())
+                alleles that the MT binds well to. These peptides each have up to 8 binding algorithm scores for Class I alleles or up
+                to 4 algorithm scores for Class II alleles.", br())
             ),
             column(width = 8,
                 img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_IC50_Plots.png?raw=true",

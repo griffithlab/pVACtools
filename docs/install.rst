@@ -203,24 +203,24 @@ You will also need to install either the ``refseq_select_prot`` or the
 the ``bin`` subdirectory). You will need to set the ``BLASTDB`` to point to the
 installation directory of your BLAST reference proteome databases.
 
+Downlaoding Reference Proteome FASTA file
+-----------------------------------------
+
+As an alternative to BLAST, a reference proteome fasta file may be used for
+the reference proteome similarity step and specified as an input via the
+``--peptide-fasta`` command. Any proteome fasta may be used. Ensembl provides
+reference proteome fastas for many species. For example, the latest reference
+proteome fasta for human can be downloaded from `this
+link <https://ftp.ensembl.org/pub/current_fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz>`_.
+
 Docker and CWL
 --------------
 
-Three kinds of Docker containers for pVACtools are available on DockerHub using the
-`griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo:
-
-- ``<version>-xs``: Includes pVACtools only
-- ``<version>-slim``: Includes everything in xs plus IEDB MHC Class I and Class II tools.
-  These tools are installed at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
-- ``<version>``: Includes everything in slim plus an installation of BLAST at ``/opt/ncbi-blast-2.12.0+`` ( ``--blastp-path /opt/ncbi-blast-2.12.0+/bin/blastp`` )
-  and the ``refseq_select_prot``
-  database under the ``/opt/blastdb`` directory. The ``BLASTDB`` environment variable is already
-  set to this path inside of the Docker container so this database can be used
-  without any additional modifications. The ``refseq_protein``
-  database is not installed inside of the Docker container due to size
-  constraints. If usage of this database is desired, we recommend installing it outside
-  of the Docker container and mounting the database path using the ``-v`` flag in your
-  ``docker run`` command (``-v <blastdb_path>:/opt/blastdb``).
+Versioned Docker containers for pVACtools are available on DockerHub using the
+`griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo.
+The Docker container contains pVACtools as well as installations of the
+standalone IEDB MHC Class I and Class II software. These are installed at
+``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
 
 An example on how to run pVACseq using Docker can be found on the :ref:`Getting Started <pvacseq_docker>` page.
 

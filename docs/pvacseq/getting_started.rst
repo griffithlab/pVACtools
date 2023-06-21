@@ -13,12 +13,13 @@ The example data output can be reproduced by running the following command:
 
    pvacseq run \
    <example_data_dir>/input.vcf \
-   Test \
-   HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
-   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
+   HCC1395_TUMOR_DNA \
+   HLA-A*29:02,HLA-B*45:01,DRB1*04:05 \
+   all \
    <output_dir> \
    -e1 8,9,10 \
-   -e2 15
+   -e2 15 \
+   --normal-sample-name HCC1395_NORMAL_DNA
 
 A detailed description of all command options can be found on the :ref:`Usage <pvacseq_run>` page.
 
@@ -27,14 +28,11 @@ A detailed description of all command options can be found on the :ref:`Usage <p
 Running pVACseq using Docker
 ____________________________
 
-Three kinds of Docker containers for pVACtools are available on DockerHub using the
-`griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo:
-
-- ``<version>-xs``: Includes pVACtools only
-- ``<version>-slim``: Includes everything in xs plus IEDB MHC Class I and Class II tools.
-  These tools are installed at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
-- ``<version>``: Includes everything in slim plus an installation of BLAST and the ``refseq_select_prot``
-  database.
+Versioned Docker containers for pVACtools are available on DockerHub using the
+`griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo.
+The Docker container contains pVACtools as well as installations of the
+standalone IEDB MHC Class I and Class II software. These are installed at
+``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
 
 After `installing Docker <https://docs.docker.com/install/>`_
 you can start an interactive Docker instance by running the following command:
@@ -77,27 +75,17 @@ You can now run your pVACseq command like so:
 
    pvacseq run \
    /pvacseq_example_data/input.vcf \
-   Test \
-   HLA-A*02:01,HLA-B*35:01,DRB1*11:01 \
-   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
+   HCC1395_TUMOR_DNA \
+   HLA-A*29:02,HLA-B*45:01,DRB1*04:05 \
+   all \
    /pvacseq_output_data \
-   -e1 8,9,10
-   -e2 15
+   -e1 8,9,10 \
+   -e2 15 \
+   --normal-sample-name HCC1395_NORMAL_DNA
    --iedb-install-directory /opt/iedb
 
 The output from your pVACseq run can be found under ``/pvacseq_output_data``
 inside of the container and ``/local/path/to/output_dir`` on your local
 machine.
 
-Please note that the slim and full Docker containers already include installations of the IEDB class I and class II tools at ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
-
-The full Docker container also includes
-installation of BLAST at ``/opt/ncbi-blast-2.12.0+`` (``--blastp-path
-/opt/ncbi-blast-2.12.0+/bin/blastp``) as well as the ``refseq_select_prot``
-database under the ``/opt/blastdb`` directory. The ``BLASTDB`` environment variable is already
-set to this path inside of the Docker container so this database can be used
-without any additional modifications. The ``refseq_protein``
-database is not installed inside of the Docker container due to size
-constraints. If usage of this database is desired, we recommend installing it outside
-of the Docker container and mounting the database path using the ``-v`` flag in your
-``docker run`` command (``-v /local/path/to/blastdb:/opt/blastdb``).
+The above example command makes use of the installations of the IEDB software in the container (``--iedb-install-directory /opt/iedb``).
