@@ -30,7 +30,7 @@ class NetChop:
     def get_mt_peptides(self):
         records = list(SeqIO.parse(self.input_fasta, "fasta"))
         if self.file_type == 'pVACseq':
-            records_dict = {x.id.replace('MT.', ''): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
+            records_dict = {re.sub('^%s' % "MT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
         else:
             records_dict = {x.id: str(x.seq) for x in records}
         return records_dict

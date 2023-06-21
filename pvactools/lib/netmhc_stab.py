@@ -36,6 +36,8 @@ class NetMHCStab:
         observed_alleles = self.observed_alleles()
         alleles = self.valid_alleles(list(set(observed_alleles).intersection(set(mhci_alleles))))
         invalid_alleles = list(set(observed_alleles) - set(alleles))
+        if len(invalid_alleles) > 0:
+            print("Alleles not supported by NetMHCstabpan: {}".format(', '.join(invalid_alleles)))
         lengths = self.observed_epitope_lengths()
 
         result_delimiter = re.compile(r'-{20,}')

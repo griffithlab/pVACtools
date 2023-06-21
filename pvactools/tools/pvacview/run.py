@@ -16,7 +16,7 @@ def define_parser():
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
-    arguments = ['{}'.format(args.r_path), "-e", "shiny::runApp('{}')".format(args.pvacseq_dir)]
+    arguments = ['{}'.format(args.r_path), "-e", "shiny::runApp('{}', port=3333)".format(args.pvacseq_dir)]
     response = run(arguments, check=True)
 
 if __name__ == '__main__':

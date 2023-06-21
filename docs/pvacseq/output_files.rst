@@ -46,6 +46,11 @@ created):
    * - ``<sample_name>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format.
+   * - ``<sample_name>.all_epitopes.aggregated.metrics.json``
+     - A JSON file with detailed information about the predicted epitopes,
+       formatted for pVACview. This file, in combination with the
+       aggregated.tsv file, is required to visualize your results
+       in pVACview.
    * - ``ui.R``, ``app.R``, ``server.R``, ``styling.R``, ``anchor_and_helper_functions.R``
      - pVACview R Shiny application files
    * - ``www`` (directory)
@@ -89,6 +94,13 @@ The following prediction algorithms do not provide a percentile rank:
 
 - MHCnuggets
 
+Prediction Algorithms Supporting Elution Scores
+_______________________________________________
+
+- MHCflurryEL
+- NetMHCpanEL
+- NetMHCIIpanEL
+
 .. _all_ep_and_filtered:
 
 all_epitopes.tsv and filtered.tsv Report Columns
@@ -113,7 +125,11 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - The Ensembl ID of the affected transcript
    * - ``Transcript Support Level``
      - The `transcript support level (TSL) <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html#tsl>`_
-       of the affected transcript. ``NA`` if the VCF entry doesn't contain TSL information.
+       of the affected transcript. ``Not Supported`` if the VCF entry doesn't contain TSL information.
+   * - ``Transcript Length``
+     - The protein sequence length of the affected transcript
+   * - ``Biotype``
+     - The biotype of the affected transcript
    * - ``Ensembl Gene ID``
      - The Ensembl ID of the affected gene
    * - ``Variant Type``
@@ -136,20 +152,19 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Sub-peptide Position``
      - The one-based position of the epitope within the protein sequence used to make the prediction
    * - ``Mutation Position``
-     - The one-based position of the start of the mutation within the epitope sequence. ``0`` if the
-       start of the mutation is before the epitope
+     - The one-based positional range (inclusive) of the mutation within the epitope sequence. If the mutation is a deletion, the amino acids flanking the deletion are recorded. Note that in the case of ambiguous amino acid changes, this reflects the change that is left-aligned, starting from the first changed amino acid; this may differ from the ``Mutation`` column.
    * - ``MT Epitope Seq``
      - The mutant epitope sequence
    * - ``WT Epitope Seq``
      - The wildtype (reference) epitope sequence at the same position in the full protein sequence. ``NA`` if there is no wildtype sequence at this position or if more than half of the amino acids of the mutant epitope are mutated
-   * - ``Best MT Score Method``
+   * - ``Best MT IC50 Score Method``
      - Prediction algorithm with the lowest mutant ic50 binding affinity for this epitope
-   * - ``Best MT Score``
+   * - ``Best MT IC50 Score``
      - Lowest ic50 binding affinity of all prediction algorithms used
-   * - ``Corresponding WT Score``
+   * - ``Corresponding WT IC50 Score``
      - ic50 binding affinity of the wildtype epitope. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Corresponding Fold Change``
-     - ``Corresponding WT Score`` / ``Best MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
+     - ``Corresponding WT IC50 Score`` / ``Best MT IC50 Score``. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Best MT Percentile Method``
      - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
    * - ``Best MT Percentile``
@@ -177,22 +192,30 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Transcript Expression``
      - Transcript expression value for the annotated transcript containing the variant. ``NA`` if VCF entry does
        not contain transcript expression annotation.
-   * - ``Median MT Score``
+   * - ``Median MT IC50 Score``
      - Median ic50 binding affinity of the mutant epitope across all prediction algorithms used
-   * - ``Median WT Score``
+   * - ``Median WT IC50 Score``
      - Median ic50 binding affinity of the wildtype epitope across all prediction algorithms used.
        ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Median Fold Change``
-     - ``Median WT Score`` / ``Median MT Score``. ``NA`` if there is no ``WT Epitope Seq``.
+     - ``Median WT IC50 Score`` / ``Median MT IC50 Score``. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Median MT Percentile``
      - Median binding affinity percentile rank of the mutant epitope across all prediction algorithms (those that provide percentile output)
    * - ``Median WT Percentile``
      - Median binding affinity percentile rank of the wildtype epitope across all prediction algorithms used (those that provide percentile output)
        ``NA`` if there is no ``WT Epitope Seq``.
-   * - ``Individual Prediction Algorithm WT and MT Scores and Percentiles`` (multiple)
+   * - ``Individual Prediction Algorithm WT and MT IC50 Scores and Percentiles`` (multiple)
      - ic50 binding affintity and percentile ranks for the ``MT Epitope Seq`` and ``WT Eptiope Seq`` for the individual prediction algorithms used
+   * - ``MHCflurryEL WT and MT Processing Score and Presentation Score and Percentile`` (optional)
+     - MHCflurry elution processing score and presentation score and percentiles
+       for the ``MT Epitope Seq`` and ``WT Epitiope Seq`` if the run included
+       MHCflurryEL as one of the prediction algorithms
    * - ``Index``
      - A unique idenitifer for this variant-transcript combination
+   * - ``Problematic Positions`` (optional)
+     - A list of positions in the ``MT Epitope Seq`` that match the
+       problematic amino acids defined by the ``--problematic-amino-acids``
+       parameter
    * - ``cterm_7mer_gravy_score``
      - Mean hydropathy of last 7 residues on the C-terminus of the peptide
    * - ``max_7mer_gravy_score``
@@ -225,52 +248,9 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - The % rank stability of the pMHC-I complex
    * - ``NetMHCstab allele`` (optional)
      - Nearest neighbor to the ``HLA Allele``. Used for NetMHCstab prediction
-   * - ``Reference Match`` (T/F) (optional)
-     - Was there a BLAST match of the mutated peptide sequence to the
-       reference proteome?
 
 .. image:: ../images/output_file_columns.png
     :alt: pVACseq ouput file columns illustration
-
-.. _reference_matches:
-
-filtered.tsv.reference_matches Report Columns
----------------------------------------------
-
-This file is only generated when the ``--run-reference-proteome-similarity``
-option is chosen.
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column Name
-     - Description
-   * - ``Chromosome``
-     - The chromosome of this variant
-   * - ``Start``
-     - The start position of this variant in the zero-based, half-open coordinate system
-   * - ``Stop``
-     - The stop position of this variant in the zero-based, half-open coordinate system
-   * - ``Reference``
-     - The reference allele
-   * - ``Variant``
-     - The alt allele
-   * - ``Transcript``
-     - The Ensembl ID of the affected transcript
-   * - ``Peptide``
-     - The peptide sequence submitted to BLAST
-   * - ``Hit ID``
-     - The BLAST alignment hit ID (reference proteome sequence ID)
-   * - ``Hit Definition``
-     - The BLAST alignment hit definition (reference proteome sequence name)
-   * - ``Query Sequence``
-     - The BLAST query sequence
-   * - ``Match Sequence``
-     - The BLAST match sequence
-   * - ``Match Start``
-     - The match start position in the matched reference proteome sequence
-   * - ``Match Stop``
-     - The match stop position in the matched reference proteome sequence
 
 .. _aggregated:
 
@@ -278,13 +258,22 @@ all_epitopes.aggregated.tsv Report Columns
 --------------------------------------------
 
 The ``all_epitopes.aggregated.tsv`` file is an aggregated version of the all_epitopes TSV.
-It presents the best-scoring (lowest binding affinity)
-epitope for each variant, and outputs additional binding affinity, expression, and
+It shows the :ref:`best-scoring epitope <pvacseq_best_peptide>`
+for each variant, and outputs additional binding affinity, expression, and
 coverage information for that epitope. It also gives information about the
 total number of well-scoring epitopes for each variant, the number of
 transcripts covered by those epitopes, as well as the HLA alleles that those
 epitopes are well-binding to. Lastly, the report will bin variants into tiers
 that offer suggestions as to the suitability of variants for use in vaccines.
+Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
+Whether the median or the lowest binding affinity metrics are output in the ``IC50 MT``,
+``IC50 WT``, ``%ile MT``, and ``%ile WT`` columns is controlled by the
+``--top-score-metric`` parameter.
+
+Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
+Whether the median or the lowest binding affinity metrics are output in the ``IC50 MT``,
+``IC50 WT``, ``%ile MT``, and ``%ile WT`` columns is controlled by the
+``--top-score-metric`` parameter.
 
 .. list-table::
    :header-rows: 1
@@ -295,30 +284,42 @@ that offer suggestions as to the suitability of variants for use in vaccines.
      - A unique identifier for the variant
    * - ``HLA Alleles`` (multiple)
      - For each HLA allele in the run, the number of this variant's epitopes that bound well
-       to the HLA allele (with median mutant binding affinity < 1000)
+       to the HLA allele (with median/lowest mutant binding affinity < binding_threshold)
    * - ``Gene``
      - The Ensembl gene name of the affected gene
    * - ``AA Change``
      - The amino acid change for the mutation
    * - ``Num Passing Transcripts``
      - The number of transcripts for this mutation that resulted in at least
-       one well-binding peptide (median mutant binding affinity < 1000).
+       one well-binding peptide (median/lowest mutant binding affinity < 500).
    * - ``Best Peptide``
-     - The best-binding mutant epitope sequence (lowest median mutant binding
-       affinity)
+     - The best-binding mutant epitope sequence (see Best Peptide Criteria
+       below for more details on how this is determined)
+   * - ``Best Transcript``
+     - The best transcript of all transcripts coding for the Best Peptide (see
+       Best Peptide Criteria below for more details on how this is
+       determined)
+   * - ``TSL``
+     - The Transcript Support Level of the Best Transcript
+   * - ``Allele``
+     - The Allele that the Best Peptide is binding to
    * - ``Pos``
      - The one-based position of the start of the mutation within the epitope sequence. ``0`` if the
        start of the mutation is before the epitope (as can occur downstream of frameshift mutations)
+   * - ``Prob Pos``
+     - A list of positions in the Best Peptide that are problematic.
+       ``None`` if the ``--problematic-pos`` parameter was not set during
+       the pVACseq run
    * - ``Num Passing Peptides``
      - The number of unique well-binding peptides for this mutation.
    * - ``IC50 MT``
-     - Median ic50 binding affinity of the best-binding mutant epitope across all prediction algorithms used
+     - Median or lowest ic50 binding affinity of the best-binding mutant epitope across all prediction algorithms used
    * - ``IC50 WT``
-     - Median ic50 binding affinity of the corresponding wildtype epitope across all prediction algorithms used.
+     - Median or lowest ic50 binding affinity of the corresponding wildtype epitope across all prediction algorithms used.
    * - ``%ile MT``
-     - Median binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used (those that provide percentile output)
+     - Median or lowest binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used (those that provide percentile output)
    * - ``%ile WT``
-     - Median binding affinity percentile rank of the corresponding wildtype epitope across all prediction algorithms used (those that provide percentile output)
+     - Median or lowest binding affinity percentile rank of the corresponding wildtype epitope across all prediction algorithms used (those that provide percentile output)
    * - ``RNA Expr``
      - Gene expression value for the annotated gene containing the variant.
    * - ``RNA VAF``
@@ -331,32 +332,184 @@ that offer suggestions as to the suitability of variants for use in vaccines.
      - Tumor DNA variant allele frequency (VAF) at this position.
    * - ``Tier``
      - A tier suggesting the suitability of variants for use in vaccines.
+   * - ``Ref Match`` (T/F) (optional)
+     - Was there a match of the mutated peptide sequence to the reference proteome?
    * - ``Evaluation``
      - Column to store the evaluation of each variant when evaluating the run in pVACview. Either ``Accept``, ``Reject``, or ``Review``.
+
+.. _pvacseq_best_peptide:
+
+Best Peptide Criteria
+_____________________
+
+To determine the Best Peptide, all peptides meeting the
+``--aggregate-inclusion-threshold`` are evaluated as follows:
+
+- Pick all entries with a variant transcript that have a ``protein_coding`` Biotype
+- Of the remaining entries, pick the ones with a variant transcript having
+  a Transcript Support Level <= maximum_transcript_support_level
+- Of the remaining entries, pick the entries with no Problematic Positions
+- Of the remaining entries, pick the ones passing the Anchor Criteria (see
+  Criteria Details section below)
+- Of the remaining entries, pick the one with the lowest median/best MT IC50
+  score, lowest Transcript Support Level, and longest transcript.
 
 .. _pvacseq_aggregate_report_tiers_label:
 
 The pVACseq Aggregate Report Tiers
 __________________________________
 
-To bin a variant in a tier, the best binding epitope is evaluated as follows:
+Tiering Parameters
+******************
+
+To tier the Best Peptide, several cutoffs can be adjusted using arguments provided to the pVACseq run:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Default
+   * - ``--binding-threshold``
+     - The threshold used for filtering epitopes on the IC50 MT binding affinity.
+     - 500
+   * - ``--allele-specific-binding-thresholds``
+     - Instead of the hard cutoff set by the ``--binding-threshold``, use
+       allele-specific binding thresholds. For alleles where no
+       allele-specific binding threshold is available, use the
+       ``--binding-threshold`` as a fallback. To print a list of alleles that have
+       specific binding thresholds and the value of those thresholds, run ``pvacseq allele_specific_cutoffs``.
+     - False
+   * - ``--percentile-threshold``
+     - When set, use this threshold to filter epitopes on the %ile MT score in addition to having to meet the binding threshold.
+     - None
+   * - ``--tumor-purity``
+     - Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used for a simple estimation of
+       whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.
+     - None
+   * - ``--trna-vaf``
+     - Tumor RNA VAF Cutoff. Used to calculate the allele expression cutoff for tiering.
+     - 0.25
+   * - ``--trna-cov``
+     - Tumor RNA Coverage Cutoff. Used as a cutoff for tiering.
+     - 10
+   * - ``--expn-val``
+     - Gene and Expression cutoff. Used to calculate the allele expression cutoff for tiering.
+     - 1.0
+   * - ``--maximum-transcript-support-level``
+     - The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL).
+       Transcript support level needs to be <= this cutoff to be included in most tiers.
+     - 1
+   * - ``--allele-specific-anchors``
+     - Use allele-specific anchor positions when tiering epitopes in the aggregate report. This option is available for 8, 9, 10, and
+       11mers and only for HLA-A, B, and C alleles. If this option is not enabled or as a fallback for unsupported lengths and alleles,
+       the default positions of [1, 2, epitope length - 1, and epitope length] are used. Please see https://doi.org/10.1101/2020.12.08.416271 for more details.
+     - False
+   * - ``--anchor-contribution-threshold``
+     - For determining allele-specific anchors, each position is assigned a score based on how binding is influenced by mutations. From these scores, the relative
+       contribution of each position to the overall binding is calculated. Starting with the highest relative contribution, positions whose score together account for the
+       selected contribution threshold are assigned as anchor locations. As a result, a higher threshold leads to the inclusion of more positions to be considered
+       anchors.
+     - 0.8
+
+Tiers
+*****
+
+Given the thresholds provided above, the Best Peptide is evaluated and binned into a tier as follows:
 
 .. list-table::
    :header-rows: 1
 
    * - Tier
      - Citeria
-   * - ``NoExpr``
-     - Mutant allele is not expressed
-   * - ``LowExpr``
-     - Mutant allele has low expression `(TPM * RNA_VAF < 1)`
-   * - ``Subclonal``
-     - Likely not in the founding clone of the tumor `(DNA_VAF > max(DNA_VAF)/2)`
-   * - ``Anchor``
-     - Mutation is at an anchor residue in the shown peptide, and the WT allele has good binding `(WT ic50 <1000)`
-   * - ``Poor``
-     - Fails two or more of the above criteria
-   * - ``Relaxed``
-     - Passes the above criteria, has decent MT binding `(ic50 < 1000)`
    * - ``Pass``
-     - Passes the above criteria, has strong MT binding `(ic50 < 1000)` and strong expression `(TPM * RNA_VAF > 3)`
+     - Best Peptide passes the binding, expression, tsl, clonal, and anchor criteria
+   * - ``Anchor``
+     - Best Peptide fails the anchor criteria but passes the binding,
+       expression, tsl, and clonal criteria
+   * - ``Subclonal``
+     - Best Peptide fails the clonal criteria but passes the binding, tsl, and
+       anchor criteria
+   * - ``LowExpr``
+     - Best Peptide meets the Low Expression Criteria and passes the binding, tsl,
+       clonal, and anchor criteria
+   * - ``NoExpr``
+     - Best Peptide is not expressed (RNA Expr == 0 or RNA VAF == 0)
+   * - ``Poor``
+     - Best Peptide doesn't fit in any of the above tiers, usually if it fails
+       two or more criteria or if it fails the binding criteria
+
+Criteria Details
+****************
+
+.. list-table::
+
+   * - Binding Criteria
+     - Pass if Best Peptide is a strong binder
+     - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
+       (if ``--percentile-threshold`` parameter is set)
+   * - Expression Criteria
+     - Pass if Best Transcript is expressed
+     - ``Allele Expr > trna_vaf * expn_val``
+   * - Low Expression Criteria
+     - Peptide has low expression or no expression but RNA VAF and coverage
+     - ``(0 < Allele Expr < trna_vaf * expn_val) OR (RNA Expr == 0 AND RNA
+       Depth > trna_cov AND RNA VAF > trna_vaf)``
+   * - TSL Criteria
+     - Pass if Best Transcript has good transcript support level
+     - ``TSL <= maximum_transcript_support_level``
+   * - Clonal Criteria
+     - Best Peptide is likely in the founding clone of the tumor
+     - ``DNA VAF > tumor_purity / 4``
+   * - Anchor Criteria
+     - Fail if all mutated amino acids of the Best Peptide (``Pos``) are at an anchor position and the WT peptide has good binding ``(IC50 WT < binding_threshold)``
+     -
+
+.. _reference_matches:
+
+aggregated.tsv.reference_matches Report Columns
+-----------------------------------------------
+
+This file is only generated when the ``--run-reference-proteome-similarity``
+option is chosen.
+
+.. flat-table::
+   :header-rows: 1
+
+   * - Column Name
+     - Description (BLAST)
+     - Description (reference fasta)
+   * - ``Chromosome``
+     - :cspan:`2` The chromosome of this variant
+   * - ``Start``
+     - :cspan:`2` The start position of this variant in the zero-based, half-open coordinate system
+   * - ``Stop``
+     - :cspan:`2` The stop position of this variant in the zero-based, half-open coordinate system
+   * - ``Reference``
+     - :cspan:`2` The reference allele
+   * - ``Variant``
+     - :cspan:`2` The alt allele
+   * - ``Transcript``
+     - :cspan:`2` The Ensembl ID of the affected transcript
+   * - ``MT Epitope Seq``
+     - :cspan:`2` The mutant peptide sequence for the epitope candidate
+   * - ``Peptide``
+     - The peptide sequence submitted to BLAST
+     - The peptide sequence to search for in the reference proteome
+   * - ``Hit ID``
+     - The BLAST alignment hit ID (reference proteome sequence ID)
+     - The FASTA header ID of the entry where the match was made
+   * - ``Hit Definition``
+     - The BLAST alignment hit definition (reference proteome sequence name)
+     - The FASTA header description of the entry where the match was made
+   * - ``Match Window``
+     - :cspan:`2` The substring of the ``Peptide`` that was found in the ``Match
+       Sequence``
+   * - ``Match Sequence``
+     - The BLAST match sequence
+     - The FASTA sequence of the entry where the match was made
+   * - ``Match Start``
+     - :cspan:`2` The match start position of the ``Match Window`` in the ``Match Sequence``
+   * - ``Match Stop``
+     - :cspan:`2` The match stop position of the ``Match Window`` in the ``Match Sequence``
+

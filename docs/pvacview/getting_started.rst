@@ -13,8 +13,13 @@
 Getting Started
 ---------------
 
-The pVACview user interface has three pages: Upload, Visualize and Explore, and Export.
+The pVACview user interface has four sections:
 
+- pVACtools Output, where pVACseq results can be uploaded, visualized/explored, and exported
+- Tutorials, where the pVACview app is documented in more detail
+- pVACview Documentation, which is a link to the documentation here
+- Submit GitHub Issue, which is a link to GitHub to submit bug reports and
+  additional questions
 
 :large:`Upload`
 ____________________________
@@ -23,21 +28,18 @@ Once you've successfully launched pVACview by completing the :ref:`prerequisites
 your local directories to load in the aggregate report and metrics files, usually located in the same directory as your ``app.R`` file.
 You will need to select the type of your files uploaded (Class I or Class II).
 
-The two required inputs are ``SAMPLE_NAME.class_name.all_epitopes.aggregated.tsv`` and ``SAMPLE_NAME.class_name.all_epitopes.aggregated.metrics.json`` (these names may vary depending on your specific commands).
-Both of which are output files from the pVACseq pipeline. The aggregated tsv file is a list of all predicted epitopes and their binding affinity scores,
-with additional variant information and the metrics json file contains additional transcript and peptide level information that is needed for certain features
-of the pVACview application. You can find further details on them :ref:`here <pvacseq_output_files>`.
+The two required inputs are ``<sample_name>.all_epitopes.aggregated.tsv`` and ``<sample_name>.all_epitopes.aggregated.metrics.json``), both of which are output files from the pVACseq pipeline. The aggregated tsv file is a list of all predicted epitopes and their binding affinity scores,
+with additional variant information and the metrics json file contains additional transcript and peptide level information that is needed for certain features of the pVACview application. You can find further details on them :ref:`here <pvacseq_output_files>`.
 
 You have the option of uploading an additional file to supplement the data you are exploring. This is useful in cases where you are visualizing Class I prediction data but would like to have
 a general idea of the variant's Class II prediction performance or vice versa. In order to match your main data with data from your additional file, it is important that they were generated
-from the same set of variants (but predicted for different HLA alleles). You will also want to specify whether the type of data you are adding was generated from Class I or Class II on the upload page by adding an appropriate label.
+from the same set of variants (but predicted for different HLA alleles). You will also want to specify whether the type of data you are adding was generated from Class I or Class II on the upload page by selecting the appropriate radio button option.
 
 We also provide users with the opportunity of uploading a gene-of-interest tsv file, where each individual line consists of one gene name. If matched in the aggregate report, the gene name will be
 highlighted using bold font and a green box around the cell.
 
 .. figure:: ../images/screenshots/pvacview-upload.png
     :width: 1000px
-    :height: 350px
     :align: right
     :alt: pVACview Upload
     :figclass: align-left
@@ -45,74 +47,115 @@ highlighted using bold font and a green box around the cell.
 :large:`Visualize and Explore`
 ______________________________
 
+Data
+****
+
 Upon successfully uploading the matching data files, you can now explore the different aspects of your neoantigen candidates.
 
 .. figure:: ../images/screenshots/pvacview-visualize_and_explore.png
     :width: 1000px
-    :height: 400px
     :align: right
     :alt: pVACview Upload
     :figclass: align-left
 
-Specifically, the features can be separated into three main categories:
+Specifically, the features can be separated into five categories:
 
 - :bold:`Variant level information`
 
   - Main aggregate report table showcasing best candidates by variant
-  - Mutation and Gene Info box
 
-- :bold:`Transcript level information`
+- :bold:`Selected Variant detail information`
 
-  - Transcripts of selected mutation that produces good binding peptides
-  - Transcript Expression
+  - Transcript sets for a selected variant in the main aggregate report table,
+    where all transcripts in the set code for the same set of neoantigen
+    candidates
+  - Reference proteome match details for the selected variant (if reference
+    protome similarity feature was originally run)
+  - Additional Data for the selected variant when a Additional Neoantigen Candidate Aggregate Report was uploaded
+  - Variant & Gene Info box with VAF and expression information for the
+    selected variant
 
-- :bold:`Peptide level information`
+- :bold:`Selected Transcript Set information`
 
-  - All good binding peptides (for at least 1 HLA allele)
-  - MHC binding prediction scores for each MT and WT peptide pair (IC50 and percentile)
-  - Allele-specific anchor predictions
+  - Transcripts of selected set that produces good binding peptides
+  - Expression, transcript support level, and biotype information etc. of the
+    transcripts in the set
+
+- :bold:`Selected Transcript Set Peptide information`
+
+  - All good binding peptides (for at least 1 HLA allele) in the selected
+    transcript set
+  - MHC binding prediction scores for each MT and WT peptide pair
+  - Allele-specific anchor prediction heatmap
+
+- :bold:`Selected Peptide information`
+
+  - Per-algorithm and HLA-allele MHC binding predictions for the selected peptide and its
+    matched WT (IC50 and Percentile)
+  - Violin plot for the IC50 and Percentile predictions
+  - Elution data for the selected peptide and its matched WT
 
 For detailed descriptions on individual sections, please refer to :ref:`features <features_pvacview_label>` page.
 
-Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers_label>` of variants by supplying a different set of variants:
+Regenerate Tiering
+******************
 
-- :bold:`Anchor contribution cutoff` (default: 0.8)
+Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers_label>` of variants by supplying a different set of parameter cutoffs from your original pVACseq run and pressing the ``Recalculate Tiering with new paramters`` button:
 
-  This is the contribution cutoff for determining which positions of an HLA allele are categorized as anchors. Previously, our lab has computationally predicted anchor positions for different
+- :bold:`Allele-specific anchor calculations`
+
+  Check this box to turn on allele-specific anchor calculations. If this
+  option is unchecked, the following positions will be considered anchor
+  positions: 1, 2, n-1, and n
+
+- :bold:`Anchor contribution cutoff`
+
+  When the allele-specific anchor calculations option is chose, this is the contribution cutoff for determining which positions of an HLA allele are categorized as anchors. Previously, our lab has computationally predicted anchor positions for different
   hla alleles and peptide length combinations (`"Accurate neoantigen prediction depends on mutation position relative to patient allele-specific MHC anchor location" <https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1>`_).
-  These predictions are normalized probabilities representing the likelihood of each position of the peptide to participate in anchoring to the hla allele. Upon the user specifying the contribution cutoff, the application calculates
+  These predictions are normalized probabilities representing the likelihood of each position of the peptide to participate in anchoring to the HLA allele. Upon the user specifying the contribution cutoff, the application calculates
   which positions will be included such that their probabilities add up to equal/more than the specified cutoff. (For example: if positions 2 and 9 have normalized probabilities of 0.4 and 0.5 and the user specified the cutoff to be 0.8
   , the anchors will be set as 2 and 9 for the specific peptide-HLA combination)
 
-  Please note that you will need to check the box in order for this function to be used in calculation. If you wish to only change the other criteria (e.g. clonal vaf, allele expression) then please leave
-  this box unchecked and proceed, your anchors will then remain as 1,2, and n-1, n for all n-mers.
+- :bold:`Binding Threshold`
 
-- :bold:`Clonal variant VAF` (default: 0.5)
+  The threshold to consider a peptide a good binder. The IC50 MT will need to
+  be below this value
+
+- :bold:`Allele-specific binding thresholds`
+
+  When this box is checked, use allele-specific binding thresholds, as defined
+  by `IEDB
+  <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_,
+  instead of the binding threshold set above. For alleles where not specific
+  threshold is defined, the binding threshold set above is used as a fallback.
+
+- :bold:`Percentile Threshold`
+
+  In addition to passing the binding affinity IC50 threshold above, the %ile MT will
+  also need to be below this value in order for the peptide to be considered a
+  good binder.
+
+- :bold:`Clonal variant VAF`
 
   This is the estimated DNA VAF of the clonal variant of the tumor. Variants with a DNA VAF less than half the specified number will be marked as subclonal.
-  The aggregate report generated from the pVACseq pipeline (version 2.0) uses the maximum VAF under 0.6 as the clonal variant VAF. However, users may want to change this cutoff based on other genomic findings after
-  closer analysis (e.g. VAF of driver mutations).
 
-  As guidance, we provide the maximum VAF under 0.6 of the DNA VAF column of the aggregate report for reference. If you wish to keep the
-  same cutoff, then please use the reference instead of the default which would be 0.5. Note that if you remove rows from the aggregate report, the number displayed might be influenced.
+- :bold:`Allele Expression`
 
-- :bold:`Allele Expression` (default: 3 and 1)
-
-  Allele expression is calculated as gene expression * RNA VAF. This expression value is used as a cutoff in defining different Tiers for variants generating neoantigen candidates. The default allele
-  expression cutoff for a variant to be considered a PASS variant is 3 and the cutoff is 1 for the variant to be considered as RELAXED. If the variant meets all other criteria but has an allele expression
-  less than 1, then the variant is labeled as Low Expression. If the variant has an allele expression greater than 1, but fails the anchor criteria (mutation located an anchor with a strong binding WT peptide)
-  then the variant is labeled as ANCHOR. Otherwise if the variant has an allele expression greater than 1, but fails the subclonal criteria (DNA VAF < 1/2 of the clonal VAF), then it is labeled as SUBCLONAL.
-  More details can be found in the tooltip Help button on the top right of the aggreate report table.
-
-  Here we provide users with the option of changing the high and low allele expression cutoffs to customize tiering for their individual samples.
-
+  Allele expression is calculated as gene expression * RNA VAF. This expression value is used as a cutoff in order to determine whether the peptide has good allele expression when the Allele Expr value of a variant is above this cutoff.
 
 .. figure:: ../images/screenshots/pvacview-regenerate_tier.png
     :width: 1000px
-    :height: 500px
     :align: right
     :alt: pVACview Upload
     :figclass: align-left
+
+These parameters will default to the value used in your original pVACseq run.
+After adjusting and retiering your candidates, you can reset the tiers to the
+parameters used originally by clicking the ``Reset to original paramters``
+button in the ``Original Parameters for Tiering`` section.
+
+Investigating Different Variants
+********************************
 
 To investigate a specific variant in detail (on both the transcript and peptide levels), you will need to click on the investigate button located in the select column of the main aggregate report table (last column).
 Afterwards, you may choose to select a rating for the neoantigen candidate using the Eval column. By default, all peptides are initially in a Pending state when the report is generated from pVACseq. Based on
@@ -120,7 +163,6 @@ exploration and evaluation of the features provided, you can mark the peptide as
 
 .. figure:: ../images/screenshots/pvacview-comments.png
     :width: 800px
-    :height: 200px
     :align: right
     :alt: pVACview Upload
     :figclass: align-left
@@ -152,7 +194,6 @@ There are a couple things to note when exporting your current data:
 
 .. figure:: ../images/screenshots/pvacview-export.png
       :width: 1000px
-      :height: 300px
       :align: right
       :alt: pVACview Upload
       :figclass: align-left

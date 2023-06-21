@@ -1,4 +1,4 @@
-Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median Score	Best Score	Best Score Method	Median Percentile	Best Percentile	Best Percentile Method	MHCflurry Score	MHCflurry Percentile
+Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	MHCflurry IC50 Score	MHCflurry Percentile
 1.KCNQ5_MAP3K11.ENST00000342056_ENST00000309100.inframe_fusion.508	HLA-C*15:05	1	QPKPVIDG	28394.798	28394.79812418208	MHCflurry	NA	NA	NA	28394.79812418208	NA
 2.KCNQ5_MAP3K11.ENST00000342056_ENST00000532507.inframe_fusion.508	HLA-C*15:05	1	QPKPVIDG	28394.798	28394.79812418208	MHCflurry	NA	NA	NA	28394.79812418208	NA
 3.KCNQ5_MAP3K11.ENST00000342056_ENST00000530153.inframe_fusion.508	HLA-C*15:05	1	QPKPVIDG	28394.798	28394.79812418208	MHCflurry	NA	NA	NA	28394.79812418208	NA

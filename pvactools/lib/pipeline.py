@@ -22,6 +22,7 @@ from pvactools.lib.input_file_converter import VcfConverter
 from pvactools.lib.fasta_generator import FastaGenerator, VectorFastaGenerator
 from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser
 from pvactools.lib.post_processor import PostProcessor
+from pvactools.lib.run_utils import *
 import pvactools.lib.call_iedb
 import pvactools.lib.combine_parsed_outputs
 
@@ -33,6 +34,8 @@ class Pipeline(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         for (k,v) in kwargs.items():
            setattr(self, k, v)
+        self.flurry_state                = self.get_flurry_state()
+        self.starfusion_file             = kwargs.pop('starfusion_file', None)
         self.proximal_variants_file      = None
         tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(tmp_dir, exist_ok=True)
@@ -77,6 +80,19 @@ class Pipeline(metaclass=ABCMeta):
                 inputs = self.__dict__
                 inputs['pvactools_version'] = pkg_resources.get_distribution("pvactools").version
                 yaml.dump(inputs, log_fh, default_flow_style=False)
+
+    def get_flurry_state(self):
+        if 'MHCflurry' in self.prediction_algorithms and 'MHCflurryEL' in self.prediction_algorithms:
+            self.prediction_algorithms.remove('MHCflurryEL')
+            return 'both'
+        elif 'MHCflurry' in self.prediction_algorithms:
+            return 'BA_only'
+        elif 'MHCflurryEL' in self.prediction_algorithms:
+            pred_idx = self.prediction_algorithms.index('MHCflurryEL')
+            self.prediction_algorithms[pred_idx] = 'MHCflurry'
+            return 'EL_only'
+        else:
+            return None
 
     def tsv_file_path(self):
         if self.input_file_type == 'pvacvector_input_fasta':
@@ -322,6 +338,7 @@ class Pipeline(metaclass=ABCMeta):
                             '-r', str(self.iedb_retries),
                             '-e', self.iedb_executable,
                             '-l', str(epl),
+                            '--tmp-dir', self.tmp_dir,
                         ]
                         argument_sets.append(arguments)
 
@@ -389,6 +406,7 @@ class Pipeline(metaclass=ABCMeta):
                             'output_file'            : split_parsed_file_path,
                         }
                         params['sample_name'] = self.sample_name
+                        params['flurry_state'] = self.flurry_state
                         if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                             params['add_sample_name_column'] = True 
                         parser = self.output_parser(params)
@@ -503,14 +521,14 @@ class PvacbindPipeline(Pipeline):
 
     def create_per_length_fasta_and_process_stops(self, length):
         stop_chars = set('X*')
-        supported_amino_acids = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
+        supported_aas = supported_amino_acids()
         records = []
         for record in SeqIO.parse(self.input_file, "fasta"):
             sequence = str(record.seq).upper()
             x_index = sequence.index('X') if 'X' in sequence else len(sequence)
             star_index = sequence.index('*') if '*' in sequence else len(sequence)
             sequence = sequence[0:min(x_index, star_index)]
-            if not all([c in supported_amino_acids for c in sequence]):
+            if not all([c in supported_aas for c in sequence]):
                 logging.warning("Record {} contains unsupported amino acids. Skipping.".format(record.id))
                 continue
             if len(sequence) >= length:
@@ -694,7 +712,7 @@ class PvacbindPipeline(Pipeline):
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['add_sample_name_column'] = True 
                     parser = self.output_parser(params)
-                    parser.execute()
+                    parser.execute() 
                     status_message("Parsing prediction file for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, length, fasta_chunk))
 
                     split_parsed_output_files.append(split_parsed_file_path)

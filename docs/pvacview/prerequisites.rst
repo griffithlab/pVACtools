@@ -46,7 +46,8 @@ Additionally, there are a number of packages you will need to install in your R/
   install.packages("shinycssloaders", dependencies=TRUE)
   install.packages("RCurl", dependencies=TRUE)
   install.packages("curl", dependencies=TRUE)
-
+  install.packages("string", dependencies=TRUE)
+  install.packages("shinycssloaders", dependencies=TRUE)
 
 Note that certain R packages may have further dependencies that require additional installation. If you are using R studio, these should be automatically installed for you during the respective package
 installation process. However, if you are using conda-based R, you may need to install them manually (usually by running ``install.packages(<package name>)``).
@@ -57,24 +58,38 @@ Launching pVACview R Shiny App
 ______________________________
 
 Once you have R packages and their respective dependencies successfully installed, you may now launch the pVACview app.
+The pVACview R files are distributed with every pVACseq run. They can be found
+in the ``MHC_Class_I`` and/or ``MHC_Class_II`` subdirectories,depending on whether
+you run Class I, Class II, or both.
 
 .. role:: large
 
 :large:`Option 1:`
 
-If using R from the command line, you will first need to locate the path to the shiny app e.g. ``~/pVACtools_output/MHC_Class_I/``. Then you can run the following command from your
-terminal or console window once you replace ``~/pVACtools_output/MHC_Class_I/`` with the appropriate path:
+We've added a convenient shortcut command to launch pVACview from the command
+line: ``pvacview run``.
 
 .. code-block:: none
 
-  R -e "shiny::runApp('~/pVACtools_output/MHC_Class_I/')"
+  pvacview run ~/pVACseq_output/MHC_Class_I
 
-Your terminal/console window should then provide you with a localhost port where the R shiny app is being hosted. e.g. ``http://127.0.0.1:6126`` or ``http://localhost:6126``. Open a browser window of
-your choice and enter the address to use pVACview.
+This will serve the pVACview app to ``http://127.0.0.1:3333``, which you can
+open up in your browser of choice (e.g., Chrome, Firefox, etc.).
 
 :large:`Option 2:`
 
-Alternatively, you can run R studio and open the file ``app.R`` located in your pVACtools output folder. In your R studio interface, on the top right, you should see a ``runApp`` button and
+You can also start pVACview directly with R.
+
+.. code-block:: none
+
+  R -e "shiny::runApp('~/pVACseq_output/MHC_Class_I/', port=3333)"
+
+This will serve the pVACview app to ``http://127.0.0.1:3333``, which you can
+open up in your browser of choice (e.g., Chrome, Firefox, etc.).
+
+:large:`Option 3:`
+
+Alternatively, you can run R studio and open the file ``app.R`` located in your pVACseq output folder. In your R studio interface, on the top right, you should see a ``runApp`` button and
 upon clicking pVACview will be launched. You may also run the following line in R studio console to achieve the same result:
 
 .. code-block:: none

@@ -2,11 +2,15 @@ from setuptools import setup
 import os
 
 import sys
-if sys.version_info < (3,6):
+if (sys.version_info.major, sys.version_info.minor) < (3,7):
     print("This python version is not supported:")
     print(sys.version)
-    print("pVACtools requires python 3.6 or greater")
+    print("pVACtools requires python 3.7 or greater")
     sys.exit(1)
+
+import pypandoc
+pypandoc.download_pandoc()
+long_description = pypandoc.convert_file('README.md', 'rst')
 
 pvacseq_data_files = []
 for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/example_data"):
@@ -44,7 +48,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/iedb_allele
 
 setup(
     name="pvactools",
-    version="3.1.3",
+    version="4.0.0",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",
@@ -68,7 +72,7 @@ setup(
         'vcfpy',
         'requests',
         'PyYAML>=5.1',
-        'biopython==1.76',
+        'biopython==1.77',
         'networkx',
         'simanneal',
         'pandas',
@@ -78,12 +82,12 @@ setup(
         'pymp-pypi',
         'mock',
         'vaxrank>=1.1.0',
-        'keras==2.4.3',
-        'tensorflow==2.2.2',
-        'protobuf==3.19.4',
-        'mhcnuggets==2.3.3',
-        'mhcflurry==2.0.1',
-        'testfixtures'
+        'varcode>=1.1.0',
+        'mhcnuggets==2.4.1',
+        'mhcflurry==2.0.6',
+        'testfixtures',
+        'polars==0.16.18',
+        'protobuf==3.20.0',
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,
@@ -98,12 +102,17 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
 
-        "Programming Language :: Python :: 3.6"
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
 
-    author = "Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Yang-Yang Feng, Christopher A. Miller, Aaron Graubert, Amber Wollam, Connor Liu, Jonas Neichin, Megan Neveau, Jason Walker, Elaine R. Mardis, Obi L. Griffith, Malachi Griffith",
+    author = "Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Christopher A Miller, Alexander T Wollam, Huiming Xia, Connor J Liu, Sidi Zhao, Yang-Yang Feng, Aaron P Graubert, Amber Z Wollam, Jonas Neichin, Megan Neveau, Jason Walker, William E Gillanders, Elaine R Mardis, Obi L Griffith, Malachi Griffith",
     author_email = "help@pvactools.org",
     description = "A cancer immunotherapy tools suite",
+    long_description = long_description,
     license = "BSD-3-Clause-Clear",
     keywords = "antigens neoantigens cancer sequencing variant variants fusion fusions",
     #This needs to be the url where the code is being hosted
