@@ -20,15 +20,7 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         cls.python        = sys.executable
         cls.executable    = os.path.join(pvactools_directory(), "pvactools", "lib", "calculate_reference_proteome_similarity.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "calculate_reference_proteome_similarity")
-        url = "http://ftp.ensembl.org/pub/release-106/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz"
-        with urlopen(url) as fsrc, NamedTemporaryFile(delete=False) as fdst:
-            copyfileobj(fsrc, fdst)
-            fdst.close()
-            cls.peptide_fasta = fdst
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.peptide_fasta.name)
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
 
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
@@ -56,7 +48,7 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         input_fasta = os.path.join(self.test_data_dir, 'input.fasta')
         output_file = tempfile.NamedTemporaryFile()
         metric_file = "{}.reference_matches".format(output_file.name)
-        self.assertFalse(CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, peptide_fasta=self.peptide_fasta.name).execute())
+        self.assertFalse(CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, peptide_fasta=self.peptide_fasta).execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "output.peptide_fasta.tsv"),
@@ -81,7 +73,7 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
             input_file,
             input_fasta,
             output_file.name,
-            peptide_fasta=self.peptide_fasta.name,
+            peptide_fasta=self.peptide_fasta,
             aggregate_metrics_file=tmp_aggregated_metrics_file.name,
         ).execute())
         self.assertTrue(cmp(
@@ -107,7 +99,7 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
             input_file,
             input_fasta,
             output_file.name,
-            peptide_fasta=self.peptide_fasta.name,
+            peptide_fasta=self.peptide_fasta,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,

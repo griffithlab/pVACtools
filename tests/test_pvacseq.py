@@ -42,15 +42,7 @@ class PvacseqTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
-        url = "http://ftp.ensembl.org/pub/release-106/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz"
-        with urlopen(url) as fsrc, NamedTemporaryFile(delete=False) as fdst:
-            copyfileobj(fsrc, fdst)
-            fdst.close()
-            cls.peptide_fasta = fdst
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.peptide_fasta.name)
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
 
     def test_pvacseq_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -295,7 +287,7 @@ class PvacseqTests(unittest.TestCase):
                 '-d', 'full',
                 '--pass-only',
                 '--run-reference-proteome-similarity',
-                '--peptide-fasta', self.peptide_fasta.name,
+                '--peptide-fasta', self.peptide_fasta,
             ])
 
             run.main([
@@ -309,7 +301,7 @@ class PvacseqTests(unittest.TestCase):
                 '--keep-tmp-files',
                 '-d', 'full',
                 '--run-reference-proteome-similarity',
-                '--peptide-fasta', self.peptide_fasta.name,
+                '--peptide-fasta', self.peptide_fasta,
             ])
             close_mock_fhs()
 
@@ -427,7 +419,7 @@ class PvacseqTests(unittest.TestCase):
                     '--top-score-metric=lowest',
                     '--keep-tmp-files',
                     '--run-reference-proteome-similarity',
-                    '--peptide-fasta', self.peptide_fasta.name,
+                    '--peptide-fasta', self.peptide_fasta,
                 ])
             self.assertEqual(
                 str(cm.exception),
