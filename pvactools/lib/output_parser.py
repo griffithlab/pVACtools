@@ -307,7 +307,10 @@ class OutputParser(metaclass=ABCMeta):
             result['wt_percentiles'] = self.format_match_na(result, 'percentile')
             #We then infer the mutation position and match direction from the previous MT epitope
             result['match_direction'] = previous_result['match_direction']
-            result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
+            if previous_result['mutation_position'] == 'NA' or previous_result['mutation_position'] == 1:
+                result['mutation_position'] = 'NA'
+            else:
+                result['mutation_position'] = previous_result['mutation_position'] - 1
             return
 
         baseline_best_match_wt_result      = wt_results[baseline_best_match_position]
@@ -368,12 +371,12 @@ class OutputParser(metaclass=ABCMeta):
             if result['variant_type'] == 'inframe_ins':
                 mutation_position = self.find_ins_mut_position(baseline_best_match_wt_epitope_seq, mt_epitope_seq, result['amino_acid_change'], match_direction)
                 if mutation_position is None:
-                    result['mutation_position'] = None
+                    result['mutation_position'] = 'NA'
                 else:
                     if previous_result is None:
                         result['mutation_position'] = '{}-{}'.format(mutation_position[0], mutation_position[1]) if len(mutation_position)==2 else '{}'.format(mutation_position[0])
                     else:
-                        if previous_result['mutation_position'] is None:
+                        if previous_result['mutation_position'] == 'NA':
                             result['mutation_position'] = '{}-{}'.format(mutation_position[0], mutation_position[1]) if len(mutation_position)==2 else '{}'.format(mutation_position[0])
                         else:
                             result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
