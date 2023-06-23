@@ -294,7 +294,16 @@ class CalculateReferenceProteomeSimilarity:
                 epitope = line['Best Peptide']
                 (full_peptide, wt_peptide, variant_type, mt_amino_acids, wt_amino_acids) = self._get_full_peptide(line, mt_records_dict, wt_records_dict)
                 if variant_type != 'FS':
-                    mt_pos = int(line['Pos'].split('-')[0])
+                    if line['Pos'] == 'NA':
+                        mt_pos = None
+                        for i,(wt_aa,mt_aa) in enumerate(zip(wt_peptide,full_peptide)):
+                            if wt_aa != mt_aa:
+                                mt_pos = i
+                                break
+                        if mt_pos is None:
+                            return None, full_peptide
+                    else:
+                        mt_pos = int(line['Pos'].split('-')[0])
             else:
                 epitope = line['MT Epitope Seq']
                 full_peptide = mt_records_dict[line['Index']]
@@ -453,6 +462,20 @@ class CalculateReferenceProteomeSimilarity:
                 peptide, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
 
                 if self.peptide_fasta:
+                    if peptide is None:
+                        if self._input_tsv_type(line) == 'aggregated':
+                            line['Ref Match'] = 'Not Run'
+                            if self.aggregate_metrics_file:
+                                self.aggregate_metrics[line['ID']]['reference_matches'] = {
+                                    'count': 0,
+                                    'query_peptide': peptide,
+                                    'matches': []
+                                }
+                        else:
+                            line['Reference Match'] = 'Not Run'
+                        writer.writerow(line)
+                        continue
+
                     results = processed_peptides[peptide]
                 else:
                     results = processed_peptides[full_peptide]
@@ -553,7 +576,8 @@ class CalculateReferenceProteomeSimilarity:
             for line in reader:
                 peptide, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
                 if self.peptide_fasta:
-                    unique_peptides.add(peptide)
+                    if peptide is not None:
+                        unique_peptides.add(peptide)
                 else:
                     unique_peptides.add(full_peptide)
 
