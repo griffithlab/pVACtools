@@ -110,6 +110,8 @@ ______________________________
 Phase variants using GATK’s ReadBackedPhasing
 _____________________________________________
 
+Unfortunately, the tool used for this step is no longer available in current versions of GATK. We recommend using GATK 3.6.0 to run this step.
+
 .. code-block:: none
 
    /usr/bin/java -Xmx16g -jar /opt/GenomeAnalysisTK.jar \
