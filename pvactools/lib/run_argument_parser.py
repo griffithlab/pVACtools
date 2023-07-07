@@ -302,11 +302,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             + "The VCF may be gzipped (requires tabix index)."
         )
         self.parser.add_argument(
-            "ref-fasta",
+            "ref_fasta",
             help="A reference FASTA file. Note: this input should be the same as the RegTools vcf input."
         )
         self.parser.add_argument(
-            "gtf-file",
+            "gtf_file",
             help="A reference GTF file. Note: this input should be the same as the RegTools gtf input."
         )
         self.parser.add_argument(
