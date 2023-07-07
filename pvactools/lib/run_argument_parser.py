@@ -203,7 +203,7 @@ class PvacseqRunArgumentParser(PredictionRunWithFastaGenerationArgumentParser):
         tool_name = "pvacseq"
         input_file_help = (
             "A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
-            "Wildtype protein sequence, and Downstream protein sequence information."
+            "Wildtype protein sequence, and Frameshift protein sequence information."
             "The VCF may be gzipped (requires tabix index)."
         )
         PredictionRunWithFastaGenerationArgumentParser.__init__(self, tool_name, input_file_help)
