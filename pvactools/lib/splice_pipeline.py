@@ -130,13 +130,15 @@ class JunctionPipeline:
                 sys.exit("The RegTools junctions TSV file doesn't contain any splice sites supported by pVACsplice. Aborting.")
 
             combine_params = {
-                'junctions_df': self.filter_regtools_results(),
+                'junctions_df': junctions_df,
                 'variant_file': self.create_file_path('annotated', temp=True),
                 'output_dir': self.output_dir,
                 'output_file': self.create_file_path('combined'),
             }
             combined = CombineInputs(**combine_params)
             combined_df = combined.execute()
+            if len(combined_df) == 0:
+                sys.exit("Combined dataset is empty. Aborting.")
             print('Completed')
         return combined_df
 
@@ -187,8 +189,10 @@ class JunctionPipeline:
                     combined_df.loc[i, 'alt_protein_length'] = len(alt_aa)
                     combined_df.loc[i, 'frameshift_event'] = alt_fs
             combined_df = combined_df.dropna(subset=['wt_protein_length', 'alt_protein_length', 'frameshift_event'])
+            if len(combined_df) == 0:
+                sys.exit("Unable to determine junction peptide sequence for any of the candidates. Aborting.")
             # update file
-            combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False)
+            combined_df.to_csv(self.create_file_path('combined'), sep='\t', index=False, na_rep="NA")
             print('Completed')
 
     def fasta_to_kmers(self):

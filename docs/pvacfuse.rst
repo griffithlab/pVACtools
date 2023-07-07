@@ -8,8 +8,8 @@ pVACfuse
 ====================================
 
 This component of the pVACtools workflow provides support for predicting
-neoantigens from gene fusions. Currently, fusion variants as reported by
-`INTEGRATE-Neo <https://github.com/ChrisMaherLab/INTEGRATE-Neo>`_ are supported, 
+neoantigens from gene fusions. Currently, annotated fusion variants as reported by
+`AGFusion <https://github.com/murphycj/AGFusion>`_ and `Arriba <https://github.com/suhrig/arriba>`_ are supported, 
 and any of the binding affinity prediction software available in pVACseq can 
 be used for binding prediction.
 

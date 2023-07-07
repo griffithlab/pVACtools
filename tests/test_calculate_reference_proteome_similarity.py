@@ -98,6 +98,28 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         ))
         os.remove(metric_file)
 
+    def test_wt_peptide_fully_in_mt_peptide(self):
+        input_file = os.path.join(self.test_data_dir, 'input_wt_in_mt.tsv')
+        input_fasta = os.path.join(self.test_data_dir, 'input_wt_in_mt.fasta')
+        output_file = tempfile.NamedTemporaryFile()
+        metric_file = "{}.reference_matches".format(output_file.name)
+        self.assertFalse(CalculateReferenceProteomeSimilarity(
+            input_file,
+            input_fasta,
+            output_file.name,
+            peptide_fasta=self.peptide_fasta.name,
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output_wt_in_mt.tsv"),
+        ))
+        self.assertTrue(cmp(
+            metric_file,
+            os.path.join(self.test_data_dir, "output_wt_in_mt.tsv.reference_matches"),
+        ))
+        os.remove(metric_file)
+        close_mock_fhs()
+
     def test_blastp_db_incompatible_with_species(self):
         with self.assertRaises(Exception) as context:
             input_file = os.path.join(self.test_data_dir, 'input.tsv')

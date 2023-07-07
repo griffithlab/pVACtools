@@ -1,7 +1,7 @@
 {
   "tumor_purity": null,
-  "vaf_clonal": 0.571,
-  "vaf_subclonal": 0.286,
+  "vaf_clonal": 0.5,
+  "vaf_subclonal": 0.25,
   "binding_threshold": 500,
   "aggregate_inclusion_binding_threshold": 5000,
   "trna_vaf": 0.25,
@@ -9,18 +9,18 @@
   "allele_expr_threshold": 2.5,
   "maximum_transcript_support_level": 1,
   "percentile_threshold": null,
-  "allele_specific_binding_thresholds": false,
+  "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Median",
   "wt_top_score_metric": "Median",
-  "binding_cutoffs": {
-    "HLA-A*02:01": 500,
-    "HLA-B*35:01": 500
-  },
-  "is_allele_specific_binding_cutoff": {
-    "HLA-A*02:01": false,
-    "HLA-B*35:01": false
+  "allele_specific_binding_thresholds": {
+    "HLA-A*02:01": 255.0,
+    "HLA-B*35:01": 348.0
   },
   "allele_specific_anchors": false,
+  "alleles": [
+    "HLA-A*02:01",
+    "HLA-B*35:01"
+  ],
   "anchor_contribution_threshold": 0.8,
   "2-217498305-217498305-T-TGCTGCC": {
     "good_binders": {

@@ -8,6 +8,13 @@ if (sys.version_info.major, sys.version_info.minor) < (3,7):
     print("pVACtools requires python 3.7 or greater")
     sys.exit(1)
 
+try:
+    import pypandoc
+    pypandoc.download_pandoc()
+    long_description = pypandoc.convert_file('README.md', 'rst')
+except:
+    long_description = ""
+
 pvacseq_data_files = []
 for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/example_data"):
     for filename in filenames:
@@ -44,7 +51,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/iedb_allele
 
 setup(
     name="pvactools",
-    version="3.1.2",
+    version="4.0.0",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",
@@ -88,6 +95,7 @@ setup(
         'pyfaidx==0.7.1',
         'packaging',
         'pyarrow',
+        'polars==0.16.18',
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,
@@ -102,12 +110,17 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
 
-        "Programming Language :: Python :: 3.6"
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
 
-    author = "Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Yang-Yang Feng, Christopher A. Miller, Aaron Graubert, Amber Wollam, Connor Liu, Jonas Neichin, Megan Neveau, Jason Walker, Elaine R. Mardis, Obi L. Griffith, Malachi Griffith",
+    author = "Jasreet Hundal, Susanna Kiwala, Joshua McMichael, Christopher A Miller, Alexander T Wollam, Huiming Xia, Connor J Liu, Sidi Zhao, Yang-Yang Feng, Aaron P Graubert, Amber Z Wollam, Jonas Neichin, Megan Neveau, Jason Walker, William E Gillanders, Elaine R Mardis, Obi L Griffith, Malachi Griffith",
     author_email = "help@pvactools.org",
     description = "A cancer immunotherapy tools suite",
+    long_description = long_description,
     license = "BSD-3-Clause-Clear",
     keywords = "antigens neoantigens cancer sequencing variant variants fusion fusions",
     #This needs to be the url where the code is being hosted
