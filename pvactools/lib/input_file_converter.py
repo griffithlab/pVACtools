@@ -533,7 +533,7 @@ class PvacspliceVcfConverter(VcfConverter):
                 if genotype.gt_bases and alt not in genotype.gt_bases:
                     print('genotype filter 2 - skipped')
                     continue
-                    
+
                 coverage_for_entry = self.calculate_coverage_for_entry(entry, reference, alt, genotype)
 
                 transcripts = self.csq_parser.parse_csq_entries_for_allele(entry.INFO['CSQ'], alt)

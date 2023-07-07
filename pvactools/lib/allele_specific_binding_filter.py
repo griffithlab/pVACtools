@@ -24,21 +24,21 @@ class AlleleSpecificBindingFilter:
             for entry in reader:
                 if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                     if self.top_score_metric == 'median':
-                        score = float(entry['Median IC50 Score'])
+                        score = entry['Median IC50 Score']
                         percentile_column = 'Median Percentile'
                     elif self.top_score_metric == 'lowest':
-                        score = float(entry['Best IC50 Score'])
+                        score = entry['Best IC50 Score']
                         percentile_column = 'Best Percentile'
                 else:
                     if self.top_score_metric == 'median':
-                        score = float(entry['Median MT IC50 Score'])
+                        score = entry['Median MT IC50 Score']
                         if self.exclude_nas and entry['Median Fold Change'] == 'NA':
                             continue
                         else:
                             fold_change = sys.maxsize if entry['Median Fold Change'] == 'NA' else float(entry['Median Fold Change'])
                         percentile_column = 'Median MT Percentile'
                     elif self.top_score_metric == 'lowest':
-                        score = float(entry['Best MT IC50 Score'])
+                        score = entry['Best MT IC50 Score']
                         if self.exclude_nas and entry['Corresponding Fold Change'] == 'NA':
                             continue
                         else:
@@ -52,7 +52,10 @@ class AlleleSpecificBindingFilter:
                 threshold = PredictionClass.cutoff_for_allele(entry['HLA Allele'])
                 threshold = self.default_threshold if threshold is None else float(threshold)
 
-                if score > threshold:
+                if score == 'NA':
+                    if self.exclude_nas:
+                        continue
+                elif float(score) > threshold:
                     continue
 
                 if self.minimum_fold_change is not None and fold_change < self.minimum_fold_change:

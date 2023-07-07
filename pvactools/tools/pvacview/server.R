@@ -56,10 +56,10 @@ server <- shinyServer(function(input, output, session) {
     additionalData = NULL,
     gene_list = NULL,
     binding_threshold = NULL,
+    use_allele_specific_binding_thresholds = NULL,
     aggregate_inclusion_binding_threshold = NULL,
     percentile_threshold = NULL,
-    binding_cutoffs = NULL,
-    is_allele_specific_binding_cutoff = NULL,
+    allele_specific_binding_thresholds = NULL,
     allele_expr = NULL,
     anchor_mode = NULL,
     anchor_contribution = NULL,
@@ -86,22 +86,17 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$metricsDataInput, {
     df$metricsData <- fromJSON(input$metricsDataInput$datapath)
     df$binding_threshold <- df$metricsData$`binding_threshold`
+    df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
     df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
     df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
     df$percentile_threshold <- df$metricsData$`percentile_threshold`
-    df$binding_cutoffs <- df$metricsData$`binding_cutoffs`
-    df$is_allele_specific_binding_cutoff <- df$metricsData$`is_allele_specific_binding_cutoff`
     df$dna_cutoff <- df$metricsData$vaf_clonal
     df$allele_expr <- df$metricsData$allele_expr_threshold
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
-    hla <- names(df$metricsData$binding_cutoffs)
-    if (input$hla_class == "class_i"){
-      converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
-    } else if (input$hla_class == "class_ii"){
-      converted_hla_names <- hla
-    }
+    hla <- df$metricsData$alleles
+    converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
     if (!("Ref Match" %in% colnames(df$mainTable))) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
@@ -115,10 +110,10 @@ server <- shinyServer(function(input, output, session) {
       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
     }
     df$mainTable <- df$mainTable[, columns_needed]
-    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     rownames(df$comments) <- df$mainTable$ID
-    df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
+    df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
     df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
     df$mainTable$`Bad TSL` <- apply(df$mainTable, 1, function(x) {x["TSL"] == "NA" | (x["TSL"] != "NA" & x["TSL"] != "Not Supported" & x["TSL"] > df$metricsData$maximum_transcript_support_level)})
     df$mainTable$`Col RNA Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Expr"]), 0, x["RNA Expr"])})
@@ -151,7 +146,7 @@ server <- shinyServer(function(input, output, session) {
    observeEvent(input$loadDefaultmain, {
      ## Class I demo aggregate report
      session$sendCustomMessage("unbind-DT", "mainTable")
-     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/pvacview/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
+     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/acb105eb2a48534fee103d560c3d38b6f8e38fe3/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
      mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
      colnames(mainData) <- mainData[1, ]
      mainData <- mainData[-1, ]
@@ -164,20 +159,19 @@ server <- shinyServer(function(input, output, session) {
      mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
      df$mainTable <- mainData
      ## Class I demo metrics file
-     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/pvacview/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
+     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/acb105eb2a48534fee103d560c3d38b6f8e38fe3/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
      df$metricsData <- fromJSON(txt = metricsdata)
      df$binding_threshold <- df$metricsData$`binding_threshold`
      df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
+     df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
      df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
      df$percentile_threshold <- df$metricsData$`percentile_threshold`
-     df$binding_cutoffs <- df$metricsData$`binding_cutoffs`
-     df$is_allele_specific_binding_cutoff <- df$metricsData$`is_allele_specific_binding_cutoff`
      df$dna_cutoff <- df$metricsData$vaf_clonal
      df$allele_expr <- df$metricsData$allele_expr_threshold
      df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
      df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
      df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
-     hla <- names(df$metricsData$binding_cutoffs)
+     hla <- df$metricsData$alleles
      converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
      if (!("Ref Match" %in% colnames(df$mainTable))) {
        df$mainTable$`Ref Match` <- "Not Run"
@@ -192,7 +186,7 @@ server <- shinyServer(function(input, output, session) {
        df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
      }
      df$mainTable <- df$mainTable[, columns_needed]
-     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
+     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
      df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
      if ("Comments" %in% colnames(df$mainTable)) {
        df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
@@ -201,18 +195,18 @@ server <- shinyServer(function(input, output, session) {
      }
      rownames(df$comments) <- df$mainTable$ID
      ## Class II additional demo aggregate report
-     add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/6c24091a9276618af422c76cc9f1c23f16c2074d/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+     add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/acb105eb2a48534fee103d560c3d38b6f8e38fe3/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
      addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
      colnames(addData) <- addData[1, ]
      addData <- addData[-1, ]
      row.names(addData) <- NULL
      df$additionalData <- addData
      ## Hotspot gene list autoload
-     gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/7c7b8352d81b44ec7743578e7715c65261f5dab7/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
+     gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/acb105eb2a48534fee103d560c3d38b6f8e38fe3/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
      gene_list <- read.table(text = gene_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
      df$gene_list <- gene_list
      df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
-     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
+     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
      df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
      df$mainTable$`Bad TSL` <- apply(df$mainTable, 1, function(x) {x["TSL"] == "NA" | (x["TSL"] != "NA" & x["TSL"] != "Not Supported" & x["TSL"] > df$metricsData$maximum_transcript_support_level)})
      df$mainTable$`Col RNA Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Expr"]), 0, x["RNA Expr"])})
@@ -268,7 +262,7 @@ server <- shinyServer(function(input, output, session) {
     numericInput("binding_threshold", "Binding Threshold", current_binding, min = 0, max = max_cutoff, step = 10, width = 500)
   })
   output$allele_specific_binding_ui <- renderUI({
-    current_is_allele_specific_binding_set <- df$allele_specific_binding_thresholds
+    current_is_allele_specific_binding_set <- df$use_allele_specific_binding_thresholds
     checkboxInput(
       "allele_specific_binding",
       "If you want to use allele-specific binding thresholds for tiering purposes please check this box.",
@@ -292,7 +286,7 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$submit, {
       session$sendCustomMessage("unbind-DT", "mainTable")
       df$binding_threshold <- input$binding_threshold
-      df$allele_specific_binding_thresholds <- input$allele_specific_binding
+      df$use_allele_specific_binding_thresholds <- input$allele_specific_binding
       df$percentile_threshold <- input$percentile_threshold
       df$dna_cutoff <- input$dna_cutoff
       df$allele_expr <- input$allele_expr
@@ -302,14 +296,12 @@ server <- shinyServer(function(input, output, session) {
       if (input$use_anchor) {
         df$anchor_mode <- "allele-specific"
         df$anchor_contribution <- input$anchor_contribution
-        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
-        df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
       }else {
         df$anchor_mode <- "default"
-        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
-        df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
       }
-      df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
+      df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+      df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
       df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse((is.null(df$percentile_threshold) || is.na(df$percentile_threshold)), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
       if (is.null(df$percentile_threshold) || is.na(df$percentile_threshold)) {
         df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
@@ -335,6 +327,7 @@ server <- shinyServer(function(input, output, session) {
     session$sendCustomMessage("unbind-DT", "mainTable")
     df$binding_threshold <- df$metricsData$`binding_threshold`
     df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
+    df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
     df$percentile_threshold <- df$metricsData$`percentile_threshold`
     df$dna_cutoff <- df$metricsData$`vaf_clonal`
     df$allele_expr <- df$metricsData$`allele_expr`
@@ -342,9 +335,9 @@ server <- shinyServer(function(input, output, session) {
     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
     df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-    df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
-    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode))
-    df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$binding_cutoffs, df$is_allele_specific_binding_cutoff, df$binding_threshold, x["Allele"], x["IC50 MT"]))
+    df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+    df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
     df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
     if (is.null(df$percentile_threshold)) {
       df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
@@ -390,16 +383,29 @@ server <- shinyServer(function(input, output, session) {
                   df$metricsData$binding_threshold, df$metricsData$`aggregate_inclusion_binding_threshold`,
                   df$metricsData$maximum_transcript_support_level,
                   if (is.null(df$metricsData$percentile_threshold)) {"NULL"}else { df$metricsData$percentile_threshold},
-                  df$metricsData$allele_specific_binding_thresholds,
+                  df$metricsData$use_allele_specific_binding_thresholds,
                   df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric,
                   df$metricsData$allele_specific_anchors, df$metricsData$anchor_contribution_threshold)
     ), digits = 3
   )
   output$bindingParamTable <- renderTable(
-    data <- data.frame(
-      "HLA Alleles" = names(df$metricsData$binding_cutoffs),
-      "Binding Cutoffs" = unlist(lapply(names(df$metricsData$binding_cutoffs), function(x) df$metricsData$binding_cutoffs[[x]]))
-    )
+    if (df$metricsData$use_allele_specific_binding_thresholds) {
+      data <- data.frame(
+        "HLA Alleles" = df$metricsData$alleles,
+        "Binding Cutoffs" = unlist(lapply(df$metricsData$alleles, function(x) {
+            if (x %in% names(df$metricsData$allele_specific_binding_thresholds)) {
+                df$metricsData$allele_specific_binding_thresholds[[x]]
+            } else {
+                df$metricsData$binding_threshold
+            }
+        }
+      )))
+    } else {
+      data <- data.frame(
+        "HLA Alleles" = df$metricsData$alleles,
+        "Binding Cutoffs" = unlist(lapply(df$metricsData$alleles, function(x) df$metricsData$binding_threshold))
+      )
+    }
   )
   output$comment_text <- renderUI({
     if (is.null(df$mainTable)) {
@@ -744,7 +750,6 @@ server <- shinyServer(function(input, output, session) {
             list(orderable = TRUE, targets = 0),
             list(visible = FALSE, targets = c(-1, -2))),
           rowCallback = JS("function(row, data, index, rowId) {",
-                            "console.log(rowId)",
                             "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
         ),
@@ -977,7 +982,6 @@ server <- shinyServer(function(input, output, session) {
           pageLength = 10,
           lengthMenu = c(10),
           rowCallback = JS("function(row, data, index, rowId) {",
-                           "console.log(rowId)",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                            'row.style.backgroundColor = "#E0E0E0";', "}", "}")
         )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
@@ -1042,7 +1046,7 @@ server <- shinyServer(function(input, output, session) {
             pageLength = 10,
             lengthMenu = c(10),
             rowCallback = JS("function(row, data, index, rowId) {",
-                           "console.log(rowId)","if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
+                           "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                            'row.style.backgroundColor = "#E0E0E0";', "}", "}")
           )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
           dtable

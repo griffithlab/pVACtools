@@ -7,11 +7,11 @@ Features
 
 **Fusion analysis**
 
-pVACfuses proceses fusion variants annotated by AGFusion.
+pVACfuses proceses fusion variants annotated by AGFusion or Arriba.
 
 **No local install of epitope prediction software needed**
 
-pVACbind utilizes the IEDB RESTful web interface. This means that none of the underlying prediction software, like NetMHC, needs to be installed locally.
+pVACfuse utilizes the IEDB RESTful web interface. This means that none of the underlying prediction software, like NetMHC, needs to be installed locally.
 
 .. warning::
    We only recommend using the RESTful API for small requests. If you use the
@@ -24,7 +24,7 @@ pVACbind utilizes the IEDB RESTful web interface. This means that none of the un
 
 **Support for local installation of the IEDB Analysis Resources**
 
-pVACbind provides the option of using a local installation of the IEDB MHC
+pVACfuse provides the option of using a local installation of the IEDB MHC
 `class I <http://tools.iedb.org/mhci/download/>`_ and `class II <http://tools.iedb.org/mhcii/download/>`_
 binding prediction tools.
 
@@ -37,35 +37,53 @@ binding prediction tools.
 
 **MHC Class I and Class II predictions**
 
-Both MHC Class I and Class II predictions are supported. Simply choose the desired prediction algorithms and HLA alleles during processing and Class I and Class II prediction results will be written to their own respective subdirectories in your output directory.
+Both MHC Class I and Class II predictions are supported. Simply choose the desired
+prediction algorithms and HLA alleles during processing and Class I and Class II
+prediction results will be written to their own respective subdirectories in your
+output directory. pVACfuse supports binding affinity algorithms as well as elution
+algortihms.
 
-By using the IEDB RESTful web interface, pVACseq leverages their extensive support of different prediction algorithms.
+By using the IEDB RESTful web interface, pVACfuse leverages their extensive support of different prediction algorithms.
 
 In addition to IEDB-supported prediction algorithms, we've also added support
 for `MHCflurry <http://www.biorxiv.org/content/early/2017/08/09/174243>`_ and
 `MHCnuggets <http://karchinlab.org/apps/appMHCnuggets.html>`_.
 
-================================= =======
-MHC Class I Prediction Algorithm  Version
-================================= =======
-NetMHCpan                         4.1
-NetMHC                            4.0
-NetMHCcons                        1.1
-PickPocket                        1.1
-SMM                               1.0
-SMMPMBEC                          1.0
-MHCflurry
-MHCnuggets
-================================= =======
+================================================= ======= ========================
+MHC Class I Binding Affinity Prediction Algorithm Version Supports Percentile Rank
+================================================= ======= ========================
+NetMHCpan                                         4.1     yes
+NetMHC                                            4.0     yes
+NetMHCcons                                        1.1     yes
+PickPocket                                        1.1     yes
+SMM                                               1.0     yes
+SMMPMBEC                                          1.0     yes
+MHCflurry                                                 yes
+MHCnuggets                                                no
+================================================= ======= ========================
 
-================================= =======
-MHC Class II Prediction Algorithm Version
-================================= =======
-NetMHCIIpan                       4.0
-SMMalign                          1.1
-NNalign                           2.3
-MHCnuggets
-================================= =======
+================================================== ======= ========================
+MHC Class II Binding Affinity Prediction Algorithm Version Supports Percentile Rank
+================================================== ======= ========================
+NetMHCIIpan                                        4.1     yes
+SMMalign                                           1.1     yes
+NNalign                                            2.3     yes
+MHCnuggets                                                 no
+================================================== ======= ========================
+
+======================================== ======= ========================
+MHC Class I Elution Prediction Algorithm Version Supports Percentile Rank
+======================================== ======= ========================
+NetMHCpanEL                              4.1     yes
+MHCflurryEL                                      | Processing Score: no;
+                                                 | Presentation Score: yes
+======================================== ======= ========================
+
+========================================= ======= ========================
+MHC Class II Elution Prediction Algorithm Version Supports Percentile Rank
+========================================= ======= ========================
+NetMHCIIpanEL                             4.1     yes
+========================================= ======= ========================
 
 **Comprehensive filtering**
 
@@ -73,14 +91,21 @@ Automatic filtering on the binding affinity ic50 (nm) value narrows down the res
 "good" candidate peptides. The binding filter threshold can be adjusted by the user for each
 pVACfuse run. pVACfuse also support the option of filtering on allele-specific binding thresholds
 as recommended by `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_.
+as well as percentile ranks.
 Additional filtering on the binding affitinity can be manually done by the user by running the
-:ref:`standalone binding filter <filter_commands>` on the filtered result file
+:ref:`standalone binding filter <pvacfuse_filter_commands>` on the filtered result file
 to narrow down the candidate epitopes even further or on the unfiltered
 all_epitopes file to apply different cutoffs.
 
+Read support and expression data are extracted from a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv,
+when provided, in order to automatically filter with
+adjustable thresholds. The user can also manually run
+the :ref:`standalone coverage filter <pvacfuse_filter_commands>` to further narrow down their results
+from the filtered output file.
+
 pVACfuse also runs a top score filter to only keep the top scoring epitope
 for each fusion. This filter can also be run
-:ref:`standalone <filter_commands>`.
+:ref:`standalone <pvacfuse_filter_commands>`.
 
 **NetChop and NetMHCstab integration**
 
@@ -91,5 +116,12 @@ Stability predictions can be added if desired by the user. These predictions are
 **Reference proteome similarity analysis**
 
 This optional feature will search for an epitope in the reference proteome
-using BLAST to determine if the epitope occurs elsewhere in the proteome and
+using BLAST or a reference proteome FASTA file to determine if the epitope occurs elsewhere in the proteome and
 is, therefore, not tumor-specific.
+
+**Problematic amino acids**
+
+This optional feature allows users to specify a list of amino acids that would
+be considered problematic to occur either everywhere or at specific positions
+in a neoepitope. This can be useful when certain amino acids would be
+problematic during peptide manufacturing.

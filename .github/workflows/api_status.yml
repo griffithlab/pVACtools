@@ -1,0 +1,132 @@
+name: Check external APIs
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  iedb:
+    name: "Check IEDB Class I and Class II APIs"
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.7']
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install system dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get install -y ghostscript
+          sudo apt-get install -y gcc
+          sudo apt-get install -y pandoc
+          pip install setuptools==57
+          pip install pypandoc==1.7.2
+      - name: Install Python dependencies
+        run: |
+          pip install polars==0.16.18
+          pip install -e .
+      - name: List installed packages
+        run: |
+          pip list
+      - name: Run tests
+        run: python -m unittest api_status_tests/test_iedb.py
+  netchop:
+    name: "Check NetChop API"
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.7']
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install system dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get install -y ghostscript
+          sudo apt-get install -y gcc
+          sudo apt-get install -y pandoc
+          pip install setuptools==57
+          pip install pypandoc==1.7.2
+      - name: Install Python dependencies
+        run: |
+          pip install polars==0.16.18
+          pip install -e .
+      - name: List installed packages
+        run: |
+          pip list
+      - name: Run tests
+        run: python -m unittest api_status_tests/test_netchop.py
+  netmhcstabpan:
+    name: "Check NetMHCstabpan API"
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.7']
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install system dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get install -y ghostscript
+          sudo apt-get install -y gcc
+          sudo apt-get install -y pandoc
+          pip install setuptools==57
+          pip install pypandoc==1.7.2
+      - name: Install Python dependencies
+        run: |
+          pip install polars==0.16.18
+          pip install -e .
+      - name: List installed packages
+        run: |
+          pip list
+      - name: Run tests
+        run: python -m unittest api_status_tests/test_netmhc_stab.py
+  blast:
+    name: "Check Blast API"
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.7']
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install system dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get install -y ghostscript
+          sudo apt-get install -y gcc
+          sudo apt-get install -y pandoc
+          pip install setuptools==57
+          pip install pypandoc==1.7.2
+      - name: Install Python dependencies
+        run: |
+          pip install polars==0.16.18
+          pip install -e .
+      - name: List installed packages
+        run: |
+          pip list
+      - name: Run tests
+        run: python -m unittest api_status_tests/test_blast.py
