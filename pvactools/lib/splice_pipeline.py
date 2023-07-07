@@ -125,6 +125,10 @@ class JunctionPipeline:
             combined_df = pd.read_csv(self.create_file_path('combined'), sep='\t')
         else:
             print('Merging junction and variant info')
+            junctions_df = self.filter_regtools_results()
+            if len(junctions_df) == 0:
+                sys.exit("The RegTools junctions TSV file doesn't contain any splice sites supported by pVACsplice. Aborting.")
+
             combine_params = {
                 'junctions_df': self.filter_regtools_results(),
                 'variant_file': self.create_file_path('annotated', temp=True),

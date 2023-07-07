@@ -10,10 +10,14 @@ import yaml
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-import pvactools.lib.call_iedb
-import pvactools.lib.combine_parsed_outputs
+from pvactools.lib.prediction_class import *
+from pvactools.lib.input_file_converter import VcfConverter
+from pvactools.lib.fasta_generator import FastaGenerator, VectorFastaGenerator
+from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser, PvacspliceOutputParser
 from pvactools.lib.post_processor import PostProcessor
 from pvactools.lib.run_utils import *
+import pvactools.lib.call_iedb
+import pvactools.lib.combine_parsed_outputs
 
 
 def status_message(msg):
