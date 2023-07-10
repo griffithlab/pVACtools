@@ -277,7 +277,7 @@ class OutputParser(metaclass=ABCMeta):
             best_match_position           = previous_result['wt_epitope_position'] + 1
             result['wt_epitope_position'] = best_match_position
             result['match_direction']     = 'right'
-            result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
+            result['mutation_position']   = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
 
             #We need to ensure that the matched WT eptiope has enough overlapping amino acids with the MT epitope
             best_match_wt_result = wt_results[str(best_match_position)]
@@ -310,7 +310,7 @@ class OutputParser(metaclass=ABCMeta):
             if previous_result['mutation_position'] == 'NA' or previous_result['mutation_position'] == 1:
                 result['mutation_position'] = 'NA'
             else:
-                result['mutation_position'] = previous_result['mutation_position'] - 1
+                result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
             return
 
         baseline_best_match_wt_result      = wt_results[baseline_best_match_position]
