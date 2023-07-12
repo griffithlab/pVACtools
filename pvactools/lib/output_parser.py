@@ -307,7 +307,7 @@ class OutputParser(metaclass=ABCMeta):
             result['wt_percentiles'] = self.format_match_na(result, 'percentile')
             #We then infer the mutation position and match direction from the previous MT epitope
             result['match_direction'] = previous_result['match_direction']
-            if previous_result['mutation_position'] == 'NA' or previous_result['mutation_position'] == 1:
+            if previous_result['mutation_position'] == 'NA' or previous_result['mutation_position'] == '1':
                 result['mutation_position'] = 'NA'
             else:
                 result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
