@@ -265,7 +265,7 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_percentiles'] = self.format_match_na(result, 'percentile')
             mutation_position = self.find_mutation_position(wt_epitope_seq, mt_epitope_seq)
             if mutation_position == peptide_length:
-                result['mutation_position'] = mutation_position
+                result['mutation_position'] = '{}'.format(mutation_position)
             else:
                 result['mutation_position'] = '{}-{}'.format(mutation_position, peptide_length)
             result['wt_epitope_position'] = match_position
