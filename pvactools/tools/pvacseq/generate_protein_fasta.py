@@ -27,7 +27,7 @@ def define_parser():
     parser.add_argument(
         "input_vcf",
         help="A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
-            +"Wildtype protein sequence, and Downstream protein sequence information."
+            +"Wildtype protein sequence, and Frameshift protein sequence information."
             +"The VCF may be gzipped (requires tabix index)."
     )
     parser.add_argument(
