@@ -1253,6 +1253,7 @@ server <- shinyServer(function(input, output, session) {
     colnames(data) <- c(col_names, "Evaluation")
     comments <- data.frame("ID" = row.names(df$comments), Comments = df$comments[, 1])
     data <- join(data, comments)
+    data[is.na(data)] <- "NA"
     data
     }, escape = FALSE, server = FALSE, rownames = FALSE,
     options = list(dom = "Bfrtip",
