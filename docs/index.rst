@@ -51,6 +51,17 @@ Contents
    contact
    mailing_list
 
+New in Release |release|
+------------------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- It fixes errors for a few edge cases when determining the mutation
+  position(s).
+- Update the HCC1395 demo date for pVACview to include elution data.
+- Correctly set NA columns in pVACview export dataframe.
+- Handle Arriba files with empty peptide_sequence fields.
+
 New in Version |version|
 ------------------------
 
