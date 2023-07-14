@@ -13,6 +13,11 @@ from collections import defaultdict
 from Bio import SeqIO
 import random
 import uuid
+from mhcflurry.downloads import get_default_class1_presentation_models_dir
+from mhcflurry.class1_presentation_predictor import Class1PresentationPredictor
+import numpy
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 class IEDB(metaclass=ABCMeta):
     @classmethod
@@ -318,29 +323,28 @@ class MHCflurry(MHCI):
 
         all_epitopes = list(set(all_epitopes))
         if len(all_epitopes) > 0:
-            tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
-            arguments = ["mhcflurry-predict", "--alleles", allele, "--out", tmp_output_file.name, "--peptides"]
-            arguments.extend(all_epitopes)
-            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
-            try:
-                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-            except:
-                stderr_fh.close()
-                with open(stderr_fh.name, 'r') as fh:
-                    err = fh.read()
-                os.unlink(stderr_fh.name)
-                raise Exception("An error occurred while calling MHCflurry:\n{}".format(err))
-            stderr_fh.close()
-            os.unlink(stderr_fh.name)
-            tmp_output_file.close()
-            df = pd.read_csv(tmp_output_file.name)
-            os.unlink(tmp_output_file.name)
+            models_dir = get_default_class1_presentation_models_dir(test_exists=True)
+            predictor = Class1PresentationPredictor.load(models_dir)
+            df = predictor.predict(
+                peptides=numpy.array(all_epitopes, dtype='object'),
+                n_flanks=None,
+                c_flanks=None,
+                alleles={allele: [allele]},
+                throw=True,
+                include_affinity_percentile=True,
+                verbose=0
+            )
             df.rename(columns={
-                'mhcflurry_prediction': 'ic50',
-                'mhcflurry_affinity': 'ic50',
-                'mhcflurry_prediction_percentile': 'percentile',
-                'mhcflurry_affinity_percentile': 'percentile'
+                'prediction': 'ic50',
+                'affinity': 'ic50',
+                'prediction_percentile': 'percentile',
+                'affinity_percentile': 'percentile',
+                'processing_score': 'mhcflurry_processing_score',
+                'presentation_score': 'mhcflurry_presentation_score',
+                'presentation_percentile': 'mhcflurry_presentation_percentile',
+                'best_allele': 'allele',
             }, inplace=True)
+            df.drop(labels='peptide_num', axis=1, inplace=True)
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 peptide = str(record.seq)
