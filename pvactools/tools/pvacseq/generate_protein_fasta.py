@@ -180,7 +180,18 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
                         continue
             new_record = SeqRecord(record.seq, id=record_id, description=record_id)
             output_records.append(new_record)
+    
 
+    if tsv_indexes is not None:
+        output_records_tsv = []
+        for tsv_index in tsv_indexes:
+            new_record_tsv = None
+            for record_fa in output_records:
+                if tsv_index in record_fa.id :
+                    new_record_tsv = record_fa
+                    output_records_tsv.append(new_record_tsv)
+        output_records = output_records_tsv
+        
     SeqIO.write(output_records, output_file, "fasta")
     print("Completed")
 
