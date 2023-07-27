@@ -26,11 +26,11 @@ created):
    * - ``<sample_name>.filtered.tsv``
      - The above file after applying all filters, with cleavage site and stability
        predictions added.
-   * - ``<sample_name>.filtered.tsv.reference_matches`` (optional)
-     - A file outlining details of reference proteome matches
    * - ``<sample_name>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format.
+   * - ``<sample_name>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
+     - A file outlining details of reference proteome matches
 
 Filters applied to the filtered.tsv file
 ----------------------------------------
@@ -243,8 +243,8 @@ Criteria Details
 
 .. _pvacbind_reference_matches:
 
-filtered.tsv.reference_matches Report Columns
----------------------------------------------
+aggregated.tsv.reference_matches Report Columns
+-----------------------------------------------
 
 This file is only generated when the ``--run-reference-proteome-similarity``
 option is chosen.

@@ -12,7 +12,7 @@ The example data output can be reproduced by running the following command:
 .. code-block:: none
 
    pvacseq run \
-   <example_data_dir>/input.vcf \
+   <example_data_dir>/annotated.expression.vcf.gz \
    HCC1395_TUMOR_DNA \
    HLA-A*29:02,HLA-B*45:01,DRB1*04:05 \
    all \

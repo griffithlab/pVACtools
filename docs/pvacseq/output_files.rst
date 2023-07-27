@@ -41,11 +41,11 @@ created):
    * - ``<sample_name>.filtered.tsv``
      - The above file after applying all filters, with (optionally) cleavage site, stability
        predictions, and reference proteome similarity metrics added.
-   * - ``<sample_name>.filtered.tsv.reference_matches`` (optional)
-     - A file outlining details of reference proteome matches
    * - ``<sample_name>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format.
+   * - ``<sample_name>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
+     - A file outlining details of reference proteome matches
    * - ``<sample_name>.all_epitopes.aggregated.metrics.json``
      - A JSON file with detailed information about the predicted epitopes,
        formatted for pVACview. This file, in combination with the
