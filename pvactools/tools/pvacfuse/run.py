@@ -212,9 +212,10 @@ def main(args_input = sys.argv[1:]):
                 pipeline = PvacbindPipeline(**run_arguments)
                 pipeline.execute()
                 intermediate_output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
-                output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.final.tsv".format(args.sample_name))
-                append_columns(intermediate_output_file, "{}.tsv".format(input_file), output_file)
-                output_files.append(output_file)
+                if os.path.exists(intermediate_output_file):
+                    output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.final.tsv".format(args.sample_name))
+                    append_columns(intermediate_output_file, "{}.tsv".format(input_file), output_file)
+                    output_files.append(output_file)
                 if epitope_length == max(epitope_lengths):
                     # copy fasta to output dir
                     fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
@@ -231,10 +232,12 @@ def main(args_input = sys.argv[1:]):
                 #!!! make below call to create_net_class_report
                 #create_combined_reports(output_files, all_epitopes_file, filtered_file, True, args)
                 create_net_class_report(output_files, all_epitopes_file, filtered_file, args, run_arguments)
+            else:
+                print("\nNo processable fusions found. Aborting.\n")
         elif len(prediction_algorithms) == 0:
             print("No MHC class {} prediction algorithms chosen. Skipping MHC class I predictions.".format(mhc_class))
         elif len(alleles) == 0:
-            print("No MHC class{} alleles chosen. Skipping MHC class I predictions.".format(mhc_class))
+            print("No MHC class {} alleles chosen. Skipping MHC class II predictions.".format(mhc_class))
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
