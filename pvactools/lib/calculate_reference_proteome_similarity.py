@@ -279,7 +279,8 @@ class CalculateReferenceProteomeSimilarity:
             (parsed_aa_change, pos, wt_aa, mt_aa) = index_to_aggregate_report_aa_change(aa_change, variant_type)
             if line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
                 return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, mt_aa, wt_aa)
-        raise Exception("Unable to find full_peptide for variant {}".format(line['ID']))
+        print("Unable to find full_peptide for variant {}".format(line['ID']))
+        return (None, None, variant_type, mt_aa, wt_aa)
 
     def _get_peptide(self, line, mt_records_dict, wt_records_dict):
         ## Get epitope, peptide and full_peptide
@@ -293,6 +294,8 @@ class CalculateReferenceProteomeSimilarity:
             if self._input_tsv_type(line) == 'aggregated':
                 epitope = line['Best Peptide']
                 (full_peptide, wt_peptide, variant_type, mt_amino_acids, wt_amino_acids) = self._get_full_peptide(line, mt_records_dict, wt_records_dict)
+                if full_peptide is None:
+                    return None, None
                 if variant_type != 'FS':
                     if line['Pos'] == 'NA':
                         mt_pos = None
