@@ -181,7 +181,7 @@ explore_tab <- tabItem(
             )
         ),
         fluidRow(
-            box(width = 12, title = "Transcript Set Detailed Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
+            box(width = 12, title = "Transcript and Peptide Set Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
                 tabBox(width = 12, title = " ",
                     tabPanel("Peptide Candidates from Selected Transcript Set",
                             DTOutput("peptideTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
