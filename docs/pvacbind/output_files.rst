@@ -28,7 +28,7 @@ created):
        predictions added.
    * - ``<sample_name>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
-       the best epitope for each mutation in an easy-to-read format.
+       the best epitope for each mutation in an easy-to-read format. Not generated when running with elution algorithms only.
    * - ``<sample_name>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
 
@@ -74,6 +74,9 @@ _______________________________________________
 - MHCflurryEL
 - NetMHCpanEL
 - NetMHCIIpanEL
+
+Please note that when running pVACfuse with only elution algorithms, no
+aggregate report is created.
 
 .. _pvacbind_all_ep_and_filtered:
 
