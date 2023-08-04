@@ -90,7 +90,7 @@ def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, 
         convert_params['proximal_variants_vcf'] = phased_proximal_variants_vcf
         proximal_variants_tsv = os.path.join(temp_dir, 'proximal_variants.tsv')
         convert_params['proximal_variants_tsv'] = proximal_variants_tsv
-        convert_params['flanking_bases'] = flanking_sequence_length * 4
+        convert_params['flanking_bases'] = (flanking_sequence_length + 1)* 4
     else:
         proximal_variants_tsv = None
     if pass_only:
