@@ -56,11 +56,23 @@ New in Release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- It fixes errors for a few edge cases when determining the mutation
-  position(s).
-- Update the HCC1395 demo date for pVACview to include elution data.
-- Correctly set NA columns in pVACview export dataframe.
-- Handle Arriba files with empty peptide_sequence fields.
+- Arriba annotated fusion sequences may contain characters that aren't
+  supported. This update skips such sequences.
+- The ``--aggregate-report-evaluation`` parameter in the standalone ``pvacseq
+  generate_protein_fasta`` command was previously set up with
+  nargs in order to allow specifying multiple values. However, this
+  conflicts with required positional parameters. The parameter definiton was
+  updated so that multiple values are now specified as a comma-separated list.
+- pVACfuse would previously fail in an odd way when none of the fusions in the
+  input were processable. This update now exits pVACfuse more gracefully in
+  this case.
+- The reference proteome similarity step would previously fail when an epitope's
+  full peptide sequence wasn't found in the input fasta. It now skips such
+  epitopes and marks the Reference Match column as ``Not Run``.
+- There was a mismatch in how proximal variants were incorporated into the
+  n-mer fasta files vs the "master" fasta file which had the potential of
+  epitopes not being present in the "master" fasta file. This update brings
+  both file creation steps in sync.
 
 New in Version |version|
 ------------------------
