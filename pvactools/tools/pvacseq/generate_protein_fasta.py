@@ -60,10 +60,9 @@ def define_parser():
     )
     parser.add_argument(
         "--aggregate-report-evaluation",
-        help="When running with an aggregate report input TSV, only include variants with this evaluation. Specifiy multiple times to include multiple evaluation states.",
-        nargs="*",
-        default=['Accept'],
-        choices=["Pending", "Accept", "Reject", "Review"]
+        help="When running with an aggregate report input TSV, only include variants with this evaluation. Valid values for this field are Accept, Reject, Pending, and Review. Specifiy multiple values as a comma-separated list to include multiple evaluation states.",
+        default='Accept',
+        type=lambda s:[e for e in s.split(',')],
     )
     parser.add_argument(
         "-d", "--downstream-sequence-length",
@@ -194,6 +193,9 @@ def main(args_input = sys.argv[1:]):
         downstream_sequence_length = int(args.downstream_sequence_length)
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
+
+    if not (set(args.aggregate_report_evaluation)).issubset(set(['Accept', 'Reject', 'Review', 'Pending'])):
+        sys.exit("Aggregate report evaluation ({}) contains invalid values.".format(args.aggregate_report_evaluation))
 
     temp_dir = tempfile.mkdtemp()
     proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only)
