@@ -211,7 +211,7 @@ def main(args_input = sys.argv[1:]):
             for epitope_length in epitope_lengths:
                 (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, epitope_length)
                 if os.path.getsize(input_file) == 0:
-                    print("The intermediate FASTA file for epitope length {} is empty. Please check that the input AGfusion directory contains fusion entries with `*_protein.fa` files. Fusion entries without this file cannot be processed by pVACfuse.".format(epitope_length))
+                    print("The intermediate FASTA file for epitope length {} is empty. No processable fusions found.")
                     continue
 
                 run_arguments['input_file']              = input_file
