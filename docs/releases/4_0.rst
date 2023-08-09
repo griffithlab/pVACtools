@@ -98,3 +98,11 @@ This is a bugfix release. It fixes the following problem(s):
   n-mer fasta files vs the "master" fasta file which had the potential of
   epitopes not being present in the "master" fasta file. This update brings
   both file creation steps in sync.
+
+New in Version 4.0.3
+--------------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- The fixes in issue in the reference proteome similarity step in pVACseq
+  where running with non-human data would cause an error.
