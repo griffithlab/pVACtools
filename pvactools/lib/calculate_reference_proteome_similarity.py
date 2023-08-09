@@ -269,7 +269,7 @@ class CalculateReferenceProteomeSimilarity:
     def _get_full_peptide(self, line, mt_records_dict, wt_records_dict):
         for record_id in mt_records_dict.keys():
             (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
-            transcript_regex = '^.*(ENST[0-9|.]+)$'
+            transcript_regex = '^.*(ENS[0-9|A-Z|.]+)$'
             transcript_p = re.compile(transcript_regex)
             m = transcript_p.match(rest_record_id)
             if m:
@@ -522,7 +522,7 @@ class CalculateReferenceProteomeSimilarity:
                         for query_window, hit_reference_matches in groupby(metric_lines,key=lambda x:x['Match Window']):
                             hit_reference_matches = list(hit_reference_matches)
                             gene_regex = '^.*gene_symbol:([0-9|A-Z]+).*$'
-                            transcript_regex = '^.*transcript:(ENST[0-9|.]+).*$'
+                            transcript_regex = '^.*transcript:(ENS[0-9|A-Z|.]+).*$'
                             gene_p = re.compile(gene_regex)
                             transcript_p = re.compile(transcript_regex)
                             genes = []
