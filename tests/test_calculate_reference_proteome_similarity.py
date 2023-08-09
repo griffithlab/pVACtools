@@ -90,6 +90,29 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         ))
         os.remove(metric_file)
 
+    def test_calculate_self_similarity_with_aggregated_tsv_and_peptide_fasta_mouse(self):
+        input_file = os.path.join(self.test_data_dir, 'Test.all_epitopes.aggregated.mouse.tsv')
+        input_aggregated_metrics_file = os.path.join(self.test_data_dir, 'Test.all_epitopes.aggregated.mouse.tsv.metrics.json')
+        tmp_aggregated_metrics_file = tempfile.NamedTemporaryFile()
+        import shutil
+        shutil.copy(input_aggregated_metrics_file, tmp_aggregated_metrics_file.name)
+        input_fasta = os.path.join(self.test_data_dir, 'Test.mouse.fasta')
+        output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
+        metric_file = "{}.reference_matches".format(output_file.name)
+        output_aggregated_metrics_file = output_file.name.replace(".tsv", ".metrics.json")
+        self.assertFalse(CalculateReferenceProteomeSimilarity(
+            input_file,
+            input_fasta,
+            output_file.name,
+            peptide_fasta=self.peptide_fasta,
+            aggregate_metrics_file=tmp_aggregated_metrics_file.name,
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output.aggregated.peptide_fasta.mouse.tsv"),
+        ))
+        os.remove(metric_file)
+
     def test_wt_peptide_fully_in_mt_peptide(self):
         input_file = os.path.join(self.test_data_dir, 'input_wt_in_mt.tsv')
         input_fasta = os.path.join(self.test_data_dir, 'input_wt_in_mt.fasta')
