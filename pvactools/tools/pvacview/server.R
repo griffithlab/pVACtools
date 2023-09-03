@@ -14,7 +14,7 @@ source("styling.R")
 
 #specify max shiny app upload size (currently 300MB)
 options(shiny.maxRequestSize = 300 * 1024^2)
-options(shiny.host = '127.0.0.1')
+options(shiny.host = '0.0.0.0')
 options(shiny.port = 3333)
 
 server <- shinyServer(function(input, output, session) {
