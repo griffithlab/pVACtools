@@ -269,13 +269,7 @@ class CalculateReferenceProteomeSimilarity:
     def _get_full_peptide(self, line, mt_records_dict, wt_records_dict):
         for record_id in mt_records_dict.keys():
             (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
-            transcript_regex = '^.*(ENS[0-9|A-Z|.]+)$'
-            transcript_p = re.compile(transcript_regex)
-            m = transcript_p.match(rest_record_id)
-            if m:
-                transcript = m.group(1)
-            else:
-                raise Exception("Unexpected record_id format: {}".format(record_id))
+            (count, gene, transcript) = rest_record_id.split(".", 2)
             (parsed_aa_change, pos, wt_aa, mt_aa) = index_to_aggregate_report_aa_change(aa_change, variant_type)
             if line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
                 return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, mt_aa, wt_aa)
