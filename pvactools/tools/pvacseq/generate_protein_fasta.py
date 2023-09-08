@@ -166,13 +166,7 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
                         continue
                 else:
                     (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
-                    transcript_regex = '^.*(ENST[0-9|.]+)$'
-                    transcript_p = re.compile(transcript_regex)
-                    m = transcript_p.match(rest_record_id)
-                    if m:
-                        transcript = m.group(1)
-                    else:
-                        raise Exception("Unexpected record_id format: {}".format(record_id))
+                    (peptide_type, count, gene, transcript) = rest_record_id.split(".", 3)
                     (parsed_aa_change, _, _, _) = index_to_aggregate_report_aa_change(aa_change, variant_type)
                     matches = [i for i in tsv_indexes if i['Best Transcript'] == transcript and i['AA Change'] == parsed_aa_change and i['Evaluation'] in aggregate_report_evaluation]
                     if len(matches) == 0:
