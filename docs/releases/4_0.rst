@@ -106,3 +106,11 @@ This is a bugfix release. It fixes the following problem(s):
 
 - The fixes in issue in the reference proteome similarity step in pVACseq
   where running with non-human data would cause an error.
+
+New in Version 4.0.4
+--------------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- This release makes various fixes to allow pVACtools to run with non-human
+  data.
