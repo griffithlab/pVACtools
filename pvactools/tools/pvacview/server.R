@@ -96,7 +96,13 @@ server <- shinyServer(function(input, output, session) {
     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
     hla <- df$metricsData$alleles
-    converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
+    converted_hla_names <- unlist(lapply(hla, function(x) {
+      if (grepl("HLA-", x)) {
+        strsplit(x, "HLA-")[[1]][2]
+      } else {
+        x
+      }
+    }))
     if (!("Ref Match" %in% colnames(df$mainTable))) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
@@ -172,7 +178,13 @@ server <- shinyServer(function(input, output, session) {
      df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
      df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
      hla <- df$metricsData$alleles
-     converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
+     converted_hla_names <- unlist(lapply(hla, function(x) {
+       if (grepl("HLA-", x)) {
+         strsplit(x, "HLA-")[[1]][2]
+       } else {
+         x
+       }
+     }))
      if (!("Ref Match" %in% colnames(df$mainTable))) {
        df$mainTable$`Ref Match` <- "Not Run"
      }
