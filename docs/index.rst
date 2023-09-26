@@ -56,8 +56,15 @@ New in Release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- This release makes various fixes to allow pVACtools to run with non-human
-  data.
+- In recent releases, users have noticed that at some point during pipeline
+  runs, predictions to MHCflurry would hang or get killed. We were able to
+  determine that the cause was related to
+  `PR 988 <https://github.com/griffithlab/pVACtools/pull/988>`_.
+  This PR originally updated calls to MHCflurry to happen by instantiating
+  their predictor within Python instead of calling it on the command line.
+  However, we suspect that this causes a substantial increase in memory usage
+  resulting in the observed behavior. This release reverts the change from PR
+  988.
 
 New in Version |version|
 ------------------------
