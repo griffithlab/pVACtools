@@ -258,19 +258,9 @@ option is chosen.
    * - Column Name
      - Description (BLAST)
      - Description (reference fasta)
-   * - ``Chromosome``
-     - :cspan:`2` The chromosome of this variant
-   * - ``Start``
-     - :cspan:`2` The start position of this variant in the zero-based, half-open coordinate system
-   * - ``Stop``
-     - :cspan:`2` The stop position of this variant in the zero-based, half-open coordinate system
-   * - ``Reference``
-     - :cspan:`2` The reference allele
-   * - ``Variant``
-     - :cspan:`2` The alt allele
-   * - ``Transcript``
-     - :cspan:`2` The Ensembl ID of the affected transcript
-   * - ``MT Epitope Seq``
+   * - ``ID``
+     - :cspan:`2` A unique identifier for the variant
+   * - ``Epitope Seq``
      - :cspan:`2` The mutant peptide sequence for the epitope candidate
    * - ``Peptide``
      - The peptide sequence submitted to BLAST

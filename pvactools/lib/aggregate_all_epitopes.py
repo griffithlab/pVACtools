@@ -334,7 +334,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         #subset protein_coding dataframe to only include entries with a TSL < maximum_transcript_support_level
         tsl_df = biotype_df[biotype_df['Transcript Support Level'] != 'NA']
         tsl_df = tsl_df[tsl_df['Transcript Support Level'] != 'Not Supported']
-        tsl_df = tsl_df[tsl_df['Transcript Support Level'] < self.maximum_transcript_support_level]
+        tsl_df = tsl_df[tsl_df['Transcript Support Level'] <= self.maximum_transcript_support_level]
         #if this results in an empty dataframe, reset to previous dataframe
         if tsl_df.shape[0] == 0:
             tsl_df = biotype_df
