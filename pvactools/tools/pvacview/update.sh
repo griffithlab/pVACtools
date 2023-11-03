@@ -1,7 +1,7 @@
 LAB="griffith-lab"
 REPO="shiny-apps"
 IMAGE_NAME="pvacview"
-TAG_NAME="latest"
+TAG_NAME="latest" # do not change this unless you have looked at how your service fetches the tag
 REGION="us-central1"
 SERVICE_NAME="pvacview-latest"
 SERVICE_TAG=$1 # format like: v1-0-0
