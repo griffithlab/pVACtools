@@ -2,8 +2,9 @@ LAB="griffith-lab"
 REPO="shiny-apps"
 IMAGE_NAME="pvacview"
 TAG_NAME="latest"
-SERVICE_NAME="pvacview-latest"
 REGION="us-central1"
+SERVICE_NAME="pvacview-latest"
+SERVICE_TAG=$1 # format like: v1-0-0
 
 # check if Docker is running
 if ! docker info >/dev/null 2>&1; then
@@ -44,5 +45,5 @@ fi
 if [[ -z $(gcloud --project $LAB run services list | grep -w $SERVICE_NAME) ]]; then
   echo "<< Your service does not exist. You must initialize it first. >>"
 else
-  gcloud --project $LAB run services update $SERVICE_NAME --update-env-vars KEY=VALUE
+  gcloud --project $LAB run services update $SERVICE_NAME --update-env-vars KEY=VALUE --revision-suffix $SERVICE_TAG
 fi
