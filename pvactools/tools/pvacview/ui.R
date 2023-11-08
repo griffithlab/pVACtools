@@ -181,10 +181,25 @@ explore_tab <- tabItem(
             )
         ),
         fluidRow(
-            box(width = 12, title = "Transcript Set Detailed Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
+            box(width = 12, title = "Transcript and Peptide Set Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
                 tabBox(width = 12, title = " ",
                     tabPanel("Peptide Candidates from Selected Transcript Set",
                             DTOutput("peptideTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
+                    tabPanel("Anchor Heatmap",
+                        column(width = 6,
+                            h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
+                            h5("HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
+                                " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
+                            plotOutput(outputId = "peptideFigureLegend", height = "50px"),
+                            plotOutput(outputId = "anchorPlot", height = "500px")
+                        ) %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;",
+                        column(width = 6,
+                            h4("Anchor vs Mutation position Scenario Guide",
+                            img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/anchor.jpg",
+                                align = "center", height = "500px")
+                            )
+                        )
+                    ),
                     tabPanel("Transcripts in Set",
                             DTOutput("transcriptsTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%")
                 )
@@ -192,13 +207,15 @@ explore_tab <- tabItem(
         ),
         fluidRow(
             box(width = 12, title = "Additional Peptide Information",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
-                tabBox(title = " ", id = "info",
+                tabBox(width = 12, title = " ", id = "info",
                     tabPanel("IC50 Plot",
                         h4("Violin Plots showing distribution of MHC IC50 predictions for selected peptide pair (MT and WT)."),
+                        h5("Showcases individual binding prediction scores from each algorithm used. A solid line is used to represent the median score."),
                         plotOutput(outputId = "bindingData_IC50") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
                     ),
                     tabPanel("%ile Plot",
                         h4("Violin Plots showing distribution of MHC percentile predictions for selected peptide pair (MT and WT)."),
+                        h5("Showcases individual percentile scores from each algorithm used. A solid line is used to represent the median percentile score."),
                         plotOutput(outputId = "bindingData_percentile") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
                     ),
                     tabPanel("Binding Data",
@@ -218,25 +235,6 @@ explore_tab <- tabItem(
                         strong("NetMHCpanEL / NetMHCIIpanEL"), span(": A predictor trained on eluted ligand data. ("),
                         a(href = "https://academic.oup.com/nar/article/48/W1/W449/5837056", "Citation"), span(")"),
                         style = "overflow-x: scroll;"
-                    ),
-                    tabPanel("Anchor Heatmap",
-                        h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
-                        plotOutput(outputId = "peptideFigureLegend", height = "50px"),
-                        plotOutput(outputId = "anchorPlot") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
-                    )
-                ),
-                box(
-                    column(width = 4,
-                        h4("Allele Specific Anchor Prediction Heatmap"),
-                        h5(" This tab displays HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
-                            " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
-                        h4("MHC Binding Prediction Scores"),
-                        h5(" This tab contains violin plots that showcase individual binding prediction scores from each algorithm used. A solid line is used to represent the median score.")
-                    ),
-                    column(width = 8,
-                        box(title = "Anchor vs Mutation position Scenario Guide", collapsible = TRUE, collapsed = FALSE, width = 12,
-                            img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/anchor.jpg",
-                            align = "center", height = "350px", width = "600px"), style = "overflow-x: scroll;")
                     )
                 )
             )
