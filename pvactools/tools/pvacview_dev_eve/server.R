@@ -1365,64 +1365,178 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$visualize_neofox, {
     updateTabItems(session, "neofox_tabs", "neofox_explore")
   })
+  
+  observeEvent(input$neofox_page_length, {
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    df$pageLength <- as.numeric(input$neofox_page_length)
+  })
+  
   output$neofoxTable <- DT::renderDataTable(
     if (is.null(df_neofox$mainTable_neofox)) {
       return(datatable(data.frame("Annotated Table" = character())))
-    }else {
+    } else {
       datatable(df_neofox$mainTable_neofox,
                 escape = FALSE, class = "stripe",
-                options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = input$neofox_page_length,
-                               columnDefs = list(list(visible = FALSE, targets = c(-1:-12)),
-                                                 list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
-                               initComplete = htmlwidgets::JS(
-                                 "function(settings, json) {",
-                                 paste("$(this.api().table().header()).css({'font-size': '", "10pt", "'});"),
-                                 "}")),
+                options = list(
+                  lengthChange = FALSE,
+                  dom = "Bfrtip",
+                  server = FALSE,  # Enable server-side processing
+                  processing = TRUE,
+                  pageLength = input$neofox_page_length,
+                  columnDefs = list(list(visible = FALSE, targets = c(-1:-12)),
+                                    list(orderable = TRUE, targets = 0)),
+                  buttons = list(I("colvis"))
+                ),
                 selection = "multiple",
-                extensions = c("Buttons"))
-    }, server = FALSE)
+                extensions = c("Buttons")
+      )
+    }
+  )
+  
+  
   output$neofox_selected <- renderText({
     if (is.null(df_neofox$mainTable_neofox)) {
       return()
     }
     input$neofoxTable_rows_selected
   })
+  
+  
+  output$noefox_features_ui1 <- renderUI({
+    df <- df_neofox$mainTable_neofox
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    feature <- names(df)[sapply(df, is.numeric)]
+    default_selection <- "imputedGeneExpression"
+    pickerInput(inputId = "x_scatter",
+                label = "X Axis",
+                choices = feature,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$noefox_features_ui2 <- renderUI({
+    df <- df_neofox$mainTable_neofox
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    feature <- names(df)[sapply(df, is.numeric)]
+    default_selection <- "DAI_MHCI_bestAffinity"
+    pickerInput(inputId = "y_scatter",
+                label = "Y Axis",
+                choices = feature,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$noefox_features_ui3 <- renderUI({
+    df <- df_neofox$mainTable_neofox
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    feature <- names(df)[sapply(df, is.numeric)]
+    default_selection <- "IEDB_Immunogenicity_MHCI"
+    pickerInput(inputId = "color_scatter",
+                label = "Color",
+                choices = feature,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$noefox_features_ui4 <- renderUI({
+    df <- df_neofox$mainTable_neofox
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    feature <- names(df)[sapply(df, is.numeric)]
+    default_selection <- "Vaxrank_totalScore"
+    pickerInput(inputId = "size_scatter",
+                label = "Size",
+                choices = feature,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$scatter <- renderPlot({
+    withProgress(message = "Loading Scatter Plots", value = 0, {
+      req(input$x_scatter, input$y_scatter)  # Use req() to check if inputs are not NULL
+      
+      df <- df_neofox$mainTable_neofox
+      df <- type.convert(df, as.is = TRUE)
+      df[is.na(df)] <- 0
+      
+      df$Selected <- "No"
+      df[input$neofoxTable_rows_selected, "Selected"] <- "Yes"
+      
+      scatter_plot <- ggplot(df, aes(x = .data[[input$x_scatter]], y = .data[[input$y_scatter]])) +
+        geom_point(aes(color = .data[[input$color_scatter]], size = .data[[input$size_scatter]])) +  # Correct placement of aes() here
+        scale_color_gradient(low = "grey", high = "blue") +
+        theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+      
+      incProgress(1)
+      print(scatter_plot)
+    })
+  })
+  
+  
+  
+  # Drop down to select what features to show violin plots for
+  # only allow to select 5
+  output$noefox_features_ui <- renderUI({
+    df <- df_neofox$mainTable_neofox
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    feature <- names(df)[sapply(df, is.numeric)]
+    
+    default_selection <- c("imputedGeneExpression", "DAI_MHCI_bestAffinity", "IEDB_Immunogenicity_MHCI", "IEDB_Immunogenicity_MHCII", "MixMHCpred_bestScore_rank", "HexAlignmentScore_MHCI")
+    
+    pickerInput(inputId = "neofox_features",
+                label = "Plots to Display",
+                choices = feature,
+                selected = default_selection,
+                options = list(`live-search` = TRUE, "max-options" = 6),
+                multiple = TRUE,
+                )
+  })
+  
+  # Violin Plots
   output$neofox_violin_plots_row1 <- renderPlot({
     withProgress(message = "Loading Violin Plots", value = 0, {
-      if (length(input$neofoxTable_rows_selected) != 0) {
-        plot_cols_neofox <- c("mutatedXmer", "imputedGeneExpression", "DAI_MHCI_bestAffinity", "IEDB_Immunogenicity_MHCI")
+      if (length(input$neofoxTable_rows_selected) != 0 & length(input$neofox_features) != 0) {
+    
+        plot_cols_neofox <- c("mutatedXmer", input$neofox_features)
         plot_data_neofox <- df_neofox$mainTable_neofox[, plot_cols_neofox]
-        plot_data_neofox[, "imputedGeneExpression"] <- as.numeric(plot_data_neofox[, "imputedGeneExpression"])
-        plot_data_neofox[, "DAI_MHCI_bestAffinity"] <- as.numeric(plot_data_neofox[, "DAI_MHCI_bestAffinity"])
-        plot_data_neofox[, "IEDB_Immunogenicity_MHCI"] <- as.numeric(plot_data_neofox[, "IEDB_Immunogenicity_MHCI"])
+        plot_data_neofox <- type.convert(plot_data_neofox, as.is = TRUE)
+        plot_data_neofox[is.na(plot_data_neofox)] <- 0
+        
         plot_data_neofox$Selected <- "No"
         plot_data_neofox[input$neofoxTable_rows_selected, "Selected"] <- "Yes"
+        #reformat_data_neofox <- plot_data_neofox %>%
+          #gather("Feature", "Value", colnames(plot_data_neofox)[2]:tail(colnames(plot_data_neofox), n = 2))
         reformat_data_neofox <- plot_data_neofox %>%
-          gather("Feature", "Value", colnames(plot_data_neofox)[2]:tail(colnames(plot_data_neofox), n = 2))
+          gather("Feature", "Value", -c("mutatedXmer", "Selected"))
         
         
-        gene_expr_data_neofox <- reformat_data_neofox[reformat_data_neofox["Feature"] == "imputedGeneExpression", ]
-        gene_expr_plot_neofox <- ggplot(data = gene_expr_data_neofox, aes(x = Feature, y = Value)) + geom_violin() +
-          geom_jitter(data = gene_expr_data_neofox[gene_expr_data_neofox["Selected"] == "No", ], aes(color = Selected), size = 1, alpha = 0.5, stroke = 1, position = position_jitter(0.3)) +
-          geom_jitter(data = gene_expr_data_neofox[gene_expr_data_neofox["Selected"] == "Yes", ], aes(color = Selected), size = 2, alpha = 1, stroke = 1, position = position_jitter(0.3)) +
-          scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409")) +
-          theme(legend.position = "none")
-        
-        
-        
-        DAI_ClassI_data_neofox <- reformat_data_neofox[reformat_data_neofox["Feature"] == "DAI_MHCI_bestAffinity", ]
-        DAI_ClassI_plot_neofox <- ggplot(DAI_ClassI_data_neofox, aes(x = Feature, y = Value)) + geom_violin() +
-          geom_jitter(data = DAI_ClassI_data_neofox[DAI_ClassI_data_neofox["Selected"] == "No", ], aes(color = Selected), size = 1, alpha = 0.5, stroke = 1, position = position_jitter(0.3)) +
-          geom_jitter(data = DAI_ClassI_data_neofox[DAI_ClassI_data_neofox["Selected"] == "Yes", ], aes(color = Selected), size = 2, alpha = 1, stroke = 1, position = position_jitter(0.3)) +
-          scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409")) +
-          theme(legend.position = "none")
-        IEDB_Immuno_data_neofox <- reformat_data_neofox[reformat_data_neofox["Feature"] == "IEDB_Immunogenicity_MHCI", ]
-        IEDB_Immuno_plot_neofox <- ggplot(IEDB_Immuno_data_neofox, aes(x = Feature, y = Value)) + geom_violin() +
-          geom_jitter(data = IEDB_Immuno_data_neofox[IEDB_Immuno_data_neofox["Selected"] == "No", ], aes(color = Selected), size = 1, alpha = 0.5, stroke = 1, position = position_jitter(0.3)) +
-          geom_jitter(data = IEDB_Immuno_data_neofox[IEDB_Immuno_data_neofox["Selected"] == "Yes", ], aes(color = Selected), size = 2, alpha = 1, stroke = 1, position = position_jitter(0.3)) +
-          scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409"))
-        p_neofox <- grid.arrange(gene_expr_plot_neofox, DAI_ClassI_plot_neofox, IEDB_Immuno_plot_neofox, ncol = 3)
-        incProgress(1)
+        p_neofox <- ggplot(reformat_data_neofox, aes(x = "", y = Value)) + geom_violin() +
+           geom_jitter(data = reformat_data_neofox[reformat_data_neofox["Selected"] == "No", ], aes(color = Selected), size = 1, alpha = 0.5, stroke = 1, position = position_jitter(0.3)) +
+           geom_jitter(data = reformat_data_neofox[reformat_data_neofox["Selected"] == "Yes", ], aes(color = Selected), size = 2, alpha = 1, stroke = 1, position = position_jitter(0.3)) +
+           scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409")) +
+          labs(x = NULL) +
+          facet_wrap(~Feature, scales="free", ncol=6) +
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 10), axis.ticks = element_line(size = 3), legend.text = element_text(size = 10), legend.title = element_text(size = 10))
+
+        incProgress(0.5)
         print(p_neofox)
       }else {
         p_neofox <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
@@ -1432,46 +1546,7 @@ server <- shinyServer(function(input, output, session) {
       }
     })
   })
-  output$neofox_violin_plots_row2 <- renderPlot({
-    withProgress(message = "Loading Violin Plots", value = 0, {
-      if (length(input$neofoxTable_rows_selected) != 0) {
-        plot_cols <- c("mutatedXmer", "MixMHCpred_bestScore_rank", "HexAlignmentScore_MHCI", "PRIME_best_rank")
-        plot_data <- df_neofox$mainTable_neofox[, plot_cols]
-        plot_data[, "MixMHCpred_bestScore_rank"] <- as.numeric(plot_data[, "MixMHCpred_bestScore_rank"])
-        plot_data[, "HexAlignmentScore_MHCI"] <- as.numeric(plot_data[, "HexAlignmentScore_MHCI"])
-        plot_data[, "PRIME_best_rank"] <- as.numeric(plot_data[, "PRIME_best_rank"])
-        plot_data$Selected <- "No"
-        plot_data[input$neofoxTable_rows_selected, "Selected"] <- "Yes"
-        reformat_data <- plot_data %>%
-          gather("Feature", "Value", colnames(plot_data)[2]:tail(colnames(plot_data), n = 2))
-        mixpred_data <- reformat_data[reformat_data["Feature"] == "MixMHCpred_bestScore_rank", ]
-        mixpred_plot <- ggplot(data = mixpred_data, aes(x = Feature, y = Value)) + geom_violin() +
-          geom_jitter(data = mixpred_data[mixpred_data["Selected"] == "No", ], aes(color = Selected), size = 1, alpha = 0.5, stroke = 1, position = position_jitter(0.3)) +
-          geom_jitter(data = mixpred_data[mixpred_data["Selected"] == "Yes", ], aes(color = Selected), size = 2, alpha = 1, stroke = 1, position = position_jitter(0.3)) +
-          scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409")) +
-          theme(legend.position = "none")
-        hex_data <- reformat_data[reformat_data["Feature"] == "HexAlignmentScore_MHCI", ]
-        hex_plot <- ggplot(hex_data, aes(x = Feature, y = Value)) + geom_violin() +
-          geom_jitter(data = hex_data[hex_data["Selected"] == "No", ], aes(color = Selected), size = 1, alpha = 0.5, stroke = 1, position = position_jitter(0.3)) +
-          geom_jitter(data = hex_data[hex_data["Selected"] == "Yes", ], aes(color = Selected), size = 2, alpha = 1, stroke = 1, position = position_jitter(0.3)) +
-          scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409")) +
-          theme(legend.position = "none")
-        prime_data <- reformat_data[reformat_data["Feature"] == "PRIME_best_rank", ]
-        prime_plot <- ggplot(prime_data, aes(x = Feature, y = Value)) + geom_violin() +
-          geom_jitter(data = prime_data[prime_data["Selected"] == "No", ], aes(color = Selected), size = 1, alpha = 0.5, stroke = 1, position = position_jitter(0.3)) +
-          geom_jitter(data = prime_data[prime_data["Selected"] == "Yes", ], aes(color = Selected), size = 2, alpha = 1, stroke = 1, position = position_jitter(0.3)) +
-          scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409"))
-        p_neofox <- grid.arrange(mixpred_plot, hex_plot, prime_plot, ncol = 3)
-        incProgress(1)
-        print(p)
-      }else {
-        p_neofox <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
-          theme_void() + theme(legend.position = "none", panel.border = element_blank())
-        incProgress(1)
-        print(p)
-      }
-    })
-  })
+
   ############### Custom Tab ##########################
   df_custom <- reactiveValues(
     selectedRow = 1,
