@@ -39,12 +39,34 @@ neofox_tab <- tabItem("neofox",
                         span("Currently investigating row(s): ", verbatimTextOutput("neofox_selected")),
                         style = "overflow-x: scroll;font-size:100%")
             ),
+
             fluidRow(
-                box(width = 12, title = "Data Visualization",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
-                    h4("Violin Plots showing distribution of various neoantigen features for selected variants."),
-                    plotOutput(outputId = "neofox_violin_plots_row1") %>% withSpinner(color = "#8FCCFA"), 
-                    plotOutput(outputId = "neofox_violin_plots_row2") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
-                )
+              box(width = 12, 
+                  title = "Data Visualization",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                  h4("Violin Plots showing distribution of various neoantigen features for selected variants."),
+                  uiOutput("noefox_features_ui"),
+                  plotOutput(outputId = "neofox_violin_plots_row1") %>% withSpinner(color = "#8FCCFA")
+                  )
+            ),
+            
+            fluidRow(
+              box(width = 12,
+                  title = "Dynamic Scatter Plot", status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                  h4("Scatter plot to explore characteristics of data"),
+                  
+                  sidebarLayout(
+                    sidebarPanel(
+                      uiOutput("noefox_features_ui1"),
+                      uiOutput("noefox_features_ui2"),
+                      uiOutput("noefox_features_ui3"),
+                      uiOutput("noefox_features_ui4")
+                    ),
+                    
+                    mainPanel(
+                      plotOutput("scatter")
+                    )
+                  )
+              )
             )
         )
     )
