@@ -34,10 +34,11 @@ neofox_tab <- tabItem("neofox",
                         title = "Annotated Neoantigen Candidates using NeoFox",
                         status = "primary", solidHeader = TRUE, collapsible = TRUE,
                         enable_sidebar = TRUE, sidebar_width = 25, sidebar_start_open = TRUE,
-                        selectInput("neofox_page_length", "Number of entries displayed per page:", selected = "10", c("10", "20", "50", "100"), width = "280px"),
+                        #selectInput("neofox_page_length", "Number of entries displayed per page:", selected = "10", c("10", "20", "50", "100"), width = "280px"),
                         DTOutput("neofoxTable") %>% withSpinner(color = "#8FCCFA"),
                         span("Currently investigating row(s): ", verbatimTextOutput("neofox_selected")),
-                        style = "overflow-x: scroll;font-size:100%")
+                        style = "overflow-x: scroll;font-size:100%"
+                        )
             ),
 
             fluidRow(
