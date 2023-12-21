@@ -1373,28 +1373,41 @@ server <- shinyServer(function(input, output, session) {
     df$pageLength <- as.numeric(input$neofox_page_length)
   })
   
+  # output$neofoxTable <- DT::renderDataTable(
+  #   if (is.null(df_neofox$mainTable_neofox)) {
+  #     return(datatable(data.frame("Annotated Table" = character())))
+  #   } else {
+  #     datatable(df_neofox$mainTable_neofox,
+  #               escape = FALSE, class = "stripe",
+  #               options = list(
+  #                 lengthChange = FALSE,
+  #                 dom = "Bfrtip",
+  #                 server = FALSE,  # Enable server-side processing
+  #                 processing = TRUE,
+  #                 pageLength = input$neofox_page_length,
+  #                 columnDefs = list(list(visible = FALSE, targets = c(-1:-12)),
+  #                                   list(orderable = TRUE, targets = 0)),
+  #                 buttons = list(I("colvis"))
+  #               ),
+  #               selection = "multiple",
+  #               extensions = c("Buttons")
+  #     )
+  #   }
+  # )
+  
   output$neofoxTable <- DT::renderDataTable(
     if (is.null(df_neofox$mainTable_neofox)) {
-      return(datatable(data.frame("Annotated Table" = character())))
+         return(datatable(data.frame("Annotated Table" = character())))
     } else {
       datatable(df_neofox$mainTable_neofox,
-                escape = FALSE, class = "stripe",
-                options = list(
-                  lengthChange = FALSE,
-                  dom = "Bfrtip",
-                  server = FALSE,  # Enable server-side processing
-                  processing = TRUE,
-                  pageLength = input$neofox_page_length,
-                  columnDefs = list(list(visible = FALSE, targets = c(-1:-12)),
-                                    list(orderable = TRUE, targets = 0)),
-                  buttons = list(I("colvis"))
-                ),
-                selection = "multiple",
-                extensions = c("Buttons")
-      )
+                              escape = FALSE, class = "stripe",
+                              selection = "multiple",
+                              extensions = c("Buttons")
+
+                    )
     }
   )
-  
+
   
   output$neofox_selected <- renderText({
     if (is.null(df_neofox$mainTable_neofox)) {
