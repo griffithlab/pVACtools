@@ -131,6 +131,8 @@ class VcfConverter(InputFileConverter):
         for header in headers:
             if 'GRCh38' in header.value:
                 return True
+            if 'GRCm38' in header.value:
+                return True
 
         return False
 
