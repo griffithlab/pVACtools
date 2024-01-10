@@ -395,3 +395,23 @@ class OutputParserTests(unittest.TestCase):
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output_percentile_empty.iedb.parsed.tsv")
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+
+    def test_parse_output_runs_and_produces_expected_output_for_empty_percentile_2(self):
+        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "mhcflurry_no_percentile", "input_no_percentile.MHCflurry.HLA-C*15:05.8.tsv")]
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "mhcflurry_no_percentile", "input_no_percentile.tsv")
+        parse_output_key_file = os.path.join(self.test_data_dir, "mhcflurry_no_percentile", "input_no_percentile.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'input_iedb_files'       : parse_output_input_iedb_file,
+            'input_tsv_file'         : parse_output_input_tsv_file,
+            'key_file'               : parse_output_key_file,
+            'output_file'            : parse_output_output_file.name,
+            'sample_name'            : 'input_no_percentile',
+            'flurry_state'           : 'both',
+        }
+        parser = DefaultOutputParser(**parse_output_params)
+
+        self.assertFalse(parser.execute())
+        expected_output_file  = os.path.join(self.test_data_dir, "mhcflurry_no_percentile", "output_no_percentile.iedb.parsed.tsv")
+        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
