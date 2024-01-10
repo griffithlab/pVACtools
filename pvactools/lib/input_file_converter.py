@@ -468,7 +468,9 @@ class FusionInputConverter(InputFileConverter):
             sequence = full_sequence.replace(separator, '')
             return (fusion_position, sequence)
 
-    def parse_exon_file(self, input_file):
+    def parse_exon_file(self, input_file, transcripts):
+        (five_prime_transcript, three_prime_transcript) = transcripts.split('-')
+
         exon_file = input_file.replace('_protein.fa', '.exons.txt')
         if not os.path.exists(exon_file):
             exon_file = exon_file.replace('.txt', '.csv')
@@ -480,11 +482,11 @@ class FusionInputConverter(InputFileConverter):
             for record in reader:
                 exon_start = int(record['exon_start'])
                 exon_end = int(record['exon_end'])
-                if record['exon_gene_source'] == "'5 gene":
+                if record['exon_gene_source'] == "'5 gene" and record["5'_transcript"] == five_prime_transcript and record["3'_transcript"] == three_prime_transcript:
                     five_prime_chr = record['exon_chr']
                     five_prime_positions.append(exon_start)
                     five_prime_positions.append(exon_end)
-                else:
+                elif record['exon_gene_source'] == "'3 gene" and record["5'_transcript"] == five_prime_transcript and record["3'_transcript"] == three_prime_transcript:
                     three_prime_chr = record['exon_chr']
                     three_prime_positions.append(exon_start)
                     three_prime_positions.append(exon_end)
@@ -605,13 +607,18 @@ class FusionInputConverter(InputFileConverter):
         output_rows = []
         count = 1
         for input_file in sorted(glob.glob(os.path.join(self.input_file, '*', '*_protein.fa'))):
-            (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end) = self.parse_exon_file(input_file)
-            if starfusion_entries is not None:
-                starfusion_entry = self.find_matching_starfusion_entry_for_agfusion(starfusion_entries, five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end)
-            else:
-                starfusion_entry = None
             for record in SeqIO.parse(input_file, "fasta"):
                 record_info = dict(map(lambda x: x.split(': '), record.description.split(', ')[1:]))
+
+                transcripts = record_info['transcripts'].replace('_', '-')
+
+                (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end) = self.parse_exon_file(input_file, transcripts)
+
+                if starfusion_entries is not None:
+                    starfusion_entry = self.find_matching_starfusion_entry_for_agfusion(starfusion_entries, five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end)
+                else:
+                    starfusion_entry = None
+
                 if record_info['effect'] == 'in-frame' or record_info['effect'] == 'in-frame (with mutation)':
                     variant_type = 'inframe_fusion'
                 elif record_info['effect'] == 'out-of-frame':
@@ -645,7 +652,7 @@ class FusionInputConverter(InputFileConverter):
                     'variant_type'               : variant_type,
                     'protein_position'           : fusion_position,
                     'fusion_amino_acid_sequence' : fusion_amino_acid_sequence,
-                    'transcript_name'            : record_info['transcripts'],
+                    'transcript_name'            : transcripts,
                     'index'                      : pvactools.lib.run_utils.construct_index(count, record_info['genes'], record_info['transcripts'], variant_type, fusion_position),
                 }
                 if starfusion_entry is not None:
