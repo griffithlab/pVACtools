@@ -13,6 +13,7 @@ from collections import defaultdict
 from Bio import SeqIO
 import random
 import uuid
+from datetime import datetime
 
 class IEDB(metaclass=ABCMeta):
     @classmethod
@@ -72,7 +73,11 @@ class IEDB(metaclass=ABCMeta):
 
             response = requests.post(self.url, data=data)
             retries = 0
-            while (response.status_code == 500 or response.status_code == 403) and retries < iedb_retries:
+            while (response.status_code == 500 or response.status_code == 403 or response.text.count("\n") == 1) and retries < iedb_retries:
+                if response.text.count("\n") == 1:
+                    print("No data returned. Retrying.")
+                    print(datetime.now())
+                    print(data)
                 random.seed(uuid.uuid4().int)
                 time.sleep(random.randint(30,90) * retries)
                 retries += 1
