@@ -13,6 +13,7 @@ from collections import defaultdict
 from Bio import SeqIO
 import random
 import uuid
+import io
 from datetime import datetime
 
 class IEDB(metaclass=ABCMeta):
@@ -51,6 +52,21 @@ class IEDB(metaclass=ABCMeta):
     def check_length_valid_for_allele(self, length, allele):
         return True
 
+    def check_iedb_api_response_matches(self, input_file, response_text, epitope_length):
+        input_peptides = set()
+        with open(input_file) as input_fh:
+            for record in SeqIO.parse(input_fh, "fasta"):
+                seq = record.seq
+                input_peptides.update([seq[i:i+epitope_length] for i in range(0, len(seq)-epitope_length+1)])
+
+        output_peptides = set()
+        for record in csv.DictReader(io.StringIO(response_text), delimiter="\t"):
+            if 'peptide' in record:
+                output_peptides.add(record['peptide'])
+
+        return (input_peptides == output_peptides, input_peptides, output_peptides)
+
+
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
         if iedb_executable_path is not None:
             arguments = [sys.executable]
@@ -63,8 +79,9 @@ class IEDB(metaclass=ABCMeta):
             return (response_text, 'wb')
         else:
             with open(input_file, 'r') as input_fh:
+                sequence_text = input_fh.read()
                 data = {
-                    'sequence_text': input_fh.read(),
+                    'sequence_text': sequence_text,
                     'method':        self.iedb_prediction_method,
                     'allele':        allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
                     'length':        epitope_length,
@@ -72,23 +89,37 @@ class IEDB(metaclass=ABCMeta):
                 }
 
             response = requests.post(self.url, data=data)
+            (peptides_match, input_peptides, output_peptides) = self.check_iedb_api_response_matches(input_file, response.text, epitope_length)
             retries = 0
-            while (response.status_code == 500 or response.status_code == 403 or response.text.count("\n") == 1) and retries < iedb_retries:
-                if response.text.count("\n") == 1:
-                    print("No data returned. Retrying.")
+            while (response.status_code == 500 or response.status_code == 403 or not peptides_match) and retries < iedb_retries:
+                if response.status_code == 200 and not peptides_match:
+                    print("IEDB API Output doesn't match input. Retrying.")
                     print(datetime.now())
+                    print("Inputs:")
                     print(data)
+                    print("Output:")
+                    print(response.text)
+
                 random.seed(uuid.uuid4().int)
                 time.sleep(random.randint(30,90) * retries)
                 retries += 1
                 print("IEDB: Retry %s of %s" % (retries, iedb_retries))
                 response = requests.post(self.url, data=data)
+                (peptides_match, input_peptides, output_peptides) = self.check_iedb_api_response_matches(input_file, response.text, epitope_length)
 
             if response.status_code != 200:
                 sys.exit("Error posting request to IEDB.\n%s" % response.text)
-            response_text = response.text
+            if not peptides_match:
+                print("Error. IEDB API Output doesn't match input and number of retries exceeded.")
+                print(datetime.now())
+                print("Inputs:")
+                print(data)
+                print("Output:")
+                print(response.text)
+                sys.exit("Error. IEDB API Output doesn't match input and number of retries exceeded.")
+
             output_mode = 'w'
-            return (response_text, 'w')
+            return (response.text, 'w')
 
 class MHCnuggets(metaclass=ABCMeta):
     def check_length_valid_for_allele(self, length, allele):
