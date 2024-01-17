@@ -67,7 +67,11 @@ class IEDB(metaclass=ABCMeta):
         return (input_peptides == output_peptides, input_peptides, output_peptides)
 
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        if log_dir is not None:
+            log_file = os.path.join(log_dir, "iedb.log")
+        else:
+            log_file = None
         if iedb_executable_path is not None:
             arguments = [sys.executable]
             arguments.extend(self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length))
@@ -93,12 +97,17 @@ class IEDB(metaclass=ABCMeta):
             retries = 0
             while (response.status_code == 500 or response.status_code == 403 or not peptides_match) and retries < iedb_retries:
                 if response.status_code == 200 and not peptides_match:
-                    print("IEDB API Output doesn't match input. Retrying.")
-                    print(datetime.now())
-                    print("Inputs:")
-                    print(data)
-                    print("Output:")
-                    print(response.text)
+                    log_text = "IEDB API Output doesn't match input. Retrying.\n"
+                    log_text += "{}\n".format(datetime.now())
+                    log_text += "Inputs:\n"
+                    log_text += "{}\n".format(data)
+                    log_text += "Output:\n"
+                    log_text += "{}\n".format(response.text)
+                    if log_file:
+                        with open(log_file, "a") as log_fh:
+                            log_fh.write(log_text)
+                    else:
+                        print(log_text)
 
                 random.seed(uuid.uuid4().int)
                 time.sleep(random.randint(30,90) * retries)
@@ -110,12 +119,17 @@ class IEDB(metaclass=ABCMeta):
             if response.status_code != 200:
                 sys.exit("Error posting request to IEDB.\n%s" % response.text)
             if not peptides_match:
-                print("Error. IEDB API Output doesn't match input and number of retries exceeded.")
-                print(datetime.now())
-                print("Inputs:")
-                print(data)
-                print("Output:")
-                print(response.text)
+                log_text = "Error. IEDB API Output doesn't match input and number of retries exceeded."
+                log_text += "{}\n".format(datetime.now())
+                log_text += "Inputs:\n"
+                log_text += "{}\n".format(data)
+                log_text += "Output:\n"
+                log_text += "{}\n".format(response.text)
+                if log_file:
+                    with open(log_file, "a") as log_fh:
+                        log_fh.write(log_text)
+                else:
+                    print(log_text)
                 sys.exit("Error. IEDB API Output doesn't match input and number of retries exceeded.")
 
             output_mode = 'w'
@@ -132,7 +146,7 @@ class MHCnuggets(metaclass=ABCMeta):
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, class_type, tmp_dir=None):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, class_type, tmp_dir=None, log_dir=None):
         tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
         script = os.path.join(os.path.dirname(os.path.realpath(__file__)), "call_mhcnuggets.py")
         arguments = ["python", script, input_file, allele, str(epitope_length), class_type, tmp_output_file.name]
@@ -343,7 +357,7 @@ class MHCflurry(MHCI):
             epitopes[i+1] = sequence[i:i+length]
         return epitopes
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
@@ -401,7 +415,7 @@ class MHCnuggetsI(MHCI, MHCnuggets):
     def mhcnuggets_allele(self, allele):
         return allele.replace('*', '')
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
         return MHCnuggets.predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, 'I', tmp_dir=tmp_dir)
 
 class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
@@ -495,7 +509,7 @@ class MHCnuggetsII(MHCII, MHCnuggets):
     def mhcnuggets_allele(self,allele):
         return "HLA-{}".format(allele).replace('*', '')
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
         return MHCnuggets.predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, 'II', tmp_dir=tmp_dir)
 
 class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
