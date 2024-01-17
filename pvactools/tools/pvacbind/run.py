@@ -3,6 +3,7 @@ import argparse
 import os
 import shutil
 import yaml
+import platform
 
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import PvacbindPipeline
@@ -49,6 +50,9 @@ def main(args_input = sys.argv[1:]):
 
     if args.iedb_retries > 100:
         sys.exit("The number of IEDB retries must be less than or equal to 100")
+
+    if args.n_threads > 1 and platform.system() == "Darwin":
+        raise Exception("Multithreading is not supported on MacOS")
 
     input_file_type = 'fasta'
     base_output_dir = os.path.abspath(args.output_dir)
