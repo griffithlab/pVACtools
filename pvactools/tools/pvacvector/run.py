@@ -15,6 +15,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 import itertools
 import json
+import platform
 
 from pvactools.lib.optimal_peptide import OptimalPeptide
 from pvactools.lib.vector_visualization import VectorVisualization
@@ -411,7 +412,6 @@ def create_dna_backtranslation(results_file, dna_results_file):
     SeqIO.write([output_record], dna_results_file, 'fasta')
 
 def main(args_input=sys.argv[1:]):
-
     parser = define_parser()
     args = parser.parse_args(args_input)
 
@@ -432,6 +432,9 @@ def main(args_input=sys.argv[1:]):
         generate_input_fasta = True
     else:
         sys.exit("Input file type not as expected. Needs to be a .fa or a .tsv file")
+
+    if args.n_threads > 1 and platform.system() == "Darwin":
+        raise Exception("Multithreading is not supported on MacOS")
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = pvactools.lib.run_utils.split_algorithms(args.prediction_algorithms)
     if len(class_i_prediction_algorithms) == 0:
