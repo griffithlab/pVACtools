@@ -80,7 +80,7 @@ setup(
         'biopython==1.77',
         'networkx',
         'simanneal',
-        'pandas',
+        'pandas<2.1.0',
         'wget',
         'pysam',
         'Pillow',
