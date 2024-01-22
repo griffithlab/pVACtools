@@ -37,11 +37,11 @@ created):
    * - ``<sample_name>.filtered.tsv``
      - The above file after applying all filters, with cleavage site and stability
        predictions added.
-   * - ``<sample_name>.filtered.tsv.reference_matches`` (optional)
-     - A file outlining details of reference proteome matches
    * - ``<sample_name>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
-       the best epitope for each mutation in an easy-to-read format.
+       the best epitope for each mutation in an easy-to-read format. Not generated when running with elution algorithms only.
+   * - ``<sample_name>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
+     - A file outlining details of reference proteome matches
 
 Filters applied to the filtered.tsv file
 ----------------------------------------
@@ -88,6 +88,9 @@ _______________________________________________
 - MHCflurryEL
 - NetMHCpanEL
 - NetMHCIIpanEL
+
+Please note that when running pVACfuse with only elution algorithms, no
+aggregate report is created.
 
 all_epitopes.tsv and filtered.tsv Report Columns
 ------------------------------------------------
@@ -323,19 +326,9 @@ option is chosen.
    * - Column Name
      - Description (BLAST)
      - Description (reference fasta)
-   * - ``Chromosome``
-     - :cspan:`2` The chromosome of this variant
-   * - ``Start``
-     - :cspan:`2` The start position of this variant in the zero-based, half-open coordinate system
-   * - ``Stop``
-     - :cspan:`2` The stop position of this variant in the zero-based, half-open coordinate system
-   * - ``Reference``
-     - :cspan:`2` The reference allele
-   * - ``Variant``
-     - :cspan:`2` The alt allele
-   * - ``Transcript``
-     - :cspan:`2` The Ensembl ID of the affected transcript
-   * - ``MT Epitope Seq``
+   * - ``ID``
+     - :cspan:`2` A unique identifier for the fusion
+   * - ``Epitope Seq``
      - :cspan:`2` The mutant peptide sequence for the epitope candidate
    * - ``Peptide``
      - The peptide sequence submitted to BLAST

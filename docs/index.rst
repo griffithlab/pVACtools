@@ -51,6 +51,15 @@ Contents
    contact
    mailing_list
 
+New in Release |release|
+------------------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- A bug in the aggregate report creation incorrectly evaluated the Transcript
+  Support Level and resulted in picking the wrong Best Transcript in some
+  cases.
+
 New in Version |version|
 ------------------------
 

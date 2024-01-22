@@ -26,7 +26,7 @@ def define_parser():
     parser.add_argument(
         "input_vcf",
         help="A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
-            +"Wildtype protein sequence, and Downstream protein sequence information."
+            +"Wildtype protein sequence, and Frameshift protein sequence information."
             +"The VCF may be gzipped (requires tabix index)."
     )
     parser.add_argument(
@@ -59,10 +59,9 @@ def define_parser():
     )
     parser.add_argument(
         "--aggregate-report-evaluation",
-        help="When running with an aggregate report input TSV, only include variants with this evaluation. Specifiy multiple times to include multiple evaluation states.",
-        nargs="*",
-        default=['Accept'],
-        choices=["Pending", "Accept", "Reject", "Review"]
+        help="When running with an aggregate report input TSV, only include variants with this evaluation. Valid values for this field are Accept, Reject, Pending, and Review. Specifiy multiple values as a comma-separated list to include multiple evaluation states.",
+        default='Accept',
+        type=lambda s:[e for e in s.split(',')],
     )
     parser.add_argument(
         "-d", "--downstream-sequence-length",
@@ -89,7 +88,7 @@ def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, 
         convert_params['proximal_variants_vcf'] = phased_proximal_variants_vcf
         proximal_variants_tsv = os.path.join(temp_dir, 'proximal_variants.tsv')
         convert_params['proximal_variants_tsv'] = proximal_variants_tsv
-        convert_params['flanking_bases'] = flanking_sequence_length * 4
+        convert_params['flanking_bases'] = (flanking_sequence_length + 1)* 4
     else:
         proximal_variants_tsv = None
     if pass_only:
@@ -166,13 +165,7 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
                         continue
                 else:
                     (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
-                    transcript_regex = '^.*(ENST[0-9|.]+)$'
-                    transcript_p = re.compile(transcript_regex)
-                    m = transcript_p.match(rest_record_id)
-                    if m:
-                        transcript = m.group(1)
-                    else:
-                        raise Exception("Unexpected record_id format: {}".format(record_id))
+                    (peptide_type, count, gene, transcript) = rest_record_id.split(".", 3)
                     (parsed_aa_change, _, _, _) = index_to_aggregate_report_aa_change(aa_change, variant_type)
                     matches = [i for i in tsv_indexes if i['Best Transcript'] == transcript and i['AA Change'] == parsed_aa_change and i['Evaluation'] in aggregate_report_evaluation]
                     if len(matches) == 0:
@@ -193,6 +186,9 @@ def main(args_input = sys.argv[1:]):
         downstream_sequence_length = int(args.downstream_sequence_length)
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
+
+    if not (set(args.aggregate_report_evaluation)).issubset(set(['Accept', 'Reject', 'Review', 'Pending'])):
+        sys.exit("Aggregate report evaluation ({}) contains invalid values.".format(args.aggregate_report_evaluation))
 
     temp_dir = tempfile.mkdtemp()
     proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only)
