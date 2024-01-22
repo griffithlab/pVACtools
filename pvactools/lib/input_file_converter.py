@@ -701,7 +701,7 @@ class FusionInputConverter(InputFileConverter):
             for record in reader:
                 (five_prime_chr, five_prime_start) = record['breakpoint1'].split(':')
                 (three_prime_chr, three_prime_start) = record['breakpoint2'].split(':')
-                if record['peptide_sequence'] == '.':
+                if record['peptide_sequence'] == '.' or record['peptide_sequence'] is None or record['peptide_sequence'] == "":
                     continue
                 (fusion_position, fusion_amino_acid_sequence) = self.determine_fusion_sequence(record['peptide_sequence'], '|')
                 gene_name = "{}-{}".format(record['#gene1'], record['gene2'])

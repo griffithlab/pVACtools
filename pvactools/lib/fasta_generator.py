@@ -33,6 +33,13 @@ class FastaGenerator(metaclass=ABCMeta):
         self.proximal_variants_file     = kwargs.pop('proximal_variants_file', None)
         self.proximal_variants          = self.parse_proximal_variants_file()
 
+
+    def contains_invalid_characters(self, sequence):
+        for character in ['*', 'X', '?']:
+            if character in sequence:
+                return True
+        return False
+
     def position_out_of_bounds(self, position, sequence):
         return position > len(sequence)-1
 
@@ -305,10 +312,7 @@ class FusionFastaGenerator(FastaGenerator):
             if subsequence.endswith('X'):
                 subsequence = subsequence[:-1]
 
-            if '*' in subsequence:
-                continue
-
-            if 'X' in subsequence:
+            if self.contains_invalid_characters(subsequence):
                 continue
 
             if len(subsequence) < self.epitope_length:

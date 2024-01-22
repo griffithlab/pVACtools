@@ -268,17 +268,12 @@ class CalculateReferenceProteomeSimilarity:
     def _get_full_peptide(self, line, mt_records_dict, wt_records_dict):
         for record_id in mt_records_dict.keys():
             (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
-            transcript_regex = '^.*(ENST[0-9|.]+)$'
-            transcript_p = re.compile(transcript_regex)
-            m = transcript_p.match(rest_record_id)
-            if m:
-                transcript = m.group(1)
-            else:
-                raise Exception("Unexpected record_id format: {}".format(record_id))
+            (count, gene, transcript) = rest_record_id.split(".", 2)
             (parsed_aa_change, pos, wt_aa, mt_aa) = index_to_aggregate_report_aa_change(aa_change, variant_type)
             if line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
                 return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, mt_aa, wt_aa)
-        raise Exception("Unable to find full_peptide for variant {}".format(line['ID']))
+        print("Unable to find full_peptide for variant {}".format(line['ID']))
+        return (None, None, variant_type, mt_aa, wt_aa)
 
     def _get_peptide(self, line, mt_records_dict, wt_records_dict):
         ## Get epitope, peptide and full_peptide
@@ -292,8 +287,19 @@ class CalculateReferenceProteomeSimilarity:
             if self._input_tsv_type(line) == 'aggregated':
                 epitope = line['Best Peptide']
                 (full_peptide, wt_peptide, variant_type, mt_amino_acids, wt_amino_acids) = self._get_full_peptide(line, mt_records_dict, wt_records_dict)
+                if full_peptide is None:
+                    return None, None
                 if variant_type != 'FS':
-                    mt_pos = int(line['Pos'].split('-')[0])
+                    if line['Pos'] == 'NA':
+                        mt_pos = None
+                        for i,(wt_aa,mt_aa) in enumerate(zip(wt_peptide,full_peptide)):
+                            if wt_aa != mt_aa:
+                                mt_pos = i
+                                break
+                        if mt_pos is None:
+                            return None, full_peptide
+                    else:
+                        mt_pos = int(line['Pos'].split('-')[0])
             else:
                 epitope = line['MT Epitope Seq']
                 full_peptide = mt_records_dict[line['Index']]
@@ -452,6 +458,20 @@ class CalculateReferenceProteomeSimilarity:
                 peptide, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
 
                 if self.peptide_fasta:
+                    if peptide is None:
+                        if self._input_tsv_type(line) == 'aggregated':
+                            line['Ref Match'] = 'Not Run'
+                            if self.aggregate_metrics_file:
+                                self.aggregate_metrics[line['ID']]['reference_matches'] = {
+                                    'count': 0,
+                                    'query_peptide': peptide,
+                                    'matches': []
+                                }
+                        else:
+                            line['Reference Match'] = 'Not Run'
+                        writer.writerow(line)
+                        continue
+
                     results = processed_peptides[peptide]
                 else:
                     results = processed_peptides[full_peptide]
@@ -495,7 +515,7 @@ class CalculateReferenceProteomeSimilarity:
                         for query_window, hit_reference_matches in groupby(metric_lines,key=lambda x:x['Match Window']):
                             hit_reference_matches = list(hit_reference_matches)
                             gene_regex = '^.*gene_symbol:([0-9|A-Z]+).*$'
-                            transcript_regex = '^.*transcript:(ENST[0-9|.]+).*$'
+                            transcript_regex = '^.*transcript:(ENS[0-9|A-Z|.]+).*$'
                             gene_p = re.compile(gene_regex)
                             transcript_p = re.compile(transcript_regex)
                             genes = []
@@ -552,7 +572,8 @@ class CalculateReferenceProteomeSimilarity:
             for line in reader:
                 peptide, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
                 if self.peptide_fasta:
-                    unique_peptides.add(peptide)
+                    if peptide is not None:
+                        unique_peptides.add(peptide)
                 else:
                     unique_peptides.add(full_peptide)
 
