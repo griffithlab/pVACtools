@@ -329,6 +329,7 @@ class CalculateReferenceProteomeSimilarity:
 
 
     def _call_blast(self, full_peptide, p):
+        word_size = min(self.match_length, 7, int(len(full_peptide)/2))
         if self.blastp_path is not None: # if blastp installed locally, perform BLAST with it
 
             # create a SeqRecord of full_peptide and write it to a tmp file
@@ -337,7 +338,7 @@ class CalculateReferenceProteomeSimilarity:
             SeqIO.write([record], tmp_peptide_fh.name, "fasta")
 
             # configure args for local blastp, run it and put results in new tmp file
-            arguments = [self.blastp_path, '-query', tmp_peptide_fh.name, '-db', self.blastp_db, '-outfmt', '16', '-word_size', str(min(self.match_length, 7)), '-gapopen', '32767', '-gapextend', '32767']
+            arguments = [self.blastp_path, '-query', tmp_peptide_fh.name, '-db', self.blastp_db, '-outfmt', '16', '-word_size', str(word_size), '-gapopen', '32767', '-gapextend', '32767']
             result_handle = tempfile.NamedTemporaryFile(delete=False)
             response = run(arguments, stdout=result_handle, check=True)
             result_handle.seek(0)
@@ -347,7 +348,7 @@ class CalculateReferenceProteomeSimilarity:
             with p.lock: # stagger calls to qblast
                 if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0': # we don't need to sleep during testing since this is mocked and not actually calling the API
                     sleep(10)
-            result_handle = NCBIWWW.qblast("blastp", self.blastp_db, full_peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
+            result_handle = NCBIWWW.qblast("blastp", self.blastp_db, full_peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=word_size, gapcosts='32767 32767', hitlist_size=500)
 
         return result_handle
 
