@@ -1,9 +1,9 @@
-IMAGE_NAME="testing"
+IMAGE_NAME="pvacview"
 TAG_NAME="latest" # do not change this unless you have looked at how your service fetches the tag
 REGION="us-central1"
 LAB="griffith-lab" # also the project name
 REPO="shiny-apps"
-SERVICE_NAME="testing"
+SERVICE_NAME="pvacview"
 SERVICE_TAG=$2 # format like: v1-0-0
 
 # script
