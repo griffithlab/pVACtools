@@ -2,6 +2,7 @@ import sys
 import argparse
 import os
 import shutil
+import platform
 
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import PvacbindPipeline
@@ -124,6 +125,8 @@ def main(args_input = sys.argv[1:]):
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
+    if args.n_threads > 1 and platform.system() == "Darwin":
+        raise Exception("Multithreading is not supported on MacOS")
 
     base_output_dir = os.path.abspath(args.output_dir)
 

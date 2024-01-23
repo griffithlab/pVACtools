@@ -339,6 +339,7 @@ class Pipeline(metaclass=ABCMeta):
                             '-e', self.iedb_executable,
                             '-l', str(epl),
                             '--tmp-dir', self.tmp_dir,
+                            '--log-dir', self.log_dir(),
                         ]
                         argument_sets.append(arguments)
 
@@ -645,6 +646,8 @@ class PvacbindPipeline(Pipeline):
                         '-r', str(self.iedb_retries),
                         '-e', self.iedb_executable,
                         '-l', str(length),
+                        '--tmp-dir', self.tmp_dir,
+                        '--log-dir', self.log_dir(),
                     ]
                     argument_sets.append(arguments)
 

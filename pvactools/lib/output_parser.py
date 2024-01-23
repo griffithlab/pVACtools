@@ -449,7 +449,15 @@ class OutputParser(metaclass=ABCMeta):
                         corresponding_wt = result['wt_{}s'.format(metric)][best_mt_value_method]['ic50']
                         calculated_median = median([score['ic50'] for score in mt_values.values()])
                     else:
-                        corresponding_wt = min(result['wt_{}s'.format(metric)][best_mt_value_method].values())
+                        corresponding_wts = list(result['wt_{}s'.format(metric)][best_mt_value_method].values())
+                        if len(corresponding_wts) > 1:
+                            none_na_corresponding_wts = [p for p in corresponding_wts if p != 'NA']
+                            if len(none_na_corresponding_wts) == 0:
+                                corresponding_wt = 'NA'
+                            else:
+                                corresponding_wt = min(none_na_corresponding_wts)
+                        else:
+                            corresponding_wt = corresponding_wts[0]
                         flattend_percentiles = [percentile for method_results in mt_values.values() for percentile in method_results.values()]
                         calculated_median = median(flattend_percentiles)
 
