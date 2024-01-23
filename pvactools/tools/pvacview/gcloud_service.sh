@@ -3,7 +3,7 @@ TAG_NAME="latest" # do not change this unless you have looked at how your servic
 REGION="us-central1"
 LAB="griffith-lab" # also the project name
 REPO="shiny-apps"
-SERVICE_NAME="pvacview"
+SERVICE_NAME="pvacview2"
 SERVICE_TAG=$2 # format like: v1-0-0
 
 # script
@@ -75,8 +75,8 @@ function init {
     --port=3333 \
     --min-instances=0 \
     --max-instances=100 \
-    --memory=512Mi \
-    --cpu=1 \
+    --memory=2Gi \
+    --cpu=4 \
     --timeout=300 \
     --allow-unauthenticated \
     --update-env-vars KEY=VALUE --revision-suffix $SERVICE_TAG
