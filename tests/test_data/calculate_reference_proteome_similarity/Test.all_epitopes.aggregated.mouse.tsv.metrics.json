@@ -1,0 +1,247 @@
+{
+  "tumor_purity": null,
+  "vaf_clonal": 0.571,
+  "vaf_subclonal": 0.286,
+  "binding_threshold": 500,
+  "aggregate_inclusion_binding_threshold": 5000,
+  "trna_vaf": 0.25,
+  "trna_cov": 10,
+  "allele_expr_threshold": 2.5,
+  "maximum_transcript_support_level": 1,
+  "percentile_threshold": null,
+  "allele_specific_binding_thresholds": false,
+  "mt_top_score_metric": "Best",
+  "wt_top_score_metric": "Corresponding",
+  "binding_cutoffs": {
+    "HLA-E*01:01": 500,
+    "HLA-G*01:09": 500
+  },
+  "is_allele_specific_binding_cutoff": {
+    "HLA-E*01:01": false,
+    "HLA-G*01:09": false
+  },
+  "allele_specific_anchors": false,
+  "anchor_contribution_threshold": 0.8,
+  "22-41920894-41920895-G-C": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "LLPLLPLLL": {
+            "ic50s_MT": [
+              2551.25,
+              4778.52001953125
+            ],
+            "percentiles_MT": [
+              0.1700439453125,
+              6.80078125
+            ],
+            "ic50s_WT": [
+              3099.81,
+              4830.5
+            ],
+            "percentiles_WT": [
+              0.33,
+              6.9
+            ],
+            "hla_types": [
+              "HLA-E*01:01",
+              "HLA-G*01:09"
+            ],
+            "mutation_position": "6-7",
+            "problematic_positions": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  6891.60986328125,
+                  2551.25
+                ],
+                "HLA-G*01:09": [
+                  "NA",
+                  4778.52001953125
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  9234.71,
+                  3099.81
+                ],
+                "HLA-G*01:09": [
+                  "NA",
+                  4830.5
+                ]
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  0.1700439453125,
+                  1.400390625
+                ],
+                "HLA-G*01:09": [
+                  "NA",
+                  6.80078125
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  0.33,
+                  2.2
+                ],
+                "HLA-G*01:09": [
+                  "NA",
+                  6.9
+                ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-E*01:01": [],
+                "HLA-G*01:09": []
+              },
+              "WT": {
+                "HLA-E*01:01": [],
+                "HLA-G*01:09": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-E*01:01": [],
+                "HLA-G*01:09": []
+              },
+              "WT": {
+                "HLA-E*01:01": [],
+                "HLA-G*01:09": []
+              }
+            },
+            "wt_peptide": "LLPLLLLLL"
+          },
+          "LLPLLLLLG": {
+            "ic50s_MT": [
+              4676.22998046875,
+              "X"
+            ],
+            "percentiles_MT": [
+              5.8984375,
+              "X"
+            ],
+            "ic50s_WT": [
+              38565.12,
+              "X"
+            ],
+            "percentiles_WT": [
+              81.0,
+              "X"
+            ],
+            "hla_types": [
+              "HLA-E*01:01",
+              "HLA-G*01:09"
+            ],
+            "mutation_position": "3-4",
+            "problematic_positions": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  31981.0703125,
+                  4676.22998046875
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  42768.73,
+                  38565.12
+                ]
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  14.0,
+                  5.8984375
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  60.0,
+                  81.0
+                ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-E*01:01": []
+              },
+              "WT": {
+                "HLA-E*01:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-E*01:01": []
+              },
+              "WT": {
+                "HLA-E*01:01": []
+              }
+            },
+            "wt_peptide": "LPLLLLLLG"
+          }
+        },
+        "transcripts": [
+          "ENST00000233809.4-IGFBP2-L/LLP-20"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "tsl": [
+          "Not Supported"
+        ],
+        "biotype": [
+          "protein_coding"
+        ],
+        "transcript_length": [
+          325
+        ],
+        "transcript_count": 1,
+        "peptide_count": 2,
+        "total_expr": 0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      2
+    ],
+    "set_expr": [
+      0
+    ],
+    "DNA VAF": 0.891,
+    "RNA VAF": "NA",
+    "gene_expr": "NA",
+    "best_peptide_mt": "LLPLLPLLL",
+    "best_peptide_wt": "LLPLLLLLL",
+    "best_hla_allele": "HLA-E*01:01"
+  }
+}

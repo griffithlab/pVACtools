@@ -96,7 +96,13 @@ server <- shinyServer(function(input, output, session) {
     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
     hla <- df$metricsData$alleles
-    converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
+    converted_hla_names <- unlist(lapply(hla, function(x) {
+      if (grepl("HLA-", x)) {
+        strsplit(x, "HLA-")[[1]][2]
+      } else {
+        x
+      }
+    }))
     if (!("Ref Match" %in% colnames(df$mainTable))) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
@@ -172,7 +178,13 @@ server <- shinyServer(function(input, output, session) {
      df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
      df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
      hla <- df$metricsData$alleles
-     converted_hla_names <- unlist(lapply(hla, function(x) {strsplit(x, "HLA-")[[1]][2]}))
+     converted_hla_names <- unlist(lapply(hla, function(x) {
+       if (grepl("HLA-", x)) {
+         strsplit(x, "HLA-")[[1]][2]
+       } else {
+         x
+       }
+     }))
      if (!("Ref Match" %in% colnames(df$mainTable))) {
        df$mainTable$`Ref Match` <- "Not Run"
      }
@@ -702,7 +714,7 @@ server <- shinyServer(function(input, output, session) {
         datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "N/A", targets = c(3)), list(visible = FALSE, targets = c(-1))))) %>%
           formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
       }else {
-        GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character(), "Biotype" = character(), "Length" = character())
+        GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character(), "Biotype" = character(), "Transcript Length (#AA)"= character(), "Length" = character())
         incProgress(0.5)
         names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
         incProgress(0.5)
