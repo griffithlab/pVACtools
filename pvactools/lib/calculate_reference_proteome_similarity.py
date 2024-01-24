@@ -269,17 +269,12 @@ class CalculateReferenceProteomeSimilarity:
     def _get_full_peptide(self, line, mt_records_dict, wt_records_dict):
         for record_id in mt_records_dict.keys():
             (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
-            transcript_regex = '^.*(ENST[0-9|.]+)$'
-            transcript_p = re.compile(transcript_regex)
-            m = transcript_p.match(rest_record_id)
-            if m:
-                transcript = m.group(1)
-            else:
-                raise Exception("Unexpected record_id format: {}".format(record_id))
+            (count, gene, transcript) = rest_record_id.split(".", 2)
             (parsed_aa_change, pos, wt_aa, mt_aa) = index_to_aggregate_report_aa_change(aa_change, variant_type)
             if line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
                 return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, mt_aa, wt_aa)
-        raise Exception("Unable to find full_peptide for variant {}".format(line['ID']))
+        print("Unable to find full_peptide for variant {}".format(line['ID']))
+        return (None, None, variant_type, mt_aa, wt_aa)
 
     def _get_peptide(self, line, mt_records_dict, wt_records_dict):
         ## Get epitope, peptide and full_peptide
@@ -293,6 +288,8 @@ class CalculateReferenceProteomeSimilarity:
             if self._input_tsv_type(line) == 'aggregated':
                 epitope = line['Best Peptide']
                 (full_peptide, wt_peptide, variant_type, mt_amino_acids, wt_amino_acids) = self._get_full_peptide(line, mt_records_dict, wt_records_dict)
+                if full_peptide is None:
+                    return None, None
                 if variant_type != 'FS':
                     if line['Pos'] == 'NA':
                         mt_pos = None
@@ -333,6 +330,7 @@ class CalculateReferenceProteomeSimilarity:
 
 
     def _call_blast(self, full_peptide, p):
+        word_size = min(self.match_length, 7, int(len(full_peptide)/2))
         if self.blastp_path is not None: # if blastp installed locally, perform BLAST with it
 
             # create a SeqRecord of full_peptide and write it to a tmp file
@@ -341,7 +339,7 @@ class CalculateReferenceProteomeSimilarity:
             SeqIO.write([record], tmp_peptide_fh.name, "fasta")
 
             # configure args for local blastp, run it and put results in new tmp file
-            arguments = [self.blastp_path, '-query', tmp_peptide_fh.name, '-db', self.blastp_db, '-outfmt', '16', '-word_size', str(min(self.match_length, 7)), '-gapopen', '32767', '-gapextend', '32767']
+            arguments = [self.blastp_path, '-query', tmp_peptide_fh.name, '-db', self.blastp_db, '-outfmt', '16', '-word_size', str(word_size), '-gapopen', '32767', '-gapextend', '32767']
             result_handle = tempfile.NamedTemporaryFile(delete=False)
             response = run(arguments, stdout=result_handle, check=True)
             result_handle.seek(0)
@@ -351,7 +349,7 @@ class CalculateReferenceProteomeSimilarity:
             with p.lock: # stagger calls to qblast
                 if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0': # we don't need to sleep during testing since this is mocked and not actually calling the API
                     sleep(10)
-            result_handle = NCBIWWW.qblast("blastp", self.blastp_db, full_peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=min(self.match_length, 7), gapcosts='32767 32767')
+            result_handle = NCBIWWW.qblast("blastp", self.blastp_db, full_peptide, entrez_query="{} [Organism]".format(self.species_to_organism[self.species]), word_size=word_size, gapcosts='32767 32767', hitlist_size=500)
 
         return result_handle
 
@@ -519,7 +517,7 @@ class CalculateReferenceProteomeSimilarity:
                         for query_window, hit_reference_matches in groupby(metric_lines,key=lambda x:x['Match Window']):
                             hit_reference_matches = list(hit_reference_matches)
                             gene_regex = '^.*gene_symbol:([0-9|A-Z]+).*$'
-                            transcript_regex = '^.*transcript:(ENST[0-9|.]+).*$'
+                            transcript_regex = '^.*transcript:(ENS[0-9|A-Z|.]+).*$'
                             gene_p = re.compile(gene_regex)
                             transcript_p = re.compile(transcript_regex)
                             genes = []

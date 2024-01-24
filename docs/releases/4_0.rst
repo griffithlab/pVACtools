@@ -1,5 +1,8 @@
-New in Version 4.0.0
---------------------
+Version 4.0
+===========
+
+Version 4.0.0
+-------------
 
 This version adds the following features, outlined below. Please note that
 pVACtools 4.0 is not backwards-compatible and certain changes will break old
@@ -65,8 +68,8 @@ _____________
 - A new parameter ``--aggregate-inclusion-binding-threshold`` controls which
   epitope candidates are included in the aggregate report.
 
-New in Version 4.0.1
---------------------
+Version 4.0.1
+-------------
 
 This is a bugfix release. It fixes the following problem(s):
 
@@ -75,3 +78,98 @@ This is a bugfix release. It fixes the following problem(s):
 - Update the HCC1395 demo date for pVACview to include elution data.
 - Correctly set NA columns in pVACview export dataframe.
 - Handle Arriba files with empty peptide_sequence fields.
+
+Version 4.0.2
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- Arriba annotated fusion sequences may contain characters that aren't
+  supported. This update skips such sequences.
+- The ``--aggregate-report-evaluation`` parameter in the standalone ``pvacseq
+  generate_protein_fasta`` command was previously set up with
+  nargs in order to allow specifying multiple values. However, this
+  conflicts with required positional parameters. The parameter definiton was
+  updated so that multiple values are now specified as a comma-separated list.
+- pVACfuse would previously fail in an odd way when none of the fusions in the
+  input were processable. This update now exits pVACfuse more gracefully in
+  this case.
+- The reference proteome similarity step would previously fail when an epitope's
+  full peptide sequence wasn't found in the input fasta. It now skips such
+  epitopes and marks the Reference Match column as ``Not Run``.
+- There was a mismatch in how proximal variants were incorporated into the
+  n-mer fasta files vs the "master" fasta file which had the potential of
+  epitopes not being present in the "master" fasta file. This update brings
+  both file creation steps in sync.
+
+Version 4.0.3
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- The fixes in issue in the reference proteome similarity step in pVACseq
+  where running with non-human data would cause an error.
+
+Version 4.0.4
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- This release makes various fixes to allow pVACtools to run with non-human
+  data.
+
+Version 4.0.5
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- In recent releases, users have noticed that at some point during pipeline
+  runs, predictions to MHCflurry would hang or get killed. We were able to
+  determine that the cause was related to
+  `PR 988 <https://github.com/griffithlab/pVACtools/pull/988>`_.
+  This PR originally updated calls to MHCflurry to happen by instantiating
+  their predictor within Python instead of calling it on the command line.
+  However, we suspect that this causes a substantial increase in memory usage
+  resulting in the observed behavior. This release reverts the change from PR
+  988.
+
+Version 4.0.6
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- A bug in the aggregate report creation incorrectly evaluated the Transcript
+  Support Level and resulted in picking the wrong Best Transcript in some
+  cases.
+
+Version 4.0.7
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- The multithreading capabilities in pVACtools are not available for Mac OSX.
+  Attempting to use the -t parameter would result in the forked processes
+  crashing but the run would still complete successfully leading to results
+  with incomplete data. This release will result in an error when multithreading is
+  used under Mac OSX.
+- We've observed issues with IEDB's API sometimes returning incorrect or
+  incomplete data. This results in downstream errors. This release updates the prediction
+  calling to log such occurrences and to retry the API when they are observed.
+- MHCflurry sometimes returns no binding affinity percentile data. This
+  resulted in errors when parsing such prediction data. This release fixes our
+  parsing logic to handle this case.
+- TSL parsing of the input VCF in pVACseq used to be limited to human data
+  only. This release adds support for TSL parsing in mouse data.
+- When running with the --noncanonical flag, the exons.csv file will contain
+  exon postions for all possible transcript combinations. However, the transcripts
+  weren't being taken into account when parsing this file to determine the fusion
+  positions. This release fixes this issue by looking up the positions for the
+  specific transcripts of the record currently being parsed.
+- When using BLASTp for the reference proteome match step, we applied the word-size
+  parameter in order to only return perfect matches. However, for short sequences,
+  word-size must be less than half the query length, or reliable hits can be missed.
+  This release updates how the word-size parameter is calculated in order to
+  meet this criteria.
+- This release addresses in error in pVACview that would occur in the
+  Transcripts in Set window when there are
+  no peptides passing the aggregate inclusion binding threshold.

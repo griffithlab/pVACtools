@@ -339,6 +339,7 @@ class Pipeline(metaclass=ABCMeta):
                             '-e', self.iedb_executable,
                             '-l', str(epl),
                             '--tmp-dir', self.tmp_dir,
+                            '--log-dir', self.log_dir(),
                         ]
                         argument_sets.append(arguments)
 
@@ -367,7 +368,6 @@ class Pipeline(metaclass=ABCMeta):
             for a in self.alleles:
                 for epl in self.epitope_lengths:
                     split_iedb_output_files = []
-                    status_message("Parsing binding predictions for Allele %s and Epitope Length %s - Entries %s" % (a, epl, fasta_chunk))
                     for method in self.prediction_algorithms:
                         prediction_class = globals()[method]
                         prediction = prediction_class()
@@ -646,6 +646,8 @@ class PvacbindPipeline(Pipeline):
                         '-r', str(self.iedb_retries),
                         '-e', self.iedb_executable,
                         '-l', str(length),
+                        '--tmp-dir', self.tmp_dir,
+                        '--log-dir', self.log_dir(),
                     ]
                     argument_sets.append(arguments)
 
@@ -673,7 +675,6 @@ class PvacbindPipeline(Pipeline):
                 fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
             for a in self.alleles:
                 split_iedb_output_files = []
-                status_message("Parsing binding predictions for Allele %s and Epitope Length %s - Entries %s" % (a, length, fasta_chunk))
                 for method in self.prediction_algorithms:
                     prediction_class = globals()[method]
                     prediction = prediction_class()
