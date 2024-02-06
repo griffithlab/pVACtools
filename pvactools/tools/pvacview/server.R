@@ -473,16 +473,16 @@ server <- shinyServer(function(input, output, session) {
                 options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
                                columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
                                                  list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
-                                                 list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
-                               initComplete = htmlwidgets::JS(
-                                 "function(settings, json) {",
-                                 paste("$(this.api().table().header()).css({'font-size': '", "10pt", "'});"),
-                                 "}"),
-                               rowCallback = JS(rowcallback(hla_count(), df$selectedRow - 1)),
-                               preDrawCallback = JS("function() {
-                                        Shiny.unbindAll(this.api().table().node()); }"),
-                               drawCallback = JS("function() { 
-                                     Shiny.bindAll(this.api().table().node()); } ")),
+                                                 list(orderable = TRUE, targets = 0)), buttons = list(I("colvis"))),
+                               # initComplete = htmlwidgets::JS(
+                               #   "function(settings, json) {",
+                               #   paste("$(this.api().table().header()).css({'font-size': '", "10pt", "'});"),
+                               #   "}"),
+                               # rowCallback = JS(rowcallback(hla_count(), df$selectedRow - 1)),
+                               # preDrawCallback = JS("function() {
+                               #          Shiny.unbindAll(this.api().table().node()); }"),
+                               # drawCallback = JS("function() { 
+                               #       Shiny.bindAll(this.api().table().node()); } ")),
                 selection = "none",
                 extensions = c("Buttons"))
     }
@@ -1640,11 +1640,11 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$min_color <- renderUI({
-    colourInput("min_col", "Select min color", "grey")
+    colourInput("min_col", "Select min color", "#434c4c")
   })
   
   output$max_color <- renderUI({
-    colourInput("max_col", "Select max color", "purple")
+    colourInput("max_col", "Select max color", "#14c4c4")
   })
   
   output$scatter <- renderPlotly({
@@ -2036,11 +2036,11 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$min_color_custom <- renderUI({
-    colourInput("min_col_custom", "Select min color", "grey")
+    colourInput("min_col_custom", "Select min color", "#434c4c")
   })
   
   output$max_color_custom <- renderUI({
-    colourInput("max_col_custom", "Select max color", "purple")
+    colourInput("max_col_custom", "Select max color", "#14c4c4")
   })
   
   output$size_custom<- renderUI({
