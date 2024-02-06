@@ -48,7 +48,7 @@ class PostProcessor:
     def is_el(self, algorithm):
         if algorithm == 'MHCflurry' and self.flurry_state == 'EL_only':
             return True
-        if algorithm in ['NetMHCIIpanEL', 'NetMHCpanEL']:
+        if algorithm in ['NetMHCIIpanEL', 'NetMHCpanEL', 'BigMHC_EL', 'BigMHC_IM']:
             return True
         return False
 
