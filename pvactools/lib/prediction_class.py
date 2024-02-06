@@ -92,13 +92,14 @@ class IEDB(metaclass=ABCMeta):
                     'user_tool':     'pVac-seq',
                 }
 
+            response_timestamp = datetime.now()
             response = requests.post(self.url, data=data)
             (peptides_match, input_peptides, output_peptides) = self.check_iedb_api_response_matches(input_file, response.text, epitope_length)
             retries = 0
             while (response.status_code == 500 or response.status_code == 403 or not peptides_match) and retries < iedb_retries:
                 if response.status_code == 200 and not peptides_match:
                     log_text = "IEDB API Output doesn't match input. Retrying.\n"
-                    log_text += "{}\n".format(datetime.now())
+                    log_text += "{}\n".format(response_timestamp)
                     log_text += "Inputs:\n"
                     log_text += "{}\n".format(data)
                     log_text += "Output:\n"
@@ -113,6 +114,7 @@ class IEDB(metaclass=ABCMeta):
                 time.sleep(random.randint(30,90) * retries)
                 retries += 1
                 print("IEDB: Retry %s of %s" % (retries, iedb_retries))
+                response_timestamp = datetime.now()
                 response = requests.post(self.url, data=data)
                 (peptides_match, input_peptides, output_peptides) = self.check_iedb_api_response_matches(input_file, response.text, epitope_length)
 
@@ -120,7 +122,7 @@ class IEDB(metaclass=ABCMeta):
                 sys.exit("Error posting request to IEDB.\n%s" % response.text)
             if not peptides_match:
                 log_text = "Error. IEDB API Output doesn't match input and number of retries exceeded."
-                log_text += "{}\n".format(datetime.now())
+                log_text += "{}\n".format(response_timestamp)
                 log_text += "Inputs:\n"
                 log_text += "{}\n".format(data)
                 log_text += "Output:\n"
