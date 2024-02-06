@@ -1,4 +1,0 @@
-Allele	Mutant_peptide_sequence	Score	Predicted_mutant_pMHC_affinity	Variant_allele RNA_read_count	Wildtype_sequence	Predicted_wildtype_pMHC_affinity	Gene_name	Genomic_variant
-HLA-C*06:02	RKFSYRSTV	3.602910221	44.90	1457	RKFSYRSRV	228.5788773	DDX3X	chrX_g.41344255G>C
-HLA-C*06:02	SYRSTVRPC	3.602910221	85.53	1457	SYRSRVRPC	153.3440023	DDX3X	chrX_g.41344255G>C
-HLA-A*29:02	STVRPCVVY	3.602910221	115.78	1457	SRVRPCVVY	3415.131825	DDX3X	chrX_g.41344255G>C

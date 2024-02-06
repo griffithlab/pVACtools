@@ -83,7 +83,7 @@ peptide_coloring <- function(hla_allele, peptide_row) {
 #calculate anchor list for specific peptide length and HLA allele combo given contribution cutoff
 calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution) {
   result <- tryCatch({
-      anchor_raw_data <- as.numeric(anchor_data[[peptide_length]][anchor_data[[peptide_length]]["HLA"] == hla_allele][2:(peptide_length + 1)])
+    anchor_raw_data <- as.numeric(anchor_data[[peptide_length]][anchor_data[[peptide_length]]["HLA"] == hla_allele][2:(peptide_length + 1)])
     if (any(is.na(anchor_raw_data))) {
       return("NA")
     }
@@ -100,7 +100,7 @@ calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution) {
       }
     }
     return(anchor_list)
-    }, error = function(e) { return("NA") })
+  }, error = function(e) { return("NA") })
 }
 
 #converts string range (e.g. '2-4', '6') to associated list
@@ -224,7 +224,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
       return("Pass")
     }
   }
-
+  
   if ((mt_binding < binding_threshold) && allele_expr_pass && vaf_clonal_pass && tsl_pass && !anchor_residue_pass) {
     if (percentile_filter) {
       if (mt_percent <= percentile_threshold) {
@@ -275,7 +275,7 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
   rna_depth <- as.numeric(variant_info["RNA Depth"])
   allele_expr <- as.numeric(variant_info["Allele Expr"])
   if (use_allele_specific_binding_thresholds && hla_allele %in% names(meta_data[["allele_specific_binding_thresholds"]][hla_allele])) {
-      binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
+    binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
   }
   trna_vaf <- as.numeric(meta_data["trna_vaf"])
   trna_cov <- as.numeric(meta_data["trna_cov"])
@@ -305,11 +305,11 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
     range_stop <- as.numeric(strsplit(mutation_pos_list, "-")[[1]][2])
     mutation_pos_list <- c(range_start:range_stop)
     if (all(mutation_pos_list %in% anchor_list)) {
-        if (is.na(wt_binding)) {
-          anchor_residue_pass <- FALSE
-        }else if (wt_binding < binding_threshold) {
-          anchor_residue_pass <- FALSE
-        }
+      if (is.na(wt_binding)) {
+        anchor_residue_pass <- FALSE
+      }else if (wt_binding < binding_threshold) {
+        anchor_residue_pass <- FALSE
+      }
     }
   }else if (!is.na(mutation_pos_list)) {
     if (all(as.numeric(mutation_pos_list) %in% anchor_list)) {
@@ -354,7 +354,7 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
         return(5)
       }
     }else {
-     return(5)
+      return(5)
     }
   }
   if ((mt_binding < binding_threshold) && allele_expr_pass && !vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
