@@ -1,3 +1,7 @@
+# ui.R
+library(shiny)
+library(plotly)
+
 neofox_tab <- tabItem("neofox",
     tabsetPanel(type = "tabs", id = "neofox_tabs",
         tabPanel(title = "Upload Data", value = "neofox_upload",
@@ -37,8 +41,10 @@ neofox_tab <- tabItem("neofox",
                         #selectInput("neofox_page_length", "Number of entries displayed per page:", selected = "10", c("10", "20", "50", "100"), width = "280px"),
                         DTOutput("neofoxTable") %>% withSpinner(color = "#8FCCFA"),
                         span("Currently investigating row(s): ", verbatimTextOutput("neofox_selected")),
-                        style = "overflow-x: scroll;font-size:100%"
+                        style = "overflow-x: scroll;font-size:100%",
+                        "* indicates variable of interested designated by authors"
                         )
+                    
             ),
 
             fluidRow(
@@ -46,29 +52,41 @@ neofox_tab <- tabItem("neofox",
                   title = "Data Visualization",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
                   h4("Violin Plots showing distribution of various neoantigen features for selected variants."),
                   uiOutput("noefox_features_ui"),
-                  plotOutput(outputId = "neofox_violin_plots_row1") %>% withSpinner(color = "#8FCCFA")
+                  plotOutput(outputId = "neofox_violin_plots_row1") %>% withSpinner(color = "#8FCCFA"),
+                  "* indicates variable of interested designated by authors"
                   )
+              
             ),
             
             fluidRow(
               box(width = 12,
                   title = "Dynamic Scatter Plot", status = "primary", solidHeader = TRUE, collapsible = TRUE,
                   h4("Scatter plot to explore characteristics of data"),
-                  
-                  sidebarLayout(
-                    sidebarPanel(
-                      uiOutput("noefox_features_ui1"),
-                      uiOutput("noefox_features_ui2"),
-                      uiOutput("noefox_features_ui3"),
-                      uiOutput("noefox_features_ui4")
+                  sidebarPanel(
+                      # variable selection for x-axis
+                      uiOutput("xvrbl"),
+                      uiOutput("xvrbl_log"),
+                      uiOutput("xvrbl_scale"),
+                      # variable selection for y-axis
+                      uiOutput("yvrbl"),
+                      uiOutput("yvrbl_log"),
+                      uiOutput("yvrbl_scale"),
+                      # color
+                      uiOutput("color_noefox"),
+                      uiOutput("min_color"),
+                      uiOutput("max_color"),
+                      # size
+                      uiOutput("size_neofox"),
+                      "* indicates variable of interested designated by authors"
                     ),
-                    
                     mainPanel(
-                      plotOutput("scatter")
+                      align = "center",
+                      plotlyOutput(outputId = "scatter", height = "800px") %>% withSpinner(color = "#8FCCFA"),
                     )
-                  )
+                  
               )
             )
+
         )
     )
 )

@@ -1,3 +1,4 @@
+# Developement
 library(shiny)
 library(ggplot2)
 library(DT)
@@ -7,7 +8,14 @@ library(tibble)
 library(tidyr)
 library(plyr)
 library(dplyr)
-library("stringr")
+library("stringr")                    
+library(grid)
+library(gridExtra)
+library(shinyWidgets)
+library(plotly)
+library(tidyverse)
+library(colourpicker)
+
 
 source("anchor_and_helper_functions.R", local = TRUE)
 source("styling.R")
@@ -18,7 +26,7 @@ options(shiny.host = '127.0.0.1')
 options(shiny.port = 3333)
 
 server <- shinyServer(function(input, output, session) {
-
+  
   ##############################DATA UPLOAD TAB###################################
   ## helper function defined for generating shinyInputs in mainTable (Evaluation dropdown menus)
   shinyInput <- function(data, FUN, len, id, ...) {
@@ -59,7 +67,7 @@ server <- shinyServer(function(input, output, session) {
     use_allele_specific_binding_thresholds = NULL,
     aggregate_inclusion_binding_threshold = NULL,
     percentile_threshold = NULL,
-    allele_specific_binding_thresholds = NULL,
+    allele_specific_binding_thresholds = NULL,                        
     allele_expr = NULL,
     anchor_mode = NULL,
     anchor_contribution = NULL,
@@ -68,7 +76,7 @@ server <- shinyServer(function(input, output, session) {
   )
   #Option 1: User uploaded main aggregate report file
   observeEvent(input$mainDataInput$datapath, {
-    session$sendCustomMessage("unbind-DT", "mainTable")
+    # session$sendCustomMessage("unbind-DT", "mainTable")                         # KEPT COMMENTED DESPITE BEING IN NEWER VERSION OF PVACVIEW
     mainData <- read.table(input$mainDataInput$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
@@ -86,8 +94,105 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$metricsDataInput, {
     df$metricsData <- fromJSON(input$metricsDataInput$datapath)
     df$binding_threshold <- df$metricsData$`binding_threshold`
-    df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
+    df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`         
+    df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`               
+    df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`               
+    df$percentile_threshold <- df$metricsData$`percentile_threshold`  
+    df$dna_cutoff <- df$metricsData$vaf_clonal
+    df$allele_expr <- df$metricsData$allele_expr_threshold
+    df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
+    df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
+    df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
+    
+    hla <- df$metricsData$alleles                                           
+    converted_hla_names <- unlist(lapply(hla, function(x) {
+      if (grepl("HLA-", x)) {
+        strsplit(x, "HLA-")[[1]][2]
+      } else {
+        x
+      }
+    }))
+    
+    
+    if (!("Ref Match" %in% colnames(df$mainTable))) {
+      df$mainTable$`Ref Match` <- "Not Run"
+    }
+    columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+                        "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
+                        "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
+    if ("Comments" %in% colnames(df$mainTable)) {
+      columns_needed <- c(columns_needed, "Comments")
+      df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
+    }else {
+      df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
+    }
+    df$mainTable <- df$mainTable[, columns_needed]
+    
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x)   
+      tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, 
+                   x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], 
+                   df$anchor_mode, df$allele_specific_binding_thresholds, 
+                   df$use_allele_specific_binding_thresholds, df$binding_threshold))
+    
+    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+    rownames(df$comments) <- df$mainTable$ID
+    
+    df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x)
+      scale_binding_affinity(df$allele_specific_binding_thresholds, 
+                             df$use_allele_specific_binding_thresholds, 
+                             df$binding_threshold, x["Allele"], x["IC50 MT"]))
+
+    
+    df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
+    df$mainTable$`Bad TSL` <- apply(df$mainTable, 1, function(x) {x["TSL"] == "NA" | (x["TSL"] != "NA" & x["TSL"] != "Not Supported" & x["TSL"] > df$metricsData$maximum_transcript_support_level)})
+    df$mainTable$`Col RNA Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Expr"]), 0, x["RNA Expr"])})
+    df$mainTable$`Col RNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA VAF"]), 0, x["RNA VAF"])})
+    df$mainTable$`Col Allele Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["Allele Expr"]), 0, x["Allele Expr"])})
+    df$mainTable$`Col RNA Depth` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Depth"]), 0, x["RNA Depth"])})
+    df$mainTable$`Col DNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["DNA VAF"]), 0, x["DNA VAF"])})
+    if (is.null(df$percentile_threshold)) {
+      df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
+    }else {
+      df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
+    }
+    df$mainTable$`Has Prob Pos` <- apply(df$mainTable, 1, function(x) {ifelse(x["Prob Pos"] != "None", TRUE, FALSE)})
+  })
+  #Option 1: User uploaded additional data file
+  observeEvent(input$additionalDataInput, {
+    addData <- read.table(input$additionalDataInput$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(addData) <- addData[1, ]
+    addData <- addData[-1, ]
+    row.names(addData) <- NULL
+    df$additionalData <- addData
+  })
+  #Option 1: User uploaded additional gene list
+  observeEvent(input$gene_list, {
+    gene_list <- read.table(input$gene_list$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    df$gene_list <- gene_list
+    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+  })
+  #Option 2: Load from HCC1395 demo data from github
+  observeEvent(input$loadDefaultmain, {
+    ## Class I demo aggregate report
+    # session$sendCustomMessage("unbind-DT", "mainTable")                                # THIS LINE IS IN THE MOST UPDATED VERSION OF PVACVIEW BUT PREVENTS NEOFOX/PVAC TO BEING LOADED AT THE SAME TIME
+    data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
+    mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData) <- mainData[1, ]
+    mainData <- mainData[-1, ]
+    row.names(mainData) <- NULL
+    mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+    mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
+    mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
+    mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
+    mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
+    mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+    df$mainTable <- mainData
+    ## Class I demo metrics file
+    metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
+    df$metricsData <- fromJSON(txt = metricsdata)
+    df$binding_threshold <- df$metricsData$`binding_threshold`
     df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
+    df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
     df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
     df$percentile_threshold <- df$metricsData$`percentile_threshold`
     df$dna_cutoff <- df$metricsData$vaf_clonal
@@ -118,7 +223,24 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable <- df$mainTable[, columns_needed]
     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+    if ("Comments" %in% colnames(df$mainTable)) {
+      df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
+    }else {
+      df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
+    }
     rownames(df$comments) <- df$mainTable$ID
+    ## Class II additional demo aggregate report
+    add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+    addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(addData) <- addData[1, ]
+    addData <- addData[-1, ]
+    row.names(addData) <- NULL
+    df$additionalData <- addData
+    ## Hotspot gene list autoload
+    gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
+    gene_list <- read.table(text = gene_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    df$gene_list <- gene_list
+    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
     df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
     df$mainTable$`Bad TSL` <- apply(df$mainTable, 1, function(x) {x["TSL"] == "NA" | (x["TSL"] != "NA" & x["TSL"] != "Not Supported" & x["TSL"] > df$metricsData$maximum_transcript_support_level)})
@@ -133,123 +255,24 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
     }
     df$mainTable$`Has Prob Pos` <- apply(df$mainTable, 1, function(x) {ifelse(x["Prob Pos"] != "None", TRUE, FALSE)})
+    updateTabItems(session, "tabs", "explore")
   })
-  #Option 1: User uploaded additional data file
-  observeEvent(input$additionalDataInput, {
-    addData <- read.table(input$additionalDataInput$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    colnames(addData) <- addData[1, ]
-    addData <- addData[-1, ]
-    row.names(addData) <- NULL
-    df$additionalData <- addData
+  ##Clear file inputs if demo data load button is clicked
+  output$aggregate_report_ui <- renderUI({
+    input$loadDefaultmain
+    fileInput(inputId = "mainDataInput", label = "1. Neoantigen Candidate Aggregate Report (tsv required)",
+              accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
   })
-  #Option 1: User uploaded additional gene list
-  observeEvent(input$gene_list, {
-    gene_list <- read.table(input$gene_list$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    df$gene_list <- gene_list
-    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+  output$metrics_ui <- renderUI({
+    input$loadDefaultmain
+    fileInput(inputId = "metricsDataInput", label = "2. Neoantigen Candidate Metrics file (json required)",
+              accept = c("application/json", ".json"))
   })
-  #Option 2: Load from HCC1395 demo data from github
-   observeEvent(input$loadDefaultmain, {
-     ## Class I demo aggregate report
-     session$sendCustomMessage("unbind-DT", "mainTable")
-     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
-     mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-     colnames(mainData) <- mainData[1, ]
-     mainData <- mainData[-1, ]
-     row.names(mainData) <- NULL
-     mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
-     mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
-     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
-     mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
-     mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
-     df$mainTable <- mainData
-     ## Class I demo metrics file
-     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
-     df$metricsData <- fromJSON(txt = metricsdata)
-     df$binding_threshold <- df$metricsData$`binding_threshold`
-     df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
-     df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
-     df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
-     df$percentile_threshold <- df$metricsData$`percentile_threshold`
-     df$dna_cutoff <- df$metricsData$vaf_clonal
-     df$allele_expr <- df$metricsData$allele_expr_threshold
-     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
-     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
-     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
-     hla <- df$metricsData$alleles
-     converted_hla_names <- unlist(lapply(hla, function(x) {
-       if (grepl("HLA-", x)) {
-         strsplit(x, "HLA-")[[1]][2]
-       } else {
-         x
-       }
-     }))
-     if (!("Ref Match" %in% colnames(df$mainTable))) {
-       df$mainTable$`Ref Match` <- "Not Run"
-     }
-     columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
-                         "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
-                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
-     if ("Comments" %in% colnames(df$mainTable)) {
-       columns_needed <- c(columns_needed, "Comments")
-       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
-     }else {
-       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
-     }
-     df$mainTable <- df$mainTable[, columns_needed]
-     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
-     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
-     if ("Comments" %in% colnames(df$mainTable)) {
-       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
-     }else {
-       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
-     }
-     rownames(df$comments) <- df$mainTable$ID
-     ## Class II additional demo aggregate report
-     add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
-     addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-     colnames(addData) <- addData[1, ]
-     addData <- addData[-1, ]
-     row.names(addData) <- NULL
-     df$additionalData <- addData
-     ## Hotspot gene list autoload
-     gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
-     gene_list <- read.table(text = gene_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-     df$gene_list <- gene_list
-     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
-     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
-     df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
-     df$mainTable$`Bad TSL` <- apply(df$mainTable, 1, function(x) {x["TSL"] == "NA" | (x["TSL"] != "NA" & x["TSL"] != "Not Supported" & x["TSL"] > df$metricsData$maximum_transcript_support_level)})
-     df$mainTable$`Col RNA Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Expr"]), 0, x["RNA Expr"])})
-     df$mainTable$`Col RNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA VAF"]), 0, x["RNA VAF"])})
-     df$mainTable$`Col Allele Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["Allele Expr"]), 0, x["Allele Expr"])})
-     df$mainTable$`Col RNA Depth` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Depth"]), 0, x["RNA Depth"])})
-     df$mainTable$`Col DNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["DNA VAF"]), 0, x["DNA VAF"])})
-     if (is.null(df$percentile_threshold)) {
-       df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
-     }else {
-       df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
-     }
-     df$mainTable$`Has Prob Pos` <- apply(df$mainTable, 1, function(x) {ifelse(x["Prob Pos"] != "None", TRUE, FALSE)})
-     updateTabItems(session, "tabs", "explore")
-   })
-   ##Clear file inputs if demo data load button is clicked
-   output$aggregate_report_ui <- renderUI({
-     input$loadDefaultmain
-     fileInput(inputId = "mainDataInput", label = "1. Neoantigen Candidate Aggregate Report (tsv required)",
-               accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
-   })
-   output$metrics_ui <- renderUI({
-     input$loadDefaultmain
-     fileInput(inputId = "metricsDataInput", label = "2. Neoantigen Candidate Metrics file (json required)",
-               accept = c("application/json", ".json"))
-   })
-   output$add_file_ui <- renderUI({
-     input$loadDefaultmain
-     fileInput(inputId = "additionalDataInput", label = "3. Additional Neoantigen Candidate Aggregate Report (tsv required)",
-               accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
-   })
+  output$add_file_ui <- renderUI({
+    input$loadDefaultmain
+    fileInput(inputId = "additionalDataInput", label = "3. Additional Neoantigen Candidate Aggregate Report (tsv required)",
+              accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
+  })
   ##Visualize button
   observeEvent(input$visualize, {
     updateTabItems(session, "tabs", "explore")
@@ -296,43 +319,43 @@ server <- shinyServer(function(input, output, session) {
   })
   #reactions for once "regenerate table" command is submitted
   observeEvent(input$submit, {
-      session$sendCustomMessage("unbind-DT", "mainTable")
-      df$binding_threshold <- input$binding_threshold
-      df$use_allele_specific_binding_thresholds <- input$allele_specific_binding
-      df$percentile_threshold <- input$percentile_threshold
-      df$dna_cutoff <- input$dna_cutoff
-      df$allele_expr <- input$allele_expr
-      df$allele_specific_anchors <- input$use_anchor
+    session$sendCustomMessage("unbind-DT", "mainTable")
+    df$binding_threshold <- input$binding_threshold
+    df$use_allele_specific_binding_thresholds <- input$allele_specific_binding
+    df$percentile_threshold <- input$percentile_threshold
+    df$dna_cutoff <- input$dna_cutoff
+    df$allele_expr <- input$allele_expr
+    df$allele_specific_anchors <- input$use_anchor
+    df$anchor_contribution <- input$anchor_contribution
+    df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
+    if (input$use_anchor) {
+      df$anchor_mode <- "allele-specific"
       df$anchor_contribution <- input$anchor_contribution
-      df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-      if (input$use_anchor) {
-        df$anchor_mode <- "allele-specific"
-        df$anchor_contribution <- input$anchor_contribution
-      }else {
-        df$anchor_mode <- "default"
-      }
-      df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold))
-      df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
-      df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
-      df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse((is.null(df$percentile_threshold) || is.na(df$percentile_threshold)), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
-      if (is.null(df$percentile_threshold) || is.na(df$percentile_threshold)) {
-        df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
-      }else {
-        df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
-      }
-      tier_sorter <- c("Pass", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr")
-      df$mainTable$`Rank_ic50` <- NA
-      df$mainTable$`Rank_expr` <- NA
-      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
-      df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
-      df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
-      df$mainTable <- df$mainTable %>%
-        arrange(factor(Tier, levels = tier_sorter), Rank)
-      df$mainTable$`Rank` <- NULL
-      df$mainTable$`Rank_ic50` <- NULL
-      df$mainTable$`Rank_expr` <- NULL
-      df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-      df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+    }else {
+      df$anchor_mode <- "default"
+    }
+    df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+    df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
+    df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse((is.null(df$percentile_threshold) || is.na(df$percentile_threshold)), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
+    if (is.null(df$percentile_threshold) || is.na(df$percentile_threshold)) {
+      df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
+    }else {
+      df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
+    }
+    tier_sorter <- c("Pass", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr")
+    df$mainTable$`Rank_ic50` <- NA
+    df$mainTable$`Rank_expr` <- NA
+    df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
+    df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
+    df$mainTable <- df$mainTable %>%
+      arrange(factor(Tier, levels = tier_sorter), Rank)
+    df$mainTable$`Rank` <- NULL
+    df$mainTable$`Rank_ic50` <- NULL
+    df$mainTable$`Rank_expr` <- NULL
+    df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
+    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
   })
   #reset tier-ing with original parameters
   observeEvent(input$reset_params, {
@@ -405,13 +428,13 @@ server <- shinyServer(function(input, output, session) {
       data <- data.frame(
         "HLA Alleles" = df$metricsData$alleles,
         "Binding Cutoffs" = unlist(lapply(df$metricsData$alleles, function(x) {
-            if (x %in% names(df$metricsData$allele_specific_binding_thresholds)) {
-                df$metricsData$allele_specific_binding_thresholds[[x]]
-            } else {
-                df$metricsData$binding_threshold
-            }
+          if (x %in% names(df$metricsData$allele_specific_binding_thresholds)) {
+            df$metricsData$allele_specific_binding_thresholds[[x]]
+          } else {
+            df$metricsData$binding_threshold
+          }
         }
-      )))
+        )))
     } else {
       data <- data.frame(
         "HLA Alleles" = df$metricsData$alleles,
@@ -446,28 +469,28 @@ server <- shinyServer(function(input, output, session) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
       datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments")],
-      escape = FALSE, callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)), class = "stripe",
-      options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
-      columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
-      list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
-      list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
-      initComplete = htmlwidgets::JS(
-                     "function(settings, json) {",
-                     paste("$(this.api().table().header()).css({'font-size': '", "10pt", "'});"),
-                     "}"),
-      rowCallback = JS(rowcallback(hla_count(), df$selectedRow - 1)),
-                   preDrawCallback = JS("function() {
+                escape = FALSE, callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)), class = "stripe",
+                options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
+                               columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
+                                                 list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
+                                                 list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
+                               initComplete = htmlwidgets::JS(
+                                 "function(settings, json) {",
+                                 paste("$(this.api().table().header()).css({'font-size': '", "10pt", "'});"),
+                                 "}"),
+                               rowCallback = JS(rowcallback(hla_count(), df$selectedRow - 1)),
+                               preDrawCallback = JS("function() {
                                         Shiny.unbindAll(this.api().table().node()); }"),
-                   drawCallback = JS("function() { 
+                               drawCallback = JS("function() { 
                                      Shiny.bindAll(this.api().table().node()); } ")),
-      selection = "none",
-      extensions = c("Buttons"))
+                selection = "none",
+                extensions = c("Buttons"))
     }
     %>% formatStyle("IC50 MT", "Scaled BA", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
-                                                                c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
-                     , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
+                                                                            c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
+                    , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
     %>% formatStyle("%ile MT", "Scaled percentile", backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2),
-                                                                c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+                                                                                    c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
     %>% formatStyle("Tier", color = styleEqual(c("Pass", "Poor", "Anchor", "Subclonal", "LowExpr", "NoExpr"), c("green", "orange", "#b0b002", "#D4AC0D", "salmon", "red")))
     %>% formatStyle(c("RNA VAF"), "Col RNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("DNA VAF"), "Col DNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
@@ -695,7 +718,7 @@ server <- shinyServer(function(input, output, session) {
     }
     df$metricsData[[selectedID()]]$sets[selection]
   })
-
+  
   ##transcripts table displaying transcript id and transcript expression values
   output$transcriptsTable <- renderDT({
     withProgress(message = "Loading Transcripts Table", value = 0, {
@@ -714,7 +737,7 @@ server <- shinyServer(function(input, output, session) {
         datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "N/A", targets = c(3)), list(visible = FALSE, targets = c(-1))))) %>%
           formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
       }else {
-        GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character(), "Biotype" = character(), "Length" = character())
+        GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character(), "Biotype" = character(), "Transcript Length (#AA)"= character(), "Length" = character())
         incProgress(0.5)
         names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
         incProgress(0.5)
@@ -722,7 +745,7 @@ server <- shinyServer(function(input, output, session) {
       }
     })
   })
-
+  
   ##display transcript expression
   output$metricsTextTranscript <- renderText({
     if (length(df$metricsData[[selectedID()]]$sets) != 0) {
@@ -758,12 +781,12 @@ server <- shinyServer(function(input, output, session) {
         dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data)), options = list(
           pageLength = 10,
           columnDefs = list(list(defaultContent = "X",
-            targets = c(2:hla_count() + 1)),
-            list(orderable = TRUE, targets = 0),
-            list(visible = FALSE, targets = c(-1, -2))),
+                                 targets = c(2:hla_count() + 1)),
+                            list(orderable = TRUE, targets = 0),
+                            list(visible = FALSE, targets = c(-1, -2))),
           rowCallback = JS("function(row, data, index, rowId) {",
-                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
-                          'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+                           "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
+                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
         ),
         selection = list(mode = "single", selected = "1"),
         style="bootstrap") %>%
@@ -982,15 +1005,15 @@ server <- shinyServer(function(input, output, session) {
   output$bindingDatatable <- renderDT({
     withProgress(message = "Loading binding datatable", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-      binding_data <- bindingScoreDataIC50()
-      names(binding_data)[names(binding_data) == "Score"] <- "IC50 Score"
-      binding_data["% Score"] <- bindingScoreDataPercentile()["Score"]
-      binding_data["Score"] <- paste(round(as.numeric(binding_data$`IC50 Score`), 2), " (%: ", round(as.numeric(binding_data$`% Score`), 2), ")", sep = "")
-      binding_data["IC50 Score"] <- NULL
-      binding_data["% Score"] <- NULL
-      binding_reformat <- dcast(binding_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
-      incProgress(1)
-      dtable <- datatable(binding_reformat, options = list(
+        binding_data <- bindingScoreDataIC50()
+        names(binding_data)[names(binding_data) == "Score"] <- "IC50 Score"
+        binding_data["% Score"] <- bindingScoreDataPercentile()["Score"]
+        binding_data["Score"] <- paste(round(as.numeric(binding_data$`IC50 Score`), 2), " (%: ", round(as.numeric(binding_data$`% Score`), 2), ")", sep = "")
+        binding_data["IC50 Score"] <- NULL
+        binding_data["% Score"] <- NULL
+        binding_reformat <- dcast(binding_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+        incProgress(1)
+        dtable <- datatable(binding_reformat, options = list(
           pageLength = 10,
           lengthMenu = c(10),
           rowCallback = JS("function(row, data, index, rowId) {",
@@ -1058,8 +1081,8 @@ server <- shinyServer(function(input, output, session) {
             pageLength = 10,
             lengthMenu = c(10),
             rowCallback = JS("function(row, data, index, rowId) {",
-                           "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
-                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+                             "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
+                             'row.style.backgroundColor = "#E0E0E0";', "}", "}")
           )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
           dtable
         }else {
@@ -1072,13 +1095,13 @@ server <- shinyServer(function(input, output, session) {
       }
     })
   })
-
+  
   ##updating reference matches for selected peptide
   output$hasReferenceMatchData <- reactive({
     if (is.null(df$metricsData[[selectedID()]]$reference_matches)) {
-        "Reference Similarity not run"
+      "Reference Similarity not run"
     } else {
-        ""
+      ""
     }
   })
   referenceMatchData <- reactive({
@@ -1090,34 +1113,34 @@ server <- shinyServer(function(input, output, session) {
   })
   output$referenceMatchHitCount <- reactive({
     if (is.null(df$metricsData[[selectedID()]]$reference_matches)) {
-        "N/A"
+      "N/A"
     } else {
-        df$metricsData[[selectedID()]]$reference_matches$count
+      df$metricsData[[selectedID()]]$reference_matches$count
     }
   })
   output$referenceMatchQuerySequence <- reactive({
     if (is.null(df$metricsData[[selectedID()]]$reference_matches)) {
-        "N/A"
+      "N/A"
     } else {
-        df$metricsData[[selectedID()]]$reference_matches$query_peptide
+      df$metricsData[[selectedID()]]$reference_matches$query_peptide
     }
   })
   output$referenceMatchDatatable <- renderDT({
     withProgress(message = "Loading reference match datatable", value = 0, {
-        reference_match_data <- referenceMatchData()
-        if (!is.null(reference_match_data)) {
-            incProgress(1)
-            dtable <- datatable(reference_match_data, options = list(
-                pageLength = 10,
-                lengthMenu = c(10)
-            ),
-            style="bootstrap") %>%
-              formatStyle("Matched Peptide", fontFamily="monospace")
-            dtable
-        } else {
-            incProgress(1)
-            datatable(data.frame("Reference Matches Datatable" = character()))
-        }
+      reference_match_data <- referenceMatchData()
+      if (!is.null(reference_match_data)) {
+        incProgress(1)
+        dtable <- datatable(reference_match_data, options = list(
+          pageLength = 10,
+          lengthMenu = c(10)
+        ),
+        style="bootstrap") %>%
+          formatStyle("Matched Peptide", fontFamily="monospace")
+        dtable
+      } else {
+        incProgress(1)
+        datatable(data.frame("Reference Matches Datatable" = character()))
+      }
     })
   })
   ##Best Peptide with mutated positions marked
@@ -1160,12 +1183,12 @@ server <- shinyServer(function(input, output, session) {
       print(p2)
     })
   }, height = 20, width = function(){
-      selectedPeptide <- if (is.null(df$selectedRow)) {
-        df$mainTable$`Best Peptide`[1]
-      }else {
-        df$mainTable$`Best Peptide`[df$selectedRow]
-      }
-      nchar(selectedPeptide) * 20
+    selectedPeptide <- if (is.null(df$selectedRow)) {
+      df$mainTable$`Best Peptide`[1]
+    }else {
+      df$mainTable$`Best Peptide`[df$selectedRow]
+    }
+    nchar(selectedPeptide) * 20
   } )
   ##Best Peptide with best peptide highlighted and mutated positions marked
   output$referenceMatchQueryPlot <- renderPlot({
@@ -1239,7 +1262,7 @@ server <- shinyServer(function(input, output, session) {
       return(nchar(df$metricsData[[selectedID()]]$reference_matches$query_peptide) * 20)
     }
   } )
-##############################EXPORT TAB##############################################
+  ##############################EXPORT TAB##############################################
   #evalutation overview table
   output$checked <- renderTable({
     if (is.null(df$mainTable)) {
@@ -1257,8 +1280,8 @@ server <- shinyServer(function(input, output, session) {
       return()
     }
     colsToDrop <- colnames(df$mainTable) %in% c("Evaluation", "Eval", "Select", "Scaled BA", "Scaled percentile", "Tier Count", "Bad TSL",
-                                               "Comments", "Gene of Interest", "Bad TSL", "Col RNA Expr", "Col RNA VAF", "Col Allele Expr",
-                                               "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos")
+                                                "Comments", "Gene of Interest", "Bad TSL", "Col RNA Expr", "Col RNA VAF", "Col Allele Expr",
+                                                "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos")
     data <- df$mainTable[, !(colsToDrop)]
     col_names <- colnames(data)
     data <- data.frame(data, Evaluation = shinyValue("selecter_", nrow(df$mainTable), df$mainTable))
@@ -1267,24 +1290,840 @@ server <- shinyServer(function(input, output, session) {
     data <- join(data, comments)
     data[is.na(data)] <- "NA"
     data
-    }, escape = FALSE, server = FALSE, rownames = FALSE,
-    options = list(dom = "Bfrtip",
-                  buttons = list(
-                    list(extend = "csvHtml5",
-                    filename = input$exportFileName,
-                    fieldSeparator = "\t",
-                    text = "Download as TSV",
-                    extension = ".tsv"),
-                    list(extend = "excel",
-                    filename = input$exportFileName,
-                    text = "Download as excel")
+  }, escape = FALSE, server = FALSE, rownames = FALSE,
+  options = list(dom = "Bfrtip",
+                 buttons = list(
+                   list(extend = "csvHtml5",
+                        filename = input$exportFileName,
+                        fieldSeparator = "\t",
+                        text = "Download as TSV",
+                        extension = ".tsv"),
+                   list(extend = "excel",
+                        filename = input$exportFileName,
+                        text = "Download as excel")
                  ),
                  initComplete = htmlwidgets::JS(
                    "function(settings, json) {",
                    paste0("$(this.api().table().header()).css({'font-size': '", "8pt", "'});"),
                    "}")
-    ),
-    selection = "none",
-    extensions = c("Buttons"))
+  ),
+  selection = "none",
+  extensions = c("Buttons"))
+  
 
+  ### Other Modules ############################################################
+  
+  
+  ############### NeoFox Tab ##########################
+  df_neofox <- reactiveValues(
+    mainTable_neofox = NULL
+  )
+  observeEvent(input$loadDefaultneofox, {
+    #session$sendCustomMessage("unbind-DT", "neofoxTable")
+    data_neofox <- "data/test_pt1_neoantigen_candidates_annotated.tsv"
+    mainData_neofox <- read.table(data_neofox, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData_neofox) <- mainData_neofox[1, ]
+    mainData_neofox <- mainData_neofox[-1, ]
+    row.names(mainData_neofox) <- NULL
+    
+    # Columns that have been reviewed as most interesting
+    columns_to_star <- c(
+      "dnaVariantAlleleFrequency", "rnaExpression", "imputedGeneExpression",
+      "rnaVariantAlleleFrequency", "NetMHCpan_bestRank_rank", "NetMHCpan_bestAffinity_affinity",
+      "NetMHCpan_bestAffinity_affinityWT", "NetMHCpan_bestRank_rankWT", "PHBR_I",
+      "NetMHCIIpan_bestRank_rank", "NetMHCIIpan_bestRank_rankWT", "PHBR_II", "Amplitude_MHCI_bestAffinity",
+      "Pathogensimiliarity_MHCI_bestAffinity9mer", "DAI_MHCI_bestAffinity", "Tcell_predictor",
+      "Selfsimilarity_MHCI", "Selfsimilarity_MHCII", "IEDB_Immunogenicity_MHCI", "IEDB_Immunogenicity_MHCII",
+      "MixMHCpred_bestScore_score", "MixMHCpred_bestScore_rank", "MixMHC2pred_bestRank_peptide",
+      "MixMHC2pred_bestRank_rank", "Dissimilarity_MHCI", "Dissimilarity_MHCII", "Vaxrank_bindingScore",
+      "PRIME_bestScore_rank", "PRIME_bestScore_score"
+    )
+    
+    # Check if each column is present in the dataframe and modify the names
+    for (col_name in columns_to_star) {
+      if (col_name %in% names(mainData_neofox)) {
+        new_col_name <- paste0("*", col_name)
+        names(mainData_neofox)[names(mainData_neofox) == col_name] <- new_col_name
+      }
+    }    
+    
+    df_neofox$mainTable_neofox <- mainData_neofox
+    updateTabItems(session, "neofox_tabs", "neofox_explore")
+  })
+  output$neofox_upload_ui <- renderUI({
+    fileInput(inputId = "neofox_data", label = "NeoFox output table (tsv required)",
+              accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
+  })
+  observeEvent(input$neofox_data$datapath, {
+    #session$sendCustomMessage("unbind-DT", "neofoxTable")
+    mainData_neofox <- read.table(input$neofox_data$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData_neofox) <- mainData_neofox[1, ]
+    mainData_neofox <- mainData_neofox[-1, ]
+    row.names(mainData_neofox) <- NULL
+    df_neofox$mainTable_neofox <- mainData_neofox
+  })
+  observeEvent(input$visualize_neofox, {
+    updateTabItems(session, "neofox_tabs", "neofox_explore")
+    updateSliderInput(session,"xvrbl_scale", value = c(min_value, max_value))
+  })
+  
+  observeEvent(input$neofox_page_length, {
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    df$pageLength <- as.numeric(input$neofox_page_length)
+  })
+  
+  output$neofoxTable <- DT::renderDataTable(
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return(datatable(data.frame("Annotated Table" = character())))
+    } else {
+      datatable(df_neofox$mainTable_neofox,
+                escape = FALSE, class = "stripe",
+                selection = "multiple",
+                extensions = c("Buttons")
+      )
+    }
+  )
+  output$neofox_selected <- renderText({
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    input$neofoxTable_rows_selected
+  })
+  
+  
+  # Drop down to select what features to show violin plots for
+  output$noefox_features_ui <- renderUI({
+    df <- df_neofox$mainTable_neofox
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- names(df)[sapply(df, is.numeric)]
+    sorted_features <- features[order(!grepl("^\\*", features))]
+    
+    
+    default_selection <- c("*IEDB_Immunogenicity_MHCI", "*IEDB_Immunogenicity_MHCII", "*PHBR_I",
+      "*MixMHCpred_bestScore_score", "*MixMHCpred_bestScore_rank", "*MixMHC2pred_bestRank_peptide")
+    
+    pickerInput(inputId = "neofox_features",
+                label = "Plots to Display",
+                choices = sorted_features,
+                selected = default_selection,
+                options = list(`live-search` = TRUE, "max-options" = 6),
+                multiple = TRUE
+                )
+  })
+  
+  # Violin Plots
+  output$neofox_violin_plots_row1 <- renderPlot({
+    withProgress(message = "Loading Violin Plots", value = 0, {
+      if (length(input$neofoxTable_rows_selected) != 0 & length(input$neofox_features) != 0) {
+    
+        plot_cols_neofox <- c("mutatedXmer", input$neofox_features)
+        plot_data_neofox <- df_neofox$mainTable_neofox[, plot_cols_neofox]
+        plot_data_neofox <- type.convert(plot_data_neofox, as.is = TRUE)
+        plot_data_neofox[is.na(plot_data_neofox)] <- 0
+        
+        plot_data_neofox$Selected <- "No"
+        plot_data_neofox[input$neofoxTable_rows_selected, "Selected"] <- "Yes"
+        reformat_data_neofox <- plot_data_neofox %>%
+          gather("Feature", "Value", -c("mutatedXmer", "Selected"))
+        
+        
+        p_neofox <- ggplot(reformat_data_neofox, aes(x = "", y = Value)) + geom_violin() +
+           geom_jitter(data = reformat_data_neofox[reformat_data_neofox["Selected"] == "No", ], aes(color = Selected), size = 1, alpha = 0.5, stroke = 1, position = position_jitter(0.3)) +
+           geom_jitter(data = reformat_data_neofox[reformat_data_neofox["Selected"] == "Yes", ], aes(color = Selected), size = 2, alpha = 1, stroke = 1, position = position_jitter(0.3)) +
+           scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409")) +
+          labs(x = NULL) +
+          facet_wrap(~Feature, scales="free", ncol=6) +
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 10), axis.ticks = element_line(size = 3), legend.text = element_text(size = 10), legend.title = element_text(size = 10))
+
+        incProgress(0.5)
+        print(p_neofox)
+      }else {
+        p_neofox <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        incProgress(1)
+        print(p_neofox)
+      }
+    })
+  })
+  
+  
+  # Dynamic scatter plot
+  output$xvrbl <- renderUI({
+    df <- df_neofox$mainTable_neofox
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- names(df)[sapply(df, is.numeric)]
+    sorted_features <- features[order(!grepl("^\\*", features))]
+    
+    default_selection <- "*NetMHCpan_bestAffinity_affinity"
+    
+    pickerInput(inputId = "xvrbl",
+                label = "X-Axis Variable",
+                choices = sorted_features,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$xvrbl_log <- renderUI({
+    radioButtons(
+      inputId = "LogX",
+      choices = c("none", "ln", "log2", "log10", "sqrt"),
+      label = "Transform",
+      inline = TRUE
+      )
+  })
+  
+  output$yvrbl <- renderUI({
+    df <- df_neofox$mainTable_neofox
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- names(df)[sapply(df, is.numeric)]
+    sorted_features <- features[order(!grepl("^\\*", features))]
+    default_selection <- "*NetMHCpan_bestAffinity_affinityWT"
+    
+    pickerInput(inputId = "yvrbl",
+                label = "Y-Axis Variable",
+                choices = sorted_features,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$yvrbl_log <- renderUI({
+    radioButtons(
+      inputId = "LogY",
+      choices = c("none", "ln", "log2", "log10", "sqrt"),
+      label = "Transform",
+      inline = TRUE
+    )
+  })
+  
+  output$xvrbl_scale <- renderUI({
+    withProgress(message = "Loading Scale", value = 0, {
+      req(input$xvrbl, input$LogX)  # Use req() to check if inputs are not NULL
+          df <- df_neofox$mainTable_neofox
+          df <- type.convert(df, as.is = TRUE)
+          df[is.na(df)] <- 0
+          df <- df[is.finite(df[[input$xvrbl]]),]
+          
+          # Apply log or sqrt transformation
+          if (input$LogX == "ln") {
+            df[[input$xvrbl]] <- log(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+          } else if (input$LogX == "log2") {
+            df[[input$xvrbl]] <- log2(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+          } else if (input$LogX == "log10") {
+            df[[input$xvrbl]] <- log10(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+          } else if (input$LogX == "sqrt") {
+            df[[input$xvrbl]] <- sqrt(ifelse(df[[input$xvrbl]] < 0, 1e-10, df[[input$xvrbl]]))
+          } else {
+            df[[input$xvrbl]] <- df[[input$xvrbl]]
+          }
+          
+          df <- df[is.finite(df[[input$xvrbl]]),]
+          
+          xvrbl_values <- df[[input$xvrbl]]
+          range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
+          min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
+          max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+          
+      
+          # Check if min_value and max_value are equal, set default values
+          if (min_value == max_value) {
+            min_value <- min_value - 1
+            max_value <- max_value + 1
+          }
+          
+          sliderInput(
+            inputId = "xvrbl_scale",
+            label = "Min/Max",
+            min = min_value,
+            max = max_value,
+            value = c(min_value, max_value),
+            step = 0.01,
+            dragRange = TRUE  # Allow users to drag the range handles 
+            )
+    })
+  })
+  
+  output$yvrbl_scale <- renderUI({
+    withProgress(message = "Loading Scale", value = 0, {
+      req(input$yvrbl)  # Use req() to check if inputs are not NULL
+        df <- df_neofox$mainTable_neofox
+        df <- type.convert(df, as.is = TRUE)
+        df[is.na(df)] <- 0
+        df <- df[is.finite(df[[input$yvrbl]]),]
+        
+        # Apply log or sqrt transformation
+        if (input$LogY == "ln") {
+          df[[input$yvrbl]] <- log(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+        } else if (input$LogY == "log2") {
+          df[[input$yvrbl]] <- log2(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+        } else if (input$LogY == "log10") {
+          df[[input$yvrbl]] <- log10(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+        } else if (input$LogY == "sqrt") {
+          df[[input$yvrbl]] <- sqrt(ifelse(df[[input$yvrbl]] < 0, 1e-10, df[[input$yvrbl]]))
+        } else {
+          df[[input$yvrbl]] <- df[[input$yvrbl]]
+        }
+        
+        
+        df <- df[is.finite(df[[input$yvrbl]]),]
+        
+        yvrbl_values <- df[[input$yvrbl]]
+        range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
+        min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
+        max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+        
+        
+        # Check if min_value and max_value are equal, set default values
+        if (min_value == max_value) {
+          min_value <- min_value - 1
+          max_value <- max_value + 1
+        }
+        
+        
+        sliderInput(
+          inputId = "yvrbl_scale",
+          label = "Min/Max",
+          min = min_value,
+          max = max_value,
+          value = c(min_value, max_value),
+          step = 0.01,
+          dragRange = TRUE  # Allow users to drag the range handles 
+        )
+    })
+  })
+  
+  output$color_noefox <- renderUI({
+    df <- df_neofox$mainTable_neofox
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- names(df)[sapply(df, is.numeric)]
+    sorted_features <- features[order(!grepl("^\\*", features))]
+    
+    default_selection <- "*Tcell_predictor"
+    pickerInput(inputId = "color_scatter",
+                label = "Color",
+                choices = sorted_features,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$size_neofox <- renderUI({
+    df <- df_neofox$mainTable_neofox
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- names(df)[sapply(df, is.numeric)]
+    sorted_features <- features[order(!grepl("^\\*", features))]
+    
+    default_selection <- "*rnaExpression"
+    pickerInput(inputId = "size_scatter",
+                label = "Size",
+                choices = sorted_features,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$min_color <- renderUI({
+    colourInput("min_col", "Select min color", "grey")
+  })
+  
+  output$max_color <- renderUI({
+    colourInput("max_col", "Select max color", "purple")
+  })
+  
+  output$scatter <- renderPlotly({
+    withProgress(message = "Loading Scatter Plots", value = 0, {
+      incProgress(0.5)
+      if (!is.null(input$xvrbl) & !(is.null(input$yvrbl))) {
+        df <- df_neofox$mainTable_neofox
+        df <- type.convert(df, as.is = TRUE)
+        df[is.na(df)] <- 0
+  
+  
+        # For input$xvrbl
+        if (input$LogX == "ln") {
+          df[[input$xvrbl]] <- log(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+        } else if (input$LogX == "log2") {
+          df[[input$xvrbl]] <- log2(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+        } else if (input$LogX == "log10") {
+          df[[input$xvrbl]] <- log10(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+        } else if (input$LogX == "sqrt") {
+          df[[input$xvrbl]] <- sqrt(ifelse(df[[input$xvrbl]] < 0, 1e-10, df[[input$xvrbl]]))
+        } else {
+          df[[input$xvrbl]] <- df[[input$xvrbl]]
+        }
+        
+        # For input$yvrbl
+        if (input$LogY == "ln") {
+          df[[input$yvrbl]] <- log(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+        } else if (input$LogY == "log2") {
+          df[[input$yvrbl]] <- log2(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+        } else if (input$LogY == "log10") {
+          df[[input$yvrbl]] <- log10(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+        } else if (input$LogY == "sqrt") {
+          df[[input$yvrbl]] <- sqrt(ifelse(df[[input$yvrbl]] < 0, 1e-10, df[[input$yvrbl]]))
+        } else {
+          df[[input$yvrbl]] <- df[[input$yvrbl]]
+        }
+        
+        
+        df[is.na(df)] <- 0
+        
+        # Filter data based on the slider range
+        df <- subset(df, df[[input$xvrbl]] >= input$xvrbl_scale[1] & df[[input$xvrbl]] <= input$xvrbl_scale[2])
+        df <- subset(df, df[[input$yvrbl]] >= input$yvrbl_scale[1] & df[[input$yvrbl]] <= input$yvrbl_scale[2])
+        
+        
+        incProgress(0.5)
+  
+        scatter_plot <- ggplot(df , aes(x = .data[[input$xvrbl]], y = .data[[input$yvrbl]],
+                                        text = paste("Patient:", .data[["patientIdentifier"]], "<br>",
+                                                     "Gene:", .data[["gene"]]))) +
+          geom_point(aes(color = .data[[input$color_scatter]], size = .data[[input$size_scatter]])) +  # Correct placement of aes() here
+          scale_color_gradient(low = input$min_col, high = input$max_col) +
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+  
+        scatter_plot <- ggplotly(scatter_plot)
+        
+        print(scatter_plot)
+        } 
+        else {
+        p <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        scatter_plot <- ggplotly(p)
+        incProgress(1)
+        print(scatter_plot)
+      }
+    })
+  })
+
+  ############### Custom Tab ##########################
+  df_custom <- reactiveValues(
+    selectedRow = 1,
+    fullData = NULL,
+    mainTable = NULL,
+    group_inds = NULL,
+    metricsData = NULL,
+    pageLength = 10,
+    groupBy = NULL,
+    orderBy = NULL,
+    peptide_features = NULL
+  )
+  observeEvent(input$loadDefault_Vaxrank, {
+    data <- "data/vaxrank_output.tsv"
+    mainData <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData) <- mainData[1, ]
+    mainData <- mainData[-1, ]
+    row.names(mainData) <- NULL
+    df_custom$fullData <- mainData
+  })
+  observeEvent(input$loadDefault_Neopredpipe, {
+    data <- "data/HCC1395Run.neoantigens.txt"
+    mainData <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData) <- mainData[1, ]
+    mainData <- mainData[-1, ]
+    row.names(mainData) <- NULL
+    df_custom$fullData <- mainData
+  })
+  observeEvent(input$loadDefault_antigengarnish, {
+    data <- "data/ag_test_antigen.tsv"
+    mainData <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData) <- mainData[1, ]
+    mainData <- mainData[-1, ]
+    row.names(mainData) <- NULL
+    df_custom$fullData <- mainData
+  })
+  output$custom_upload_ui <- renderUI({
+    fileInput(inputId = "custom_data", label = "Custom input table (tsv required)",
+              accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
+  })
+  observeEvent(input$custom_data$datapath, {
+    mainData <- read.table(input$custom_data$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData) <- mainData[1, ]
+    mainData <- mainData[-1, ]
+    row.names(mainData) <- NULL
+    df_custom$fullData <- mainData
+  })
+  
+  output$custom_group_by_feature_ui <- renderUI({
+    df <- df_custom$fullData
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- as.list(names(df))
+    default_selection <- ifelse(length(features) >= 1, features[[1]], "")
+    
+    pickerInput(inputId = "feature_1",
+                label = "Group peptides by",
+                choices = features, # a list of strings
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE)
+  })
+  output$custom_order_by_feature_ui <- renderUI({
+    df <- df_custom$fullData
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- names(df)[sapply(df, is.numeric)]
+    default_selection <- ifelse(length(features) >= 2, features[[2]], "")
+    
+    pickerInput(inputId = "feature_2",
+                label = "Sort peptides by",
+                choices = features, # a list of strings
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE)
+  })
+  
+  output$custom_peptide_features_ui <- renderUI({
+    df <- df_custom$fullData
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- as.list(names(df))
+    default_selection <- features[((features != input$feature_2) & (features != input$feature_1))]
+    
+    features <- names(df_custom$fullData)
+    pickerInput(inputId = "peptide_features",
+                label = "Features to display for each group of peptides",
+                selected = default_selection,
+                options = list(`actions-box` = TRUE,`live-search` = TRUE),
+                choices = features[((features != input$feature_2) & (features != input$feature_1))], # a list of strings
+                multiple = TRUE)
+  })
+  
+  observeEvent(input$visualize_custom, {
+    #browser()
+    df_custom$groupBy <- input$feature_1
+    df_custom$orderBy <- input$feature_2
+    
+    reformat_data <- df_custom$fullData %>% group_by(across(all_of(df_custom$groupBy))) %>% arrange(across(all_of(df_custom$orderBy)))
+    df_custom$fullData <- reformat_data
+    row_ind <- reformat_data %>% group_rows()
+    row_ind_df <- as.data.frame(row_ind)
+    df_custom$group_inds <- row_ind_df
+    row_ind_top <- apply(row_ind_df, 1, function(x) {unlist(x[1])[1]})
+    df_custom$mainTable <- as.data.frame(reformat_data[row_ind_top, ])
+    df_custom$mainTable <- cbind(Select = shinyInputSelect(actionButton, nrow(df_custom$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"custom_select_button\",  this.id)'), df_custom$mainTable)
+    df_custom$metricsData <- get_group_inds(df_custom$fullData, df_custom$group_inds)
+    df_custom$peptide_features <- input$peptide_features
+    updateTabItems(session, "custom_tabs", "custom_explore")
+  })
+  
+  output$customTable <- DT::renderDataTable(
+    if (is.null(df_custom$mainTable)) {
+      return(datatable(data.frame("Annotated Table" = character())))
+    }else {
+      datatable(df_custom$mainTable,
+                escape = FALSE, class = "stripe",
+                selection = "single",
+                extensions = c("Buttons")
+                
+      )
+    }, server = FALSE)
+  
+
+  observeEvent(input$custom_select_button, {
+    if (is.null(df_custom$mainTable) | is.null(df_custom$selectedRow)){
+      return ()
+    }
+    #browser()
+    df_custom$selectedRow <- as.numeric(strsplit(input$custom_select_button, "_")[[1]][2])
+    session$sendCustomMessage('unbind-DT', 'customTable')
+    dataTableProxy("customMainTable") %>% 
+      selectPage((df_custom$selectedRow-1) %/% df_custom$pageLength + 1)
+  })
+  output$customPeptideTable <- renderDT({
+    withProgress(message = 'Loading Peptide Table', value = 0, {
+      incProgress(0.5)
+      #browser()
+      if (!is.null(df_custom$selectedRow) & !(is.null(df_custom$mainTable)) & !is.null(df_custom$peptide_features)){
+        display_table <- get_current_group_info(df_custom$peptide_features, df_custom$metricsData, df_custom$fullData, df_custom$selectedRow)
+        incProgress(0.5)
+        dtable <- datatable(display_table, options =list(
+          pageLength = 10,
+          rowCallback = JS('function(row, data, index, rowId) {',
+                           'console.log(rowId)','if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {',
+                           'row.style.backgroundColor = "#E0E0E0";','}','}')
+        ), selection = list(mode='single', selected = '1')) 
+        dtable
+      }
+      else{
+        incProgress(1)
+        datatable(data.frame("Peptide Datatable"=character()), selection = list(mode='single', selected = '1'))
+      }})
+  })
+  
+  
+  # Dynamic Scatter Plot 
+  output$xvrbl_custom <- renderUI({
+    df <- df_custom$fullData
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- as.list(names(df)[sapply(df, is.numeric)])
+    default_selection <- ifelse(length(features) >= 1, features[[1]], "")
+    
+    pickerInput(inputId = "xvrbl_custom",
+                label = "X-Axis Variable",
+                choices = features,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$xvrbl_log_custom <- renderUI({
+    radioButtons(
+      inputId = "LogX_custom",
+      choices = c("none", "ln", "log2", "log10", "sqrt"),
+      label = "X Log Transform",
+      inline = TRUE
+    )
+  })
+  
+  output$xvrbl_scale_custom <- renderUI({
+    withProgress(message = "Loading Scale", value = 0, {
+      req(input$xvrbl_custom)  # Use req() to check if inputs are not NULL
+      df <- df_custom$fullData
+      df <- type.convert(df, as.is = TRUE)
+      df[is.na(df)] <- 0
+      df <- df[is.finite(df[[input$xvrbl_custom]]),]
+      
+      # Apply log or sqrt transformation
+      if (input$LogX_custom == "ln") {
+        df[[input$xvrbl_custom]] <- log(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+      } else if (input$LogX_custom == "log2") {
+        df[[input$xvrbl_custom]] <- log2(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+      } else if (input$LogX_custom == "log10") {
+        df[[input$xvrbl_custom]] <- log10(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+      } else if (input$LogX_custom == "sqrt") {
+        df[[input$xvrbl_custom]] <- sqrt(ifelse(df[[input$xvrbl_custom]] < 0, 1e-10, df[[input$xvrbl_custom]]))
+      } else {
+        df[[input$xvrbl_custom]] <- df[[input$xvrbl_custom]]
+      }
+      
+      df <- df[is.finite(df[[input$xvrbl_custom]]),]
+      
+      xvrbl_values <- df[[input$xvrbl_custom]]
+      range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
+      min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
+      max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+      
+      
+      # Check if min_value and max_value are equal, set default values
+      if (min_value == max_value) {
+        min_value <- min_value - 1
+        max_value <- max_value + 1
+      }
+      
+      sliderInput(
+        inputId = "xvrbl_scale_custom",
+        label = "X Min/Max",
+        min = min_value,
+        max = max_value,
+        value = c(min_value, max_value),
+        step = 0.01,
+        dragRange = TRUE  # Allow users to drag the range handles 
+      )
+    })
+  })
+  
+  output$yvrbl_custom <- renderUI({
+    df <- df_custom$fullData
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- as.list(names(df)[sapply(df, is.numeric)])
+    default_selection <- ifelse(length(features) >= 2, features[[2]], "")
+    
+    pickerInput(inputId = "yvrbl_custom",
+                label = "Y-Axis Variable",
+                choices = features,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$yvrbl_log_custom <- renderUI({
+    radioButtons(
+      inputId = "LogY_custom",
+      choices = c("none", "ln", "log2", "log10", "sqrt"),
+      label = "Y Log Transform",
+      inline = TRUE
+    )
+  })
+  
+  output$yvrbl_scale_custom <- renderUI({
+    withProgress(message = "Loading Scale", value = 0, {
+      req(input$yvrbl_custom)  # Use req() to check if inputs are not NULL
+      df <- df_custom$fullData
+      df <- type.convert(df, as.is = TRUE)
+      df[is.na(df)] <- 0
+      df <- df[is.finite(df[[input$yvrbl_custom]]),]
+      
+      # Apply log or sqrt transformation
+      if (input$LogY_custom == "ln") {
+        df[[input$yvrbl_custom]] <- log(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
+      } else if (input$LogY_custom == "log2") {
+        df[[input$yvrbl_custom]] <- log2(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
+      } else if (input$LogY_custom == "log10") {
+        df[[input$yvrbl_custom]] <- log10(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
+      } else if (input$LogY_custom == "sqrt") {
+        df[[input$yvrbl_custom]] <- sqrt(ifelse(df[[input$yvrbl_custom]] < 0, 1e-10, df[[input$yvrbl_custom]]))
+      } else {
+        df[[input$yvrbl_custom]] <- df[[input$yvrbl_custom]]
+      }
+      
+      df <- df[is.finite(df[[input$yvrbl_custom]]),]
+      yvrbl_values <- df[[input$yvrbl_custom]]
+      range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
+      min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
+      max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+      
+      # Check if min_value and max_value are equal, set default values
+      if (min_value == max_value) {
+        min_value <- min_value - 1
+        max_value <- max_value + 1
+      }
+      
+      sliderInput(
+        inputId = "yvrbl_scale_custom",
+        label = "Y Min/Max",
+        min = min_value,
+        max = max_value,
+        value = c(min_value, max_value),
+        step = 0.01,
+        dragRange = TRUE  # Allow users to drag the range handles 
+      )
+    })
+  })
+  
+  
+  output$color_custom <- renderUI({
+    df <- df_custom$fullData
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- as.list(names(df)[sapply(df, is.numeric)])
+    default_selection <- ifelse(length(features) >= 3, features[[3]], "")
+    
+    pickerInput(inputId = "color_scatter_custom",
+                label = "Color",
+                choices = features,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$min_color_custom <- renderUI({
+    colourInput("min_col_custom", "Select min color", "grey")
+  })
+  
+  output$max_color_custom <- renderUI({
+    colourInput("max_col_custom", "Select max color", "purple")
+  })
+  
+  output$size_custom<- renderUI({
+    df <- df_custom$fullData
+    df <- type.convert(df, as.is = TRUE)
+    df[is.na(df)] <- 0
+    
+    features <- as.list(names(df)[sapply(df, is.numeric)])
+    default_selection <- ifelse(length(features) >= 4, features[[4]], "")
+
+    pickerInput(inputId = "size_scatter_custom",
+                label = "Size",
+                choices = features,
+                selected = default_selection,
+                options = list(`live-search` = TRUE),
+                multiple = FALSE
+    )
+  })
+  
+  output$scatter_custom <- renderPlotly({
+    withProgress(message = "Loading Scatter Plots", value = 0, {
+      incProgress(0.5)
+      if (!is.null(input$xvrbl_custom) & !is.null(input$yvrbl_custom)
+          & !is.null(input$min_col_custom)  & !is.null(input$max_col_custom)
+          & !is.null(input$xvrbl_scale_custom)  & !is.null(input$yvrbl_scale_custom)
+          & !is.null(input$color_scatter_custom)  & !is.null(input$size_scatter_custom)) {
+        
+        df <- df_custom$fullData
+        df <- type.convert(df, as.is = TRUE)
+        df[is.na(df)] <- 0
+        
+        
+        # For input$xvrbl_custom
+        if (input$LogX_custom == "ln") {
+          df[[input$xvrbl_custom]] <- log(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+        } else if (input$LogX_custom == "log2") {
+          df[[input$xvrbl_custom]] <- log2(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+        } else if (input$LogX_custom == "log10") {
+          df[[input$xvrbl_custom]] <- log10(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+        } else if (input$LogX_custom == "sqrt") {
+          df[[input$xvrbl_custom]] <- sqrt(ifelse(df[[input$xvrbl_custom]] < 0, 1e-10, df[[input$xvrbl_custom]]))
+        } else {
+          df[[input$xvrbl_custom]] <- df[[input$xvrbl_custom]]
+        }
+        # For input$yvrbl_custom
+        if (input$LogY_custom == "ln") {
+          df[[input$yvrbl_custom]] <- log(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
+        } else if (input$LogY_custom == "log2") {
+          df[[input$yvrbl_custom]] <- log2(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
+        } else if (input$LogY_custom == "log10") {
+          df[[input$yvrbl_custom]] <- log10(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
+        } else if (input$LogY_custom == "sqrt") {
+          df[[input$yvrbl_custom]] <- sqrt(ifelse(df[[input$yvrbl_custom]] < 0, 1e-10, df[[input$yvrbl_custom]]))
+        } else {
+          df[[input$yvrbl_custom]] <- df[[input$yvrbl_custom]]
+        }
+        
+        
+        df[is.na(df)] <- 0
+        
+        # Filter data based on the slider range
+        df <- subset(df, df[[input$xvrbl_custom]] >= input$xvrbl_scale_custom[1] & df[[input$xvrbl_custom]] <= input$xvrbl_scale_custom[2])
+        df <- subset(df, df[[input$yvrbl_custom]] >= input$yvrbl_scale_custom[1] & df[[input$yvrbl_custom]] <= input$yvrbl_scale_custom[2])
+        
+        incProgress(0.5)
+        
+        scatter_plot <- ggplot(df , aes(x = .data[[input$xvrbl_custom]], y = .data[[input$yvrbl_custom]])) +
+          geom_point(aes(color = .data[[input$color_scatter_custom]], size = .data[[input$size_scatter_custom]])) +  # Correct placement of aes() here
+          scale_color_gradient(low = input$min_col_custom, high = input$max_col_custom) +
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+        
+        scatter_plot <- ggplotly(scatter_plot)
+        
+        print(scatter_plot)
+      } 
+      else {
+        p <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
+          theme_void() + theme(legend.position = "none", panel.border = element_blank())
+        incProgress(1)
+        print(p)
+      }
+    })
+  })
+  
+  
 })

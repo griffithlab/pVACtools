@@ -24,9 +24,16 @@ custom_tab <- tabItem("custom",
                         br(), br(),
                         uiOutput("custom_upload_ui")
                     ),
-                    uiOutput("custom_group_by_feature_ui"),
-                    uiOutput("custom_order_by_feature_ui"),
-                    uiOutput("custom_peptide_features_ui"),
+                    box(
+                      title = "Choose How to Visualize Data", status = "primary", solidHeader = TRUE, width = NULL,
+                      uiOutput("custom_group_by_feature_ui"),
+                      h5("Group peptides together by a certain feature. For example, grouping by variant would allow user to explore all proposed peptides for one variant at a time."),
+                      uiOutput("custom_order_by_feature_ui"),
+                      h5("Order peptides by a certain feature. For example, ordering peptides by binding scores to find the best binders."),
+                      uiOutput("custom_peptide_features_ui"),
+                      h5("Choose what features you would like to consider for each group of peptides.")
+                    ),
+                    
                     actionButton("visualize_custom", "Visualize")
                 ),
                 column(6,
@@ -59,14 +66,38 @@ custom_tab <- tabItem("custom",
                     enable_sidebar = TRUE, sidebar_width = 25, sidebar_start_open = TRUE,
                     DTOutput('customTable')%>% withSpinner(color="#8FCCFA"),
                     span("Currently investigating row: ", verbatimTextOutput("customSelected")),
-                    style = "overflow-x: scroll;font-size:100%")
+                    style = "overflow-x: scroll;font-size:100%"),
           ),
           fluidRow(
             box(width = 12, title = "Detailed Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
-                tabBox(width = 12, title = " ",
-                       tabPanel("Peptide candidates grouped by selected feature",
-                                DTOutput('customPeptideTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%")
+                DTOutput('customPeptideTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%"
+            )
+          ),
+          fluidRow(
+            box(width = 12,
+                title = "Dynamic Scatter Plot", status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                h4("Scatter plot to explore characteristics of data"),
+                sidebarPanel(
+                  #variable selection for x-axis
+                  uiOutput("xvrbl_custom"),
+                  uiOutput("xvrbl_log_custom"),
+                  uiOutput("xvrbl_scale_custom"),
+                  # variable selection for y-axis
+                  uiOutput("yvrbl_custom"),
+                  uiOutput("yvrbl_log_custom"),
+                  uiOutput("yvrbl_scale_custom"),
+                  # color
+                  uiOutput("color_custom"),
+                  uiOutput("min_color_custom"),
+                  uiOutput("max_color_custom"),
+                  # size
+                  uiOutput("size_custom")
+                ),
+                mainPanel(
+                  align = "center",
+                  plotlyOutput(outputId = "scatter_custom", height = "800px") %>% withSpinner(color = "#8FCCFA"),
                 )
+                
             )
           )
         )

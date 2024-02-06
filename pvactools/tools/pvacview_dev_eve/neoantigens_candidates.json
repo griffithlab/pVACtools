@@ -1,9 +1,0 @@
-[{
-    "patientIdentifier": "Ptx",
-    "gene": "BRCA2",
-    "mutation": {
-        "wildTypeXmer": "AAAAAAAAAAAAALAAAAAAAAAAAAA",
-        "mutatedXmer": "AAAAAAAAAAAAAFAAAAAAAAAAAAA"
-    }
-}]
-
