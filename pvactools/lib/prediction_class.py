@@ -332,10 +332,86 @@ class PredictionClass(metaclass=ABCMeta):
         if allele not in valid_alleles:
             sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, self.__class__.__name__, self.__class__.__name__))
 
+    def determine_neoepitopes(self, sequence, length):
+        epitopes = {}
+        for i in range(0, len(sequence)-length+1):
+            epitopes[i+1] = sequence[i:i+length]
+        return epitopes
+
+
 class MHCI(PredictionClass, metaclass=ABCMeta):
     @property
     def needs_epitope_length(self):
         return True
+
+class BigMHC(metaclass=ABCMeta):
+    def valid_allele_names(self):
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_file_name = os.path.join(alleles_dir, "BigMHC.txt")
+        with open(alleles_file_name, 'r') as fh:
+            return list(filter(None, fh.read().split('\n')))
+
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
+    def valid_lengths_for_allele(self, allele):
+        return [8,9,10,11,12,13,14,15]
+
+    def predict_bigmhc(self, bigmhc_type, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        results = pd.DataFrame()
+        all_epitopes = []
+        for record in SeqIO.parse(input_file, "fasta"):
+            seq_num = record.id
+            peptide = str(record.seq)
+            epitopes = self.determine_neoepitopes(peptide, epitope_length)
+            all_epitopes.extend(epitopes.values())
+        all_epitopes = list(set(all_epitopes))
+
+        if len(all_epitopes) > 0:
+            tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
+            for epitope in all_epitopes:
+                tmp_input_file.write("{}\n".format(epitope))
+            tmp_input_file.close()
+            tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
+            arguments = ['bigmhc_predict', '-a', allele, '-i', tmp_input_file.name, '-p', '0', '-c', '0', '-o', tmp_output_file.name, '-m', bigmhc_type, '-d', 'cpu']
+            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
+            try:
+                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
+            except:
+                stderr_fh.close()
+                with open(stderr_fh.name, 'r') as fh:
+                    err = fh.read()
+                os.unlink(stderr_fh.name)
+                raise Exception("An error occurred while calling BigMHC:\n{}".format(err))
+            stderr_fh.close()
+            os.unlink(stderr_fh.name)
+            os.unlink(tmp_input_file.name)
+            tmp_output_file.close()
+            df = pd.read_csv(tmp_output_file.name)
+            df.rename(columns={
+                'pep': 'peptide',
+                'mhc': 'allele',
+            }, inplace=True)
+            os.unlink(tmp_output_file.name)
+            for record in SeqIO.parse(input_file, "fasta"):
+                seq_num = record.id
+                peptide = str(record.seq)
+                epitopes = self.determine_neoepitopes(peptide, epitope_length)
+                for start, epitope in epitopes.items():
+                    epitope_df = df[df['peptide'] == epitope]
+                    epitope_df['seq_num'] = seq_num
+                    epitope_df['start'] = start
+                    results = pd.concat((results, epitope_df), axis=0)
+        return (results, 'pandas')
+
+class BigMHC_EL(BigMHC, MHCI):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        return self.predict_bigmhc('el', input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None)
+
+class BigMHC_IM(BigMHC, MHCI):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        return self.predict_bigmhc('im', input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None)
 
 class MHCflurry(MHCI):
     def valid_allele_names(self):
@@ -350,12 +426,6 @@ class MHCflurry(MHCI):
 
     def valid_lengths_for_allele(self, allele):
         return [8,9,10,11,12,13,14,15]
-
-    def determine_neoepitopes(self, sequence, length):
-        epitopes = {}
-        for i in range(0, len(sequence)-length+1):
-            epitopes[i+1] = sequence[i:i+length]
-        return epitopes
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
         results = pd.DataFrame()
