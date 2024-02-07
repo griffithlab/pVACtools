@@ -90,6 +90,7 @@ setup(
         'mhcflurry==2.0.6',
         'testfixtures',
         'polars==0.16.18',
+        'bigmhc @ git+https://github.com/KarchinLab/bigmhc.git#egg=bigmhc',
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,
