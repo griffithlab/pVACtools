@@ -73,7 +73,7 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
-    mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+    mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
     mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
@@ -157,7 +157,7 @@ server <- shinyServer(function(input, output, session) {
      colnames(mainData) <- mainData[1, ]
      mainData <- mainData[-1, ]
      row.names(mainData) <- NULL
-     mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+     mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
      mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
      mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
      mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
@@ -332,7 +332,7 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$`Rank_ic50` <- NULL
       df$mainTable$`Rank_expr` <- NULL
       df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-      df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+      df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
   })
   #reset tier-ing with original parameters
   observeEvent(input$reset_params, {
@@ -368,7 +368,7 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Rank_ic50` <- NULL
     df$mainTable$`Rank_expr` <- NULL
     df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
   })
   #determine hla allele count in order to generate column tooltip locations correctly
   hla_count <- reactive({
@@ -432,7 +432,7 @@ server <- shinyServer(function(input, output, session) {
     df$pageLength <- as.numeric(input$page_length)
     session$sendCustomMessage("unbind-DT", "mainTable")
     df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
   })
   output$filesUploaded <- reactive({
     val <- !(is.null(df$mainTable) | is.null(df$metricsData))
@@ -541,7 +541,7 @@ server <- shinyServer(function(input, output, session) {
     df$selectedRow <- as.numeric(strsplit(input$select_button, "_")[[1]][2])
     session$sendCustomMessage("unbind-DT", "mainTable")
     df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
     dataTableProxy("mainTable") %>%
       selectPage((df$selectedRow - 1) %/% df$pageLength + 1)
   })
