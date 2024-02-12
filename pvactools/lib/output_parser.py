@@ -163,6 +163,8 @@ class OutputParser(metaclass=ABCMeta):
                 }
             else:
                 return {'ic50': float(line['ic50'])}
+        elif method.lower() == 'deepimmuno':
+            return {'score': float(line['immunogenicity'])}
         elif method.lower() == 'bigmhc_el':
             return {'score': float(line['BigMHC_EL'])}
         elif method.lower() == 'bigmhc_im':
@@ -587,7 +589,7 @@ class OutputParser(metaclass=ABCMeta):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if method in ['BigMHC_EL', 'BigMHC_IM']:
+            if method in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
                 headers.append("%s WT Score" % pretty_method)
                 headers.append("%s MT Score" % pretty_method)
                 continue
@@ -633,7 +635,7 @@ class OutputParser(metaclass=ABCMeta):
                     row['MHCflurryEL Processing %s' % suffix.replace("IC50 ", "")] = s
                 elif st == 'mhcflurry_presentation_percentile':
                     row['MHCflurryEL Presentation %s' % suffix.replace("IC50 ", "")] = s
-                elif pretty_method in ['NetMHCpanEL', 'NetMHCIIpanEL', 'BigMHC_EL', 'BigMHC_IM']:
+                elif pretty_method in ['NetMHCpanEL', 'NetMHCIIpanEL', 'BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
                     row['%s %s' % (pretty_method, suffix.replace("IC50 ", ""))] = s
                 else:
                     row['%s %s' % (pretty_method, suffix)] = s
@@ -735,7 +737,7 @@ class OutputParser(metaclass=ABCMeta):
                     pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                     self.add_pretty_row(row, wt_scores, method, pretty_method, 'WT IC50 Score')
                     self.add_pretty_row(row, mt_scores, method, pretty_method, 'MT IC50 Score')
-                    if pretty_method not in ['BigMHC_EL', 'BigMHC_IM']:
+                    if pretty_method not in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
                         self.add_pretty_row(row, wt_percentiles, method, pretty_method, 'WT Percentile')
                         self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'MT Percentile')
 
@@ -937,7 +939,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 elif self.flurry_state == 'both':
                     self.flurry_headers(headers)
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if method in ['BigMHC_EL', 'BigMHC_IM']:
+            if method in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
                 headers.append("%s Score" % pretty_method)
                 continue
 
@@ -991,7 +993,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                 self.add_pretty_row(row, mt_scores, method, pretty_method, 'IC50 Score')
-                if pretty_method not in ['BigMHC_EL', 'BigMHC_IM']:
+                if pretty_method not in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
                     self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
             if self.add_sample_name:
                 row['Sample Name'] = self.sample_name
