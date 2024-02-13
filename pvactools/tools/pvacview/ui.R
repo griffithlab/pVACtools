@@ -223,7 +223,7 @@ explore_tab <- tabItem(
                         DTOutput(outputId = "bindingDatatable"), style = "overflow-x: scroll;"
                     ),
                     tabPanel("Elution and Immunogenicity Data",
-                        h4("Prediction score table showing exact MHC binding values for elution and percentile calculations."),
+                        h4("Prediction score table showing exact MHC scpres for elution, immunogenicity, and percentile calculations."),
                         DTOutput(outputId = "elutionDatatable"),
                         br(),
                         strong("MHCflurryEL Processing"), span(': An "antigen processing" predictor that attempts to model MHC allele-independent effects such as proteosomal cleavage. ('),
