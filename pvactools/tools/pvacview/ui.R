@@ -607,7 +607,8 @@ ui <- dashboardPage(
       menuItem("Tutorials", tabName = "tutorial", startExpanded = TRUE, icon = icon("fas fa-book-open")),
       menuItem("pVACview Documentation", icon = icon("fas fa-file-invoice"), href = "https://pvactools.readthedocs.io/en/latest/pvacview.html"),
       menuItem("Submit Github Issue", tabName = "contact", icon = icon("far fa-question-circle"))
-    )
+    ),
+    div(textOutput("version"), style="margin-left:20px;position:fixed;bottom:20px;color:#b8c7ce")
   ),
   body = dashboardBody(
     use_theme(mytheme),
