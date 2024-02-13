@@ -118,6 +118,53 @@ class CallIEDBClassITests(CallIEDBTests):
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
 
+    def test_bigmhc_el__method_generates_expected_files(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+
+        pvactools.lib.call_iedb.main([
+            self.input_file,
+            call_iedb_output_file.name,
+            'BigMHC_EL',
+            self.allele,
+            '-l', str(self.epitope_length)
+        ])
+        expected_output_file = os.path.join(self.test_data_dir, 'output_bigmhc_el.tsv')
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[1,5,6])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[1,5,6])
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+
+    def test_bigmhc_im_method_generates_expected_files(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+
+        pvactools.lib.call_iedb.main([
+            self.input_file,
+            call_iedb_output_file.name,
+            'BigMHC_IM',
+            self.allele,
+            '-l', str(self.epitope_length)
+        ])
+        expected_output_file = os.path.join(self.test_data_dir, 'output_bigmhc_im.tsv')
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[1,5,6])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[1,5,6])
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+
+    def test_deepimmuno_method_generates_expected_files(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+        tmp_call_iedb_output_dir = tempfile.TemporaryDirectory()
+
+        pvactools.lib.call_iedb.main([
+            self.input_file,
+            call_iedb_output_file.name,
+            'DeepImmuno',
+            self.allele,
+            '-l', str(self.epitope_length),
+            '--tmp-dir', tmp_call_iedb_output_dir.name,
+        ])
+        expected_output_file = os.path.join(self.test_data_dir, 'output_deepimmuno.tsv')
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,3,4])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,3,4])
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+
 class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):
