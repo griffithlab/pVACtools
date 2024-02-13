@@ -56,32 +56,10 @@ New in Release |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-- The multithreading capabilities in pVACtools are not available for Mac OSX.
-  Attempting to use the -t parameter would result in the forked processes
-  crashing but the run would still complete successfully leading to results
-  with incomplete data. This release will result in an error when multithreading is
-  used under Mac OSX.
-- We've observed issues with IEDB's API sometimes returning incorrect or
-  incomplete data. This results in downstream errors. This release updates the prediction
-  calling to log such occurrences and to retry the API when they are observed.
-- MHCflurry sometimes returns no binding affinity percentile data. This
-  resulted in errors when parsing such prediction data. This release fixes our
-  parsing logic to handle this case.
-- TSL parsing of the input VCF in pVACseq used to be limited to human data
-  only. This release adds support for TSL parsing in mouse data.
-- When running with the --noncanonical flag, the exons.csv file will contain
-  exon postions for all possible transcript combinations. However, the transcripts
-  weren't being taken into account when parsing this file to determine the fusion
-  positions. This release fixes this issue by looking up the positions for the
-  specific transcripts of the record currently being parsed.
-- When using BLASTp for the reference proteome match step, we applied the word-size
-  parameter in order to only return perfect matches. However, for short sequences,
-  word-size must be less than half the query length, or reliable hits can be missed.
-  This release updates how the word-size parameter is calculated in order to
-  meet this criteria.
-- This release addresses in error in pVACview that would occur in the
-  Transcripts in Set window when there are
-  no peptides passing the aggregate inclusion binding threshold.
+- pVACbind was not parsing the individual El prediction algorithm scores correctly
+  resulting in them being missing from the all epitopes file.
+- This release fixes some display issues in pVACview. It also implements a
+  Docker file and bash script for deploying pVACview to GCP.
 
 New in Version |version|
 ------------------------
