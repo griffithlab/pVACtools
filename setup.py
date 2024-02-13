@@ -90,6 +90,8 @@ setup(
         'mhcflurry==2.0.6',
         'testfixtures',
         'polars==0.16.18',
+        'bigmhc @ git+https://github.com/griffithlab/bigmhc.git#egg=bigmhc',
+        'deepimmuno @ git+https://github.com/griffithlab/deepimmuno.git#egg=deepimmuno',
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,
