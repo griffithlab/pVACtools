@@ -173,3 +173,13 @@ This is a bugfix release. It fixes the following problem(s):
 - This release addresses in error in pVACview that would occur in the
   Transcripts in Set window when there are
   no peptides passing the aggregate inclusion binding threshold.
+
+Version 4.0.8
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- pVACbind was not parsing the individual El prediction algorithm scores correctly
+  resulting in them being missing from the all epitopes file.
+- This release fixes some display issues in pVACview. It also implements a
+  Docker file and bash script for deploying pVACview to GCP.
