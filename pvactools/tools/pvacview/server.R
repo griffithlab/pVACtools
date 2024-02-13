@@ -992,7 +992,7 @@ server <- shinyServer(function(input, output, session) {
       incProgress(1)
       dtable <- datatable(binding_reformat, options = list(
           pageLength = 10,
-          lengthMenu = c(10),
+          lengthChange = FALSE,
           rowCallback = JS("function(row, data, index, rowId) {",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                            'row.style.backgroundColor = "#E0E0E0";', "}", "}")
@@ -1056,7 +1056,7 @@ server <- shinyServer(function(input, output, session) {
           incProgress(1)
           dtable <- datatable(elution_reformat, options = list(
             pageLength = 10,
-            lengthMenu = c(10),
+            lengthChange = FALSE,
             rowCallback = JS("function(row, data, index, rowId) {",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                            'row.style.backgroundColor = "#E0E0E0";', "}", "}")
