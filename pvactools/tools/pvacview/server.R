@@ -881,8 +881,8 @@ server <- shinyServer(function(input, output, session) {
         incProgress(0.2)
         p1 <- p1 +
           geom_rect(data = all_peptides_multiple_hla, aes(xmin = x_pos - 0.5, xmax = 1 + x_pos - 0.5, ymin = .5 + y_pos, ymax = -.5 + y_pos), fill = all_peptides_multiple_hla$color_value) +
-          geom_text(data = all_peptides_multiple_hla, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 5) +
-          geom_text(data = hla_data, aes(x = x_pos, y = y_pos, label = hla), size = 5, fontface = "bold") +
+          geom_text(data = all_peptides_multiple_hla, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 4) +
+          geom_text(data = hla_data, aes(x = x_pos, y = y_pos, label = hla), size = 4, fontface = "bold") +
           geom_line(data = h_line_pos, (aes(x = x_pos, y = y_pos, group = y_pos)), linetype = "dashed")
         p1 <- p1 + scale_color_manual("mutation", values = c("not_mutated" = "#000000", "mutated" = "#e74c3c"))
         p1 <- p1 + theme_void() + theme(legend.position = "none", panel.border = element_blank())
@@ -894,7 +894,7 @@ server <- shinyServer(function(input, output, session) {
         print(p1)
       }
     })
-  }, height = 500, width = 1000)
+  }, height = 400, width = 800)
   ##updating IC50 binding score for selected peptide pair
   bindingScoreDataIC50 <- reactive({
     if (is.null(df$metricsData)) {
