@@ -186,24 +186,34 @@ explore_tab <- tabItem(
                     tabPanel("Peptide Candidates from Selected Transcript Set",
                             DTOutput("peptideTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
                     tabPanel("Anchor Heatmap",
-                        column(width = 6,
-                            div(style = 'overflow-y:scroll;height: 500px;',
-                                h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
-                                h5("HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
-                                    " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
-                                plotOutput(outputId = "peptideFigureLegend", height = "50px"),
-                                plotOutput(outputId = "anchorPlot")
+                        fluidRow(
+                            column(width = 6,
+                                div(style = 'overflow-y:scroll;height: 500px;',
+                                    h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
+                                    h5("HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
+                                        " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
+                                    plotOutput(outputId = "peptideFigureLegend", height = "50px"),
+                                    plotOutput(outputId = "anchorPlot")
+                                )
+                            ) %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll; overflow-y: scroll",
+                            column(width = 6,
+                                h4("Anchor vs Mutation position Scenario Guide",
+                                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/anchor.jpg",
+                                    align = "center", width = "100%")
+                                )
                             )
-                        ) %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll; overflow-y: scroll",
-                        column(width = 6,
-                            h4("Anchor vs Mutation position Scenario Guide",
-                            img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/anchor.jpg",
-                                align = "center", width = "100%")
+                        ),
+                        fluidRow(
+                            box(width = 12, title = "Anchor Weights", solidHeader = TRUE, collapsible = TRUE, status = "primary", collapsed = TRUE,
+                                DTOutput("anchorWeights") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll"
                             )
                         )
                     ),
-                    tabPanel("Transcripts in Set",
-                            DTOutput("transcriptsTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%")
+                    tabPanel(
+                      "Transcripts in Set",
+                      DTOutput("transcriptsTable") %>% withSpinner(color = "#8FCCFA"),
+                      style = "overflow-x: scroll;font-size:100%"
+                    )
                 )
             )
         ),
