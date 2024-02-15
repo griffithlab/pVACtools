@@ -742,7 +742,7 @@ server <- shinyServer(function(input, output, session) {
     }
   })
   ##display peptide table with coloring
-  output$peptideTable <- renderDT({
+  output$peptideTable<- renderDT({
     withProgress(message = "Loading Peptide Table", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0 & !is.null(df$metricsData)) {
         peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
@@ -895,6 +895,20 @@ server <- shinyServer(function(input, output, session) {
       }
     })
   }, height = 400, width = 800)
+  #anchor score tables for each HLA allele
+  output$anchorWeights<- renderDT({
+    withProgress(message = "Loading Anchor Weights Table", value = 0, {
+      weights <- anchor_weights_for_alleles(df$metricsData$alleles)
+      dtable <- datatable(weights, options = list(
+          pageLength = 10,
+          lengthChange = FALSE,
+          rowCallback = JS("function(row, data, index, rowId) {",
+                           "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
+                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+      ))
+      dtable
+    })
+  })
   ##updating IC50 binding score for selected peptide pair
   bindingScoreDataIC50 <- reactive({
     if (is.null(df$metricsData)) {
