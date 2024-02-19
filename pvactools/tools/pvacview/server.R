@@ -421,6 +421,46 @@ server <- shinyServer(function(input, output, session) {
       )
     }
   )
+  output$currentParamTable <- renderTable(
+    data <- data.frame(
+      "Parameter" = c("VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
+                      "Binding Threshold", "Binding Threshold for Inclusion into Metrics File", "Maximum TSL",
+                      "Percentile Threshold", "Allele Specific Binding Thresholds",
+                      "MT Top Score Metric", "WT Top Score Metric",
+                      "Allele Specific Anchors Used", "Anchor Contribution Threshold"),
+      "Value" = c(
+          df$dna_cutoff,
+          df$dna_cutoff / 2,
+          df$allele_expr,
+          df$binding_threshold,
+          df$metricsData$`aggregate_inclusion_binding_threshold`,
+          df$metricsData$maximum_transcript_support_level,
+          if (is.null(df$percentile_threshold) || is.na(df$percentile_threshold)) {"NULL"}else { df$percentile_threshold},
+          df$use_allele_specific_binding_thresholds,
+          df$metricsData$mt_top_score_metric,
+          df$metricsData$wt_top_score_metric,
+          df$allele_specific_anchors, df$anchor_contribution)
+    ), digits = 3
+  )
+  output$currentBindingParamTable <- renderTable(
+    if (df$use_allele_specific_binding_thresholds) {
+      data <- data.frame(
+        "HLA Alleles" = df$metricsData$alleles,
+        "Binding Cutoffs" = unlist(lapply(df$metricsData$alleles, function(x) {
+            if (x %in% names(df$metricsData$allele_specific_binding_thresholds)) {
+                df$metricsData$allele_specific_binding_thresholds[[x]]
+            } else {
+                df$binding_threshold
+            }
+        }
+      )))
+    } else {
+      data <- data.frame(
+        "HLA Alleles" = df$metricsData$alleles,
+        "Binding Cutoffs" = unlist(lapply(df$metricsData$alleles, function(x) df$binding_threshold))
+      )
+    }
+  )
   output$comment_text <- renderUI({
     if (is.null(df$mainTable)) {
       return(HTML("N/A"))

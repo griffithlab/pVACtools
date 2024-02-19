@@ -83,39 +83,73 @@ explore_tab <- tabItem(
             tags$script(HTML("Shiny.addCustomMessageHandler('unbind-DT', function(id) {
             Shiny.unbindAll($('#'+id).find('table').DataTable().table().node());
                                 })")),
-            box(width = 6,
-                title = "Advanced Options: Regenerate Tiering with different parameters",
-                status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
-                "*Please note that the metrics file is required in order to regenerate tiering information with different parameters", br(),
-                "Current version of pVACseq results defaults to positions 1, 2, n-1 and n (for a n-mer peptide) when determining anchor positions.
-                If you would like to use our allele specific anchor results and regenerate the tiering results for your variants,
-                please specify your contribution cutoff and submit for recalculation. ", tags$a(href = "https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1", "More details can be found here.", target = "_blank"), br(),
-                uiOutput("allele_specific_anchors_ui"),
-                uiOutput("anchor_contribution_ui"),
-                uiOutput("binding_threshold_ui"),
-                uiOutput("allele_specific_binding_ui"),
-                uiOutput("percentile_threshold_ui"),
-                uiOutput("dna_cutoff_ui"),
-                uiOutput("allele_expr_ui"),
-                h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
-                actionButton("submit", "Recalculate Tiering with new parameters"),
-                style = "overflow-x: scroll;font-size:100%"),
-            box(width = 3,
-                title = "Original Parameters for Tiering",
-                status = "primary", solidHeader = TRUE, collapsible = TRUE,
-                column(width = 12,
-                h5("These are the original parameters used in the tiering calculations extracted from the metrics data file given as input."),
-                tableOutput("paramTable"),
-                tableOutput("bindingParamTable"), style = "height:250px; overflow-y: scroll;overflow-x: scroll;"),
-                actionButton("reset_params", "Reset to original parameters"),
-                style = "overflow-x: scroll;font-size:100%"),
-            box(width = 3,
-                title = "Add Comments for selected variant",
-                status = "primary", solidHeader = TRUE, collapsible = TRUE,
-                textAreaInput("comments", "Please add/update your comments for the variant you are currently examining", value = ""),
-                actionButton("comment", "Update Comment Section"),
-                h5("Comment:"), htmlOutput("comment_text"),
-                style = "font-size:100%")
+            column(width = 6,
+                box(width = 12,
+                    title = "Advanced Options: Regenerate Tiering with different parameters",
+                    status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
+                    "*Please note that the metrics file is required in order to regenerate tiering information with different parameters", br(),
+                    "Current version of pVACseq results defaults to positions 1, 2, n-1 and n (for a n-mer peptide) when determining anchor positions.
+                    If you would like to use our allele specific anchor results and regenerate the tiering results for your variants,
+                    please specify your contribution cutoff and submit for recalculation. ", tags$a(href = "https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1", "More details can be found here.", target = "_blank"), br(),
+                    uiOutput("allele_specific_anchors_ui"),
+                    uiOutput("anchor_contribution_ui"),
+                    uiOutput("binding_threshold_ui"),
+                    uiOutput("allele_specific_binding_ui"),
+                    uiOutput("percentile_threshold_ui"),
+                    uiOutput("dna_cutoff_ui"),
+                    uiOutput("allele_expr_ui"),
+                    h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
+                    actionButton("submit", "Recalculate Tiering with new parameters"),
+                    style = "overflow-x: scroll;font-size:100%"),
+                style = "padding:0px;"
+            ),
+            column(width = 3,
+                fluidRow(
+                    box(width = 12,
+                        title = "Original Parameters for Tiering",
+                        status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
+                        column(width = 12,
+                            h5("These are the original parameters used in the tiering calculations extracted from the metrics data file given as input."),
+                            tableOutput("paramTable"),
+                            tableOutput("bindingParamTable"),
+                            style = "height:250px; overflow-y: scroll;overflow-x: scroll;"
+                        ),
+                        style = "font-size:100%"
+                    )
+                ),
+                fluidRow(
+                    box(width = 12,
+                        title = "Current Parameters for Tiering",
+                        status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = FALSE,
+                        column(width = 12,
+                            h5("These are current parameters used in the tiering calculaions which may be different from the original parameters if candidates were re-tiered."),
+                            tableOutput("currentParamTable"),
+                            tableOutput("currentBindingParamTable"),
+                            style = "height:250px; overflow-y: scroll;overflow-x: scroll;"
+                        ),
+                        style = "font-size:100%"
+                    )
+                ),
+                fluidRow(
+                    column(
+                        width = 12,
+                        actionButton("reset_params", "Reset to original parameters", style = "width: 100%"),
+                        align = "center",
+                        style = "padding-bottom: 20px"
+                    )
+                ),
+                style = "padding:0px;"
+            ),
+            column(width = 3,
+                box(width = 12,
+                    title = "Add Comments for selected variant",
+                    status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                    textAreaInput("comments", "Please add/update your comments for the variant you are currently examining", value = ""),
+                    actionButton("comment", "Update Comment Section"),
+                    h5("Comment:"), htmlOutput("comment_text"),
+                    style = "font-size:100%"),
+                style = "padding:0px;"
+            )
         ),
         fluidRow(
             box(width = 12,
