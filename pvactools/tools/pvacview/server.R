@@ -715,10 +715,11 @@ server <- shinyServer(function(input, output, session) {
           transcript_set <- lapply(transcript_set, function(x) strsplit(x, "-")[[1]][1])
           if (best_transcript %in% transcript_set) {
             best_transcript_set <- df$metricsData[[selectedID()]]$sets[i]
+            best_transcript_set_id <- i
           }
         }
         incProgress(0.5)
-        datatable(GB_transcripts, selection = list(mode = "single", selected = "1"), style="bootstrap") %>%
+        datatable(GB_transcripts, selection = list(mode = "single", selected = best_transcript_set_id), style="bootstrap") %>%
           formatStyle("Transcripts Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
       }else {
         GB_transcripts <- data.frame("Transcript Sets" = character(), "# Transcripts" = character(), "# Peptides" = character(), "Total Expr" = character())
