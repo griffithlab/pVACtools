@@ -59,6 +59,7 @@ setup(
         "pvactools.tools.pvacvector",
         "pvactools.tools.pvacseq",
         "pvactools.tools.pvacview",
+        "pvactools.tools.pvacsplice",
         "pvactools.lib",
     ],
     entry_points={
@@ -69,6 +70,7 @@ setup(
             "pvacfuse = pvactools.tools.pvacfuse.main:main",
             "pvacvector = pvactools.tools.pvacvector.main:main",
             "pvacview = pvactools.tools.pvacview.main:main",
+            "pvacsplice = pvactools.tools.pvacsplice.main:main",
         ]
     },
     install_requires=[
@@ -78,7 +80,7 @@ setup(
         'biopython==1.77',
         'networkx',
         'simanneal',
-        'pandas',
+        'pandas<2.1.0',
         'wget',
         'pysam',
         'Pillow',
@@ -89,6 +91,10 @@ setup(
         'mhcnuggets==2.4.1',
         'mhcflurry==2.0.6',
         'testfixtures',
+        'gtfparse==2.0.1',
+        'pyfaidx==0.7.1',
+        'packaging',
+        'pyarrow',
         'polars==0.16.18',
         'bigmhc @ git+https://github.com/griffithlab/bigmhc.git#egg=bigmhc',
         'deepimmuno @ git+https://github.com/griffithlab/deepimmuno.git#egg=deepimmuno',

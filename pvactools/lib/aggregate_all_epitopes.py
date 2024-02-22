@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from collections import defaultdict, Counter
 import json
-from Bio import SeqIO
 import os
 import shutil
 from abc import ABCMeta, abstractmethod
@@ -759,7 +758,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         super().__init__()
 
-
     def get_list_unique_mutation_keys(self, df):
         keys = df["Mutation"].values.tolist()
         return sorted(list(set(keys)))
@@ -957,3 +955,89 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
                 return "Pass"
 
         return "Poor"
+
+
+class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABCMeta):
+    def __init__(
+        self,
+        input_file,
+        output_file,
+        binding_threshold=500,
+        percentile_threshold=None,
+        allele_specific_binding_thresholds=False,
+        aggregate_inclusion_binding_threshold=5000,
+        top_score_metric="median",
+        trna_vaf=0.25,
+        trna_cov=10,
+        expn_val=1,
+    ):
+        PvacbindAggregateAllEpitopes.__init__(
+            self,
+            input_file,
+            output_file,
+            binding_threshold=binding_threshold,
+            percentile_threshold=percentile_threshold,
+            allele_specific_binding_thresholds=allele_specific_binding_thresholds,
+            aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
+            top_score_metric=top_score_metric,
+        )
+        self.trna_vaf = trna_vaf
+        self.trna_cov = trna_cov
+        self.expn_val = expn_val
+
+    # pvacbind w/ Index instead of Mutation
+    def get_list_unique_mutation_keys(self, df):
+        keys = df["Index"].values.tolist()
+        return sorted(list(set(keys)))
+
+    # this needs to match the junction index
+    # def get_list_unique_mutation_keys(self):
+    #     key_columns = {
+    #         'Gene Name': str,
+    #         'Transcript': str,
+    #         'Junction': str,
+    #         'Variant': str,
+    #         'Junction Anchor': str,
+    #     }
+    #     key_df = pd.read_csv(self.input_file, delimiter="\t", usecols=key_columns.keys(), dtype=key_columns)
+    #     keys = key_df[['Gene Name', 'Transcript', 'Junction', 'Variant', 'Junction Anchor']].values.tolist()
+    #     keys = [list(i) for i in set(tuple(i) for i in keys)]
+    #     return sorted(keys)
+
+    # pvacbind w/ Index instead of Mutation
+    def read_input_file(self, used_columns, dtypes):
+        return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False,
+                           na_values="NA", keep_default_na=False, dtype={"Index": str})
+
+    # pvacbind w/ Index instead of Mutation
+    def get_sub_df(self, all_epitopes_df, df_key):
+        df = (all_epitopes_df[lambda x: (x['Index'] == df_key)]).copy()
+        return df, df_key
+
+    # pvacbind w/ vaf and expression info included
+    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count):
+        tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
+
+        out_dict = {'ID': key}
+        out_dict.update({k.replace('HLA-', ''): v for k, v in sorted(hla.items())})
+        gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
+        transcript = best['Transcript'] if 'Transcript' in best else 'NA'
+        out_dict.update({
+            'Gene': gene,
+            'Transcript': transcript,
+            'Junction Name': best['Junction'],
+            'AA Change': best['Amino Acid Change'],
+            'Best Peptide': best["Epitope Seq"],
+            'Pos': best['Protein Position'],
+            'Num Passing Peptides': peptide_count,
+            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
+            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
+            'Gene Expr': best["Gene Expression"],
+            'RNA VAF': best["Tumor RNA VAF"],
+            'RNA Depth': best["Tumor RNA Depth"],
+            'DNA VAF': best["Tumor DNA VAF"],
+            'Tier': tier,
+            'Evaluation': 'Pending',
+            'ID': key,
+        })
+        return out_dict

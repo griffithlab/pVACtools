@@ -348,3 +348,36 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
     def find_best_line(self, lines):
         sorted_lines = sorted(lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)])))
         return sorted_lines[0]
+
+class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
+    def __init__(self, input_file, output_file, top_score_metric="median"):
+        self.input_file = input_file
+        self.output_file = output_file
+        self.top_score_metric = top_score_metric
+        if self.top_score_metric == 'median':
+            self.formatted_top_score_metric = "Median"
+        else:
+            self.formatted_top_score_metric = "Best"
+
+    def execute(self):
+        with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
+            reader = csv.DictReader(input_fh, delimiter = "\t")
+            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames = reader.fieldnames)
+            writer.writeheader()
+            lines_per_variant = defaultdict(list)
+            for line in reader:
+                if line["{} IC50 Score".format(self.formatted_top_score_metric)] == 'NA':
+                    continue
+                lines_per_variant[line['Index']].append(line)
+
+            filtered_lines = []
+            for index, lines in lines_per_variant.items():
+                best_line = self.find_best_line(lines)
+                filtered_lines.append(best_line)
+
+            sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric)
+            writer.writerows(sorted_rows)
+
+    def find_best_line(self, lines):
+        sorted_lines = sorted(lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)])))
+        return sorted_lines[0]
