@@ -1,5 +1,6 @@
 library(RCurl)
 library(curl)
+library(data.table)
 
 ## Load Anchor data
 anchor_data <- list()
@@ -79,6 +80,42 @@ peptide_coloring <- function(hla_allele, peptide_row) {
                     include.lowest = TRUE)
   colors <- colorRampPalette(c("lightblue", "blue"))(99)[value_bins]
   return(colors[[position]])
+}
+#calculate per-length anchor score for HLA allele
+anchor_weights_for_alleles <- function(hla_alleles) {
+  scores_df <- data.frame()
+  for (hla_allele in hla_alleles) {
+    if (any(hla_allele == anchor_data[[8]]["HLA"])) {
+      eight_mer_scores <- append(anchor_data[[8]][anchor_data[[8]]["HLA"] == hla_allele][1:(8 + 1)], "9mer", 1)
+    }
+    else {
+      eight_mer_scores <- c(hla_allele, "8mer")
+    }
+    if (any(hla_allele == anchor_data[[9]]["HLA"])) {
+      nine_mer_scores <- append(anchor_data[[9]][anchor_data[[9]]["HLA"] == hla_allele][1:(9 + 1)], "9mer", 1)
+    }
+    else {
+      nine_mer_scores <- c(hla_allele, "9mer")
+    }
+    if (any(hla_allele == anchor_data[[10]]["HLA"])) {
+      ten_mer_scores <- append(anchor_data[[10]][anchor_data[[10]]["HLA"] == hla_allele][1:(10 + 1)], "10mer", 1)
+    }
+    else {
+      ten_mer_scores <- c(hla_allele, "8mer")
+    }
+    if (any(hla_allele == anchor_data[[11]]["HLA"])) {
+      eleven_mer_scores <- append(anchor_data[[11]][anchor_data[[11]]["HLA"] == hla_allele][1:(11 + 1)], "11mer", 1)
+    }
+    else {
+      eleven_mer_scores <- c(hla_allele, "8mer")
+    }
+    scores <- list(eight_mer_scores, nine_mer_scores, ten_mer_scores, eleven_mer_scores)
+    scores <- lapply(scores, `length<-`, 13)
+    scores <- transpose(data.frame(scores))
+    colnames(scores) <- c("HLA Allele", "Peptide Length", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")
+    scores_df <- rbind(scores_df, scores)
+  }
+  return(scores_df)
 }
 #calculate anchor list for specific peptide length and HLA allele combo given contribution cutoff
 calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution) {
