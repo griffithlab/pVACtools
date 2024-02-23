@@ -15,14 +15,14 @@ fasta_size: 200
 flurry_state: null
 iedb_executable: null
 iedb_retries: 5
-input_file: /Users/ssiebert/Documents/Work/pVACtools/pvactools/tools/pvacfuse/example_data/agfusion_results/MHC_Class_II/15/Test.fa
+input_file: /Users/ssiebert/Documents/Work/pVACtools/pvactools/tools/pvacfuse/example_data/MHC_Class_II/15/Test.fa
 input_file_type: fasta
 keep_tmp_files: false
 n_threads: 1
 net_chop_method: null
 net_chop_threshold: 0.5
 netmhc_stab: false
-output_dir: /Users/ssiebert/Documents/Work/pVACtools/pvactools/tools/pvacfuse/example_data/agfusion_results/MHC_Class_II/15
+output_dir: /Users/ssiebert/Documents/Work/pVACtools/pvactools/tools/pvacfuse/example_data/MHC_Class_II/15
 peptide_fasta: null
 percentile_threshold: null
 prediction_algorithms:
@@ -33,12 +33,12 @@ prediction_algorithms:
 - SMMalign
 problematic_amino_acids: null
 proximal_variants_file: null
-pvactools_version: 4.0.0rc21
+pvactools_version: 4.1.0rc1
 read_support: 5
 run_post_processor: false
 run_reference_proteome_similarity: false
 sample_name: Test
 species: human
 starfusion_file: null
-tmp_dir: /Users/ssiebert/Documents/Work/pVACtools/pvactools/tools/pvacfuse/example_data/agfusion_results/MHC_Class_II/15/tmp
+tmp_dir: /Users/ssiebert/Documents/Work/pVACtools/pvactools/tools/pvacfuse/example_data/MHC_Class_II/15/tmp
 top_score_metric: median
