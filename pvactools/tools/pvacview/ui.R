@@ -232,7 +232,7 @@ explore_tab <- tabItem(
                             ) %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll; overflow-y: scroll",
                             column(width = 6,
                                 h4("Anchor vs Mutation position Scenario Guide",
-                                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/anchor.jpg",
+                                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/anchor.jpg",
                                     align = "center", width = "100%")
                                 )
                             )
@@ -401,7 +401,7 @@ tutorial_tab <- tabItem("tutorial",
                 highlight the ", strong("Transcript Set"), " producing the Best Peptide for the variant in question.")
             ),
             column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Transcript_Set.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Transcript_Set.png",
                 align = "center", height = "300px", width = "500px"),
             )
         ),
@@ -414,7 +414,7 @@ tutorial_tab <- tabItem("tutorial",
                 " A light green color is used to highlight the specific", strong("Transcript in Selected Set"), " that produced the Best Peptide for the variant in question.")
             ),
             column(width = 9,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Transcript_in_Set.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Transcript_in_Set.png",
                 align = "center", height = "300px", width = "1200px"),
             )
         )
@@ -436,7 +436,7 @@ tutorial_tab <- tabItem("tutorial",
         ),
         fluidRow(
             column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Peptide_Table.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Peptide_Table.png",
                 align = "center", width = "1500px"), br(), br()
             )
         ),
@@ -452,7 +452,7 @@ tutorial_tab <- tabItem("tutorial",
                 strong("Advanced Options: Anchor Contribution"))
             ),
             column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Anchor_Heatmap.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Anchor_Heatmap.png",
                 align = "center", width = "1500px"), br(), br()
             )
         ),
@@ -467,7 +467,7 @@ tutorial_tab <- tabItem("tutorial",
                 to 4 algorithm scores for Class II alleles.", br())
             ),
             column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_IC50_Plots.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_IC50_Plots.png",
                 align = "center", width = "1500px"), br(), br()
             )
         ),
@@ -478,7 +478,7 @@ tutorial_tab <- tabItem("tutorial",
                 for HLA alleles that the MT binds well to.", br())
             ),
             column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png",
                 align = "center", width = "1500px"), br(), br()
             )
         ),
@@ -489,7 +489,7 @@ tutorial_tab <- tabItem("tutorial",
                 Each cell shows the IC50 prediction followed by the percentile predictions in parenthesis.", br())
             ),
             column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Binding_Data.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Binding_Data.png",
                 align = "center", width = "1500px"), br(), br()
             )
         ),
@@ -500,7 +500,7 @@ tutorial_tab <- tabItem("tutorial",
                 such as NetMHCpanEL/NetMHCIIpanEL, MHCflurryELProcessing and MHCflurryELPresentation.", br())
             ),
             column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Elution_Data.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Elution_Data.png",
                 align = "center", width = "1500px"), br(), br()
             )
         )
@@ -539,7 +539,7 @@ tutorial_tab <- tabItem("tutorial",
                 )
             ),
             column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Anchor_Scenarios.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Anchor_Scenarios.png",
                     align = "center", height = "800px", width = "400px"), br(), br()
             )
         ),
@@ -559,7 +559,7 @@ tutorial_tab <- tabItem("tutorial",
                 p(strong("Scenario 4 : "), code(" I + III"), strong(" -> Accept"))
             ),
             column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/anchor.jpg",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/anchor.jpg",
                     align = "center", height = "350px", width = "600px"), br(), br()
             )
         )
@@ -596,7 +596,7 @@ tutorial_tab <- tabItem("tutorial",
                 )
             ),
             column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Regenerate_Tiering.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Regenerate_Tiering.png",
                     align = "center", width = "700px"), br(), br()
             )
         ),
@@ -619,7 +619,7 @@ tutorial_tab <- tabItem("tutorial",
                 )
             ),
             column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Original_Parameters.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Original_Parameters.png",
                     align = "center", width = "300px"), br(), br()
             )
         )
@@ -638,8 +638,8 @@ ui <- dashboardPage(
   ## HEADER ##
   header = dashboardHeader(
     title = tagList(tags$a(class = "logo",
-                         span(class = "logo-mini", tags$img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/pVACview_logo_mini.png")),
-                         span(class = "logo-lg", tags$img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/pVACview_logo.png"))
+                         span(class = "logo-mini", tags$img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/pVACview_logo_mini.png")),
+                         span(class = "logo-lg", tags$img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/pVACview_logo.png"))
                   )),
     tags$li(class = "dropdown", tags$a(href = "https://pvactools.readthedocs.io/en/latest/", class = "my_class", "Help", target = "_blank"))
     ),
