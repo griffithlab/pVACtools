@@ -272,6 +272,12 @@ explore_tab <- tabItem(
                         h4("Prediction score table showing exact MHC scpres for elution, immunogenicity, and percentile calculations."),
                         DTOutput(outputId = "elutionDatatable"),
                         br(),
+                        strong("BigMHC_EL / BigMHC_IM"), span(": A deep learning tool for predicting MHC-I (neo)epitope presentation and immunogenicity. ("),
+                        a(href = "https://www.nature.com/articles/s42256-023-00694-6", "Citation"), span(")"),
+                        br(),
+                        strong("DeepImmuno"), span(": Deep-learning empowered prediction of immunogenic epitopes for T cell immunity. ("),
+                        a(href = "https://academic.oup.com/bib/article/22/6/bbab160/6261914?login=false", "Citation"), span(")"),
+                        br(),
                         strong("MHCflurryEL Processing"), span(': An "antigen processing" predictor that attempts to model MHC allele-independent effects such as proteosomal cleavage. ('),
                         a(href = "https://www.sciencedirect.com/science/article/pii/S2405471220302398", "Citation"), span(")"),
                         br(),
@@ -280,12 +286,6 @@ explore_tab <- tabItem(
                         br(),
                         strong("NetMHCpanEL / NetMHCIIpanEL"), span(": A predictor trained on eluted ligand data. ("),
                         a(href = "https://academic.oup.com/nar/article/48/W1/W449/5837056", "Citation"), span(")"),
-                        br(),
-                        strong("BigMHC_EL / BigMHC_IM"), span(": A deep learning tool for predicting MHC-I (neo)epitope presentation and immunogenicity. ("),
-                        a(href = "https://www.nature.com/articles/s42256-023-00694-6", "Citation"), span(")"),
-                        br(),
-                        strong("DeepImmuno"), span(": Deep-learning empowered prediction of immunogenic epitopes for T cell immunity. ("),
-                        a(href = "https://academic.oup.com/bib/article/22/6/bbab160/6261914?login=false", "Citation"), span(")"),
                         style = "overflow-x: scroll;"
                     )
                 )
@@ -401,7 +401,7 @@ tutorial_tab <- tabItem("tutorial",
                 highlight the ", strong("Transcript Set"), " producing the Best Peptide for the variant in question.")
             ),
             column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Transcript_Set.png?raw=true",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Transcript_Set.png",
                 align = "center", height = "300px", width = "500px"),
             )
         ),
@@ -414,7 +414,7 @@ tutorial_tab <- tabItem("tutorial",
                 " A light green color is used to highlight the specific", strong("Transcript in Selected Set"), " that produced the Best Peptide for the variant in question.")
             ),
             column(width = 9,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Transcript_in_Set.png?raw=true",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Transcript_in_Set.png",
                 align = "center", height = "300px", width = "1200px"),
             )
         )
@@ -424,7 +424,7 @@ tutorial_tab <- tabItem("tutorial",
         fluidRow(
             column(width = 12,
                 h4("Peptide Table", style = "font-weight: bold; text-decoration: underline;"),
-                p("Upon selecting a specific transcript set, you can also visualize which good-binding peptides are produced from this set.", br(), br(),
+                p("Upon selecting a specific transcript set, you can also visualize which well-binding peptides are produced from this set. The best peptide is highlighted in light green.", br(), br(),
                 "Both, mutant (", code("MT"), ") and wildtype (", code("WT"), ") sequences are shown, along with either the", code("lowest"), " or ", code("median"),
                 " binding affinities, depending on how you generated the aggregate report.", br(), br(),
                 "An ", code("X"), "is marked for binding affinities higher than the ", code("aggregate_inclusion_binding_threshold"), " set when generating the aggregate report.", br(), br(),
@@ -436,12 +436,28 @@ tutorial_tab <- tabItem("tutorial",
         ),
         fluidRow(
             column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Peptide_Table.png?raw=true",
-                align = "center", height = "400px", width = "1500px"), br(), br()
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Peptide_Table.png",
+                align = "center", width = "1500px"), br(), br()
             )
         ),
         fluidRow(
-            column(width = 4,
+            column(width = 12,
+                h4("Anchor Heatmap", style = "font-weight: bold; text-decoration: underline;"),
+                p("The ", strong("Anchor Heatmap"), "tab shows the top 30 MT/WT peptide pairs from the peptide table with anchor probabilities overlayed as a heatmap.
+                The anchor probabilities shown are both allele and peptide length specific. The mutated amino acid is marked in red (for missense mutations) and each 
+                MT/WT pair are separated from others using a dotted line. ", br(),
+                "For peptide sequences with no overlaying heatmap, we currently do not have allele-specific predictions in our database.", br(), br(),
+                "The Anchor Weights section shows a table of the per-allele per-length anchor weights for each peptide position.", br(), br(),
+                "For more details and explanations regarding anchor positions and its influence on neoantigen prediction and prioritization, please refer to the next section: ",
+                strong("Advanced Options: Anchor Contribution"))
+            ),
+            column(width = 12,
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Anchor_Heatmap.png",
+                align = "center", width = "1500px"), br(), br()
+            )
+        ),
+        fluidRow(
+            column(width = 12,
                 h4("Additional Information",  style = "font-weight: bold; text-decoration: underline;"),
                 h5("IC50 Plot", style = "font-weight: bold;"),
                 p("By clicking on each MT/WT peptide pair, you can then assess the peptides in more detail by navigating to the ", strong("Additional Peptide Information"), " tab.", br(), br(),
@@ -450,57 +466,42 @@ tutorial_tab <- tabItem("tutorial",
                 alleles that the MT binds well to. These peptides each have up to 8 binding algorithm scores for Class I alleles or up
                 to 4 algorithm scores for Class II alleles.", br())
             ),
-            column(width = 8,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_IC50_Plots.png?raw=true",
-                align = "center", height = "350px", width = "700px"), br(), br()
+            column(width = 12,
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_IC50_Plots.png",
+                align = "center", width = "1500px"), br(), br()
             )
         ),
         fluidRow(
-            column(width = 4,
+            column(width = 12,
                 h5("%ile Plot", style = "font-weight: bold;"),
                 p("The ", strong("%ile Plot"), "tab shows violin plots of the individual percentile-based binding affinity predictions of the MT and WT peptides
                 for HLA alleles that the MT binds well to.", br())
             ),
-            column(width = 8,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png?raw=true",
-                align = "center", height = "350px", width = "700px"), br(), br()
+            column(width = 12,
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png",
+                align = "center", width = "1500px"), br(), br()
             )
         ),
         fluidRow(
-            column(width = 4,
+            column(width = 12,
                 h5("Binding Data", style = "font-weight: bold;"),
                 p("The ", strong("Binding Data"), "tab shows the specific IC50 and percentile binding affinity predictions generated from each individual algorithm.
                 Each cell shows the IC50 prediction followed by the percentile predictions in parenthesis.", br())
             ),
-            column(width = 8,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Binding_Data.png?raw=true",
-                align = "center", height = "350px", width = "720px"), br(), br()
+            column(width = 12,
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Binding_Data.png",
+                align = "center", width = "1500px"), br(), br()
             )
         ),
         fluidRow(
-            column(width = 4,
-                h5("Elution Table", style = "font-weight: bold;"),
-                p("The ", strong("Elution Table"), "tab shows prediction results based on algorithms trained from peptide elution data. This includes algorithms
+            column(width = 12,
+                h5("Elution and Immunogenicity Table", style = "font-weight: bold;"),
+                p("The ", strong("Elution and Immunigenicity Table"), "tab shows prediction results based on algorithms trained from peptide elution data. This includes algorithms
                 such as NetMHCpanEL/NetMHCIIpanEL, MHCflurryELProcessing and MHCflurryELPresentation.", br())
             ),
-            column(width = 8,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Elution_Data.png?raw=true",
-                align = "center", height = "350px", width = "720px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 4,
-                h5("Anchor Heatmap", style = "font-weight: bold;"),
-                p("The ", strong("Anchor Heatmap"), "tab shows the top 30 MT/WT peptide pairs from the peptide table with anchor probabilities overlayed as a heatmap.
-                The anchor probabilities shown are both allele and peptide length specific. The mutated amino acid is marked in red (for missense mutations) and each 
-                MT/WT pair are separated from others using a dotted line. ", br(),
-                "For peptide sequences with no overlaying heatmap, we currently do not have allele-specific predictions for them in our database.", br(), br(),
-                "For more details and explanations regarding anchor positions and its influence on neoantigen prediction and prioritization, please refer to the next section: ",
-                strong("Advanced Options: Anchor Contribution"))
-            ),
-            column(width = 8,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Anchor_Heatmap.png?raw=trueg",
-                align = "center", height = "350px", width = "720px"), br(), br()
+            column(width = 12,
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Elution_Data.png",
+                align = "center", width = "1500px"), br(), br()
             )
         )
     ),
@@ -508,7 +509,7 @@ tutorial_tab <- tabItem("tutorial",
         h4(" "),
         fluidRow(
             column(width = 6,
-                h4("Anchor vs Mutation Posiions", style = "font-weight: bold; text-decoration: underline;"),
+                h4("Anchor vs Mutation Positions", style = "font-weight: bold; text-decoration: underline;"),
                 p("Neoantigen identification and prioritization relies on correctly predicting whether the presented 
                 peptide sequence can successfully induce an immune response. As the majority of somatic mutations are single nucleotide variants,
                 changes between wildtype and mutated peptides are typically subtle and require cautious interpretation. ", br(), br(),
@@ -538,7 +539,7 @@ tutorial_tab <- tabItem("tutorial",
                 )
             ),
             column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Anchor_Scenarios.png?raw=true",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Anchor_Scenarios.png",
                     align = "center", height = "800px", width = "400px"), br(), br()
             )
         ),
@@ -595,25 +596,31 @@ tutorial_tab <- tabItem("tutorial",
                 )
             ),
             column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Regenerate_Tiering.png?raw=true",
-                    align = "center", height = "400px", width = "700px"), br(), br()
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Regenerate_Tiering.png",
+                    align = "center", width = "700px"), br(), br()
             )
         ),
         fluidRow(
             column(width = 6,
                 h4("Original Parameters", style = "font-weight: bold; text-decoration: underline;"),
-                p(" In this box, we provide users with the original parameters they had used to generate the currently loaded aggregate report and metrics file.",
-                "This not only allows users to compare their current parameters (if changed) with the original setting but we also offer a ", strong("reset"),
-                " button that allows the user to restore the original tiering when desired.", br(), br(),
-                "Note that the app will keep track of your peptide evaluations and comments accordingly even when changing or reseting the parameters.", br(), br(),
-                "If you see a parameter in the original parameter box but did not see an option to change it in the advanced options section, it is likely that you
+                p(" In this box, we provide users with the original parameters they had used to generate the currently loaded aggregate report and metrics file."),
+                p("Note that the app will keep track of your peptide evaluations and comments accordingly even when changing or reseting the parameters."),
+                p("If you see a parameter in the original parameter box but did not see an option to change it in the advanced options section, it is likely that you
                 will be required to rerun the", code("pvacseq generate-aggregate-report"), " command. This is likely due to the current metrics file not 
                 having the necessary peptide information to perform this request."
+                ),
+                h4("Current Parameters", style = "font-weight: bold; text-decoration: underline;"),
+                p(" In this box, we provide users with the tiering parameters that currently applied to the aggregate report.",
+                "This not only allows users to compare their current parameters (if changed) with the original parameters."
+                ),
+                h4("Resetting Parameters", style = "font-weight: bold; text-decoration: underline;"),
+                p("The ", strong("reset"),
+                " button allows the user to restore the original tiering when desired."
                 )
             ),
             column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/pvacview/pvactools/tools/pvacview/www/Explore_Original_Parameters.png?raw=true",
-                    align = "center", height = "400px", width = "300px"), br(), br()
+                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Explore_Original_Parameters.png",
+                    align = "center", width = "300px"), br(), br()
             )
         )
     )
