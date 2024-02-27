@@ -94,7 +94,7 @@ Specifically, the features can be separated into five categories:
   - Per-algorithm and HLA-allele MHC binding predictions for the selected peptide and its
     matched WT (IC50 and Percentile)
   - Violin plot for the IC50 and Percentile predictions
-  - Elution and immunigenicity data for the selected peptide and its matched WT
+  - Elution and immunogenicity data for the selected peptide and its matched WT
 
 For detailed descriptions on individual sections, please refer to :ref:`features <features_pvacview_label>` page.
 
@@ -152,7 +152,7 @@ Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers
 
 These parameters will default to the value used in your original pVACseq run.
 After adjusting and retiering your candidates, the currently applied tiering
-parametesr are displayed in the ``Current Parameters for Tiering`` section.
+parameters are displayed in the ``Current Parameters for Tiering`` section.
 The parameters originally used for tiering are displayed in the ``Original
 Parameters for Tiering`` section. You can reset the tiers to the parameters
 used originally by clicking the ``Reset to original paramters`` button.

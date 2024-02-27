@@ -507,7 +507,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def replace_nas(self, items):
         return ["NA" if pd.isna(x) else x for x in items]
 
-    def round_ints(self, items):
+    def round_to_ints(self, items):
         return [round(x) if (type(x) == float and not pd.isna(x)) else x for x in items]
 
     def get_good_binders_metrics(self, good_binders, prediction_algorithms, el_algorithms):
@@ -595,7 +595,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             sorted_transcripts = self.sort_transcripts(annotations, good_binders)
             peptides[set_name]['transcripts'] = list(sorted_transcripts.Annotation)
             peptides[set_name]['transcript_expr'] = self.replace_nas(list(sorted_transcripts.Expr))
-            peptides[set_name]['tsl'] = self.replace_nas(self.round_ints(list(sorted_transcripts.TSL)))
+            peptides[set_name]['tsl'] = self.replace_nas(self.round_to_ints(list(sorted_transcripts.TSL)))
             peptides[set_name]['biotype'] = list(sorted_transcripts.Biotype)
             peptides[set_name]['transcript_length'] = [int(l) for l in list(sorted_transcripts.Length)]
             peptides[set_name]['transcript_count'] = len(annotations)
