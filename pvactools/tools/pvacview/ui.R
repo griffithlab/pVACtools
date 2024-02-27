@@ -83,39 +83,73 @@ explore_tab <- tabItem(
             tags$script(HTML("Shiny.addCustomMessageHandler('unbind-DT', function(id) {
             Shiny.unbindAll($('#'+id).find('table').DataTable().table().node());
                                 })")),
-            box(width = 6,
-                title = "Advanced Options: Regenerate Tiering with different parameters",
-                status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
-                "*Please note that the metrics file is required in order to regenerate tiering information with different parameters", br(),
-                "Current version of pVACseq results defaults to positions 1, 2, n-1 and n (for a n-mer peptide) when determining anchor positions.
-                If you would like to use our allele specific anchor results and regenerate the tiering results for your variants,
-                please specify your contribution cutoff and submit for recalculation. ", tags$a(href = "https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1", "More details can be found here.", target = "_blank"), br(),
-                uiOutput("allele_specific_anchors_ui"),
-                uiOutput("anchor_contribution_ui"),
-                uiOutput("binding_threshold_ui"),
-                uiOutput("allele_specific_binding_ui"),
-                uiOutput("percentile_threshold_ui"),
-                uiOutput("dna_cutoff_ui"),
-                uiOutput("allele_expr_ui"),
-                h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
-                actionButton("submit", "Recalculate Tiering with new parameters"),
-                style = "overflow-x: scroll;font-size:100%"),
-            box(width = 3,
-                title = "Original Parameters for Tiering",
-                status = "primary", solidHeader = TRUE, collapsible = TRUE,
-                column(width = 12,
-                h5("These are the original parameters used in the tiering calculations extracted from the metrics data file given as input."),
-                tableOutput("paramTable"),
-                tableOutput("bindingParamTable"), style = "height:250px; overflow-y: scroll;overflow-x: scroll;"),
-                actionButton("reset_params", "Reset to original parameters"),
-                style = "overflow-x: scroll;font-size:100%"),
-            box(width = 3,
-                title = "Add Comments for selected variant",
-                status = "primary", solidHeader = TRUE, collapsible = TRUE,
-                textAreaInput("comments", "Please add/update your comments for the variant you are currently examining", value = ""),
-                actionButton("comment", "Update Comment Section"),
-                h5("Comment:"), htmlOutput("comment_text"),
-                style = "font-size:100%")
+            column(width = 6,
+                box(width = 12,
+                    title = "Advanced Options: Regenerate Tiering with different parameters",
+                    status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
+                    "*Please note that the metrics file is required in order to regenerate tiering information with different parameters", br(),
+                    "Current version of pVACseq results defaults to positions 1, 2, n-1 and n (for a n-mer peptide) when determining anchor positions.
+                    If you would like to use our allele specific anchor results and regenerate the tiering results for your variants,
+                    please specify your contribution cutoff and submit for recalculation. ", tags$a(href = "https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1", "More details can be found here.", target = "_blank"), br(),
+                    uiOutput("allele_specific_anchors_ui"),
+                    uiOutput("anchor_contribution_ui"),
+                    uiOutput("binding_threshold_ui"),
+                    uiOutput("allele_specific_binding_ui"),
+                    uiOutput("percentile_threshold_ui"),
+                    uiOutput("dna_cutoff_ui"),
+                    uiOutput("allele_expr_ui"),
+                    h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
+                    actionButton("submit", "Recalculate Tiering with new parameters"),
+                    style = "overflow-x: scroll;font-size:100%"),
+                style = "padding:0px;"
+            ),
+            column(width = 3,
+                fluidRow(
+                    box(width = 12,
+                        title = "Original Parameters for Tiering",
+                        status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
+                        column(width = 12,
+                            h5("These are the original parameters used in the tiering calculations extracted from the metrics data file given as input."),
+                            tableOutput("paramTable"),
+                            tableOutput("bindingParamTable"),
+                            style = "height:250px; overflow-y: scroll;overflow-x: scroll;"
+                        ),
+                        style = "font-size:100%"
+                    )
+                ),
+                fluidRow(
+                    box(width = 12,
+                        title = "Current Parameters for Tiering",
+                        status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = FALSE,
+                        column(width = 12,
+                            h5("These are current parameters used in the tiering calculaions which may be different from the original parameters if candidates were re-tiered."),
+                            tableOutput("currentParamTable"),
+                            tableOutput("currentBindingParamTable"),
+                            style = "height:250px; overflow-y: scroll;overflow-x: scroll;"
+                        ),
+                        style = "font-size:100%"
+                    )
+                ),
+                fluidRow(
+                    column(
+                        width = 12,
+                        actionButton("reset_params", "Reset to original parameters", style = "width: 100%"),
+                        align = "center",
+                        style = "padding-bottom: 20px"
+                    )
+                ),
+                style = "padding:0px;"
+            ),
+            column(width = 3,
+                box(width = 12,
+                    title = "Add Comments for selected variant",
+                    status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                    textAreaInput("comments", "Please add/update your comments for the variant you are currently examining", value = ""),
+                    actionButton("comment", "Update Comment Section"),
+                    h5("Comment:"), htmlOutput("comment_text"),
+                    style = "font-size:100%"),
+                style = "padding:0px;"
+            )
         ),
         fluidRow(
             box(width = 12,
@@ -181,24 +215,53 @@ explore_tab <- tabItem(
             )
         ),
         fluidRow(
-            box(width = 12, title = "Transcript Set Detailed Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
+            box(width = 12, title = "Transcript and Peptide Set Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
                 tabBox(width = 12, title = " ",
                     tabPanel("Peptide Candidates from Selected Transcript Set",
                             DTOutput("peptideTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
-                    tabPanel("Transcripts in Set",
-                            DTOutput("transcriptsTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%")
+                    tabPanel("Anchor Heatmap",
+                        fluidRow(
+                            column(width = 6,
+                                div(style = 'overflow-y:scroll;height: 500px;',
+                                    h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
+                                    h5("HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
+                                        " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
+                                    plotOutput(outputId = "peptideFigureLegend", height = "50px"),
+                                    plotOutput(outputId = "anchorPlot")
+                                )
+                            ) %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll; overflow-y: scroll",
+                            column(width = 6,
+                                h4("Anchor vs Mutation position Scenario Guide",
+                                img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/anchor.jpg",
+                                    align = "center", width = "100%")
+                                )
+                            )
+                        ),
+                        fluidRow(
+                            box(width = 12, title = "Anchor Weights", solidHeader = TRUE, collapsible = TRUE, status = "primary", collapsed = TRUE,
+                                DTOutput("anchorWeights") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll"
+                            )
+                        )
+                    ),
+                    tabPanel(
+                      "Transcripts in Set",
+                      DTOutput("transcriptsTable") %>% withSpinner(color = "#8FCCFA"),
+                      style = "overflow-x: scroll;font-size:100%"
+                    )
                 )
             )
         ),
         fluidRow(
             box(width = 12, title = "Additional Peptide Information",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
-                tabBox(title = " ", id = "info",
+                tabBox(width = 12, title = " ", id = "info",
                     tabPanel("IC50 Plot",
                         h4("Violin Plots showing distribution of MHC IC50 predictions for selected peptide pair (MT and WT)."),
+                        h5("Showcases individual binding prediction scores from each algorithm used. A solid line is used to represent the median score."),
                         plotOutput(outputId = "bindingData_IC50") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
                     ),
                     tabPanel("%ile Plot",
                         h4("Violin Plots showing distribution of MHC percentile predictions for selected peptide pair (MT and WT)."),
+                        h5("Showcases individual percentile scores from each algorithm used. A solid line is used to represent the median percentile score."),
                         plotOutput(outputId = "bindingData_percentile") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
                     ),
                     tabPanel("Binding Data",
@@ -206,7 +269,7 @@ explore_tab <- tabItem(
                         DTOutput(outputId = "bindingDatatable"), style = "overflow-x: scroll;"
                     ),
                     tabPanel("Elution and Immunogenicity Data",
-                        h4("Prediction score table showing exact MHC binding values for elution and percentile calculations."),
+                        h4("Prediction score table showing exact MHC scpres for elution, immunogenicity, and percentile calculations."),
                         DTOutput(outputId = "elutionDatatable"),
                         br(),
                         strong("MHCflurryEL Processing"), span(': An "antigen processing" predictor that attempts to model MHC allele-independent effects such as proteosomal cleavage. ('),
@@ -224,25 +287,6 @@ explore_tab <- tabItem(
                         strong("DeepImmuno"), span(": Deep-learning empowered prediction of immunogenic epitopes for T cell immunity. ("),
                         a(href = "https://academic.oup.com/bib/article/22/6/bbab160/6261914?login=false", "Citation"), span(")"),
                         style = "overflow-x: scroll;"
-                    ),
-                    tabPanel("Anchor Heatmap",
-                        h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
-                        plotOutput(outputId = "peptideFigureLegend", height = "50px"),
-                        plotOutput(outputId = "anchorPlot") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
-                    )
-                ),
-                box(
-                    column(width = 4,
-                        h4("Allele Specific Anchor Prediction Heatmap"),
-                        h5(" This tab displays HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
-                            " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
-                        h4("MHC Binding Prediction Scores"),
-                        h5(" This tab contains violin plots that showcase individual binding prediction scores from each algorithm used. A solid line is used to represent the median score.")
-                    ),
-                    column(width = 8,
-                        box(title = "Anchor vs Mutation position Scenario Guide", collapsible = TRUE, collapsed = FALSE, width = 12,
-                            img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/anchor.jpg",
-                            align = "center", height = "350px", width = "600px"), style = "overflow-x: scroll;")
                     )
                 )
             )
@@ -609,7 +653,8 @@ ui <- dashboardPage(
       menuItem("Tutorials", tabName = "tutorial", startExpanded = TRUE, icon = icon("fas fa-book-open")),
       menuItem("pVACview Documentation", icon = icon("fas fa-file-invoice"), href = "https://pvactools.readthedocs.io/en/latest/pvacview.html"),
       menuItem("Submit Github Issue", tabName = "contact", icon = icon("far fa-question-circle"))
-    )
+    ),
+    div(textOutput("version"), style="margin-left:20px;position:fixed;bottom:20px;color:#b8c7ce")
   ),
   body = dashboardBody(
     use_theme(mytheme),
