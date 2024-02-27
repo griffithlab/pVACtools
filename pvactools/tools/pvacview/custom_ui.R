@@ -31,10 +31,11 @@ custom_tab <- tabItem("custom",
                       uiOutput("custom_order_by_feature_ui"),
                       h5("Order peptides by a certain feature. For example, ordering peptides by binding scores to find the best binders."),
                       uiOutput("custom_peptide_features_ui"),
-                      h5("Choose what features you would like to consider for each group of peptides.")
+                      h5("Choose what features you would like to consider for each group of peptides."),
+                      actionButton("visualize_custom", "Visualize")
                     ),
                     
-                    actionButton("visualize_custom", "Visualize")
+                   
                 ),
                 column(6,
                     box(

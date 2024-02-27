@@ -1,4 +1,4 @@
-.. image:: ../images/pVACview_logo_trans-bg_sm_v4b.png
+.. image:: ../../images/pVACview_logo_trans-bg_sm_v4b.png
     :align: right
     :alt: pVACview logo
 
@@ -54,7 +54,7 @@ As shown, different cells of the report table are highlighted in various ways:
 
 For more details on what each column represent, you can hover over the column names and/or click the tool icon on the top right where ``Help`` documentation is located.
 
-.. figure:: ../images/screenshots/pvacview-main_table.png
+.. figure:: ../../images/screenshots/pvacview-main_table.png
     :width: 1000px
     :align: right
     :figclass: align-left
@@ -98,7 +98,7 @@ There are three separate boxes in this section as shown, from left to right you 
 
   This box shows an overview of the current state of your evaluation choices (i.e. how many are marked accepted, rejected, or for review). Note that aggregate reports generated from the pvacseq pipeline defaults everything to ``Pending``.
 
-.. figure:: ../images/screenshots/pvacview-middle_section.png
+.. figure:: ../../images/screenshots/pvacview-middle_section.png
     :width: 1000px
     :align: right
     :alt: pVACview Upload
@@ -120,7 +120,7 @@ positions and whether or not the peptide failed the anchor residue criteria
 for any of the HLA alleles. Peptides failing these criteria are deprioritized
 in the sorting of this table.
 
-.. figure:: ../images/screenshots/pvacview-peptide_table.png
+.. figure:: ../../images/screenshots/pvacview-peptide_table.png
     :width: 1000px
     :align: right
     :alt: pVACview Upload
@@ -130,7 +130,7 @@ We also provide (in the "Transcripts in Set" tab), additional information regard
 This includes: transcript id, individual transcript expression, `transcript support level <http://uswest.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_, biotype and transcript length. Transcripts with a protein_coding biotype, low TSL and long length
 are prioritized in the sorting of this table.
 
-.. figure:: ../images/screenshots/pvacview-transcript_set.png
+.. figure:: ../../images/screenshots/pvacview-transcript_set.png
     :width: 1000px
     :align: right
     :alt: pVACview Upload
@@ -148,7 +148,7 @@ There are five different tabs in this section of the app, providing peptide-leve
   Shown in this tab are violin plots of the individual IC50-based binding affinity predictions of the MT and WT peptides for HLA alleles were the MT binds well to.
   These peptides each have up to 8 binding algorithm scores for Class I alleles or up to 4 algorithm scores for Class II alleles.
 
-  .. figure:: ../images/screenshots/pvacview-additional_info_1.png
+  .. figure:: ../../images/screenshots/pvacview-additional_info_1.png
       :width: 1000px
       :align: left
       :alt: pVACview Upload
@@ -160,7 +160,7 @@ There are five different tabs in this section of the app, providing peptide-leve
   Shown in this tab are violin plots of the individual percentile-based binding affinity predictions of the MT and WT peptides for HLA alleles were the MT binds well to.
   These peptides each have up to 8 binding algorithm scores for Class I alleles or up to 4 algorithm scores for Class II alleles.
 
-  .. figure:: ../images/screenshots/pvacview-additional_info_2.png
+  .. figure:: ../../images/screenshots/pvacview-additional_info_2.png
           :width: 1000px
           :align: left
           :figclass: align-left
@@ -170,7 +170,7 @@ There are five different tabs in this section of the app, providing peptide-leve
   Here, we provide the specific IC50 and percentile binding affinity predictions generated from each individual algorithm.
   This data is specific to the MT/WT peptide pair selected in the peptide table.
 
-  .. figure:: ../images/screenshots/pvacview-additional_info_3.png
+  .. figure:: ../../images/screenshots/pvacview-additional_info_3.png
               :width: 1000px
               :align: left
               :figclass: align-left
@@ -180,7 +180,7 @@ There are five different tabs in this section of the app, providing peptide-leve
   Here, we provide the specific elution scores and percentiled generated from each individual algorithm.
   This data is specific to the MT/WT peptide pair selected in the peptide table.
 
-  .. figure:: ../images/screenshots/pvacview-additional_info_4.png
+  .. figure:: ../../images/screenshots/pvacview-additional_info_4.png
               :width: 1000px
               :align: left
               :figclass: align-left
@@ -193,7 +193,8 @@ There are five different tabs in this section of the app, providing peptide-leve
   Top 30 MT/WT peptide pairs from the peptide table are shown in this tab with anchor probabilities overlaying as a heatmap. These anchor probabilities shown are both allele and peptide length specific.
   The mutated amino acid(s) is/are marked in red (or the flanking ones are, in the case of deletions) and each MT/WT pair are separated from others using a dotted line.
 
-  .. figure:: ../images/screenshots/pvacview-additional_info_5.png
+  .. figure:: ../../images/screenshots/pvacview-additional_info_5.png
               :width: 1000px
               :align: left
               :figclass: align-left
+

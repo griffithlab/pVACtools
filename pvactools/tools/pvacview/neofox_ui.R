@@ -49,7 +49,7 @@ neofox_tab <- tabItem("neofox",
 
             fluidRow(
               box(width = 12, 
-                  title = "Data Visualization",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                  title = "Comparative Violin Plots",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
                   h4("Violin Plots showing distribution of various neoantigen features for selected variants."),
                   uiOutput("noefox_features_ui"),
                   plotOutput(outputId = "neofox_violin_plots_row1") %>% withSpinner(color = "#8FCCFA"),
