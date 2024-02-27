@@ -86,7 +86,7 @@ anchor_weights_for_alleles <- function(hla_alleles) {
   scores_df <- data.frame()
   for (hla_allele in hla_alleles) {
     if (any(hla_allele == anchor_data[[8]]["HLA"])) {
-      eight_mer_scores <- append(anchor_data[[8]][anchor_data[[8]]["HLA"] == hla_allele][1:(8 + 1)], "9mer", 1)
+      eight_mer_scores <- append(anchor_data[[8]][anchor_data[[8]]["HLA"] == hla_allele][1:(8 + 1)], "8mer", 1)
     }
     else {
       eight_mer_scores <- c(hla_allele, "8mer")
@@ -101,13 +101,13 @@ anchor_weights_for_alleles <- function(hla_alleles) {
       ten_mer_scores <- append(anchor_data[[10]][anchor_data[[10]]["HLA"] == hla_allele][1:(10 + 1)], "10mer", 1)
     }
     else {
-      ten_mer_scores <- c(hla_allele, "8mer")
+      ten_mer_scores <- c(hla_allele, "10mer")
     }
     if (any(hla_allele == anchor_data[[11]]["HLA"])) {
       eleven_mer_scores <- append(anchor_data[[11]][anchor_data[[11]]["HLA"] == hla_allele][1:(11 + 1)], "11mer", 1)
     }
     else {
-      eleven_mer_scores <- c(hla_allele, "8mer")
+      eleven_mer_scores <- c(hla_allele, "11mer")
     }
     scores <- list(eight_mer_scores, nine_mer_scores, ten_mer_scores, eleven_mer_scores)
     scores <- lapply(scores, `length<-`, 13)
