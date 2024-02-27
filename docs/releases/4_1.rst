@@ -1,0 +1,29 @@
+Version 4.1
+===========
+
+Version 4.1.0
+-------------
+
+This is a minor feature release. It adds the following features:
+
+- This release adds support for two new prediction algorithms: BigMHC and
+  DeepImmuno (`#1063 <https://github.com/griffithlab/pVACtools/pull/1063>`_).
+  BigMHC includes predictions for elution (BigMHC_EL) and
+  immunogenicity (BigMHC_IM). DeepImmuno is a prediction algorithms for
+  immunogenicty.
+- This release includes several updates to pVACview (`#1012
+  <https://github.com/griffithlab/pVACtools/pull/1012>`_):
+
+  - The tab containing the anchor heatmaps for each well-binding peptide of a
+    variant has been moved to the "Transcript and Peptide Set Data" panel.
+  - The anchor heatmap tab now also contains a table of all the per-length and
+    per-allele anchor weights for each position in a peptide.
+  - The pVACtools version is now displayed at the bottom of the sidebar.
+  - A new panel has been added to show the tiering parameters currently
+    applied.
+  - Where there are multiple transcript sets for a variant, the one containing
+    the best peptide is now selected by default.
+
+- This release adds a new command ``pvactools download_wdls`` (`#1055
+  <https://github.com/griffithlab/pVACtools/pull/1055>`_). This command
+  can be used to download WDL workflow files for pVACseq and pVACfuse.
