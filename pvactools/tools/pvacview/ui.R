@@ -282,7 +282,7 @@ explore_tab <- tabItem(
                         a(href = "https://www.sciencedirect.com/science/article/pii/S2405471220302398", "Citation", target = "_blank"), span(")"),
                         br(),
                         strong("MHCflurryEL Presentation"), span(': A predictor that integrates processing predictions with binding affinity predictions to give a composite "presentation score." ('),
-                        a(href = "https://www.sciencedirect.com/science/article/pii/S2405471220302398", "Citation"), span(")"),
+                        a(href = "https://www.sciencedirect.com/science/article/pii/S2405471220302398", "Citation", target = "_blank"), span(")"),
                         br(),
                         strong("NetMHCpanEL / NetMHCIIpanEL"), span(": A predictor trained on eluted ligand data. ("),
                         a(href = "https://academic.oup.com/nar/article/48/W1/W449/5837056", "Citation", target = "_blank"), span(")"),
