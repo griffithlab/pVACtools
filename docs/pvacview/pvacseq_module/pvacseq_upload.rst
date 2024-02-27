@@ -1,4 +1,4 @@
-.. image:: ../images/pVACview_logo_trans-bg_sm_v4b.png
+.. image:: ../../images/pVACview_logo_trans-bg_sm_v4b.png
     :align: right
     :alt: pVACview logo
 
@@ -10,7 +10,7 @@
 .. role:: large
 .. role:: bold
 
-Getting Started
+Upload
 ---------------
 
 The pVACview user interface has four sections:
@@ -38,7 +38,7 @@ from the same set of variants (but predicted for different HLA alleles). You wil
 We also provide users with the opportunity of uploading a gene-of-interest tsv file, where each individual line consists of one gene name. If matched in the aggregate report, the gene name will be
 highlighted using bold font and a green box around the cell.
 
-.. figure:: ../images/screenshots/pvacview-upload.png
+.. figure:: ../../images/screenshots/pvacview-upload.png
     :width: 1000px
     :align: right
     :alt: pVACview Upload
@@ -52,7 +52,7 @@ Data
 
 Upon successfully uploading the matching data files, you can now explore the different aspects of your neoantigen candidates.
 
-.. figure:: ../images/screenshots/pvacview-visualize_and_explore.png
+.. figure:: ../../images/screenshots/pvacview-visualize_and_explore.png
     :width: 1000px
     :align: right
     :alt: pVACview Upload
@@ -143,7 +143,7 @@ Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers
 
   Allele expression is calculated as gene expression * RNA VAF. This expression value is used as a cutoff in order to determine whether the peptide has good allele expression when the Allele Expr value of a variant is above this cutoff.
 
-.. figure:: ../images/screenshots/pvacview-regenerate_tier.png
+.. figure:: ../../images/screenshots/pvacview-regenerate_tier.png
     :width: 1000px
     :align: right
     :alt: pVACview Upload
@@ -161,7 +161,7 @@ To investigate a specific variant in detail (on both the transcript and peptide 
 Afterwards, you may choose to select a rating for the neoantigen candidate using the Eval column. By default, all peptides are initially in a Pending state when the report is generated from pVACseq. Based on
 exploration and evaluation of the features provided, you can mark the peptide as either ``Accept``, ``Reject``, or ``Review``. Your current state of selections are also counted and shown in the ``Peptide Evaluation Overview`` box.
 
-.. figure:: ../images/screenshots/pvacview-comments.png
+.. figure:: ../../images/screenshots/pvacview-comments.png
     :width: 800px
     :align: right
     :alt: pVACview Upload
@@ -192,7 +192,7 @@ There are a couple things to note when exporting your current data:
   :bold:`This serves as a way to save your progress as your evaluations are
   cleared upon closing or refreshing the pVACview app.`
 
-.. figure:: ../images/screenshots/pvacview-export.png
+.. figure:: ../../images/screenshots/pvacview-export.png
       :width: 1000px
       :align: right
       :alt: pVACview Upload

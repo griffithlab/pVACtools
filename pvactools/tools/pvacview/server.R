@@ -76,7 +76,7 @@ server <- shinyServer(function(input, output, session) {
   )
   #Option 1: User uploaded main aggregate report file
   observeEvent(input$mainDataInput$datapath, {
-    # session$sendCustomMessage("unbind-DT", "mainTable")                         # KEPT COMMENTED DESPITE BEING IN NEWER VERSION OF PVACVIEW
+    session$sendCustomMessage("unbind-DT", "mainTable")
     mainData <- read.table(input$mainDataInput$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
@@ -174,7 +174,7 @@ server <- shinyServer(function(input, output, session) {
   #Option 2: Load from HCC1395 demo data from github
   observeEvent(input$loadDefaultmain, {
     ## Class I demo aggregate report
-    # session$sendCustomMessage("unbind-DT", "mainTable")                                # THIS LINE IS IN THE MOST UPDATED VERSION OF PVACVIEW BUT PREVENTS NEOFOX/PVAC TO BEING LOADED AT THE SAME TIME
+    session$sendCustomMessage("unbind-DT", "mainTable")                                # THIS LINE IS IN THE MOST UPDATED VERSION OF PVACVIEW BUT PREVENTS NEOFOX/PVAC TO BEING LOADED AT THE SAME TIME
     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
     mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     colnames(mainData) <- mainData[1, ]
@@ -473,16 +473,16 @@ server <- shinyServer(function(input, output, session) {
                 options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
                                columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
                                                  list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
-                                                 list(orderable = TRUE, targets = 0)), buttons = list(I("colvis"))),
-                               # initComplete = htmlwidgets::JS(
-                               #   "function(settings, json) {",
-                               #   paste("$(this.api().table().header()).css({'font-size': '", "10pt", "'});"),
-                               #   "}"),
-                               # rowCallback = JS(rowcallback(hla_count(), df$selectedRow - 1)),
-                               # preDrawCallback = JS("function() {
-                               #          Shiny.unbindAll(this.api().table().node()); }"),
-                               # drawCallback = JS("function() { 
-                               #       Shiny.bindAll(this.api().table().node()); } ")),
+                                                 list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
+                               initComplete = htmlwidgets::JS(
+                                 "function(settings, json) {",
+                                 paste("$(this.api().table().header()).css({'font-size': '", "10pt", "'});"),
+                                 "}"),
+                               rowCallback = JS(rowcallback(hla_count(), df$selectedRow - 1)),
+                               preDrawCallback = JS("function() {
+                                        Shiny.unbindAll(this.api().table().node()); }"),
+                               drawCallback = JS("function() { 
+                                     Shiny.bindAll(this.api().table().node()); } ")),
                 selection = "none",
                 extensions = c("Buttons"))
     }
@@ -718,7 +718,6 @@ server <- shinyServer(function(input, output, session) {
     }
     df$metricsData[[selectedID()]]$sets[selection]
   })
-  
   ##transcripts table displaying transcript id and transcript expression values
   output$transcriptsTable <- renderDT({
     withProgress(message = "Loading Transcripts Table", value = 0, {
@@ -781,7 +780,7 @@ server <- shinyServer(function(input, output, session) {
         dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data)), options = list(
           pageLength = 10,
           columnDefs = list(list(defaultContent = "X",
-                                 targets = c(2:hla_count() + 1)),
+                            targets = c(2:hla_count() + 1)),
                             list(orderable = TRUE, targets = 0),
                             list(visible = FALSE, targets = c(-1, -2))),
           rowCallback = JS("function(row, data, index, rowId) {",
