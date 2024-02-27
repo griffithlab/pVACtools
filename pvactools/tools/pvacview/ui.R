@@ -273,19 +273,19 @@ explore_tab <- tabItem(
                         DTOutput(outputId = "elutionDatatable"),
                         br(),
                         strong("BigMHC_EL / BigMHC_IM"), span(": A deep learning tool for predicting MHC-I (neo)epitope presentation and immunogenicity. ("),
-                        a(href = "https://www.nature.com/articles/s42256-023-00694-6", "Citation"), span(")"),
+                        a(href = "https://www.nature.com/articles/s42256-023-00694-6", "Citation", target = "_blank"), span(")"),
                         br(),
                         strong("DeepImmuno"), span(": Deep-learning empowered prediction of immunogenic epitopes for T cell immunity. ("),
-                        a(href = "https://academic.oup.com/bib/article/22/6/bbab160/6261914?login=false", "Citation"), span(")"),
+                        a(href = "https://academic.oup.com/bib/article/22/6/bbab160/6261914?login=false", "Citation", target = "_blank"), span(")"),
                         br(),
                         strong("MHCflurryEL Processing"), span(': An "antigen processing" predictor that attempts to model MHC allele-independent effects such as proteosomal cleavage. ('),
-                        a(href = "https://www.sciencedirect.com/science/article/pii/S2405471220302398", "Citation"), span(")"),
+                        a(href = "https://www.sciencedirect.com/science/article/pii/S2405471220302398", "Citation", target = "_blank"), span(")"),
                         br(),
                         strong("MHCflurryEL Presentation"), span(': A predictor that integrates processing predictions with binding affinity predictions to give a composite "presentation score." ('),
                         a(href = "https://www.sciencedirect.com/science/article/pii/S2405471220302398", "Citation"), span(")"),
                         br(),
                         strong("NetMHCpanEL / NetMHCIIpanEL"), span(": A predictor trained on eluted ligand data. ("),
-                        a(href = "https://academic.oup.com/nar/article/48/W1/W449/5837056", "Citation"), span(")"),
+                        a(href = "https://academic.oup.com/nar/article/48/W1/W449/5837056", "Citation", target = "_blank"), span(")"),
                         style = "overflow-x: scroll;"
                     )
                 )
