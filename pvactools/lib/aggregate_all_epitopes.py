@@ -507,6 +507,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def replace_nas(self, items):
         return ["NA" if pd.isna(x) else x for x in items]
 
+    def round_to_ints(self, items):
+        return [round(x) if (type(x) == float and not pd.isna(x)) else x for x in items]
+
     def get_good_binders_metrics(self, good_binders, prediction_algorithms, el_algorithms):
         peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
         good_peptides = good_binders["MT Epitope Seq"].unique()
@@ -592,7 +595,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             sorted_transcripts = self.sort_transcripts(annotations, good_binders)
             peptides[set_name]['transcripts'] = list(sorted_transcripts.Annotation)
             peptides[set_name]['transcript_expr'] = self.replace_nas(list(sorted_transcripts.Expr))
-            peptides[set_name]['tsl'] = self.replace_nas(list(sorted_transcripts.TSL))
+            peptides[set_name]['tsl'] = self.replace_nas(self.round_to_ints(list(sorted_transcripts.TSL)))
             peptides[set_name]['biotype'] = list(sorted_transcripts.Biotype)
             peptides[set_name]['transcript_length'] = [int(l) for l in list(sorted_transcripts.Length)]
             peptides[set_name]['transcript_count'] = len(annotations)
@@ -657,7 +660,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
         problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
-        tsl = best['Transcript Support Level'] if best['Transcript Support Level'] == "Not Supported" or pd.isna(best['Transcript Support Level']) else round(best['Transcript Support Level'])
+        tsl = best['Transcript Support Level'] if best['Transcript Support Level'] == "Not Supported" or pd.isna(best['Transcript Support Level']) else str(int(best['Transcript Support Level']))
 
         out_dict = { 'ID': key }
         out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
