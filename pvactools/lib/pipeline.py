@@ -339,6 +339,7 @@ class Pipeline(metaclass=ABCMeta):
                             '-e', self.iedb_executable,
                             '-l', str(epl),
                             '--tmp-dir', self.tmp_dir,
+                            '--log-dir', self.log_dir(),
                         ]
                         argument_sets.append(arguments)
 
@@ -645,6 +646,8 @@ class PvacbindPipeline(Pipeline):
                         '-r', str(self.iedb_retries),
                         '-e', self.iedb_executable,
                         '-l', str(length),
+                        '--tmp-dir', self.tmp_dir,
+                        '--log-dir', self.log_dir(),
                     ]
                     argument_sets.append(arguments)
 
@@ -707,6 +710,7 @@ class PvacbindPipeline(Pipeline):
                         'output_file'            : split_parsed_file_path,
                     }
                     params['sample_name'] = self.sample_name
+                    params['flurry_state'] = self.flurry_state
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['add_sample_name_column'] = True 
                     parser = self.output_parser(params)

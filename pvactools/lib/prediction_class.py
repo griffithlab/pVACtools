@@ -13,6 +13,8 @@ from collections import defaultdict
 from Bio import SeqIO
 import random
 import uuid
+import io
+from datetime import datetime
 
 class IEDB(metaclass=ABCMeta):
     @classmethod
@@ -50,7 +52,26 @@ class IEDB(metaclass=ABCMeta):
     def check_length_valid_for_allele(self, length, allele):
         return True
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
+    def check_iedb_api_response_matches(self, input_file, response_text, epitope_length):
+        input_peptides = set()
+        with open(input_file) as input_fh:
+            for record in SeqIO.parse(input_fh, "fasta"):
+                seq = record.seq
+                input_peptides.update([seq[i:i+epitope_length] for i in range(0, len(seq)-epitope_length+1)])
+
+        output_peptides = set()
+        for record in csv.DictReader(io.StringIO(response_text), delimiter="\t"):
+            if 'peptide' in record:
+                output_peptides.add(record['peptide'])
+
+        return (input_peptides == output_peptides, input_peptides, output_peptides)
+
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        if log_dir is not None:
+            log_file = os.path.join(log_dir, "iedb.log")
+        else:
+            log_file = None
         if iedb_executable_path is not None:
             arguments = [sys.executable]
             arguments.extend(self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length))
@@ -62,28 +83,59 @@ class IEDB(metaclass=ABCMeta):
             return (response_text, 'wb')
         else:
             with open(input_file, 'r') as input_fh:
+                sequence_text = input_fh.read()
                 data = {
-                    'sequence_text': input_fh.read(),
+                    'sequence_text': sequence_text,
                     'method':        self.iedb_prediction_method,
                     'allele':        allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB'),
                     'length':        epitope_length,
                     'user_tool':     'pVac-seq',
                 }
 
+            response_timestamp = datetime.now()
             response = requests.post(self.url, data=data)
+            (peptides_match, input_peptides, output_peptides) = self.check_iedb_api_response_matches(input_file, response.text, epitope_length)
             retries = 0
-            while (response.status_code == 500 or response.status_code == 403) and retries < iedb_retries:
+            while (response.status_code == 500 or response.status_code == 403 or not peptides_match) and retries < iedb_retries:
+                if response.status_code == 200 and not peptides_match:
+                    log_text = "IEDB API Output doesn't match input. Retrying.\n"
+                    log_text += "{}\n".format(response_timestamp)
+                    log_text += "Inputs:\n"
+                    log_text += "{}\n".format(data)
+                    log_text += "Output:\n"
+                    log_text += "{}\n".format(response.text)
+                    if log_file:
+                        with open(log_file, "a") as log_fh:
+                            log_fh.write(log_text)
+                    else:
+                        print(log_text)
+
                 random.seed(uuid.uuid4().int)
                 time.sleep(random.randint(30,90) * retries)
                 retries += 1
                 print("IEDB: Retry %s of %s" % (retries, iedb_retries))
+                response_timestamp = datetime.now()
                 response = requests.post(self.url, data=data)
+                (peptides_match, input_peptides, output_peptides) = self.check_iedb_api_response_matches(input_file, response.text, epitope_length)
 
             if response.status_code != 200:
                 sys.exit("Error posting request to IEDB.\n%s" % response.text)
-            response_text = response.text
+            if not peptides_match:
+                log_text = "Error. IEDB API Output doesn't match input and number of retries exceeded."
+                log_text += "{}\n".format(response_timestamp)
+                log_text += "Inputs:\n"
+                log_text += "{}\n".format(data)
+                log_text += "Output:\n"
+                log_text += "{}\n".format(response.text)
+                if log_file:
+                    with open(log_file, "a") as log_fh:
+                        log_fh.write(log_text)
+                else:
+                    print(log_text)
+                sys.exit("Error. IEDB API Output doesn't match input and number of retries exceeded.")
+
             output_mode = 'w'
-            return (response_text, 'w')
+            return (response.text, 'w')
 
 class MHCnuggets(metaclass=ABCMeta):
     def check_length_valid_for_allele(self, length, allele):
@@ -96,7 +148,7 @@ class MHCnuggets(metaclass=ABCMeta):
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, class_type, tmp_dir=None):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, class_type, tmp_dir=None, log_dir=None):
         tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
         script = os.path.join(os.path.dirname(os.path.realpath(__file__)), "call_mhcnuggets.py")
         arguments = ["python", script, input_file, allele, str(epitope_length), class_type, tmp_output_file.name]
@@ -282,10 +334,150 @@ class PredictionClass(metaclass=ABCMeta):
         if allele not in valid_alleles:
             sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, self.__class__.__name__, self.__class__.__name__))
 
+    def determine_neoepitopes(self, sequence, length):
+        epitopes = {}
+        for i in range(0, len(sequence)-length+1):
+            epitopes[i+1] = sequence[i:i+length]
+        return epitopes
+
+
 class MHCI(PredictionClass, metaclass=ABCMeta):
     @property
     def needs_epitope_length(self):
         return True
+
+class DeepImmuno(MHCI):
+    def valid_allele_names(self):
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_file_name = os.path.join(alleles_dir, "DeepImmuno.tsv")
+        alleles           = []
+        with open(alleles_file_name) as alleles_file:
+            tsv_reader = csv.DictReader(alleles_file, delimiter='\t')
+            for row in tsv_reader:
+                alleles.append(row['HLA'])
+        return alleles
+
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
+    def valid_lengths_for_allele(self, allele):
+        return [9,10]
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        results = pd.DataFrame()
+        all_epitopes = []
+        for record in SeqIO.parse(input_file, "fasta"):
+            seq_num = record.id
+            peptide = str(record.seq)
+            epitopes = self.determine_neoepitopes(peptide, epitope_length)
+            all_epitopes.extend(epitopes.values())
+        all_epitopes = list(set(all_epitopes))
+
+        if len(all_epitopes) > 0:
+            tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
+            for epitope in all_epitopes:
+                tmp_input_file.write("{},{}\n".format(epitope, allele.replace(':', '')))
+            tmp_input_file.close()
+            arguments = ['deepimmuno-cnn', '--mode', 'multiple', '--intdir', tmp_input_file.name, '--outdir', tmp_dir]
+            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
+            try:
+                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
+            except:
+                stderr_fh.close()
+                with open(stderr_fh.name, 'r') as fh:
+                    err = fh.read()
+                os.unlink(stderr_fh.name)
+                raise Exception("An error occurred while calling DeepImmuno:\n{}".format(err))
+            stderr_fh.close()
+            os.unlink(stderr_fh.name)
+            os.unlink(tmp_input_file.name)
+            tmp_output_file_name = os.path.join(tmp_dir, "deepimmuno-cnn-result.txt")
+            df = pd.read_csv(tmp_output_file_name, sep="\t")
+            df.rename(columns={
+                'HLA': 'allele',
+            }, inplace=True)
+            os.unlink(tmp_output_file_name)
+            for record in SeqIO.parse(input_file, "fasta"):
+                seq_num = record.id
+                peptide = str(record.seq)
+                epitopes = self.determine_neoepitopes(peptide, epitope_length)
+                for start, epitope in epitopes.items():
+                    epitope_df = df[df['peptide'] == epitope]
+                    epitope_df['seq_num'] = seq_num
+                    epitope_df['start'] = start
+                    results = pd.concat((results, epitope_df), axis=0)
+        return (results, 'pandas')
+
+
+class BigMHC(metaclass=ABCMeta):
+    def valid_allele_names(self):
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_file_name = os.path.join(alleles_dir, "BigMHC.txt")
+        with open(alleles_file_name, 'r') as fh:
+            return list(filter(None, fh.read().split('\n')))
+
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
+    def valid_lengths_for_allele(self, allele):
+        return [8,9,10,11,12,13,14,15]
+
+    def predict_bigmhc(self, bigmhc_type, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        results = pd.DataFrame()
+        all_epitopes = []
+        for record in SeqIO.parse(input_file, "fasta"):
+            seq_num = record.id
+            peptide = str(record.seq)
+            epitopes = self.determine_neoepitopes(peptide, epitope_length)
+            all_epitopes.extend(epitopes.values())
+        all_epitopes = list(set(all_epitopes))
+
+        if len(all_epitopes) > 0:
+            tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
+            for epitope in all_epitopes:
+                tmp_input_file.write("{}\n".format(epitope))
+            tmp_input_file.close()
+            tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
+            arguments = ['bigmhc_predict', '-a', allele, '-i', tmp_input_file.name, '-p', '0', '-c', '0', '-o', tmp_output_file.name, '-m', bigmhc_type, '-d', 'cpu']
+            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
+            try:
+                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
+            except:
+                stderr_fh.close()
+                with open(stderr_fh.name, 'r') as fh:
+                    err = fh.read()
+                os.unlink(stderr_fh.name)
+                raise Exception("An error occurred while calling BigMHC:\n{}".format(err))
+            stderr_fh.close()
+            os.unlink(stderr_fh.name)
+            os.unlink(tmp_input_file.name)
+            tmp_output_file.close()
+            df = pd.read_csv(tmp_output_file.name)
+            df.rename(columns={
+                'pep': 'peptide',
+                'mhc': 'allele',
+            }, inplace=True)
+            os.unlink(tmp_output_file.name)
+            for record in SeqIO.parse(input_file, "fasta"):
+                seq_num = record.id
+                peptide = str(record.seq)
+                epitopes = self.determine_neoepitopes(peptide, epitope_length)
+                for start, epitope in epitopes.items():
+                    epitope_df = df[df['peptide'] == epitope]
+                    epitope_df['seq_num'] = seq_num
+                    epitope_df['start'] = start
+                    results = pd.concat((results, epitope_df), axis=0)
+        return (results, 'pandas')
+
+class BigMHC_EL(BigMHC, MHCI):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        return self.predict_bigmhc('el', input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None)
+
+class BigMHC_IM(BigMHC, MHCI):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        return self.predict_bigmhc('im', input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None)
 
 class MHCflurry(MHCI):
     def valid_allele_names(self):
@@ -301,13 +493,7 @@ class MHCflurry(MHCI):
     def valid_lengths_for_allele(self, allele):
         return [8,9,10,11,12,13,14,15]
 
-    def determine_neoepitopes(self, sequence, length):
-        epitopes = {}
-        for i in range(0, len(sequence)-length+1):
-            epitopes[i+1] = sequence[i:i+length]
-        return epitopes
-
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
@@ -365,7 +551,7 @@ class MHCnuggetsI(MHCI, MHCnuggets):
     def mhcnuggets_allele(self, allele):
         return allele.replace('*', '')
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
         return MHCnuggets.predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, 'I', tmp_dir=tmp_dir)
 
 class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
@@ -459,7 +645,7 @@ class MHCnuggetsII(MHCII, MHCnuggets):
     def mhcnuggets_allele(self,allele):
         return "HLA-{}".format(allele).replace('*', '')
 
-    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
         return MHCnuggets.predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, 'II', tmp_dir=tmp_dir)
 
 class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
