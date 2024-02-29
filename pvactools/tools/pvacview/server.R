@@ -154,7 +154,7 @@ server <- shinyServer(function(input, output, session) {
    observeEvent(input$loadDefaultmain, {
      ## Class I demo aggregate report
      session$sendCustomMessage("unbind-DT", "mainTable")
-     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
+     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
      mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
      colnames(mainData) <- mainData[1, ]
      mainData <- mainData[-1, ]
@@ -167,7 +167,7 @@ server <- shinyServer(function(input, output, session) {
      mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
      df$mainTable <- mainData
      ## Class I demo metrics file
-     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
+     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
      df$metricsData <- fromJSON(txt = metricsdata)
      df$binding_threshold <- df$metricsData$`binding_threshold`
      df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
@@ -209,14 +209,14 @@ server <- shinyServer(function(input, output, session) {
      }
      rownames(df$comments) <- df$mainTable$ID
      ## Class II additional demo aggregate report
-     add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+     add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
      addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
      colnames(addData) <- addData[1, ]
      addData <- addData[-1, ]
      row.names(addData) <- NULL
      df$additionalData <- addData
      ## Hotspot gene list autoload
-     gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
+     gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
      gene_list <- read.table(text = gene_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
      df$gene_list <- gene_list
      df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
