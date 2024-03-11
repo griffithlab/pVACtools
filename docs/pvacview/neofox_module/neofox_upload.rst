@@ -37,7 +37,7 @@ ______________________________
 Data
 ****
 
-Upon successfully uploading the corret data file, you can now explore the different aspects of your neoantigen candidates.
+Upon successfully uploading the correct data file, you can now explore the different aspects of your neoantigen candidates.
 
 .. figure:: ../../images/screenshots/pvacview-neofox-maintable.png
     :width: 1000px
