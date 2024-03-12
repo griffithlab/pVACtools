@@ -21,6 +21,7 @@ decisions when deciding final peptide candidates for personalized cancer vaccine
    :glob:
 
    pvacview/prerequisites
-   pvacview/getting_started
-   pvacview/features
+   pvacview/pvacseq_module
+   pvacview/neofox_module
+   pvacview/custom_module
    pvacview/troubleshooting
