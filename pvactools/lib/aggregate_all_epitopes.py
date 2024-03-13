@@ -317,8 +317,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def get_sub_df(self, all_epitopes_df, key):
         key_str = "{}-{}-{}-{}-{}".format(key[0], key[1], key[2], key[3], key[4])
         df = (all_epitopes_df[lambda x: (x['Chromosome'] == key[0]) & (x['Start'] == key[1]) & (x['Stop'] == key[2]) & (x['Reference'] == key[3]) & (x['Variant'] == key[4])]).copy()
-        df['Variant Type'] = df['Variant Type'].cat.add_categories('NA')
-        df['Mutation Position'] = df['Mutation Position'].cat.add_categories('NA')
         df['annotation'] = df[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1)
         df['key'] = key_str
         return (df, key_str)
@@ -367,14 +365,16 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         anchors = self.get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']))
         # parse out mutation position from str
         position = mutation["Mutation Position"]
-        if '-' in position:
+        if pd.isna(position):
+            return anchor_residue_pass
+        elif '-' in position:
             d_ind = position.index('-')
             if all(pos in anchors for pos in range(int(position[0:d_ind]), int(position[d_ind+1:])+1)):
                 if pd.isna(mutation["{} WT IC50 Score".format(self.wt_top_score_metric)]):
                     anchor_residue_pass = False
                 elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
                     anchor_residue_pass = False
-        elif position != "NA":
+        else:
             if int(float(position)) in anchors:
                 if pd.isna(mutation["{} WT IC50 Score".format(self.wt_top_score_metric)]):
                     anchor_residue_pass = False
@@ -571,7 +571,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         individual_el_calls[peptide_type] = el_calls
                         individual_el_percentile_calls[peptide_type] = el_percentile_calls
                     results[peptide]['hla_types'] = sorted(self.hla_types)
-                    results[peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
+                    results[peptide]['mutation_position'] = "NA" if pd.isna(good_binders_peptide_annotation.iloc[0]['Mutation Position']) else str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
                     results[peptide]['problematic_positions'] = str(good_binders_peptide_annotation.iloc[0]['Problematic Positions']) if 'Problematic Positions' in good_binders_peptide_annotation.iloc[0] else 'None'
                     if len(anchor_fails) > 0:
                         results[peptide]['anchor_fails'] = ', '.join(anchor_fails)
