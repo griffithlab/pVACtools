@@ -66,7 +66,7 @@ def combine_class_ii_alleles(class_ii_alleles):
         combinations = ["{}-{}".format(alpha_allele, beta_allele) for (alpha_allele, beta_allele) in list(product(alpha_alleles, beta_alleles))]
         valid_combinations.extend([combination for combination in combinations if combination in MHCII.all_valid_allele_names()])
 
-    return list(set(class_ii_alleles + valid_combinations))
+    return sorted(list(set(class_ii_alleles + valid_combinations)))
 
 def combine_reports(input_files, output_file):
     fieldnames = []
