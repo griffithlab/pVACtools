@@ -122,7 +122,7 @@ explore_tab <- tabItem(
                         title = "Current Parameters for Tiering",
                         status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = FALSE,
                         column(width = 12,
-                            h5("These are current parameters used in the tiering calculaions which may be different from the original parameters if candidates were re-tiered."),
+                            h5("These are current parameters used in the tiering calculations which may be different from the original parameters if candidates were re-tiered."),
                             tableOutput("currentParamTable"),
                             tableOutput("currentBindingParamTable"),
                             style = "height:250px; overflow-y: scroll;overflow-x: scroll;"
