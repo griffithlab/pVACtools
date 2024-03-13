@@ -28,7 +28,7 @@ class FilterTests(unittest.TestCase):
                     output_dir,
                     self.spacers
                 ).draw())
-                self.assertTrue(os.path.exists(os.path.join(output_dir, 'vector.jpg')))
+                self.assertTrue(os.path.exists(os.path.join(output_dir, 'vector.png')))
 
     def test_fasta_with_long_peptide(self):
         if 'DISPLAY' in os.environ.keys():
@@ -41,4 +41,4 @@ class FilterTests(unittest.TestCase):
                     output_dir,
                     self.spacers
                 ).draw())
-                self.assertTrue(os.path.exists(os.path.join(output_dir, 'vector.jpg')))
+                self.assertTrue(os.path.exists(os.path.join(output_dir, 'vector.png')))
