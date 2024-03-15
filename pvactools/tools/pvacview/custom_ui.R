@@ -65,12 +65,14 @@ custom_tab <- tabItem("custom",
                     title="Overview of Neoantigen Features", 
                     status='primary', solidHeader = TRUE, collapsible = TRUE,
                     enable_sidebar = TRUE, sidebar_width = 25, sidebar_start_open = TRUE,
+                    uiOutput("group_feature"),
                     DTOutput('customTable')%>% withSpinner(color="#8FCCFA"),
                     span("Currently investigating row: ", verbatimTextOutput("customSelected")),
                     style = "overflow-x: scroll;font-size:100%"),
           ),
           fluidRow(
             box(width = 12, title = "Detailed Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
+                uiOutput("sort_feature"),
                 DTOutput('customPeptideTable')%>% withSpinner(color="#8FCCFA"), style = "overflow-x: scroll;font-size:100%"
             )
           ),
