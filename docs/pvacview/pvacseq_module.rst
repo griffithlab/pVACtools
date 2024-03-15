@@ -13,3 +13,4 @@ pVACseq Module
 
    pvacseq_module/pvacseq_upload
    pvacseq_module/pvacseq_features
+   pvacseq_module/pvacseq_vignette
