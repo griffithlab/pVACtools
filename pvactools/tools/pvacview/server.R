@@ -1769,6 +1769,8 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
+    mainData <- type.convert(mainData, as.is = TRUE)
+    mainData[is.na(mainData)] <- 0
     df_custom$fullData <- mainData
   })
   observeEvent(input$loadDefault_Neopredpipe, {
@@ -1777,6 +1779,8 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
+    mainData <- type.convert(mainData, as.is = TRUE)
+    mainData[is.na(mainData)] <- 0
     df_custom$fullData <- mainData
   })
   observeEvent(input$loadDefault_antigengarnish, {
@@ -1785,6 +1789,8 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
+    mainData <- type.convert(mainData, as.is = TRUE)
+    mainData[is.na(mainData)] <- 0
     df_custom$fullData <- mainData
   })
   output$custom_upload_ui <- renderUI({
@@ -1796,9 +1802,12 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
+    mainData <- type.convert(mainData, as.is = TRUE)
+    mainData[is.na(mainData)] <- 0
     df_custom$fullData <- mainData
   })
   
+  # group peptides by
   output$custom_group_by_feature_ui <- renderUI({
     df <- df_custom$fullData
     df <- type.convert(df, as.is = TRUE)
@@ -1814,6 +1823,9 @@ server <- shinyServer(function(input, output, session) {
                 options = list(`live-search` = TRUE),
                 multiple = FALSE)
   })
+  
+  # Sort peptides by
+  # Render the UI for selecting the feature
   output$custom_order_by_feature_ui <- renderUI({
     df <- df_custom$fullData
     df <- type.convert(df, as.is = TRUE)
@@ -1824,26 +1836,43 @@ server <- shinyServer(function(input, output, session) {
     
     pickerInput(inputId = "feature_2",
                 label = "Sort peptides by",
-                choices = features, # a list of strings
+                choices = features, 
                 selected = default_selection,
                 options = list(`live-search` = TRUE),
                 multiple = FALSE)
   })
+
+  output$group_feature <- renderUI({
+    if (!is.null(input$feature_1)) {
+      HTML(paste("Peptides grouped by: ", input$feature_1))
+    } else {
+      HTML("No feature selected")
+    }
+  })
   
+  output$sort_feature <- renderUI({
+    if (!is.null(input$feature_2)) {
+      HTML(paste("Peptides sorted by: ", input$feature_2))
+    } else {
+      HTML("No feature selected")
+    }
+  })
+  
+
+  # features to display 
   output$custom_peptide_features_ui <- renderUI({
     df <- df_custom$fullData
     df <- type.convert(df, as.is = TRUE)
     df[is.na(df)] <- 0
     
     features <- as.list(names(df))
-    default_selection <- features[((features != input$feature_2) & (features != input$feature_1))]
+    default_selection <- features
     
-    features <- names(df_custom$fullData)
     pickerInput(inputId = "peptide_features",
                 label = "Features to display for each group of peptides",
                 selected = default_selection,
                 options = list(`actions-box` = TRUE,`live-search` = TRUE),
-                choices = features[((features != input$feature_2) & (features != input$feature_1))], # a list of strings
+                choices = features, # a list of strings
                 multiple = TRUE)
   })
   
@@ -1853,6 +1882,9 @@ server <- shinyServer(function(input, output, session) {
     df_custom$orderBy <- input$feature_2
     
     reformat_data <- df_custom$fullData %>% group_by(across(all_of(df_custom$groupBy))) %>% arrange(across(all_of(df_custom$orderBy)))
+    reformat_data <- type.convert(reformat_data, as.is = TRUE)
+    reformat_data[is.na(reformat_data)] <- 0
+    
     df_custom$fullData <- reformat_data
     row_ind <- reformat_data %>% group_rows()
     row_ind_df <- as.data.frame(row_ind)
@@ -1863,6 +1895,9 @@ server <- shinyServer(function(input, output, session) {
     df_custom$metricsData <- get_group_inds(df_custom$fullData, df_custom$group_inds)
     df_custom$peptide_features <- input$peptide_features
     updateTabItems(session, "custom_tabs", "custom_explore")
+    
+    updateSelectInput(session, "feature_1", selected = df_custom$groupBy)
+    updateSelectInput(session, "feature_2", selected = df_custom$orderBy)
   })
   
   output$customTable <- DT::renderDataTable(
@@ -1888,18 +1923,23 @@ server <- shinyServer(function(input, output, session) {
     dataTableProxy("customMainTable") %>% 
       selectPage((df_custom$selectedRow-1) %/% df_custom$pageLength + 1)
   })
+  
+  
   output$customPeptideTable <- renderDT({
     withProgress(message = 'Loading Peptide Table', value = 0, {
       incProgress(0.5)
       #browser()
       if (!is.null(df_custom$selectedRow) & !(is.null(df_custom$mainTable)) & !is.null(df_custom$peptide_features)){
+    
+        
         display_table <- get_current_group_info(df_custom$peptide_features, df_custom$metricsData, df_custom$fullData, df_custom$selectedRow)
         incProgress(0.5)
         dtable <- datatable(display_table, options =list(
           pageLength = 10,
           rowCallback = JS('function(row, data, index, rowId) {',
                            'console.log(rowId)','if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {',
-                           'row.style.backgroundColor = "#E0E0E0";','}','}')
+                           'row.style.backgroundColor = "#E0E0E0";','}','}'
+                           )
         ), selection = list(mode='single', selected = '1')) 
         dtable
       }
@@ -1938,50 +1978,52 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$xvrbl_scale_custom <- renderUI({
-    withProgress(message = "Loading Scale", value = 0, {
-      req(input$xvrbl_custom)  # Use req() to check if inputs are not NULL
-      df <- df_custom$fullData
-      df <- type.convert(df, as.is = TRUE)
-      df[is.na(df)] <- 0
-      df <- df[is.finite(df[[input$xvrbl_custom]]),]
-      
-      # Apply log or sqrt transformation
-      if (input$LogX_custom == "ln") {
-        df[[input$xvrbl_custom]] <- log(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
-      } else if (input$LogX_custom == "log2") {
-        df[[input$xvrbl_custom]] <- log2(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
-      } else if (input$LogX_custom == "log10") {
-        df[[input$xvrbl_custom]] <- log10(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
-      } else if (input$LogX_custom == "sqrt") {
-        df[[input$xvrbl_custom]] <- sqrt(ifelse(df[[input$xvrbl_custom]] < 0, 1e-10, df[[input$xvrbl_custom]]))
-      } else {
-        df[[input$xvrbl_custom]] <- df[[input$xvrbl_custom]]
-      }
-      
-      df <- df[is.finite(df[[input$xvrbl_custom]]),]
-      
-      xvrbl_values <- df[[input$xvrbl_custom]]
-      range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
-      min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-      max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
-      
-      
-      # Check if min_value and max_value are equal, set default values
-      if (min_value == max_value) {
-        min_value <- min_value - 1
-        max_value <- max_value + 1
-      }
-      
-      sliderInput(
-        inputId = "xvrbl_scale_custom",
-        label = "X Min/Max",
-        min = min_value,
-        max = max_value,
-        value = c(min_value, max_value),
-        step = 0.01,
-        dragRange = TRUE  # Allow users to drag the range handles 
-      )
-    })
+    if (!is.null(input$xvrbl_custom)) {
+      withProgress(message = "Loading Scale", value = 0, {
+        req(input$xvrbl_custom)  # Use req() to check if inputs are not NULL
+        df <- df_custom$fullData
+        df <- type.convert(df, as.is = TRUE)
+        df[is.na(df)] <- 0
+        df <- df[is.finite(df[[input$xvrbl_custom]]),]
+        
+        # Apply log or sqrt transformation
+        if (input$LogX_custom == "ln") {
+          df[[input$xvrbl_custom]] <- log(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+        } else if (input$LogX_custom == "log2") {
+          df[[input$xvrbl_custom]] <- log2(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+        } else if (input$LogX_custom == "log10") {
+          df[[input$xvrbl_custom]] <- log10(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+        } else if (input$LogX_custom == "sqrt") {
+          df[[input$xvrbl_custom]] <- sqrt(ifelse(df[[input$xvrbl_custom]] < 0, 1e-10, df[[input$xvrbl_custom]]))
+        } else {
+          df[[input$xvrbl_custom]] <- df[[input$xvrbl_custom]]
+        }
+        
+        df <- df[is.finite(df[[input$xvrbl_custom]]),]
+        
+        xvrbl_values <- df[[input$xvrbl_custom]]
+        range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
+        min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
+        max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+        
+        
+        # Check if min_value and max_value are equal, set default values
+        if (min_value == max_value) {
+          min_value <- min_value - 1
+          max_value <- max_value + 1
+        }
+        
+        sliderInput(
+          inputId = "xvrbl_scale_custom",
+          label = "X Min/Max",
+          min = min_value,
+          max = max_value,
+          value = c(min_value, max_value),
+          step = 0.01,
+          dragRange = TRUE  # Allow users to drag the range handles 
+        )
+      })
+    }
   })
   
   output$yvrbl_custom <- renderUI({
@@ -2011,48 +2053,51 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$yvrbl_scale_custom <- renderUI({
-    withProgress(message = "Loading Scale", value = 0, {
-      req(input$yvrbl_custom)  # Use req() to check if inputs are not NULL
-      df <- df_custom$fullData
-      df <- type.convert(df, as.is = TRUE)
-      df[is.na(df)] <- 0
-      df <- df[is.finite(df[[input$yvrbl_custom]]),]
-      
-      # Apply log or sqrt transformation
-      if (input$LogY_custom == "ln") {
-        df[[input$yvrbl_custom]] <- log(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
-      } else if (input$LogY_custom == "log2") {
-        df[[input$yvrbl_custom]] <- log2(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
-      } else if (input$LogY_custom == "log10") {
-        df[[input$yvrbl_custom]] <- log10(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
-      } else if (input$LogY_custom == "sqrt") {
-        df[[input$yvrbl_custom]] <- sqrt(ifelse(df[[input$yvrbl_custom]] < 0, 1e-10, df[[input$yvrbl_custom]]))
-      } else {
-        df[[input$yvrbl_custom]] <- df[[input$yvrbl_custom]]
-      }
-      
-      df <- df[is.finite(df[[input$yvrbl_custom]]),]
-      yvrbl_values <- df[[input$yvrbl_custom]]
-      range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
-      min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-      max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
-      
-      # Check if min_value and max_value are equal, set default values
-      if (min_value == max_value) {
-        min_value <- min_value - 1
-        max_value <- max_value + 1
-      }
-      
-      sliderInput(
-        inputId = "yvrbl_scale_custom",
-        label = "Y Min/Max",
-        min = min_value,
-        max = max_value,
-        value = c(min_value, max_value),
-        step = 0.01,
-        dragRange = TRUE  # Allow users to drag the range handles 
-      )
-    })
+    if (!is.null(input$yvrbl_custom)) {
+          
+      withProgress(message = "Loading Scale", value = 0, {
+        req(input$yvrbl_custom)  # Use req() to check if inputs are not NULL
+        df <- df_custom$fullData
+        df <- type.convert(df, as.is = TRUE)
+        df[is.na(df)] <- 0
+        df <- df[is.finite(df[[input$yvrbl_custom]]),]
+        
+        # Apply log or sqrt transformation
+        if (input$LogY_custom == "ln") {
+          df[[input$yvrbl_custom]] <- log(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
+        } else if (input$LogY_custom == "log2") {
+          df[[input$yvrbl_custom]] <- log2(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
+        } else if (input$LogY_custom == "log10") {
+          df[[input$yvrbl_custom]] <- log10(ifelse(df[[input$yvrbl_custom]] == 0, 1e-10, df[[input$yvrbl_custom]]))
+        } else if (input$LogY_custom == "sqrt") {
+          df[[input$yvrbl_custom]] <- sqrt(ifelse(df[[input$yvrbl_custom]] < 0, 1e-10, df[[input$yvrbl_custom]]))
+        } else {
+          df[[input$yvrbl_custom]] <- df[[input$yvrbl_custom]]
+        }
+        
+        df <- df[is.finite(df[[input$yvrbl_custom]]),]
+        yvrbl_values <- df[[input$yvrbl_custom]]
+        range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
+        min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
+        max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+        
+        # Check if min_value and max_value are equal, set default values
+        if (min_value == max_value) {
+          min_value <- min_value - 1
+          max_value <- max_value + 1
+        }
+        
+        sliderInput(
+          inputId = "yvrbl_scale_custom",
+          label = "Y Min/Max",
+          min = min_value,
+          max = max_value,
+          value = c(min_value, max_value),
+          step = 0.01,
+          dragRange = TRUE  # Allow users to drag the range handles 
+        )
+      })
+    }
   })
   
   
@@ -2158,7 +2203,6 @@ server <- shinyServer(function(input, output, session) {
         p <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
           theme_void() + theme(legend.position = "none", panel.border = element_blank())
         incProgress(1)
-        print(p)
       }
     })
   })
