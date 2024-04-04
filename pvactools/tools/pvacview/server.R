@@ -1357,7 +1357,7 @@ server <- shinyServer(function(input, output, session) {
     mainTable_neofox = NULL
   )
   observeEvent(input$loadDefaultneofox, {
-    #session$sendCustomMessage("unbind-DT", "neofoxTable")
+    session$sendCustomMessage("unbind-DT", "mainTable_neofox")
     data_neofox <- "data/test_pt1_neoantigen_candidates_annotated.tsv"
     mainData_neofox <- read.table(data_neofox, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     colnames(mainData_neofox) <- mainData_neofox[1, ]
@@ -1405,13 +1405,14 @@ server <- shinyServer(function(input, output, session) {
     updateSliderInput(session,"xvrbl_scale", value = c(min_value, max_value))
   })
   
+  ##### Output table -- something in this is not working
   observeEvent(input$neofox_page_length, {
     if (is.null(df_neofox$mainTable_neofox)) {
       return()
     }
-    df$pageLength <- as.numeric(input$neofox_page_length)
+    df_neofox$pageLength <- as.numeric(input$neofox_page_length)
   })
-  
+
   output$neofoxTable <- DT::renderDataTable(
     if (is.null(df_neofox$mainTable_neofox)) {
       return(datatable(data.frame("Annotated Table" = character())))
@@ -1431,331 +1432,331 @@ server <- shinyServer(function(input, output, session) {
   })
   
   
-  # Drop down to select what features to show violin plots for
-  output$noefox_features_ui <- renderUI({
-    df <- df_neofox$mainTable_neofox
-    df <- type.convert(df, as.is = TRUE)
-    df[is.na(df)] <- 0
-    
-    features <- names(df)[sapply(df, is.numeric)]
-    sorted_features <- features[order(!grepl("^\\*", features))]
-    
-    
-    default_selection <- c("*IEDB_Immunogenicity_MHCI", "*IEDB_Immunogenicity_MHCII", "*PHBR_I",
-      "*MixMHCpred_bestScore_score", "*MixMHCpred_bestScore_rank", "*MixMHC2pred_bestRank_peptide")
-    
-    pickerInput(inputId = "neofox_features",
-                label = "Plots to Display",
-                choices = sorted_features,
-                selected = default_selection,
-                options = list(`live-search` = TRUE, "max-options" = 6),
-                multiple = TRUE
-                )
-  })
+  ##### Drop down to select what features to show violin plots for
+  # output$noefox_features_ui <- renderUI({
+  #   df <- df_neofox$mainTable_neofox
+  #   df <- type.convert(df, as.is = TRUE)
+  #   df[is.na(df)] <- 0
+  #   
+  #   features <- names(df)[sapply(df, is.numeric)]
+  #   sorted_features <- features[order(!grepl("^\\*", features))]
+  #   
+  #   
+  #   default_selection <- c("*IEDB_Immunogenicity_MHCI", "*IEDB_Immunogenicity_MHCII", "*PHBR_I",
+  #     "*MixMHCpred_bestScore_score", "*MixMHCpred_bestScore_rank", "*MixMHC2pred_bestRank_peptide")
+  #   
+  #   pickerInput(inputId = "neofox_features",
+  #               label = "Plots to Display",
+  #               choices = sorted_features,
+  #               selected = default_selection,
+  #               options = list(`live-search` = TRUE, "max-options" = 6),
+  #               multiple = TRUE
+  #               )
+  # })
   
   # Violin Plots
-  output$neofox_violin_plots_row1 <- renderPlot({
-    withProgress(message = "Loading Violin Plots", value = 0, {
-      if (length(input$neofoxTable_rows_selected) != 0 & length(input$neofox_features) != 0) {
-    
-        plot_cols_neofox <- c("mutatedXmer", input$neofox_features)
-        plot_data_neofox <- df_neofox$mainTable_neofox[, plot_cols_neofox]
-        plot_data_neofox <- type.convert(plot_data_neofox, as.is = TRUE)
-        plot_data_neofox[is.na(plot_data_neofox)] <- 0
-        
-        plot_data_neofox$Selected <- "No"
-        plot_data_neofox[input$neofoxTable_rows_selected, "Selected"] <- "Yes"
-        reformat_data_neofox <- plot_data_neofox %>%
-          gather("Feature", "Value", -c("mutatedXmer", "Selected"))
-        
-        
-        p_neofox <- ggplot(reformat_data_neofox, aes(x = "", y = Value)) + geom_violin() +
-           geom_jitter(data = reformat_data_neofox[reformat_data_neofox["Selected"] == "No", ], aes(color = Selected), size = 1, alpha = 0.5, stroke = 1, position = position_jitter(0.3)) +
-           geom_jitter(data = reformat_data_neofox[reformat_data_neofox["Selected"] == "Yes", ], aes(color = Selected), size = 2, alpha = 1, stroke = 1, position = position_jitter(0.3)) +
-           scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409")) +
-          labs(x = NULL) +
-          facet_wrap(~Feature, scales="free", ncol=6) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 10), axis.ticks = element_line(size = 3), legend.text = element_text(size = 10), legend.title = element_text(size = 10))
-
-        incProgress(0.5)
-        print(p_neofox)
-      }else {
-        p_neofox <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
-          theme_void() + theme(legend.position = "none", panel.border = element_blank())
-        incProgress(1)
-        print(p_neofox)
-      }
-    })
-  })
+  # output$neofox_violin_plots_row1 <- renderPlot({
+  #   withProgress(message = "Loading Violin Plots", value = 0, {
+  #     if (length(input$neofoxTable_rows_selected) != 0 & length(input$neofox_features) != 0) {
+  #   
+  #       plot_cols_neofox <- c("mutatedXmer", input$neofox_features)
+  #       plot_data_neofox <- df_neofox$mainTable_neofox[, plot_cols_neofox]
+  #       plot_data_neofox <- type.convert(plot_data_neofox, as.is = TRUE)
+  #       plot_data_neofox[is.na(plot_data_neofox)] <- 0
+  #       
+  #       plot_data_neofox$Selected <- "No"
+  #       plot_data_neofox[input$neofoxTable_rows_selected, "Selected"] <- "Yes"
+  #       reformat_data_neofox <- plot_data_neofox %>%
+  #         gather("Feature", "Value", -c("mutatedXmer", "Selected"))
+  #       
+  #       
+  #       p_neofox <- ggplot(reformat_data_neofox, aes(x = "", y = Value)) + geom_violin() +
+  #          geom_jitter(data = reformat_data_neofox[reformat_data_neofox["Selected"] == "No", ], aes(color = Selected), size = 1, alpha = 0.5, stroke = 1, position = position_jitter(0.3)) +
+  #          geom_jitter(data = reformat_data_neofox[reformat_data_neofox["Selected"] == "Yes", ], aes(color = Selected), size = 2, alpha = 1, stroke = 1, position = position_jitter(0.3)) +
+  #          scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409")) +
+  #         labs(x = NULL) +
+  #         facet_wrap(~Feature, scales="free", ncol=6) +
+  #         theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 10), axis.ticks = element_line(size = 3), legend.text = element_text(size = 10), legend.title = element_text(size = 10))
+  # 
+  #       incProgress(0.5)
+  #       print(p_neofox)
+  #     }else {
+  #       p_neofox <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
+  #         theme_void() + theme(legend.position = "none", panel.border = element_blank())
+  #       incProgress(1)
+  #       print(p_neofox)
+  #     }
+  #   })
+  # })
   
   
   # Dynamic scatter plot
-  output$xvrbl <- renderUI({
-    df <- df_neofox$mainTable_neofox
-    df <- type.convert(df, as.is = TRUE)
-    df[is.na(df)] <- 0
-    
-    features <- names(df)[sapply(df, is.numeric)]
-    sorted_features <- features[order(!grepl("^\\*", features))]
-    
-    default_selection <- "*NetMHCpan_bestAffinity_affinity"
-    
-    pickerInput(inputId = "xvrbl",
-                label = "X-Axis Variable",
-                choices = sorted_features,
-                selected = default_selection,
-                options = list(`live-search` = TRUE),
-                multiple = FALSE
-    )
-  })
-  
-  output$xvrbl_log <- renderUI({
-    radioButtons(
-      inputId = "LogX",
-      choices = c("none", "ln", "log2", "log10", "sqrt"),
-      label = "Transform",
-      inline = TRUE
-      )
-  })
-  
-  output$yvrbl <- renderUI({
-    df <- df_neofox$mainTable_neofox
-    df <- type.convert(df, as.is = TRUE)
-    df[is.na(df)] <- 0
-    
-    features <- names(df)[sapply(df, is.numeric)]
-    sorted_features <- features[order(!grepl("^\\*", features))]
-    default_selection <- "*NetMHCpan_bestAffinity_affinityWT"
-    
-    pickerInput(inputId = "yvrbl",
-                label = "Y-Axis Variable",
-                choices = sorted_features,
-                selected = default_selection,
-                options = list(`live-search` = TRUE),
-                multiple = FALSE
-    )
-  })
-  
-  output$yvrbl_log <- renderUI({
-    radioButtons(
-      inputId = "LogY",
-      choices = c("none", "ln", "log2", "log10", "sqrt"),
-      label = "Transform",
-      inline = TRUE
-    )
-  })
-  
-  output$xvrbl_scale <- renderUI({
-    withProgress(message = "Loading Scale", value = 0, {
-      req(input$xvrbl, input$LogX)  # Use req() to check if inputs are not NULL
-          df <- df_neofox$mainTable_neofox
-          df <- type.convert(df, as.is = TRUE)
-          df[is.na(df)] <- 0
-          df <- df[is.finite(df[[input$xvrbl]]),]
-          
-          # Apply log or sqrt transformation
-          if (input$LogX == "ln") {
-            df[[input$xvrbl]] <- log(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
-          } else if (input$LogX == "log2") {
-            df[[input$xvrbl]] <- log2(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
-          } else if (input$LogX == "log10") {
-            df[[input$xvrbl]] <- log10(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
-          } else if (input$LogX == "sqrt") {
-            df[[input$xvrbl]] <- sqrt(ifelse(df[[input$xvrbl]] < 0, 1e-10, df[[input$xvrbl]]))
-          } else {
-            df[[input$xvrbl]] <- df[[input$xvrbl]]
-          }
-          
-          df <- df[is.finite(df[[input$xvrbl]]),]
-          
-          xvrbl_values <- df[[input$xvrbl]]
-          range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
-          min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-          max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
-          
-      
-          # Check if min_value and max_value are equal, set default values
-          if (min_value == max_value) {
-            min_value <- min_value - 1
-            max_value <- max_value + 1
-          }
-          
-          sliderInput(
-            inputId = "xvrbl_scale",
-            label = "Min/Max",
-            min = min_value,
-            max = max_value,
-            value = c(min_value, max_value),
-            step = 0.01,
-            dragRange = TRUE  # Allow users to drag the range handles 
-            )
-    })
-  })
-  
-  output$yvrbl_scale <- renderUI({
-    withProgress(message = "Loading Scale", value = 0, {
-      req(input$yvrbl)  # Use req() to check if inputs are not NULL
-        df <- df_neofox$mainTable_neofox
-        df <- type.convert(df, as.is = TRUE)
-        df[is.na(df)] <- 0
-        df <- df[is.finite(df[[input$yvrbl]]),]
-        
-        # Apply log or sqrt transformation
-        if (input$LogY == "ln") {
-          df[[input$yvrbl]] <- log(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
-        } else if (input$LogY == "log2") {
-          df[[input$yvrbl]] <- log2(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
-        } else if (input$LogY == "log10") {
-          df[[input$yvrbl]] <- log10(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
-        } else if (input$LogY == "sqrt") {
-          df[[input$yvrbl]] <- sqrt(ifelse(df[[input$yvrbl]] < 0, 1e-10, df[[input$yvrbl]]))
-        } else {
-          df[[input$yvrbl]] <- df[[input$yvrbl]]
-        }
-        
-        
-        df <- df[is.finite(df[[input$yvrbl]]),]
-        
-        yvrbl_values <- df[[input$yvrbl]]
-        range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
-        min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-        max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
-        
-        
-        # Check if min_value and max_value are equal, set default values
-        if (min_value == max_value) {
-          min_value <- min_value - 1
-          max_value <- max_value + 1
-        }
-        
-        
-        sliderInput(
-          inputId = "yvrbl_scale",
-          label = "Min/Max",
-          min = min_value,
-          max = max_value,
-          value = c(min_value, max_value),
-          step = 0.01,
-          dragRange = TRUE  # Allow users to drag the range handles 
-        )
-    })
-  })
-  
-  output$color_noefox <- renderUI({
-    df <- df_neofox$mainTable_neofox
-    df <- type.convert(df, as.is = TRUE)
-    df[is.na(df)] <- 0
-    
-    features <- names(df)[sapply(df, is.numeric)]
-    sorted_features <- features[order(!grepl("^\\*", features))]
-    
-    default_selection <- "*Tcell_predictor"
-    pickerInput(inputId = "color_scatter",
-                label = "Color",
-                choices = sorted_features,
-                selected = default_selection,
-                options = list(`live-search` = TRUE),
-                multiple = FALSE
-    )
-  })
-  
-  output$size_neofox <- renderUI({
-    df <- df_neofox$mainTable_neofox
-    df <- type.convert(df, as.is = TRUE)
-    df[is.na(df)] <- 0
-    
-    features <- names(df)[sapply(df, is.numeric)]
-    sorted_features <- features[order(!grepl("^\\*", features))]
-    
-    default_selection <- "*rnaExpression"
-    pickerInput(inputId = "size_scatter",
-                label = "Size",
-                choices = sorted_features,
-                selected = default_selection,
-                options = list(`live-search` = TRUE),
-                multiple = FALSE
-    )
-  })
-  
-  output$min_color <- renderUI({
-    colourInput("min_col", "Select min color", "#434c4c")
-  })
-  
-  output$max_color <- renderUI({
-    colourInput("max_col", "Select max color", "#14c4c4")
-  })
-  
-  output$scatter <- renderPlotly({
-    withProgress(message = "Loading Scatter Plots", value = 0, {
-      incProgress(0.5)
-      if (!is.null(input$xvrbl) & !(is.null(input$yvrbl))) {
-        df <- df_neofox$mainTable_neofox
-        df <- type.convert(df, as.is = TRUE)
-        df[is.na(df)] <- 0
-  
-  
-        # For input$xvrbl
-        if (input$LogX == "ln") {
-          df[[input$xvrbl]] <- log(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
-        } else if (input$LogX == "log2") {
-          df[[input$xvrbl]] <- log2(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
-        } else if (input$LogX == "log10") {
-          df[[input$xvrbl]] <- log10(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
-        } else if (input$LogX == "sqrt") {
-          df[[input$xvrbl]] <- sqrt(ifelse(df[[input$xvrbl]] < 0, 1e-10, df[[input$xvrbl]]))
-        } else {
-          df[[input$xvrbl]] <- df[[input$xvrbl]]
-        }
-        
-        # For input$yvrbl
-        if (input$LogY == "ln") {
-          df[[input$yvrbl]] <- log(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
-        } else if (input$LogY == "log2") {
-          df[[input$yvrbl]] <- log2(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
-        } else if (input$LogY == "log10") {
-          df[[input$yvrbl]] <- log10(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
-        } else if (input$LogY == "sqrt") {
-          df[[input$yvrbl]] <- sqrt(ifelse(df[[input$yvrbl]] < 0, 1e-10, df[[input$yvrbl]]))
-        } else {
-          df[[input$yvrbl]] <- df[[input$yvrbl]]
-        }
-        
-        
-        df[is.na(df)] <- 0
-        
-        # Filter data based on the slider range
-        df <- subset(df, df[[input$xvrbl]] >= input$xvrbl_scale[1] & df[[input$xvrbl]] <= input$xvrbl_scale[2])
-        df <- subset(df, df[[input$yvrbl]] >= input$yvrbl_scale[1] & df[[input$yvrbl]] <= input$yvrbl_scale[2])
-        
-        
-        incProgress(0.5)
-  
-        scatter_plot <- ggplot(df , aes(x = .data[[input$xvrbl]], y = .data[[input$yvrbl]],
-                                        text = paste("Patient:", .data[["patientIdentifier"]], "<br>",
-                                                     "Gene:", .data[["gene"]]))) +
-          geom_point(aes(color = .data[[input$color_scatter]], size = .data[[input$size_scatter]])) +  # Correct placement of aes() here
-          scale_color_gradient(low = input$min_col, high = input$max_col) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
-  
-        scatter_plot <- ggplotly(scatter_plot)
-        
-        print(scatter_plot)
-        } 
-        else {
-        p <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
-          theme_void() + theme(legend.position = "none", panel.border = element_blank())
-        scatter_plot <- ggplotly(p)
-        incProgress(1)
-        print(scatter_plot)
-      }
-    })
-  })
+  # output$xvrbl <- renderUI({
+  #   df <- df_neofox$mainTable_neofox
+  #   df <- type.convert(df, as.is = TRUE)
+  #   df[is.na(df)] <- 0
+  #   
+  #   features <- names(df)[sapply(df, is.numeric)]
+  #   sorted_features <- features[order(!grepl("^\\*", features))]
+  #   
+  #   default_selection <- "*NetMHCpan_bestAffinity_affinity"
+  #   
+  #   pickerInput(inputId = "xvrbl",
+  #               label = "X-Axis Variable",
+  #               choices = sorted_features,
+  #               selected = default_selection,
+  #               options = list(`live-search` = TRUE),
+  #               multiple = FALSE
+  #   )
+  # })
+  # 
+  # output$xvrbl_log <- renderUI({
+  #   radioButtons(
+  #     inputId = "LogX",
+  #     choices = c("none", "ln", "log2", "log10", "sqrt"),
+  #     label = "Transform",
+  #     inline = TRUE
+  #     )
+  # })
+  # 
+  # output$yvrbl <- renderUI({
+  #   df <- df_neofox$mainTable_neofox
+  #   df <- type.convert(df, as.is = TRUE)
+  #   df[is.na(df)] <- 0
+  #   
+  #   features <- names(df)[sapply(df, is.numeric)]
+  #   sorted_features <- features[order(!grepl("^\\*", features))]
+  #   default_selection <- "*NetMHCpan_bestAffinity_affinityWT"
+  #   
+  #   pickerInput(inputId = "yvrbl",
+  #               label = "Y-Axis Variable",
+  #               choices = sorted_features,
+  #               selected = default_selection,
+  #               options = list(`live-search` = TRUE),
+  #               multiple = FALSE
+  #   )
+  # })
+  # 
+  # output$yvrbl_log <- renderUI({
+  #   radioButtons(
+  #     inputId = "LogY",
+  #     choices = c("none", "ln", "log2", "log10", "sqrt"),
+  #     label = "Transform",
+  #     inline = TRUE
+  #   )
+  # })
+  # 
+  # output$xvrbl_scale <- renderUI({
+  #   withProgress(message = "Loading Scale", value = 0, {
+  #     req(input$xvrbl, input$LogX)  # Use req() to check if inputs are not NULL
+  #         df <- df_neofox$mainTable_neofox
+  #         df <- type.convert(df, as.is = TRUE)
+  #         df[is.na(df)] <- 0
+  #         df <- df[is.finite(df[[input$xvrbl]]),]
+  #         
+  #         # Apply log or sqrt transformation
+  #         if (input$LogX == "ln") {
+  #           df[[input$xvrbl]] <- log(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+  #         } else if (input$LogX == "log2") {
+  #           df[[input$xvrbl]] <- log2(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+  #         } else if (input$LogX == "log10") {
+  #           df[[input$xvrbl]] <- log10(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+  #         } else if (input$LogX == "sqrt") {
+  #           df[[input$xvrbl]] <- sqrt(ifelse(df[[input$xvrbl]] < 0, 1e-10, df[[input$xvrbl]]))
+  #         } else {
+  #           df[[input$xvrbl]] <- df[[input$xvrbl]]
+  #         }
+  #         
+  #         df <- df[is.finite(df[[input$xvrbl]]),]
+  #         
+  #         xvrbl_values <- df[[input$xvrbl]]
+  #         range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
+  #         min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
+  #         max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+  #         
+  #     
+  #         # Check if min_value and max_value are equal, set default values
+  #         if (min_value == max_value) {
+  #           min_value <- min_value - 1
+  #           max_value <- max_value + 1
+  #         }
+  #         
+  #         sliderInput(
+  #           inputId = "xvrbl_scale",
+  #           label = "Min/Max",
+  #           min = min_value,
+  #           max = max_value,
+  #           value = c(min_value, max_value),
+  #           step = 0.01,
+  #           dragRange = TRUE  # Allow users to drag the range handles 
+  #           )
+  #   })
+  # })
+  # 
+  # output$yvrbl_scale <- renderUI({
+  #   withProgress(message = "Loading Scale", value = 0, {
+  #     req(input$yvrbl)  # Use req() to check if inputs are not NULL
+  #       df <- df_neofox$mainTable_neofox
+  #       df <- type.convert(df, as.is = TRUE)
+  #       df[is.na(df)] <- 0
+  #       df <- df[is.finite(df[[input$yvrbl]]),]
+  #       
+  #       # Apply log or sqrt transformation
+  #       if (input$LogY == "ln") {
+  #         df[[input$yvrbl]] <- log(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+  #       } else if (input$LogY == "log2") {
+  #         df[[input$yvrbl]] <- log2(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+  #       } else if (input$LogY == "log10") {
+  #         df[[input$yvrbl]] <- log10(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+  #       } else if (input$LogY == "sqrt") {
+  #         df[[input$yvrbl]] <- sqrt(ifelse(df[[input$yvrbl]] < 0, 1e-10, df[[input$yvrbl]]))
+  #       } else {
+  #         df[[input$yvrbl]] <- df[[input$yvrbl]]
+  #       }
+  #       
+  #       
+  #       df <- df[is.finite(df[[input$yvrbl]]),]
+  #       
+  #       yvrbl_values <- df[[input$yvrbl]]
+  #       range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
+  #       min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
+  #       max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+  #       
+  #       
+  #       # Check if min_value and max_value are equal, set default values
+  #       if (min_value == max_value) {
+  #         min_value <- min_value - 1
+  #         max_value <- max_value + 1
+  #       }
+  #       
+  #       
+  #       sliderInput(
+  #         inputId = "yvrbl_scale",
+  #         label = "Min/Max",
+  #         min = min_value,
+  #         max = max_value,
+  #         value = c(min_value, max_value),
+  #         step = 0.01,
+  #         dragRange = TRUE  # Allow users to drag the range handles 
+  #       )
+  #   })
+  # })
+  # 
+  # output$color_noefox <- renderUI({
+  #   df <- df_neofox$mainTable_neofox
+  #   df <- type.convert(df, as.is = TRUE)
+  #   df[is.na(df)] <- 0
+  #   
+  #   features <- names(df)[sapply(df, is.numeric)]
+  #   sorted_features <- features[order(!grepl("^\\*", features))]
+  #   
+  #   default_selection <- "*Tcell_predictor"
+  #   pickerInput(inputId = "color_scatter",
+  #               label = "Color",
+  #               choices = sorted_features,
+  #               selected = default_selection,
+  #               options = list(`live-search` = TRUE),
+  #               multiple = FALSE
+  #   )
+  # })
+  # 
+  # output$size_neofox <- renderUI({
+  #   df <- df_neofox$mainTable_neofox
+  #   df <- type.convert(df, as.is = TRUE)
+  #   df[is.na(df)] <- 0
+  #   
+  #   features <- names(df)[sapply(df, is.numeric)]
+  #   sorted_features <- features[order(!grepl("^\\*", features))]
+  #   
+  #   default_selection <- "*rnaExpression"
+  #   pickerInput(inputId = "size_scatter",
+  #               label = "Size",
+  #               choices = sorted_features,
+  #               selected = default_selection,
+  #               options = list(`live-search` = TRUE),
+  #               multiple = FALSE
+  #   )
+  # })
+  # 
+  # output$min_color <- renderUI({
+  #   colourInput("min_col", "Select min color", "#434c4c")
+  # })
+  # 
+  # output$max_color <- renderUI({
+  #   colourInput("max_col", "Select max color", "#14c4c4")
+  # })
+  # 
+  # output$scatter <- renderPlotly({
+  #   withProgress(message = "Loading Scatter Plots", value = 0, {
+  #     incProgress(0.5)
+  #     if (!is.null(input$xvrbl) & !(is.null(input$yvrbl))) {
+  #       df <- df_neofox$mainTable_neofox
+  #       df <- type.convert(df, as.is = TRUE)
+  #       df[is.na(df)] <- 0
+  # 
+  # 
+  #       # For input$xvrbl
+  #       if (input$LogX == "ln") {
+  #         df[[input$xvrbl]] <- log(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+  #       } else if (input$LogX == "log2") {
+  #         df[[input$xvrbl]] <- log2(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+  #       } else if (input$LogX == "log10") {
+  #         df[[input$xvrbl]] <- log10(ifelse(df[[input$xvrbl]] == 0, 1e-10, df[[input$xvrbl]]))
+  #       } else if (input$LogX == "sqrt") {
+  #         df[[input$xvrbl]] <- sqrt(ifelse(df[[input$xvrbl]] < 0, 1e-10, df[[input$xvrbl]]))
+  #       } else {
+  #         df[[input$xvrbl]] <- df[[input$xvrbl]]
+  #       }
+  #       
+  #       # For input$yvrbl
+  #       if (input$LogY == "ln") {
+  #         df[[input$yvrbl]] <- log(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+  #       } else if (input$LogY == "log2") {
+  #         df[[input$yvrbl]] <- log2(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+  #       } else if (input$LogY == "log10") {
+  #         df[[input$yvrbl]] <- log10(ifelse(df[[input$yvrbl]] == 0, 1e-10, df[[input$yvrbl]]))
+  #       } else if (input$LogY == "sqrt") {
+  #         df[[input$yvrbl]] <- sqrt(ifelse(df[[input$yvrbl]] < 0, 1e-10, df[[input$yvrbl]]))
+  #       } else {
+  #         df[[input$yvrbl]] <- df[[input$yvrbl]]
+  #       }
+  #       
+  #       
+  #       df[is.na(df)] <- 0
+  #       
+  #       # Filter data based on the slider range
+  #       df <- subset(df, df[[input$xvrbl]] >= input$xvrbl_scale[1] & df[[input$xvrbl]] <= input$xvrbl_scale[2])
+  #       df <- subset(df, df[[input$yvrbl]] >= input$yvrbl_scale[1] & df[[input$yvrbl]] <= input$yvrbl_scale[2])
+  #       
+  #       
+  #       incProgress(0.5)
+  # 
+  #       scatter_plot <- ggplot(df , aes(x = .data[[input$xvrbl]], y = .data[[input$yvrbl]],
+  #                                       text = paste("Patient:", .data[["patientIdentifier"]], "<br>",
+  #                                                    "Gene:", .data[["gene"]]))) +
+  #         geom_point(aes(color = .data[[input$color_scatter]], size = .data[[input$size_scatter]])) +  # Correct placement of aes() here
+  #         scale_color_gradient(low = input$min_col, high = input$max_col) +
+  #         theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+  # 
+  #       scatter_plot <- ggplotly(scatter_plot)
+  #       
+  #       print(scatter_plot)
+  #       } 
+  #       else {
+  #       p <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
+  #         theme_void() + theme(legend.position = "none", panel.border = element_blank())
+  #       scatter_plot <- ggplotly(p)
+  #       incProgress(1)
+  #       print(scatter_plot)
+  #     }
+  #   })
+  # })
 
   ############### Custom Tab ##########################
   df_custom <- reactiveValues(
     selectedRow = 1,
     fullData = NULL,
-    mainTable = NULL,
+    mainTable_custom = NULL,
     group_inds = NULL,
     metricsData = NULL,
     pageLength = 10,
@@ -1765,55 +1766,55 @@ server <- shinyServer(function(input, output, session) {
   )
   observeEvent(input$loadDefault_Vaxrank, {
     data <- "data/vaxrank_output.tsv"
-    mainData <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    colnames(mainData) <- mainData[1, ]
-    mainData <- mainData[-1, ]
-    row.names(mainData) <- NULL
-    mainData <- type.convert(mainData, as.is = TRUE)
-    mainData[is.na(mainData)] <- 0
-    df_custom$fullData <- mainData
+    mainData_custom <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData_custom) <- mainData_custom[1, ]
+    mainData_custom <- mainData_custom[-1, ]
+    row.names(mainData_custom) <- NULL
+    mainData_custom <- type.convert(mainData_custom, as.is = TRUE)
+    mainData_custom[is.na(mainData_custom)] <- 0
+    df_custom$fullData <- mainData_custom
   })
   observeEvent(input$loadDefault_Neopredpipe, {
     data <- "data/HCC1395Run.neoantigens.txt"
-    mainData <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    colnames(mainData) <- mainData[1, ]
-    mainData <- mainData[-1, ]
-    row.names(mainData) <- NULL
-    mainData <- type.convert(mainData, as.is = TRUE)
-    mainData[is.na(mainData)] <- 0
-    df_custom$fullData <- mainData
+    mainData_custom <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData_custom) <- mainData_custom[1, ]
+    mainData_custom <- mainData_custom[-1, ]
+    row.names(mainData_custom) <- NULL
+    mainData__custom <- type.convert(mainData_custom, as.is = TRUE)
+    mainData_custom[is.na(mainData_custom)] <- 0
+    df_custom$fullData <- mainData_custom
   })
   observeEvent(input$loadDefault_antigengarnish, {
     data <- "data/ag_test_antigen.tsv"
-    mainData <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    colnames(mainData) <- mainData[1, ]
-    mainData <- mainData[-1, ]
-    row.names(mainData) <- NULL
-    mainData <- type.convert(mainData, as.is = TRUE)
-    mainData[is.na(mainData)] <- 0
-    df_custom$fullData <- mainData
+    mainData_custom <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData_custom) <- mainData_custom[1, ]
+    mainData_custom <- mainData_custom[-1, ]
+    row.names(mainData_custom) <- NULL
+    mainData_custom <- type.convert(mainData_custom, as.is = TRUE)
+    mainData_custom[is.na(mainData_custom)] <- 0
+    df_custom$fullData <- mainData_custom
   })
   output$custom_upload_ui <- renderUI({
     fileInput(inputId = "custom_data", label = "Custom input table (tsv required)",
               accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
   })
   observeEvent(input$custom_data$datapath, {
-    mainData <- read.table(input$custom_data$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    colnames(mainData) <- mainData[1, ]
-    mainData <- mainData[-1, ]
-    row.names(mainData) <- NULL
-    mainData <- type.convert(mainData, as.is = TRUE)
-    mainData[is.na(mainData)] <- 0
-    df_custom$fullData <- mainData
+    mainData_custom <- read.table(input$custom_data$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData_custom) <- mainDat_custom[1, ]
+    mainData_custom <- mainData_custom[-1, ]
+    row.names(mainData_custom) <- NULL
+    mainData_custom <- type.convert(mainData_custom, as.is = TRUE)
+    mainData_custom[is.na(mainData_custom)] <- 0
+    df_custom$fullData <- mainData_custom
   })
   
   # group peptides by
   output$custom_group_by_feature_ui <- renderUI({
-    df <- df_custom$fullData
-    df <- type.convert(df, as.is = TRUE)
-    df[is.na(df)] <- 0
+    #df <- df_custom$fullData
+    #df <- type.convert(df, as.is = TRUE)
+    #df[is.na(df)] <- 0
     
-    features <- as.list(names(df))
+    features <- as.list(names(df_custom$fullData))
     default_selection <- ifelse(length(features) >= 1, features[[1]], "")
     
     pickerInput(inputId = "feature_1",
@@ -1827,11 +1828,11 @@ server <- shinyServer(function(input, output, session) {
   # Sort peptides by
   # Render the UI for selecting the feature
   output$custom_order_by_feature_ui <- renderUI({
-    df <- df_custom$fullData
-    df <- type.convert(df, as.is = TRUE)
-    df[is.na(df)] <- 0
+    #df <- df_custom$fullData
+    #df <- type.convert(df, as.is = TRUE)
+    #df[is.na(df)] <- 0
     
-    features <- names(df)[sapply(df, is.numeric)]
+    features <- names(df_custom$fullData)[sapply(df_custom$fullData, is.numeric)]
     default_selection <- ifelse(length(features) >= 2, features[[2]], "")
     
     pickerInput(inputId = "feature_2",
@@ -1861,11 +1862,11 @@ server <- shinyServer(function(input, output, session) {
 
   # features to display 
   output$custom_peptide_features_ui <- renderUI({
-    df <- df_custom$fullData
-    df <- type.convert(df, as.is = TRUE)
-    df[is.na(df)] <- 0
+    #df <- df_custom$fullData
+    #df <- type.convert(df, as.is = TRUE)
+    #df[is.na(df)] <- 0
     
-    features <- as.list(names(df))
+    features <- as.list(names(df_custom$fullData))
     default_selection <- features
     
     pickerInput(inputId = "peptide_features",
@@ -1890,8 +1891,8 @@ server <- shinyServer(function(input, output, session) {
     row_ind_df <- as.data.frame(row_ind)
     df_custom$group_inds <- row_ind_df
     row_ind_top <- apply(row_ind_df, 1, function(x) {unlist(x[1])[1]})
-    df_custom$mainTable <- as.data.frame(reformat_data[row_ind_top, ])
-    df_custom$mainTable <- cbind(Select = shinyInputSelect(actionButton, nrow(df_custom$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"custom_select_button\",  this.id)'), df_custom$mainTable)
+    df_custom$mainTable_custom <- as.data.frame(reformat_data[row_ind_top, ])
+    df_custom$mainTable_custom <- cbind(Select = shinyInputSelect(actionButton, nrow(df_custom$mainTable_custom), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"custom_select_button\",  this.id)'), df_custom$mainTable_custom)
     df_custom$metricsData <- get_group_inds(df_custom$fullData, df_custom$group_inds)
     df_custom$peptide_features <- input$peptide_features
     updateTabItems(session, "custom_tabs", "custom_explore")
@@ -1901,10 +1902,10 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$customTable <- DT::renderDataTable(
-    if (is.null(df_custom$mainTable)) {
+    if (is.null(df_custom$mainTable_custom)) {
       return(datatable(data.frame("Annotated Table" = character())))
     }else {
-      datatable(df_custom$mainTable,
+      datatable(df_custom$mainTable_custom,
                 escape = FALSE, class = "stripe",
                 selection = "single",
                 extensions = c("Buttons")
@@ -1914,7 +1915,7 @@ server <- shinyServer(function(input, output, session) {
   
 
   observeEvent(input$custom_select_button, {
-    if (is.null(df_custom$mainTable) | is.null(df_custom$selectedRow)){
+    if (is.null(df_custom$mainTable_custom) | is.null(df_custom$selectedRow)){
       return ()
     }
     #browser()
@@ -1929,19 +1930,19 @@ server <- shinyServer(function(input, output, session) {
     withProgress(message = 'Loading Peptide Table', value = 0, {
       incProgress(0.5)
       #browser()
-      if (!is.null(df_custom$selectedRow) & !(is.null(df_custom$mainTable)) & !is.null(df_custom$peptide_features)){
+      if (!is.null(df_custom$selectedRow) & !(is.null(df_custom$mainTable_custom)) & !is.null(df_custom$peptide_features)){
     
         
         display_table <- get_current_group_info(df_custom$peptide_features, df_custom$metricsData, df_custom$fullData, df_custom$selectedRow)
         incProgress(0.5)
-        dtable <- datatable(display_table, options =list(
+        dtable_custom <- datatable(display_table, options =list(
           pageLength = 10,
           rowCallback = JS('function(row, data, index, rowId) {',
                            'console.log(rowId)','if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {',
                            'row.style.backgroundColor = "#E0E0E0";','}','}'
                            )
         ), selection = list(mode='single', selected = '1')) 
-        dtable
+        dtable_custom
       }
       else{
         incProgress(1)
@@ -1952,11 +1953,11 @@ server <- shinyServer(function(input, output, session) {
   
   # Dynamic Scatter Plot 
   output$xvrbl_custom <- renderUI({
-    df <- df_custom$fullData
-    df <- type.convert(df, as.is = TRUE)
-    df[is.na(df)] <- 0
+    #df_custom <- df_custom$fullData
+    #df_custom <- type.convert(df_custom, as.is = TRUE)
+    #df[is.na(df)] <- 0
     
-    features <- as.list(names(df)[sapply(df, is.numeric)])
+    features <- as.list(names(df_custom$fullData)[sapply(df_custom$fullData, is.numeric)])
     default_selection <- ifelse(length(features) >= 1, features[[1]], "")
     
     pickerInput(inputId = "xvrbl_custom",
@@ -2197,10 +2198,10 @@ server <- shinyServer(function(input, output, session) {
         
         scatter_plot <- ggplotly(scatter_plot)
         
-        print(scatter_plot)
+        #print(scatter_plot)
       } 
       else {
-        p <- ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
+          ggplot() + annotate(geom = "text", x = 10, y = 20, label = "No data available", size = 6) +
           theme_void() + theme(legend.position = "none", panel.border = element_blank())
         incProgress(1)
       }
