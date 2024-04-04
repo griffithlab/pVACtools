@@ -27,7 +27,7 @@ will allow you to explore candidates that are simliar to one another in a separa
 to mimic the pVACseq Module grouping you could select to group by variant. The order of the candidates
 in each grouping is determined by the numeric feature you choose to sort by. Canidates within the pVACseq Module
 are sorted by best binders. Finally, you can select what features to display for each group of peptides,
-the defualt selection is all features. 
+the default selection is all features. 
 
 .. figure:: ../../images/screenshots/pvacview-custom-upload-vaxrank.png
     :width: 1000px

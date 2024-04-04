@@ -75,7 +75,7 @@ To investigate different candidates simple click one row (or mutiple) from the A
     :alt: pVACview Upload
     :figclass: align-left
 
-You can explore all candidates together using the synamic scatter plot. To identify a candidates of interest from the scatter plot, simple curse-over the point of interest for the specific information about that candidate to be shown.
+You can explore all candidates together using the dynamic scatter plot. To identify a candidates of interest from the scatter plot, simple curse-over the point of interest for the specific information about that candidate to be shown.
 
 .. figure:: ../../images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png
     :width: 1000px
