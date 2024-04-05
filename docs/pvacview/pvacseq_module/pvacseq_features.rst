@@ -150,9 +150,9 @@ There are five different tabs in this section of the app, providing peptide-leve
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_1.png
       :width: 1000px
-      :align: left
+      :align: center
       :alt: pVACview Upload
-      :figclass: align-left
+      
 
 
 - :bold:`%ile Plot:`
@@ -161,9 +161,9 @@ There are five different tabs in this section of the app, providing peptide-leve
   These peptides each have up to 8 binding algorithm scores for Class I alleles or up to 4 algorithm scores for Class II alleles.
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_2.png
-          :width: 1000px
-          :align: left
-          :figclass: align-left
+      :width: 1000px
+      :align: center
+ 
 
 - :bold:`Binding Data:`
 
@@ -171,9 +171,9 @@ There are five different tabs in this section of the app, providing peptide-leve
   This data is specific to the MT/WT peptide pair selected in the peptide table.
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_3.png
-              :width: 1000px
-              :align: left
-              :figclass: align-left
+      :width: 1000px
+      :align: center
+              
 
 - :bold:`Elution Data:`
 
@@ -181,20 +181,20 @@ There are five different tabs in this section of the app, providing peptide-leve
   This data is specific to the MT/WT peptide pair selected in the peptide table.
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_4.png
-              :width: 1000px
-              :align: left
-              :figclass: align-left
+      :width: 1000px
+      :align: center
+     
 
 - :bold:`Allele-specific anchor prediction heatmap:`
 
   Previously, our lab has computationally predicted anchor positions for different hla alleles and peptide length combinations
-  (`"Accurate neoantigen prediction depends on mutation position relative to patient allele-specific MHC anchor location" <https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1>`_).
+  (`"Computational prediction of MHC anchor locations guides neoantigen identification and prioritization" <https://www.science.org/doi/10.1126/sciimmunol.abg2200?url_ver=Z39.88-2003&rfr_id=ori:rid:crossref.org&rfr_dat=cr_pub%20%200pubmed>`_).
   These predictions are normalized probabilities representing the likelihood of each position of the peptide to participate in anchoring to the hla allele.
   Top 30 MT/WT peptide pairs from the peptide table are shown in this tab with anchor probabilities overlaying as a heatmap. These anchor probabilities shown are both allele and peptide length specific.
   The mutated amino acid(s) is/are marked in red (or the flanking ones are, in the case of deletions) and each MT/WT pair are separated from others using a dotted line.
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_5.png
-              :width: 1000px
-              :align: left
-              :figclass: align-left
+      :width: 1000px
+      :align: center
+
 
