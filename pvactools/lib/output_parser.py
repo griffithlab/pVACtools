@@ -329,6 +329,7 @@ class OutputParser(metaclass=ABCMeta):
             result['wt_epitope_position'] = int(baseline_best_match_position)
             result['mutation_position']   = 'NA'
             result['match_direction']     = 'left'
+            return
 
         #If there is no previous result or the previous WT epitope was matched "from the left" we start by comparing to the baseline match
         if previous_result is None or previous_result['match_direction'] == 'left':

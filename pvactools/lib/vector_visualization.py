@@ -1,6 +1,7 @@
 import turtle
 import os
 import sys
+import math
 from PIL import Image
 
 class VectorVisualization:
@@ -228,11 +229,16 @@ class VectorVisualization:
     #print turtle screen to a postscript file, convert to pdf
     def output_screen(self):
         ps_file = os.path.join(self.output_directory, "vector.ps")
-        out_file = os.path.join(self.output_directory, "vector.jpg")
+        out_file = os.path.join(self.output_directory, "vector.png")
         ts = self.turtle.getscreen()
         ts.getcanvas().postscript(file=ps_file)
-        with Image.open(ps_file) as img:
-            img.save(out_file)
+        with Image.open(ps_file, formats=["EPS"]) as img:
+            original = [float(d) for d in img.size]
+            dpi = 300
+            scale = dpi / 72.0
+            img.load(scale = math.ceil(scale))
+            img.thumbnail([round(scale * d) for d in original], Image.Resampling.LANCZOS)
+            img.save(out_file, dpi=(300.0, 300.0))
         os.remove(ps_file)
 
     #select color from scheme
