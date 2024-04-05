@@ -20,12 +20,11 @@ ____________________________
 First, navigate to the Upload page, and click on ``Load demo data``.
 This will immediately load:
 
-- A tsv of Class I data
+- A tsv of Class I data: a high level aggregated file that lists all MHC-class-I predicted epitopes, their binding affinity scores, and additional variant information (the coordinate, coverage, vaf, and expression of the variants and transcripts encoding the epitopes).
 - A json file of Class I data
-- An additional tsv for Class II data
-- A list of genes of interest (cancer census hotspot gene list tsv)
+- A tsv for Class II data: an aggregated file that lists all MHC-class-II predicted epitopes. 
+- A list of genes of interest: in this example, it's a tsv of the cancer census hotspot gene list from COSMIC. 
 
-and take you to the 'Visualize and Explore' page. 
 
 .. figure:: ../../images/screenshots/vignette/pvacview-loadDemoDataset.png
     :width: 1000px
@@ -44,25 +43,49 @@ You will next be taken to a view similar to this.
     :alt: pVACview Vignette
     :figclass: align-left
 
-The top row of the page has 3 sections: 
+The top row of the page has 4 sections: 
 
 - Advanced Options: Regenerate Tiering with different parameters
 - Original Parameters for Tiering
+- Current Parameters for Tiering
 - Add Comments for selected variant
 
-The second row of the page has 1 section named ``Aggregate Report of Best Candidates by Variant``, which lists all neoantigen candidates in provided input. Candidates with higher Tier (Tier ``Pass``) will be shown first, followed by candidates of lower Tiers (Tier ``Low Expr``, ``Subclonal``, ``Poor``, ``NoExpr``). Genes that match with the user-input list of genes of interest will have a green box around them (for example, ARID1B and MSH6 are covered by a green box in this demo). 
+pVACview prioritizes neoantigen candidates by ranking these peptides based on a set of rules (parameters for tiering), which include variant allele fraction cutoff and more as discussed later. Based on routine criteria evidenced by the literature, we provide a default set of parameters for tiering, detailed in **Original Parameters for Tiering** section. The default is a good starting point, but as all samples are unique in terms of sample quality, sequencing quality, HLA type, you may also want to set your own parameters in the **Advanced Options: Regenerate Tiering with different parameters** section. To see the real-time set of rules applied to your data, see **Current Parameters for Tiering** section. 
+Note: click the ``+``/ ``-`` in the right corner to expand/retract each section. 
 
-You can also set your own Tier-setting parameters by expanding ( clicking the ``+`` button on)  ``Advanced Options: Regenerate Tiering with different parameters``.
+The original parameters rank candidates on multiple facets.
+The first aspect is clonality. Cancer starts with a founding clone with tumor-initiating mutation which expands and drives malignancy. Descendents of the founding clone may acquire additional mutations. Clonal mutations are shared by all clones, whearas subclonal mutations are shared by some but not all cancer cells. Neoantigen candidates derived from clonal variant should be prioritized. Our tiering system provides the following parameters for determining clonality:
 
-.. figure:: ../../images/screenshots/vignette/pvacview-advancedOption.png
-    :width: 1000px
-    :align: right
-    :alt: pVACview Vignette
-    :figclass: align-left
+- ``Tumor Purity`` : a value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. (default: None)
+- ``VAF Clonal`` : Tumor DNA variant allele frequency (VAF) cutoff to determine whether the variant is clonal. (default: 0.5)
+- ``VAF Subclonal`` : Tumor DNA VAF cutoff to determine whether the variant is subclonal. This value is automatically calculated as half of ``VAF Clonal``. (default: 0.25)
 
-Here, we will use the original parameters to explore the dataset. 
-The original parameters have ``VAF Clonal`` set at 0.5. ``VAF Subclonal`` is automatically calculated as half of ``VAF Clonal``, and is therefore set at 0.25.
-The ``Allele Expression for Passing Variants`` is set at 2. ``Binding Threshold`` is 500 nM . ``Binding Threshold for Inclusion Into Metric File`` is 5000. ``Anchor Contribution Threshold`` is 0.8. The ``HLA.Alleles`` and respective ``Binding.Cutoffs`` are also displayed. 
+The second aspect is expression. The ideal peptide candidate should be derived from a gene/transcript that is expressed robustly. We provide:
+
+- ``Allele Expression for Passing Variants`` : allele expression cutoff for passing variants. (default: 2 FPKM)
+
+The third aspect is binding affinity, which is measured by IC50 score (peptide concentration required for 50% of inhibition for peptide binding to MHC). Lower IC50 score means a lower peptide concentration is required to overcome inhibitor and bind to MHC, which signifies better binding affinity. We provide:
+
+- ``Binding Threshold``: IC50 value cutoff for a passing neoantigen. (default: 500 nM) 
+- ``Binding Threshold for Inclusion Into Metric File``: IC50 value cutoff for neoantigens to be loaded to pVACview. This feature helps limit the number of neoantigens being loaded to pVACview, avoid overloading and improve runtime. (default: 5000 nM)
+
+The fourth aspect is Transcript Support Level (TSL) (see more about TSL `here <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_). TSL highlights which transcript isoform is well/poorly-supported by alignment. The existing TSL levels are: TSL1, TSL2, TSL3, TSKL4, TSL5, TSLNA, with TSL1 being the best TSL level. We provide:
+
+- ``Maximum TSL`` : cutoff TSL level for a passing candidate. (default: 1)
+
+[...]
+
+- ``Percentile Threshold``
+- ``Allele Specific Binding Threshold``
+- ``MT Top Score Metric``
+- ``WT Top Score Metric``
+- ``Allele Specific Anchors Used``
+- ``Anchor Contribution Threshold`` : cutoff to consider a  (default: 0.8). 
+
+Last but not least, the ``HLA.Alleles`` and respective ``Binding.Cutoffs`` are also displayed. 
+
+- ``HLA.Alleles`` : is the list of HLA alleles that the sample expresses and given as input when running pVACseq.
+- ``Binding.Cutoffs``: the IC50 cutoff value for the corresponding HLA allele. The default values are from literature. 
 
 .. rst-class:: three-images-row
 
@@ -78,10 +101,26 @@ The ``Allele Expression for Passing Variants`` is set at 2. ``Binding Threshold`
 
 .. figure:: ../../images/screenshots/vignette/originalParametersForTiering/pvacview-OG_params_3.png
    :width: 45%
-   :align: left
+   :align: center
    :alt: pVACview Vignette
 
-   To investigate a desired candidate, users will click on the ``Investigate`` button on the right side of the row for that candidate. The currently investigated candidate will be framed in blue.
+
+To set your own Tier-setting parameters, expand the **Advanced Options: Regenerate Tiering with different parameters** section  
+
+.. figure:: ../../images/screenshots/vignette/pvacview-advancedOption.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+ 
+and tailor the parameters as needed.
+
+
+The second row of the page spans the **Aggregate Report of Best Candidates by Variant** section, which lists all neoantigen candidates in provided input. Candidates with higher Tier will be shown first, followed by candidates of lower Tiers (Order of Tiers: ``Pass``, ``Anchor``, ``Subclonal``, ``Low Expr``, ``NoExpr``, ``Poor``)(see Tiering criteria `here <https://pvactools.readthedocs.io/en/latest/pvacseq/output_files.html>`_). Genes that match with the user-input list of genes of interest will have a green box around them (for example, ARID1B and MSH6 are covered by a green box in this demo). This feature can be useful for highlighting neoantigens derived from cancer driver genes.  
+
+To view the variant, transcript, and peptide level information of a desired candidate, click on the ``Investigate`` button on the right side of the row for that candidate. The candidate currently under investigation will be framed in blue.
+
+Next, we will evaluate some neoantigen candidates using the original parameters for Tiering.
 
 Example 1: a good candidate: KIF1C-S433F: TEFQIGPEEA
 ^^^^^^^^ 
@@ -93,7 +132,7 @@ Example 1: a good candidate: KIF1C-S433F: TEFQIGPEEA
 
 **Variant-level assessment:**
 
-The variant has good DNA and RNA VAF (the DNA VAF is higher than the Subclonal threshold of 0.25) . 
+The variant has good DNA and RNA VAF (the DNA VAF is 0.316, higher than the Subclonal threshold of 0.25, thereby the variant is clonal) . 
 
 In this case, there’s only 1 mutant transcript matches with the user-provided RNAseq data (``Transcript Sets of Selected Variant`` tab shows only 1 result).
 
@@ -102,7 +141,7 @@ In this case, there’s only 1 mutant transcript matches with the user-provided 
     :align: right
     :alt: pVACview Vignette
     :figclass: align-left
-The predicted best peptide (neoantigen candidate) doesn’t have any match in the human genome. This is ideal, since the candidate will more likely to be recognized by Tcells.
+The predicted best peptide (neoantigen candidate) doesn’t have any match in the human proteome. This is ideal, since the candidate will more likely to be recognized by T cells due to central tolerance.
 
 .. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_2_ReferenceMatches.png
     :width: 1000px
@@ -192,7 +231,63 @@ Given all the information above, we can conclude that the reviewed Class I pepti
     :figclass: align-left
 
 
-Example 2: a bad candidate: ZNF141-H389Y: KIYTGEKPY
+Example 2: a good candidate derived from a variant with multiple transcript sets: ADAR-E806V: AERMGFTVV
+^^^^^^^^ 
+.. figure:: ../../images/screenshots/vignette/ADAR/ADAR_0.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+**Variant-level assessment:**
+
+The variant has good DNA and RNA VAF (the DNA VAF is 0.302, higher than the Subclonal threshold of 0.25, thereby the variant is clonal) . 
+
+**Transcript-level assessment:**
+
+Here, there’re 2 transcript sets matching with the user-provided RNAseq data (``Transcript Sets of Selected Variant`` tab shows 2 results). The transcript set highlighted in green (Transcript Set 1 in this case) has the presumably best neoantigen candidate. Transcript Set 1 has 14 transcripts, all of which encode a stretch of amino acids (AERMGFTVVT) which gives rise to 3 different neoantigen candidates: AERMGFTVV, AERMGFTVVT, AERMGFTV. Transcript Set 2 has 1 transcript that encodes a stretch of amino acids (AERMGFTVLP), which gives rise to 3 different neoantigen candidates: AERMGFTVL, AERMGFTVLP, AERMGFTV.  
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_1_TranscriptSetsOfSelectedVariant_TranscriptSet1.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+The images below are transcripts in Transcript Set 1 (top-middle, 14 transcripts) and Transcript Set 2 (bottom, 1 transcript). The transcript with the best neoantigen candidate is highlighted in green. 
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_2_1_TranscriptSet1.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_2_2_TranscriptSet1.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet2/ADAR_2_TranscriptSet2.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+The images below are the neoantigen candidates from Transcript Set 1 (top) and Transcript Set 2 (bottom). The best neoantigen candidate (AERMGFTVV) is highlighted in green. 
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_3_TranscriptSet1.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet2/ADAR_3_TranscriptSet2.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+Example 3: a bad candidate: ZNF141-H389Y: KIYTGEKPY
 ^^^^^^^^ 
 .. figure:: ../../images/screenshots/vignette/ZNF141/ZNF141_0.png
     :width: 1000px
@@ -202,7 +297,7 @@ Example 2: a bad candidate: ZNF141-H389Y: KIYTGEKPY
 
 **Variant-level assessment:**
 
-Given that the allele expression for passing variants is set at 2.5 (and a lot of gene has allele expression in the range of 5-114), ``Allele expression`` of this ZNF141 variant is low (1.824). 
+Given that the allele expression for passing variants is set at 2 (and a lot of gene has allele expression in the range of 5-114), ``Allele expression`` of this ZNF141 variant is low (1.824). 
 
 Furthermore, the candidate peptide KIYTGEKPY matches with a sequence in the human reference proteome. 
 
