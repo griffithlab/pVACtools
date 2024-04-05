@@ -637,7 +637,7 @@ tutorial_tab <- tabItem("tutorial",
                       
                       column(width = 6,
                              img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-neofox-table-violinplot.png?raw=true",
-                                 align = "center", width = "700px"), br(), br()
+                                 align = "center", width = "1500px"), br(), br()
                       )
                ),
 
@@ -667,7 +667,7 @@ tutorial_tab <- tabItem("tutorial",
              
              column(width = 6,
                     img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png?raw=true",
-                        align = "center", width = "900px"), br(), br()
+                        align = "center", width = "1500px"), br(), br()
              ), 
              
     ),
@@ -691,7 +691,7 @@ tutorial_tab <- tabItem("tutorial",
                     ),
                column(width = 6,
                       img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-custom-upload-vaxrank.png?raw=true",
-                          align = "center", width = "400px"), br(), br()
+                          align = "center", width = "700px"), br(), br()
                )
              ),
              
@@ -719,7 +719,7 @@ tutorial_tab <- tabItem("tutorial",
 
              column(width = 6,
                       img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-custom-dynamicscatter-vaxrank.png?raw=true",
-                          align = "center", width = "900px"), br(), br()
+                          align = "center", width = "1500px"), br(), br()
                ), 
                
         )

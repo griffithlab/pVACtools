@@ -19,14 +19,18 @@ Custom Upload
 ____________________________
 
 Once you've successfully launched pVACview by completing the :ref:`prerequisites <pvacview_prerequisites>` section, 
-you can now upload any neoantigen candidate data from your local directories to load in a tabular formmated (tsv) file. 
-
+you can now upload any neoantigen candidate data from your local directories in a tabular formmated (tsv) file. 
 When you upload your file, you can then choose how to visualize the data by selecting which feature 
-from your input you would like to group and sort candidates by. The feature you choose to group by
+from your input you would like to group and sort candidates by. 
+
+The feature you choose to group by
 will allow you to explore candidates that are simliar to one another in a separate table. For example,
-to mimic the pVACseq Module grouping you could select to group by variant. The order of the candidates
-in each grouping is determined by the numeric feature you choose to sort by. Canidates within the pVACseq Module
-are sorted by best binders. Finally, you can select what features to display for each group of peptides,
+to mimic the pVACseq Module you could choose to group by variant. 
+
+The order of the candidates in each grouping is determined by the numeric feature you choose to sort by. 
+For example, candidates within the pVACseq Module are sorted by best binders. 
+
+Finally, you can select what features to display for each group of peptides,
 the default selection is all features. 
 
 .. figure:: ../../images/screenshots/pvacview-custom-upload-vaxrank.png
@@ -66,7 +70,7 @@ There are three features that can be used to explore data:
 
 
 Investigating Different Candidates
-*********************************
+**********************************
 
 To investigate a group of candidates, click investgate from the 'Overview of Neoantigen Features' table. 
 Then the 'Detailed Data' table will be updated with that group of candidates.
