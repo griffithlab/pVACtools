@@ -376,10 +376,11 @@ class DeepImmuno(MHCI):
 
         if len(all_epitopes) > 0:
             tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
+            output_dir = tempfile.TemporaryDirectory(dir=tmp_dir)
             for epitope in all_epitopes:
                 tmp_input_file.write("{},{}\n".format(epitope, allele.replace(':', '')))
             tmp_input_file.close()
-            arguments = ['deepimmuno-cnn', '--mode', 'multiple', '--intdir', tmp_input_file.name, '--outdir', tmp_dir]
+            arguments = ['deepimmuno-cnn', '--mode', 'multiple', '--intdir', tmp_input_file.name, '--outdir', output_dir.name]
             stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
                 response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
@@ -392,12 +393,12 @@ class DeepImmuno(MHCI):
             stderr_fh.close()
             os.unlink(stderr_fh.name)
             os.unlink(tmp_input_file.name)
-            tmp_output_file_name = os.path.join(tmp_dir, "deepimmuno-cnn-result.txt")
+            tmp_output_file_name = os.path.join(output_dir.name, "deepimmuno-cnn-result.txt")
             df = pd.read_csv(tmp_output_file_name, sep="\t")
             df.rename(columns={
                 'HLA': 'allele',
             }, inplace=True)
-            os.unlink(tmp_output_file_name)
+            output_dir.cleanup()
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 peptide = str(record.seq)

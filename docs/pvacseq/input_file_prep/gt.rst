@@ -9,7 +9,7 @@ pVACseq was primarily designed for clinical application. As such, it requires
 that the input VCF contains sample genotype information (``GT`` field), which identifies
 whether or not a variant was called in a specific sample of interest.
 
-Some variant callers (e.g., Strelka), however, do not include this field. In
+Some somatic variant callers (e.g., Strelka), however, do not include this field. In
 other use cases you might want to run pVACseq on a list of variants of interest. If your
 input VCF does not contain sample information (i.e. no ``FORMAT`` column
 and/or sample column) or the ``FORMAT`` list does not contain a ``GT`` field,

@@ -93,136 +93,136 @@ explore_tab <- tabItem(
                  "Current version of pVACseq results defaults to positions 1, 2, n-1 and n (for a n-mer peptide) when determining anchor positions.
                     If you would like to use our allele specific anchor results and regenerate the tiering results for your variants,
                     please specify your contribution cutoff and submit for recalculation. ", tags$a(href = "https://www.biorxiv.org/content/10.1101/2020.12.08.416271v1", "More details can be found here.", target = "_blank"), br(),
-                 uiOutput("allele_specific_anchors_ui"),
-                 uiOutput("anchor_contribution_ui"),
-                 uiOutput("binding_threshold_ui"),
-                 uiOutput("allele_specific_binding_ui"),
-                 uiOutput("percentile_threshold_ui"),
-                 uiOutput("dna_cutoff_ui"),
-                 uiOutput("allele_expr_ui"),
-                 h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
-                 actionButton("submit", "Recalculate Tiering with new parameters"),
-                 style = "overflow-x: scroll;font-size:100%"),
-             style = "padding:0px;"
-      ),
-      column(width = 3,
-             fluidRow(
-               box(width = 12,
-                   title = "Original Parameters for Tiering",
-                   status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
-                   column(width = 12,
-                          h5("These are the original parameters used in the tiering calculations extracted from the metrics data file given as input."),
-                          tableOutput("paramTable"),
-                          tableOutput("bindingParamTable"),
-                          style = "height:250px; overflow-y: scroll;overflow-x: scroll;"
-                   ),
-                   style = "font-size:100%"
-               )
-             ),
-             fluidRow(
-               box(width = 12,
-                   title = "Current Parameters for Tiering",
-                   status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = FALSE,
-                   column(width = 12,
-                          h5("These are current parameters used in the tiering calculaions which may be different from the original parameters if candidates were re-tiered."),
-                          tableOutput("currentParamTable"),
-                          tableOutput("currentBindingParamTable"),
-                          style = "height:250px; overflow-y: scroll;overflow-x: scroll;"
-                   ),
-                   style = "font-size:100%"
-               )
-             ),
-             fluidRow(
-               column(
-                 width = 12,
-                 actionButton("reset_params", "Reset to original parameters", style = "width: 100%"),
-                 align = "center",
-                 style = "padding-bottom: 20px"
-               )
-             ),
-             style = "padding:0px;"
-      ),
-      column(width = 3,
-             box(width = 12,
-                 title = "Add Comments for selected variant",
-                 status = "primary", solidHeader = TRUE, collapsible = TRUE,
-                 textAreaInput("comments", "Please add/update your comments for the variant you are currently examining", value = ""),
-                 actionButton("comment", "Update Comment Section"),
-                 h5("Comment:"), htmlOutput("comment_text"),
-                 style = "font-size:100%"),
-             style = "padding:0px;"
-      )
-    ),
-    fluidRow(
-      box(width = 12,
-          title = "Aggregate Report of Best Candidates by Variant",
-          status = "primary", solidHeader = TRUE, collapsible = TRUE,
-          enable_sidebar = TRUE, sidebar_width = 25, sidebar_start_open = TRUE,
-          dropdownMenu = boxDropdown(boxDropdownItem("Help", id = "help", icon = icon("question-circle"))),
-          selectInput("page_length", "Number of variants displayed per page:", selected = "10", c("10", "20", "50", "100"), width = "280px"),
-          DTOutput("mainTable") %>% withSpinner(color = "#8FCCFA"),
-          span("Currently investigating row: ", verbatimTextOutput("selected")),
-          style = "overflow-x: scroll;font-size:100%")
-    ),
-    
-    fluidRow(
-      box(width = 12, title = "Variant Information",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
-          tabBox(width = 6, title = " ",
-                 tabPanel("Transcript Sets of Selected Variant",
-                          DTOutput("transcriptSetsTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
-                 tabPanel("Reference Matches",
-                          h4("Best Peptide Data"),
-                          column(6,
-                                 span("Best Peptide: "),
-                                 plotOutput(outputId = "referenceMatchPlot", height="20px")
-                          ),
-                          column(2,
-                                 span("AA Change: ", verbatimTextOutput("selectedAAChange"))
-                          ),
-                          column(2,
-                                 span("Pos: ", verbatimTextOutput("selectedPos"))
-                          ),
-                          column(2,
-                                 span("Gene: ", verbatimTextOutput("selectedGene"))
-                          ),
-                          h4("Query Data"),
-                          h5(uiOutput("hasReferenceMatchData")),
-                          column(10,
-                                 span("Query Sequence: "),
-                                 plotOutput(outputId = "referenceMatchQueryPlot", height="20px")
-                          ),
-                          column(2,
-                                 span("Hits: ", verbatimTextOutput("referenceMatchHitCount"))
-                          ),
-                          h4("Hits"),
-                          DTOutput(outputId = "referenceMatchDatatable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
-                 ),
-                 tabPanel("Additional Data",
-                          span("Additional Data Type: ", verbatimTextOutput("type_text")),
-                          span("Median MT IC50: ", verbatimTextOutput("addData_IC50")),
-                          span("Median MT Percentile: ", verbatimTextOutput("addData_percentile")),
-                          span("Best Peptide: ", verbatimTextOutput("addData_peptide")),
-                          span("Corresponding HLA allele: ", verbatimTextOutput("addData_allele")),
-                          span("Best Transcript: ", verbatimTextOutput("addData_transcript")))
-          ),
-          box(width = 4, solidHeader = TRUE, title = "Variant & Gene Info",
-              span("DNA VAF", verbatimTextOutput("metricsTextDNA")),
-              span("RNA VAF", verbatimTextOutput("metricsTextRNA")),
-              span("Gene Expression", verbatimTextOutput("metricsTextGene")),
-              span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput("metricsTextGenomicCoord")),
-              h5("Additional variant information:"),
-              uiOutput("url"), style = "overflow-x: scroll;font-size:100%"),
-          box(width = 2, solidHeader = TRUE, title = "Peptide Evalutation Overview",
-              tableOutput("checked"), style = "overflow-x: scroll;font-size:100%")
-      )
-    ),
-    fluidRow(
-      box(width = 12, title = "Transcript and Peptide Set Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
-          tabBox(width = 12, title = " ",
-                 tabPanel("Peptide Candidates from Selected Transcript Set",
-                          DTOutput("peptideTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
-                 tabPanel("Anchor Heatmap",
-                          fluidRow(
+                    uiOutput("allele_specific_anchors_ui"),
+                    uiOutput("anchor_contribution_ui"),
+                    uiOutput("binding_threshold_ui"),
+                    uiOutput("allele_specific_binding_ui"),
+                    uiOutput("percentile_threshold_ui"),
+                    uiOutput("dna_cutoff_ui"),
+                    uiOutput("allele_expr_ui"),
+                    h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
+                    actionButton("submit", "Recalculate Tiering with new parameters"),
+                    style = "overflow-x: scroll;font-size:100%"),
+                style = "padding:0px;"
+            ),
+            column(width = 3,
+                fluidRow(
+                    box(width = 12,
+                        title = "Original Parameters for Tiering",
+                        status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
+                        column(width = 12,
+                            h5("These are the original parameters used in the tiering calculations extracted from the metrics data file given as input."),
+                            tableOutput("paramTable"),
+                            tableOutput("bindingParamTable"),
+                            style = "height:250px; overflow-y: scroll;overflow-x: scroll;"
+                        ),
+                        style = "font-size:100%"
+                    )
+                ),
+                fluidRow(
+                    box(width = 12,
+                        title = "Current Parameters for Tiering",
+                        status = "primary", solidHeader = TRUE, collapsible = TRUE, collapsed = FALSE,
+                        column(width = 12,
+                            h5("These are current parameters used in the tiering calculations which may be different from the original parameters if candidates were re-tiered."),
+                            tableOutput("currentParamTable"),
+                            tableOutput("currentBindingParamTable"),
+                            style = "height:250px; overflow-y: scroll;overflow-x: scroll;"
+                        ),
+                        style = "font-size:100%"
+                    )
+                ),
+                fluidRow(
+                    column(
+                        width = 12,
+                        actionButton("reset_params", "Reset to original parameters", style = "width: 100%"),
+                        align = "center",
+                        style = "padding-bottom: 20px"
+                    )
+                ),
+                style = "padding:0px;"
+            ),
+            column(width = 3,
+                box(width = 12,
+                    title = "Add Comments for selected variant",
+                    status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                    textAreaInput("comments", "Please add/update your comments for the variant you are currently examining", value = ""),
+                    actionButton("comment", "Update Comment Section"),
+                    h5("Comment:"), htmlOutput("comment_text"),
+                    style = "font-size:100%"),
+                style = "padding:0px;"
+            )
+        ),
+        fluidRow(
+            box(width = 12,
+                title = "Aggregate Report of Best Candidates by Variant",
+                status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                enable_sidebar = TRUE, sidebar_width = 25, sidebar_start_open = TRUE,
+                dropdownMenu = boxDropdown(boxDropdownItem("Help", id = "help", icon = icon("question-circle"))),
+                selectInput("page_length", "Number of variants displayed per page:", selected = "10", c("10", "20", "50", "100"), width = "280px"),
+                DTOutput("mainTable") %>% withSpinner(color = "#8FCCFA"),
+                span("Currently investigating row: ", verbatimTextOutput("selected")),
+                style = "overflow-x: scroll;font-size:100%")
+        ),
+
+        fluidRow(
+            box(width = 12, title = "Variant Information",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                tabBox(width = 6, title = " ",
+                    tabPanel("Transcript Sets of Selected Variant",
+                        DTOutput("transcriptSetsTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
+                    tabPanel("Reference Matches",
+                        h4("Best Peptide Data"),
+                        column(6,
+                            span("Best Peptide: "),
+                            plotOutput(outputId = "referenceMatchPlot", height="20px")
+                        ),
+                        column(2,
+                            span("AA Change: ", verbatimTextOutput("selectedAAChange"))
+                        ),
+                        column(2,
+                            span("Pos: ", verbatimTextOutput("selectedPos"))
+                        ),
+                        column(2,
+                            span("Gene: ", verbatimTextOutput("selectedGene"))
+                        ),
+                        h4("Query Data"),
+                        h5(uiOutput("hasReferenceMatchData")),
+                        column(10,
+                            span("Query Sequence: "),
+                            plotOutput(outputId = "referenceMatchQueryPlot", height="20px")
+                        ),
+                        column(2,
+                            span("Hits: ", verbatimTextOutput("referenceMatchHitCount"))
+                        ),
+                        h4("Hits"),
+                        DTOutput(outputId = "referenceMatchDatatable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
+                    ),
+                    tabPanel("Additional Data",
+                        span("Additional Data Type: ", verbatimTextOutput("type_text")),
+                        span("Median MT IC50: ", verbatimTextOutput("addData_IC50")),
+                        span("Median MT Percentile: ", verbatimTextOutput("addData_percentile")),
+                        span("Best Peptide: ", verbatimTextOutput("addData_peptide")),
+                        span("Corresponding HLA allele: ", verbatimTextOutput("addData_allele")),
+                        span("Best Transcript: ", verbatimTextOutput("addData_transcript")))
+                ),
+                box(width = 4, solidHeader = TRUE, title = "Variant & Gene Info",
+                    span("DNA VAF", verbatimTextOutput("metricsTextDNA")),
+                    span("RNA VAF", verbatimTextOutput("metricsTextRNA")),
+                    span("Gene Expression", verbatimTextOutput("metricsTextGene")),
+                    span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput("metricsTextGenomicCoord")),
+                    h5("Additional variant information:"),
+                    uiOutput("url"), style = "overflow-x: scroll;font-size:100%"),
+                box(width = 2, solidHeader = TRUE, title = "Peptide Evalutation Overview",
+                    tableOutput("checked"), style = "overflow-x: scroll;font-size:100%")
+            )
+        ),
+        fluidRow(
+            box(width = 12, title = "Transcript and Peptide Set Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
+                tabBox(width = 12, title = " ",
+                    tabPanel("Peptide Candidates from Selected Transcript Set",
+                            DTOutput("peptideTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
+                    tabPanel("Anchor Heatmap",
+                        fluidRow(
                             column(width = 6,
                                    div(style = 'overflow-y:scroll;height: 500px;',
                                        h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),

@@ -191,7 +191,7 @@ class TestPvacvector(unittest.TestCase):
             ))
 
             if 'DISPLAY' in os.environ.keys():
-                image_out = os.path.join(output_dir.name, 'vector.jpg')
+                image_out = os.path.join(output_dir.name, 'vector.png')
                 #vaccine visualization producing image
                 self.assertTrue(os.path.exists(image_out))
                 self.assertTrue(os.stat(image_out).st_size > 0)
@@ -226,7 +226,7 @@ class TestPvacvector(unittest.TestCase):
 
 
             if 'DISPLAY' in os.environ.keys():
-                image_out = os.path.join(output_dir.name, 'vector.jpg')
+                image_out = os.path.join(output_dir.name, 'vector.png')
                 #vaccine visualization producing image
                 self.assertTrue(os.path.exists(image_out))
                 self.assertTrue(os.stat(image_out).st_size > 0)

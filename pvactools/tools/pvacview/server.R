@@ -22,8 +22,9 @@ options(shiny.port = 3333)
 
 server <- shinyServer(function(input, output, session) {
   ## pVACtools version
-  output$version <- renderText({"pVACtools version 4.1.0"})
-  
+
+  output$version <- renderText({"pVACtools version 4.1.1"})
+
   ##############################DATA UPLOAD TAB###################################
   ## helper function defined for generating shinyInputs in mainTable (Evaluation dropdown menus)
   shinyInput <- function(data, FUN, len, id, ...) {
@@ -154,107 +155,108 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
   })
   #Option 2: Load from HCC1395 demo data from github
-  observeEvent(input$loadDefaultmain, {
-    ## Class I demo aggregate report
-    session$sendCustomMessage("unbind-DT", "mainTable")
-    data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
-    mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    colnames(mainData) <- mainData[1, ]
-    mainData <- mainData[-1, ]
-    row.names(mainData) <- NULL
-    mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
-    mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-    mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
-    mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
-    mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
-    mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
-    df$mainTable <- mainData
-    ## Class I demo metrics file
-    metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
-    df$metricsData <- fromJSON(txt = metricsdata)
-    df$binding_threshold <- df$metricsData$`binding_threshold`
-    df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
-    df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
-    df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
-    df$percentile_threshold <- df$metricsData$`percentile_threshold`
-    df$dna_cutoff <- df$metricsData$vaf_clonal
-    df$allele_expr <- df$metricsData$allele_expr_threshold
-    df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
-    df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
-    df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
-    hla <- df$metricsData$alleles
-    converted_hla_names <- unlist(lapply(hla, function(x) {
-      if (grepl("HLA-", x)) {
-        strsplit(x, "HLA-")[[1]][2]
-      } else {
-        x
-      }
-    }))
-    if (!("Ref Match" %in% colnames(df$mainTable))) {
-      df$mainTable$`Ref Match` <- "Not Run"
-    }
-    columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
-                        "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
-                        "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
-    if ("Comments" %in% colnames(df$mainTable)) {
-      columns_needed <- c(columns_needed, "Comments")
-      df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
-    }else {
-      df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
-    }
-    df$mainTable <- df$mainTable[, columns_needed]
-    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
-    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
-    if ("Comments" %in% colnames(df$mainTable)) {
-      df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
-    }else {
-      df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
-    }
-    rownames(df$comments) <- df$mainTable$ID
-    ## Class II additional demo aggregate report
-    add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
-    addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    colnames(addData) <- addData[1, ]
-    addData <- addData[-1, ]
-    row.names(addData) <- NULL
-    df$additionalData <- addData
-    ## Hotspot gene list autoload
-    gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
-    gene_list <- read.table(text = gene_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    df$gene_list <- gene_list
-    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
-    df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
-    df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
-    df$mainTable$`Bad TSL` <- apply(df$mainTable, 1, function(x) {x["TSL"] == "NA" | (x["TSL"] != "NA" & x["TSL"] != "Not Supported" & x["TSL"] > df$metricsData$maximum_transcript_support_level)})
-    df$mainTable$`Col RNA Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Expr"]), 0, x["RNA Expr"])})
-    df$mainTable$`Col RNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA VAF"]), 0, x["RNA VAF"])})
-    df$mainTable$`Col Allele Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["Allele Expr"]), 0, x["Allele Expr"])})
-    df$mainTable$`Col RNA Depth` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Depth"]), 0, x["RNA Depth"])})
-    df$mainTable$`Col DNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["DNA VAF"]), 0, x["DNA VAF"])})
-    if (is.null(df$percentile_threshold)) {
-      df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
-    }else {
-      df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
-    }
-    df$mainTable$`Has Prob Pos` <- apply(df$mainTable, 1, function(x) {ifelse(x["Prob Pos"] != "None", TRUE, FALSE)})
-    updateTabItems(session, "tabs", "explore")
-  })
-  ##Clear file inputs if demo data load button is clicked
-  output$aggregate_report_ui <- renderUI({
-    input$loadDefaultmain
-    fileInput(inputId = "mainDataInput", label = "1. Neoantigen Candidate Aggregate Report (tsv required)",
-              accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
-  })
-  output$metrics_ui <- renderUI({
-    input$loadDefaultmain
-    fileInput(inputId = "metricsDataInput", label = "2. Neoantigen Candidate Metrics file (json required)",
-              accept = c("application/json", ".json"))
-  })
-  output$add_file_ui <- renderUI({
-    input$loadDefaultmain
-    fileInput(inputId = "additionalDataInput", label = "3. Additional Neoantigen Candidate Aggregate Report (tsv required)",
-              accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
-  })
+   observeEvent(input$loadDefaultmain, {
+     ## Class I demo aggregate report
+     session$sendCustomMessage("unbind-DT", "mainTable")
+     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
+     mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+     colnames(mainData) <- mainData[1, ]
+     mainData <- mainData[-1, ]
+     row.names(mainData) <- NULL
+     mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
+     mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
+     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
+     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
+     mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
+     mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+     df$mainTable <- mainData
+     ## Class I demo metrics file
+     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
+     df$metricsData <- fromJSON(txt = metricsdata)
+     df$binding_threshold <- df$metricsData$`binding_threshold`
+     df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
+     df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
+     df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
+     df$percentile_threshold <- df$metricsData$`percentile_threshold`
+     df$dna_cutoff <- df$metricsData$vaf_clonal
+     df$allele_expr <- df$metricsData$allele_expr_threshold
+     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
+     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
+     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
+     hla <- df$metricsData$alleles
+     converted_hla_names <- unlist(lapply(hla, function(x) {
+       if (grepl("HLA-", x)) {
+         strsplit(x, "HLA-")[[1]][2]
+       } else {
+         x
+       }
+     }))
+     if (!("Ref Match" %in% colnames(df$mainTable))) {
+       df$mainTable$`Ref Match` <- "Not Run"
+     }
+     columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+                         "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
+                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
+     if ("Comments" %in% colnames(df$mainTable)) {
+       columns_needed <- c(columns_needed, "Comments")
+       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
+     }else {
+       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
+     }
+     df$mainTable <- df$mainTable[, columns_needed]
+     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+     if ("Comments" %in% colnames(df$mainTable)) {
+       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
+     }else {
+       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
+     }
+     rownames(df$comments) <- df$mainTable$ID
+     ## Class II additional demo aggregate report
+     add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+     addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+     colnames(addData) <- addData[1, ]
+     addData <- addData[-1, ]
+     row.names(addData) <- NULL
+     df$additionalData <- addData
+     ## Hotspot gene list autoload
+     gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
+     gene_list <- read.table(text = gene_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+     df$gene_list <- gene_list
+     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
+     df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
+     df$mainTable$`Bad TSL` <- apply(df$mainTable, 1, function(x) {x["TSL"] == "NA" | (x["TSL"] != "NA" & x["TSL"] != "Not Supported" & x["TSL"] > df$metricsData$maximum_transcript_support_level)})
+     df$mainTable$`Col RNA Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Expr"]), 0, x["RNA Expr"])})
+     df$mainTable$`Col RNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA VAF"]), 0, x["RNA VAF"])})
+     df$mainTable$`Col Allele Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["Allele Expr"]), 0, x["Allele Expr"])})
+     df$mainTable$`Col RNA Depth` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Depth"]), 0, x["RNA Depth"])})
+     df$mainTable$`Col DNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["DNA VAF"]), 0, x["DNA VAF"])})
+     if (is.null(df$percentile_threshold)) {
+       df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {FALSE})
+     }else {
+       df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
+     }
+     df$mainTable$`Has Prob Pos` <- apply(df$mainTable, 1, function(x) {ifelse(x["Prob Pos"] != "None", TRUE, FALSE)})
+     updateTabItems(session, "tabs", "explore")
+   })
+   ##Clear file inputs if demo data load button is clicked
+   output$aggregate_report_ui <- renderUI({
+     input$loadDefaultmain
+     fileInput(inputId = "mainDataInput", label = "1. Neoantigen Candidate Aggregate Report (tsv required)",
+               accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
+   })
+   output$metrics_ui <- renderUI({
+     input$loadDefaultmain
+     fileInput(inputId = "metricsDataInput", label = "2. Neoantigen Candidate Metrics file (json required)",
+               accept = c("application/json", ".json"))
+   })
+   output$add_file_ui <- renderUI({
+     input$loadDefaultmain
+     fileInput(inputId = "additionalDataInput", label = "3. Additional Neoantigen Candidate Aggregate Report (tsv required)",
+               accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
+   })
+
   ##Visualize button
   observeEvent(input$visualize, {
     updateTabItems(session, "tabs", "explore")
