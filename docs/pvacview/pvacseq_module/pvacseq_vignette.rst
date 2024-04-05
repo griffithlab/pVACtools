@@ -21,7 +21,7 @@ First, navigate to the Upload page, and click on ``Load demo data``.
 This will immediately load:
 
 - A tsv of Class I data: a high level aggregated file that lists all MHC-class-I predicted epitopes, their binding affinity scores, and additional variant information (the coordinate, coverage, vaf, and expression of the variants and transcripts encoding the epitopes).
-- A json file of Class I data
+- A json file of Class I data: JSON file with detailed information about the predicted epitopes, formatted for pVACview.
 - A tsv for Class II data: an aggregated file that lists all MHC-class-II predicted epitopes. 
 - A list of genes of interest: in this example, it's a tsv of the cancer census hotspot gene list from COSMIC. 
 
@@ -57,7 +57,7 @@ The original parameters rank candidates on multiple facets.
 The first aspect is clonality. Cancer starts with a founding clone with tumor-initiating mutation which expands and drives malignancy. Descendents of the founding clone may acquire additional mutations. Clonal mutations are shared by all clones, whearas subclonal mutations are shared by some but not all cancer cells. Neoantigen candidates derived from clonal variant should be prioritized. Our tiering system provides the following parameters for determining clonality:
 
 - ``Tumor Purity`` : a value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. (default: None)
-- ``VAF Clonal`` : Tumor DNA variant allele frequency (VAF) cutoff to determine whether the variant is clonal. (default: 0.5)
+- ``VAF Clonal`` : Tumor DNA variant allele frequency (VAF) to determine whether the variant is clonal. (default: 0.5)
 - ``VAF Subclonal`` : Tumor DNA VAF cutoff to determine whether the variant is subclonal. This value is automatically calculated as half of ``VAF Clonal``. (default: 0.25)
 
 The second aspect is expression. The ideal peptide candidate should be derived from a gene/transcript that is expressed robustly. We provide:
@@ -67,19 +67,28 @@ The second aspect is expression. The ideal peptide candidate should be derived f
 The third aspect is binding affinity, which is measured by IC50 score (peptide concentration required for 50% of inhibition for peptide binding to MHC). Lower IC50 score means a lower peptide concentration is required to overcome inhibitor and bind to MHC, which signifies better binding affinity. We provide:
 
 - ``Binding Threshold``: IC50 value cutoff for a passing neoantigen. (default: 500 nM) 
-- ``Binding Threshold for Inclusion Into Metric File``: IC50 value cutoff for neoantigens to be loaded to pVACview. This feature helps limit the number of neoantigens being loaded to pVACview, avoid overloading and improve runtime. (default: 5000 nM)
+- ``Binding Threshold for Inclusion Into Metric File``: IC50 value cutoff for neoantigens to be loaded to pVACview. This feature helps limit the number of neoantigens being loaded to pVACview. (default: 5000 nM)
 
-The fourth aspect is Transcript Support Level (TSL) (see more about TSL `here <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_). TSL highlights which transcript isoform is well/poorly-supported by alignment. The existing TSL levels are: TSL1, TSL2, TSL3, TSKL4, TSL5, TSLNA, with TSL1 being the best TSL level. We provide:
+The fourth aspect is Transcript Support Level (`TSL <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_). TSL highlights which transcript isoform is well/poorly-supported by alignment. The existing TSL levels are: TSL1, TSL2, TSL3, TSKL4, TSL5, TSLNA, with TSL1 being the best TSL level. We provide:
 
 - ``Maximum TSL`` : cutoff TSL level for a passing candidate. (default: 1)
 
-[...]
+Another aspect is percentile rank. Percentile rank is a method used to predict binding affinity of a peptide by comparing it to a set of peptides with similar sizes. A lower percentile rank indicates stronger affinity. Percentile rank of less than 2% are generally
+recommended for differentiating binders from non-binders (see `Jurtz 2017 <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5679736/>`_`). We provide: 
 
-- ``Percentile Threshold``
-- ``Allele Specific Binding Threshold``
-- ``MT Top Score Metric``
-- ``WT Top Score Metric``
-- ``Allele Specific Anchors Used``
+- ``Percentile Threshold`` : percentile score cutoff. (default: NULL)
+
+Another aspect to consider is binding threshold of each allele. We provide: 
+
+- ``Allele Specific Binding Threshold`` : this dictates whether the binding threshold is set specific to each allele based on `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_ suggestion (option TRUE), or based on the ``Binding Threshold`` defined above (option FALSE). (default: TRUE)
+
+When running pVACseq, one can decide whether the median or the lowest binding affinity metrics are output in the IC50 MT, IC50 WT, %ile MT, and %ile WT columns. To view what score metric (median or lowest) was used to compare binding affinity of mutant (MT) and wildtype (WT) peptides, we provide:
+
+- ``MT Top Score Metric`` : (default: Median)
+- ``WT Top Score Metric`` : (default: Median)
+
+Another aspect to consider is anchor contribution. 
+- ``Allele Specific Anchors Used`` : . (default: TRUE)
 - ``Anchor Contribution Threshold`` : cutoff to consider a  (default: 0.8). 
 
 Last but not least, the ``HLA.Alleles`` and respective ``Binding.Cutoffs`` are also displayed. 
@@ -113,13 +122,19 @@ To set your own Tier-setting parameters, expand the **Advanced Options: Regenera
     :alt: pVACview Vignette
     :figclass: align-left
  
-and tailor the parameters as needed.
+and tailor the parameters as needed. Learn more about Advanced Options `here <https://pvactools.readthedocs.io/en/stable/pvacview/getting_started.html#regenerate-tiering>`_.
 
 
-The second row of the page spans the **Aggregate Report of Best Candidates by Variant** section, which lists all neoantigen candidates in provided input. Candidates with higher Tier will be shown first, followed by candidates of lower Tiers (Order of Tiers: ``Pass``, ``Anchor``, ``Subclonal``, ``Low Expr``, ``NoExpr``, ``Poor``)(see Tiering criteria `here <https://pvactools.readthedocs.io/en/latest/pvacseq/output_files.html>`_). Genes that match with the user-input list of genes of interest will have a green box around them (for example, ARID1B and MSH6 are covered by a green box in this demo). This feature can be useful for highlighting neoantigens derived from cancer driver genes.  
+The second row of the page spans the **Aggregate Report of Best Candidates by Variant** section, which lists all neoantigen candidates in provided input. Candidates with higher Tier will be shown first, followed by candidates of lower Tiers (Order of Tiers: ``Pass``, ``Anchor``, ``Subclonal``, ``Low Expr``, ``NoExpr``, ``Poor``)(see Tiering criteria `here <https://pvactools.readthedocs.io/en/latest/pvacseq/output_files.html#tiers>`_). Genes that match with the user-input list of genes of interest will have a green box around them (for example, ARID1B and MSH6 are covered by a green box in this demo). This feature can be useful for highlighting neoantigens derived from cancer driver genes.  
 
-To view the variant, transcript, and peptide level information of a desired candidate, click on the ``Investigate`` button on the right side of the row for that candidate. The candidate currently under investigation will be framed in blue.
+To view the variant, transcript, and peptide level information of a desired candidate, click on the ``Investigate`` button on the right side of the row for that candidate. The candidate currently under investigation will be framed in blue. The number of the currently investigating row is indicated at the bottom of this section.
 
+.. figure:: ../../images/screenshots/vignette/pvacview-aggrReportTable_withCGCgenesHighlighted.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+ 
 Next, we will evaluate some neoantigen candidates using the original parameters for Tiering.
 
 Example 1: a good candidate: KIF1C-S433F: TEFQIGPEEA
