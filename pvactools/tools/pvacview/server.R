@@ -74,7 +74,7 @@ server <- shinyServer(function(input, output, session) {
   )
   #Option 1: User uploaded main aggregate report file
   observeEvent(input$mainDataInput$datapath, {
-    session$sendCustomMessage("unbind-DT", "mainTable")
+    #session$sendCustomMessage("unbind-DT", "mainTable")
     mainData <- read.table(input$mainDataInput$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
@@ -157,7 +157,7 @@ server <- shinyServer(function(input, output, session) {
   #Option 2: Load from HCC1395 demo data from github
    observeEvent(input$loadDefaultmain, {
      ## Class I demo aggregate report
-     session$sendCustomMessage("unbind-DT", "mainTable")
+     #session$sendCustomMessage("unbind-DT", "mainTable")
      data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
      mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
      colnames(mainData) <- mainData[1, ]
@@ -1359,13 +1359,13 @@ server <- shinyServer(function(input, output, session) {
     mainTable_neofox = NULL
   )
   observeEvent(input$loadDefaultneofox, {
-    session$sendCustomMessage("unbind-DT", "mainTable_neofox")
+    #session$sendCustomMessage("unbind-DT", "mainTable_neofox")
     data_neofox <- "data/test_pt1_neoantigen_candidates_annotated.tsv"
     mainData_neofox <- read.table(data_neofox, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     colnames(mainData_neofox) <- mainData_neofox[1, ]
     mainData_neofox <- mainData_neofox[-1, ]
     row.names(mainData_neofox) <- NULL
-    
+
     # Columns that have been reviewed as most interesting
     columns_to_star <- c(
       "dnaVariantAlleleFrequency", "rnaExpression", "imputedGeneExpression",
@@ -1390,6 +1390,7 @@ server <- shinyServer(function(input, output, session) {
     df_neofox$mainTable_neofox <- mainData_neofox
     updateTabItems(session, "neofox_tabs", "neofox_explore")
   })
+  
   output$neofox_upload_ui <- renderUI({
     fileInput(inputId = "neofox_data", label = "NeoFox output table (tsv required)",
               accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
@@ -1402,18 +1403,19 @@ server <- shinyServer(function(input, output, session) {
     row.names(mainData_neofox) <- NULL
     df_neofox$mainTable_neofox <- mainData_neofox
   })
+  
   observeEvent(input$visualize_neofox, {
     updateTabItems(session, "neofox_tabs", "neofox_explore")
     updateSliderInput(session,"xvrbl_scale", value = c(min_value, max_value))
   })
   
   ##### Output table -- something in this is not working
-  observeEvent(input$neofox_page_length, {
-    if (is.null(df_neofox$mainTable_neofox)) {
-      return()
-    }
-    df_neofox$pageLength <- as.numeric(input$neofox_page_length)
-  })
+  #observeEvent(input$neofox_page_length, {
+    #if (is.null(df_neofox$mainTable_neofox)) {
+     # return()
+   # }
+   # df_neofox$pageLength <- as.numeric(input$neofox_page_length)
+  #})
 
   output$neofoxTable <- DT::renderDataTable(
     if (is.null(df_neofox$mainTable_neofox)) {
@@ -1426,7 +1428,7 @@ server <- shinyServer(function(input, output, session) {
                 extensions = c("Buttons")
       ))
       
-    }, server = FALSE)
+    })
   
   
   output$neofox_selected <- renderText({
