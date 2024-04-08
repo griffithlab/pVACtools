@@ -1418,14 +1418,17 @@ server <- shinyServer(function(input, output, session) {
   output$neofoxTable <- DT::renderDataTable(
     if (is.null(df_neofox$mainTable_neofox)) {
       return(datatable(data.frame("Annotated Table" = character())))
+      
     } else {
-      datatable(df_neofox$mainTable_neofox,
-                escape = FALSE, class = "stripe",
+      return(datatable(df_neofox$mainTable_neofox,
+                escape = FALSE,
                 selection = "multiple",
                 extensions = c("Buttons")
-      )
-    }
-  )
+      ))
+      
+    }, server = FALSE)
+  
+  
   output$neofox_selected <- renderText({
     if (is.null(df_neofox$mainTable_neofox)) {
       return()
