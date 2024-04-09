@@ -193,12 +193,8 @@ def main(args_input = sys.argv[1:]):
 
     temp_dir = tempfile.mkdtemp()
     proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only)
-    if proximal_variants_tsv is not None:
-        proximal_variants_file = "{}.proximal_variants.tsv".format(args.output_file)
-        with open(proximal_variants_tsv, 'r') as input_file:
-            with open(proximal_variants_file, 'w', newline='') as output_file:
-                output_file.write(input_file.read())
-	
+    proximal_variants_file = "{}.proximal_variants.tsv".format(args.output_file)
+    shutil.copy(proximal_variants_tsv, proximal_variants_file)
     generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir, proximal_variants_tsv)
     parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv, args.aggregate_report_evaluation)
     shutil.rmtree(temp_dir, ignore_errors=True)
