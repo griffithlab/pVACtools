@@ -15,6 +15,13 @@ def define_parser():
     )
     download_cwls_parser.set_defaults(func=download_cwls)
 
+    download_wdls_parser = subparsers.add_parser(
+        "download_wdls",
+        help="Download pVACtools WDLs to run the main pVACseq and pVACfuse pipelines",
+        add_help=False
+        )
+    download_wdls_parser.set_defaults(func=download_wdls)
+
     parser.add_argument(
         "-v", "--version",
         action="store_true",

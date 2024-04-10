@@ -81,6 +81,7 @@ MHC Class I Elution Prediction Algorithm Version Supports Percentile Rank
 NetMHCpanEL                              4.1     yes
 MHCflurryEL                                      | Processing Score: no;
                                                  | Presentation Score: yes
+BigMHC_EL                                        no
 ======================================== ======= ========================
 
 ========================================= ======= ========================
@@ -88,6 +89,13 @@ MHC Class II Elution Prediction Algorithm Version Supports Percentile Rank
 ========================================= ======= ========================
 NetMHCIIpanEL                             4.1     yes
 ========================================= ======= ========================
+
+=============================================== ======= ========================
+MHC Class I Immunogenicity Prediction Algorithm Version Supports Percentile Rank
+=============================================== ======= ========================
+BigMHC_IM                                               no
+DeepImmuno                                              no
+=============================================== ======= ========================
 
 **Comprehensive filtering**
 
