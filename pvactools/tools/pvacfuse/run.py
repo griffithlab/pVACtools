@@ -9,7 +9,8 @@ from pvactools.lib.pipeline import PvacbindPipeline
 from pvactools.lib.run_argument_parser import PvacfuseRunArgumentParser
 from pvactools.lib.post_processor import PostProcessor
 import pvactools.tools.pvacfuse.generate_protein_fasta
-import pvactools.lib.run_utils
+from pvactools.lib.run_utils import *
+from pvactools.lib.prediction_class_utils import *
 
 def define_parser():
     return PvacfuseRunArgumentParser().parser
@@ -20,7 +21,7 @@ def create_net_class_report(files, all_epitopes_output_file, filtered_report_fil
             print("File {} doesn't exist. Aborting.".format(file_name))
             return
 
-    pvactools.lib.run_utils.combine_reports(files, all_epitopes_output_file)
+    combine_reports(files, all_epitopes_output_file)
 
     post_processing_params = vars(args).copy()
     post_processing_params['input_file'] = all_epitopes_output_file
@@ -47,7 +48,7 @@ def create_combined_reports(files, all_epitopes_output_file, filtered_report_fil
             print("File {} doesn't exist. Aborting.".format(file_name))
             return
 
-    pvactools.lib.run_utils.combine_reports(files, all_epitopes_output_file)
+    combine_reports(files, all_epitopes_output_file)
 
     post_processing_params = vars(args).copy()
     post_processing_params['input_file'] = all_epitopes_output_file
@@ -130,9 +131,9 @@ def main(args_input = sys.argv[1:]):
 
     base_output_dir = os.path.abspath(args.output_dir)
 
-    (class_i_prediction_algorithms, class_ii_prediction_algorithms) = pvactools.lib.run_utils.split_algorithms(args.prediction_algorithms)
-    (class_i_alleles, class_ii_alleles, species) = pvactools.lib.run_utils.split_alleles(args.allele)
-    class_ii_alleles = pvactools.lib.run_utils.combine_class_ii_alleles(class_ii_alleles)
+    (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
+    (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
+    class_ii_alleles = combine_class_ii_alleles(class_ii_alleles)
 
     shared_arguments = {
         'input_file_type'           : 'fasta',
@@ -260,7 +261,7 @@ def main(args_input = sys.argv[1:]):
         filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
         create_combined_reports([file1, file2], combined_output_file, filtered_report_file, False, args)
 
-    pvactools.lib.run_utils.change_permissions_recursive(base_output_dir, 0o755, 0o644)
+    change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
 if __name__ == '__main__':
     main()
