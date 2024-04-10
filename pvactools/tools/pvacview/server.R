@@ -14,10 +14,12 @@ source("styling.R")
 
 #specify max shiny app upload size (currently 300MB)
 options(shiny.maxRequestSize = 300 * 1024^2)
-options(shiny.host = '127.0.0.1')
+options(shiny.host = '0.0.0.0')
 options(shiny.port = 3333)
 
 server <- shinyServer(function(input, output, session) {
+  ## pVACtools version
+  output$version <- renderText({"pVACtools version 4.1.1"})
 
   ##############################DATA UPLOAD TAB###################################
   ## helper function defined for generating shinyInputs in mainTable (Evaluation dropdown menus)
@@ -73,7 +75,7 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
-    mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+    mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
     mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
@@ -152,12 +154,12 @@ server <- shinyServer(function(input, output, session) {
    observeEvent(input$loadDefaultmain, {
      ## Class I demo aggregate report
      session$sendCustomMessage("unbind-DT", "mainTable")
-     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
+     data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
      mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
      colnames(mainData) <- mainData[1, ]
      mainData <- mainData[-1, ]
      row.names(mainData) <- NULL
-     mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+     mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
      mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
      mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
      mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
@@ -165,7 +167,7 @@ server <- shinyServer(function(input, output, session) {
      mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
      df$mainTable <- mainData
      ## Class I demo metrics file
-     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
+     metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
      df$metricsData <- fromJSON(txt = metricsdata)
      df$binding_threshold <- df$metricsData$`binding_threshold`
      df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
@@ -207,14 +209,14 @@ server <- shinyServer(function(input, output, session) {
      }
      rownames(df$comments) <- df$mainTable$ID
      ## Class II additional demo aggregate report
-     add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+     add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
      addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
      colnames(addData) <- addData[1, ]
      addData <- addData[-1, ]
      row.names(addData) <- NULL
      df$additionalData <- addData
      ## Hotspot gene list autoload
-     gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/4ab3139a92d314da7b207e009fd8a1e4715a8166/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
+     gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
      gene_list <- read.table(text = gene_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
      df$gene_list <- gene_list
      df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
@@ -332,7 +334,7 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$`Rank_ic50` <- NULL
       df$mainTable$`Rank_expr` <- NULL
       df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-      df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+      df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
   })
   #reset tier-ing with original parameters
   observeEvent(input$reset_params, {
@@ -368,7 +370,7 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Rank_ic50` <- NULL
     df$mainTable$`Rank_expr` <- NULL
     df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
   })
   #determine hla allele count in order to generate column tooltip locations correctly
   hla_count <- reactive({
@@ -419,6 +421,46 @@ server <- shinyServer(function(input, output, session) {
       )
     }
   )
+  output$currentParamTable <- renderTable(
+    data <- data.frame(
+      "Parameter" = c("VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
+                      "Binding Threshold", "Binding Threshold for Inclusion into Metrics File", "Maximum TSL",
+                      "Percentile Threshold", "Allele Specific Binding Thresholds",
+                      "MT Top Score Metric", "WT Top Score Metric",
+                      "Allele Specific Anchors Used", "Anchor Contribution Threshold"),
+      "Value" = c(
+          df$dna_cutoff,
+          df$dna_cutoff / 2,
+          df$allele_expr,
+          df$binding_threshold,
+          df$metricsData$`aggregate_inclusion_binding_threshold`,
+          df$metricsData$maximum_transcript_support_level,
+          if (is.null(df$percentile_threshold) || is.na(df$percentile_threshold)) {"NULL"}else { df$percentile_threshold},
+          df$use_allele_specific_binding_thresholds,
+          df$metricsData$mt_top_score_metric,
+          df$metricsData$wt_top_score_metric,
+          df$allele_specific_anchors, df$anchor_contribution)
+    ), digits = 3
+  )
+  output$currentBindingParamTable <- renderTable(
+    if (df$use_allele_specific_binding_thresholds) {
+      data <- data.frame(
+        "HLA Alleles" = df$metricsData$alleles,
+        "Binding Cutoffs" = unlist(lapply(df$metricsData$alleles, function(x) {
+            if (x %in% names(df$metricsData$allele_specific_binding_thresholds)) {
+                df$metricsData$allele_specific_binding_thresholds[[x]]
+            } else {
+                df$binding_threshold
+            }
+        }
+      )))
+    } else {
+      data <- data.frame(
+        "HLA Alleles" = df$metricsData$alleles,
+        "Binding Cutoffs" = unlist(lapply(df$metricsData$alleles, function(x) df$binding_threshold))
+      )
+    }
+  )
   output$comment_text <- renderUI({
     if (is.null(df$mainTable)) {
       return(HTML("N/A"))
@@ -432,7 +474,7 @@ server <- shinyServer(function(input, output, session) {
     df$pageLength <- as.numeric(input$page_length)
     session$sendCustomMessage("unbind-DT", "mainTable")
     df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
   })
   output$filesUploaded <- reactive({
     val <- !(is.null(df$mainTable) | is.null(df$metricsData))
@@ -541,7 +583,7 @@ server <- shinyServer(function(input, output, session) {
     df$selectedRow <- as.numeric(strsplit(input$select_button, "_")[[1]][2])
     session$sendCustomMessage("unbind-DT", "mainTable")
     df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "60px")
+    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
     dataTableProxy("mainTable") %>%
       selectPage((df$selectedRow - 1) %/% df$pageLength + 1)
   })
@@ -673,10 +715,11 @@ server <- shinyServer(function(input, output, session) {
           transcript_set <- lapply(transcript_set, function(x) strsplit(x, "-")[[1]][1])
           if (best_transcript %in% transcript_set) {
             best_transcript_set <- df$metricsData[[selectedID()]]$sets[i]
+            best_transcript_set_id <- i
           }
         }
         incProgress(0.5)
-        datatable(GB_transcripts, selection = list(mode = "single", selected = "1"), style="bootstrap") %>%
+        datatable(GB_transcripts, selection = list(mode = "single", selected = best_transcript_set_id), style="bootstrap") %>%
           formatStyle("Transcripts Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
       }else {
         GB_transcripts <- data.frame("Transcript Sets" = character(), "# Transcripts" = character(), "# Peptides" = character(), "Total Expr" = character())
@@ -740,7 +783,7 @@ server <- shinyServer(function(input, output, session) {
     }
   })
   ##display peptide table with coloring
-  output$peptideTable <- renderDT({
+  output$peptideTable<- renderDT({
     withProgress(message = "Loading Peptide Table", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0 & !is.null(df$metricsData)) {
         peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
@@ -879,8 +922,8 @@ server <- shinyServer(function(input, output, session) {
         incProgress(0.2)
         p1 <- p1 +
           geom_rect(data = all_peptides_multiple_hla, aes(xmin = x_pos - 0.5, xmax = 1 + x_pos - 0.5, ymin = .5 + y_pos, ymax = -.5 + y_pos), fill = all_peptides_multiple_hla$color_value) +
-          geom_text(data = all_peptides_multiple_hla, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 5) +
-          geom_text(data = hla_data, aes(x = x_pos, y = y_pos, label = hla), size = 5, fontface = "bold") +
+          geom_text(data = all_peptides_multiple_hla, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 4) +
+          geom_text(data = hla_data, aes(x = x_pos, y = y_pos, label = hla), size = 4, fontface = "bold") +
           geom_line(data = h_line_pos, (aes(x = x_pos, y = y_pos, group = y_pos)), linetype = "dashed")
         p1 <- p1 + scale_color_manual("mutation", values = c("not_mutated" = "#000000", "mutated" = "#e74c3c"))
         p1 <- p1 + theme_void() + theme(legend.position = "none", panel.border = element_blank())
@@ -892,7 +935,21 @@ server <- shinyServer(function(input, output, session) {
         print(p1)
       }
     })
-  }, height = 500, width = 1000)
+  }, height = 400, width = 800)
+  #anchor score tables for each HLA allele
+  output$anchorWeights<- renderDT({
+    withProgress(message = "Loading Anchor Weights Table", value = 0, {
+      weights <- anchor_weights_for_alleles(df$metricsData$alleles)
+      dtable <- datatable(weights, options = list(
+          pageLength = 10,
+          lengthChange = FALSE,
+          rowCallback = JS("function(row, data, index, rowId) {",
+                           "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
+                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+      ))
+      dtable
+    })
+  })
   ##updating IC50 binding score for selected peptide pair
   bindingScoreDataIC50 <- reactive({
     if (is.null(df$metricsData)) {
@@ -992,7 +1049,7 @@ server <- shinyServer(function(input, output, session) {
       incProgress(1)
       dtable <- datatable(binding_reformat, options = list(
           pageLength = 10,
-          lengthMenu = c(10),
+          lengthChange = FALSE,
           rowCallback = JS("function(row, data, index, rowId) {",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                            'row.style.backgroundColor = "#E0E0E0";', "}", "}")
@@ -1056,7 +1113,7 @@ server <- shinyServer(function(input, output, session) {
           incProgress(1)
           dtable <- datatable(elution_reformat, options = list(
             pageLength = 10,
-            lengthMenu = c(10),
+            lengthChange = FALSE,
             rowCallback = JS("function(row, data, index, rowId) {",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
                            'row.style.backgroundColor = "#E0E0E0";', "}", "}")

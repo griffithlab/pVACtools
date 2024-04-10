@@ -74,8 +74,15 @@ _______________________________________________
 - MHCflurryEL
 - NetMHCpanEL
 - NetMHCIIpanEL
+- BigMHC_EL
 
-Please note that when running pVACfuse with only elution algorithms, no
+Prediction Algorithms Supporting Immunogenicity Scores
+______________________________________________________
+
+- BigMHC_IM
+- DeepImmuno
+
+Please note that when running pVACfuse with only elution or immungenicity algorithms, no
 aggregate report is created.
 
 .. _pvacbind_all_ep_and_filtered:
