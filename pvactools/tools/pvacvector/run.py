@@ -21,7 +21,8 @@ from pvactools.lib.vector_visualization import VectorVisualization
 from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
 from pvactools.lib.pvacvector_input_fasta_generator import PvacvectorInputFastaGenerator
 from pvactools.lib.pipeline import *
-import pvactools.lib.run_utils
+from pvactools.lib.run_utils import *
+from pvactools.lib.prediction_class_utils import *
 
 def define_parser():
     return PvacvectorRunArgumentParser().parser
@@ -435,14 +436,14 @@ def main(args_input=sys.argv[1:]):
     if args.n_threads > 1 and platform.system() == "Darwin":
         raise Exception("Multithreading is not supported on MacOS")
 
-    (class_i_prediction_algorithms, class_ii_prediction_algorithms) = pvactools.lib.run_utils.split_algorithms(args.prediction_algorithms)
+    (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     if len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
 
-    (class_i_alleles, class_ii_alleles, species) = pvactools.lib.run_utils.split_alleles(args.allele)
-    class_ii_alleles = pvactools.lib.run_utils.combine_class_ii_alleles(class_ii_alleles)
+    (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
+    class_ii_alleles = combine_class_ii_alleles(class_ii_alleles)
     if len(class_i_alleles) == 0:
         print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
     elif len(class_ii_alleles) == 0:
@@ -520,7 +521,7 @@ def main(args_input=sys.argv[1:]):
                     shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
                     shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
 
-    pvactools.lib.run_utils.change_permissions_recursive(base_output_dir, 0o755, 0o644)
+    change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
 if __name__ == "__main__":
     main()

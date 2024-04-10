@@ -189,13 +189,15 @@ class CalculateReferenceProteomeSimilarity:
         # Create mt record dictionary
         if self.file_type == 'pVACseq':
             records_dict = {re.sub('^%s' % "MT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
+        elif self.file_type == 'pVACsplice':
+            records_dict = {re.sub('^%s' % "ALT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('ALT.'), records)}
         else:
             records_dict = {x.id: str(x.seq) for x in records}
         return records_dict
 
 
     def get_wt_peptides(self):
-        if self.file_type == 'pVACseq':
+        if self.file_type == 'pVACseq' or self.file_type == 'pVACsplice':
             # make a list of SeqRecords from the input_fasta
             records = list(SeqIO.parse(self.input_fasta, "fasta"))
 
@@ -275,6 +277,21 @@ class CalculateReferenceProteomeSimilarity:
         print("Unable to find full_peptide for variant {}".format(line['ID']))
         return (None, None, variant_type, mt_aa, wt_aa)
 
+    def _get_full_peptide_for_pvacsplice(self, wt_peptide, mt_peptide):
+        wt_epitopes = determine_neoepitopes(wt_peptide, self.match_length)
+        mt_epitopes = determine_neoepitopes(mt_peptide, self.match_length)
+        for i in range(1, len(wt_epitopes)):
+            wt_epitope = wt_epitopes[i]
+            mt_epitope = mt_epitopes[i]
+            if wt_epitope != mt_epitope:
+                start = i
+                break
+        for i, (wt_epitope, mt_epitope) in enumerate(zip(reversed(list(wt_epitopes.values())), reversed(list(mt_epitopes.values())))):
+            if wt_epitope != mt_epitope:
+                stop = len(mt_epitopes) - i + self.match_length
+                break
+        return mt_peptide[start:stop-1]
+
     def _get_peptide(self, line, mt_records_dict, wt_records_dict):
         ## Get epitope, peptide and full_peptide
         if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
@@ -282,6 +299,15 @@ class CalculateReferenceProteomeSimilarity:
                 peptide = mt_records_dict[line['ID']]
             else:
                 peptide = mt_records_dict[line['Mutation']]
+            full_peptide = peptide
+        elif self.file_type == 'pVACsplice':
+            if self._input_tsv_type(line) == 'aggregated':
+                identifier = line['ID'].rsplit('.', 1)[0]
+            else:
+                identifier = line['Mutation'].rsplit('.', 1)[0]
+            wt_peptide = wt_records_dict[identifier]
+            mt_peptide = mt_records_dict[identifier]
+            peptide = self._get_full_peptide_for_pvacsplice(wt_peptide, mt_peptide)
             full_peptide = peptide
         else:
             if self._input_tsv_type(line) == 'aggregated':

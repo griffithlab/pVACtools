@@ -8,6 +8,7 @@ from pvactools.lib.pipeline import *
 from pvactools.lib.run_argument_parser import *
 from pvactools.lib.post_processor import *
 from pvactools.lib.run_utils import *
+from pvactools.lib.prediction_class_utils import *
 from pvactools.lib.print_log import *
 
 
@@ -186,6 +187,9 @@ def main(args_input = sys.argv[1:]):
             pipeline = PvacsplicePipeline(**class_i_arguments)
             pipeline.execute()
 
+        fasta_file = os.path.join(args.output_dir, "{}.transcripts.fa".format(args.sample_name))
+        class_i_arguments['fasta'] = fasta_file
+
         combine_reports_per_class(junctions_dir, class_i_arguments, 'I')
 
     elif len(class_i_prediction_algorithms) == 0:
@@ -218,6 +222,9 @@ def main(args_input = sys.argv[1:]):
 
             pipeline = PvacsplicePipeline(**class_ii_arguments)
             pipeline.execute()
+
+        fasta_file = os.path.join(args.output_dir, "{}.transcripts.fa".format(args.sample_name))
+        class_ii_arguments['fasta'] = fasta_file
 
         combine_reports_per_class(junctions_dir, class_ii_arguments, 'II')
 
