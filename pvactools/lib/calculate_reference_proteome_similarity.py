@@ -277,21 +277,6 @@ class CalculateReferenceProteomeSimilarity:
         print("Unable to find full_peptide for variant {}".format(line['ID']))
         return (None, None, variant_type, mt_aa, wt_aa)
 
-    def _get_full_peptide_for_pvacsplice(self, wt_peptide, mt_peptide):
-        wt_epitopes = determine_neoepitopes(wt_peptide, self.match_length)
-        mt_epitopes = determine_neoepitopes(mt_peptide, self.match_length)
-        for i in range(1, len(wt_epitopes)):
-            wt_epitope = wt_epitopes[i]
-            mt_epitope = mt_epitopes[i]
-            if wt_epitope != mt_epitope:
-                start = i
-                break
-        for i, (wt_epitope, mt_epitope) in enumerate(zip(reversed(list(wt_epitopes.values())), reversed(list(mt_epitopes.values())))):
-            if wt_epitope != mt_epitope:
-                stop = len(mt_epitopes) - i + self.match_length
-                break
-        return mt_peptide[start:stop-1]
-
     def _get_peptide(self, line, mt_records_dict, wt_records_dict):
         ## Get epitope, peptide and full_peptide
         if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
@@ -307,7 +292,7 @@ class CalculateReferenceProteomeSimilarity:
                 identifier = line['Mutation'].rsplit('.', 1)[0]
             wt_peptide = wt_records_dict[identifier]
             mt_peptide = mt_records_dict[identifier]
-            peptide = self._get_full_peptide_for_pvacsplice(wt_peptide, mt_peptide)
+            peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length)
             full_peptide = peptide
         else:
             if self._input_tsv_type(line) == 'aggregated':

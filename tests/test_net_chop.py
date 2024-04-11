@@ -53,6 +53,26 @@ class NetChopTest(unittest.TestCase):
         compiled_script_path = py_compile.compile(self.script_path)
         self.assertTrue(compiled_script_path)
 
+    def test_net_chop_pvacsplice(self):
+        with patch('requests.sessions.Session.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+            data,
+            files,
+            self.test_data_directory,
+            'net_chop.pvacsplice.html'
+            ))):
+            output_file = tempfile.NamedTemporaryFile()
+            NetChop(
+                os.path.join(self.test_data_directory, 'Test.pvacsplice.tsv'),
+                os.path.join(self.test_data_directory, 'Test.pvacsplice.fasta'),
+                output_file.name,
+                'cterm',
+                file_type = 'pVACsplice',
+            ).execute()
+            self.assertTrue(cmp(
+                os.path.join(self.test_data_directory, 'output.pvacsplice.tsv'),
+                output_file.name
+            ))
+
     def test_net_chop_cterm_runs(self):
         for method in ['cterm', '20s']:
             with patch('requests.sessions.Session.post', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(

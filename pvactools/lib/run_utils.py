@@ -90,3 +90,18 @@ def determine_neoepitopes(sequence, length):
     for i in range(0, len(sequence)-length+1):
         epitopes[i+1] = sequence[i:i+length]
     return epitopes
+
+def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length):
+    wt_epitopes = determine_neoepitopes(wt_peptide, flanking_length)
+    mt_epitopes = determine_neoepitopes(mt_peptide, flanking_length)
+    for i in range(1, len(wt_epitopes)):
+        wt_epitope = wt_epitopes[i]
+        mt_epitope = mt_epitopes[i]
+        if wt_epitope != mt_epitope:
+            start = i
+            break
+    for i, (wt_epitope, mt_epitope) in enumerate(zip(reversed(list(wt_epitopes.values())), reversed(list(mt_epitopes.values())))):
+        if wt_epitope != mt_epitope:
+            stop = len(mt_epitopes) - i + flanking_length
+            break
+    return mt_peptide[start:stop-1]
