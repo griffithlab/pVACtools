@@ -142,6 +142,8 @@ class NetMHCStab:
 
             if self.file_type == 'pVACseq':
                 sorted_lines = pvactools.lib.sort.default_sort_from_pd_dict(output_lines, self.top_score_metric)
+            elif self.file_type == 'pVACsplice':
+                sorted_lines = pvactools.lib.sort.pvacsplice_sort(output_lines, self.top_score_metric)
             else:
                 sorted_lines = pvactools.lib.sort.pvacbind_sort(output_lines, self.top_score_metric)
             writer.writerows(sorted_lines)
