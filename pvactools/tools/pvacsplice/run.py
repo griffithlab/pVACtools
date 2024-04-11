@@ -189,6 +189,7 @@ def main(args_input = sys.argv[1:]):
 
         fasta_file = os.path.join(args.output_dir, "{}.transcripts.fa".format(args.sample_name))
         class_i_arguments['fasta'] = fasta_file
+        class_i_arguments['net_chop_fasta'] = fasta_file
 
         combine_reports_per_class(junctions_dir, class_i_arguments, 'I')
 
@@ -225,6 +226,7 @@ def main(args_input = sys.argv[1:]):
 
         fasta_file = os.path.join(args.output_dir, "{}.transcripts.fa".format(args.sample_name))
         class_ii_arguments['fasta'] = fasta_file
+        class_ii_arguments['net_chop_fasta'] = fasta_file
 
         combine_reports_per_class(junctions_dir, class_ii_arguments, 'II')
 
