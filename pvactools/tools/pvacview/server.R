@@ -1360,7 +1360,7 @@ server <- shinyServer(function(input, output, session) {
   )
   observeEvent(input$loadDefaultneofox, {
     #session$sendCustomMessage("unbind-DT", "mainTable_neofox")
-    data_neofox <- "data/test_pt1_neoantigen_candidates_annotated.tsv"
+    data_neofox <- "data/neofox_neoantigen_candidates_annotated.tsv"
     mainData_neofox <- read.table(data_neofox, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     colnames(mainData_neofox) <- mainData_neofox[1, ]
     mainData_neofox <- mainData_neofox[-1, ]
@@ -1409,13 +1409,12 @@ server <- shinyServer(function(input, output, session) {
     updateSliderInput(session,"xvrbl_scale", value = c(min_value, max_value))
   })
   
-  ##### Output table -- something in this is not working
-  #observeEvent(input$neofox_page_length, {
-    #if (is.null(df_neofox$mainTable_neofox)) {
-     # return()
-   # }
-   # df_neofox$pageLength <- as.numeric(input$neofox_page_length)
-  #})
+  observeEvent(input$neofox_page_length, {
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    df_neofox$pageLength <- as.numeric(input$neofox_page_length)
+  })
 
   output$neofoxTable <- DT::renderDataTable(
     if (is.null(df_neofox$mainTable_neofox)) {
@@ -1782,7 +1781,7 @@ server <- shinyServer(function(input, output, session) {
     df_custom$fullData <- mainData_custom
   })
   observeEvent(input$loadDefault_Neopredpipe, {
-    data <- "data/HCC1395Run.neoantigens.txt"
+    data <- "data/neopredpipe.neoantigens.txt"
     mainData_custom <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     colnames(mainData_custom) <- mainData_custom[1, ]
     mainData_custom <- mainData_custom[-1, ]
@@ -1792,7 +1791,7 @@ server <- shinyServer(function(input, output, session) {
     df_custom$fullData <- mainData_custom
   })
   observeEvent(input$loadDefault_antigengarnish, {
-    data <- "data/ag_test_antigen.tsv"
+    data <- "data/antigengarnish_test_antigen.tsv"
     mainData_custom <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     colnames(mainData_custom) <- mainData_custom[1, ]
     mainData_custom <- mainData_custom[-1, ]
