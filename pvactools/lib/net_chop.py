@@ -89,7 +89,7 @@ class NetChop:
                         index = line['Mutation']
                         epitope = line['Epitope Seq']
                     elif self.file_type == 'pVACsplice':
-                        index = line['Index'].rsplit('.', 1)[0]
+                        index = line['Index']
                         epitope = line['Epitope Seq']
                     else:
                         index = line['Index']
