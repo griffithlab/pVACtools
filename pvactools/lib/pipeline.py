@@ -766,6 +766,7 @@ class PvacbindPipeline(Pipeline):
 
 class PvacsplicePipeline(PvacbindPipeline):
     def execute(self):
+        self.print_log()
 
         # mv fasta file to temp dir
         shutil.copy(self.input_file, os.path.join(self.tmp_dir, os.path.basename(self.input_file)))

@@ -36,6 +36,38 @@ def create_combined_report(junctions_dir, args):
         output_file = os.path.join(output_dir, f"{args.sample_name}.{x}.tsv")
         combine_reports([file1, file2], output_file)
 
+def create_full_combined_reports(base_output_dir, args):
+    output_dir = os.path.join(base_output_dir, 'combined')
+    os.makedirs(output_dir, exist_ok=True)
+
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
+    if not os.path.exists(file1):
+        print("File {} doesn't exist. Aborting.".format(file1))
+        return
+    if not os.path.exists(file2):
+        print("File {} doesn't exist. Aborting.".format(file2))
+        return
+
+    combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+    combine_reports([file1, file2], combined_output_file)
+    filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+
+    post_processing_params = vars(args)
+    post_processing_params['input_file'] = combined_output_file
+    post_processing_params['filtered_report_file'] = filtered_report_file
+    post_processing_params['minimum_fold_change'] = None
+    post_processing_params['run_coverage_filter'] = True
+    #TODO: remove prefiltering and enable tsl filter
+    post_processing_params['run_transcript_support_level_filter'] = False
+    post_processing_params['run_net_chop'] = False
+    post_processing_params['run_netmhc_stab'] = False
+    post_processing_params['run_manufacturability_metrics'] = False
+    post_processing_params['run_reference_proteome_similarity'] = False
+    post_processing_params['file_type'] = 'pVACsplice'
+
+    PostProcessor(**post_processing_params).execute()
+
 def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
     output_dir = os.path.join(class_output_dir, f'MHC_Class_{mhc_class}')
 
@@ -56,8 +88,9 @@ def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
     # methods in pp class
     post_processing_params['run_manufacturability_metrics'] = True
     post_processing_params['run_coverage_filter'] = True
+    #TODO: remove prefiltering and enable tsl filter
     post_processing_params['run_transcript_support_level_filter'] = False
-    # add custom params for netchop / metmhc_stab
+    # add custom params for netchop / netmhc_stab
     if params['net_chop_method']:
         post_processing_params['net_chop_fasta'] = params['net_chop_fasta']
         post_processing_params['run_net_chop'] = True
@@ -168,7 +201,7 @@ def main(args_input = sys.argv[1:]):
                 sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
         else:
             iedb_mhc_i_executable = None
-        
+
         for x in args.class_i_epitope_length:
 
             print(f'Executing MHC Class I predictions for {x}mers')
@@ -187,7 +220,7 @@ def main(args_input = sys.argv[1:]):
             pipeline = PvacsplicePipeline(**class_i_arguments)
             pipeline.execute()
 
-        fasta_file = os.path.join(args.output_dir, "{}.transcripts.fa".format(args.sample_name))
+        fasta_file = os.path.join(junctions_dir, "{}.transcripts.fa".format(args.sample_name))
         class_i_arguments['fasta'] = fasta_file
         class_i_arguments['net_chop_fasta'] = fasta_file
 
@@ -224,7 +257,7 @@ def main(args_input = sys.argv[1:]):
             pipeline = PvacsplicePipeline(**class_ii_arguments)
             pipeline.execute()
 
-        fasta_file = os.path.join(args.output_dir, "{}.transcripts.fa".format(args.sample_name))
+        fasta_file = os.path.join(junctions_dir, "{}.transcripts.fa".format(args.sample_name))
         class_ii_arguments['fasta'] = fasta_file
         class_ii_arguments['net_chop_fasta'] = fasta_file
 
@@ -235,9 +268,9 @@ def main(args_input = sys.argv[1:]):
     elif len(class_ii_alleles) == 0:
         print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
 
-    # if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
-    #     print("Creating combined reports")
-    #     create_combined_report(junctions_dir, args)
+    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+        print("Creating combined reports")
+        create_full_combined_reports(junctions_dir, args)
 
     if args.save_gtf is False:
         shutil.rmtree(os.path.join(junctions_dir, 'tmp'), ignore_errors=True)
