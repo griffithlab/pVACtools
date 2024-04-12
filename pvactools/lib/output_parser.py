@@ -1142,8 +1142,7 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             median_mt_percentile,
         ) in iedb_results:
             # get unique index
-            protein_position = tsv_index.split('.')[-1]
-            final_index = '.'.join(tsv_index.split('.')[:-1])
+            (final_index, protein_position) = tsv_index.rsplit('.', 1)
             tsv_entry = tsv_entries[final_index]
             row = {
                 'Chromosome'          : tsv_entry['chromosome_name'],
@@ -1168,7 +1167,7 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Gene Name'           : tsv_entry['gene_name'],
                 'HGVSc'               : tsv_entry['hgvsc'],
                 'HGVSp'               : tsv_entry['hgvsp'],
-                'Index'               : tsv_index,
+                'Index'               : final_index,
                 'Fasta Key'           : fasta_id,
                 'WT Protein Length' : tsv_entry['wt_protein_length'],
                 'ALT Protein Length': tsv_entry['alt_protein_length'],
