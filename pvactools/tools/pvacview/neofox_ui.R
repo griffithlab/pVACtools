@@ -72,7 +72,7 @@ neofox_tab <- tabItem("neofox",
                       uiOutput("yvrbl_log"),
                       uiOutput("yvrbl_scale"),
                       # color
-                      uiOutput("color_noefox"),
+                      uiOutput("color_neofox"),
                       uiOutput("min_color"),
                       uiOutput("max_color"),
                       # size

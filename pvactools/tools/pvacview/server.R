@@ -1358,6 +1358,40 @@ server <- shinyServer(function(input, output, session) {
   df_neofox <- reactiveValues(
     mainTable_neofox = NULL
   )
+  
+  # Option 1: User uploaded
+  observeEvent(input$neofox_data$datapath, {
+    #session$sendCustomMessage("unbind-DT", "mainTable_neofox")
+    mainData_neofox <- read.table(input$neofox_data$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData_neofox) <- mainData_neofox[1, ]
+    mainData_neofox <- mainData_neofox[-1, ]
+    row.names(mainData_neofox) <- NULL
+    
+    # Columns that have been reviewed as most interesting
+    columns_to_star <- c(
+      "dnaVariantAlleleFrequency", "rnaExpression", "imputedGeneExpression",
+      "rnaVariantAlleleFrequency", "NetMHCpan_bestRank_rank", "NetMHCpan_bestAffinity_affinity",
+      "NetMHCpan_bestAffinity_affinityWT", "NetMHCpan_bestRank_rankWT", "PHBR_I",
+      "NetMHCIIpan_bestRank_rank", "NetMHCIIpan_bestRank_rankWT", "PHBR_II", "Amplitude_MHCI_bestAffinity",
+      "Pathogensimiliarity_MHCI_bestAffinity9mer", "DAI_MHCI_bestAffinity", "Tcell_predictor",
+      "Selfsimilarity_MHCI", "Selfsimilarity_MHCII", "IEDB_Immunogenicity_MHCI", "IEDB_Immunogenicity_MHCII",
+      "MixMHCpred_bestScore_score", "MixMHCpred_bestScore_rank", "MixMHC2pred_bestRank_peptide",
+      "MixMHC2pred_bestRank_rank", "Dissimilarity_MHCI", "Dissimilarity_MHCII", "Vaxrank_bindingScore",
+      "PRIME_bestScore_rank", "PRIME_bestScore_score"
+    )
+    
+    # Check if each column is present in the dataframe and modify the names
+    for (col_name in columns_to_star) {
+      if (col_name %in% names(mainData_neofox)) {
+        new_col_name <- paste0("*", col_name)
+        names(mainData_neofox)[names(mainData_neofox) == col_name] <- new_col_name
+      }
+    }   
+    
+    df_neofox$mainTable_neofox <- mainData_neofox
+  })
+  
+  # Option 2: Demo Data
   observeEvent(input$loadDefaultneofox, {
     #session$sendCustomMessage("unbind-DT", "mainTable_neofox")
     data_neofox <- "data/neofox_neoantigen_candidates_annotated.tsv"
@@ -1365,7 +1399,7 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData_neofox) <- mainData_neofox[1, ]
     mainData_neofox <- mainData_neofox[-1, ]
     row.names(mainData_neofox) <- NULL
-
+    
     # Columns that have been reviewed as most interesting
     columns_to_star <- c(
       "dnaVariantAlleleFrequency", "rnaExpression", "imputedGeneExpression",
@@ -1391,31 +1425,18 @@ server <- shinyServer(function(input, output, session) {
     updateTabItems(session, "neofox_tabs", "neofox_explore")
   })
   
+  ##Clear file inputs if demo data load button is clicked
   output$neofox_upload_ui <- renderUI({
     fileInput(inputId = "neofox_data", label = "NeoFox output table (tsv required)",
               accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
   })
-  observeEvent(input$neofox_data$datapath, {
-    #session$sendCustomMessage("unbind-DT", "neofoxTable")
-    mainData_neofox <- read.table(input$neofox_data$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    colnames(mainData_neofox) <- mainData_neofox[1, ]
-    mainData_neofox <- mainData_neofox[-1, ]
-    row.names(mainData_neofox) <- NULL
-    df_neofox$mainTable_neofox <- mainData_neofox
-  })
   
   observeEvent(input$visualize_neofox, {
     updateTabItems(session, "neofox_tabs", "neofox_explore")
-    updateSliderInput(session,"xvrbl_scale", value = c(min_value, max_value))
   })
   
-  observeEvent(input$neofox_page_length, {
-    if (is.null(df_neofox$mainTable_neofox)) {
-      return()
-    }
-    df_neofox$pageLength <- as.numeric(input$neofox_page_length)
-  })
 
+  ## NeoFox Explore
   output$neofoxTable <- DT::renderDataTable(
     if (is.null(df_neofox$mainTable_neofox)) {
       return(datatable(data.frame("Annotated Table" = character())))
@@ -1426,9 +1447,7 @@ server <- shinyServer(function(input, output, session) {
                 selection = "multiple",
                 extensions = c("Buttons")
       ))
-      
     })
-  
   
   output$neofox_selected <- renderText({
     if (is.null(df_neofox$mainTable_neofox)) {
@@ -1437,8 +1456,9 @@ server <- shinyServer(function(input, output, session) {
     input$neofoxTable_rows_selected
   })
   
+  ### NeoFox Violin Plots
   
-  ##### Drop down to select what features to show violin plots for
+  ## Drop down to select what features to show violin plots for
   output$noefox_features_ui <- renderUI({
     df <- df_neofox$mainTable_neofox
     df <- type.convert(df, as.is = TRUE)
@@ -1460,7 +1480,6 @@ server <- shinyServer(function(input, output, session) {
                 )
   })
 
-  # Violin Plots
   output$neofox_violin_plots_row1 <- renderPlot({
     withProgress(message = "Loading Violin Plots", value = 0, {
       if (length(input$neofoxTable_rows_selected) != 0 & length(input$neofox_features) != 0) {
@@ -1496,7 +1515,7 @@ server <- shinyServer(function(input, output, session) {
   })
 
 
-  # Dynamic scatter plot
+  ## NeoFox Dynamic scatter plot
   output$xvrbl <- renderUI({
     df <- df_neofox$mainTable_neofox
     df <- type.convert(df, as.is = TRUE)
@@ -1635,7 +1654,6 @@ server <- shinyServer(function(input, output, session) {
           max_value <- max_value + 1
         }
 
-
         sliderInput(
           inputId = "yvrbl_scale",
           label = "Min/Max",
@@ -1648,7 +1666,7 @@ server <- shinyServer(function(input, output, session) {
     })
   })
 
-  output$color_noefox <- renderUI({
+  output$color_neofox <- renderUI({
     df <- df_neofox$mainTable_neofox
     df <- type.convert(df, as.is = TRUE)
     df[is.na(df)] <- 0
@@ -1770,6 +1788,19 @@ server <- shinyServer(function(input, output, session) {
     orderBy = NULL,
     peptide_features = NULL
   )
+  
+  # Option 1: User uploaded 
+  observeEvent(input$custom_data$datapath, {
+    mainData_custom <- read.table(input$custom_data$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+    colnames(mainData_custom) <- mainData_custom[1, ]
+    mainData_custom <- mainData_custom[-1, ]
+    row.names(mainData_custom) <- NULL
+    mainData_custom <- type.convert(mainData_custom, as.is = TRUE)
+    mainData_custom[is.na(mainData_custom)] <- 0
+    df_custom$fullData <- mainData_custom
+  })
+
+  # Option 2: Demo Data
   observeEvent(input$loadDefault_Vaxrank, {
     data <- "data/vaxrank_output.tsv"
     mainData_custom <- read.table(data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
@@ -1800,25 +1831,9 @@ server <- shinyServer(function(input, output, session) {
     mainData_custom[is.na(mainData_custom)] <- 0
     df_custom$fullData <- mainData_custom
   })
-  output$custom_upload_ui <- renderUI({
-    fileInput(inputId = "custom_data", label = "Custom input table (tsv required)",
-              accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
-  })
-  observeEvent(input$custom_data$datapath, {
-    mainData_custom <- read.table(input$custom_data$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
-    colnames(mainData_custom) <- mainDat_custom[1, ]
-    mainData_custom <- mainData_custom[-1, ]
-    row.names(mainData_custom) <- NULL
-    mainData_custom <- type.convert(mainData_custom, as.is = TRUE)
-    mainData_custom[is.na(mainData_custom)] <- 0
-    df_custom$fullData <- mainData_custom
-  })
   
   # group peptides by
   output$custom_group_by_feature_ui <- renderUI({
-    #df <- df_custom$fullData
-    #df <- type.convert(df, as.is = TRUE)
-    #df[is.na(df)] <- 0
     
     features <- as.list(names(df_custom$fullData))
     default_selection <- ifelse(length(features) >= 1, features[[1]], "")
@@ -1832,11 +1847,7 @@ server <- shinyServer(function(input, output, session) {
   })
   
   # Sort peptides by
-  # Render the UI for selecting the feature
   output$custom_order_by_feature_ui <- renderUI({
-    #df <- df_custom$fullData
-    #df <- type.convert(df, as.is = TRUE)
-    #df[is.na(df)] <- 0
     
     features <- names(df_custom$fullData)[sapply(df_custom$fullData, is.numeric)]
     default_selection <- ifelse(length(features) >= 2, features[[2]], "")
@@ -1848,7 +1859,20 @@ server <- shinyServer(function(input, output, session) {
                 options = list(`live-search` = TRUE),
                 multiple = FALSE)
   })
+  
+  ## Clear file inputs if demo data load button is clicked
+  output$custom_upload_ui <- renderUI({
+    fileInput(inputId = "custom_data", label = "Custom input table (tsv required)",
+              accept =  c("text/tsv", "text/tab-separated-values,text/plain", ".tsv"))
+  })
+  
+  observeEvent(input$visualize_custom, {
+    updateTabItems(session, "custom_tabs", "custom_explore")
+    updateSliderInput(session, "xvrbl_scale_custom", value = c(0, 1))  # Set default values for x-axis slider input
+    updateSliderInput(session, "yvrbl_scale_custom", value = c(0, 1))  # Set default values for y-axis slider input
+  })
 
+  ## Custom Explore
   output$group_feature <- renderUI({
     if (!is.null(input$feature_1)) {
       HTML(paste("Peptides grouped by: ", input$feature_1))
@@ -1868,9 +1892,6 @@ server <- shinyServer(function(input, output, session) {
 
   # features to display 
   output$custom_peptide_features_ui <- renderUI({
-    #df <- df_custom$fullData
-    #df <- type.convert(df, as.is = TRUE)
-    #df[is.na(df)] <- 0
     
     features <- as.list(names(df_custom$fullData))
     default_selection <- features
@@ -1985,50 +2006,50 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$xvrbl_scale_custom <- renderUI({
-    if (!is.null(input$xvrbl_custom)) {
+    if (!is.null(input$xvrbl_custom) && input$xvrbl_custom != "") {
       withProgress(message = "Loading Scale", value = 0, {
-        req(input$xvrbl_custom)  # Use req() to check if inputs are not NULL
-        df <- df_custom$fullData
-        df <- type.convert(df, as.is = TRUE)
-        df[is.na(df)] <- 0
-        df <- df[is.finite(df[[input$xvrbl_custom]]),]
-        
-        # Apply log or sqrt transformation
-        if (input$LogX_custom == "ln") {
-          df[[input$xvrbl_custom]] <- log(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
-        } else if (input$LogX_custom == "log2") {
-          df[[input$xvrbl_custom]] <- log2(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
-        } else if (input$LogX_custom == "log10") {
-          df[[input$xvrbl_custom]] <- log10(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
-        } else if (input$LogX_custom == "sqrt") {
-          df[[input$xvrbl_custom]] <- sqrt(ifelse(df[[input$xvrbl_custom]] < 0, 1e-10, df[[input$xvrbl_custom]]))
-        } else {
-          df[[input$xvrbl_custom]] <- df[[input$xvrbl_custom]]
-        }
-        
-        df <- df[is.finite(df[[input$xvrbl_custom]]),]
-        
-        xvrbl_values <- df[[input$xvrbl_custom]]
-        range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
-        min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-        max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
-        
-        
-        # Check if min_value and max_value are equal, set default values
-        if (min_value == max_value) {
-          min_value <- min_value - 1
-          max_value <- max_value + 1
-        }
-        
-        sliderInput(
-          inputId = "xvrbl_scale_custom",
-          label = "X Min/Max",
-          min = min_value,
-          max = max_value,
-          value = c(min_value, max_value),
-          step = 0.01,
-          dragRange = TRUE  # Allow users to drag the range handles 
-        )
+          req(input$xvrbl_custom)  # Use req() to check if inputs are not NULL
+          df <- df_custom$fullData
+          df <- type.convert(df, as.is = TRUE)
+          df[is.na(df)] <- 0
+          df <- df[is.finite(df[[input$xvrbl_custom]]),]
+          
+          # Apply log or sqrt transformation
+          if (input$LogX_custom == "ln") {
+            df[[input$xvrbl_custom]] <- log(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+          } else if (input$LogX_custom == "log2") {
+            df[[input$xvrbl_custom]] <- log2(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+          } else if (input$LogX_custom == "log10") {
+            df[[input$xvrbl_custom]] <- log10(ifelse(df[[input$xvrbl_custom]] == 0, 1e-10, df[[input$xvrbl_custom]]))
+          } else if (input$LogX_custom == "sqrt") {
+            df[[input$xvrbl_custom]] <- sqrt(ifelse(df[[input$xvrbl_custom]] < 0, 1e-10, df[[input$xvrbl_custom]]))
+          } else {
+            df[[input$xvrbl_custom]] <- df[[input$xvrbl_custom]]
+          }
+          
+          df <- df[is.finite(df[[input$xvrbl_custom]]),]
+          
+          xvrbl_values <- df[[input$xvrbl_custom]]
+          range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
+          min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
+          max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+          
+          
+          # Check if min_value and max_value are equal, set default values
+          if (min_value == max_value) {
+            min_value <- min_value - 1
+            max_value <- max_value + 1
+          }
+          
+          sliderInput(
+            inputId = "xvrbl_scale_custom",
+            label = "X Min/Max",
+            min = min_value,
+            max = max_value,
+            value = c(min_value, max_value),
+            step = 0.01,
+            dragRange = TRUE  # Allow users to drag the range handles 
+          )
       })
     }
   })
@@ -2060,7 +2081,7 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$yvrbl_scale_custom <- renderUI({
-    if (!is.null(input$yvrbl_custom)) {
+    if (!is.null(input$yvrbl_custom) && input$yvrbl_custom != "") {
           
       withProgress(message = "Loading Scale", value = 0, {
         req(input$yvrbl_custom)  # Use req() to check if inputs are not NULL
