@@ -34,7 +34,7 @@ class FastaToKmersTests(unittest.TestCase):
             'class_i_hla'     : 'HLA-A',
             'class_ii_hla'    : 'DBP1',
             'sample_name'     : 'sample',
-        }           
+        }
         fasta = FastaToKmers(**params)
         fasta.execute()
 
@@ -43,10 +43,10 @@ class FastaToKmersTests(unittest.TestCase):
             output_file = os.path.join(output_dir.name, f'sample.{x}.fa')
 
             self.assertTrue(cmp(
-                    output_file, 
-                    expected_file, 
+                    output_file,
+                    expected_file,
                     False
-                ), 
+                ),
                 "files don't match {} - {}".format(output_file, expected_file)
             )
 

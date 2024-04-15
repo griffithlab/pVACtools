@@ -23,7 +23,6 @@ class JunctionPipeline:
         self.class_ii_hla = kwargs['class_ii_hla']
         self.junction_score = kwargs['junction_score']
         self.variant_distance = kwargs['variant_distance']
-        self.tsl = kwargs['maximum_transcript_support_level']
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
         self.save_gtf = kwargs['save_gtf']
         self.keep_tmp_files = kwargs['keep_tmp_files']
@@ -65,7 +64,6 @@ class JunctionPipeline:
                 'output_file': self.create_file_path('gtf'),
                 'save_gtf': self.save_gtf,
                 # default no but option to save for running cohorts processed with the same reference data
-                'tsl': self.tsl,
             }
             gtf_data = LoadGtfData(**gtf_params)
             gtf_df = gtf_data.execute()

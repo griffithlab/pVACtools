@@ -24,7 +24,7 @@ class FilterRegtoolsResultsTests(unittest.TestCase):
     def test_filter_regtools_results_runs_and_produces_expected_output(self):
         input_file = os.path.join(self.test_data_dir, 'inputs', 'splice_junctions_chr1.tsv')
         output_dir = tempfile.TemporaryDirectory()
-        gtf_df = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.gtf_1.tsv'), sep='\t')
+        gtf_df = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.gtf.tsv'), sep='\t', na_values="NA", dtype={'transcript_support_level': str})
 
         # iterate free params
         for score in [5, 10, 50]:
@@ -40,16 +40,16 @@ class FilterRegtoolsResultsTests(unittest.TestCase):
                 FilterRegtoolsResults(**params).execute()
 
                 expected_file = os.path.join(
-                    self.test_data_dir, 
-                    'results', 
+                    self.test_data_dir,
+                    'results',
                     'Test.{}_{}_filtered.tsv'.format(score, distance)
                 )
                 # direct file comparison to existing
                 self.assertTrue(cmp(
-                        output_file, 
-                        expected_file, 
+                        output_file,
+                        expected_file,
                         False
-                    ), 
+                    ),
                     "files don't match {} - {}".format(output_file, expected_file)
                 )
 

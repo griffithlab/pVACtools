@@ -58,8 +58,7 @@ def create_full_combined_reports(base_output_dir, args):
     post_processing_params['filtered_report_file'] = filtered_report_file
     post_processing_params['minimum_fold_change'] = None
     post_processing_params['run_coverage_filter'] = True
-    #TODO: remove prefiltering and enable tsl filter
-    post_processing_params['run_transcript_support_level_filter'] = False
+    post_processing_params['run_transcript_support_level_filter'] = True
     post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = False
     post_processing_params['run_manufacturability_metrics'] = False
@@ -88,8 +87,7 @@ def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
     # methods in pp class
     post_processing_params['run_manufacturability_metrics'] = True
     post_processing_params['run_coverage_filter'] = True
-    #TODO: remove prefiltering and enable tsl filter
-    post_processing_params['run_transcript_support_level_filter'] = False
+    post_processing_params['run_transcript_support_level_filter'] = True
     # add custom params for netchop / netmhc_stab
     if params['net_chop_method']:
         post_processing_params['net_chop_fasta'] = params['net_chop_fasta']
@@ -150,7 +148,6 @@ def main(args_input = sys.argv[1:]):
         'annotated_vcf'                    : args.annotated_vcf,
         'class_i_epitope_length'           : args.class_i_epitope_length,
         'class_ii_epitope_length'          : args.class_ii_epitope_length,
-        'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'anchor_types'                     : args.anchor_types,
@@ -189,6 +186,7 @@ def main(args_input = sys.argv[1:]):
         'trna_cov'                  : args.trna_cov,
         'trna_vaf'                  : args.trna_vaf,
         'expn_val'                  : args.expn_val,
+        'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'run_post_processor'        : True,
         'exclude_NAs'               : args.exclude_NAs,
     }
