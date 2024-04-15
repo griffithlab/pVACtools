@@ -25,8 +25,8 @@ class JunctionToFastaTests(unittest.TestCase):
 
     # using GBM data instead? - how about i run one with current gtf and fa - one of every type going through the pipeline
     def test_junction_to_fasta_runs_and_produces_expected_output(self):
-        combined_df   = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.combined.tsv'), sep='\t')
-        gtf_df        = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.gtf_1.tsv'), sep='\t')
+        combined_df   = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.combined.tsv'), sep='\t', na_values="NA", dtype={'transcript_support_level': str})
+        gtf_df        = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.gtf.tsv'), sep='\t', na_values="NA", dtype={'transcript_support_level': str})
         annotated_vcf = os.path.join(pvactools_directory(), self.test_data_dir, 'inputs', 'annotated.expression_chr1.vcf.gz')
         sample_name   = 'HCC1395_TUMOR_DNA'
         fasta_path = os.path.join(self.test_data_dir, 'inputs', 'all_sequences_chr1.fa.gz')
@@ -76,8 +76,8 @@ class JunctionToFastaTests(unittest.TestCase):
         expected_file = os.path.join(self.test_data_dir, 'results', 'Test.transcripts.fa')
 
         self.assertTrue(cmp(
-                output_file, 
-                expected_file), 
+                output_file,
+                expected_file),
                 "files don't match {} - {}".format(output_file, expected_file)
             )
 

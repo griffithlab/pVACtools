@@ -16,7 +16,7 @@ class CombineInputsTests(unittest.TestCase):
         cls.executable    = os.path.join(pvactools_directory(), "pvactools", "tools", "pvacsplice", "combine_inputs.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice", 'results')
         # inputs 
-        cls.junctions_df = pd.read_csv(os.path.join(cls.test_data_dir, 'Test.10_100_filtered.tsv'), sep='\t') # default filters
+        cls.junctions_df = pd.read_csv(os.path.join(cls.test_data_dir, 'Test.10_100_filtered.tsv'), sep='\t', na_values="NA", dtype={'transcript_support_level': str}) # default filters
         cls.variant_file = os.path.join(cls.test_data_dir, 'Test.annotated.tsv')
 
     def module_compiles(self):

@@ -80,7 +80,7 @@ class FilterRegtoolsResults:
             # switch strand to numeral
             merged_df['strand'] = merged_df['strand'].replace(['+', '-'], [1, -1])
         # create filtered tsv file
-        merged_df.to_csv(self.output_file, sep='\t', index=False)
+        merged_df.to_csv(self.output_file, sep='\t', index=False, na_rep="NA")
 
         return merged_df
 
