@@ -229,6 +229,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=1,
             choices=[1, 2, 3, 4, 5]
         )
+        self.parser.add_argument(
+            "--biotypes", type=lambda s:[a for a in s.split(',')],
+            help="A list of biotypes to use for pre-filtering transcripts for processing in the pipeline.",
+            default=['protein_coding']
+        )
 
     def pvacfuse(self):
         self.parser.add_argument(

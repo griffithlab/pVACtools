@@ -63,6 +63,7 @@ class VcfConverter(InputFileConverter):
         self.proximal_variants_vcf = kwargs.pop('proximal_variants_vcf', None)
         self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
         self.flanking_bases = kwargs.pop('flanking_bases', None)
+        self.biotypes = kwargs.pop('biotypes', ['protein_coding'])
         if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.flanking_bases):
             sys.exit("A proximal variants TSV output path and number of flanking bases need to be specified if a proximal variants input VCF is provided.")
         if self.proximal_variants_vcf and not pvactools.lib.run_utils.is_gz_file(self.input_file):
@@ -381,6 +382,8 @@ class VcfConverter(InputFileConverter):
 
                     if transcript['BIOTYPE'] is not None and transcript['BIOTYPE'] != '':
                         biotype = transcript['BIOTYPE']
+                        if biotype not in self.biotypes:
+                            continue
                     else:
                         biotype = 'NA'
 

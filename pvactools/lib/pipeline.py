@@ -138,9 +138,10 @@ class Pipeline(metaclass=ABCMeta):
             self.input_file,
             str(epitope_flank_length + max(self.epitope_lengths) - 1),
             fasta_path,
+            "--sample-name", self.sample_name,
+            "--biotypes" , ",".join(self.biotypes),
         ]
         import pvactools.tools.pvacseq.generate_protein_fasta as generate_combined_fasta
-        params.extend(["--sample-name", self.sample_name])
         if self.phased_proximal_variants_vcf is not None:
             params.extend(["--phased-proximal-variants-vcf", self.phased_proximal_variants_vcf])
         if self.downstream_sequence_length is not None:
@@ -163,6 +164,7 @@ class Pipeline(metaclass=ABCMeta):
             'output_file': self.tsv_file_path(),
             'sample_name': self.sample_name,
             'pass_only': self.pass_only,
+            'biotypes': self.biotypes,
         }
         if self.normal_sample_name is not None:
             convert_params['normal_sample_name'] = self.normal_sample_name

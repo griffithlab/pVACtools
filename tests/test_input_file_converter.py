@@ -55,6 +55,7 @@ class InputFileConverterTests(unittest.TestCase):
             convert_vcf_params = {
                 'input_file'        : convert_vcf_input_file,
                 'output_file'       : convert_vcf_output_file.name,
+                'biotypes'          : ['nonsense_mediated_decay', 'protein_coding', 'polymorphic_pseudogene'],
             }
             converter = VcfConverter(**convert_vcf_params)
             converter.execute()
@@ -428,6 +429,7 @@ class InputFileConverterTests(unittest.TestCase):
             'output_file'       : convert_vcf_output_file.name,
             'sample_name'       : 'H_NJ-HCC1395-HCC1395',
             'normal_sample_name': 'H_NJ-HCC1395-HCC1395_BL',
+            'biotypes'          : ['nonsense_mediated_decay', 'protein_coding'],
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -568,6 +570,7 @@ class InputFileConverterTests(unittest.TestCase):
             'input_file'        : convert_vcf_input_file,
             'output_file'       : convert_vcf_output_file.name,
             'sample_name'       : 'TUMOR',
+            'biotypes'          : ['nonsense_mediated_decay', 'protein_coding'],
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -583,6 +586,7 @@ class InputFileConverterTests(unittest.TestCase):
             'input_file'        : convert_vcf_input_file,
             'output_file'       : convert_vcf_output_file.name,
             'sample_name'       : 'TUMOR',
+            'biotypes'          : ['nonsense_mediated_decay'],
         }
         converter = VcfConverter(**convert_vcf_params)
 

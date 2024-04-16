@@ -148,6 +148,7 @@ def main(args_input = sys.argv[1:]):
         'annotated_vcf'                    : args.annotated_vcf,
         'class_i_epitope_length'           : args.class_i_epitope_length,
         'class_ii_epitope_length'          : args.class_ii_epitope_length,
+        'biotypes'                         : args.biotypes,
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'anchor_types'                     : args.anchor_types,
