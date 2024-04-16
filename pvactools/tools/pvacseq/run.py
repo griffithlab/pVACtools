@@ -106,6 +106,7 @@ def main(args_input = sys.argv[1:]):
         'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
         'n_threads'                 : args.n_threads,
         'maximum_transcript_support_level': args.maximum_transcript_support_level,
+        'biotypes'                  : args.biotypes,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,

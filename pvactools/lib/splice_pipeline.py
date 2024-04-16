@@ -26,6 +26,7 @@ class JunctionPipeline:
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
         self.save_gtf = kwargs['save_gtf']
         self.keep_tmp_files = kwargs['keep_tmp_files']
+        self.biotypes = kwargs['biotypes']
         self.gtf_data = self.load_gtf_data()
         self.tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(self.tmp_dir, exist_ok=True)
@@ -64,6 +65,7 @@ class JunctionPipeline:
                 'output_file': self.create_file_path('gtf'),
                 'save_gtf': self.save_gtf,
                 # default no but option to save for running cohorts processed with the same reference data
+                'biotypes': self.biotypes,
             }
             gtf_data = LoadGtfData(**gtf_params)
             gtf_df = gtf_data.execute()

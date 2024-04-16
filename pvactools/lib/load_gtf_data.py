@@ -7,6 +7,7 @@ class LoadGtfData:
         self.gtf_file    = kwargs['gtf_file']
         self.output_file = kwargs['output_file']
         self.save_gtf    = kwargs['save_gtf']  # default false
+        self.biotypes    = kwargs.pop('biotypes', ['protein_coding'])
 
     def execute(self):
 
@@ -26,7 +27,7 @@ class LoadGtfData:
         if 'transcript_biotype' in gtf_df_all:
             gtf_df = gtf_df_all.loc[
                 (gtf_df_all['feature'].isin(['CDS', 'transcript'])) &
-                (gtf_df_all['transcript_biotype'] == 'protein_coding')
+                (gtf_df_all['transcript_biotype'].isin(self.biotypes))
                 ].replace(["^\s*$"], 'NA', regex=True)
         else:
             gtf_df = gtf_df_all.loc[

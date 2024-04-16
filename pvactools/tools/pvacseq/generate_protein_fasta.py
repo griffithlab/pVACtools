@@ -52,6 +52,11 @@ def define_parser():
         action='store_true',
     )
     parser.add_argument(
+        "--biotypes", type=lambda s:[a for a in s.split(',')],
+        help="A list of biotypes to use for pre-filtering transcripts for processing in the pipeline.",
+        default=['protein_coding']
+    )
+    parser.add_argument(
         "--mutant-only",
         help="Only output mutant peptide sequences",
         default=False,
@@ -75,12 +80,13 @@ def define_parser():
     )
     return parser
 
-def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, flanking_sequence_length, pass_only):
+def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, flanking_sequence_length, pass_only, biotypes):
     print("Converting VCF to TSV")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     convert_params = {
         'input_file' : input_vcf,
         'output_file': tsv_file,
+        'biotypes'   : biotypes,
     }
     if sample_name is not None:
         convert_params['sample_name'] = sample_name
@@ -191,7 +197,7 @@ def main(args_input = sys.argv[1:]):
         sys.exit("Aggregate report evaluation ({}) contains invalid values.".format(args.aggregate_report_evaluation))
 
     temp_dir = tempfile.mkdtemp()
-    proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only)
+    proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only, args.biotypes)
     generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir, proximal_variants_tsv)
     parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv, args.aggregate_report_evaluation)
     shutil.rmtree(temp_dir, ignore_errors=True)
