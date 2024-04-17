@@ -123,14 +123,16 @@ class PostProcessor:
             PvacspliceAggregateAllEpitopes(
                 self.input_file,
                 self.aggregate_report,
+                tumor_purity=self.tumor_purity,
                 binding_threshold=self.binding_threshold,
-                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 percentile_threshold=self.percentile_threshold,
-                top_score_metric=self.top_score_metric,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
+                top_score_metric=self.top_score_metric,
                 trna_vaf=self.trna_vaf,
                 trna_cov=self.trna_cov,
                 expn_val=self.expn_val,
+                maximum_transcript_support_level=self.maximum_transcript_support_level,
             ).execute()
         print("Completed")
 
