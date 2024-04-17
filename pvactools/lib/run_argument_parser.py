@@ -223,6 +223,10 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=0.25
         )
         self.parser.add_argument(
+            "--tumor-purity", type=float_range(0.0, 1.0),
+            help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used during aggregate report creation for a simple estimation of whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.",
+        )
+        self.parser.add_argument(
             "--maximum-transcript-support-level", type=int,
             help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
                  + "Keep all epitopes with a transcript support level <= to this cutoff.",
@@ -288,11 +292,6 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Only process VCF entries with a PASS status.",
             default=False,
             action='store_true'
-        )
-        self.parser.add_argument(
-            "--tumor-purity",
-            help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used during aggregate report creation for a simple estimation of whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.",
-            type=float,
         )
         self.parser.add_argument(
             '--expn-val', type=float,

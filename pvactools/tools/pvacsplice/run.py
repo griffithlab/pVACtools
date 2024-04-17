@@ -187,6 +187,7 @@ def main(args_input = sys.argv[1:]):
         'trna_cov'                  : args.trna_cov,
         'trna_vaf'                  : args.trna_vaf,
         'expn_val'                  : args.expn_val,
+        'tumor_purity'              : args.tumor_purity,
         'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'run_post_processor'        : True,
         'exclude_NAs'               : args.exclude_NAs,

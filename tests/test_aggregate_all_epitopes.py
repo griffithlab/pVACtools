@@ -5,7 +5,7 @@ from filecmp import cmp
 import sys
 import py_compile
 
-from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes
+from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes, PvacspliceAggregateAllEpitopes
 from tests.utils import *
 
 class AggregateAllEptiopesTests(unittest.TestCase):
@@ -124,6 +124,32 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "output.pvacbind.tsv"),
+        ))
+
+        metrics_file = output_file.name.replace('.tsv', '.metrics.json')
+        self.assertFalse(os.path.isfile(metrics_file))
+
+        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+            pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
+            self.assertFalse(os.path.isfile(pvacview_file))
+
+        for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
+            pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
+            self.assertFalse(os.path.isfile(pvacview_file))
+
+    def test_aggregate_all_epitopes_pvacsplice_runs_and_produces_expected_output(self):
+        self.assertTrue(py_compile.compile(self.executable))
+        output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
+        self.assertFalse(PvacspliceAggregateAllEpitopes(
+            os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacsplice.tsv'),
+            output_file.name,
+            aggregate_inclusion_binding_threshold=30000,
+            binding_threshold=15000,
+            expn_val=2.4,
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output.pvacsplice.tsv"),
         ))
 
         metrics_file = output_file.name.replace('.tsv', '.metrics.json')
