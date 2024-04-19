@@ -348,6 +348,7 @@ tutorial_tab <- tabItem("tutorial",
                                              p(code("TSL"), " : ", "Transcript support level of the best peptide"),
                                              p(code("Pos"), " : ", "The one-based position of the start of the mutation within the epitope sequence. ",
                                                code("0"), " if the start of the mutation is before the epitope (as can occur downstream of frameshift mutations)"),
+                                             p(code("Prob Pos"), " : ", "If you specify problematic amino acids when running pVACseq, the number of problematic peptides within the best peptide."),
                                              p(code("Num Passing Peptides"), " : ", "The number of unique well-binding peptides for this mutation."),
                                              p(code("IC50 MT"), " : ", code("Lowest"), " or ", code("Median"), " ic50 binding affinity of 
         the best-binding mutant epitope across all prediction algorithms used."),
@@ -390,7 +391,7 @@ tutorial_tab <- tabItem("tutorial",
                                              p("Note that if a percentile threshold has been provided, then the ", code("%ile MT"), " column is also required to be lower than
         the given threshold to qualify for tiers, including Pass, Anchor, Subclonal and LowExpr.") 
                                     ),
-            tabPanel("Transcript Level",
+                                    tabPanel("Transcript Level",
                                              h3(" "),
                                              fluidRow(
                                                column(width = 6,
@@ -419,6 +420,19 @@ tutorial_tab <- tabItem("tutorial",
                 img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Transcript_in_Set.png",
                 align = "center", height = "300px", width = "1200px"),
             )
+        ),
+        fluidRow(
+          column(width = 3,
+                 h4("Reference Match", style = "font-weight: bold; text-decoration: underline;"),
+                 p("When the ", code("--run-reference-proteome-similarity"), "option is chosen, pVACseq will output a file of found matches of the epitode candidates in the reference proteome.", br(), br(),
+                   "The ", strong("Reference Matches"), "tab will display the subsequent matches for the candidate currently being investigated:", br(), br(),
+                   "The tab shows the best peptide with the variant highlighted in red, the query data which includes the flanking sequence and the best peptide highlighted in yellow, and a table of reference proteome hits", br(), br(),
+                   "The Hits table will display the peptides that match the query sequence and the genes, transcripts, and Hit IDs of the found matches.")
+          ),
+          column(width = 9,
+                 img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Reference_Match.png",
+                     align = "center", height = "300px", width = "1200px"),
+          )
         )
     ),
     tabPanel("Peptide Level",
