@@ -390,7 +390,7 @@ tutorial_tab <- tabItem("tutorial",
                                              p("Note that if a percentile threshold has been provided, then the ", code("%ile MT"), " column is also required to be lower than
         the given threshold to qualify for tiers, including Pass, Anchor, Subclonal and LowExpr.") 
                                     ),
-                                    tabPanel("Transcript Level",
+            tabPanel("Transcript Level",
                                              h3(" "),
                                              fluidRow(
                                                column(width = 6,
