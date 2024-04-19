@@ -14,13 +14,13 @@ Vignette
 ---------------
 In this vignette, we will demonstrate evaluation of neoantigen candidates predicted by pVACseq with pVACview using the built-in demo data. The demonstration dataset includes Class I and Class II neoantigen candidate files generated from the HCC1395 breast cancer cell line and its matched lymphoblastoid cell line HCC1395BL. You can also download the demo data `here <https://github.com/griffithlab/pVACtools/tree/master/pvactools/tools/pvacview/data>`_. 
 
-:large:`Upload`
+:large:`Upload input data files`
 ____________________________
 
 First, navigate to the Upload page, and click on ``Load demo data``.
 This will immediately load:
 
-- A tsv of Class I data: a high level aggregated file that lists all MHC-class-I predicted epitopes, their binding affinity scores, and additional variant information (the coordinate, coverage, vaf, and expression of the variants and transcripts encoding the epitopes).
+- A tsv of Class I data: a high level aggregated file that lists all MHC-class-I predicted epitopes, their binding affinity scores, and additional variant information (genomic coordinates, coverage, VAF, and expression of the variants and transcripts encoding the epitopes).
 - A json file of Class I data: JSON file with detailed information about the predicted epitopes, formatted for pVACview.
 - A tsv for Class II data: an aggregated file that lists all MHC-class-II predicted epitopes. 
 - A list of genes of interest: in this example, it's a tsv of the cancer census hotspot gene list from COSMIC. 
@@ -50,21 +50,21 @@ The top row of the page has 4 sections:
 - Current Parameters for Tiering
 - Add Comments for selected variant
 
-pVACview prioritizes neoantigen candidates by ranking these peptides based on a set of rules (parameters for tiering), which include variant allele fraction cutoff, gene/transcript expression, binding affinity predictions and more as discussed later. Based on routine criteria evidenced by the literature, we provide a default set of parameters for tiering, detailed in **Original Parameters for Tiering** section. The default is a good starting point, but as all samples are unique in terms of sample quality, sequencing quality, tumor purity, tumor mutation burden, HLA type, you may also want to set your own parameters in the **Advanced Options: Regenerate Tiering with different parameters** section. To see the real-time set of rules applied to your data, see **Current Parameters for Tiering** section.
-Note: click the ``+``/ ``-`` in the right corner to expand/retract each section. 
+pVACview prioritizes neoantigen candidates by ranking these peptides based on a set of rules (parameters for tiering), which include variant allele fraction cutoff, gene/transcript expression, binding affinity predictions and more as discussed later. Based on routine criteria described in the literature, we provide a default set of parameters for tiering, detailed in the **Original Parameters for Tiering** section. The default is a good starting point, but as all samples are unique in terms of sample quality, sequencing quality, tumor purity, tumor mutation burden, HLA type, you may also want to set your own parameters in the **Advanced Options: Regenerate Tiering with different parameters** section. To see the real-time set of rules applied to your data, see the **Current Parameters for Tiering** section.
+Note: click the ``+``/ ``-`` in the right corner to expand/contract each section.
 
 The original parameters rank candidates on multiple facets.
-The first aspect is clonality. Cancer starts with a founding clone with tumor-initiating mutations which expand and drive malignancy. Descendents of the founding clone may acquire additional mutations. Clonal mutations are shared by all clones, whereas subclonal mutations are shared by some but not all cancer cells. Neoantigen candidates derived from clonal variants should be prioritized as we expect targeting such mutations will drive a better clinical response. pVACview uses the following parameters when determining clonality:
+The first aspect is clonality. Cancer starts with a founding clone with tumor-initiating mutations which expand and drive malignancy. Descendents of the founding clone may acquire additional mutations. Clonal mutations are shared by all clones, whereas subclonal mutations are shared by some but not all cancer cells. Neoantigen candidates derived from clonal variants should be prioritized as it has been proposed that targeting such mutations will drive a better clinical response. pVACview uses the following parameters when determining clonality:
 
 - ``Tumor Purity`` : a value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. (default: None)
-- ``VAF Clonal`` : Tumor DNA variant allele frequency (VAF) to determine whether the variant is clonal. (default: 0.5)
-- ``VAF Subclonal`` : Tumor DNA VAF cutoff to determine whether the variant is subclonal. This value is automatically calculated as half of ``VAF Clonal``. (default: 0.25)
+- ``VAF Clonal`` : Tumor DNA variant allele frequency (VAF) to determine whether the variant is clonal. This value is determined automatically from the VAFs in the input data (see pVACtools docs for further details) but can be adjusted by the user (see below).
+- ``VAF Subclonal`` : Tumor DNA VAF cutoff to determine whether the variant is subclonal. This value is automatically calculated as half of ``VAF Clonal``.
 
-The second aspect is expression. The ideal peptide candidate should be derived from a gene/transcript that is expressed robustly. We calculate allele expression by multiplying gene expression by the RNA VAF and set a default cutoff of 2. Variants with expression lower than this cutoff will be marked with low expression. Users can adjust this cutoff based on their own knowledge of the dataset being analyzed:
+The second aspect is expression. The ideal peptide candidate should be derived from a gene/transcript that is expressed robustly. We calculate allele expression by multiplying gene expression by the RNA VAF and set a default cutoff of 2.5. Variants with expression lower than this cutoff will be marked with low expression. Users can adjust this cutoff based on their own knowledge of the dataset being analyzed:
 
-- ``Allele Expression for Passing Variants`` : allele expression cutoff for passing variants. (default: 2 FPKM)
+- ``Allele Expression for Passing Variants`` : allele expression cutoff for passing variants. (default: 2.5 FPKM*VAF)
 
-The third aspect is predicted binding affinity, which is measured by IC50 (peptide concentration required for 50% of inhibition for peptide binding to MHC). Lower IC50 means a lower peptide concentration is required to overcome inhibitors and bind to MHC, which signifies better binding affinity. The default cutoff for strong binders is set to 500nM. We also list the `Binding threshold for inclusion into Metric File which is a parameter used upstream to determine how many peptides the user wants to include in the peptide detailed view. Note that this parameter cannot be changed in the visualization component of pVACview but would need to be changed when generating the original aggregate report and metrics file. The default cutoff was set to 5000nM to reasonably capture information about different peptide candidates from the same mutation but also to exclude those that have extremely poor binding.
+The third aspect is predicted binding affinity, which is measured by IC50 (peptide concentration required for 50% of displacement of a reference peptide to an MHC groove). Lower IC50 means a lower peptide concentration was required to achieve 50% displacement, which signifies better binding affinity. A common threshold for considering a peptide to be a strong binder is 500 nM. We also list the `Binding threshold` for inclusion in the Metric File. This paramete determines how many peptides the user wants to include in the peptide detailed view. Note that this parameter cannot be changed in the visualization component of pVACview but would need to be changed when generating the original aggregate report and metrics file. The default cutoff was set to 5000 nM to reasonably capture information about different peptide candidates from the same mutation but also to exclude those that have extremely poor binding.
 
 - ``Binding Threshold``: IC50 value cutoff for a passing neoantigen. (default: 500 nM)
 - ``Binding Threshold for Inclusion Into Metric File``: IC50 value cutoff for neoantigens to be loaded to pVACview. This feature helps limit the number of neoantigens being loaded to pVACview. (default: 5000 nM)
