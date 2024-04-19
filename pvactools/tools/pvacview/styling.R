@@ -17,6 +17,7 @@ callback <- function(hla_count, score_mode) {
     "        'Best Peptide - The best-binding mutant epitope sequence (lowest mutant binding affinity) prioritizing epitope sequences that resulted from a protein_coding transcript with a TSL below the maximum transcript support level and having no problematic positions.',",
     "        'Best Transcript - Transcript corresponding to the best peptide with the lowest TSL and shortest length.',",
     "        'TSL - Transcript support level of the best peptide.',",
+    "        'Allele',",
     "        'Pos - The one-based position of the start of the mutation within the epitope sequence. 0 if the start of the mutation is before the epitope (as can occur downstream of frameshift mutations).',",
     "        'Prob Pos - Problematic positions within the best peptide.',",
     "        'Num Passing Peptides - The number of unique well-binding peptides for this mutation.',",
