@@ -68,7 +68,9 @@ The third aspect is predicted binding affinity, which is measured by IC50 (pepti
 
 - ``Binding Threshold``: IC50 value cutoff for a passing neoantigen. (default: 500 nM)
 - ``Binding Threshold for Inclusion Into Metric File``: IC50 value cutoff for neoantigens to be loaded to pVACview. This feature helps limit the number of neoantigens being loaded to pVACview. (default: 5000 nM)
-The fourth aspect is Transcript Support Level (`TSL <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_). TSL highlights which transcript isoform is well/poorly-supported by alignment. The existing TSL levels are: TSL1, TSL2, TSL3, TSKL4, TSL5, TSLNA, with TSL1 being the best TSL level.  We suggest users using a higher TSL cutoff for higher confidence in the annotation of the targeted transcript. Default is set to be TSL1. - ``Maximum TSL`` : cutoff TSL level for a passing candidate. (default: 1)
+The fourth aspect is Transcript Support Level (`TSL <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_). TSL highlights which transcript isoform is well/poorly-supported by alignment. The existing TSL levels are: TSL1, TSL2, TSL3, TSKL4, TSL5, TSLNA, with TSL1 being the best TSL level.  We suggest users using a higher TSL cutoff for higher confidence in the annotation of the targeted transcript. Default is set to be TSL1. 
+
+- ``Maximum TSL`` : cutoff TSL level for a passing candidate. (default: 1)
 
 Additionally, users have the option to consider percentile ranks on top of raw IC50 predictions. Percentile rank is a method used to predict binding affinity of a peptide by comparing it to a set of peptides with similar sizes. A lower percentile rank indicates stronger affinity. Percentile rank of less than 2% are generally
 recommended for differentiating binders from non-binders (see `paper <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5679736/>`_). In contrast to IC50 predictions, percentile ranks allow a more normalized comparison across different HLA alleles that may have allele-specific binding cutoffs. This feature is turned off by default but can be turned on by the user and considered when regenerating Tiering across variants. 
@@ -176,7 +178,7 @@ You can see the mutant (MT) and wildtype (WT) peptide sequence for this transcri
     :alt: pVACview Vignette
     :figclass: align-left
 
-**Protein-level assessment:**
+**Peptide-level assessment:**
 
 The candidate in investigation has good binding affinity (median IC50 score is less than 500nM, percentile rank is less than 2%). Elution score varies with algorithms but overall the mutant peptide has better elution score than wildtype peptide, and the elution score is close to 1. 
 
@@ -282,7 +284,7 @@ The images below are transcripts in Transcript Set 1 (top-middle, 14 transcripts
     :alt: pVACview Vignette
     :figclass: align-left
 
-The images below are the neoantigen candidates from Transcript Set 1 (top) and Transcript Set 2 (bottom). The best neoantigen candidate (AERMGFTVV) is highlighted in green. 
+The images below are the neoantigen candidates from Transcript Set 1 (top) and Transcript Set 2 (bottom). The best neoantigen candidate (AERMGFTVV) is highlighted in green. Here, candidates are ranked based on IC50 score - the best candidate has the lowest IC50 score. 
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_3_TranscriptSet1.png
     :width: 1000px
@@ -295,6 +297,50 @@ The images below are the neoantigen candidates from Transcript Set 1 (top) and T
     :align: right
     :alt: pVACview Vignette
     :figclass: align-left
+
+**Peptide-level assessment:**
+
+For simplicity, we will review only the best peptide (AERMGFTVV) of the six candidates mentioned above. This candidate has good binding affinity (the median IC50 is 76.11nM, which is less than the 500nM cut-off; the median %ile is 0.125, which is less than recommended value of 2; the predictions from all algorithms are in high agreement with no outliers, as seen in the violin plot).  
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_7_IC50plot_TranscriptSet1.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_8_%ileplot_TranscriptSet1.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+The candidate also has good elution scores (elution scores close to 1). It's unclear whether the candidate is likely to trigger Tcell response, since  immunogenicity %ile scores were not provided (two algorithms BigMHC_IM and DeepImmuno fail to predict immunogenicity %ile scores).
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_10_ElutionAndImmunogenicityData_TranscriptSet1.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+Altogether, both the candidate (mutant peptide - MT) and its wildtype (WT) peptide are strong binders. The figure below shows the mutated amino acid (V) in the candidate is not in anchor position. This fits into Scenario 4 in the guide, where the candidate is likely to elicit strong recognition from the immune system. 
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_5_AnchorHeatmap_TranscriptSet1.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+The candidate sequence also has no match with any known peptide in the human proteome.
+
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_4_ReferenceMatches_TranscriptSet1.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+**Decision:**
+
+Given all the information above, we can conclude that the reviewed Class I peptide is potentially a good binder and choose to Accept this candidate in the ``Eval`` drop-down menu. 
 
 Example 3: a bad candidate: ZNF141-H389Y: KIYTGEKPY
 ^^^^^^^^ 
