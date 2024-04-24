@@ -37,7 +37,7 @@ class TopScoreFilter(metaclass=ABCMeta):
                  + "lowest: Use the best MT Score (i.e. the lowest MT ic50 binding score of all chosen prediction methods). "
                  + "median: Use the median MT Score (i.e. the median MT ic50 binding score of all chosen prediction methods)."
         )
-        if tool == 'pvacseq':
+        if tool == 'pvacseq' or tool == 'pvacsplice':
             parser.add_argument(
                 "--maximum-transcript-support-level", type=int,
                 help="When determining the top peptide, only consider those entries that meet this threshold for the Ensembl transcript support level (TSL). "
@@ -45,6 +45,7 @@ class TopScoreFilter(metaclass=ABCMeta):
                 default=1,
                 choices=[1,2,3,4,5]
             )
+        if tool == 'pvacseq':
             parser.add_argument(
                 '-b', '--binding-threshold', type=int,
                 help="When determining the top peptide, only peptides passing the anchor criteria are considered. This criteria is failed if "
@@ -308,12 +309,22 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
-        for line in lines:
+        #subset dataset to only include entries with no problematic positions
+        if 'Problematic Positions' in lines[0]:
+            prob_pos_lines = [x for x in lines if x['Problematic Positions'] == "None"]
+            #if this results in an empty dataset, reset to previous dataset
+            if len(prob_pos_lines) == 0:
+                prob_pos_lines = lines
+        else:
+            prob_pos_lines = lines
+
+        for line in prob_pos_lines:
             if line['Expression'] == 'NA':
                 line['Expression Sort'] = 0
             else:
                 line['Expression Sort'] = float(line['Expression'])
-        sorted_lines = sorted(lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)]), -d['Expression Sort']))
+
+        sorted_lines = sorted(prob_pos_lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)]), -d['Expression Sort']))
         return sorted_lines[0]
 
 class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
@@ -346,11 +357,20 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
-        sorted_lines = sorted(lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)])))
+        #subset tsl dataset to only include entries with no problematic positions
+        if 'Problematic Positions' in lines[0]:
+            prob_pos_lines = [x for x in lines if x['Problematic Positions'] == "None"]
+            #if this results in an empty dataset, reset to previous dataset
+            if len(prob_pos_lines) == 0:
+                prob_pos_lines = lines
+        else:
+            prob_pos_lines = lines
+
+        sorted_lines = sorted(prob_pos_lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)])))
         return sorted_lines[0]
 
 class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median"):
+    def __init__(self, input_file, output_file, top_score_metric="median", maximum_transcript_support_level=1):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
@@ -358,6 +378,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.formatted_top_score_metric = "Median"
         else:
             self.formatted_top_score_metric = "Best"
+        self.maximum_transcript_support_level = maximum_transcript_support_level
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -379,5 +400,26 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
-        sorted_lines = sorted(lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)])))
+        #get all entries with Biotype 'protein_coding'
+        biotype_lines = [x for x in lines if x['Biotype'] == 'protein_coding']
+        #if there are none, reset to previous dataset
+        if len(biotype_lines) == 0:
+            biotype_lines = lines
+
+        #subset protein_coding dataset to only include entries with a TSL < maximum_transcript_support_level
+        tsl_lines = [x for x in biotype_lines if x['Transcript Support Level'] != 'NA' and x['Transcript Support Level'] != 'Not Supported' and int(x['Transcript Support Level']) < self.maximum_transcript_support_level]
+        #if this results in an empty dataset, reset to previous dataset
+        if len(tsl_lines) == 0:
+            tsl_lines = biotype_lines
+
+        #subset tsl dataset to only include entries with no problematic positions
+        if 'Problematic Positions' in tsl_lines[0]:
+            prob_pos_lines = [x for x in tsl_lines if x['Problematic Positions'] == "None"]
+            #if this results in an empty dataset, reset to previous dataset
+            if len(prob_pos_lines) == 0:
+                prob_pos_lines = tsl_lines
+        else:
+            prob_pos_lines = tsl_lines
+
+        sorted_lines = sorted(prob_pos_lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)])))
         return sorted_lines[0]

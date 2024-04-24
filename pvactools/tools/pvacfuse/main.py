@@ -1,7 +1,6 @@
 import argparse
 import sys
 import os
-import pkg_resources
 from pvactools.tools.pvacfuse import *
 
 def define_parser():
