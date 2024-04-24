@@ -238,6 +238,7 @@ class PostProcessor:
                 self.transcript_support_level_filter_fh.name,
                 self.top_score_filter_fh.name,
                 top_score_metric = self.top_score_metric,
+                maximum_transcript_support_level=self.maximum_transcript_support_level,
             ).execute()
         print("Completed")
 

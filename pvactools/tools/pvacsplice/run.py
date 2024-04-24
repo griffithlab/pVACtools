@@ -277,5 +277,7 @@ def main(args_input = sys.argv[1:]):
 
     change_permissions_recursive(junctions_dir, 0o755, 0o644)
 
+    #TODO: add tumor purity
+
 if __name__ == '__main__':
     main()

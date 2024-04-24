@@ -9,7 +9,7 @@ from pvactools.lib.run_utils import *
 
 def define_parser():
     parser = argparse.ArgumentParser(
-        'pvacseq coverage_filter',
+        'pvacsplice coverage_filter',
         description="Filter variants processed by IEDB by coverage, vaf, and gene expression",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
