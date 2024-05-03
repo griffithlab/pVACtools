@@ -68,6 +68,7 @@ The third aspect is predicted binding affinity, which is measured by IC50 (pepti
 
 - ``Binding Threshold``: IC50 value cutoff for a passing neoantigen. (default: 500 nM)
 - ``Binding Threshold for Inclusion Into Metric File``: IC50 value cutoff for neoantigens to be loaded to pVACview. This feature helps limit the number of neoantigens being loaded to pVACview. (default: 5000 nM)
+
 The fourth aspect is Transcript Support Level (`TSL <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_). TSL highlights which transcript isoform is well/poorly-supported by alignment. The existing TSL levels are: TSL1, TSL2, TSL3, TSL4, TSL5, TSLNA, with TSL1 being the best TSL level.  We suggest users using a higher TSL level cutoff (lower number) for higher confidence in the annotation of the targeted transcript. Default is set to be TSL1. 
 
 - ``Maximum TSL`` : cutoff TSL level for a passing candidate. (default: 1)
