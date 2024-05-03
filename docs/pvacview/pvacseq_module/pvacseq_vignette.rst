@@ -326,7 +326,7 @@ For simplicity, we will review only the best peptide (AERMGFTVV) of the six cand
     :alt: pVACview Vignette
     :figclass: align-left
 
-.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_8_percentileplot_TranscriptSet1.png
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_8_percentilePlot_TranscriptSet1.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
