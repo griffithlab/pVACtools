@@ -206,7 +206,7 @@ The candidate being investigated has a good binding affinity (median IC50 score 
     :alt: pVACview Vignette
     :figclass: align-left
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_8_%ilePlot.png
+.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_8_percentilePlot.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
@@ -326,7 +326,7 @@ For simplicity, we will review only the best peptide (AERMGFTVV) of the six cand
     :alt: pVACview Vignette
     :figclass: align-left
 
-.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_8_%ileplot_TranscriptSet1.png
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_8_percentileplot_TranscriptSet1.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
