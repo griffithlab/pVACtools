@@ -77,16 +77,6 @@ Binding affinity is measured by IC50 (peptide concentration required for 50% of 
 
 - ``Binding Threshold``: IC50 value cutoff for a passing neoantigen. (default: 500 nM)
 - ``Binding Threshold for Inclusion Into Metric File``: IC50 value cutoff for neoantigens to be loaded to pVACview. This feature helps limit the number of neoantigens being loaded to pVACview. (default: 5000 nM)
-
-**Transcript Support Level**
-
-(`TSL <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_) provides information on degree to which transcript isoforms are supported by experimental evidence. The existing TSL levels are: TSL1, TSL2, TSL3, TSL4, TSL5, TSLNA, with TSL1 being the best TSL level.  We suggest users using a higher TSL level cutoff (lower number) for higher confidence in the annotation of the targeted transcript. Default is set to be TSL1. 
-
-- ``Maximum TSL`` : cutoff TSL level for a passing candidate. (default: 1)
-
-Additionally, users have the option to consider percentile ranks on top of raw IC50 predictions. Percentile rank is a method used to predict binding affinity of a peptide by comparing it to a set of peptides with similar sizes. A lower percentile rank indicates stronger affinity. Percentile rank of less than 2% are generally
-recommended for differentiating binders from non-binders (see `paper <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5679736/>`_). In contrast to IC50 predictions, percentile ranks allow a more normalized comparison across different HLA alleles that may have allele-specific binding cutoffs. This feature is turned off by default but can be turned on by the user and considered when regenerating Tiering across variants. 
-
 - ``Percentile Threshold`` : percentile score cutoff. (default: NULL)
 
 When using the predicted IC50 values from binding prediction tools, another aspect to consider is the binding threshold of each allele. As stated earlier, different alleles may have allele-specific binding thresholds that vary from the default 500nM cutoff. Users can choose to use allele-specific binding threshold where data is available by turning this option on.
@@ -98,6 +88,20 @@ An important advantage of using pVACseq to generate neoantigen predictions is th
 - ``MT Top Score Metric`` : mutant top score metric. (default: Median)
 - ``WT Top Score Metric`` : wildtype top score metric. (default: Median)
 
+Aditionally, the ``HLA.Alleles`` and respective ``Binding.Cutoffs`` are also displayed.
+
+- ``HLA.Alleles`` : is the list of HLA alleles that the sample expresses and given as input when running pVACseq.
+- ``Binding.Cutoffs``: the IC50 cutoff value for the corresponding HLA allele. In the below example, allele-specific binding thresholds were used (``Allele Specific Binding Threshold: TRUE``). This results in the binding threshold for HLA-A*29:01 being set to the one recommended by `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_. For the remaining alleles, IEDB does not have an specific binding threshold recommendation so the threshold is set to the basic binding threshold as a fallback, in this case 500 (``Binding Threshold: 500``).
+
+**Transcript Support Level**
+
+(`TSL <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_) provides information on degree to which transcript isoforms are supported by experimental evidence. The existing TSL levels are: TSL1, TSL2, TSL3, TSL4, TSL5, TSLNA, with TSL1 being the best TSL level.  We suggest users using a higher TSL level cutoff (lower number) for higher confidence in the annotation of the targeted transcript. Default is set to be TSL1. 
+
+- ``Maximum TSL`` : cutoff TSL level for a passing candidate. (default: 1)
+
+Additionally, users have the option to consider percentile ranks on top of raw IC50 predictions. Percentile rank is a method used to predict binding affinity of a peptide by comparing it to a set of peptides with similar sizes. A lower percentile rank indicates stronger affinity. Percentile rank of less than 2% are generally
+recommended for differentiating binders from non-binders (see `paper <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5679736/>`_). In contrast to IC50 predictions, percentile ranks allow a more normalized comparison across different HLA alleles that may have allele-specific binding cutoffs. This feature is turned off by default but can be turned on by the user and considered when regenerating Tiering across variants. 
+
 **Anchor Positions**
 
 Anchor positions can influence whether a neoantigen candidate may be recognized by the patient’s immune system. Thus, another aspect to consider is anchor contribution. A subset of  amino acid positions within the neoantigen candidate is more likely to face the TCR, while other positions are responsible for anchoring the peptide to the MHC. Anchor identity is determined by anchor likelihood score (more information about how the score is calculated `here <https://www.science.org/doi/10.1126/sciimmunol.abg2200?url_ver=Z39.88-2003&rfr_id=ori:rid:crossref.org&rfr_dat=cr_pub%20%200pubmed>`_). Anchor identity of the mutated amino acid can influence whether the neoantigen candidate is expected to induce an immune response or be subject to central tolerance of the immune system, as elaborated in the 4 scenarios discussed later. To examine whether the mutated amino acid is located at anchor position, we provide:
@@ -105,10 +109,6 @@ Anchor positions can influence whether a neoantigen candidate may be recognized 
 - ``Allele Specific Anchors Used`` : if TRUE, likelihood score is used to determine anchor position; if FALSE, position 1, 2, n-1 and n are set as anchor positions. (default: TRUE)
 - ``Anchor Contribution Threshold`` : anchor likelihood score (between 0-1) cutoff to determine whether the amino acid is in anchor position. (default: 0.8)
 
-Last but not least, the ``HLA.Alleles`` and respective ``Binding.Cutoffs`` are also displayed.
-
-- ``HLA.Alleles`` : is the list of HLA alleles that the sample expresses and given as input when running pVACseq.
-- ``Binding.Cutoffs``: the IC50 cutoff value for the corresponding HLA allele. In the below example, allele-specific binding thresholds were used (``Allele Specific Binding Threshold: TRUE``). This results in the binding threshold for HLA-A*29:01 being set to the one recommended by IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_. For the remaining alleles, IEDB does not have an specific binding threshold recommendation so the threshold is set to the basic binding threshold as a fallback, in this case 500 (``Binding Threshold: 500``).
 .. rst-class:: three-images-row
 
 .. image:: ../../images/screenshots/vignette/originalParametersForTiering/pvacview-OG_params_1.png
