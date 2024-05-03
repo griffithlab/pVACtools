@@ -77,9 +77,11 @@ Additionally, users have the option to consider percentile ranks on top of raw I
 recommended for differentiating binders from non-binders (see `paper <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5679736/>`_). In contrast to IC50 predictions, percentile ranks allow a more normalized comparison across different HLA alleles that may have allele-specific binding cutoffs. This feature is turned off by default but can be turned on by the user and considered when regenerating Tiering across variants. 
 
 - ``Percentile Threshold`` : percentile score cutoff. (default: NULL)
+
 When using the predicted IC50 values from binding prediction tools, another aspect to consider is the binding threshold of each allele. As stated earlier, different alleles may have allele-specific binding thresholds that vary from the default 500nM cutoff. Users can choose to use allele-specific binding threshold where data is available by turning this option on.
 
 - ``Allele Specific Binding Threshold`` : this dictates whether the binding threshold is set specific to each allele based on `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_ suggestion (option TRUE), or based on the ``Binding Threshold`` defined above (option FALSE). (default: TRUE)
+
 An important advantage of using pVACseq to generate neoantigen predictions is that multiple algorithms can be run (namely up to 8 Class I algorithms and up to 4 Class II algorithms). However, the user will need to decide whether the lowest or the median prediction value across algorithms should be used as the binding metric (IC50 MT, IC50 WT, %ile MT, and %ile WT columns) for each peptide-HLA combination. This cannot be changed in pVACview but is determined during the initial pVACseq run. To view which score metric (median or lowest) was used to compare binding affinity of mutant (MT) and wildtype (WT) peptides, we provide:
 
 - ``MT Top Score Metric`` : mutant top score metric. (default: Median)
@@ -89,6 +91,7 @@ Anchor positions can influence whether a neoantigen candidate may be recognized 
 
 - ``Allele Specific Anchors Used`` : if TRUE, likelihood score is used to determine anchor position; if FALSE, position 1, 2, n-1 and n are set as anchor positions. (default: TRUE)
 - ``Anchor Contribution Threshold`` : anchor likelihood score (between 0-1) cutoff to determine whether the amino acid is in anchor position. (default: 0.8)
+
 Last but not least, the ``HLA.Alleles`` and respective ``Binding.Cutoffs`` are also displayed.
 
 - ``HLA.Alleles`` : is the list of HLA alleles that the sample expresses and given as input when running pVACseq.
@@ -153,6 +156,7 @@ In this case, there’s only 1 mutant transcript matches with the user-provided 
     :align: right
     :alt: pVACview Vignette
     :figclass: align-left
+
 The predicted best peptide (neoantigen candidate) doesn’t have any match in the human proteome. This is ideal, since the candidate will more likely to be recognized by T cells due to central tolerance.
 
 .. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_2_ReferenceMatches.png
