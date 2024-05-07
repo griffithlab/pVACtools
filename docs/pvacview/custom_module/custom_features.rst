@@ -12,7 +12,7 @@ _______________________________
 
 The **Overview of Neantigen Features** table displays the groups of candidates as designated
 by the feature specified by the user. The top candidate of the group according to the sort by feature
-is shown in the table. To investiage the candidates within the group, click the ``Investigate`` button.
+is shown in the table. To investigate the candidates within the group, click the ``Investigate`` button.
 
 
 .. figure:: ../../images/screenshots/pvacview-custom-maintable-neopredpipe.png
@@ -26,7 +26,7 @@ Detailed Data
 _____________
 
 The **Detailed Data** table shows all the candidates within the group so that users can
-compared them to one another. This table will only display the features that are
+compare them to one another. This table will only display the features that are
 selected on the upload page.
 
 .. figure:: ../../images/screenshots/pvacview-custom-detaileddatatable-neopredpipe.png

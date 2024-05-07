@@ -52,7 +52,7 @@ The top row of the page has 4 sections:
 - Add Comments for selected variant
 
 pVACview prioritizes neoantigen candidates by ranking these peptides based on a set of rules (:ref:`parameters for tiering <pvacseq_aggregate_report_tiers_label>`), which include variant allele fraction cutoff, gene/transcript expression, binding affinity predictions and more, as discussed later. Based on criteria described in the literature, we provide a default set of parameters for tiering, detailed in the **Original Parameters for Tiering** section. The default is a good starting point, but as all samples are unique in terms of sample quality, sequencing quality, tumor purity, tumor mutation burden, HLA type, etc. you may want to set your own parameters in the **Advanced Options: Regenerate Tiering with different parameters** section. To see the current set of rules applied to your data, see the **Current Parameters for Tiering** section.
-Note: click the ``+``/ ``-`` in the right corner if a section to expand/contract the section.
+Note: click the ``+``/ ``-`` in the right corner of a section to expand/contract the section.
 
 The original parameters rank candidates on multiple facets:
 
@@ -224,7 +224,7 @@ The candidate being investigated has a good binding affinity (median IC50 score 
     :alt: pVACview Vignette
     :figclass: align-left
 
-The mutation is not in an anchor position (see ``Anchor heatmap`` tab). Anchor prediction scores for each amino acid position are provided in ``Anchor Weights`` tab at the bottom. Both mutant and wildtype peptides are good binders, yet the mutant peptide is a stronger binder. This is scenario number 2 (WT strong binder, MT strong binder, MT not in an anchor position) according to the Scenario Guide, where the neoantigen candidate is favorable and can be accepted.
+The mutation is not in an anchor position (see ``Anchor heatmap`` tab). Anchor prediction scores for each amino acid position are provided in the ``Anchor Weights`` tab at the bottom. Both mutant and wildtype peptides are good binders, yet the mutant peptide is a stronger binder. This is scenario number 2 (WT strong binder, MT strong binder, MT not in an anchor position) according to the Scenario Guide, where the neoantigen candidate is favorable and can be accepted.
 
 .. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_5_AnchorHeatmap.png
     :width: 1000px
@@ -371,7 +371,7 @@ Example 3: a bad candidate: ZNF141-H389Y: KIYTGEKPY
 
 Given that the allele expression for passing variants is set at 2 (and a lot of gene has allele expression in the range of 5-114), ``Allele expression`` of this ZNF141 variant is low (1.824). 
 
-Furthermore, the candidate peptide KIYTGEKPY matches with a sequence in the human reference proteome. 
+Furthermore, the candidate peptide KIYTGEKPY matches with a sequence in the human reference proteome.
 
 .. figure:: ../../images/screenshots/vignette/ZNF141/2_ReferenceMatches.png
     :width: 1000px
@@ -389,7 +389,7 @@ Since the candidate peptide has a match in the reference proteome, we will rejec
 :large:`Export`
 ____________________________
 
-After reviewing candidates, you can download the file with evaluationa as a tsv or as an excel sheet.
+After reviewing candidates, you can download the file with evaluation as a tsv or as an excel sheet.
 
 .. figure:: ../../images/screenshots/vignette/pvacview-export.png
     :width: 1000px
