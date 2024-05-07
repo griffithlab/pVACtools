@@ -641,103 +641,83 @@ tutorial_tab <- tabItem("tutorial",
         )
     ),
     tabPanel("NeoFox Module",
-             h4(" "),
-             fluidRow(
-               column(width = 6,
-                      h4("Module for Exploring NeoFox Annotated Neoantigens", style = "font-weight: bold; text-decoration: underline;"),
-                      p("The one required file should end with the suffix", code("_neoantigen_candidates_annotated.tsv"), ".",
-                        "The module expects all all NeoFox annotated features to be in in the file and can handle input with other annotations you might append to the neoantigen candidates.", br(), br(),
-                      ),
-                      
-                      column(width = 6,
-                             img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-neofox-table-violinplot.png?raw=true",
-                                 align = "center", width = "1500px"), br(), br()
-                      )
-               ),
-
-             ),
-             
-             fluidRow(
-               column(width = 6,
-                      h4("Features", style = "font-weight: bold; text-decoration: underline;"),
-                      h5("Annotated Neoantigen Table", style = "font-weight: bold;"),
-                      p("The annotated neoantigen table is generated as output from NeoFox and includes many annotations based on published neoantigen features. 
-                        You can page through the candidates, sort by any feature, and select one or more candidates for further investgation. We have marked the 
-                        features we find most informative with an asterick. "),
-                      h5("Comparative Violin Plots", style = "font-weight: bold;"),
-                      p("You can understand how selected candidates relate to the the rest of the dataset using the comparative violin plots. You can select as many candidates 
-                        as you would like which will then be highlighted in red in the violin plots. You can also select up to six features to view at a time. We have pre-selected
-                        five features which we found informative. "),
-                      h5("Dynamic Scatter Plot", style = "font-weight: bold;"),
-                      p("You can also further investigate the data using the dynamic scatter plot where you can choose any feature to be the X-axis, Y-axis,
-                        color, or size variable. The X and Y scale can be transformed and a range of values subsetted. The color represents the minimum
-                        and maximum values can also be changed to any HEX value. ", br(), br(),
-                        
-                        "To view information about different points on the plot simply mouse over individual points. You can also export the current scatter plot 
-                        by using the camera icon at the top right corner of the plot." ),
-                      
-               )
-             ),
-             
-             column(width = 6,
-                    img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png?raw=true",
-                        align = "center", width = "1500px"), br(), br()
-             ), 
-             
+      h4("Module for Exploring NeoFox Annotated Neoantigens", style = "font-weight: bold; text-decoration: underline;"),
+      p("The one required file should end with the suffix \"_neoantigen_candidates_annotated.tsv\".
+        The module expects all all NeoFox annotated features to be in in the file and can handle input with other annotations
+        you might append to the neoantigen candidates."
+      ),
+      img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-neofox-table-violinplot.png?raw=true", align = "center", width = "1500px"),
+      h4("Features", style = "font-weight: bold; text-decoration: underline;"),
+      h5("Annotated Neoantigen Table", style = "font-weight: bold;"),
+      p("The annotated neoantigen table is generated as output from NeoFox and includes many annotations based on published neoantigen features. 
+        You can page through the candidates, sort by any feature, and select one or more candidates for further investgation. We have marked the 
+        features we find most informative with an asterick. "
+      ),
+      h5("Comparative Violin Plots", style = "font-weight: bold;"),
+      p("You can understand how selected candidates relate to the the rest of the dataset using the comparative violin plots. You can select as many candidates 
+        as you would like which will then be highlighted in red in the violin plots. You can also select up to six features to view at a time. We have pre-selected
+        five features which we found informative. "
+      ),
+      h5("Dynamic Scatter Plot", style = "font-weight: bold;"),
+      p("You can also further investigate the data using the dynamic scatter plot where you can choose any feature to be the X-axis, Y-axis,
+        color, or size variable. The X and Y scale can be transformed and a range of values subsetted. The color represents the minimum
+        and maximum values can also be changed to any HEX value."
+      ),
+      p("To view information about different points on the plot simply mouse over individual points. You can also export the current scatter plot 
+        by using the camera icon at the top right corner of the plot."
+      ),
+        img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png?raw=true", align = "center", width = "1500px")
     ),
     tabPanel("Custom Module",
-             h4(" "),
-             fluidRow(
-               column(width = 6,
-                      h4("Module for Exploring Any Annotated Neoantigens", style = "font-weight: bold; text-decoration: underline;"),
-                      p("The custom module boasts the most flexibility for viewing your data, since there are no required features that
-                          are expected to be in the file.", br(), br(),
-                        "We provide three examples of neoantigen prediction pipeline output data: Vaxrank, NeoPredPipe, and antigen.garnish.2", br(), br(),
-                        
-                        "When you upload your file, you can then choose how to visualize the data by selecting which feature 
-                        from your input you would like to group and sort candidates by. The feature you choose to group by
-                        will allow you to explore candidates that are simliar to one another in a separate table. For example,
-                        to mimic the pVACseq Module grouping you could select to group by variant. The order of the candidates
-                        in each grouping is determined by the numeric feature you choose to sort by. Canidates within the pVACseq Module
-                        are sorted by best binders. Finally, you can select what features to display for each group of peptides,
-                        the default selection is all features.",
-                      ),
-                    ),
-               column(width = 6,
-                      img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-custom-upload-vaxrank.png?raw=true",
-                          align = "center", width = "700px"), br(), br()
-               )
-             ),
-             
-             fluidRow(
-               column(width = 6,
-                      h4("Features", style = "font-weight: bold; text-decoration: underline;"),
-                      h5("Overview of Neoantigen Features", style = "font-weight: bold;"),
-                      p("The Overview of Neantigen Features table displays the groups of candidates as designated
-                        by the feature you specify. The top candidate of the group according to the sort by feature
-                        is shown in the table. To investage the candidates within the group, click the Investigate button."),
-                      h5("Detailed Data", style = "font-weight: bold;"),
-                      p("The Detailed Data table shows you all the candidates within the group so that you can
-                        compared them to one another. This table will only display the features that you 
-                        selected on the upload page. "),
-                      h5("Dynamic Scatter Plot", style = "font-weight: bold;"),
-                      p("You can also further investigate the data using the dynamic scatter plot where you can choose any feature to be the X-axis, Y-axis,
-                        color, or size variable. The X and Y scale can be transformed and a range of values subsetted. The color represents the minimum
-                        and maximum values can also be changed to any HEX value. ", br(), br(),
-  
-                        "To view information about different points on the plot simply mouse over individual points. You can also export the current scatter plot 
-                        by using the camera icon at the top right corner of the plot." ),
-                      
-               )
-              ),
-
-             column(width = 6,
-                      img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-custom-dynamicscatter-vaxrank.png?raw=true",
-                          align = "center", width = "1500px"), br(), br()
-               ), 
-               
+        fluidRow(
+            column(width = 6,
+                h4("Module for Exploring Any Annotated Neoantigens", style = "font-weight: bold; text-decoration: underline;"),
+                p("The custom module boasts the most flexibility for viewing your data, since there are no required features that
+                    are expected to be in the file."
+                ),
+                p(
+                    "We provide three examples of neoantigen prediction pipeline output data: Vaxrank, NeoPredPipe, and antigen.garnish.2"
+                ),
+                p(
+                    "When you upload your file, you can then choose how to visualize the data by selecting which feature 
+                    from your input you would like to group and sort candidates by. The feature you choose to group by
+                    will allow you to explore candidates that are simliar to one another in a separate table. For example,
+                    to mimic the pVACseq Module grouping you could select to group by variant. The order of the candidates
+                    in each grouping is determined by the numeric feature you choose to sort by. Canidates within the pVACseq Module
+                    are sorted by best binders. Finally, you can select what features to display for each group of peptides,
+                    the default selection is all features."
+                )
+            ),
+            column(width = 6,
+                img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-custom-upload-vaxrank.png?raw=true", align = "center", width = "700px")
+            )
+        ),
+        fluidRow(
+            column(width = 12,
+                h4("Features", style = "font-weight: bold; text-decoration: underline;"),
+                h5("Overview of Neoantigen Features", style = "font-weight: bold;"),
+                p("The Overview of Neantigen Features table displays the groups of candidates as designated
+                    by the feature you specify. The top candidate of the group according to the sort by feature
+                    is shown in the table. To investage the candidates within the group, click the Investigate button."
+                ),
+                h5("Detailed Data", style = "font-weight: bold;"),
+                p("The Detailed Data table shows you all the candidates within the group so that you can
+                    compared them to one another. This table will only display the features that you 
+                    selected on the upload page."
+                ),
+                h5("Dynamic Scatter Plot", style = "font-weight: bold;"),
+                p("You can also further investigate the data using the dynamic scatter plot where you can choose any feature to be the X-axis, Y-axis,
+                    color, or size variable. The X and Y scale can be transformed and a range of values subsetted. The color represents the minimum
+                    and maximum values can also be changed to any HEX value."
+                ),
+                p("To view information about different points on the plot simply mouse over individual points. You can also export the current scatter plot 
+                    by using the camera icon at the top right corner of the plot."
+                ),
+                img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-custom-dynamicscatter-vaxrank.png?raw=true", align = "center", width = "1500px")
+            )
         )
     )
+)
 )
 
 ## CONTACT TAB ##
