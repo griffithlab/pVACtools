@@ -17,7 +17,7 @@ from the input they would like to use to group and sort candidates.
 
 The feature chosen to group by
 will allow users to explore candidates that are simliar to one another in a separate table. For example,
-to mimic the pVACseq module users could choose to group by variant.
+to mimic the pVACseq module, users could choose to group by variant.
 
 The order of the candidates in each grouping is determined by the numeric feature chosen to sort by.
 For example, candidates within the pVACseq module are sorted by tier.
@@ -62,7 +62,7 @@ There are three features that can be used to explore data:
 Investigating Different Candidates
 **********************************
 
-To investigate a group of candidates, click ``Investigate`` from the **Overview of Neoantigen Features** table.
+To investigate a group of candidates, click the ``Investigate`` button in the appropriate row of the **Overview of Neoantigen Features** table.
 The **Detailed Data** table will be updated with detailed data for that group of candidates.
 
 .. figure:: ../../images/screenshots/pvacview-custom-investigate-vaxrank.png
@@ -71,7 +71,7 @@ The **Detailed Data** table will be updated with detailed data for that group of
     :alt: pVACview Upload
     :figclass: align-left
 
-All candidates can be explored together using the **Dynamic Scatter Plot**. To identify a candidates of interest from the scatter plot, simple curse-over the point of interest for the specific information about that candidate to be shown.
+All candidates can be explored together using the **Dynamic Scatter Plot**. To identify a candidate of interest from the scatter plot, simple mouse-over the point of interest for the specific information about that candidate to be shown.
 
 .. figure:: ../../images/screenshots/pvacview-custom-dynamicscatter-vaxrank.png
     :width: 1000px
