@@ -750,9 +750,9 @@ ui <- dashboardPage(
                menuSubItem("Export", tabName = "export", icon = icon("file-export")),
                br()
       ),
-      menuItem("Tutorials", tabName = "tutorial", startExpanded = TRUE, icon = icon("fas fa-book-open")),
       menuItem("Neofox Data Visualization", tabName = "neofox", startExpanded = TRUE, icon = icon("fas fa-file")),
       menuItem("Custom Data Visualization", tabName = "custom", startExpanded = TRUE, icon = icon("fas fa-pen-to-square")),
+      menuItem("Tutorials", tabName = "tutorial", startExpanded = TRUE, icon = icon("fas fa-book-open")),
       menuItem("pVACview Documentation", icon = icon("fas fa-file-invoice"), href = "https://pvactools.readthedocs.io/en/latest/pvacview.html"),
       menuItem("Submit Github Issue", tabName = "contact", icon = icon("far fa-question-circle"))
     ),
