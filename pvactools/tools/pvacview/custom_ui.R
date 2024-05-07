@@ -6,17 +6,20 @@ custom_tab <- tabItem("custom",
                     box(
                         title = "Option 1: View Demo data", status = "primary", solidHeader = TRUE, width = NULL,
                         actionButton("loadDefault_Vaxrank", "Load demo data (VaxRank output)", style = "color: #fff; background-color: #c92424; border-color: #691111"),
-                        h5("Please wait a couple seconds after clicking for the data to load.")
+                        h5("After clicking the \"Load demo data\" button, select your desired grouping and sorting parameters in the \"Choose How to Visualize Data\" panel
+                           and click \"Visualize\". Please wait a couple seconds for the data to load.")
                     ),
                     box(
                         title = "Option 2: View NeoPredPipe demo data", status = "primary", solidHeader = TRUE, width = NULL,
                         actionButton("loadDefault_Neopredpipe", "Load demo data (NeoPredPipe output)", style = "color: #fff; background-color: #c92424; border-color: #691111"),
-                        h5("Please wait a couple seconds after clicking for the data to load.")
+                        h5("After clicking the \"Load demo data\" button, select your desired grouping and sorting parameters in the \"Choose How to Visualize Data\" panel
+                           and click \"Visualize\". Please wait a couple seconds for the data to load.")
                     ),
                     box(
                         title = "Option 3: View antigen.garnish demo data", status = "primary", solidHeader = TRUE, width = NULL,
                         actionButton("loadDefault_antigengarnish", "Load demo data (antigen.garnish output)", style = "color: #fff; background-color: #c92424; border-color: #691111"),
-                        h5("Please wait a couple seconds after clicking for the data to load.")
+                        h5("After clicking the \"Load demo data\" button, select your desired grouping and sorting parameters in the \"Choose How to Visualize Data\" panel
+                           and click \"Visualize\". Please wait a couple seconds for the data to load.")
                     ),
                     box(
                         title = "Option 4: Upload your own custom data files", status = "primary", solidHeader = TRUE, width = NULL,
@@ -34,8 +37,6 @@ custom_tab <- tabItem("custom",
                       h5("Choose what features you would like to consider for each group of peptides."),
                       actionButton("visualize_custom", "Visualize")
                     ),
-                    
-                   
                 ),
                 column(6,
                     box(
