@@ -15,8 +15,8 @@
 Custom Module
 ---------------
 
-The custom module boasts the most flexibility for viewing your data, since there are no required features that
-are expected to be in the file. 
+The custom module boasts the most flexibility for viewing neoantigen candidate data, since there are no required features that
+are expected to be in the file.
 
 We provide three examples of neoantigen prediction pipeline output data:
 
