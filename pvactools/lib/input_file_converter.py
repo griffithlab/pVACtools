@@ -529,7 +529,7 @@ class FusionInputConverter(InputFileConverter):
                     continue
                 (fusion_position, fusion_amino_acid_sequence) = self.determine_fusion_sequence(record['peptide_sequence'], '|')
                 gene_name = "{}-{}".format(record['#gene1'], record['gene2'])
-                transcript_name = "{}-{}".format(record['transcript_id1'], record['transcript_id1'])
+                transcript_name = "{}-{}".format(record['transcript_id1'], record['transcript_id2'])
                 if record['reading_frame'] == 'in-frame':
                     variant_type = 'inframe_fusion'
                 elif record['reading_frame'] == 'out-of-frame':

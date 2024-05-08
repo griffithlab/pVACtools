@@ -283,18 +283,18 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
 
             filtered_lines = []
             for index, lines in lines_per_variant.items():
-                lines = sorted(lines, key = itemgetter('Transcript'))
+                lines = sorted(lines, key = itemgetter('Mutation'))
                 variant_tracker = defaultdict(set)
                 for line in lines:
                     variant, consequence = line['Mutation'].split('.', 1)
                     variant_tracker[consequence].add(variant)
                 transcripts_with_same_epitopes = defaultdict(list)
-                for transcript, transcript_lines in groupby(lines, key = itemgetter('Transcript')):
+                for transcript, transcript_lines in groupby(lines, key = itemgetter('Mutation')):
                     transcript_lines = list(transcript_lines)
                     epitopes = ','.join(sorted([x['Epitope Seq'] for x in transcript_lines]))
                     transcripts_with_same_epitopes[epitopes].append(transcript)
                 for transcripts in transcripts_with_same_epitopes.values():
-                    transcript_set_lines = [x for x in lines if x['Transcript'] in transcripts]
+                    transcript_set_lines = [x for x in lines if x['Mutation'] in transcripts]
                     best_line = self.find_best_line(transcript_set_lines)
                     filtered_lines.append(best_line)
                     best_line_variant, best_line_consequence = best_line['Mutation'].split('.', 1)
