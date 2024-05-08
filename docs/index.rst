@@ -51,33 +51,22 @@ Contents
    contact
    mailing_list
 
-New in Release |release|
+New in Version |version|
 ------------------------
 
-This is a bugfix release. It fixes the following problem(s):
+This is a minor feature release. It adds the following features:
 
-- The previous version updated how the all_epitopes.tsv file was parsed when creating
-  the aggregated report and NA values are now parsed as native pandas nan. However,
-  this update was not handled correctly for the Mutation Position column,
-  leading to errors with NA values in that column. This release fixes this error.
-  (`#1079 <https://github.com/griffithlab/pVACtools/pull/1079>`_)
-- The previous version would write the DeepImmuno output file in the same location for
-  multiple prediction calls. This would lead to errors when running in multi-threaded mode.
-  This releases updates the code to write DeepImmuno outputs to unique file locations.
-  (`#1078 <https://github.com/griffithlab/pVACtools/pull/1078>`_)
-- This release updates how the list of combinatorial class II alleles is created in order
-  to return it as a sorted list, creating a consistent order when writing the
-  input.yml log file. (`#1077 <https://github.com/griffithlab/pVACtools/pull/1077>`_)
-- This release updates the GitHub commit for the pVACview demo data in order to pull the
-  latest version of this data, including DeepImmuno and BigMHC prediction data.
-  (`#1073 <https://github.com/griffithlab/pVACtools/pull/1073>`_)
-- This release fixes an issue where the pVACvector visualization images were saved in a
-  low resolution format resulting in blurry images.  (`#1071
-  <https://github.com/griffithlab/pVACtools/pull/1071>`_)
-- This release fixes an issue where the method to determine the matched wildtype result
-  didn't return where appropriate, causing the mutation position to not be set correctly.
-  (`#1082 <https://github.com/griffithlab/pVACtools/pull/1082>`_)
-- This release fixes some typos. (`#1072 <https://github.com/griffithlab/pVACtools/pull/1072>`_)
+- We added two new modules to pVACview: a :ref:`neofox_module` to visualize
+  NeoFox neoantigen annotations and a :ref:`custom_module` to visualize
+  neoantigen data in a TSV file, for example output files from VaxRank,
+  NeoPredPipe, or antigen.garnish.
+- We added a :ref:`vignette <pvacseq_vignette>` to our documentation to provide
+  an extended tutorial on how evaluate neoantigen candidates using pVACview.
+
+This release also fixes the following bug(s):
+
+- When running pVACfuse with Arriba input data, the 3' transcript was not
+  being parsed correctly. This release fixes this issue.
 
 Past release notes can be found on our :ref:`releases` page.
 

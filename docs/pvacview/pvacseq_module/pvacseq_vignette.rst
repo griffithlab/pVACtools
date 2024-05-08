@@ -2,21 +2,15 @@
     :align: right
     :alt: pVACview logo
 
-.. raw:: html
-
-  <style> .large {font-size: 90%; font-weight: bold} </style>
-  <style> .bold {font-size: 100%; font-weight: bold} </style>
-
-.. role:: large
-.. role:: bold
+.. _pvacseq_vignette:
 
 Vignette - Using pVACview to Evaluate Neoantigen Candidates
 -----------------------------------------------------------
 
 In this vignette, we will use demo data to demonstrate using pVACview to evaluate neoantigen candidates predicted by pVACseq. The demonstration dataset includes Class I and Class II neoantigen candidate files generated from the HCC1395 breast cancer cell line and its matched lymphoblastoid cell line HCC1395BL. You can also download the demo data `here <https://github.com/griffithlab/pVACtools/tree/master/pvactools/tools/pvacview/data>`_. 
 
-:large:`Upload input data files`
-________________________________
+Upload input data files
+_______________________
 
 First, navigate to the Upload page, and click on ``Load demo data``.
 This will immediately load:
@@ -33,8 +27,8 @@ This will immediately load:
     :alt: pVACview Vignette
     :figclass: align-left
 
-:large:`Visualize and Explore`
-______________________________
+Visualize and Explore
+_____________________
 
 You will next be taken to a view similar to this.
 
@@ -135,8 +129,6 @@ To set your own Tier-setting parameters, expand the **Advanced Options: Regenera
     :align: right
     :alt: pVACview Vignette
     :figclass: align-left
- 
-
 
 The second row of the page spans the **Aggregate Report of Best Candidates by Variant** section, which lists all neoantigen candidates in the provided input. Candidates with a higher Tier will be shown first, followed by candidates of lower Tiers (Order of Tiers: ``Pass``, ``Anchor``, ``Subclonal``, ``Low Expr``, ``NoExpr``, ``Poor`` - see `Tiering criteria <https://pvactools.readthedocs.io/en/latest/pvacseq/output_files.html#tiers>`_). Genes that match with the user-input genes of interest list will have a green box around them (for example, ARID1B and MSH6 are covered by a green box in this demo). This feature can be useful for highlighting neoantigens derived from cancer driver genes.
 
@@ -147,11 +139,12 @@ To view the variant, transcript, and peptide level information of a desired cand
     :align: right
     :alt: pVACview Vignette
     :figclass: align-left
- 
+
 Next, we will evaluate some neoantigen candidates using the original parameters for Tiering.
 
 Example 1: a good candidate: KIF1C-S433F: TEFQIGPEEA
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_0.png
     :width: 1000px
     :align: right
@@ -386,8 +379,8 @@ These potentially problematic characteristics are also flagged by the red boxes 
 Since the candidate peptide has a match in the reference proteome, we will reject this candidate.
 
 
-:large:`Export`
-____________________________
+Export
+______
 
 After reviewing candidates, you can download the file with evaluation as a tsv or as an excel sheet.
 
