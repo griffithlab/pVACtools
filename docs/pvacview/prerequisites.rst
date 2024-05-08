@@ -13,7 +13,7 @@
 .. role:: bold
 
 Prerequisites
----------------
+--------------
 
 In order to launch the pVACview R shiny application, you will need to have R/ R studio and a list of R packages correctly installed.
 Once launched, pVACview will require you to upload your corresponding input files for analysis. Alternatively, there is also a demo dataset that can be loaded to explore basic features of the app.
@@ -48,6 +48,9 @@ Additionally, there are a number of packages you will need to install in your R/
   install.packages("curl", dependencies=TRUE)
   install.packages("string", dependencies=TRUE)
   install.packages("shinycssloaders", dependencies=TRUE)
+  install.packages("plotly", dependencies=TRUE)
+  install.packages("shinyWidgets", dependencies=TRUE)
+  install.packages("colourpicker", dependencies=TRUE)
 
 Note that certain R packages may have further dependencies that require additional installation. If you are using R studio, these should be automatically installed for you during the respective package
 installation process. However, if you are using conda-based R, you may need to install them manually (usually by running ``install.packages(<package name>)``).
