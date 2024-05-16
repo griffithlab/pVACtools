@@ -55,9 +55,10 @@ class InputFileConverter(metaclass=ABCMeta):
         ]
 
 class VcfConverter(InputFileConverter):
-    def __init__(self, **kwargs):
+    def __init__(self, pipeline_type='pVACseq', **kwargs):
         InputFileConverter.__init__(self, **kwargs)
-        self.pass_only                   = kwargs.pop('pass_only', False)
+        self.pipeline_type = pipeline_type
+        self.pass_only          = kwargs.pop('pass_only', False)
         self.sample_name        = kwargs.pop('sample_name', None)
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
         self.proximal_variants_vcf = kwargs.pop('proximal_variants_vcf', None)
@@ -101,9 +102,9 @@ class VcfConverter(InputFileConverter):
         self.tsv_writer = csv.DictWriter(self.writer, delimiter='\t', fieldnames=self.output_headers(), restval='NA')
         self.tsv_writer.writeheader()
         self.csq_parser = self.create_csq_parser()
-        if 'FrameshiftSequence' not in self.csq_parser.csq_format:
+        if self.pipeline_type == 'pVACseq' and 'FrameshiftSequence' not in self.csq_parser.csq_format:
             sys.exit("VCF doesn't contain VEP FrameshiftSequence annotations. Please re-annotate the VCF with VEP and the Wildtype and Frameshift plugins.")
-        if 'WildtypeProtein' not in self.csq_parser.csq_format:
+        if self.pipeline_type == 'pVACseq' and 'WildtypeProtein' not in self.csq_parser.csq_format:
             sys.exit("VCF doesn't contain VEP WildtypeProtein annotations. Please re-annotate the VCF with VEP and the Wildtype and Frameshift plugins.")
         if 'TSL' not in self.csq_parser.csq_format:
             sys.exit("VCF {} doesn't contain VEP TSL annotations. Please re-annotate the VCF with VEP and the --tsl option enabled.".format(self.input_file))
@@ -462,7 +463,7 @@ class VcfConverter(InputFileConverter):
 
 class PvacspliceVcfConverter(VcfConverter):
     def __init__(self, **kwargs):
-        VcfConverter.__init__(self, **kwargs)
+        VcfConverter.__init__(self, pipeline_type='pVACsplice', **kwargs)
 
     def output_headers(self):
         return[
@@ -474,16 +475,12 @@ class PvacspliceVcfConverter(VcfConverter):
             'gene_name',
             'transcript_name',
             'transcript_support_level',
-            'transcript_length',
             'biotype',
             'amino_acid_change',
             'codon_change',
             'ensembl_gene_id',
             'hgvsc',
             'hgvsp',
-            #'wildtype_amino_acid_sequence',
-            #'frameshift_amino_acid_sequence',
-            #'fusion_amino_acid_sequence',
             'variant_type',
             'protein_position',
             'transcript_expression',
@@ -494,13 +491,9 @@ class PvacspliceVcfConverter(VcfConverter):
             'tdna_vaf',
             'trna_depth',
             'trna_vaf',
-            #'index',
-            'protein_length_change',
         ]
 
     def execute(self):
-        # indexes = []
-        # count = 1
         while True:
             try:
                 entry = next(self.vcf_reader)
@@ -557,7 +550,6 @@ class PvacspliceVcfConverter(VcfConverter):
                         protein_position = transcript['Protein_position']
                     transcript_name = transcript['Feature']
                     consequence = transcript['Consequence']
-                    #consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
                     gene_name = transcript['SYMBOL']
 
                     ensembl_gene_id = transcript['Gene']
@@ -567,26 +559,11 @@ class PvacspliceVcfConverter(VcfConverter):
                         tsl = transcript['TSL']
                     else:
                         tsl = 'NA'
-                    
 
                     if 'BIOTYPE' in transcript and transcript['BIOTYPE'] is not None and transcript['BIOTYPE'] != '':
                         biotype = transcript['BIOTYPE']
                     else:
                         biotype = 'NA'
-
-                    wildtype_amino_acid_sequence = transcript['WildtypeProtein']
-
-                    if transcript['FrameshiftSequence'] != '':
-                        wt_len = len(wildtype_amino_acid_sequence)
-                        mt_len = len(transcript['FrameshiftSequence'])
-                        if mt_len > wt_len:
-                            protein_length_change = "+{}".format(mt_len - wt_len)
-                        elif mt_len < wt_len:
-                            protein_length_change = "-{}".format(wt_len - mt_len)
-                        else:
-                            protein_length_change = "0"
-                    else:
-                        protein_length_change = ""
 
                     if len(entry.REF) > len(alt):
                         start = entry.affected_start + 1
@@ -601,14 +578,12 @@ class PvacspliceVcfConverter(VcfConverter):
                         'gene_name'                      : gene_name,
                         'transcript_name'                : transcript_name,
                         'transcript_support_level'       : tsl,
-                        'transcript_length'              : len(wildtype_amino_acid_sequence),
                         'biotype'                        : biotype,
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,
                         'variant_type'                   : consequence,
                         'protein_position'               : protein_position,
-                        'protein_length_change'          : protein_length_change,
                     }
                     if transcript['Amino_acids']:
                         output_row['amino_acid_change'] = transcript['Amino_acids']
