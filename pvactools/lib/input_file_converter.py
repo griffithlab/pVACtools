@@ -560,8 +560,10 @@ class PvacspliceVcfConverter(VcfConverter):
                     else:
                         tsl = 'NA'
 
-                    if 'BIOTYPE' in transcript and transcript['BIOTYPE'] is not None and transcript['BIOTYPE'] != '':
+                    if transcript['BIOTYPE'] is not None and transcript['BIOTYPE'] != '':
                         biotype = transcript['BIOTYPE']
+                        if biotype not in self.biotypes:
+                            continue
                     else:
                         biotype = 'NA'
 

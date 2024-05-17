@@ -565,6 +565,23 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice.pass_only.tsv')
         self.assertTrue(compare(convert_output_file.name, expected_output_file))
 
+    def test_pvacsplice_protein_coding_input_generates_expected_tsv(self):
+        convert_input_file  = os.path.join(self.test_data_dir, '..', 'pvacsplice', 'inputs', 'annotated.expression_chr1.vcf.gz')
+        convert_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'        : convert_input_file,
+            'output_file'       : convert_output_file.name,
+            'sample_name'       : 'HCC1395_TUMOR_DNA',
+            'normal_sample_name': 'HCC1395_NORMAL_DNA',
+            'biotypes'          : ['protein_coding'],
+        }
+        converter = PvacspliceVcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice.protein_coding.tsv')
+        self.assertTrue(compare(convert_output_file.name, expected_output_file))
+
     def test_proximal_variants_input(self):
         convert_input_file = os.path.join(self.test_data_dir, 'somatic.vcf.gz')
         convert_input_proximal_variants_file = os.path.join(self.test_data_dir, 'phased.vcf.gz')
