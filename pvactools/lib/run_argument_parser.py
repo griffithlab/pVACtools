@@ -179,6 +179,14 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true'
         )
 
+    def pass_only_args(self):
+        self.parser.add_argument(
+            '--pass-only',
+            help="Only process VCF entries with a PASS status.",
+            default=False,
+            action='store_true'
+        )
+
     def fasta_generation(self):
         self.parser.add_argument(
             "-d", "--downstream-sequence-length",
@@ -288,12 +296,6 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=0.8
         )
         self.parser.add_argument(
-            '--pass-only',
-            help="Only process VCF entries with a PASS status.",
-            default=False,
-            action='store_true'
-        )
-        self.parser.add_argument(
             '--expn-val', type=float,
             default=1.0,
             help="Gene and Transcript Expression cutoff. Only sites above this cutoff will be considered.",
@@ -386,6 +388,7 @@ class PvacspliceRunArgumentParser(RunArgumentParser):
         tool_name = "pvacsplice"
         input_file_help = "RegTools junctions output TSV file"
         RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.pass_only_args()
         self.expression_coverage_args()
         self.prediction_args()
         self.pvacsplice()
@@ -400,8 +403,9 @@ class PvacseqRunArgumentParser(RunArgumentParser):
             "The VCF may be gzipped (requires tabix index)."
         )
         RunArgumentParser.__init__(self, tool_name, input_file_help)
-        self.prediction_args()
+        self.pass_only_args()
         self.expression_coverage_args()
+        self.prediction_args()
         self.fasta_generation()
         self.pvacseq()
 

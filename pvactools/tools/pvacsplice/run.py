@@ -146,6 +146,7 @@ def main(args_input = sys.argv[1:]):
         'sample_name'                      : args.sample_name,
         'ref_fasta'                        : args.ref_fasta,
         'annotated_vcf'                    : args.annotated_vcf,
+        'pass_only'                        : args.pass_only,
         'class_i_epitope_length'           : args.class_i_epitope_length,
         'class_ii_epitope_length'          : args.class_ii_epitope_length,
         'biotypes'                         : args.biotypes,

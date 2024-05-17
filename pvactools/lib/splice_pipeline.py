@@ -16,6 +16,7 @@ class JunctionPipeline:
         self.output_dir = kwargs['junctions_dir']
         self.fasta_path = kwargs['ref_fasta']
         self.annotated_vcf = kwargs['annotated_vcf']
+        self.pass_only = kwargs['pass_only']
         self.gtf_file = kwargs['gtf_file']
         self.class_i_epitope_length = kwargs['class_i_epitope_length']
         self.class_ii_epitope_length = kwargs['class_ii_epitope_length']
@@ -111,6 +112,7 @@ class JunctionPipeline:
             print('Converting VCF to TSV')
             convert_params = {
                 'input_file': self.annotated_vcf,
+                'pass_only': self.pass_only,
                 'output_file': self.create_file_path('annotated', temp=True),
                 'sample_name': self.sample_name,
             }
