@@ -65,6 +65,13 @@ def define_parser():
     )
     calculate_reference_proteome_similarity_parser.set_defaults(func=calculate_reference_proteome_similarity)
 
+    generate_protein_fasta_parser = subparsers.add_parser(
+        "generate_protein_fasta",
+        help="Generate an annotated fasta file from a RegTools junctions output TSV file with protein sequences of mutations",
+        add_help=False
+    )
+    generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
+
     generate_aggregated_report_parser = subparsers.add_parser(
         "generate_aggregated_report",
         help="Generate an aggregated report from a pVACsplice .all_epitopes.tsv report file.",
