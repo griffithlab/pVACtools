@@ -4,6 +4,7 @@ __all__ = [
     'calculate_reference_proteome_similarity',
     'coverage_filter',
     'generate_aggregated_report',
+    'generate_protein_fasta',
     'identify_problematic_amino_acids',
     'install_vep_plugin',
     'net_chop',
