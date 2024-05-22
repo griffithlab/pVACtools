@@ -1,6 +1,7 @@
 import sys
 import os
 import pandas as pd
+import shutil
 from pathlib import Path
 from pvactools.lib.splice_pipeline import *
 from pvactools.lib.prediction_class import *
@@ -19,7 +20,7 @@ def combine_epitope_len_reports(file_list, file_final_name):
     if len(file_list) > 1:
         combine_reports(file_list, file_final_name)
     elif len(file_list) == 1:
-        os.rename(file_list[0], file_final_name)
+        shutil.copy(file_list[0], file_final_name)
 
 def create_combined_report(junctions_dir, args):
     output_dir = os.path.join(junctions_dir, 'combined')
@@ -277,8 +278,6 @@ def main(args_input = sys.argv[1:]):
         shutil.rmtree(os.path.join(junctions_dir, 'tmp'), ignore_errors=True)
 
     change_permissions_recursive(junctions_dir, 0o755, 0o644)
-
-    #TODO: add tumor purity
 
 if __name__ == '__main__':
     main()

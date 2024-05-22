@@ -2,8 +2,6 @@ import unittest
 import os
 import sys
 import tempfile
-import gzip
-import shutil
 from filecmp import cmp
 import py_compile
 import pandas as pd
@@ -30,9 +28,7 @@ class JunctionToFastaTests(unittest.TestCase):
         annotated_vcf = os.path.join(pvactools_directory(), self.test_data_dir, 'inputs', 'annotated.expression_chr1.vcf.gz')
         sample_name   = 'HCC1395_TUMOR_DNA'
         fasta_path = os.path.join(self.test_data_dir, 'inputs', 'all_sequences_chr1.fa.gz')
-        unzipped_fasta_file = tempfile.NamedTemporaryFile()
-        with gzip.open(fasta_path, 'rb') as f_in, open(unzipped_fasta_file.name, 'wb') as f_out:
-            shutil.copyfileobj(f_in, f_out)
+        unzipped_fasta_file = gunzip_file(fasta_path)
         output_dir  = tempfile.TemporaryDirectory() #output_dir.name
         output_file = os.path.join(output_dir.name, 'sample_transcripts.fa')
 
@@ -41,7 +37,7 @@ class JunctionToFastaTests(unittest.TestCase):
             junction = combined_df.loc[[i], :]
             for row in junction.itertuples():
                 junction_params = {
-                    'fasta_path'     : unzipped_fasta_file.name,
+                    'fasta_path'     : unzipped_fasta_file,
                     'junction_df'    : combined_df,
                     'gtf_df'         : gtf_df,
                     'tscript_id'     : row.transcript_id,
@@ -80,5 +76,7 @@ class JunctionToFastaTests(unittest.TestCase):
                 expected_file),
                 "files don't match {} - {}".format(output_file, expected_file)
             )
+
+        os.unlink(unzipped_fasta_file)
 
         output_dir.cleanup()
