@@ -292,7 +292,7 @@ class CalculateReferenceProteomeSimilarity:
                 identifier = line['Mutation']
             wt_peptide = wt_records_dict[identifier]
             mt_peptide = mt_records_dict[identifier]
-            peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length)
+            peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
             full_peptide = peptide
         else:
             if self._input_tsv_type(line) == 'aggregated':
