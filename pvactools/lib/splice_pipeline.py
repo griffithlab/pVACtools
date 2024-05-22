@@ -1,12 +1,11 @@
 import shutil
-from pvactools.lib.filter_regtools_results import *
-from pvactools.lib.junction_to_fasta import *
-from pvactools.lib.fasta_to_kmers import *
-from pvactools.lib.combine_inputs import *
-from pvactools.lib.run_argument_parser import *
+import os
+from pvactools.lib.filter_regtools_results import FilterRegtoolsResults
+from pvactools.lib.junction_to_fasta import JunctionToFasta
+from pvactools.lib.fasta_to_kmers import FastaToKmers
+from pvactools.lib.combine_inputs import CombineInputs
 from pvactools.lib.input_file_converter import PvacspliceVcfConverter
-from pvactools.lib.load_gtf_data import *
-
+from pvactools.lib.load_gtf_data import LoadGtfData
 
 class JunctionPipeline:
     def __init__(self, **kwargs):

@@ -39,10 +39,11 @@ class GenerateFastaTests(unittest.TestCase):
         self.assertTrue(py_compile.compile(self.executable))
 
     def test_input_vcf_generates_expected_file(self):
-        generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "HCC1395.splice_junctions.tsv")
-        generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "annotated.expression.vcf.gz")
-        generate_protein_fasta_input_fasta = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "all_sequences_chr1.fa")
-        generate_protein_fasta_input_gtf   = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "Homo_sapiens.GRCh38.105_chr1.gtf")
+        generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "splice_junctions_chr1.tsv")
+        generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "annotated.expression_chr1.vcf.gz")
+        generate_protein_fasta_input_fasta = os.path.join(self.test_input_data_dir, "inputs", "all_sequences_chr1.fa.gz")
+        unzipped_fasta_file = gunzip_file(generate_protein_fasta_input_fasta)
+        generate_protein_fasta_input_gtf   = os.path.join(self.test_input_data_dir, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz")
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
@@ -53,7 +54,7 @@ class GenerateFastaTests(unittest.TestCase):
             self.flanking_sequence_length,
             generate_protein_fasta_output_file.name,
             generate_protein_fasta_input_vcf,
-            generate_protein_fasta_input_fasta,
+            unzipped_fasta_file,
             generate_protein_fasta_input_gtf,
             '-s', 'HCC1395_TUMOR_DNA',
         ], shell=False))
@@ -63,13 +64,15 @@ class GenerateFastaTests(unittest.TestCase):
         expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
         os.unlink(generate_protein_fasta_output_tsv)
+        os.unlink(unzipped_fasta_file)
 
     def test_input_tsv(self):
-        generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "HCC1395.splice_junctions.tsv")
-        generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "annotated.expression.vcf.gz")
-        generate_protein_fasta_input_fasta = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "all_sequences_chr1.fa")
-        generate_protein_fasta_input_gtf   = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "Homo_sapiens.GRCh38.105_chr1.gtf")
-        generate_protein_fasta_input_tsv   = os.path.join(self.test_input_data_dir, "results", "Test.filtered.tsv")
+        generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "splice_junctions_chr1.tsv")
+        generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "annotated.expression_chr1.vcf.gz")
+        generate_protein_fasta_input_fasta = os.path.join(self.test_input_data_dir, "inputs", "all_sequences_chr1.fa.gz")
+        unzipped_fasta_file = gunzip_file(generate_protein_fasta_input_fasta)
+        generate_protein_fasta_input_gtf   = os.path.join(self.test_input_data_dir, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz")
+        generate_protein_fasta_input_tsv   = os.path.join(self.test_output_data_dir, "Test.filtered.tsv")
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
@@ -80,7 +83,7 @@ class GenerateFastaTests(unittest.TestCase):
             self.flanking_sequence_length,
             generate_protein_fasta_output_file.name,
             generate_protein_fasta_input_vcf,
-            generate_protein_fasta_input_fasta,
+            unzipped_fasta_file,
             generate_protein_fasta_input_gtf,
             '-s', 'HCC1395_TUMOR_DNA',
             '--input-tsv', generate_protein_fasta_input_tsv,
@@ -89,13 +92,15 @@ class GenerateFastaTests(unittest.TestCase):
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
+        os.unlink(unzipped_fasta_file)
 
     def test_input_aggregated_tsv(self):
-        generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "HCC1395.splice_junctions.tsv")
-        generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "annotated.expression.vcf.gz")
-        generate_protein_fasta_input_fasta = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "all_sequences_chr1.fa")
-        generate_protein_fasta_input_gtf   = os.path.join(self.test_input_data_dir, "inputs", "HCC1395", "Homo_sapiens.GRCh38.105_chr1.gtf")
-        generate_protein_fasta_input_tsv   = os.path.join(self.test_input_data_dir, "results", "Test.all_epitopes.aggregated.tsv")
+        generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "splice_junctions_chr1.tsv")
+        generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "annotated.expression_chr1.vcf.gz")
+        generate_protein_fasta_input_fasta = os.path.join(self.test_input_data_dir, "inputs", "all_sequences_chr1.fa.gz")
+        unzipped_fasta_file = gunzip_file(generate_protein_fasta_input_fasta)
+        generate_protein_fasta_input_gtf   = os.path.join(self.test_input_data_dir, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz")
+        generate_protein_fasta_input_tsv   = os.path.join(self.test_output_data_dir, "Test.all_epitopes.aggregated.tsv")
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
@@ -106,7 +111,7 @@ class GenerateFastaTests(unittest.TestCase):
             self.flanking_sequence_length,
             generate_protein_fasta_output_file.name,
             generate_protein_fasta_input_vcf,
-            generate_protein_fasta_input_fasta,
+            unzipped_fasta_file,
             generate_protein_fasta_input_gtf,
             '-s', 'HCC1395_TUMOR_DNA',
             '--input-tsv', generate_protein_fasta_input_tsv,
@@ -116,3 +121,4 @@ class GenerateFastaTests(unittest.TestCase):
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
+        os.unlink(unzipped_fasta_file)
