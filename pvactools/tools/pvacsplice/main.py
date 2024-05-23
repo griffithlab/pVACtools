@@ -107,13 +107,6 @@ def define_parser():
     )
     allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
 
-    gtf_to_tsv = subparsers.add_parser(
-        "gtf_to_tsv",
-        help="Filter and convert reference GTF to TSV format.",
-        add_help=False
-    )
-    gtf_to_tsv.set_defaults(func=run)
-    
     return parser
 
 
