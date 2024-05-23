@@ -22,21 +22,6 @@ def combine_epitope_len_reports(file_list, file_final_name):
     elif len(file_list) == 1:
         shutil.copy(file_list[0], file_final_name)
 
-def create_combined_report(junctions_dir, args):
-    output_dir = os.path.join(junctions_dir, 'combined')
-    os.makedirs(output_dir, exist_ok=True)
-    for x in ['all_epitopes', 'filtered']:
-        file1 = os.path.join(output_dir, 'MHC_Class_I', f"{args.sample_name}.{x}.tsv")
-        file2 = os.path.join(output_dir, 'MHC_Class_II', f"{args.sample_name}.{x}.tsv")
-        if not os.path.exists(file1):
-            print("File {} doesn't exist. Aborting.".format(file1))
-            return
-        if not os.path.exists(file2):
-            print("File {} doesn't exist. Aborting.".format(file2))
-            return
-        output_file = os.path.join(output_dir, f"{args.sample_name}.{x}.tsv")
-        combine_reports([file1, file2], output_file)
-
 def create_full_combined_reports(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
