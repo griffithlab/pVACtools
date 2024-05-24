@@ -1,5 +1,6 @@
 import shutil
 import os
+import pandas as pd
 from pvactools.lib.filter_regtools_results import FilterRegtoolsResults
 from pvactools.lib.junction_to_fasta import JunctionToFasta
 from pvactools.lib.fasta_to_kmers import FastaToKmers
