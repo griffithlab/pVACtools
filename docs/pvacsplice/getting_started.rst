@@ -8,12 +8,16 @@ The example data output can be reproduced by running the following command:
 .. code-block:: none
 
    pvacsplice run \
-   <example_data_dir>/input_junctions.tsv \
-   <sample_name> \
-   HLA-A*01:01,HLA-A*02:01,HLA-B*15:01,HLA-B*57:01,HLA-C*03:03,HLA-C*06:02 \
-   all_class_i \
+   <example_data_dir>/HCC1395.splice_junctions.tsv \
+   HCC1395_TUMOR_DNA \
+   HLA-A*29:02,HLA-B*45:01,DRB1*04:05 \
+   all \
    <output_dir> \
-   annotated_variants.vcf \
-   ref.fa
+   <example_data_dir>/annotated.expression.vcf.gz \
+   <example_data_dir>/ref_genome.fa \
+   <example_data_dir>/Homo_sapiens.GRCh38.105.chr.gtf.gz \
+   -e1 8,9,10 \
+   -e2 15 \
+   --normal-sample-name HCC1395_NORMAL_DNA
 
 A detailed description of all command options can be found on the following page.

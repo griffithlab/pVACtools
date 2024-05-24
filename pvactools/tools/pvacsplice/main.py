@@ -86,6 +86,13 @@ def define_parser():
         )
     identify_problematic_amino_acids_parser.set_defaults(func=identify_problematic_amino_acids)
 
+    download_example_data_parser = subparsers.add_parser(
+        "download_example_data",
+        help="Download example input and output files.",
+        add_help=False
+    )
+    download_example_data_parser.set_defaults(func=download_example_data)
+
     install_vep_plugin_parser = subparsers.add_parser(
         "install_vep_plugin",
         help="Install the Wildtype and Frameshift VEP plugins into your VEP_plugins directory.",
