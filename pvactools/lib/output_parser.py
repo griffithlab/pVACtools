@@ -1188,7 +1188,8 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                 self.add_pretty_row(row, mt_scores, method, pretty_method, 'IC50 Score')
-                self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
+                if pretty_method not in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
+                    self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
 
             for (tsv_key, row_key) in zip(['gene_expression', 'transcript_expression', 'normal_vaf', 'tdna_vaf', 'trna_vaf'], ['Gene Expression', 'Transcript Expression', 'Normal VAF', 'Tumor DNA VAF', 'Tumor RNA VAF']):
                 if tsv_key in tsv_entry:
