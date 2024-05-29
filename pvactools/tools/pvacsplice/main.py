@@ -93,13 +93,6 @@ def define_parser():
     )
     download_example_data_parser.set_defaults(func=download_example_data)
 
-    install_vep_plugin_parser = subparsers.add_parser(
-        "install_vep_plugin",
-        help="Install the Wildtype and Frameshift VEP plugins into your VEP_plugins directory.",
-        add_help=False
-    )
-    install_vep_plugin_parser.set_defaults(func=install_vep_plugin)
-
     valid_alleles_parser = subparsers.add_parser(
         "valid_alleles",
         help="Show a list of valid allele names.",
