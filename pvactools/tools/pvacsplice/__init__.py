@@ -7,7 +7,6 @@ __all__ = [
     'generate_aggregated_report',
     'generate_protein_fasta',
     'identify_problematic_amino_acids',
-    'install_vep_plugin',
     'net_chop',
     'netmhc_stab',
     'run',
