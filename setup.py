@@ -35,6 +35,11 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacbind/example_da
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             pvacbind_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
+pvacsplice_data_files = []
+for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacsplice/example_data"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            pvacbind_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
 pvacview_data_files = []
 for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacview"):
     for filename in filenames:
@@ -103,6 +108,7 @@ setup(
         'pvactools.tools.pvacvector': pvacvector_data_files,
         'pvactools.tools.pvacbind': pvacbind_data_files,
         'pvactools.tools.pvacview': pvacview_data_files,
+        'pvactools.tools.pvacsplice': pvacsplice_data_files,
     },
     classifiers=[
         'Development Status :: 4 - Beta',
