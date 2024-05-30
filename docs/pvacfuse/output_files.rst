@@ -22,15 +22,8 @@ created):
 
    * - File Name
      - Description
-   * - ``<sample_name>.tsv``
-     - An intermediate file with variant and transcript information parsed from the input file(s).
-   * - ``<sample_name>.tsv_<chunks>`` (multiple)
-     - The above file but split into smaller chunks for easier processing with IEDB.
    * - ``<sample_name>.fasta``
-     - A fasta file with mutant peptide subsequences for all
-       processable fusion combinations.
-   * - ``<sample_name>.net_chop.fa``
-     - A fasta file with mutant peptide subsequences specific for use in running the net_chop tool.
+     - A fasta file with mutant peptide subsequences for each fusion.
    * - ``<sample_name>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``.
@@ -42,6 +35,10 @@ created):
        the best epitope for each mutation in an easy-to-read format. Not generated when running with elution algorithms only.
    * - ``<sample_name>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
+
+Additionally, each folder will contain subfolders, one for each selected
+epitope length, that contains intermediate files that are specific to each
+epitope length.
 
 Filters applied to the filtered.tsv file
 ----------------------------------------
