@@ -24,7 +24,7 @@ def main(args_input = sys.argv[1:]):
     )
     parser.add_argument(
         '--file-type',
-        choices=['pVACseq', 'pVACfuse', 'pVACbind'],
+        choices=['pVACseq', 'pVACfuse', 'pVACbind', 'pVACsplice'],
         default='pVACseq',
         help="Pipeline that created files to be combined."
     )

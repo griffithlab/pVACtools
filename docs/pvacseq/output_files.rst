@@ -277,10 +277,6 @@ total number of well-scoring epitopes for each variant, the number of
 transcripts covered by those epitopes, as well as the HLA alleles that those
 epitopes are well-binding to. Lastly, the report will bin variants into tiers
 that offer suggestions as to the suitability of variants for use in vaccines.
-Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
-Whether the median or the lowest binding affinity metrics are output in the ``IC50 MT``,
-``IC50 WT``, ``%ile MT``, and ``%ile WT`` columns is controlled by the
-``--top-score-metric`` parameter.
 
 Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
 Whether the median or the lowest binding affinity metrics are output in the ``IC50 MT``,

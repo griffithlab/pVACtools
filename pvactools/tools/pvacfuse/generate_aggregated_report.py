@@ -70,7 +70,7 @@ def main(args_input = sys.argv[1:]):
 
     tmp_fh = tempfile.NamedTemporaryFile()
 
-    print("Creating Aggreggated Report")
+    print("Creating Aggregated Report")
     PvacfuseAggregateAllEpitopes(
         args.input_file,
         args.output_file,

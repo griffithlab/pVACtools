@@ -1,6 +1,9 @@
 import argparse
 import sys
-import pkg_resources
+try:
+    from importlib.metadata import version
+except:
+    from importlib_metadata import version
 from pvactools.tools import *
 
 def define_parser():
@@ -33,7 +36,7 @@ def main():
     parser = define_parser()
     args = parser.parse_known_args()
     if args[0].version is True:
-        print(pkg_resources.get_distribution("pvactools").version)
+        print(version('pvactools'))
     else:
         try:
             args[0].func.main(args[1])

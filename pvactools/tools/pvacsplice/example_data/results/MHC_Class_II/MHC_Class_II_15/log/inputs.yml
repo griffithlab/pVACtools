@@ -1,0 +1,74 @@
+additional_report_columns: null
+aggregate_inclusion_binding_threshold: 5000
+allele_specific_binding_thresholds: false
+alleles: &id001
+- DRB1*04:05
+anchor_types:
+- A
+- D
+- NDA
+annotated_vcf: pvacsplice_example_data/annotated.expression.vcf.gz
+binding_threshold: 500
+biotypes:
+- protein_coding
+blastp_db: refseq_select_prot
+blastp_path: null
+class_i_epitope_length:
+- 8
+- 9
+- 10
+class_i_hla:
+- HLA-A*29:02
+- HLA-B*45:01
+class_ii_epitope_length:
+- 15
+class_ii_hla: *id001
+epitope_lengths: 15
+exclude_NAs: false
+expn_val: 1.0
+fasta_size: 200
+flurry_state: null
+gtf_file: pvacsplice_example_data/Homo_sapiens.GRCh38.105.chr.gtf.gz
+iedb_executable: null
+iedb_retries: 5
+input_file: /Users/ssiebert/Documents/Work/pVACtools/pvacsplice_example_data/results/tmp/HCC1395_TUMOR_DNA.15.fa
+input_file_type: junctions
+junction_score: 10
+junctions_dir: /Users/ssiebert/Documents/Work/pVACtools/pvacsplice_example_data/results
+keep_tmp_files: false
+maximum_transcript_support_level: 1
+n_threads: 1
+net_chop_method: null
+net_chop_threshold: 0.5
+netmhc_stab: false
+normal_cov: 5
+normal_sample_name: HCC1395_NORMAL_DNA
+normal_vaf: 0.02
+output_dir: /Users/ssiebert/Documents/Work/pVACtools/pvacsplice_example_data/results/MHC_Class_II/MHC_Class_II_15
+pass_only: false
+peptide_fasta: null
+percentile_threshold: null
+prediction_algorithms:
+- MHCnuggetsII
+- NNalign
+- NetMHCIIpan
+- NetMHCIIpanEL
+- SMMalign
+problematic_amino_acids: null
+proximal_variants_file: null
+pvactools_version: 4.1.1
+ref_fasta: pvacsplice_example_data/ref_genome.fa
+run_post_processor: true
+run_reference_proteome_similarity: false
+sample_name: HCC1395_TUMOR_DNA
+save_gtf: false
+species: human
+starfusion_file: null
+tdna_cov: 10
+tdna_vaf: 0.25
+tmp_dir: /Users/ssiebert/Documents/Work/pVACtools/pvacsplice_example_data/results/MHC_Class_II/MHC_Class_II_15/tmp
+top_score_metric: median
+trna_cov: 10
+trna_vaf: 0.25
+tumor_purity: null
+variant_distance: 100

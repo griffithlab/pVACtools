@@ -53,7 +53,7 @@ class CalculateManufacturability:
                 writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + self.manufacturability_headers(), extrasaction='ignore', restval='NA')
                 writer.writeheader()
                 for line in reader:
-                    if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
+                    if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse' or self.file_type == 'pVACsplice':
                         sequence = line['Epitope Seq']
                     else:
                         sequence = line['MT Epitope Seq']

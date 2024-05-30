@@ -35,6 +35,11 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacbind/example_da
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             pvacbind_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
+pvacsplice_data_files = []
+for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacsplice/example_data"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            pvacbind_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
 pvacview_data_files = []
 for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacview"):
     for filename in filenames:
@@ -59,6 +64,7 @@ setup(
         "pvactools.tools.pvacvector",
         "pvactools.tools.pvacseq",
         "pvactools.tools.pvacview",
+        "pvactools.tools.pvacsplice",
         "pvactools.lib",
     ],
     entry_points={
@@ -69,6 +75,7 @@ setup(
             "pvacfuse = pvactools.tools.pvacfuse.main:main",
             "pvacvector = pvactools.tools.pvacvector.main:main",
             "pvacview = pvactools.tools.pvacview.main:main",
+            "pvacsplice = pvactools.tools.pvacsplice.main:main",
         ]
     },
     install_requires=[
@@ -78,7 +85,7 @@ setup(
         'biopython==1.77',
         'networkx',
         'simanneal',
-        'pandas',
+        'pandas<2.1.0',
         'wget',
         'pysam',
         'Pillow',
@@ -89,6 +96,10 @@ setup(
         'mhcnuggets==2.4.1',
         'mhcflurry==2.0.6',
         'testfixtures',
+        'gtfparse==2.0.1',
+        'pyfaidx==0.7.1',
+        'packaging',
+        'pyarrow',
         'polars==0.16.18',
     ],
     package_data={
@@ -97,6 +108,7 @@ setup(
         'pvactools.tools.pvacvector': pvacvector_data_files,
         'pvactools.tools.pvacbind': pvacbind_data_files,
         'pvactools.tools.pvacview': pvacview_data_files,
+        'pvactools.tools.pvacsplice': pvacsplice_data_files,
     },
     classifiers=[
         'Development Status :: 4 - Beta',
