@@ -1,5 +1,5 @@
 Usage
-=========================
+=====
 
 .. warning::
    Using a local IEDB installation is strongly recommended for larger datasets
