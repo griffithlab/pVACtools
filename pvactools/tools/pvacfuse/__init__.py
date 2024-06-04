@@ -3,6 +3,7 @@ __all__ = [
     'binding_filter',
     'coverage_filter',
     'valid_alleles',
+    'valid_algorithms',
     'allele_specific_cutoffs',
     'download_example_data',
     'top_score_filter',
