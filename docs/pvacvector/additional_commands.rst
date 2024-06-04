@@ -41,6 +41,18 @@ List Valid Alleles
     :func: define_parser
     :prog: pvacfuse valid_alleles
 
+.. _valid_algorithms:
+
+List Valid Algorithms
+------------------
+
+.. program-output:: pvacvector valid_algorithms -h
+
+.. .. argparse::
+    :module: lib.valid_algorithms
+    :func: define_parser
+    :prog: pvacvector valid_algorithms
+
 List Allele-Specific Cutoffs
 ----------------------------
 
