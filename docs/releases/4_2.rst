@@ -1,0 +1,19 @@
+Version 4.2
+===========
+
+Version 4.2.0
+-------------
+
+This is a minor feature release. It adds the following features:
+
+- We added two new modules to pVACview: a :ref:`neofox_module` to visualize
+  NeoFox neoantigen annotations and a :ref:`custom_module` to visualize
+  neoantigen data in a TSV file, for example output files from VaxRank,
+  NeoPredPipe, or antigen.garnish.2.
+- We added a :ref:`vignette <pvacseq_vignette>` to our documentation to provide
+  an extended tutorial on how evaluate neoantigen candidates using pVACview.
+
+This release also fixes the following bug(s):
+
+- When running pVACfuse with Arriba input data, the 3' transcript was not
+  being parsed correctly. This release fixes this issue.
