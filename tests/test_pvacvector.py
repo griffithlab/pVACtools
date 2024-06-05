@@ -160,7 +160,7 @@ class TestPvacvector(unittest.TestCase):
     
     def test_valid_algorithms_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
+            self.base_dir,
             'pvactools',
             "tools",
             "pvacvector",
