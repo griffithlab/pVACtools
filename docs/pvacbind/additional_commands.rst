@@ -19,6 +19,18 @@ List Valid Alleles
 
 .. program-output:: pvacbind valid_alleles -h
 
+.. _valid_algorithms:
+
+List Valid Algorithms
+---------------------
+
+.. program-output:: pvacbind valid_algorithms -h
+
+.. .. argparse::
+    :module: lib.valid_algorithms
+    :func: define_parser
+    :prog: pvacbind valid_algorithms
+
 List Allele-Specific Cutoffs
 ----------------------------
 

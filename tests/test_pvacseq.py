@@ -82,6 +82,7 @@ class PvacseqTests(unittest.TestCase):
             "top_score_filter",
             "transcript_support_level_filter",
             "valid_alleles",
+            "valid_algorithms",
             'identify_problematic_amino_acids',
             ]:
             result = subprocess_run([
@@ -247,6 +248,19 @@ class PvacseqTests(unittest.TestCase):
 
     def test_valid_alleles_runs(self):
         valid_alleles.main(["-p", "SMM"])
+    
+    def test_valid_algorithms_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacseq",
+            "valid_algorithms.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_algorithms_runs(self):
+        valid_algorithms.main("")
 
     def test_identify_problematic_amino_acids_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
