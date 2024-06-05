@@ -23,8 +23,11 @@ class ValidAlgorithms:
                             valid_algorithms.append(algorithm)
                             break
         else:
-            valid_algorithms = []
             PredictionClass.check_alleles_valid([self.allele])
+            if (self.species != None and PredictionClass.species_for_allele(self.allele) != self.species):
+                print("Given species does not have that allele.")
+                return
+            valid_algorithms = []
             prediction_algorithms = PredictionClass.prediction_methods()
             for algorithm in prediction_algorithms:
                 cls = globals()[algorithm]
