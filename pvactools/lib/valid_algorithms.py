@@ -25,7 +25,7 @@ class ValidAlgorithms:
         else:
             PredictionClass.check_alleles_valid([self.allele])
             if (self.species != None and PredictionClass.species_for_allele(self.allele) != self.species):
-                print("Given species does not have that allele.")
+                raise Exception("Given species does not match given allele.")
                 return
             valid_algorithms = []
             prediction_algorithms = PredictionClass.prediction_methods()
@@ -36,7 +36,7 @@ class ValidAlgorithms:
                       and (PredictionClass.species_for_allele(self.allele) == self.species \
                            or self.species == None):
                     valid_algorithms.append(algorithm)
-        print(', '.join([a for a in valid_algorithms]))
+        print('\n'.join([a for a in valid_algorithms]))
 
     @classmethod
     def parser(cls, tool="pvacseq"):
@@ -47,7 +47,7 @@ class ValidAlgorithms:
         )
         parser.add_argument(
             "-a", "--allele",
-            help="Name of the allele to use to get supported algorithms. "
+            help="Show valid algorithms for the selected allele. "
                  + "For a list of available alleles, use: `{} valid_alleles`.".format(tool),
         )
         parser.add_argument(

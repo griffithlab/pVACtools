@@ -22,7 +22,7 @@ List Valid Alleles
 .. _valid_algorithms:
 
 List Valid Algorithms
-------------------
+---------------------
 
 .. program-output:: pvacbind valid_algorithms -h
 

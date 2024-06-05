@@ -46,7 +46,7 @@ List Valid Alleles
 .. _valid_algorithms:
 
 List Valid Algorithms
-------------------
+---------------------
 
 .. program-output:: pvacseq valid_algorithms -h
 

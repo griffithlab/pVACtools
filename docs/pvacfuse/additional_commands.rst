@@ -32,7 +32,7 @@ List Valid Alleles
 .. _valid_algorithms:
 
 List Valid Algorithms
-------------------
+---------------------
 
 .. program-output:: pvacfuse valid_algorithms -h
 
