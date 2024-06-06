@@ -137,6 +137,19 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             anchor_probabilities[length] = probs
         self.anchor_probabilities = anchor_probabilities
 
+        mouse_anchor_positions = {}
+        for length in [8, 9, 10, 11]:
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "mouse_anchor_predictions_{}_mer.tsv".format(length))
+            values = {}
+            with open(file_name, 'r') as fh:
+                reader = csv.DictReader(fh, delimiter="\t")
+                for line in reader:
+                    allele = line.pop('Allele')
+                    values[allele] = line
+            mouse_anchor_positions[length] = values
+        self.mouse_anchor_positions = mouse_anchor_positions
+
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
             reader = csv.DictReader(input_fh, delimiter = "\t")
@@ -215,20 +228,6 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         sorted_anchor_residue_pass_lines = sorted(anchor_residue_pass_lines, key=lambda d: (float(d["{} MT IC50 Score".format(self.mt_top_score_metric)]), d['TSL Sort'], -int(d['Transcript Length'])))
         return sorted_anchor_residue_pass_lines[0]
 
-    def get_anchor_positions(self, hla_allele, epitope_length):
-        if self.allele_specific_anchors and epitope_length in self.anchor_probabilities and hla_allele in self.anchor_probabilities[epitope_length]:
-            probs = self.anchor_probabilities[epitope_length][hla_allele]
-            positions = []
-            total_prob = 0
-            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
-                total_prob += float(prob)
-                positions.append(pos)
-                if total_prob > self.anchor_contribution_threshold:
-                    return positions
-
-        return [1, 2, epitope_length - 1 , epitope_length]
-
-
     def is_anchor_residue_pass(self, line):
         if self.use_allele_specific_binding_thresholds:
             binding_threshold = self.allele_specific_binding_thresholds[line['HLA Allele']]
@@ -236,7 +235,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             binding_threshold = self.binding_threshold
 
         anchor_residue_pass = True
-        anchors = self.get_anchor_positions(line['HLA Allele'], len(line['MT Epitope Seq']))
+        anchors = get_anchor_positions(self, line['HLA Allele'], len(line['MT Epitope Seq']))
         # parse out mutation position from str
         position = line["Mutation Position"]
         if '-' in position:

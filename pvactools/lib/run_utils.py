@@ -147,3 +147,22 @@ def float_range(minimum, maximum):
 def supported_amino_acids():
     return ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
 
+def get_anchor_positions(self, hla_allele, epitope_length):
+        if self.allele_specific_anchors and epitope_length in self.anchor_probabilities and hla_allele in self.anchor_probabilities[epitope_length]:
+            probs = self.anchor_probabilities[epitope_length][hla_allele]
+            positions = []
+            total_prob = 0
+            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
+                total_prob += float(prob)
+                positions.append(int(pos))
+                if total_prob > self.anchor_contribution_threshold:
+                    return positions
+        elif self.allele_specific_anchors and epitope_length in self.mouse_anchor_positions and hla_allele in self.mouse_anchor_positions[epitope_length]:
+            values = self.mouse_anchor_positions[epitope_length][hla_allele]
+            positions = []
+            for (pos, val) in values.items():
+                if val == "TRUE":
+                    positions.append(int(pos))
+            return positions
+                
+        return [1, 2, epitope_length - 1 , epitope_length]
