@@ -8,6 +8,7 @@ import shutil
 from abc import ABCMeta, abstractmethod
 import itertools
 import csv
+import ast
 from pvactools.lib.run_utils import get_anchor_positions
 
 from pvactools.lib.prediction_class import PredictionClass
@@ -292,7 +293,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 reader = csv.DictReader(fh, delimiter="\t")
                 for line in reader:
                     allele = line.pop('Allele')
-                    values[allele] = line
+                    values[allele] = {int(k): ast.literal_eval(v) for k, v in line.items()}
             mouse_anchor_positions[length] = values
         self.mouse_anchor_positions = mouse_anchor_positions
 
@@ -377,7 +378,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             binding_threshold = self.binding_threshold
 
         anchor_residue_pass = True
-        anchors = get_anchor_positions(self, mutation['HLA Allele'], len(mutation['MT Epitope Seq']))
+        anchors = get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
         # parse out mutation position from str
         position = mutation["Mutation Position"]
         if pd.isna(position):

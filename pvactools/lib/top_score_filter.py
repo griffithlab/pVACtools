@@ -1,4 +1,5 @@
 import csv
+import ast
 import argparse
 import re
 import os
@@ -146,7 +147,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 reader = csv.DictReader(fh, delimiter="\t")
                 for line in reader:
                     allele = line.pop('Allele')
-                    values[allele] = line
+                    values[allele] = {int(k): ast.literal_eval(v) for k, v in line.items()}
             mouse_anchor_positions[length] = values
         self.mouse_anchor_positions = mouse_anchor_positions
 
@@ -235,7 +236,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             binding_threshold = self.binding_threshold
 
         anchor_residue_pass = True
-        anchors = get_anchor_positions(self, line['HLA Allele'], len(line['MT Epitope Seq']))
+        anchors = get_anchor_positions(line['HLA Allele'], len(line['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
         # parse out mutation position from str
         position = line["Mutation Position"]
         if '-' in position:
