@@ -651,6 +651,7 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)) {
       return()
     }
+    updateTextAreaInput(session, "comments", value = "")
     df$comments[selectedID(), 1] <- input$comments
   })
   ##display of genomic information
@@ -711,7 +712,7 @@ server <- shinyServer(function(input, output, session) {
   output$addData_transcript <- renderText({
     df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Transcript`
   })
-  ##transcripts sets table displaying sets of transcripts with the same consequence
+  ##transcript sets table displaying sets of transcripts with the same consequence
   output$transcriptSetsTable <- renderDT({
     withProgress(message = "Loading Transcript Sets Table", value = 0, {
       GB_transcripts <- data.frame()
@@ -723,7 +724,7 @@ server <- shinyServer(function(input, output, session) {
           "# Peptides" = df$metricsData[[selectedID()]]$peptide_counts,
           "Total Expr" = df$metricsData[[selectedID()]]$set_expr
         )
-        names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
+        names(GB_transcripts) <- c("Transcript Sets", "#Transcripts", "# Peptides", "Total Expr")
         best_transcript_set <- NULL
         incProgress(0.5)
         for (i in 1:length(df$metricsData[[selectedID()]]$sets)){
@@ -736,10 +737,10 @@ server <- shinyServer(function(input, output, session) {
         }
         incProgress(0.5)
         datatable(GB_transcripts, selection = list(mode = "single", selected = best_transcript_set_id), style="bootstrap") %>%
-          formatStyle("Transcripts Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
+          formatStyle("Transcript Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
       }else {
         GB_transcripts <- data.frame("Transcript Sets" = character(), "# Transcripts" = character(), "# Peptides" = character(), "Total Expr" = character())
-        names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
+        names(GB_transcripts) <- c("Transcript Sets", "#Transcripts", "# Peptides", "Total Expr")
         incProgress(0.5)
         datatable(GB_transcripts)
         incProgress(0.5)
