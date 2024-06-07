@@ -39,19 +39,19 @@ class RunUtilsTests(unittest.TestCase):
         )
     
     def test_get_anchor_positions(self):
-        class_object = PvacseqAggregateAllEpitopes(input_file=os.path.join(self.test_data_dir, 'M_GC-OxParp_A-OxParp_A_FF_DNA.all_epitopes.tsv'), 
+        agg_obj = PvacseqAggregateAllEpitopes(input_file=os.path.join(self.test_data_dir, 'M_GC-OxParp_A-OxParp_A_FF_DNA.all_epitopes.tsv'), 
                                                    output_file="",
                                                    allele_specific_anchors=True
                                                   )
 
         # anchor positions are stored for the given valid mouse allele and epitope length
         self.assertEqual(
-            get_anchor_positions(class_object, "H-2-Db", 11),
+            get_anchor_positions("H-2-Db", 11, agg_obj.allele_specific_anchors, agg_obj.anchor_probabilities, agg_obj.anchor_contribution_threshold, agg_obj.mouse_anchor_positions),
             [5, 11]
         )
 
         # valid mouse allele, but positions not stored for given epitope length
         self.assertEqual(
-            get_anchor_positions(class_object, "H-2-Kb", 11),
+            get_anchor_positions("H-2-Kb", 11, agg_obj.allele_specific_anchors, agg_obj.anchor_probabilities, agg_obj.anchor_contribution_threshold, agg_obj.mouse_anchor_positions),
             [1, 2, 10, 11]
         )
