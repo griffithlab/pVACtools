@@ -212,7 +212,7 @@ explore_tab <- tabItem(
                     span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput("metricsTextGenomicCoord")),
                     h5("Additional variant information:"),
                     uiOutput("url"), style = "overflow-x: scroll;font-size:100%"),
-                box(width = 2, solidHeader = TRUE, title = "Peptide Evalutation Overview",
+                box(width = 2, solidHeader = TRUE, title = "Peptide Evaluation Overview",
                     tableOutput("checked"), style = "overflow-x: scroll;font-size:100%")
             )
         ),
