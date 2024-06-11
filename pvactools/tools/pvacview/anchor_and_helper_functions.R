@@ -97,6 +97,12 @@ peptide_coloring <- function(hla_allele, peptide_row) {
         colors <- append(colors, "lightblue")
       }
     }
+  } else {
+    if ((position == 1) || (position == 2) || (position == peptide_length-1) || (position == peptide_length)) {
+      return("blue")
+    } else {
+      return("lightblue")
+    }
   }
 
   return(colors[[position]])
