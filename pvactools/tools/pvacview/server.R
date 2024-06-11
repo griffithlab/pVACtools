@@ -967,6 +967,19 @@ server <- shinyServer(function(input, output, session) {
       dtable
     })
   })
+  output$anchorPositions<- renderDT({
+    withProgress(message = "Loading Anchor Positions Table", value = 0, {
+      positions <- all_anchors(df$metricsData$alleles, df$metricsData$`epitope_lengths`, df$allele_specific_anchors, df$anchor_contribution)
+      dtable <- datatable(positions, options = list(
+        pageLength = 10,
+        lengthChange = FALSE,
+        rowCallback = JS("function(row, data, index, rowId) {",
+                         "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
+                         'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+      ))
+      dtable
+    })
+  })
   ##updating IC50 binding score for selected peptide pair
   bindingScoreDataIC50 <- reactive({
     if (is.null(df$metricsData)) {

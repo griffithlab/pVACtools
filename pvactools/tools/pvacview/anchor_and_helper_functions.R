@@ -140,6 +140,29 @@ calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution) {
   }, error = function(e) { return("NA") })
 }
 
+all_anchors <- function(hla_alleles, peptide_lengths, allele_specific_anchors, anchor_contribution) {
+  all_anchors_df <- data.frame(matrix(ncol = 3, nrow = 0))
+  colnames(all_anchors_df) <- c("Allele", "Length", "Anchor Positions")
+  for (hla_allele in hla_alleles) {
+    for (peptide_length in peptide_lengths) {
+      if (allele_specific_anchors) {
+        anchor_list = unlist(calculate_anchor(hla_allele, peptide_length, anchor_contribution))
+        if (anchor_list[[1]] == "NA") {
+          anchors <- c(1, 2, peptide_length-1 , peptide_length)
+        }
+        else{
+          anchors <- sort(anchor_list)
+        }
+      }else {
+        anchors <- c(1, 2, peptide_length-1 , peptide_length)
+      }
+      line <- c(hla_allele, peptide_length, paste(anchors, collapse=", "))
+      all_anchors_df[nrow(all_anchors_df) + 1,] = line
+    }
+  }
+  all_anchors_df
+}
+
 #converts string range (e.g. '2-4', '6') to associated list
 range_str_to_seq <- function(mutation_position) {
   rnge <- strsplit(mutation_position, "-")[[1]]

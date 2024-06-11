@@ -240,6 +240,11 @@ explore_tab <- tabItem(
                             )
                           ),
                           fluidRow(
+                            box(width = 12, title = "Anchor Positions", solidHeader = TRUE, collapsible = TRUE, status = "primary", collapsed = TRUE,
+                                DTOutput("anchorPositions") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll"
+                            )
+                          ),
+                          fluidRow(
                             box(width = 12, title = "Anchor Weights", solidHeader = TRUE, collapsible = TRUE, status = "primary", collapsed = TRUE,
                                 DTOutput("anchorWeights") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll"
                             )

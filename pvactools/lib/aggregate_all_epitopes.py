@@ -123,6 +123,17 @@ class AggregateAllEpitopes:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
 
+    def determine_used_epitope_lengths(self):
+        col_name = self.determine_epitope_seq_column_name()
+        return list(set([len(s) for s in pd.read_csv(self.input_file, delimiter="\t", usecols=[col_name])[col_name]]))
+
+    def determine_epitope_seq_column_name(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        for header in ["MT Epitope Seq", "Epitope Seq"]:
+            if header in headers:
+                return header
+        raise Exception("No mutant epitope sequence header found.")
+
     def problematic_positions_exist(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
         return 'Problematic Positions' in headers
@@ -183,6 +194,7 @@ class AggregateAllEpitopes:
 
     def execute(self):
         prediction_algorithms = self.determine_used_prediction_algorithms()
+        epitope_lengths = self.determine_used_epitope_lengths()
         el_algorithms = self.determine_used_el_algorithms()
         used_columns = self.determine_columns_used_for_aggregation(prediction_algorithms, el_algorithms)
         dtypes = self.set_column_types(prediction_algorithms)
@@ -209,6 +221,7 @@ class AggregateAllEpitopes:
                 'allele_specific_anchors': self.allele_specific_anchors,
                 'alleles': self.hla_types.tolist(),
                 'anchor_contribution_threshold': self.anchor_contribution_threshold,
+                'epitope_lengths': epitope_lengths,
             }
         else:
             metrics = {}
