@@ -98,7 +98,7 @@ peptide_coloring <- function(hla_allele, peptide_row) {
       }
     }
   } else {
-    if ((position == 1) || (position == 2) || (position == peptide_length-1) || (position == peptide_length)) {
+    if (position %in% c(1, 2, peptide_length-1, peptide_length)) {
       return("blue")
     } else {
       return("lightblue")
