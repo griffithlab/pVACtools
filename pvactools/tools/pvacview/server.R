@@ -159,10 +159,10 @@ server <- shinyServer(function(input, output, session) {
      ## Class I demo aggregate report
      #session$sendCustomMessage("unbind-DT", "mainTable")
      withProgress(message = "Loading Demo Data", value = 0, {
-       #load(url("https://github.com/griffithlab/pVACtools/raw/52ced64ad04bf627ef900fa6ade38f5d366a783f/pvactools/tools/pvacview/HCC1395_demo_data.rda"))
-       #incProgress(0.3)
-       data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
-       mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
+       load(url("https://github.com/griffithlab/pVACtools/raw/e4761c6eaea9d2868db3ffe3c410211f5bb4351f/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
+       incProgress(0.3)
+       #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
+       #mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(mainData) <- mainData[1, ]
        mainData <- mainData[-1, ]
        row.names(mainData) <- NULL
@@ -175,9 +175,9 @@ server <- shinyServer(function(input, output, session) {
        df$mainTable <- mainData
        incProgress(0.1)
        ## Class I demo metrics file
-       metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
-       df$metricsData <- fromJSON(txt = metricsdata)
-       #df$metricsData <- metricsData
+       #metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
+       #df$metricsData <- fromJSON(txt = metricsdata)
+       df$metricsData <- metricsData
        df$binding_threshold <- df$metricsData$`binding_threshold`
        df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
        df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
