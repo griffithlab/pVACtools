@@ -917,7 +917,7 @@ server <- shinyServer(function(input, output, session) {
         peptide_table <- do.call("rbind", lapply(peptide_names, table_formatting, peptide_data))
         peptide_table_filtered <- Filter(function(x) length(unique(x)) != 1, peptide_table)
         peptide_table_names <- names(peptide_table_filtered)
-        hla_list <- peptide_table_names[grepl("^HLA-*", peptide_table_names)]
+        hla_list <- df$metricsData$alleles
         hla_data <- data.frame(hla = hla_list)
         hla_sep <- max(nchar(peptide_table$`Peptide Sequence`))
         hla_data$y_pos <- 1
