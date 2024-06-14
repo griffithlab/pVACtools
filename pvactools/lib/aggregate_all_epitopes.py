@@ -8,6 +8,8 @@ import shutil
 from abc import ABCMeta, abstractmethod
 import itertools
 import csv
+import ast
+from pvactools.lib.run_utils import get_anchor_positions
 
 from pvactools.lib.prediction_class import PredictionClass
 
@@ -294,6 +296,20 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     probs[hla] = line
             anchor_probabilities[length] = probs
         self.anchor_probabilities = anchor_probabilities
+
+        mouse_anchor_positions = {}
+        for length in [8, 9, 10, 11]:
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "mouse_anchor_predictions_{}_mer.tsv".format(length))
+            values = {}
+            with open(file_name, 'r') as fh:
+                reader = csv.DictReader(fh, delimiter="\t")
+                for line in reader:
+                    allele = line.pop('Allele')
+                    values[allele] = {int(k): ast.literal_eval(v) for k, v in line.items()}
+            mouse_anchor_positions[length] = values
+        self.mouse_anchor_positions = mouse_anchor_positions
+
         self.allele_specific_anchors = allele_specific_anchors
         self.anchor_contribution_threshold = anchor_contribution_threshold
         super().__init__()
@@ -375,7 +391,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             binding_threshold = self.binding_threshold
 
         anchor_residue_pass = True
-        anchors = self.get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']))
+        anchors = get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
         # parse out mutation position from str
         position = mutation["Mutation Position"]
         if pd.isna(position):
@@ -394,20 +410,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
                     anchor_residue_pass = False
         return anchor_residue_pass
-
-    def get_anchor_positions(self, hla_allele, epitope_length):
-        if self.allele_specific_anchors and epitope_length in self.anchor_probabilities and hla_allele in self.anchor_probabilities[epitope_length]:
-            probs = self.anchor_probabilities[epitope_length][hla_allele]
-            positions = []
-            total_prob = 0
-            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
-                total_prob += float(prob)
-                positions.append(int(pos))
-                if total_prob > self.anchor_contribution_threshold:
-                    return positions
-
-        return [1, 2, epitope_length - 1 , epitope_length]
-
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
