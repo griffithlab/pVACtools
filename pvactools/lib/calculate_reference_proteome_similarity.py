@@ -124,9 +124,9 @@ class CalculateReferenceProteomeSimilarity:
         self.file_type = file_type
         self.blastp_path = blastp_path
         self.blastp_db = blastp_db
-        if self.blastp_db == 'refseq_select_prot' and self.species != 'human' and self.species != 'mouse':
-            raise Exception("refseq_select_prot blastp database is only compatible with human and mouse species.")
         self.peptide_fasta = peptide_fasta
+        if self.peptide_fasta is None and self.blastp_db == 'refseq_select_prot' and self.species != 'human' and self.species != 'mouse':
+            raise Exception("refseq_select_prot blastp database is only compatible with human and mouse species.")
         self.aggregate_metrics_file = aggregate_metrics_file
         if self.aggregate_metrics_file:
             (dir_name, full_file_name) = os.path.split(output_file)
