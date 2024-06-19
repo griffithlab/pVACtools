@@ -51,22 +51,18 @@ Contents
    contact
    mailing_list
 
-New in Version |version|
+New in Release |release|
 ------------------------
 
-This is a minor feature release. It adds the following features:
+This is a bugfix release. It fixes the following problem(s):
 
-- We added two new modules to pVACview: a :ref:`neofox_module` to visualize
-  NeoFox neoantigen annotations and a :ref:`custom_module` to visualize
-  neoantigen data in a TSV file, for example output files from VaxRank,
-  NeoPredPipe, or antigen.garnish.
-- We added a :ref:`vignette <pvacseq_vignette>` to our documentation to provide
-  an extended tutorial on how evaluate neoantigen candidates using pVACview.
-
-This release also fixes the following bug(s):
-
-- When running pVACfuse with Arriba input data, the 3' transcript was not
-  being parsed correctly. This release fixes this issue.
+- When running the reference protome similarity step with a reference protome
+  peptide fasta file and a species other than human or mouse, the run would be aborted
+  with an error that the refseq_protein_prot BLASTp database was incompatible with
+  the species. This error should not be emitted in this circumstance since
+  BLASTp is not run when using a reference proteome peptide fasta file. This
+  release fixes this error and allows users to run the reference proteome
+  similarity step on non-human and non-mouse data with a reference proteome peptide fasta.
 
 Past release notes can be found on our :ref:`releases` page.
 
