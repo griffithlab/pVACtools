@@ -17,3 +17,17 @@ This release also fixes the following bug(s):
 
 - When running pVACfuse with Arriba input data, the 3' transcript was not
   being parsed correctly. This release fixes this issue.
+
+Version 4.2.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- When running the reference protome similarity step with a reference protome
+  peptide fasta file and a species other than human or mouse, the run would be aborted
+  with an error that the refseq_protein_prot BLASTp database was incompatible with
+  the species. This error should not be emitted in this circumstance since
+  BLASTp is not run when using a reference proteome peptide fasta file. This
+  release fixes this error and allows users to run the reference proteome
+  similarity step on non-human and non-mouse data with a reference proteome peptide fasta.
+
