@@ -18,7 +18,9 @@ RUN R -e "install.packages(c('shiny',\
   'shinydashboardPlus', \
   'shinycssloaders', \
   'fresh', \
-  'RCurl' ), repos='https://cran.rstudio.com/')"
+  'RCurl', \
+  'shinyWidgets', \
+  'colourpicker'), repos='https://cran.rstudio.com/')"
 
 RUN R -e "devtools::install_github('eclarke/ggbeeswarm', ref='v0.6.1')"
 
