@@ -1655,9 +1655,9 @@ server <- shinyServer(function(input, output, session) {
 
         yvrbl_values <- df[[input$yvrbl]]
         range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
-        min_value <- round(range_values[1], 10)
-        max_value <- round(range_values[2], 10)
-
+        
+        min_value <- range_values[1]
+        max_value <- range_values[2]
 
         # Check if min_value and max_value are equal, set default values
         if (min_value == max_value) {
@@ -2038,12 +2038,8 @@ server <- shinyServer(function(input, output, session) {
           
           xvrbl_values <- df[[input$xvrbl_custom]]
           range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
-          #min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-          #max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
-          min_value <- round(range_values[1], 10)
-          max_value <- round(range_values[2], 10)
-          
-          
+          min_value <- range_values[1]
+          max_value <- range_values[2]
           
           # Check if min_value and max_value are equal, set default values
           if (min_value == max_value) {
