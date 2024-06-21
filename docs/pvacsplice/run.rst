@@ -7,7 +7,7 @@ Usage
    prediction algorithms. More information on how to install IEDB locally can
    be found on the :ref:`Installation <iedb_install>` page.
 
-   .. program-output:: pvacsplice run -h
+.. program-output:: pvacsplice run -h
 
 ..  .. argparse::
         :module: tools.pvacsplice.run
