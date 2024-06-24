@@ -2014,7 +2014,7 @@ server <- shinyServer(function(input, output, session) {
   
   output$xvrbl_scale_custom <- renderUI({
     if (!is.null(input$xvrbl_custom) && input$xvrbl_custom != "") {
-      withProgress(message = "Loading Scale", {
+      withProgress(message = "Loading Scale", value = 0, {
           req(input$xvrbl_custom)  # Use req() to check if inputs are not NULL
           df <- df_custom$fullData
           df <- type.convert(df, as.is = TRUE)
