@@ -2113,8 +2113,8 @@ server <- shinyServer(function(input, output, session) {
         yvrbl_values <- df[[input$yvrbl_custom]]
         range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
         
-        min_value <- range_values[1]
-        max_value <- range_values[2]
+        min_value <- floor(range_values[1])
+        max_value <- ceiling(range_values[2])
         
         # Check if min_value and max_value are equal, set default values
         if (min_value == max_value ) {
