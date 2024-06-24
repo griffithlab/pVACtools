@@ -1607,8 +1607,8 @@ server <- shinyServer(function(input, output, session) {
 
           xvrbl_values <- df[[input$xvrbl]]
           range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
-          min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-          max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+          min_value <- floor(range_values[1])
+          max_value <- ceiling(range_values[2])
 
 
           # Check if min_value and max_value are equal, set default values
@@ -1655,9 +1655,9 @@ server <- shinyServer(function(input, output, session) {
 
         yvrbl_values <- df[[input$yvrbl]]
         range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
-        min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-        max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
-
+        
+        min_value <- floor(range_values[1])
+        max_value <- ceiling(range_values[2])
 
         # Check if min_value and max_value are equal, set default values
         if (min_value == max_value) {
@@ -1991,10 +1991,6 @@ server <- shinyServer(function(input, output, session) {
   
   # Dynamic Scatter Plot 
   output$xvrbl_custom <- renderUI({
-    #df_custom <- df_custom$fullData
-    #df_custom <- type.convert(df_custom, as.is = TRUE)
-    #df[is.na(df)] <- 0
-    
     features <- as.list(names(df_custom$fullData)[sapply(df_custom$fullData, is.numeric)])
     default_selection <- ifelse(length(features) >= 1, features[[1]], "")
     
@@ -2042,9 +2038,8 @@ server <- shinyServer(function(input, output, session) {
           
           xvrbl_values <- df[[input$xvrbl_custom]]
           range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
-          min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-          max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
-          
+          min_value <- floor(range_values[1])
+          max_value <- ceiling(range_values[2])
           
           # Check if min_value and max_value are equal, set default values
           if (min_value == max_value) {
@@ -2058,7 +2053,7 @@ server <- shinyServer(function(input, output, session) {
             min = min_value,
             max = max_value,
             value = c(min_value, max_value),
-            step = 0.01,
+            step = 0.001,
             dragRange = TRUE  # Allow users to drag the range handles 
           )
       })
@@ -2114,14 +2109,15 @@ server <- shinyServer(function(input, output, session) {
           df[[input$yvrbl_custom]] <- df[[input$yvrbl_custom]]
         }
         
-        df <- df[is.finite(df[[input$yvrbl_custom]]),]
+        #df <- df[is.finite(df[[input$yvrbl_custom]]),]
         yvrbl_values <- df[[input$yvrbl_custom]]
         range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
-        min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-        max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+        
+        min_value <- floor(range_values[1])
+        max_value <- ceiling(range_values[2])
         
         # Check if min_value and max_value are equal, set default values
-        if (min_value == max_value) {
+        if (min_value == max_value ) {
           min_value <- min_value - 1
           max_value <- max_value + 1
         }
@@ -2132,7 +2128,7 @@ server <- shinyServer(function(input, output, session) {
           min = min_value,
           max = max_value,
           value = c(min_value, max_value),
-          step = 0.01,
+          step = 0.001,
           dragRange = TRUE  # Allow users to drag the range handles 
         )
       })
@@ -2183,12 +2179,12 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$scatter_custom <- renderPlotly({
-    withProgress(message = "Loading Scatter Plots", value = 0, {
+    withProgress(message = "Loading Scatter Plots",  {
       incProgress(0.5)
-      if (!is.null(input$xvrbl_custom) & !is.null(input$yvrbl_custom)
-          & !is.null(input$min_col_custom)  & !is.null(input$max_col_custom)
-          & !is.null(input$xvrbl_scale_custom)  & !is.null(input$yvrbl_scale_custom)
-          & !is.null(input$color_scatter_custom)  & !is.null(input$size_scatter_custom)) {
+      if (!is.null(input$xvrbl_custom) && !is.null(input$yvrbl_custom) && input$yvrbl_custom != "" && input$xvrbl_custom != ""
+          && !is.null(input$min_col_custom)  && !is.null(input$max_col_custom)
+          && !is.null(input$xvrbl_scale_custom)  && !is.null(input$yvrbl_scale_custom)
+          && !is.null(input$color_scatter_custom)  && !is.null(input$size_scatter_custom)) {
         
         df <- df_custom$fullData
         df <- type.convert(df, as.is = TRUE)
@@ -2220,7 +2216,6 @@ server <- shinyServer(function(input, output, session) {
           df[[input$yvrbl_custom]] <- df[[input$yvrbl_custom]]
         }
         
-        
         df[is.na(df)] <- 0
         
         # Filter data based on the slider range
@@ -2229,10 +2224,17 @@ server <- shinyServer(function(input, output, session) {
         
         incProgress(0.5)
         
-        scatter_plot <- ggplot(df , aes(x = .data[[input$xvrbl_custom]], y = .data[[input$yvrbl_custom]])) +
-          geom_point(aes(color = .data[[input$color_scatter_custom]], size = .data[[input$size_scatter_custom]])) +  # Correct placement of aes() here
+        scatter_plot <- ggplot(df, aes(x = .data[[input$xvrbl_custom]], y = .data[[input$yvrbl_custom]])) +
+          geom_point(aes(color = .data[[input$color_scatter_custom]], size = .data[[input$size_scatter_custom]])) +
           scale_color_gradient(low = input$min_col_custom, high = input$max_col_custom) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+          theme(
+            strip.text = element_text(size = 15),
+            axis.text = element_text(size = 10),
+            axis.title = element_text(size = 15),
+            axis.ticks = element_line(size = 3),
+            legend.text = element_text(size = 15),
+            legend.title = element_text(size = 15)
+          )
         
         scatter_plot <- ggplotly(scatter_plot)
         
