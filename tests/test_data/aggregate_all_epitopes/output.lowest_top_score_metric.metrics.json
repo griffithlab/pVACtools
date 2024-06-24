@@ -22,6 +22,10 @@
     "HLA-B*35:01"
   ],
   "anchor_contribution_threshold": 0.8,
+  "epitope_lengths": [
+    9,
+    10
+  ],
   "2-217498305-217498305-T-TGCTGCC": {
     "good_binders": {
       "Transcript Set 1": {

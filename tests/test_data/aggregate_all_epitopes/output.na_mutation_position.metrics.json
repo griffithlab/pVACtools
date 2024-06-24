@@ -28,6 +28,12 @@
     "HLA-C*07:02"
   ],
   "anchor_contribution_threshold": 0.8,
+  "epitope_lengths": [
+    8,
+    9,
+    10,
+    11
+  ],
   "chr4-8019634-8019634-A-AGGGGGTTTCCTATAGATGTTATCTTTTACGCCAGTGTCT": {
     "good_binders": {
       "Transcript Set 1": {

@@ -18,6 +18,9 @@
     "HLA-DRB1*11:01"
   ],
   "anchor_contribution_threshold": 0.8,
+  "epitope_lengths": [
+    15
+  ],
   "2-217498305-217498305-T-TGCTGCC": {
     "good_binders": {
       "Transcript Set 1": {

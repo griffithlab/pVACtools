@@ -23,6 +23,13 @@
     "HLA-C*06:02"
   ],
   "anchor_contribution_threshold": 0.8,
+  "epitope_lengths": [
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
   "chr1-16006133-16006134-G-T": {
     "good_binders": {},
     "sets": [],
