@@ -160,18 +160,18 @@ class AggregateAllEpitopes:
 
     def set_column_types(self, prediction_algorithms):
         dtypes = {
-            'Chromosome': str,
+            'Chromosome': "string",
             "Start": "int32",
             "Stop": "int32",
-            'Reference': str,
-            'Variant': str,
+            'Reference': "string",
+            'Variant': "string",
             "Variant Type": "category",
             "Mutation Position": "category",
             "Median MT IC50 Score": "float32",
             "Median MT Percentile": "float32",
             "Best MT IC50 Score": "float32",
             "Best MT Percentile": "float32",
-            "Protein Position": "str",
+            "Protein Position": "string",
             "Transcript Length": "int32",
         }
         for algorithm in prediction_algorithms:
