@@ -15,6 +15,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         cls.python        = sys.executable
         cls.executable    = os.path.join(pvactools_directory(), "pvactools", "lib", "aggregate_all_epitopes.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "aggregate_all_epitopes")
+        cls.pvacview_r_files = ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R", "neofox_ui.R", "custom_ui.R"]
 
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
@@ -35,7 +36,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         ))
         os.remove(metrics_file)
 
-        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+        for i in self.pvacview_r_files:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
             self.assertTrue(os.path.isfile(pvacview_file))
             os.remove(pvacview_file)
@@ -61,7 +62,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         ))
         os.remove(metrics_file)
 
-        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+        for i in self.pvacview_r_files:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
             self.assertTrue(os.path.isfile(pvacview_file))
             os.remove(pvacview_file)
@@ -87,7 +88,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         ))
         os.remove(metrics_file)
 
-        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+        for i in self.pvacview_r_files:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
             self.assertTrue(os.path.isfile(pvacview_file))
             os.remove(pvacview_file)
@@ -109,7 +110,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         metrics_file = output_file.name.replace('.tsv', '.metrics.json')
         self.assertFalse(os.path.isfile(metrics_file))
 
-        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+        for i in self.pvacview_r_files:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
             self.assertFalse(os.path.isfile(pvacview_file))
 
@@ -129,7 +130,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         metrics_file = output_file.name.replace('.tsv', '.metrics.json')
         self.assertFalse(os.path.isfile(metrics_file))
 
-        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+        for i in self.pvacview_r_files:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
             self.assertFalse(os.path.isfile(pvacview_file))
 
@@ -159,7 +160,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         ))
         os.remove(metrics_file)
 
-        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+        for i in self.pvacview_r_files:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
             os.remove(pvacview_file)
 
@@ -189,7 +190,7 @@ class AggregateAllEptiopesTests(unittest.TestCase):
         ))
         os.remove(metrics_file)
 
-        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
+        for i in self.pvacview_r_files:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
             os.remove(pvacview_file)
 
