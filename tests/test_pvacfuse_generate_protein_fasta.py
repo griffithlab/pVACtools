@@ -67,5 +67,6 @@ class GenerateFastaTests(unittest.TestCase):
             generate_protein_fasta_output_file.name,
             '-d', 'full'
         ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_with_invalid_characters.fasta')
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
-        self.assertEqual(os.path.getsize(generate_protein_fasta_output_file.name), 0)

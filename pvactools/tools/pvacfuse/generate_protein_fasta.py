@@ -69,7 +69,8 @@ def generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file):
         'epitope_length'            : 0,
         'output_file'               : fasta_file,
         'output_key_file'           : fasta_key_file,
-        'downstream_sequence_length': downstream_sequence_length
+        'downstream_sequence_length': downstream_sequence_length,
+        'trim_invalid_characters'   : True,
     }
     fasta_generator = FusionFastaGenerator(**generate_fasta_params)
     fasta_generator.execute()
