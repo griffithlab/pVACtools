@@ -20,6 +20,10 @@ class FastaGeneratorTests(unittest.TestCase):
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
+    def test_trim_invalid_characters(self):
+        self.assertEqual(FastaGenerator.__new__(FastaGenerator).trim_sequence('K?TTASVKERREILSELGKCVAGKEFRVERTPLPSAPVLPELTAIPLT'), 'TTASVKERREILSELGKCVAGKEFRVERTPLPSAPVLPELTAIPLT')
+        self.assertEqual(FastaGenerator.__new__(FastaGenerator).trim_sequence('TTASVKERREILSELGKCVAGKEFRVERTPLPSAPVLPELTAI?PLT'), 'TTASVKERREILSELGKCVAGKEFRVERTPLPSAPVLPELTAI')
+
     def test_input_file_with_peptide_sequence_length_17_generates_expected_file(self):
         generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input.tsv')
         generate_fasta_output_file     = tempfile.NamedTemporaryFile()
