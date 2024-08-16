@@ -47,6 +47,7 @@ Contents
    releases
    license
    citation
+   funding
    contribute
    contact
    mailing_list
