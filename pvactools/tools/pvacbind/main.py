@@ -81,6 +81,13 @@ def main():
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
 
+    valid_algorithms_parser = subparsers.add_parser(
+        "valid_algorithms",
+        help="Show a list of algorithms supported given the specified species and/or allele",
+        add_help=False
+    )
+    valid_algorithms_parser.set_defaults(func=valid_algorithms)
+
     allele_specific_cutoffs_parser = subparsers.add_parser(
         "allele_specific_cutoffs",
         help="Show the allele specific cutoffs",

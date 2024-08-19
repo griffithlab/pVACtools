@@ -43,15 +43,7 @@ class PvacbindTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
-        url = "http://ftp.ensembl.org/pub/release-106/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz"
-        with urlopen(url) as fsrc, NamedTemporaryFile(delete=False) as fdst:
-            copyfileobj(fsrc, fdst)
-            fdst.close()
-            cls.peptide_fasta = fdst
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.peptide_fasta.name)
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
 
     def test_pvacbind_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -76,6 +68,7 @@ class PvacbindTests(unittest.TestCase):
             "run",
             'binding_filter',
             'valid_alleles',
+            'valid_algorithms',
             'allele_specific_cutoffs',
             'download_example_data',
             "net_chop",
@@ -183,7 +176,7 @@ class PvacbindTests(unittest.TestCase):
                 '--net-chop-method', 'cterm',
                 '--netmhc-stab',
                 '--run-reference-proteome-similarity',
-                '--peptide-fasta', self.peptide_fasta.name,
+                '--peptide-fasta', self.peptide_fasta,
             ])
 
             run.main([
@@ -196,7 +189,7 @@ class PvacbindTests(unittest.TestCase):
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
-                '--peptide-fasta', self.peptide_fasta.name,
+                '--peptide-fasta', self.peptide_fasta,
             ])
             close_mock_fhs()
 
@@ -293,7 +286,7 @@ class PvacbindTests(unittest.TestCase):
                     '-e2', '15',
                     '--keep-tmp-files',
                     '--run-reference-proteome-similarity',
-                    '--peptide-fasta', self.peptide_fasta.name,
+                    '--peptide-fasta', self.peptide_fasta,
                 ])
             self.assertEqual(
                 str(cm.exception),
@@ -359,7 +352,7 @@ class PvacbindTests(unittest.TestCase):
                 '--keep-tmp-files',
                 '--allele-specific-binding-thresholds',
                 '--run-reference-proteome-similarity',
-                '--peptide-fasta', self.peptide_fasta.name,
+                '--peptide-fasta', self.peptide_fasta,
             ])
             close_mock_fhs()
 
@@ -371,3 +364,16 @@ class PvacbindTests(unittest.TestCase):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
                 self.assertTrue(compare(output_file, expected_file))
+    
+    def test_valid_algorithms_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacbind",
+            "valid_algorithms.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_algorithms_runs(self):
+        valid_algorithms.main("")

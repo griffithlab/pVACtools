@@ -3,6 +3,7 @@ import argparse
 import os
 import shutil
 import yaml
+import platform
 
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import Pipeline
@@ -65,6 +66,9 @@ def main(args_input = sys.argv[1:]):
             raise Exception("--tumor-purity must be a float between 0 and 1. Value too large: {}".format(args.tumor_purity))
         elif args.tumor_purity < 0:
             raise Exception("--tumor-purity must be a float between 0 and 1. Value too small: {}".format(args.tumor_purity))
+
+    if args.n_threads > 1 and platform.system() == "Darwin":
+        raise Exception("Multithreading is not supported on MacOS")
 
     input_file_type = 'vcf'
     base_output_dir = os.path.abspath(args.output_dir)

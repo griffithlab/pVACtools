@@ -41,20 +41,22 @@ created):
    * - ``<sample_name>.filtered.tsv``
      - The above file after applying all filters, with (optionally) cleavage site, stability
        predictions, and reference proteome similarity metrics added.
-   * - ``<sample_name>.filtered.tsv.reference_matches`` (optional)
-     - A file outlining details of reference proteome matches
    * - ``<sample_name>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
-       the best epitope for each mutation in an easy-to-read format.
+       the best epitope for each mutation in an easy-to-read format. Not
+       generated when running with elution algorithms only.
+   * - ``<sample_name>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
+     - A file outlining details of reference proteome matches
    * - ``<sample_name>.all_epitopes.aggregated.metrics.json``
      - A JSON file with detailed information about the predicted epitopes,
        formatted for pVACview. This file, in combination with the
        aggregated.tsv file, is required to visualize your results
-       in pVACview.
+       in pVACview. Not generated when running with elution algorithms only.
    * - ``ui.R``, ``app.R``, ``server.R``, ``styling.R``, ``anchor_and_helper_functions.R``
-     - pVACview R Shiny application files
+     - pVACview R Shiny application files. Not generated when running with elution algorithms only.
    * - ``www`` (directory)
-     - Directory containing image files for pVACview
+     - Directory containing image files for pVACview. Not generated when running with elution algorithms only.
+
 
 Filters applied to the filtered.tsv file
 ----------------------------------------
@@ -100,6 +102,16 @@ _______________________________________________
 - MHCflurryEL
 - NetMHCpanEL
 - NetMHCIIpanEL
+- BigMHC_EL
+
+Prediction Algorithms Supporting Immunogenicity Scores
+______________________________________________________
+
+- BigMHC_IM
+- DeepImmuno
+
+Please note that when running pVACseq with only elution or immunogenicity algorithms, no
+aggregate report and pVACview files are created.
 
 .. _all_ep_and_filtered:
 
