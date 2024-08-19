@@ -1,5 +1,6 @@
 library(RCurl)
 library(curl)
+library(data.table)
 
 ## Load Anchor data
 anchor_data <- list()
@@ -7,6 +8,13 @@ anchor_data[[8]] <- read.table(curl("https://raw.githubusercontent.com/griffithl
 anchor_data[[9]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/ae938113ddbbe6c6eeecebf94459d449facd2c2f/tools/pvacview/data/Normalized_anchor_predictions_9_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 anchor_data[[10]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/ae938113ddbbe6c6eeecebf94459d449facd2c2f/tools/pvacview/data/Normalized_anchor_predictions_10_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/ae938113ddbbe6c6eeecebf94459d449facd2c2f/tools/pvacview/data/Normalized_anchor_predictions_11_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+
+## Load Mouse Anchor data
+mouse_anchor_data <- list()
+mouse_anchor_data[[8]] <- read.table(curl("https://raw.githubusercontent.com/ldhtnp/pVACtools/add_mouse_anchors/pvactools/tools/pvacview/data/mouse_anchor_predictions_8_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[9]] <- read.table(curl("https://raw.githubusercontent.com/ldhtnp/pVACtools/add_mouse_anchors/pvactools/tools/pvacview/data/mouse_anchor_predictions_9_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[10]] <- read.table(curl("https://raw.githubusercontent.com/ldhtnp/pVACtools/add_mouse_anchors/pvactools/tools/pvacview/data/mouse_anchor_predictions_10_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/ldhtnp/pVACtools/add_mouse_anchors/pvactools/tools/pvacview/data/mouse_anchor_predictions_11_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 #get binding affinity colors cutoffs given HLA
 
@@ -74,33 +82,112 @@ peptide_coloring <- function(hla_allele, peptide_row) {
     return(c("#999999"))
   }
   position <- as.numeric(peptide_row["x_pos"])
-  anchor_score <- as.numeric(anchor_data[[peptide_length]][anchor_data[[peptide_length]]["HLA"] == hla_allele][2:(peptide_length + 1)])
-  value_bins <- cut(anchor_score, breaks = seq(0, 1, len = 100),
-                    include.lowest = TRUE)
-  colors <- colorRampPalette(c("lightblue", "blue"))(99)[value_bins]
+  if (any(hla_allele == anchor_data[[peptide_length]]["HLA"])) {
+    anchor_score <- as.numeric(anchor_data[[peptide_length]][anchor_data[[peptide_length]]["HLA"] == hla_allele][2:(peptide_length + 1)])
+    value_bins <- cut(anchor_score, breaks = seq(0, 1, len = 100),
+                      include.lowest = TRUE)
+    colors <- colorRampPalette(c("lightblue", "blue"))(99)[value_bins]
+  } else if (any(hla_allele == mouse_anchor_data[[peptide_length]]["Allele"])) {
+    mouse_position_data <- (mouse_anchor_data[[peptide_length]][mouse_anchor_data[[peptide_length]]["Allele"] == hla_allele][2:(peptide_length + 1)])
+    colors <- list()
+    for (i in 1:length(mouse_position_data)) {
+      if (mouse_position_data[i] == "True") {
+        colors <- append(colors, "blue")
+      } else {
+        colors <- append(colors, "lightblue")
+      }
+    }
+  } else {
+    if (position %in% c(1, 2, peptide_length-1, peptide_length)) {
+      return("blue")
+    } else {
+      return("lightblue")
+    }
+  }
+
   return(colors[[position]])
+}
+#calculate per-length anchor score for HLA allele
+anchor_weights_for_alleles <- function(hla_alleles) {
+  scores_df <- data.frame()
+  for (hla_allele in hla_alleles) {
+    if (any(hla_allele == anchor_data[[8]]["HLA"])) {
+      eight_mer_scores <- append(anchor_data[[8]][anchor_data[[8]]["HLA"] == hla_allele][1:(8 + 1)], "8mer", 1)
+    } else if (any(hla_allele == mouse_anchor_data[[8]]["Allele"])) {
+      eight_mer_scores <- append(mouse_anchor_data[[8]][mouse_anchor_data[[8]]["Allele"] == hla_allele][1:(8 + 1)], "8mer", 1)
+    }
+    else {
+      eight_mer_scores <- c(hla_allele, "8mer")
+    }
+
+    if (any(hla_allele == anchor_data[[9]]["HLA"])) {
+      nine_mer_scores <- append(anchor_data[[9]][anchor_data[[9]]["HLA"] == hla_allele][1:(9 + 1)], "9mer", 1)
+    } else if (any(hla_allele == mouse_anchor_data[[9]]["Allele"])) {
+      nine_mer_scores <- append(mouse_anchor_data[[9]][mouse_anchor_data[[9]]["Allele"] == hla_allele][1:(9 + 1)], "9mer", 1)
+    }
+    else {
+      nine_mer_scores <- c(hla_allele, "9mer")
+    }
+
+    if (any(hla_allele == anchor_data[[10]]["HLA"])) {
+      ten_mer_scores <- append(anchor_data[[10]][anchor_data[[10]]["HLA"] == hla_allele][1:(10 + 1)], "10mer", 1)
+    } else if (any(hla_allele == mouse_anchor_data[[10]]["Allele"])) {
+      ten_mer_scores <- append(mouse_anchor_data[[10]][mouse_anchor_data[[10]]["Allele"] == hla_allele][1:(10 + 1)], "10mer", 1)
+    }
+    else {
+      ten_mer_scores <- c(hla_allele, "10mer")
+    }
+
+    if (any(hla_allele == anchor_data[[11]]["HLA"])) {
+      eleven_mer_scores <- append(anchor_data[[11]][anchor_data[[11]]["HLA"] == hla_allele][1:(11 + 1)], "11mer", 1)
+    } else if (any(hla_allele == mouse_anchor_data[[11]]["Allele"])) {
+      eleven_mer_scores <- append(mouse_anchor_data[[11]][mouse_anchor_data[[11]]["Allele"] == hla_allele][1:(11 + 1)], "11mer", 1)
+    }
+    else {
+      eleven_mer_scores <- c(hla_allele, "11mer")
+    }
+
+    scores <- list(eight_mer_scores, nine_mer_scores, ten_mer_scores, eleven_mer_scores)
+    scores <- lapply(scores, `length<-`, 13)
+    scores <- transpose(data.frame(scores))
+    colnames(scores) <- c("HLA Allele", "Peptide Length", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")
+    scores_df <- rbind(scores_df, scores)
+  }
+  return(scores_df)
 }
 #calculate anchor list for specific peptide length and HLA allele combo given contribution cutoff
 calculate_anchor <- function(hla_allele, peptide_length, anchor_contribution) {
   result <- tryCatch({
+    if (any(hla_allele == anchor_data[[peptide_length]]["HLA"])) {
       anchor_raw_data <- as.numeric(anchor_data[[peptide_length]][anchor_data[[peptide_length]]["HLA"] == hla_allele][2:(peptide_length + 1)])
-    if (any(is.na(anchor_raw_data))) {
+      if (any(is.na(anchor_raw_data))) {
+        return("NA")
+      }
+      names(anchor_raw_data) <- as.character(1:length(anchor_raw_data))
+      anchor_raw_data <- anchor_raw_data[order(unlist(anchor_raw_data), decreasing = TRUE)]
+      count <- 0
+      anchor_list <- list()
+      for (i in 1:length(anchor_raw_data)) {
+        if (count >= anchor_contribution) {
+          return(anchor_list)
+        } else {
+          count <- count + anchor_raw_data[[i]]
+          anchor_list <- append(anchor_list, names(anchor_raw_data[i]))
+        }
+      }
+    } else if (any(hla_allele == mouse_anchor_data[[peptide_length]]["Allele"])) {
+      mouse_position_data <- (mouse_anchor_data[[peptide_length]][mouse_anchor_data[[peptide_length]]["Allele"] == hla_allele][2:(peptide_length + 1)])
+      anchor_list <- list()
+      for (i in 1:length(mouse_position_data)) {
+        if (mouse_position_data[i] == "True") {
+          anchor_list <- append(anchor_list, as.character(i))
+        }
+      }
+      return(anchor_list)
+    } else {
       return("NA")
     }
-    names(anchor_raw_data) <- as.character(1:length(anchor_raw_data))
-    anchor_raw_data <- anchor_raw_data[order(unlist(anchor_raw_data), decreasing = TRUE)]
-    count <- 0
-    anchor_list <- list()
-    for (i in 1:length(anchor_raw_data)) {
-      if (count >= anchor_contribution) {
-        return(anchor_list)
-      }else {
-        count <- count + anchor_raw_data[[i]]
-        anchor_list <- append(anchor_list, names(anchor_raw_data[i]))
-      }
-    }
-    return(anchor_list)
-    }, error = function(e) { return("NA") })
+  }, error = function(e) { return("NA") })
 }
 
 #converts string range (e.g. '2-4', '6') to associated list
@@ -224,7 +311,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
       return("Pass")
     }
   }
-
+  
   if ((mt_binding < binding_threshold) && allele_expr_pass && vaf_clonal_pass && tsl_pass && !anchor_residue_pass) {
     if (percentile_filter) {
       if (mt_percent <= percentile_threshold) {
@@ -275,7 +362,7 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
   rna_depth <- as.numeric(variant_info["RNA Depth"])
   allele_expr <- as.numeric(variant_info["Allele Expr"])
   if (use_allele_specific_binding_thresholds && hla_allele %in% names(meta_data[["allele_specific_binding_thresholds"]][hla_allele])) {
-      binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
+    binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
   }
   trna_vaf <- as.numeric(meta_data["trna_vaf"])
   trna_cov <- as.numeric(meta_data["trna_cov"])
@@ -305,11 +392,11 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
     range_stop <- as.numeric(strsplit(mutation_pos_list, "-")[[1]][2])
     mutation_pos_list <- c(range_start:range_stop)
     if (all(mutation_pos_list %in% anchor_list)) {
-        if (is.na(wt_binding)) {
-          anchor_residue_pass <- FALSE
-        }else if (wt_binding < binding_threshold) {
-          anchor_residue_pass <- FALSE
-        }
+      if (is.na(wt_binding)) {
+        anchor_residue_pass <- FALSE
+      }else if (wt_binding < binding_threshold) {
+        anchor_residue_pass <- FALSE
+      }
     }
   }else if (!is.na(mutation_pos_list)) {
     if (all(as.numeric(mutation_pos_list) %in% anchor_list)) {
@@ -354,7 +441,7 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
         return(5)
       }
     }else {
-     return(5)
+      return(5)
     }
   }
   if ((mt_binding < binding_threshold) && allele_expr_pass && !vaf_clonal_pass && tsl_pass && anchor_residue_pass) {

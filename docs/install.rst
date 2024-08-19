@@ -77,8 +77,8 @@ Download the archives for `class I <http://tools.iedb.org/mhci/download/>`_ and 
 .. code-block:: none
 
    apt-get update && apt-get install -y tcsh gawk
-   wget https://downloads.iedb.org/tools/mhci/3.1.2/IEDB_MHC_I-3.1.2.tar.gz
-   tar -zxvf IEDB_MHC_I-3.1.2.tar.gz
+   wget https://downloads.iedb.org/tools/mhci/3.1.5/IEDB_MHC_I-3.1.5.tar.gz
+   tar -zxvf IEDB_MHC_I-3.1.5.tar.gz
    cd mhc_i
    ./configure
 
@@ -90,8 +90,8 @@ Download the archives for `class II <http://tools.iedb.org/mhcii/download/>`_ an
 .. code-block:: none
 
    apt-get update && apt-get install -y tcsh gawk
-   wget https://downloads.iedb.org/tools/mhcii/3.1.6/IEDB_MHC_II-3.1.6.tar.gz
-   tar -zxvf IEDB_MHC_II-3.1.6.tar.gz
+   wget https://downloads.iedb.org/tools/mhcii/3.1.11/IEDB_MHC_II-3.1.11.tar.gz
+   tar -zxvf IEDB_MHC_II-3.1.11.tar.gz
    cd mhc_ii
    ./configure.py
 
@@ -118,8 +118,7 @@ install it manually by running:
 
 .. note::
 
-   The ``mhcflurry`` package needs to be installed in the same python 3 conda
-   environment as the ``pvactools`` package.
+   The ``mhcflurry`` package needs to be installed in the same Python 3 environment as the ``pvactools`` package.
 
 Next, you will need to download the download the MHCflurry datasets and trained models:
 
@@ -165,7 +164,7 @@ install it manually by running:
 
 .. note::
 
-   The ``mhcnuggets`` package needs to be installed in the same python 3 conda
+   The ``mhcnuggets`` package needs to be installed in the same Python 3
    environment as the ``pvactools`` package.
 
 You can check that the ``mhcnuggets`` package was installed successfully by running:
@@ -184,6 +183,54 @@ tensorflow manually to version 1.5.0 should solve this problem:
 .. code-block:: none
 
    pip install tensorflow==1.5.0
+
+Installing BigMHC
+-----------------
+
+If you wish to run the BigMHC_EL or BigMHC_IM prediction algorithms, you will need to
+install BigMHC on your system. This package not a direct dependency of
+the the ``pvactools`` packages and needs to be installed manually by running:
+
+.. code-block:: none
+
+   pip install git+https://github.com/griffithlab/bigmhc.git#egg=bigmhc
+
+.. note::
+
+   BigMHC needs to be installed in the same python 3
+   environment as the ``pvactools`` package.
+
+You can check that BigMHC was installed successfully by running:
+
+.. code-block:: none
+
+   pip show bigmhc
+
+This should show information about the BigMHC installation.
+
+Installing DeepImmuno
+---------------------
+
+If you wish to run the DeepImmuno prediction algorithm, you will need to
+install DeepImmuno on your system. This package not a direct dependency of
+the the ``pvactools`` packages and needs to be installed manually by running:
+
+.. code-block:: none
+
+   pip install git+https://github.com/griffithlab/deepimmuno.git#egg=deepimmuno
+
+.. note::
+
+   DeepImmuno needs to be installed in the same python 3
+   environment as the ``pvactools`` package.
+
+You can check that DeepImmuno was installed successfully by running:
+
+.. code-block:: none
+
+   pip show deepimmuno
+
+This should show information about the DeepImmuno installation.
 
 .. _blast:
 

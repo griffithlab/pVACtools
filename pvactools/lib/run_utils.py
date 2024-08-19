@@ -66,7 +66,7 @@ def combine_class_ii_alleles(class_ii_alleles):
         combinations = ["{}-{}".format(alpha_allele, beta_allele) for (alpha_allele, beta_allele) in list(product(alpha_alleles, beta_alleles))]
         valid_combinations.extend([combination for combination in combinations if combination in MHCII.all_valid_allele_names()])
 
-    return list(set(class_ii_alleles + valid_combinations))
+    return sorted(list(set(class_ii_alleles + valid_combinations)))
 
 def combine_reports(input_files, output_file):
     fieldnames = []
@@ -147,3 +147,19 @@ def float_range(minimum, maximum):
 def supported_amino_acids():
     return ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
 
+def get_anchor_positions(hla_allele, epitope_length, allele_specific_anchors, anchor_probabilities, anchor_contribution_threshold, mouse_anchor_positions):
+        if allele_specific_anchors and epitope_length in anchor_probabilities and hla_allele in anchor_probabilities[epitope_length]:
+            probs = anchor_probabilities[epitope_length][hla_allele]
+            positions = []
+            total_prob = 0
+            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
+                total_prob += float(prob)
+                positions.append(int(pos))
+                if total_prob > anchor_contribution_threshold:
+                    return positions
+        elif allele_specific_anchors and epitope_length in mouse_anchor_positions and hla_allele in mouse_anchor_positions[epitope_length]:
+            values = mouse_anchor_positions[epitope_length][hla_allele]
+            positions = [pos for pos, val in values.items() if val]
+            return positions
+                
+        return [1, 2, epitope_length - 1 , epitope_length]

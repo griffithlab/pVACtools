@@ -81,6 +81,7 @@ class TestPvacvector(unittest.TestCase):
             "run",
             "visualize",
             "valid_alleles",
+            "valid_algorithms",
             "allele_specific_cutoffs",
             "download_example_data",
             ]:
@@ -156,6 +157,19 @@ class TestPvacvector(unittest.TestCase):
 
     def test_valid_alleles_runs(self):
         valid_alleles.main(["-p", "SMM"])
+    
+    def test_valid_algorithms_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.base_dir,
+            'pvactools',
+            "tools",
+            "pvacvector",
+            "valid_algorithms.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_algorithms_runs(self):
+        valid_algorithms.main("")
 
     def test_pvacvector_fa_input_runs_and_produces_expected_output(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data: make_response(
@@ -191,7 +205,7 @@ class TestPvacvector(unittest.TestCase):
             ))
 
             if 'DISPLAY' in os.environ.keys():
-                image_out = os.path.join(output_dir.name, 'vector.jpg')
+                image_out = os.path.join(output_dir.name, 'vector.png')
                 #vaccine visualization producing image
                 self.assertTrue(os.path.exists(image_out))
                 self.assertTrue(os.stat(image_out).st_size > 0)
@@ -226,7 +240,7 @@ class TestPvacvector(unittest.TestCase):
 
 
             if 'DISPLAY' in os.environ.keys():
-                image_out = os.path.join(output_dir.name, 'vector.jpg')
+                image_out = os.path.join(output_dir.name, 'vector.png')
                 #vaccine visualization producing image
                 self.assertTrue(os.path.exists(image_out))
                 self.assertTrue(os.stat(image_out).st_size > 0)

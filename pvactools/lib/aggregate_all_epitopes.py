@@ -8,6 +8,8 @@ import shutil
 from abc import ABCMeta, abstractmethod
 import itertools
 import csv
+import ast
+from pvactools.lib.run_utils import get_anchor_positions
 
 from pvactools.lib.prediction_class import PredictionClass
 
@@ -117,7 +119,7 @@ class AggregateAllEpitopes:
         potential_algorithms = PredictionClass.prediction_methods()
         prediction_algorithms = []
         for algorithm in potential_algorithms:
-            if algorithm == 'NetMHCpanEL' or algorithm == 'NetMHCIIpanEL':
+            if algorithm in ['NetMHCpanEL', 'NetMHCIIpanEL', 'BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
                 continue
             if "{} MT IC50 Score".format(algorithm) in headers or "{} IC50 Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
@@ -129,7 +131,7 @@ class AggregateAllEpitopes:
 
     def determine_used_el_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["MHCflurryEL Processing", "MHCflurryEL Presentation", "NetMHCpanEL", "NetMHCIIpanEL"]
+        potential_algorithms = ["MHCflurryEL Processing", "MHCflurryEL Presentation", "NetMHCpanEL", "NetMHCIIpanEL", "BigMHC_EL", 'BigMHC_IM', 'DeepImmuno']
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
@@ -152,7 +154,7 @@ class AggregateAllEpitopes:
             used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
         for algorithm in el_algorithms:
             used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm)])
-            if algorithm != "MHCflurryEL Processing":
+            if algorithm not in ["MHCflurryEL Processing", "BigMHC_EL", "BigMHC_IM", 'DeepImmuno']:
                 used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
         if self.problematic_positions_exist():
             used_columns.append("Problematic Positions")
@@ -281,6 +283,20 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     probs[hla] = line
             anchor_probabilities[length] = probs
         self.anchor_probabilities = anchor_probabilities
+
+        mouse_anchor_positions = {}
+        for length in [8, 9, 10, 11]:
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "mouse_anchor_predictions_{}_mer.tsv".format(length))
+            values = {}
+            with open(file_name, 'r') as fh:
+                reader = csv.DictReader(fh, delimiter="\t")
+                for line in reader:
+                    allele = line.pop('Allele')
+                    values[allele] = {int(k): ast.literal_eval(v) for k, v in line.items()}
+            mouse_anchor_positions[length] = values
+        self.mouse_anchor_positions = mouse_anchor_positions
+
         self.allele_specific_anchors = allele_specific_anchors
         self.anchor_contribution_threshold = anchor_contribution_threshold
         super().__init__()
@@ -317,9 +333,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def get_sub_df(self, all_epitopes_df, key):
         key_str = "{}-{}-{}-{}-{}".format(key[0], key[1], key[2], key[3], key[4])
         df = (all_epitopes_df[lambda x: (x['Chromosome'] == key[0]) & (x['Start'] == key[1]) & (x['Stop'] == key[2]) & (x['Reference'] == key[3]) & (x['Variant'] == key[4])]).copy()
-        df['Variant Type'] = df['Variant Type'].cat.add_categories('NA')
-        df['Mutation Position'] = df['Mutation Position'].cat.add_categories('NA')
-        df.fillna(value="NA", inplace=True)
         df['annotation'] = df[['Transcript', 'Gene Name', 'Mutation', 'Protein Position']].agg('-'.join, axis=1)
         df['key'] = key_str
         return (df, key_str)
@@ -334,7 +347,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         #subset protein_coding dataframe to only include entries with a TSL < maximum_transcript_support_level
         tsl_df = biotype_df[biotype_df['Transcript Support Level'] != 'NA']
         tsl_df = tsl_df[tsl_df['Transcript Support Level'] != 'Not Supported']
-        tsl_df = tsl_df[tsl_df['Transcript Support Level'] < self.maximum_transcript_support_level]
+        tsl_df = tsl_df[tsl_df['Transcript Support Level'] <= self.maximum_transcript_support_level]
         #if this results in an empty dataframe, reset to previous dataframe
         if tsl_df.shape[0] == 0:
             tsl_df = biotype_df
@@ -365,37 +378,25 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             binding_threshold = self.binding_threshold
 
         anchor_residue_pass = True
-        anchors = self.get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']))
+        anchors = get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
         # parse out mutation position from str
         position = mutation["Mutation Position"]
-        if '-' in position:
+        if pd.isna(position):
+            return anchor_residue_pass
+        elif '-' in position:
             d_ind = position.index('-')
             if all(pos in anchors for pos in range(int(position[0:d_ind]), int(position[d_ind+1:])+1)):
-                if mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
+                if pd.isna(mutation["{} WT IC50 Score".format(self.wt_top_score_metric)]):
                     anchor_residue_pass = False
                 elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
                     anchor_residue_pass = False
-        elif position != "NA":
+        else:
             if int(float(position)) in anchors:
-                if mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
+                if pd.isna(mutation["{} WT IC50 Score".format(self.wt_top_score_metric)]):
                     anchor_residue_pass = False
                 elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
                     anchor_residue_pass = False
         return anchor_residue_pass
-
-    def get_anchor_positions(self, hla_allele, epitope_length):
-        if self.allele_specific_anchors and epitope_length in self.anchor_probabilities and hla_allele in self.anchor_probabilities[epitope_length]:
-            probs = self.anchor_probabilities[epitope_length][hla_allele]
-            positions = []
-            total_prob = 0
-            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
-                total_prob += float(prob)
-                positions.append(int(pos))
-                if total_prob > self.anchor_contribution_threshold:
-                    return positions
-
-        return [1, 2, epitope_length - 1 , epitope_length]
-
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
@@ -409,7 +410,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         tsl_pass = True
         if mutation["Transcript Support Level"] == "Not Supported":
             pass
-        elif mutation["Transcript Support Level"] == "NA":
+        elif pd.isna(mutation["Transcript Support Level"]):
             tsl_pass = False
         else:
             if mutation["Transcript Support Level"] > self.maximum_transcript_support_level:
@@ -505,6 +506,12 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def get_unique_good_binders(self, good_binders):
         return pd.DataFrame(good_binders.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
 
+    def replace_nas(self, items):
+        return ["NA" if pd.isna(x) else x for x in items]
+
+    def round_to_ints(self, items):
+        return [round(x) if (type(x) == float and not pd.isna(x)) else x for x in items]
+
     def get_good_binders_metrics(self, good_binders, prediction_algorithms, el_algorithms):
         peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
         good_peptides = good_binders["MT Epitope Seq"].unique()
@@ -542,10 +549,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         for index, line in good_binders_peptide_annotation.to_dict(orient='index').items():
                             ic50s[line['HLA Allele']] = line['{} {} IC50 Score'.format(top_score_metric, peptide_type)]
                             percentiles[line['HLA Allele']] = line['{} {} Percentile'.format(top_score_metric, peptide_type)]
-                            ic50_calls[line['HLA Allele']] = [line["{} {} IC50 Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
-                            percentile_calls[line['HLA Allele']] = [line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms]
-                            el_calls[line['HLA Allele']] = [line["{} {} Score".format(algorithm, peptide_type)] for algorithm in el_algorithms]
-                            el_percentile_calls[line['HLA Allele']] = ['NA' if algorithm == 'MHCflurryEL Processing' else line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in el_algorithms]
+                            ic50_calls[line['HLA Allele']] = self.replace_nas([line["{} {} IC50 Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms])
+                            percentile_calls[line['HLA Allele']] = self.replace_nas([line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms])
+                            el_calls[line['HLA Allele']] = self.replace_nas([line["{} {} Score".format(algorithm, peptide_type)] for algorithm in el_algorithms])
+                            el_percentile_calls[line['HLA Allele']] = self.replace_nas(['NA' if algorithm in ['MHCflurryEL Processing', 'BigMHC_EL', 'BigMHC_IM', 'DeepImmuno'] else line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in el_algorithms])
                             if peptide_type == 'MT' and not self.is_anchor_residue_pass(line):
                                 anchor_fails.append(line['HLA Allele'])
                         sorted_ic50s = []
@@ -559,14 +566,14 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                                 sorted_percentiles.append(percentiles[hla_type])
                             else:
                                 sorted_percentiles.append('X')
-                        results[peptide]['ic50s_{}'.format(peptide_type)] = sorted_ic50s
-                        results[peptide]['percentiles_{}'.format(peptide_type)] = sorted_percentiles
+                        results[peptide]['ic50s_{}'.format(peptide_type)] = self.replace_nas(sorted_ic50s)
+                        results[peptide]['percentiles_{}'.format(peptide_type)] = self.replace_nas(sorted_percentiles)
                         individual_ic50_calls[peptide_type] = ic50_calls
                         individual_percentile_calls[peptide_type] = percentile_calls
                         individual_el_calls[peptide_type] = el_calls
                         individual_el_percentile_calls[peptide_type] = el_percentile_calls
                     results[peptide]['hla_types'] = sorted(self.hla_types)
-                    results[peptide]['mutation_position'] = str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
+                    results[peptide]['mutation_position'] = "NA" if pd.isna(good_binders_peptide_annotation.iloc[0]['Mutation Position']) else str(good_binders_peptide_annotation.iloc[0]['Mutation Position'])
                     results[peptide]['problematic_positions'] = str(good_binders_peptide_annotation.iloc[0]['Problematic Positions']) if 'Problematic Positions' in good_binders_peptide_annotation.iloc[0] else 'None'
                     if len(anchor_fails) > 0:
                         results[peptide]['anchor_fails'] = ', '.join(anchor_fails)
@@ -577,7 +584,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     results[peptide]['individual_el_calls'] = individual_el_calls
                     results[peptide]['individual_el_percentile_calls'] = individual_el_percentile_calls
                     wt_peptide = good_binders_peptide_annotation.iloc[0]['WT Epitope Seq']
-                    if wt_peptide == 'NA':
+                    if pd.isna(wt_peptide):
                         variant_type = good_binders_peptide_annotation.iloc[0]['Variant Type']
                         if variant_type == 'FS':
                             wt_peptide = 'FS-NA'
@@ -589,8 +596,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             peptides[set_name]['peptides'] = self.sort_peptides(results)
             sorted_transcripts = self.sort_transcripts(annotations, good_binders)
             peptides[set_name]['transcripts'] = list(sorted_transcripts.Annotation)
-            peptides[set_name]['transcript_expr'] = list(sorted_transcripts.Expr)
-            peptides[set_name]['tsl'] = list(sorted_transcripts.TSL)
+            peptides[set_name]['transcript_expr'] = self.replace_nas(list(sorted_transcripts.Expr))
+            peptides[set_name]['tsl'] = self.replace_nas(self.round_to_ints(list(sorted_transcripts.TSL)))
             peptides[set_name]['biotype'] = list(sorted_transcripts.Biotype)
             peptides[set_name]['transcript_length'] = [int(l) for l in list(sorted_transcripts.Length)]
             peptides[set_name]['transcript_count'] = len(annotations)
@@ -655,7 +662,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
         problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
-        tsl = best['Transcript Support Level'] if best['Transcript Support Level'] in ["NA", "Not Supported"] else round(best['Transcript Support Level'])
+        tsl = best['Transcript Support Level'] if best['Transcript Support Level'] == "Not Supported" or pd.isna(best['Transcript Support Level']) else str(int(best['Transcript Support Level']))
 
         out_dict = { 'ID': key }
         out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
@@ -691,11 +698,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             'transcript_counts': [v['transcript_count'] for k, v in peptides.items()],
             'peptide_counts': [v['peptide_count'] for k, v in peptides.items()],
             'set_expr': [v['total_expr'] for k, v in peptides.items()],
-            'DNA VAF': 'NA' if best['Tumor DNA VAF'] == 'NA' else float(best['Tumor DNA VAF']),
-            'RNA VAF': 'NA' if best['Tumor RNA VAF'] == 'NA' else float(best['Tumor RNA VAF']),
-            'gene_expr': 'NA' if best['Gene Expression'] == 'NA' else float(best['Gene Expression']),
+            'DNA VAF': 'NA' if pd.isna(best['Tumor DNA VAF']) else float(best['Tumor DNA VAF']),
+            'RNA VAF': 'NA' if pd.isna(best['Tumor RNA VAF']) else float(best['Tumor RNA VAF']),
+            'gene_expr': 'NA' if pd.isna(best['Gene Expression']) else float(best['Gene Expression']),
             'best_peptide_mt': best['MT Epitope Seq'],
-            'best_peptide_wt': best['WT Epitope Seq'],
+            'best_peptide_wt': 'NA' if pd.isna(best['WT Epitope Seq']) else best['WT Epitope Seq'],
             'best_hla_allele': best['HLA Allele'],
         }
 

@@ -163,6 +163,12 @@ class OutputParser(metaclass=ABCMeta):
                 }
             else:
                 return {'ic50': float(line['ic50'])}
+        elif method.lower() == 'deepimmuno':
+            return {'score': float(line['immunogenicity'])}
+        elif method.lower() == 'bigmhc_el':
+            return {'score': float(line['BigMHC_EL'])}
+        elif method.lower() == 'bigmhc_im':
+            return {'score': float(line['BigMHC_IM'])}
         elif method.lower() == 'netmhcpan_el':
             return {'score': float(line['score'])}
         elif method.lower() == 'netmhciipan_el':
@@ -265,7 +271,7 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_percentiles'] = self.format_match_na(result, 'percentile')
             mutation_position = self.find_mutation_position(wt_epitope_seq, mt_epitope_seq)
             if mutation_position == peptide_length:
-                result['mutation_position'] = mutation_position
+                result['mutation_position'] = '{}'.format(mutation_position)
             else:
                 result['mutation_position'] = '{}-{}'.format(mutation_position, peptide_length)
             result['wt_epitope_position'] = match_position
@@ -277,7 +283,7 @@ class OutputParser(metaclass=ABCMeta):
             best_match_position           = previous_result['wt_epitope_position'] + 1
             result['wt_epitope_position'] = best_match_position
             result['match_direction']     = 'right'
-            result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
+            result['mutation_position']   = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
 
             #We need to ensure that the matched WT eptiope has enough overlapping amino acids with the MT epitope
             best_match_wt_result = wt_results[str(best_match_position)]
@@ -307,7 +313,10 @@ class OutputParser(metaclass=ABCMeta):
             result['wt_percentiles'] = self.format_match_na(result, 'percentile')
             #We then infer the mutation position and match direction from the previous MT epitope
             result['match_direction'] = previous_result['match_direction']
-            result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
+            if previous_result['mutation_position'] == 'NA' or previous_result['mutation_position'] == '1':
+                result['mutation_position'] = 'NA'
+            else:
+                result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
             return
 
         baseline_best_match_wt_result      = wt_results[baseline_best_match_position]
@@ -320,6 +329,7 @@ class OutputParser(metaclass=ABCMeta):
             result['wt_epitope_position'] = int(baseline_best_match_position)
             result['mutation_position']   = 'NA'
             result['match_direction']     = 'left'
+            return
 
         #If there is no previous result or the previous WT epitope was matched "from the left" we start by comparing to the baseline match
         if previous_result is None or previous_result['match_direction'] == 'left':
@@ -368,12 +378,12 @@ class OutputParser(metaclass=ABCMeta):
             if result['variant_type'] == 'inframe_ins':
                 mutation_position = self.find_ins_mut_position(baseline_best_match_wt_epitope_seq, mt_epitope_seq, result['amino_acid_change'], match_direction)
                 if mutation_position is None:
-                    result['mutation_position'] = None
+                    result['mutation_position'] = 'NA'
                 else:
                     if previous_result is None:
                         result['mutation_position'] = '{}-{}'.format(mutation_position[0], mutation_position[1]) if len(mutation_position)==2 else '{}'.format(mutation_position[0])
                     else:
-                        if previous_result['mutation_position'] is None:
+                        if previous_result['mutation_position'] == 'NA':
                             result['mutation_position'] = '{}-{}'.format(mutation_position[0], mutation_position[1]) if len(mutation_position)==2 else '{}'.format(mutation_position[0])
                         else:
                             result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
@@ -446,7 +456,15 @@ class OutputParser(metaclass=ABCMeta):
                         corresponding_wt = result['wt_{}s'.format(metric)][best_mt_value_method]['ic50']
                         calculated_median = median([score['ic50'] for score in mt_values.values()])
                     else:
-                        corresponding_wt = min(result['wt_{}s'.format(metric)][best_mt_value_method].values())
+                        corresponding_wts = list(result['wt_{}s'.format(metric)][best_mt_value_method].values())
+                        if len(corresponding_wts) > 1:
+                            none_na_corresponding_wts = [p for p in corresponding_wts if p != 'NA']
+                            if len(none_na_corresponding_wts) == 0:
+                                corresponding_wt = 'NA'
+                            else:
+                                corresponding_wt = min(none_na_corresponding_wts)
+                        else:
+                            corresponding_wt = corresponding_wts[0]
                         flattend_percentiles = [percentile for method_results in mt_values.values() for percentile in method_results.values()]
                         calculated_median = median(flattend_percentiles)
 
@@ -572,7 +590,12 @@ class OutputParser(metaclass=ABCMeta):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if method == 'netmhcpan_el' or method == 'netmhciipan_el':
+            if method in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
+                headers.append("%s WT Score" % pretty_method)
+                headers.append("%s MT Score" % pretty_method)
+                continue
+
+            if method in ['netmhcpan_el', 'netmhciipan_el']:
                 headers.append("%s WT Score" % pretty_method)
                 headers.append("%s MT Score" % pretty_method)
             else:
@@ -613,7 +636,7 @@ class OutputParser(metaclass=ABCMeta):
                     row['MHCflurryEL Processing %s' % suffix.replace("IC50 ", "")] = s
                 elif st == 'mhcflurry_presentation_percentile':
                     row['MHCflurryEL Presentation %s' % suffix.replace("IC50 ", "")] = s
-                elif pretty_method == 'NetMHCpanEL' or pretty_method == 'NetMHCIIpanEL':
+                elif pretty_method in ['NetMHCpanEL', 'NetMHCIIpanEL', 'BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
                     row['%s %s' % (pretty_method, suffix.replace("IC50 ", ""))] = s
                 else:
                     row['%s %s' % (pretty_method, suffix)] = s
@@ -715,8 +738,9 @@ class OutputParser(metaclass=ABCMeta):
                     pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                     self.add_pretty_row(row, wt_scores, method, pretty_method, 'WT IC50 Score')
                     self.add_pretty_row(row, mt_scores, method, pretty_method, 'MT IC50 Score')
-                    self.add_pretty_row(row, wt_percentiles, method, pretty_method, 'WT Percentile')
-                    self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'MT Percentile')
+                    if pretty_method not in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
+                        self.add_pretty_row(row, wt_percentiles, method, pretty_method, 'WT Percentile')
+                        self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'MT Percentile')
 
                 for (tsv_key, row_key) in zip(['gene_expression', 'transcript_expression', 'normal_vaf', 'tdna_vaf', 'trna_vaf'], ['Gene Expression', 'Transcript Expression', 'Normal VAF', 'Tumor DNA VAF', 'Tumor RNA VAF']):
                     if tsv_key in tsv_entry:
@@ -916,7 +940,11 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 elif self.flurry_state == 'both':
                     self.flurry_headers(headers)
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if method == 'netmhcpan_el' or method == 'netmhciipan_el':
+            if method in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
+                headers.append("%s Score" % pretty_method)
+                continue
+
+            if method in ['netmhcpan_el', 'netmhciipan_el']:
                 headers.append("%s Score" % pretty_method)
             else:
                 headers.append("%s IC50 Score" % pretty_method)
@@ -966,7 +994,8 @@ class UnmatchedSequencesOutputParser(OutputParser):
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
                 self.add_pretty_row(row, mt_scores, method, pretty_method, 'IC50 Score')
-                self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
+                if pretty_method not in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
+                    self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
             if self.add_sample_name:
                 row['Sample Name'] = self.sample_name
             tsv_writer.writerow(row)
