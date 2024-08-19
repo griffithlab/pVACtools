@@ -111,7 +111,7 @@ class GenerateFastaTests(unittest.TestCase):
             '--aggregate-report-evaluation', 'Accept',
             '--aggregate-report-evaluation', 'Pending',
         ], shell=False))
-        expected_output_file = os.path.join(self.test_data_dir, 'output.fasta')
+        expected_output_file = os.path.join(self.test_data_dir, 'output_with_aggregated_tsv.fasta')
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
