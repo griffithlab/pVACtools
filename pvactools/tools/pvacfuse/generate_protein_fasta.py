@@ -108,6 +108,13 @@ def parse_files(output_file, temp_dir, input_tsv):
             new_record = SeqRecord(record.seq, id=record_id, description=record_id)
             output_records.append(new_record)
 
+    if tsv_indexes is not None:
+        ordered_output_records = []
+        for tsv_index in tsv_indexes:
+            records = [r for r in output_records if r.id == tsv_index]
+            ordered_output_records.extend(records)
+        output_records = ordered_output_records
+
     SeqIO.write(output_records, output_file, "fasta")
     print("Completed")
 
