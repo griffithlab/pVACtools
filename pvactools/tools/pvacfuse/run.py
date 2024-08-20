@@ -227,17 +227,17 @@ def main(args_input = sys.argv[1:]):
                     output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.final.tsv".format(args.sample_name))
                     append_columns(intermediate_output_file, "{}.tsv".format(input_file), output_file)
                     output_files.append(output_file)
-                if epitope_length == max(epitope_lengths):
-                    # copy fasta to output dir
-                    fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
-                    shutil.copy(input_file, fasta_file)
-                    run_arguments['fasta'] = fasta_file
-                    # generate and copy net_chop fasta to output dir if specified
-                    if args.net_chop_method:
-                        epitope_flank_length = 9
-                        (net_chop_fasta, _) = generate_fasta(args, output_dir, epitope_length, epitope_flank_length, net_chop_fasta=True)
-                        run_arguments['net_chop_fasta'] = net_chop_fasta
             if len(output_files) > 0:
+                # copy fasta to output dir
+                (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, max(epitope_lengths))
+                fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
+                shutil.copy(input_file, fasta_file)
+                run_arguments['fasta'] = fasta_file
+                # generate and copy net_chop fasta to output dir if specified
+                if args.net_chop_method:
+                    epitope_flank_length = 9
+                    (net_chop_fasta, _) = generate_fasta(args, output_dir, max(epitope_lengths), epitope_flank_length, net_chop_fasta=True)
+                    run_arguments['net_chop_fasta'] = net_chop_fasta
                 all_epitopes_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
                 filtered_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
                 #!!! make below call to create_net_class_report
@@ -246,9 +246,9 @@ def main(args_input = sys.argv[1:]):
             else:
                 print("\nNo processable fusions found. Aborting.\n")
         elif len(prediction_algorithms) == 0:
-            print("No MHC class {} prediction algorithms chosen. Skipping MHC class I predictions.".format(mhc_class))
+            print("No MHC class {} prediction algorithms chosen. Skipping MHC class {} predictions.".format(mhc_class, mhc_class))
         elif len(alleles) == 0:
-            print("No MHC class {} alleles chosen. Skipping MHC class II predictions.".format(mhc_class))
+            print("No MHC class {} alleles chosen. Skipping MHC class {} predictions.".format(mhc_class, mhc_class))
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
