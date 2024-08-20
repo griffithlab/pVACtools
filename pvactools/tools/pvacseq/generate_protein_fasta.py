@@ -174,6 +174,21 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
             new_record = SeqRecord(record.seq, id=record_id, description=record_id)
             output_records.append(new_record)
 
+    if tsv_indexes is not None:
+        ordered_output_records = []
+        for tsv_index in tsv_indexes:
+            if tsv_file_type == 'full':
+                records = [r for r in output_records if r.id.split('.', 1)[1] == tsv_index]
+                ordered_output_records.extend(records)
+            else:
+                for output_record in output_records:
+                    (rest_record_id, variant_type, aa_change) = output_record.id.rsplit(".", 2)
+                    (peptide_type, count, gene, transcript) = rest_record_id.split(".", 3)
+                    (parsed_aa_change, _, _, _) = index_to_aggregate_report_aa_change(aa_change, variant_type)
+                    if tsv_index['Best Transcript'] == transcript and tsv_index['AA Change'] == parsed_aa_change:
+                        ordered_output_records.append(output_record)
+        output_records = ordered_output_records
+
     SeqIO.write(output_records, output_file, "fasta")
     print("Completed")
 
@@ -193,6 +208,9 @@ def main(args_input = sys.argv[1:]):
 
     temp_dir = tempfile.mkdtemp()
     proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only)
+    proximal_variants_file = "{}.proximal_variants.tsv".format(args.output_file)
+    if proximal_variants_tsv is not None:	
+        shutil.copy(proximal_variants_tsv, proximal_variants_file)
     generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir, proximal_variants_tsv)
     parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv, args.aggregate_report_evaluation)
     shutil.rmtree(temp_dir, ignore_errors=True)

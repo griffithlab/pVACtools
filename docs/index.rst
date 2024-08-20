@@ -42,11 +42,13 @@ Contents
    :maxdepth: 1
 
    install
+   courses
    tools
    frequently_asked_questions
    releases
    license
    citation
+   funding
    contribute
    contact
    mailing_list
