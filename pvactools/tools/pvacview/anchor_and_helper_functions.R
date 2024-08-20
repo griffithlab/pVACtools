@@ -11,10 +11,10 @@ anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/griffith
 
 ## Load Mouse Anchor data
 mouse_anchor_data <- list()
-mouse_anchor_data[[8]] <- read.table(curl("https://raw.githubusercontent.com/ldhtnp/pVACtools/add_mouse_anchors/pvactools/tools/pvacview/data/mouse_anchor_predictions_8_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-mouse_anchor_data[[9]] <- read.table(curl("https://raw.githubusercontent.com/ldhtnp/pVACtools/add_mouse_anchors/pvactools/tools/pvacview/data/mouse_anchor_predictions_9_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-mouse_anchor_data[[10]] <- read.table(curl("https://raw.githubusercontent.com/ldhtnp/pVACtools/add_mouse_anchors/pvactools/tools/pvacview/data/mouse_anchor_predictions_10_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-mouse_anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/ldhtnp/pVACtools/add_mouse_anchors/pvactools/tools/pvacview/data/mouse_anchor_predictions_11_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[8]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/2a44403d9844a27cfca05bb158b87b747aba3ae2/pvactools/tools/pvacview/data/mouse_anchor_predictions_8_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[9]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/2a44403d9844a27cfca05bb158b87b747aba3ae2/pvactools/tools/pvacview/data/mouse_anchor_predictions_9_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[10]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/2a44403d9844a27cfca05bb158b87b747aba3ae2/pvactools/tools/pvacview/data/mouse_anchor_predictions_10_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/2a44403d9844a27cfca05bb158b87b747aba3ae2/pvactools/tools/pvacview/data/mouse_anchor_predictions_11_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 #get binding affinity colors cutoffs given HLA
 
