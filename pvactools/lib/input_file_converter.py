@@ -427,8 +427,10 @@ class VcfConverter(InputFileConverter):
                         'index'                          : index,
                         'protein_length_change'          : protein_length_change,
                     }
-                    if transcript['Amino_acids']:
+                    if transcript['Amino_acids'] and transcript['Amino_acids'] != '':
                         output_row['amino_acid_change'] = transcript['Amino_acids']
+                    else:
+                        continue
 
                     if transcript['Codons']:
                         output_row['codon_change'] =  transcript['Codons']
