@@ -8,6 +8,7 @@ import shutil
 from abc import ABCMeta, abstractmethod
 import itertools
 import csv
+import glob
 import ast
 from pvactools.lib.run_utils import get_anchor_positions
 
@@ -746,10 +747,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def copy_pvacview_r_files(self):
         module_dir = os.path.dirname(__file__)
         r_folder = os.path.abspath(os.path.join(module_dir,"..","tools","pvacview"))
+        files = glob.iglob(os.path.join(r_folder, "*.R"))
         destination = os.path.abspath(os.path.dirname(self.output_file))
         os.makedirs(os.path.join(destination, "www"), exist_ok=True)
-        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
-            shutil.copy(os.path.join(r_folder, i), os.path.join(destination, i))
+        for i in files:
+            shutil.copy(i, destination)
         for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
             shutil.copy(os.path.join(r_folder, "www", i), os.path.join(destination, "www", i))
 
