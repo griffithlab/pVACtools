@@ -680,5 +680,7 @@ class FusionInputConverter(InputFileConverter):
             output_rows = self.parse_arriba_file(starfusion_entries)
         elif os.path.isdir(self.input_file):
             output_rows = self.parse_agfusion_files(starfusion_entries)
+        if not os.path.exists(self.input_file):
+            raise Exception("Input file {} doesn't exist. Aborting.".format(self.input_file))
         tsv_writer.writerows(output_rows)
         writer.close()
