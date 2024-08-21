@@ -64,6 +64,7 @@ class PvacfuseTests(unittest.TestCase):
             "binding_filter",
             "coverage_filter",
             "valid_alleles",
+            "valid_algorithms",
             "download_example_data",
             "net_chop",
             "netmhc_stab",
@@ -205,6 +206,19 @@ class PvacfuseTests(unittest.TestCase):
 
     def test_valid_alleles_runs(self):
         valid_alleles.main(["-p", "SMM"])
+    
+    def test_valid_algorithms_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacfuse",
+            "valid_algorithms.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_algorithms_runs(self):
+        valid_algorithms.main("")
 
     def test_pvacfuse_pipeline(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(

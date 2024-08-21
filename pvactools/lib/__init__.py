@@ -11,6 +11,7 @@ __all__ = [
     "fasta_generator",
     "output_parser",
     "valid_alleles",
+    'valid_algorithms',
     'net_chop',
     "netmhc_stab",
     "filter",
