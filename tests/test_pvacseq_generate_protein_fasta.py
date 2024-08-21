@@ -111,7 +111,7 @@ class GenerateFastaTests(unittest.TestCase):
             '--aggregate-report-evaluation', 'Accept',
             '--aggregate-report-evaluation', 'Pending',
         ], shell=False))
-        expected_output_file = os.path.join(self.test_data_dir, 'output.fasta')
+        expected_output_file = os.path.join(self.test_data_dir, 'output_with_aggregated_tsv.fasta')
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
@@ -129,8 +129,12 @@ class GenerateFastaTests(unittest.TestCase):
             '-d', 'full',
             '--phased-proximal-variants-vcf', generate_protein_fasta_phased_proximal_variants_vcf,
         ], shell=False))
-        expected_output_file = os.path.join(self.test_data_dir, 'output_with_phased_vcf.fasta')
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
+        proximal_output_file = "{}.proximal_variants.tsv".format(generate_protein_fasta_output_file.name)
+        expected_proximal_output_file = os.path.join(self.test_data_dir, 'output_with_phased_vcf.proximal_variants.tsv')
+        self.assertTrue(cmp(proximal_output_file, expected_proximal_output_file))
+        os.unlink(proximal_output_file)
+        expected_output_file = os.path.join(self.test_data_dir, 'output_with_phased_vcf.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
     def test_output_peptide_sequence_length_longer_that_wildtype(self):

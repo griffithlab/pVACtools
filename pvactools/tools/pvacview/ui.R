@@ -212,7 +212,7 @@ explore_tab <- tabItem(
                     span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput("metricsTextGenomicCoord")),
                     h5("Additional variant information:"),
                     uiOutput("url"), style = "overflow-x: scroll;font-size:100%"),
-                box(width = 2, solidHeader = TRUE, title = "Peptide Evalutation Overview",
+                box(width = 2, solidHeader = TRUE, title = "Peptide Evaluation Overview",
                     tableOutput("checked"), style = "overflow-x: scroll;font-size:100%")
             )
         ),
@@ -237,6 +237,11 @@ explore_tab <- tabItem(
                                       img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/anchor.jpg",
                                           align = "center", width = "100%")
                                    )
+                            )
+                          ),
+                          fluidRow(
+                            box(width = 12, title = "Anchor Positions", solidHeader = TRUE, collapsible = TRUE, status = "primary", collapsed = TRUE,
+                                DTOutput("anchorPositions") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll"
                             )
                           ),
                           fluidRow(

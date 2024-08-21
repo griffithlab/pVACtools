@@ -23,7 +23,7 @@ options(shiny.port = 3333)
 server <- shinyServer(function(input, output, session) {
   ## pVACtools version
 
-  output$version <- renderText({"pVACtools version 4.2.0"})
+  output$version <- renderText({"pVACtools version 4.3.0"})
 
   ##############################DATA UPLOAD TAB###################################
   ## helper function defined for generating shinyInputs in mainTable (Evaluation dropdown menus)
@@ -159,9 +159,9 @@ server <- shinyServer(function(input, output, session) {
      ## Class I demo aggregate report
      #session$sendCustomMessage("unbind-DT", "mainTable")
      withProgress(message = "Loading Demo Data", value = 0, {
-       load(url("https://github.com/griffithlab/pVACtools/raw/52ced64ad04bf627ef900fa6ade38f5d366a783f/pvactools/tools/pvacview/HCC1395_demo_data.rda"))
+       load(url("https://github.com/griffithlab/pVACtools/raw/e4761c6eaea9d2868db3ffe3c410211f5bb4351f/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
        incProgress(0.3)
-       #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
+       #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
        #mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(mainData) <- mainData[1, ]
        mainData <- mainData[-1, ]
@@ -175,7 +175,7 @@ server <- shinyServer(function(input, output, session) {
        df$mainTable <- mainData
        incProgress(0.1)
        ## Class I demo metrics file
-       #metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
+       #metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
        #df$metricsData <- fromJSON(txt = metricsdata)
        df$metricsData <- metricsData
        df$binding_threshold <- df$metricsData$`binding_threshold`
@@ -220,7 +220,7 @@ server <- shinyServer(function(input, output, session) {
        rownames(df$comments) <- df$mainTable$ID
        incProgress(0.2)
        ## Class II additional demo aggregate report
-       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
        addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(addData) <- addData[1, ]
        addData <- addData[-1, ]
@@ -228,7 +228,7 @@ server <- shinyServer(function(input, output, session) {
        df$additionalData <- addData
        incProgress(0.1)
        ## Hotspot gene list autoload
-       gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/0359d15c/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
+       gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
        gene_list <- read.table(text = gene_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        df$gene_list <- gene_list
        df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
@@ -651,6 +651,7 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)) {
       return()
     }
+    updateTextAreaInput(session, "comments", value = "")
     df$comments[selectedID(), 1] <- input$comments
   })
   ##display of genomic information
@@ -711,7 +712,7 @@ server <- shinyServer(function(input, output, session) {
   output$addData_transcript <- renderText({
     df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Transcript`
   })
-  ##transcripts sets table displaying sets of transcripts with the same consequence
+  ##transcript sets table displaying sets of transcripts with the same consequence
   output$transcriptSetsTable <- renderDT({
     withProgress(message = "Loading Transcript Sets Table", value = 0, {
       GB_transcripts <- data.frame()
@@ -723,7 +724,7 @@ server <- shinyServer(function(input, output, session) {
           "# Peptides" = df$metricsData[[selectedID()]]$peptide_counts,
           "Total Expr" = df$metricsData[[selectedID()]]$set_expr
         )
-        names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
+        names(GB_transcripts) <- c("Transcript Sets", "#Transcripts", "# Peptides", "Total Expr")
         best_transcript_set <- NULL
         incProgress(0.5)
         for (i in 1:length(df$metricsData[[selectedID()]]$sets)){
@@ -736,10 +737,10 @@ server <- shinyServer(function(input, output, session) {
         }
         incProgress(0.5)
         datatable(GB_transcripts, selection = list(mode = "single", selected = best_transcript_set_id), style="bootstrap") %>%
-          formatStyle("Transcripts Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
+          formatStyle("Transcript Sets", backgroundColor = styleEqual(c(best_transcript_set), c("#98FF98")))
       }else {
         GB_transcripts <- data.frame("Transcript Sets" = character(), "# Transcripts" = character(), "# Peptides" = character(), "Total Expr" = character())
-        names(GB_transcripts) <- c("Transcripts Sets", "#Transcripts", "# Peptides", "Total Expr")
+        names(GB_transcripts) <- c("Transcript Sets", "#Transcripts", "# Peptides", "Total Expr")
         incProgress(0.5)
         datatable(GB_transcripts)
         incProgress(0.5)
@@ -916,7 +917,7 @@ server <- shinyServer(function(input, output, session) {
         peptide_table <- do.call("rbind", lapply(peptide_names, table_formatting, peptide_data))
         peptide_table_filtered <- Filter(function(x) length(unique(x)) != 1, peptide_table)
         peptide_table_names <- names(peptide_table_filtered)
-        hla_list <- peptide_table_names[grepl("^HLA-*", peptide_table_names)]
+        hla_list <- df$metricsData$alleles
         hla_data <- data.frame(hla = hla_list)
         hla_sep <- max(nchar(peptide_table$`Peptide Sequence`))
         hla_data$y_pos <- 1
@@ -957,6 +958,19 @@ server <- shinyServer(function(input, output, session) {
     withProgress(message = "Loading Anchor Weights Table", value = 0, {
       weights <- anchor_weights_for_alleles(df$metricsData$alleles)
       dtable <- datatable(weights, options = list(
+        pageLength = 10,
+        lengthChange = FALSE,
+        rowCallback = JS("function(row, data, index, rowId) {",
+                         "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
+                         'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+      ))
+      dtable
+    })
+  })
+  output$anchorPositions<- renderDT({
+    withProgress(message = "Loading Anchor Positions Table", value = 0, {
+      positions <- all_anchors(df$metricsData$alleles, df$metricsData$`epitope_lengths`, df$allele_specific_anchors, df$anchor_contribution)
+      dtable <- datatable(positions, options = list(
         pageLength = 10,
         lengthChange = FALSE,
         rowCallback = JS("function(row, data, index, rowId) {",
@@ -1607,8 +1621,8 @@ server <- shinyServer(function(input, output, session) {
 
           xvrbl_values <- df[[input$xvrbl]]
           range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
-          min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-          max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+          min_value <- floor(range_values[1])
+          max_value <- ceiling(range_values[2])
 
 
           # Check if min_value and max_value are equal, set default values
@@ -1655,9 +1669,9 @@ server <- shinyServer(function(input, output, session) {
 
         yvrbl_values <- df[[input$yvrbl]]
         range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
-        min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-        max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
-
+        
+        min_value <- floor(range_values[1])
+        max_value <- ceiling(range_values[2])
 
         # Check if min_value and max_value are equal, set default values
         if (min_value == max_value) {
@@ -1991,10 +2005,6 @@ server <- shinyServer(function(input, output, session) {
   
   # Dynamic Scatter Plot 
   output$xvrbl_custom <- renderUI({
-    #df_custom <- df_custom$fullData
-    #df_custom <- type.convert(df_custom, as.is = TRUE)
-    #df[is.na(df)] <- 0
-    
     features <- as.list(names(df_custom$fullData)[sapply(df_custom$fullData, is.numeric)])
     default_selection <- ifelse(length(features) >= 1, features[[1]], "")
     
@@ -2042,9 +2052,8 @@ server <- shinyServer(function(input, output, session) {
           
           xvrbl_values <- df[[input$xvrbl_custom]]
           range_values <- range(as.numeric(xvrbl_values), na.rm = TRUE)
-          min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-          max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
-          
+          min_value <- floor(range_values[1])
+          max_value <- ceiling(range_values[2])
           
           # Check if min_value and max_value are equal, set default values
           if (min_value == max_value) {
@@ -2058,7 +2067,7 @@ server <- shinyServer(function(input, output, session) {
             min = min_value,
             max = max_value,
             value = c(min_value, max_value),
-            step = 0.01,
+            step = 0.001,
             dragRange = TRUE  # Allow users to drag the range handles 
           )
       })
@@ -2114,14 +2123,15 @@ server <- shinyServer(function(input, output, session) {
           df[[input$yvrbl_custom]] <- df[[input$yvrbl_custom]]
         }
         
-        df <- df[is.finite(df[[input$yvrbl_custom]]),]
+        #df <- df[is.finite(df[[input$yvrbl_custom]]),]
         yvrbl_values <- df[[input$yvrbl_custom]]
         range_values <- range(as.numeric(yvrbl_values), na.rm = TRUE)
-        min_value <- as.numeric(format(round(range_values[1], 2), nsmall = 2))
-        max_value <- as.numeric(format(round(range_values[2], 2), nsmall = 2))
+        
+        min_value <- floor(range_values[1])
+        max_value <- ceiling(range_values[2])
         
         # Check if min_value and max_value are equal, set default values
-        if (min_value == max_value) {
+        if (min_value == max_value ) {
           min_value <- min_value - 1
           max_value <- max_value + 1
         }
@@ -2132,7 +2142,7 @@ server <- shinyServer(function(input, output, session) {
           min = min_value,
           max = max_value,
           value = c(min_value, max_value),
-          step = 0.01,
+          step = 0.001,
           dragRange = TRUE  # Allow users to drag the range handles 
         )
       })
@@ -2183,12 +2193,12 @@ server <- shinyServer(function(input, output, session) {
   })
   
   output$scatter_custom <- renderPlotly({
-    withProgress(message = "Loading Scatter Plots", value = 0, {
+    withProgress(message = "Loading Scatter Plots",  {
       incProgress(0.5)
-      if (!is.null(input$xvrbl_custom) & !is.null(input$yvrbl_custom)
-          & !is.null(input$min_col_custom)  & !is.null(input$max_col_custom)
-          & !is.null(input$xvrbl_scale_custom)  & !is.null(input$yvrbl_scale_custom)
-          & !is.null(input$color_scatter_custom)  & !is.null(input$size_scatter_custom)) {
+      if (!is.null(input$xvrbl_custom) && !is.null(input$yvrbl_custom) && input$yvrbl_custom != "" && input$xvrbl_custom != ""
+          && !is.null(input$min_col_custom)  && !is.null(input$max_col_custom)
+          && !is.null(input$xvrbl_scale_custom)  && !is.null(input$yvrbl_scale_custom)
+          && !is.null(input$color_scatter_custom)  && !is.null(input$size_scatter_custom)) {
         
         df <- df_custom$fullData
         df <- type.convert(df, as.is = TRUE)
@@ -2220,7 +2230,6 @@ server <- shinyServer(function(input, output, session) {
           df[[input$yvrbl_custom]] <- df[[input$yvrbl_custom]]
         }
         
-        
         df[is.na(df)] <- 0
         
         # Filter data based on the slider range
@@ -2229,10 +2238,17 @@ server <- shinyServer(function(input, output, session) {
         
         incProgress(0.5)
         
-        scatter_plot <- ggplot(df , aes(x = .data[[input$xvrbl_custom]], y = .data[[input$yvrbl_custom]])) +
-          geom_point(aes(color = .data[[input$color_scatter_custom]], size = .data[[input$size_scatter_custom]])) +  # Correct placement of aes() here
+        scatter_plot <- ggplot(df, aes(x = .data[[input$xvrbl_custom]], y = .data[[input$yvrbl_custom]])) +
+          geom_point(aes(color = .data[[input$color_scatter_custom]], size = .data[[input$size_scatter_custom]])) +
           scale_color_gradient(low = input$min_col_custom, high = input$max_col_custom) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+          theme(
+            strip.text = element_text(size = 15),
+            axis.text = element_text(size = 10),
+            axis.title = element_text(size = 15),
+            axis.ticks = element_line(size = 3),
+            legend.text = element_text(size = 15),
+            legend.title = element_text(size = 15)
+          )
         
         scatter_plot <- ggplotly(scatter_plot)
         

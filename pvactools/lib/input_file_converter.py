@@ -427,8 +427,10 @@ class VcfConverter(InputFileConverter):
                         'index'                          : index,
                         'protein_length_change'          : protein_length_change,
                     }
-                    if transcript['Amino_acids']:
+                    if transcript['Amino_acids'] and transcript['Amino_acids'] != '':
                         output_row['amino_acid_change'] = transcript['Amino_acids']
+                    else:
+                        continue
 
                     if transcript['Codons']:
                         output_row['codon_change'] =  transcript['Codons']
@@ -678,5 +680,7 @@ class FusionInputConverter(InputFileConverter):
             output_rows = self.parse_arriba_file(starfusion_entries)
         elif os.path.isdir(self.input_file):
             output_rows = self.parse_agfusion_files(starfusion_entries)
+        if not os.path.exists(self.input_file):
+            raise Exception("Input file {} doesn't exist. Aborting.".format(self.input_file))
         tsv_writer.writerows(output_rows)
         writer.close()

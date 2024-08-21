@@ -42,11 +42,13 @@ Contents
    :maxdepth: 1
 
    install
+   courses
    tools
    frequently_asked_questions
    releases
    license
    citation
+   funding
    contribute
    contact
    mailing_list
@@ -54,15 +56,46 @@ Contents
 New in Release |release|
 ------------------------
 
-This is a bugfix release. It fixes the following problem(s):
+This is a minor feature release. It adds the following features:
 
-- When running the reference protome similarity step with a reference protome
-  peptide fasta file and a species other than human or mouse, the run would be aborted
-  with an error that the refseq_protein_prot BLASTp database was incompatible with
-  the species. This error should not be emitted in this circumstance since
-  BLASTp is not run when using a reference proteome peptide fasta file. This
-  release fixes this error and allows users to run the reference proteome
-  similarity step on non-human and non-mouse data with a reference proteome peptide fasta.
+- Add a new helper command ``pvacseq|pvacfuse|pvacbind|pvacvector valid_algorithms``
+  by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1108
+- When running the ``pvacseq generate_protein_fasta`` command with the ``--phased-proximal-variants-vcf``
+  argument, output the intermediate ``proximal_variants.tsv`` file by @evelyn-schmidt
+  in https://github.com/griffithlab/pVACtools/pull/1091
+- In pVACview, clear the comment text input box after saving the comment by @ldhtnp
+  in https://github.com/griffithlab/pVACtools/pull/1113
+- Add support for mouse allele anchor positions by @ldhtnp in
+  https://github.com/griffithlab/pVACtools/pull/1110
+- Skip variants where VEP didn't predict an amino acid change by @susannasiebert
+  in https://github.com/griffithlab/pVACtools/pull/1121
+- Update the ordering of the fasta file output of the ``pvacseq|pvacfuse generate_protein_fasta``
+  command when running with the ``--input-tsv`` argument so that the order of the fasta sequences
+  is consistent with the order of the neoantigen candidates in the input TSV by @mhoang22 in
+  https://github.com/griffithlab/pVACtools/pull/1002
+- Updat the ``pvacfuse generate_protein_fasta`` command to allow aggregated TSVs as an input TSV
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1134
+- Update pVACview to display the anchor positions currently applied to the data by @susannasiebert
+  in https://github.com/griffithlab/pVACtools/pull/1114
+
+This release also fixes the following bug(s):
+
+- Handle invalid pVACfuse characters by trimming the sequence instead of skipping it. The previous
+  implementation would lead to missing sequences in certain downstream steps, resulting in errors.
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1130
+- Add new pVACview R files to the list of files getting copied into the pVACseq output folder.
+  These files were previsouly not copied in the the results folder, leading to error when running
+  the ``pvacview run`` commands on a pVACseq output directory. by @susannasiebert in
+  https://github.com/griffithlab/pVACtools/pull/1126
+- Remove single DP and DQ alpha and beta chain alleles from the list of supported alleles in MHCnuggetsII.
+  This is because those alleles need to be defined as a pair of alpha- and beta-chains in order to be
+  meaningful. Also remove DRA alleles from the same list since the DR locus is defined only by the beta
+  chain because functional variation in mature DRA gene products is absent. by @susannasiebert in
+  https://github.com/griffithlab/pVACtools/pull/1133
+- Fix errors in the rounding of the min and max values of the sliders in the custom pVACview module by
+  @evelyn-schmidt in https://github.com/griffithlab/pVACtools/pull/1116
+- Remove unused code in the Frameshift.pm VEP plugin that causes errors with certain types of variants
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1122
 
 Past release notes can be found on our :ref:`releases` page.
 

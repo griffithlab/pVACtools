@@ -68,6 +68,7 @@ class PvacbindTests(unittest.TestCase):
             "run",
             'binding_filter',
             'valid_alleles',
+            'valid_algorithms',
             'allele_specific_cutoffs',
             'download_example_data',
             "net_chop",
@@ -363,3 +364,16 @@ class PvacbindTests(unittest.TestCase):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
                 self.assertTrue(compare(output_file, expected_file))
+    
+    def test_valid_algorithms_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacbind",
+            "valid_algorithms.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_algorithms_runs(self):
+        valid_algorithms.main("")
