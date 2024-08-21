@@ -55,6 +55,26 @@ class GenerateFastaTests(unittest.TestCase):
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
+    def test_input_tsv(self):
+        generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'agfusion')
+        generate_protein_fasta_input_tsv   = os.path.join(self.test_data_dir, 'input.aggregated.tsv')
+        generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            generate_protein_fasta_input_file,
+            self.flanking_sequence_length,
+            generate_protein_fasta_output_file.name,
+            '-d', 'full',
+            '--input-tsv', generate_protein_fasta_input_tsv,
+            '--aggregate-report-evaluation', 'Accept',
+            '--aggregate-report-evaluation', 'Pending',
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_with_aggregated_tsv.fasta')
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
     def test_arriba_tsv_with_invalid_character(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input_with_invalid_character.tsv')
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
@@ -67,5 +87,6 @@ class GenerateFastaTests(unittest.TestCase):
             generate_protein_fasta_output_file.name,
             '-d', 'full'
         ], shell=False))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_with_invalid_characters.fasta')
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
-        self.assertEqual(os.path.getsize(generate_protein_fasta_output_file.name), 0)
