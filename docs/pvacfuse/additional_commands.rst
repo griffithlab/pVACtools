@@ -29,7 +29,7 @@ List Valid Alleles
     :func: define_parser
     :prog: pvacfuse valid_alleles
 
-.. _valid_algorithms:
+.. _pvacfuse_valid_algorithms:
 
 List Valid Algorithms
 ---------------------
