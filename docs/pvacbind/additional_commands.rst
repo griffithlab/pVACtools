@@ -19,7 +19,7 @@ List Valid Alleles
 
 .. program-output:: pvacbind valid_alleles -h
 
-.. _valid_algorithms:
+.. _pvacbind_valid_algorithms:
 
 List Valid Algorithms
 ---------------------
