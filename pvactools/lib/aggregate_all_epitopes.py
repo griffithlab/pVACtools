@@ -7,6 +7,9 @@ import shutil
 from abc import ABCMeta, abstractmethod
 import itertools
 import csv
+import glob
+import ast
+from pvactools.lib.run_utils import get_anchor_positions
 
 from pvactools.lib.prediction_class import PredictionClass
 
@@ -122,6 +125,17 @@ class AggregateAllEpitopes:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
 
+    def determine_used_epitope_lengths(self):
+        col_name = self.determine_epitope_seq_column_name()
+        return list(set([len(s) for s in pd.read_csv(self.input_file, delimiter="\t", usecols=[col_name])[col_name]]))
+
+    def determine_epitope_seq_column_name(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        for header in ["MT Epitope Seq", "Epitope Seq"]:
+            if header in headers:
+                return header
+        raise Exception("No mutant epitope sequence header found.")
+
     def problematic_positions_exist(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
         return 'Problematic Positions' in headers
@@ -165,18 +179,18 @@ class AggregateAllEpitopes:
 
     def set_column_types(self, prediction_algorithms):
         dtypes = {
-            'Chromosome': str,
+            'Chromosome': "string",
             "Start": "int32",
             "Stop": "int32",
-            'Reference': str,
-            'Variant': str,
+            'Reference': "string",
+            'Variant': "string",
             "Variant Type": "category",
             "Mutation Position": "category",
             "Median MT IC50 Score": "float32",
             "Median MT Percentile": "float32",
             "Best MT IC50 Score": "float32",
             "Best MT Percentile": "float32",
-            "Protein Position": "str",
+            "Protein Position": "string",
             "Transcript Length": "int32",
         }
         for algorithm in prediction_algorithms:
@@ -188,6 +202,7 @@ class AggregateAllEpitopes:
 
     def execute(self):
         prediction_algorithms = self.determine_used_prediction_algorithms()
+        epitope_lengths = self.determine_used_epitope_lengths()
         el_algorithms = self.determine_used_el_algorithms()
         used_columns = self.determine_columns_used_for_aggregation(prediction_algorithms, el_algorithms)
         dtypes = self.set_column_types(prediction_algorithms)
@@ -214,6 +229,7 @@ class AggregateAllEpitopes:
                 'allele_specific_anchors': self.allele_specific_anchors,
                 'alleles': self.hla_types.tolist(),
                 'anchor_contribution_threshold': self.anchor_contribution_threshold,
+                'epitope_lengths': epitope_lengths,
             }
         else:
             metrics = {}
@@ -286,6 +302,20 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     probs[hla] = line
             anchor_probabilities[length] = probs
         self.anchor_probabilities = anchor_probabilities
+
+        mouse_anchor_positions = {}
+        for length in [8, 9, 10, 11]:
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "mouse_anchor_predictions_{}_mer.tsv".format(length))
+            values = {}
+            with open(file_name, 'r') as fh:
+                reader = csv.DictReader(fh, delimiter="\t")
+                for line in reader:
+                    allele = line.pop('Allele')
+                    values[allele] = {int(k): ast.literal_eval(v) for k, v in line.items()}
+            mouse_anchor_positions[length] = values
+        self.mouse_anchor_positions = mouse_anchor_positions
+
         self.allele_specific_anchors = allele_specific_anchors
         self.anchor_contribution_threshold = anchor_contribution_threshold
         super().__init__()
@@ -367,7 +397,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             binding_threshold = self.binding_threshold
 
         anchor_residue_pass = True
-        anchors = self.get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']))
+        anchors = get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
         # parse out mutation position from str
         position = mutation["Mutation Position"]
         if pd.isna(position):
@@ -386,20 +416,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
                     anchor_residue_pass = False
         return anchor_residue_pass
-
-    def get_anchor_positions(self, hla_allele, epitope_length):
-        if self.allele_specific_anchors and epitope_length in self.anchor_probabilities and hla_allele in self.anchor_probabilities[epitope_length]:
-            probs = self.anchor_probabilities[epitope_length][hla_allele]
-            positions = []
-            total_prob = 0
-            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
-                total_prob += float(prob)
-                positions.append(int(pos))
-                if total_prob > self.anchor_contribution_threshold:
-                    return positions
-
-        return [1, 2, epitope_length - 1 , epitope_length]
-
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
@@ -730,10 +746,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def copy_pvacview_r_files(self):
         module_dir = os.path.dirname(__file__)
         r_folder = os.path.abspath(os.path.join(module_dir,"..","tools","pvacview"))
+        files = glob.iglob(os.path.join(r_folder, "*.R"))
         destination = os.path.abspath(os.path.dirname(self.output_file))
         os.makedirs(os.path.join(destination, "www"), exist_ok=True)
-        for i in ["ui.R", "app.R", "server.R", "styling.R", "anchor_and_helper_functions.R"]:
-            shutil.copy(os.path.join(r_folder, i), os.path.join(destination, i))
+        for i in files:
+            shutil.copy(i, destination)
         for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
             shutil.copy(os.path.join(r_folder, "www", i), os.path.join(destination, "www", i))
 

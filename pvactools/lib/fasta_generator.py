@@ -31,14 +31,27 @@ class FastaGenerator(metaclass=ABCMeta):
         self.output_key_file            = kwargs['output_key_file']
         self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', None)
         self.proximal_variants_file     = kwargs.pop('proximal_variants_file', None)
+        self.trim_invalid_characters    = kwargs.pop('trim_invalid_characters', False)
         self.proximal_variants          = self.parse_proximal_variants_file()
 
+    def invalid_characters(self):
+        return ['*', 'X', '?']
 
     def contains_invalid_characters(self, sequence):
-        for character in ['*', 'X', '?']:
+        for character in self.invalid_characters():
             if character in sequence:
                 return True
         return False
+
+    def trim_sequence(self, sequence):
+        for character in self.invalid_characters():
+            while character in sequence:
+                invalid_character_pos = sequence.index(character)
+                if invalid_character_pos < (len(sequence) - invalid_character_pos):
+                    sequence = sequence[invalid_character_pos+1:]
+                else:
+                    sequence = sequence[0:invalid_character_pos]
+        return sequence
 
     def position_out_of_bounds(self, position, sequence):
         return position > len(sequence)-1
@@ -313,7 +326,10 @@ class FusionFastaGenerator(FastaGenerator):
                 subsequence = subsequence[:-1]
 
             if self.contains_invalid_characters(subsequence):
-                continue
+                if self.trim_invalid_characters:
+                    subsequence = self.trim_sequence(subsequence)
+                else:
+                    continue
 
             if len(subsequence) < self.epitope_length:
                 continue

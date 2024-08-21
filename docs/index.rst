@@ -46,11 +46,13 @@ Contents
    :maxdepth: 1
 
    install
+   courses
    tools
    frequently_asked_questions
    releases
    license
    citation
+   funding
    contribute
    contact
    mailing_list
@@ -58,30 +60,46 @@ Contents
 New in Release |release|
 ------------------------
 
-This is a bugfix release. It fixes the following problem(s):
+This is a minor feature release. It adds the following features:
 
-- The previous version updated how the all_epitopes.tsv file was parsed when creating
-  the aggregated report and NA values are now parsed as native pandas nan. However,
-  this update was not handled correctly for the Mutation Position column,
-  leading to errors with NA values in that column. This release fixes this error.
-  (`#1079 <https://github.com/griffithlab/pVACtools/pull/1079>`_)
-- The previous version would write the DeepImmuno output file in the same location for
-  multiple prediction calls. This would lead to errors when running in multi-threaded mode.
-  This releases updates the code to write DeepImmuno outputs to unique file locations.
-  (`#1078 <https://github.com/griffithlab/pVACtools/pull/1078>`_)
-- This release updates how the list of combinatorial class II alleles is created in order
-  to return it as a sorted list, creating a consistent order when writing the
-  input.yml log file. (`#1077 <https://github.com/griffithlab/pVACtools/pull/1077>`_)
-- This release updates the GitHub commit for the pVACview demo data in order to pull the
-  latest version of this data, including DeepImmuno and BigMHC prediction data.
-  (`#1073 <https://github.com/griffithlab/pVACtools/pull/1073>`_)
-- This release fixes an issue where the pVACvector visualization images were saved in a
-  low resolution format resulting in blurry images.  (`#1071
-  <https://github.com/griffithlab/pVACtools/pull/1071>`_)
-- This release fixes an issue where the method to determine the matched wildtype result
-  didn't return where appropriate, causing the mutation position to not be set correctly.
-  (`#1082 <https://github.com/griffithlab/pVACtools/pull/1082>`_)
-- This release fixes some typos. (`#1072 <https://github.com/griffithlab/pVACtools/pull/1072>`_)
+- Add a new helper command ``pvacseq|pvacfuse|pvacbind|pvacvector valid_algorithms``
+  by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1108
+- When running the ``pvacseq generate_protein_fasta`` command with the ``--phased-proximal-variants-vcf``
+  argument, output the intermediate ``proximal_variants.tsv`` file by @evelyn-schmidt
+  in https://github.com/griffithlab/pVACtools/pull/1091
+- In pVACview, clear the comment text input box after saving the comment by @ldhtnp
+  in https://github.com/griffithlab/pVACtools/pull/1113
+- Add support for mouse allele anchor positions by @ldhtnp in
+  https://github.com/griffithlab/pVACtools/pull/1110
+- Skip variants where VEP didn't predict an amino acid change by @susannasiebert
+  in https://github.com/griffithlab/pVACtools/pull/1121
+- Update the ordering of the fasta file output of the ``pvacseq|pvacfuse generate_protein_fasta``
+  command when running with the ``--input-tsv`` argument so that the order of the fasta sequences
+  is consistent with the order of the neoantigen candidates in the input TSV by @mhoang22 in
+  https://github.com/griffithlab/pVACtools/pull/1002
+- Updat the ``pvacfuse generate_protein_fasta`` command to allow aggregated TSVs as an input TSV
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1134
+- Update pVACview to display the anchor positions currently applied to the data by @susannasiebert
+  in https://github.com/griffithlab/pVACtools/pull/1114
+
+This release also fixes the following bug(s):
+
+- Handle invalid pVACfuse characters by trimming the sequence instead of skipping it. The previous
+  implementation would lead to missing sequences in certain downstream steps, resulting in errors.
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1130
+- Add new pVACview R files to the list of files getting copied into the pVACseq output folder.
+  These files were previsouly not copied in the the results folder, leading to error when running
+  the ``pvacview run`` commands on a pVACseq output directory. by @susannasiebert in
+  https://github.com/griffithlab/pVACtools/pull/1126
+- Remove single DP and DQ alpha and beta chain alleles from the list of supported alleles in MHCnuggetsII.
+  This is because those alleles need to be defined as a pair of alpha- and beta-chains in order to be
+  meaningful. Also remove DRA alleles from the same list since the DR locus is defined only by the beta
+  chain because functional variation in mature DRA gene products is absent. by @susannasiebert in
+  https://github.com/griffithlab/pVACtools/pull/1133
+- Fix errors in the rounding of the min and max values of the sliders in the custom pVACview module by
+  @evelyn-schmidt in https://github.com/griffithlab/pVACtools/pull/1116
+- Remove unused code in the Frameshift.pm VEP plugin that causes errors with certain types of variants
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1122
 
 Past release notes can be found on our :ref:`releases` page.
 

@@ -35,7 +35,13 @@ def define_parser():
     )
     parser.add_argument(
         "--input-tsv",
-        help = "A pVACfuse all_epitopes or filtered TSV file with epitopes to use for subsetting the input file to peptides of interest. Only the peptide sequences for the epitopes in the TSV will be used when creating the FASTA."
+        help = "A pVACfuse all_epitopes, filtered, or aggregated TSV file with epitopes to use for subsetting the input file to peptides of interest. Only the peptide sequences for the epitopes in the TSV will be used when creating the FASTA."
+    )
+    parser.add_argument(
+        "--aggregate-report-evaluation",
+        help="When running with an aggregate report input TSV, only include variants with this evaluation. Valid values for this field are Accept, Reject, Pending, and Review. Specifiy multiple values as a comma-separated list to include multiple evaluation states.",
+        default='Accept',
+        type=lambda s:[e for e in s.split(',')],
     )
     parser.add_argument(
         "-d", "--downstream-sequence-length",
@@ -68,7 +74,8 @@ def generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file):
         'epitope_length'            : 0,
         'output_file'               : fasta_file,
         'output_key_file'           : fasta_key_file,
-        'downstream_sequence_length': downstream_sequence_length
+        'downstream_sequence_length': downstream_sequence_length,
+        'trim_invalid_characters'   : True,
     }
     fasta_generator = FusionFastaGenerator(**generate_fasta_params)
     fasta_generator.execute()
@@ -78,15 +85,21 @@ def generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file):
 
 def parse_input_tsv(input_tsv):
     if input_tsv is None:
-        return None
+        return (None, None)
     indexes = []
     with open(input_tsv, 'r') as fh:
         reader = csv.DictReader(fh, delimiter = "\t")
-        for line in reader:
-            indexes.append(line['Index'])
-    return indexes
+        if 'Index' in reader.fieldnames:
+            for line in reader:
+                indexes.append(line[Index])
+            file_type = 'full'
+        else:
+            for line in reader:
+                indexes.append(line)
+            file_type = 'aggregated'
+    return (indexes, file_type)
 
-def parse_files(output_file, temp_dir, input_tsv):
+def parse_files(output_file, temp_dir, input_tsv, aggregate_report_evaluation):
     print("Parsing the Variant Peptide FASTA and Key File")
     fasta_file_path = os.path.join(temp_dir, 'tmp.fasta')
     fasta_key_file_path = os.path.join(temp_dir, 'tmp.fasta.key')
@@ -94,7 +107,7 @@ def parse_files(output_file, temp_dir, input_tsv):
     with open(fasta_key_file_path, 'r') as fasta_key_file:
         keys = yaml.load(fasta_key_file, Loader=yaml.FullLoader)
 
-    tsv_indexes = parse_input_tsv(input_tsv)
+    (tsv_indexes, file_type) = parse_input_tsv(input_tsv)
 
     dataframe = OrderedDict()
     output_records = []
@@ -102,10 +115,25 @@ def parse_files(output_file, temp_dir, input_tsv):
         ids = keys[int(record.id)]
         for record_id in ids:
             if tsv_indexes is not None:
-                if record_id not in tsv_indexes:
-                    continue
+                if file_type == 'full':
+                    if record_id not in tsv_indexes:
+                        continue
+                else:
+                    matches = [r for r in tsv_indexes if r['ID'] == record_id and r['Evaluation'] in aggregate_report_evaluation]
+                    if len(matches) == 0:
+                        continue
             new_record = SeqRecord(record.seq, id=record_id, description=record_id)
             output_records.append(new_record)
+
+    if tsv_indexes is not None:
+        ordered_output_records = []
+        for tsv_index in tsv_indexes:
+            if file_type == 'full':
+                records = [r for r in output_records if r.id == tsv_index]
+            else:
+                records = [r for r in output_records if r.id == tsv_index['ID']]
+            ordered_output_records.extend(records)
+        output_records = ordered_output_records
 
     SeqIO.write(output_records, output_file, "fasta")
     print("Completed")
@@ -124,7 +152,7 @@ def main(args_input = sys.argv[1:], save_tsv_file=False, starfusion_file=None):
     temp_dir = tempfile.mkdtemp()
     convert_fusion_input(args.input, temp_dir, starfusion_file)
     generate_fasta(args, downstream_sequence_length, temp_dir, save_tsv_file)
-    parse_files(args.output_file, temp_dir, args.input_tsv)
+    parse_files(args.output_file, temp_dir, args.input_tsv, args.aggregate_report_evaluation)
     shutil.rmtree(temp_dir, ignore_errors=True)
     manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
     print("Calculating Manufacturability Metrics")

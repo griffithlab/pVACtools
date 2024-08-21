@@ -17,3 +17,5 @@ Release Notes
    releases/3_1
    releases/4_0
    releases/4_1
+   releases/4_2
+   releases/4_3
