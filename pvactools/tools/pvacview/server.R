@@ -1381,7 +1381,9 @@ server <- shinyServer(function(input, output, session) {
   
   ############### NeoFox Tab ##########################
   df_neofox <- reactiveValues(
-    mainTable_neofox = NULL
+    mainTable_neofox = NULL,
+    binding_threshold = 500,
+    percentile_threshold = 5
   )
   
   # Option 1: User uploaded
@@ -1411,7 +1413,23 @@ server <- shinyServer(function(input, output, session) {
         new_col_name <- paste0("*", col_name)
         names(mainData_neofox)[names(mainData_neofox) == col_name] <- new_col_name
       }
-    }   
+    } 
+    
+    # Add scaling columns for coloring and barplots
+    # There are no checks if user uploads data without one of these columns
+    # Maybe an easy solution would be to just create a dummy column in the
+    # for loop above for missing columns?
+    
+    # Add scaling columns for coloring and barplots
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan_bestAffinity_affinity"]), as.numeric(x["*NetMHCpan_bestAffinity_affinity"]) / (df_neofox$binding_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity_WT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan_bestAffinity_affinityWT"]), as.numeric(x["*NetMHCpan_bestAffinity_affinityWT"]) / (df_neofox$binding_threshold))})
+    # DAI is a measure of agrotopicity - so we want a a high DAI where the MT BA is low and the WT is BA is high, not sure if this is the correct scale
+    df_neofox$mainTable_neofox$`Scaled DAI_MHCI_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(1), as.numeric(x["*DAI_MHCI_bestAffinity"]), as.numeric(x["*DAI_MHCI_bestAffinity"]) / 10000)})
+    
+    df_neofox$mainTable_neofox$`Col DNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*dnaVariantAlleleFrequency"]), 0, x["*dnaVariantAlleleFrequency"])})
+    df_neofox$mainTable_neofox$`Col RNA Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaExpression"]), 0, x["*rnaExpression"])})
+    df_neofox$mainTable_neofox$`Col Gene Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*imputedGeneExpression"]), 0, x["*imputedGeneExpression"])})
+    df_neofox$mainTable_neofox$`Col RNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaVariantAlleleFrequency"]), 0, x["*rnaVariantAlleleFrequency"])})
     
     df_neofox$mainTable_neofox <- mainData_neofox
   })
@@ -1424,6 +1442,7 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData_neofox) <- mainData_neofox[1, ]
     mainData_neofox <- mainData_neofox[-1, ]
     row.names(mainData_neofox) <- NULL
+    mainData_neofox <- type.convert(mainData_neofox, as.is = TRUE)
     
     # Columns that have been reviewed as most interesting
     columns_to_star <- c(
@@ -1447,6 +1466,18 @@ server <- shinyServer(function(input, output, session) {
     }    
     
     df_neofox$mainTable_neofox <- mainData_neofox
+    
+    # Add scaling columns for coloring and barplots
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan_bestAffinity_affinity"]), as.numeric(x["*NetMHCpan_bestAffinity_affinity"]) / (df_neofox$binding_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity_WT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan_bestAffinity_affinityWT"]), as.numeric(x["*NetMHCpan_bestAffinity_affinityWT"]) / (df_neofox$binding_threshold))})
+    # DAI is a measure of agrotopicity - so we want a a high DAI where the MT BA is low and the WT is BA is high, not sure if this is the correct scale
+    df_neofox$mainTable_neofox$`Scaled DAI_MHCI_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(1), as.numeric(x["*DAI_MHCI_bestAffinity"]), as.numeric(x["*DAI_MHCI_bestAffinity"]) / 10000)})
+    
+    df_neofox$mainTable_neofox$`Col DNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*dnaVariantAlleleFrequency"]), 0, x["*dnaVariantAlleleFrequency"])})
+    df_neofox$mainTable_neofox$`Col RNA Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaExpression"]), 0, x["*rnaExpression"])})
+    df_neofox$mainTable_neofox$`Col Gene Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*imputedGeneExpression"]), 0, x["*imputedGeneExpression"])})
+    df_neofox$mainTable_neofox$`Col RNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaVariantAlleleFrequency"]), 0, x["*rnaVariantAlleleFrequency"])})
+    
     updateTabItems(session, "neofox_tabs", "neofox_explore")
   })
   
@@ -1470,9 +1501,24 @@ server <- shinyServer(function(input, output, session) {
       return(datatable(df_neofox$mainTable_neofox,
                 escape = FALSE,
                 selection = "multiple",
-                extensions = c("Buttons")
-      ))
-    })
+                extensions = c("Buttons"))     
+             %>% formatStyle(c("*dnaVariantAlleleFrequency"), "Col DNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
+             %>% formatStyle(c("*rnaExpression"), "Col RNA Expr", background = styleColorBar(range(0, 50), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
+             %>% formatStyle(c("*imputedGeneExpression"), "Col Gene Expr", background = styleColorBar(range(0, 50), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
+             %>% formatStyle(c("*rnaVariantAlleleFrequency"), "Col RNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
+             
+             %>% formatStyle("*NetMHCpan_bestAffinity_affinity", "Scaled NetMHCpan_bestAffinity", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
+                                                                                     c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
+                             , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
+            %>% formatStyle("*NetMHCpan_bestAffinity_affinityWT", "Scaled NetMHCpan_bestAffinity_WT", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
+                                                                                                                           c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
+                      , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
+            %>% formatStyle("*DAI_MHCI_bestAffinity", "Scaled DAI_MHCI_bestAffinity", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
+                                                                                                                           c("#FF9999", "#F1C664", "#F0CD5B", "#F3DD6F", "#F3E770", "#F3F171", "#3F9750", "#47AA5A", "#4FBD65", "#58D16F", "#60E47A", "#68F784"))
+                      , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
+      )
+    } 
+  )
   
   output$neofox_selected <- renderText({
     if (is.null(df_neofox$mainTable_neofox)) {
