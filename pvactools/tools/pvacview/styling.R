@@ -58,6 +58,10 @@ table.dataTable tbody tr.selected td {
 table.dataTable tbody tr.selected {
   pointer-events: none
 }
+.dataTables_length {
+  margin-left: 20px;
+  padding-top: 6px;
+}
 [id*=\"button\"] {
   pointer-events: auto
 }

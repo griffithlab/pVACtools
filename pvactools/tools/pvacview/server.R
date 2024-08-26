@@ -11,6 +11,7 @@ library("stringr")
 library(plotly)
 library(shinyWidgets)
 library(colourpicker)
+library(purrr)
 
 source("anchor_and_helper_functions.R", local = TRUE)
 source("styling.R")
@@ -534,10 +535,14 @@ server <- shinyServer(function(input, output, session) {
                 escape = FALSE,
                 callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)),
                 class = "stripe",
-                options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
+                options = list(lengthChange = TRUE, pageLength = df$pageLength,
+                               dom = "Bfrtilp",
                                columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
-                                                 list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
-                                                 list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
+                                                 list(className = "dt-center", targets = c(0:hla_count() - 1)),
+                                                 list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
+                                                 list(orderable = TRUE, targets = 0)
+                               ),
+                               buttons = list(I("colvis")),
                                drawCallback = htmlwidgets::JS(
                                     "function (oSettings, json) {
                                         $('td').each(function(i) {
@@ -1482,12 +1487,14 @@ server <- shinyServer(function(input, output, session) {
     )
     
     # Check if each column is present in the dataframe and modify the names
-    for (col_name in columns_to_star) {
-      if (col_name %in% names(mainData_neofox)) {
-        new_col_name <- paste0("*", col_name)
-        names(mainData_neofox)[names(mainData_neofox) == col_name] <- new_col_name
+    starred_column_names <- map(names(mainData_neofox), function(x) {
+      if (x %in% columns_to_star) {
+        paste0("*", x)
+      } else {
+        x
       }
-    } 
+    })
+    names(mainData_neofox) <- starred_column_names
     
     # Add scaling columns for coloring and barplots
     # There are no checks if user uploads data without one of these columns
@@ -1505,6 +1512,9 @@ server <- shinyServer(function(input, output, session) {
     df_neofox$mainTable_neofox$`Col Gene Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*imputedGeneExpression"]), 0, x["*imputedGeneExpression"])})
     df_neofox$mainTable_neofox$`Col RNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaVariantAlleleFrequency"]), 0, x["*rnaVariantAlleleFrequency"])})
     
+    df_neofox$default_neofox_columns <- c("patientIdentifier", "gene", "mutatedXmer", "wildTypeXmer", "position", map(columns_to_star, function(x) { paste0("*", x) }))
+    df_neofox$hidden_columns <- setdiff(colnames(df_neofox$mainTable_neofox), df_neofox$default_neofox_columns)
+
     df_neofox$mainTable_neofox <- mainData_neofox
   })
   
@@ -1532,12 +1542,14 @@ server <- shinyServer(function(input, output, session) {
     )
     
     # Check if each column is present in the dataframe and modify the names
-    for (col_name in columns_to_star) {
-      if (col_name %in% names(mainData_neofox)) {
-        new_col_name <- paste0("*", col_name)
-        names(mainData_neofox)[names(mainData_neofox) == col_name] <- new_col_name
+    starred_column_names <- map(names(mainData_neofox), function(x) {
+      if (x %in% columns_to_star) {
+        paste0("*", x)
+      } else {
+        x
       }
-    }    
+    })
+    names(mainData_neofox) <- starred_column_names
     
     df_neofox$mainTable_neofox <- mainData_neofox
     
@@ -1551,6 +1563,9 @@ server <- shinyServer(function(input, output, session) {
     df_neofox$mainTable_neofox$`Col RNA Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaExpression"]), 0, x["*rnaExpression"])})
     df_neofox$mainTable_neofox$`Col Gene Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*imputedGeneExpression"]), 0, x["*imputedGeneExpression"])})
     df_neofox$mainTable_neofox$`Col RNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaVariantAlleleFrequency"]), 0, x["*rnaVariantAlleleFrequency"])})
+
+    df_neofox$default_neofox_columns <- c("patientIdentifier", "gene", "mutatedXmer", "wildTypeXmer", "position", map(columns_to_star, function(x) { paste0("*", x) }))
+    df_neofox$hidden_columns <- setdiff(colnames(df_neofox$mainTable_neofox), df_neofox$default_neofox_columns)
     
     updateTabItems(session, "neofox_tabs", "neofox_explore")
   })
@@ -1575,7 +1590,27 @@ server <- shinyServer(function(input, output, session) {
       return(datatable(df_neofox$mainTable_neofox,
                 escape = FALSE,
                 selection = "multiple",
-                extensions = c("Buttons"))     
+                extensions = c("Buttons"),
+                options = list(
+                  dom = "Bfrtilp",
+                  columnDefs = list(
+                    list(visible = FALSE, targets = match(df_neofox$hidden_columns, names(df_neofox$mainTable_neofox)))
+                  ),
+                  buttons = list(I("colvis")),
+                  drawCallback = htmlwidgets::JS(
+                    "function (oSettings, json) {
+                        $('td').each(function(i) {
+                            var bgcolor = $(this).css('background-color');
+                            var bg = $(this).css('background');
+                            var color = $(this).css('color');
+                            var fw = $(this).css('font-weight');
+                            var border = $(this).css('border');
+                            $(this).attr('style', 'background-color: '+bgcolor+' !important; background: '+bg+' !important; color: '+color+' !important; font-weight: '+fw+' !important; border: '+border+' !important');
+                        })
+                    }"
+                  )
+                )
+             )
              %>% formatStyle(c("*dnaVariantAlleleFrequency"), "Col DNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
              %>% formatStyle(c("*rnaExpression"), "Col RNA Expr", background = styleColorBar(range(0, 50), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
              %>% formatStyle(c("*imputedGeneExpression"), "Col Gene Expr", background = styleColorBar(range(0, 50), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
