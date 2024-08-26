@@ -53,6 +53,32 @@ server <- shinyServer(function(input, output, session) {
       }
     }))
   }
+  #set button styling based on values in Evaluation column
+  setButtonStyling <- function(evaluations) {
+    for (i in 1:length(evaluations)){
+      evaluation <- evaluations[i]
+      if (evaluation == 'Accept') {
+        html <- paste0("#button-acpt_", i ," { color: red !important; }")
+        insertUI("head", ui = tags$style(HTML(html)))
+        removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
+      } else if (evaluation == 'Reject') {
+        html <- paste0("#button-rej_", i ," { color: red !important; }")
+        insertUI("head", ui = tags$style(HTML(html)))
+        removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
+      } else if (evaluation == 'Review') {
+        html <- paste0("#button-rev_", i ," { color: red !important; }")
+        insertUI("head", ui = tags$style(HTML(html)))
+        removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
+      } else if (evaluation == 'Pending') {
+        removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
+      }
+    }
+  }
   #reactive values defined for row selection, main table, metrics data, additional data, and dna cutoff
   df <- reactiveValues(
     selectedRow = 1,
@@ -79,12 +105,15 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
-    mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
-    mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
+    setButtonStyling(mainData$Evaluation)
+    mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id)')
+    mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id)')
+    mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id)')
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
     mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
     mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+    df$evaluations <- mainData[c("ID", "Evaluation")]
     df$mainTable <- mainData
     df$metricsData <- NULL
   })
@@ -114,7 +143,7 @@ server <- shinyServer(function(input, output, session) {
     }
     columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                         "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
-                        "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
+                        "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
     if ("Comments" %in% colnames(df$mainTable)) {
       columns_needed <- c(columns_needed, "Comments")
       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
@@ -166,6 +195,7 @@ server <- shinyServer(function(input, output, session) {
        colnames(mainData) <- mainData[1, ]
        mainData <- mainData[-1, ]
        row.names(mainData) <- NULL
+       setButtonStyling(mainData$Evaluation)
        mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id)')
        mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id)')
        mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id)')
@@ -350,9 +380,6 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Rank` <- NULL
     df$mainTable$`Rank_ic50` <- NULL
     df$mainTable$`Rank_expr` <- NULL
-    #df$mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id)')
-    #df$mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id)')
-    #df$mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id)')
   })
   #reset tier-ing with original parameters
   observeEvent(input$reset_params, {
@@ -386,9 +413,6 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Rank` <- NULL
     df$mainTable$`Rank_ic50` <- NULL
     df$mainTable$`Rank_expr` <- NULL
-    #df$mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id)')
-    #df$mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id)')
-    #df$mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id)')
   })
   #determine hla allele count in order to generate column tooltip locations correctly
   hla_count <- reactive({
