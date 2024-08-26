@@ -35,6 +35,9 @@ section of the documentation on how to create this VCF.
 
 The output may be limited to PASS variants only by setting the ``--pass`` only
 flag and to mutant sequences by setting the ``--mutant-only`` flag.
+Additionally, variants can be limited to specific transcript biotypes
+using the ``--biotypes`` parameters, which is set to only include ``protein_coding``
+transcripts by default.
 
 The output can be further limited to only certain variants by providing
 a pVACseq report file to the ``--input-tsv`` argument. Only the peptide sequences for the epitopes in the TSV
@@ -93,7 +96,8 @@ TSV.  In its output, it adds to the TSV 3 columns: Best Cleavage Position, Best 
 Cleavage Sites list.  Typically this step is done in the pVACseq run pipeline for the filtered output TSV
 when specified.  This tool provides a way to manually run this on pVACseq's generated filtered/all_epitopes
 TSV files so that you can add this information when not present if desired.
-You can view more about these columns for pVACseq in
+
+You can view more information about these columns for pVACseq in
 the :ref:`output file documentation <all_ep_and_filtered>`.
 
 NetMHCStab Predict Stability
@@ -106,7 +110,8 @@ filtered/all_epitopes TSV.  In its output, it adds to the TSV 4 columns: Predict
 Stability Rank, and NetMHCStab Allele.  Typically this step is done in the pVACseq run pipeline for the
 filtered output TSV when specified.  This tool provides a way to manually run this on pVACseq's generated
 filtered/all_epitopes TSV files so that you can add this information when not present if desired.
-You can view more about these columns for pVACseq in
+
+You can view more information about these columns for pVACseq in
 the :ref:`output file documentation <all_ep_and_filtered>`.
 
 Identify Problematic Amino Acids

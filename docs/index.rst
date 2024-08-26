@@ -13,6 +13,9 @@ tools:
 **pVACfuse**
    A tool for detecting neoantigens resulting from gene fusions.
 
+**pVACsplice**
+   A tool for detecting neoantigens resulting from splice site variants.
+
 **pVACvector**
    A tool designed to aid specifically in the construction of DNA-based
    cancer vaccines.
@@ -35,6 +38,7 @@ Contents
    pvacseq
    pvacbind
    pvacfuse
+   pvacsplice
    pvacvector
    pvacview
 

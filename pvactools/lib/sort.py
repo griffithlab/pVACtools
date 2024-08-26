@@ -26,3 +26,10 @@ def pvacbind_sort(rows, top_score_metric):
     elif top_score_metric == 'lowest':
         sorted_rows = sorted(rows, key=lambda row: ( float(row['Best IC50 Score']), int(row['Sub-peptide Position']), float(row['Median IC50 Score']), row['Mutation'] ) )
     return sorted_rows
+
+def pvacsplice_sort(rows, top_score_metric):
+    if top_score_metric == 'median':
+        sorted_rows = sorted(rows, key=lambda row: ( float(row['Median IC50 Score']), float(row['Best IC50 Score']), row['Index'] ) )
+    elif top_score_metric == 'lowest':
+        sorted_rows = sorted(rows, key=lambda row: ( float(row['Best IC50 Score']), float(row['Median IC50 Score']), row['Index'] ) )
+    return sorted_rows

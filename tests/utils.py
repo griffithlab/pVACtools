@@ -1,6 +1,9 @@
 import re
 import os
 import unittest
+import tempfile
+import gzip
+import shutil
 
 def compare(path1, path2):
     r1 = open(path1)
@@ -80,3 +83,9 @@ def generate_prediction_calls(method, allele, length, input_file, url):
         'length':        length,
         'user_tool':     'pVac-seq',
     })
+
+def gunzip_file(zipped_file_path, suffix=None):
+    unzipped_file = tempfile.NamedTemporaryFile(suffix=suffix, delete=False)
+    with gzip.open(zipped_file_path, 'rb') as f_in, open(unzipped_file.name, 'wb') as f_out:
+        shutil.copyfileobj(f_in, f_out)
+    return unzipped_file.name

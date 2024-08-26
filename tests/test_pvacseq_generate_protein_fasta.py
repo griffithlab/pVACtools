@@ -33,6 +33,7 @@ class GenerateFastaTests(unittest.TestCase):
             self.flanking_sequence_length,
             generate_protein_fasta_output_file.name,
             '-d', 'full',
+            '--biotypes', 'protein_coding,IG_V_gene',
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
@@ -53,6 +54,7 @@ class GenerateFastaTests(unittest.TestCase):
             generate_protein_fasta_output_file.name,
             '-d', 'full',
             '-s', 'H_NJ-HCC1395-HCC1395',
+            '--biotypes', 'protein_coding,IG_V_gene',
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
@@ -72,6 +74,7 @@ class GenerateFastaTests(unittest.TestCase):
             generate_protein_fasta_output_file.name,
             '-d', 'full',
             '--mutant-only',
+            '--biotypes', 'protein_coding,IG_V_gene',
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutant_only.fasta')
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
@@ -110,6 +113,7 @@ class GenerateFastaTests(unittest.TestCase):
             '--input-tsv', generate_protein_fasta_input_tsv,
             '--aggregate-report-evaluation', 'Accept',
             '--aggregate-report-evaluation', 'Pending',
+            '--biotypes', 'protein_coding,IG_V_gene',
         ], shell=False))
         expected_output_file = os.path.join(self.test_data_dir, 'output_with_aggregated_tsv.fasta')
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
