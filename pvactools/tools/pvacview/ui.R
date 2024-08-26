@@ -159,7 +159,6 @@ explore_tab <- tabItem(
                 status = "primary", solidHeader = TRUE, collapsible = TRUE,
                 enable_sidebar = TRUE, sidebar_width = 25, sidebar_start_open = TRUE,
                 dropdownMenu = boxDropdown(boxDropdownItem("Help", id = "help", icon = icon("question-circle"))),
-                selectInput("page_length", "Number of variants displayed per page:", selected = "10", c("10", "20", "50", "100"), width = "280px"),
                 DTOutput("mainTable") %>% withSpinner(color = "#8FCCFA"),
                 span("Currently investigating row: ", verbatimTextOutput("selected")),
                 style = "overflow-x: scroll;font-size:100%")

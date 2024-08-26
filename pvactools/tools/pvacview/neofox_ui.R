@@ -42,7 +42,7 @@ neofox_tab <- tabItem("neofox",
                         DTOutput("neofoxTable") %>% withSpinner(color = "#8FCCFA"),
                         span("Currently investigating row(s): ", verbatimTextOutput("neofox_selected")),
                         style = "overflow-x: scroll;font-size:100%",
-                        "* indicates variable of interested designated by authors"
+                        "* indicates variable of interest designated by authors"
                         )
                     
             ),
@@ -53,7 +53,7 @@ neofox_tab <- tabItem("neofox",
                   h4("Violin Plots showing distribution of various neoantigen features for selected variants."),
                   uiOutput("noefox_features_ui"),
                   plotOutput(outputId = "neofox_violin_plots_row1") %>% withSpinner(color = "#8FCCFA"),
-                  "* indicates variable of interested designated by authors"
+                  "* indicates variable of interest designated by authors"
                   )
               
             ),
@@ -77,7 +77,7 @@ neofox_tab <- tabItem("neofox",
                       uiOutput("max_color"),
                       # size
                       uiOutput("size_neofox"),
-                      "* indicates variable of interested designated by authors"
+                      "* indicates variable of interest designated by authors"
                     ),
                     mainPanel(
                       align = "center",
