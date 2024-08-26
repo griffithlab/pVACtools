@@ -83,7 +83,7 @@ server <- shinyServer(function(input, output, session) {
     mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
-    mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
+    mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
     mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
     df$mainTable <- mainData
     df$metricsData <- NULL
@@ -166,12 +166,14 @@ server <- shinyServer(function(input, output, session) {
        colnames(mainData) <- mainData[1, ]
        mainData <- mainData[-1, ]
        row.names(mainData) <- NULL
-       mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
-       mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
+       mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id)')
+       mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id)')
+       mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id)')
        mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
        mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
-       mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
+       mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
        mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+       df$evaluations <- mainData[c("ID", "Evaluation")]
        df$mainTable <- mainData
        incProgress(0.1)
        ## Class I demo metrics file
@@ -202,7 +204,7 @@ server <- shinyServer(function(input, output, session) {
        }
        columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                            "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
-                           "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
+                           "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
        if ("Comments" %in% colnames(df$mainTable)) {
          columns_needed <- c(columns_needed, "Comments")
          df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
@@ -322,7 +324,6 @@ server <- shinyServer(function(input, output, session) {
     df$allele_expr <- input$allele_expr
     df$allele_specific_anchors <- input$use_anchor
     df$anchor_contribution <- input$anchor_contribution
-    df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
     if (input$use_anchor) {
       df$anchor_mode <- "allele-specific"
       df$anchor_contribution <- input$anchor_contribution
@@ -349,8 +350,9 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Rank` <- NULL
     df$mainTable$`Rank_ic50` <- NULL
     df$mainTable$`Rank_expr` <- NULL
-    df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
+    #df$mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id)')
+    #df$mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id)')
+    #df$mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id)')
   })
   #reset tier-ing with original parameters
   observeEvent(input$reset_params, {
@@ -364,7 +366,6 @@ server <- shinyServer(function(input, output, session) {
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
-    df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
     df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold))
     df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
@@ -385,8 +386,9 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Rank` <- NULL
     df$mainTable$`Rank_ic50` <- NULL
     df$mainTable$`Rank_expr` <- NULL
-    df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
+    #df$mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id)')
+    #df$mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id)')
+    #df$mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id)')
   })
   #determine hla allele count in order to generate column tooltip locations correctly
   hla_count <- reactive({
@@ -503,34 +505,48 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments")],
-                escape = FALSE, callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)), class = "stripe",
+      #datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments")],
+      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Comments")],
+                escape = FALSE,
+                callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)),
+                class = "stripe",
                 options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
                                columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
                                                  list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
                                                  list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
+                               drawCallback = htmlwidgets::JS(
+                                    "function (oSettings, json) {
+                                        $('td').each(function(i) {
+                                            var bgcolor = $(this).css('background-color');
+                                            var bg = $(this).css('background');
+                                            var color = $(this).css('color');
+                                            var fw = $(this).css('font-weight');
+                                            var border = $(this).css('border');
+                                            $(this).attr('style', 'background-color: '+bgcolor+' !important; background: '+bg+' !important; color: '+color+' !important; font-weight: '+fw+' !important; border: '+border+' !important');
+                                        })
+                                    }"
+                               ),
                                initComplete = htmlwidgets::JS(
                                  "function(settings, json) {",
                                  paste("$(this.api().table().header()).css({'font-size': '", "10pt", "'});"),
-                                 "}"),
-                               rowCallback = JS(rowcallback(hla_count(), df$selectedRow - 1)),
-                               preDrawCallback = JS("function() {
-                                        Shiny.unbindAll(this.api().table().node()); }"),
-                               drawCallback = JS("function() { 
-                                     Shiny.bindAll(this.api().table().node()); } ")),
-                selection = "none",
-                extensions = c("Buttons"))
+                                 "}")
+                ),
+                selection = "single",
+                extensions = c("Buttons")
+      )
     }
-    %>% formatStyle("IC50 MT", "Scaled BA", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
-                                                                            c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
-                    , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
-    %>% formatStyle("%ile MT", "Scaled percentile", backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2),
-                                                                                    c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+    %>% formatStyle("IC50 MT", "Scaled BA",
+        backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
+        #fontWeight = styleInterval(c(1000), c("normal", "bold")),
+        #border = styleInterval(c(1000), c("normal", "2px solid red"))
+    )
+    %>% formatStyle("%ile MT", "Scaled percentile",
+        backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
     %>% formatStyle("Tier", color = styleEqual(c("Pass", "Poor", "Anchor", "Subclonal", "LowExpr", "NoExpr"), c("green", "orange", "#b0b002", "#D4AC0D", "salmon", "red")))
+    %>% formatStyle(c("RNA Depth"), "Col RNA Depth", background = styleColorBar(range(0, 200), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("RNA VAF"), "Col RNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("DNA VAF"), "Col DNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("RNA Expr"), "Col RNA Expr", background = styleColorBar(range(0, 50), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
-    %>% formatStyle(c("RNA Depth"), "Col RNA Depth", background = styleColorBar(range(0, 200), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("Allele Expr"), "Col Allele Expr", background = styleColorBar(range(0, (max(as.numeric(as.character(unlist(df$mainTable["Col RNA VAF"]))) * 50))), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("Allele Expr"), "Tier Count", fontWeight = styleEqual(c("2"), c("bold")), border = styleEqual(c("2"), c("2px solid red")))
     %>% formatStyle(c("IC50 MT", "Allele Expr"), "Tier Count", fontWeight = styleEqual(c("3"), c("bold")), border = styleEqual(c("3"), c("2px solid red")))
@@ -603,47 +619,81 @@ server <- shinyServer(function(input, output, session) {
     dataTableProxy("mainTable") %>%
       selectPage((df$selectedRow - 1) %/% df$pageLength + 1)
   })
+  observeEvent(input$accept_eval, {
+    if (is.null(df$mainTable)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$accept_eval, "_")[[1]][2])
+    df$evaluations[df$evaluations$ID == selectedID(), "Evaluation"] <- "Accept"
+    html <- paste0("#button-acpt_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'))
+  })
+  observeEvent(input$reject_eval, {
+    if (is.null(df$mainTable)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$reject_eval, "_")[[1]][2])
+    df$evaluations[df$evaluations$ID == selectedID(), "Evaluation"] <- "Reject"
+    html <- paste0("#button-rej_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'))
+  })
+  observeEvent(input$review_eval, {
+    if (is.null(df$mainTable)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$review_eval, "_")[[1]][2])
+    df$evaluations[df$evaluations$ID == selectedID(), "Evaluation"] <- "Review"
+    html <- paste0("#button-rev_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'))
+  })
   ##selected row text box
   output$selected <- renderText({
     if (is.null(df$mainTable)) {
       return()
     }
-    df$selectedRow
+    input$mainTable_rows_selected
+    #df$selectedRow
   })
   ##selected id update
   selectedID <- reactive({
-    if (is.null(df$selectedRow)) {
+    if (is.null(input$mainTable_rows_selected)) {
       df$mainTable$ID[1]
     }else {
-      df$mainTable$ID[df$selectedRow]
+      df$mainTable$ID[input$mainTable_rows_selected]
     }
   })
   output$selectedPeptide <- reactive({
-    if (is.null(df$selectedRow)) {
+    if (is.null(input$mainTable_rows_selected)) {
       df$mainTable$`Best Peptide`[1]
     }else {
-      df$mainTable$`Best Peptide`[df$selectedRow]
+      df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
     }
   })
   output$selectedAAChange <- reactive({
-    if (is.null(df$selectedRow)) {
+    if (is.null(input$mainTable_rows_selected)) {
       df$mainTable$`AA Change`[1]
     }else {
-      df$mainTable$`AA Change`[df$selectedRow]
+      df$mainTable$`AA Change`[input$mainTable_rows_selected]
     }
   })
   output$selectedPos <- reactive({
-    if (is.null(df$selectedRow)) {
+    if (is.null(input$mainTable_rows_selected)) {
       df$mainTable$`Pos`[1]
     }else {
-      df$mainTable$`Pos`[df$selectedRow]
+      df$mainTable$`Pos`[input$mainTable_rows_selected]
     }
   })
   output$selectedGene <- reactive({
-    if (is.null(df$selectedRow)) {
+    if (is.null(input$mainTable_rows_selected)) {
       df$mainTable$`Gene`[1]
     }else {
-      df$mainTable$`Gene`[df$selectedRow]
+      df$mainTable$`Gene`[input$mainTable_rows_selected]
     }
   })
   ## Update comments section based on selected row
@@ -1329,11 +1379,10 @@ server <- shinyServer(function(input, output, session) {
   ##############################EXPORT TAB##############################################
   #evalutation overview table
   output$checked <- renderTable({
-    if (is.null(df$mainTable)) {
+    if (is.null(df$evaluations)) {
       return()
     }
-    Evaluation <- data.frame(selected = shinyValue("selecter_", nrow(df$mainTable), df$mainTable))
-    data <- as.data.frame(table(Evaluation))
+    data <- as.data.frame(table(df$evaluations$Evaluation))
     data$Count <- data$Freq
     data$Freq <- NULL
     data
@@ -1348,7 +1397,8 @@ server <- shinyServer(function(input, output, session) {
                                                 "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos")
     data <- df$mainTable[, !(colsToDrop)]
     col_names <- colnames(data)
-    data <- data.frame(data, Evaluation = shinyValue("selecter_", nrow(df$mainTable), df$mainTable))
+    #data <- data.frame(data, Evaluation = shinyValue("selecter_", nrow(df$mainTable), df$mainTable))
+    data <- merge(data, df$evaluations, by='ID')
     colnames(data) <- c(col_names, "Evaluation")
     comments <- data.frame("ID" = row.names(df$comments), Comments = df$comments[, 1])
     data <- join(data, comments)

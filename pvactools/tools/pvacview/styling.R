@@ -52,6 +52,15 @@ csscode <- HTML("
 .sidebar-mini.sidebar-collapse #tohide {
   display: none;
 }
+table.dataTable tbody tr.selected td {
+  box-shadow: inset 0 0 0 9999px rgba(55, 55, 55, 0.3) !important;
+}
+table.dataTable tbody tr.selected {
+  pointer-events: none
+}
+[id*=\"button\"] {
+  pointer-events: auto
+}
 ")
 
 # Create the theme
