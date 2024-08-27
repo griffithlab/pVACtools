@@ -91,10 +91,18 @@ neofox_tab <- tabItem("neofox",
                       align = "center",
                       plotlyOutput(outputId = "scatter", height = "800px") %>% withSpinner(color = "#8FCCFA"),
                     )
-                  
               )
             )
-
+        ),
+        ## EXPORT TAB ##
+        tabPanel(title = "Export Data", value = "neofox_export",
+          fluidRow(
+            textInput("exportNeofoxFileName", "Export filename: ", value = "Annotated.Neoantigen_Candidates", width = NULL, placeholder = NULL)
+          ),
+          fluidRow(
+            column(12,
+                   DTOutput("NeofoxExportTable") %>% withSpinner(color = "#8FCCFA"))
+          )
         )
     )
 )

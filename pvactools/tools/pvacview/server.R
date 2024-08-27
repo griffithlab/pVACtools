@@ -2044,6 +2044,45 @@ server <- shinyServer(function(input, output, session) {
     })
   })
 
+  #export NeoFox table display with options to download
+  output$NeofoxExportTable <- renderDataTable(
+    {
+        if (is.null(df_neofox$mainTable_neofox)) {
+          return()
+        }
+        colsToDrop <- colnames(df_neofox$mainTable_neofox) %in% c("Scaled NetMHCpan_bestAffinity", "Scaled NetMHCpan_bestAffinity_WT", "Scaled DAI_MHCI_bestAffinity",
+                                                    "Comments", "Col RNA Expr", "Col RNA VAF", "Col Allele Expr", "Col Gene Expr",
+                                                    "Col RNA Depth", "Col DNA VAF", "Acpt", "Rej", "Rev")
+        data <- df_neofox$mainTable_neofox[, !(colsToDrop)]
+        col_names <- colnames(data)
+        data <- plyr::join(data, df_neofox$evaluations, by='ID')
+        colnames(data) <- c(col_names, "Evaluation")
+        comments <- data.frame("ID" = row.names(df_neofox$comments), Comments = df_neofox$comments[, 1])
+        data <- join(data, comments)
+        #data[is.na(data)] <- "NA"
+        data
+    },
+    escape = FALSE, server = FALSE, rownames = FALSE,
+    options = list(dom = "Bfrtip",
+                 buttons = list(
+                   list(extend = "csvHtml5",
+                        filename = input$exportNeofoxFileName,
+                        fieldSeparator = "\t",
+                        text = "Download as TSV",
+                        extension = ".tsv"),
+                   list(extend = "excel",
+                        filename = input$exportNeofoxFileName,
+                        text = "Download as excel")
+                 ),
+                 initComplete = htmlwidgets::JS(
+                   "function(settings, json) {",
+                   paste0("$(this.api().table().header()).css({'font-size': '", "8pt", "'});"),
+                   "}")
+  ),
+  selection = "none",
+  extensions = c("Buttons"))
+
+
   ############### Custom Tab ##########################
   df_custom <- reactiveValues(
     selectedRow = 1,
