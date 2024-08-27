@@ -253,7 +253,7 @@ calculate_mutation_info <- function(metrics_data_row) {
   return(diff_positions)
 }
 ##Generate Tiering for given variant with specific cutoffs
-tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode, use_allele_specific_binding_thresholds, binding_threshold) {
+tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode, use_allele_specific_binding_thresholds, binding_threshold, percentile_threshold) {
   mt_binding <- as.numeric(variant_info["IC50 MT"])
   wt_binding <- as.numeric(variant_info["IC50 WT"])
   mt_percent <- as.numeric(variant_info["%ile MT"])
@@ -269,9 +269,8 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   trna_vaf <- as.numeric(meta_data["trna_vaf"])
   trna_cov <- as.numeric(meta_data["trna_cov"])
   percentile_filter <- FALSE
-  percentile_threshold <- NULL
-  if (!is.null(meta_data[["percentile_threshold"]])) {
-    percentile_threshold <- as.numeric(meta_data[["percentile_threshold"]])
+  if (!is.null(percentile_threshold)) {
+    percentile_threshold <- as.numeric(percentile_threshold)
     percentile_filter <- TRUE
   }
   tsl_max <- as.numeric(meta_data["maximum_transcript_support_level"])
@@ -374,7 +373,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   return("Poor")
 }
 #Determine the Tier Count for given variant with specific cutoffs
-tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode, allele_specific_binding_thresholds, use_allele_specific_binding_thresholds, binding_threshold) {
+tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode, allele_specific_binding_thresholds, use_allele_specific_binding_thresholds, binding_threshold, percentile_threshold) {
   mt_binding <- as.numeric(variant_info["IC50 MT"])
   wt_binding <- as.numeric(variant_info["IC50 WT"])
   mt_percent <- as.numeric(variant_info["%ile MT"])
@@ -390,9 +389,8 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
   trna_vaf <- as.numeric(meta_data["trna_vaf"])
   trna_cov <- as.numeric(meta_data["trna_cov"])
   percentile_filter <- FALSE
-  percentile_threshold <- NULL
-  if (!is.null(meta_data[["percentile_threshold"]])) {
-    percentile_threshold <- as.numeric(meta_data[["percentile_threshold"]])
+  if (!is.null(percentile_threshold)) {
+    percentile_threshold <- as.numeric(percentile_threshold)
     percentile_filter <- TRUE
   }
   tsl_max <- as.numeric(meta_data["maximum_transcript_support_level"])
