@@ -44,7 +44,6 @@ neofox_tab <- tabItem("neofox",
                         style = "overflow-x: scroll;font-size:100%",
                         "* indicates variable of interest designated by authors"
                         )
-                    
             ),
 
             fluidRow(
