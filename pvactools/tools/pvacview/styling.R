@@ -55,15 +55,9 @@ csscode <- HTML("
 table.dataTable tbody tr.selected td {
   box-shadow: inset 0 0 0 9999px rgba(55, 55, 55, 0.3) !important;
 }
-table.dataTable tbody tr.selected {
-  pointer-events: none
-}
 .dataTables_length {
   margin-left: 20px;
   padding-top: 6px;
-}
-[id*=\"button\"] {
-  pointer-events: auto
 }
 ")
 
