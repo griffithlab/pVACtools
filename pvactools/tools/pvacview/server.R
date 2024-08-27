@@ -1402,11 +1402,10 @@ server <- shinyServer(function(input, output, session) {
     }
     colsToDrop <- colnames(df$mainTable) %in% c("Evaluation", "Eval", "Select", "Scaled BA", "Scaled percentile", "Tier Count", "Bad TSL",
                                                 "Comments", "Gene of Interest", "Bad TSL", "Col RNA Expr", "Col RNA VAF", "Col Allele Expr",
-                                                "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos")
+                                                "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos", "Acpt", "Rej", "Rev")
     data <- df$mainTable[, !(colsToDrop)]
     col_names <- colnames(data)
-    #data <- data.frame(data, Evaluation = shinyValue("selecter_", nrow(df$mainTable), df$mainTable))
-    data <- merge(data, df$evaluations, by='ID')
+    data <- plyr::join(data, df$evaluations, by='ID')
     colnames(data) <- c(col_names, "Evaluation")
     comments <- data.frame("ID" = row.names(df$comments), Comments = df$comments[, 1])
     data <- join(data, comments)
