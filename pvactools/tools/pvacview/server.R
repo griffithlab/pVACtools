@@ -510,15 +510,6 @@ server <- shinyServer(function(input, output, session) {
     }
     HTML(paste(df$comments[selectedID(), 1]))
   })
-  observeEvent(input$page_length, {
-    if (is.null(df$mainTable)) {
-      return()
-    }
-    df$pageLength <- as.numeric(input$page_length)
-    session$sendCustomMessage("unbind-DT", "mainTable")
-    df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
-  })
   output$filesUploaded <- reactive({
     val <- !(is.null(df$mainTable) | is.null(df$metricsData))
     print(val)
@@ -635,18 +626,6 @@ server <- shinyServer(function(input, output, session) {
          " Pass: Passes the above criteria, has strong MT binding (IC50 < 500) and strong expression (Allele Expr > allele expression threshold)"
       ),
     ))
-  })
-  ##update table upon selecting to investigate each individual row
-  observeEvent(input$select_button, {
-    if (is.null(df$mainTable)) {
-      return()
-    }
-    df$selectedRow <- as.numeric(strsplit(input$select_button, "_")[[1]][2])
-    session$sendCustomMessage("unbind-DT", "mainTable")
-    df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
-    dataTableProxy("mainTable") %>%
-      selectPage((df$selectedRow - 1) %/% df$pageLength + 1)
   })
   observeEvent(input$accept_eval, {
     if (is.null(df$mainTable)) {
