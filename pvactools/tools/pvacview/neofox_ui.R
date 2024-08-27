@@ -35,7 +35,15 @@ neofox_tab <- tabItem("neofox",
         tabPanel(title = "Explore Data", value = "neofox_explore",
             fluidRow(
                 box(width = 4, solidHeader = TRUE, title = "Peptide Evaluation Overview", status = "primary",
-                    tableOutput("neofox_checked"), style = "overflow-x: scroll;font-size:100%")
+                    tableOutput("neofox_checked"), style = "overflow-x: scroll;font-size:100%"),
+                box(width = 8,
+                    title = "Add Comments for last selected variant",
+                    status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                    span("Please add/update your comments for the last selected variant: ", textOutput("neofox_last_selected")),
+                    textAreaInput("neofox_comments", label = NULL, value = ""),
+                    actionButton("neofox_comment", "Update Comment Section"),
+                    h5("Comment:"), htmlOutput("neofox_comment_text"),
+                    style = "font-size:100%")
             ),
             fluidRow(
                     box(width = 12,
@@ -49,7 +57,6 @@ neofox_tab <- tabItem("neofox",
                         "* indicates variable of interest designated by authors"
                         )
             ),
-
             fluidRow(
               box(width = 12, 
                   title = "Comparative Violin Plots",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
@@ -58,9 +65,7 @@ neofox_tab <- tabItem("neofox",
                   plotOutput(outputId = "neofox_violin_plots_row1") %>% withSpinner(color = "#8FCCFA"),
                   "* indicates variable of interest designated by authors"
                   )
-              
             ),
-            
             fluidRow(
               box(width = 12,
                   title = "Dynamic Scatter Plot", status = "primary", solidHeader = TRUE, collapsible = TRUE,

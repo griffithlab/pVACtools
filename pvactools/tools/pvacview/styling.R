@@ -59,6 +59,9 @@ table.dataTable tbody tr.selected td {
   margin-left: 20px;
   padding-top: 6px;
 }
+div #neofox_last_selected {
+  display: inline;
+}
 ")
 
 # Create the theme
