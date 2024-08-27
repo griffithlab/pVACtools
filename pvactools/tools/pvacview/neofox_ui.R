@@ -34,6 +34,10 @@ neofox_tab <- tabItem("neofox",
         ),
         tabPanel(title = "Explore Data", value = "neofox_explore",
             fluidRow(
+                box(width = 4, solidHeader = TRUE, title = "Peptide Evaluation Overview", status = "primary",
+                    tableOutput("neofox_checked"), style = "overflow-x: scroll;font-size:100%")
+            ),
+            fluidRow(
                     box(width = 12,
                         title = "Annotated Neoantigen Candidates using NeoFox",
                         status = "primary", solidHeader = TRUE, collapsible = TRUE,

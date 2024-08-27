@@ -1391,8 +1391,7 @@ server <- shinyServer(function(input, output, session) {
       return()
     }
     data <- as.data.frame(table(df$evaluations$Evaluation))
-    data$Count <- data$Freq
-    data$Freq <- NULL
+    colnames(data) <- c("Evaluation","Count")
     data
   })
   #export table display with options to download
@@ -1475,6 +1474,7 @@ server <- shinyServer(function(input, output, session) {
       }
     })
     names(mainData_neofox) <- starred_column_names
+    df_neofox$mainTable_neofox <- mainData_neofox
     
     # Add scaling columns for coloring and barplots
     # There are no checks if user uploads data without one of these columns
@@ -1491,11 +1491,22 @@ server <- shinyServer(function(input, output, session) {
     df_neofox$mainTable_neofox$`Col RNA Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaExpression"]), 0, x["*rnaExpression"])})
     df_neofox$mainTable_neofox$`Col Gene Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*imputedGeneExpression"]), 0, x["*imputedGeneExpression"])})
     df_neofox$mainTable_neofox$`Col RNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaVariantAlleleFrequency"]), 0, x["*rnaVariantAlleleFrequency"])})
-    
-    df_neofox$default_neofox_columns <- c("patientIdentifier", "gene", "mutatedXmer", "wildTypeXmer", "position", map(columns_to_star, function(x) { paste0("*", x) }))
-    df_neofox$hidden_columns <- setdiff(colnames(df_neofox$mainTable_neofox), df_neofox$default_neofox_columns)
 
-    df_neofox$mainTable_neofox <- mainData_neofox
+    len <- nrow(df_neofox$mainTable_neofox)
+    if ('Evaluation' %in% df_neofox$mainTable_neofox) {
+        setButtonStyling(df_neofox$mainTable_neofox$Evaluation)
+    } else {
+        df_neofox$mainTable_neofox["Evaluation"] = "Pending"
+    }
+    df_neofox$mainTable_neofox <- cbind(ID = rownames(df_neofox$mainTable_neofox), df_neofox$mainTable_neofox)
+    df_neofox$evaluations <- df_neofox$mainTable_neofox[c("ID", "Evaluation")]
+    df_neofox$mainTable_neofox$Evaluation <- NULL
+    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\",  this.id)')
+    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\",  this.id)')
+    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\",  this.id)')
+
+    df_neofox$default_neofox_columns <- c("patientIdentifier", "gene", "mutatedXmer", "wildTypeXmer", "position", map(columns_to_star, function(x) { paste0("*", x) }), "Acpt", "Rej", "Rev")
+    df_neofox$hidden_columns <- setdiff(colnames(df_neofox$mainTable_neofox), df_neofox$default_neofox_columns)
   })
   
   # Option 2: Demo Data
@@ -1546,9 +1557,22 @@ server <- shinyServer(function(input, output, session) {
     df_neofox$mainTable_neofox$`Col Gene Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*imputedGeneExpression"]), 0, x["*imputedGeneExpression"])})
     df_neofox$mainTable_neofox$`Col RNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaVariantAlleleFrequency"]), 0, x["*rnaVariantAlleleFrequency"])})
 
-    df_neofox$default_neofox_columns <- c("patientIdentifier", "gene", "mutatedXmer", "wildTypeXmer", "position", map(columns_to_star, function(x) { paste0("*", x) }))
+    len <- nrow(df_neofox$mainTable_neofox)
+    if ('Evaluation' %in% df_neofox$mainTable_neofox) {
+        setButtonStyling(df_neofox$mainTable_neofox$Evaluation)
+    } else {
+        df_neofox$mainTable_neofox["Evaluation"] = "Pending"
+    }
+    df_neofox$mainTable_neofox <- cbind(ID = rownames(df_neofox$mainTable_neofox), df_neofox$mainTable_neofox)
+    df_neofox$evaluations <- df_neofox$mainTable_neofox[c("ID", "Evaluation")]
+    df_neofox$mainTable_neofox$Evaluation <- NULL
+    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\",  this.id)')
+    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\",  this.id)')
+    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\",  this.id)')
+
+    df_neofox$default_neofox_columns <- c("patientIdentifier", "gene", "mutatedXmer", "wildTypeXmer", "position", map(columns_to_star, function(x) { paste0("*", x) }), "Acpt", "Rej", "Rev")
     df_neofox$hidden_columns <- setdiff(colnames(df_neofox$mainTable_neofox), df_neofox$default_neofox_columns)
-    
+
     updateTabItems(session, "neofox_tabs", "neofox_explore")
   })
   
@@ -1617,9 +1641,58 @@ server <- shinyServer(function(input, output, session) {
     }
     input$neofoxTable_rows_selected
   })
-  
+  output$neofox_last_selected <- renderText({
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    input$neofoxTable_row_selected
+  })
+  observeEvent(input$accept_neofox_eval, {
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$accept_neofox_eval, "_")[[1]][2])
+    df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Accept"
+    html <- paste0("#button-neofox-acpt_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedRow, ')'))
+  })
+  observeEvent(input$reject_neofox_eval, {
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$reject_neofox_eval, "_")[[1]][2])
+    df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Reject"
+    html <- paste0("#button-neofox-rej_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedRow, ')'))
+  })
+  observeEvent(input$review_neofox_eval, {
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$review_neofox_eval, "_")[[1]][2])
+    df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Review"
+    html <- paste0("#button-neofox-rev_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedRow, ')'))
+  })
+
+  # NeoFox evalutation overview table
+  output$neofox_checked <- renderTable({
+    if (is.null(df_neofox$evaluations)) {
+      return()
+    }
+    data <- as.data.frame(table(df_neofox$evaluations$Evaluation))
+    colnames(data) <- c("Evaluation","Count")
+    data
+  })
+
   ### NeoFox Violin Plots
-  
+
   ## Drop down to select what features to show violin plots for
   output$noefox_features_ui <- renderUI({
     df <- df_neofox$mainTable_neofox
