@@ -1446,7 +1446,7 @@ server <- shinyServer(function(input, output, session) {
   df_neofox <- reactiveValues(
     mainTable_neofox = NULL,
     binding_threshold = 500,
-    percentile_threshold = 5
+    percentile_threshold = 0.5
   )
   
   # Option 1: User uploaded
@@ -1457,6 +1457,8 @@ server <- shinyServer(function(input, output, session) {
     mainData_neofox <- mainData_neofox[-1, ]
     row.names(mainData_neofox) <- NULL
 
+    rename_lookup <- c("PRIME_bestScore_allele" = "PRIME_best_allele", "PRIME_bestScore_peptide" = "PRIME_best_peptide", "PRIME_bestScore_rank" = "PRIME_best_rank", "PRIME_bestScore_score" = "PRIME_best_score")
+    mainData_neofox <- mainData_neofox %>% rename(any_of(rename_lookup))
     mainData_neofox <- rename_with(mainData_neofox, ~ gsub("_", " ", .x, fixed = TRUE))
 
     # Columns that have been reviewed as most interesting
@@ -1491,6 +1493,13 @@ server <- shinyServer(function(input, output, session) {
     # Add scaling columns for coloring and barplots
     df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan bestAffinity affinity"]), as.numeric(x["*NetMHCpan bestAffinity affinity"]) / (df_neofox$binding_threshold))})
     df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity_WT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan bestAffinity affinityWT"]), as.numeric(x["*NetMHCpan bestAffinity affinityWT"]) / (df_neofox$binding_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCpan bestRank rank"]), as.numeric(x["*NetMHCpan bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestRank_rankWT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCpan bestRank rankWT"]), as.numeric(x["*NetMHCpan bestRank rankWT"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCIIpan_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCIIpan bestRank rank"]), as.numeric(x["*NetMHCIIpan bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCIIpan_bestRank_rankWT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCIIpan bestRank rankWT"]), as.numeric(x["*NetMHCIIpan bestRank rankWT"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled MixMHCpred_bestScore_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*MixMHCpred bestScore rank"]), as.numeric(x["*MixMHCpred bestScore rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled MixMHC2pred_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*MixMHC2pred bestRank rank"]), as.numeric(x["*MixMHC2pred bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled PRIME_bestScore_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*PRIME bestScore rank"]), as.numeric(x["*PRIME bestScore rank"]) / (df_neofox$percentile_threshold))})
     # DAI is a measure of agrotopicity - so we want a a high DAI where the MT BA is low and the WT is BA is high, not sure if this is the correct scale
     df_neofox$mainTable_neofox$`Scaled DAI_MHCI_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(1), as.numeric(x["*DAI MHCI bestAffinity"]), as.numeric(x["*DAI MHCI bestAffinity"]) / 10000)})
     
@@ -1534,6 +1543,8 @@ server <- shinyServer(function(input, output, session) {
     row.names(mainData_neofox) <- NULL
     mainData_neofox <- type.convert(mainData_neofox, as.is = TRUE)
 
+    rename_lookup <- c("PRIME_bestScore_allele" = "PRIME_best_allele", "PRIME_bestScore_peptide" = "PRIME_best_peptide", "PRIME_bestScore_rank" = "PRIME_best_rank", "PRIME_bestScore_score" = "PRIME_best_score")
+    mainData_neofox <- mainData_neofox %>% rename(any_of(rename_lookup))
     mainData_neofox <- rename_with(mainData_neofox, ~ gsub("_", " ", .x, fixed = TRUE))
 
     # Columns that have been reviewed as most interesting
@@ -1564,6 +1575,13 @@ server <- shinyServer(function(input, output, session) {
     # Add scaling columns for coloring and barplots
     df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan bestAffinity affinity"]), as.numeric(x["*NetMHCpan bestAffinity affinity"]) / (df_neofox$binding_threshold))})
     df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity_WT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan bestAffinity affinityWT"]), as.numeric(x["*NetMHCpan bestAffinity affinityWT"]) / (df_neofox$binding_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCpan bestRank rank"]), as.numeric(x["*NetMHCpan bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestRank_rankWT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCpan bestRank rankWT"]), as.numeric(x["*NetMHCpan bestRank rankWT"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCIIpan_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCIIpan bestRank rank"]), as.numeric(x["*NetMHCIIpan bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCIIpan_bestRank_rankWT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCIIpan bestRank rankWT"]), as.numeric(x["*NetMHCIIpan bestRank rankWT"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled MixMHCpred_bestScore_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*MixMHCpred bestScore rank"]), as.numeric(x["*MixMHCpred bestScore rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled MixMHC2pred_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*MixMHC2pred bestRank rank"]), as.numeric(x["*MixMHC2pred bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled PRIME_bestScore_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*PRIME bestScore rank"]), as.numeric(x["*PRIME bestScore rank"]) / (df_neofox$percentile_threshold))})
     # DAI is a measure of agrotopicity - so we want a a high DAI where the MT BA is low and the WT is BA is high, not sure if this is the correct scale
     df_neofox$mainTable_neofox$`Scaled DAI_MHCI_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(1), as.numeric(x["*DAI MHCI bestAffinity"]), as.numeric(x["*DAI MHCI bestAffinity"]) / 10000)})
     
@@ -1651,6 +1669,20 @@ server <- shinyServer(function(input, output, session) {
             %>% formatStyle("*NetMHCpan bestAffinity affinityWT", "Scaled NetMHCpan_bestAffinity_WT", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
                                                                                                                            c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
                       , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
+            %>% formatStyle("*NetMHCpan bestRank rank", "Scaled NetMHCpan_bestRank_rank",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*NetMHCpan bestRank rankWT", "Scaled NetMHCpan_bestRank_rankWT",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*NetMHCIIpan bestRank rank", "Scaled NetMHCIIpan_bestRank_rank",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*NetMHCIIpan bestRank rankWT", "Scaled NetMHCIIpan_bestRank_rankWT",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*MixMHCpred bestScore rank", "Scaled MixMHCpred_bestScore_rank",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*MixMHC2pred bestRank rank", "Scaled MixMHC2pred_bestRank_rank",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*PRIME bestScore rank", "Scaled PRIME_bestScore_rank",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
             %>% formatStyle("*DAI MHCI bestAffinity", "Scaled DAI_MHCI_bestAffinity", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
                                                                                                                            c("#FF9999", "#F1C664", "#F0CD5B", "#F3DD6F", "#F3E770", "#F3F171", "#3F9750", "#47AA5A", "#4FBD65", "#58D16F", "#60E47A", "#68F784"))
                       , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
