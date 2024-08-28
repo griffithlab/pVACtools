@@ -117,6 +117,7 @@ server <- shinyServer(function(input, output, session) {
     df$evaluations <- mainData[c("ID", "Evaluation")]
     df$mainTable <- mainData
     df$metricsData <- NULL
+    df$lastSelectedRow <- 1
   })
   #Option 1: User uploaded metrics file
   observeEvent(input$metricsDataInput, {
@@ -280,6 +281,7 @@ server <- shinyServer(function(input, output, session) {
          df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
        }
        df$mainTable$`Has Prob Pos` <- apply(df$mainTable, 1, function(x) {ifelse(x["Prob Pos"] != "None", TRUE, FALSE)})
+       df$lastSelectedRow <- 1
       updateTabItems(session, "tabs", "explore")
       incProgress(0.1)
      })
@@ -600,6 +602,13 @@ server <- shinyServer(function(input, output, session) {
     %>% formatStyle(c("Ref Match"), "Ref Match", fontWeight = styleEqual(c("True"), c("bold")), border = styleEqual(c("True"), c("2px solid red")))
     %>% formatStyle("Best Peptide", fontFamily="monospace")
     , server = FALSE)
+  #capture last selected row so that it still displays data from that row when
+  #a row is deselected (instead of switching back to the first row)
+  observe({
+      if (!is.null(df$mainTable) && !is.null(input$mainTable_rows_selected)) {
+        df$lastSelectedRow <- input$mainTable_rows_selected
+      }
+  })
   #help menu for main table
   observeEvent(input$help, {
     showModal(modalDialog(
@@ -671,13 +680,16 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)) {
       return()
     }
-    input$mainTable_rows_selected
-    #df$selectedRow
+    if (is.null(input$mainTable_rows_selected)) {
+        df$lastSelectedRow
+    } else {
+        input$mainTable_rows_selected
+    }
   })
   ##selected id update
   selectedID <- reactive({
     if (is.null(input$mainTable_rows_selected)) {
-      df$mainTable$ID[1]
+      df$mainTable$ID[df$lastSelectedRow]
     }else {
       df$mainTable$ID[input$mainTable_rows_selected]
     }
