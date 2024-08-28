@@ -525,7 +525,6 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
-      #datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments")],
       datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Comments")],
                 escape = FALSE,
                 callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)),
@@ -555,7 +554,7 @@ server <- shinyServer(function(input, output, session) {
                                  paste("$(this.api().table().header()).css({'font-size': '", "10pt", "'});"),
                                  "}")
                 ),
-                selection = "single",
+                selection = list(mode = "single", selected = c(1)),
                 extensions = c("Buttons")
       )
     }
