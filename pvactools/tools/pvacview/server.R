@@ -1743,8 +1743,8 @@ server <- shinyServer(function(input, output, session) {
     sorted_features <- features[order(!grepl("^\\*", features))]
 
 
-    default_selection <- c("*IEDB_Immunogenicity_MHCI", "*IEDB_Immunogenicity_MHCII", "*PHBR_I",
-      "*MixMHCpred_bestScore_score", "*MixMHCpred_bestScore_rank", "*MixMHC2pred_bestRank_peptide")
+    default_selection <- c("*IEDB Immunogenicity MHCI", "*IEDB Immunogenicity MHCII", "*PHBR I",
+      "*MixMHCpred bestScore score", "*MixMHCpred bestScore rank", "*MixMHC2pred bestRank peptide")
 
     pickerInput(inputId = "neofox_features",
                 label = "Plots to Display",
