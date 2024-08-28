@@ -1746,12 +1746,14 @@ server <- shinyServer(function(input, output, session) {
     data
   })
   # NeoFox comment text of last selected row
-  output$neofox_comment_text <- renderUI({
+  output$neofox_comment_text <- renderTable({
     if (is.null(df_neofox$mainTable_neofox) || is.null(input$neofoxTable_rows_selected)) {
-      return(HTML("N/A"))
+      return(HTML("No variants selected"))
     }
-    selected <- input$neofoxTable_rows_selected[length(input$neofoxTable_rows_selected)]
-    HTML(paste(df_neofox$comments[selected, 1]))
+    data <- filter(df_neofox$comments, row.names(df_neofox$comments) %in% input$neofoxTable_rows_selected)
+    colnames(data) <- c("Comment")
+    data$ID <- row.names(data)
+    data[c("ID", "Comment")]
   })
   ## Update NeoFox comments section based on selected row
   observeEvent(input$neofox_comment, {
@@ -1759,8 +1761,9 @@ server <- shinyServer(function(input, output, session) {
       return()
     }
     updateTextAreaInput(session, "neofox_comments", value = "")
-    selected <- input$neofoxTable_rows_selected[length(input$neofoxTable_rows_selected)]
-    df_neofox$comments[selected, 1] <- input$neofox_comments
+    for (i in input$neofoxTable_rows_selected) {
+      df_neofox$comments[i, 1] <- input$neofox_comments
+    }
   })
 
   ### NeoFox Violin Plots
