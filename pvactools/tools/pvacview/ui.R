@@ -50,7 +50,7 @@ upload_tab <- tabItem(
                     and the <b>metrics json file</b> contains additional transcript and peptide level information.</h5>"),
              h5("You have the option of uploading an additional file to supplement the data you are exploring. This includes: additional class I or II information and
                     a gene-of-interest tsv file."),
-             actionButton("help_doc_upload", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#upload', '_blank')"),
+             actionButton("help_doc_upload", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#id1', '_blank')"),
              h4("Step 2: Exploring your data", style = "font-weight: bold"),
              HTML("<h5>To explore the different aspects of your neoantigen candidates, you will need to navigate to the <b>Aggregate Report of Best Candidate by Variant</b> on the visualize and explore tab.
                     For detailed variant, transcript and peptide information for each candidate listed, you will need to click on the <b>Investigate button</b> for the specific row of interest.
@@ -58,7 +58,7 @@ upload_tab <- tabItem(
              h5("By hovering over each column header, you will be able to see a brief description of the corresponding column and for more details, you can click on the tooltip located at the top right of the aggregate report table.", br(),
                 "After investigating each candidate, you can label the candidate using the dropdown menu located at the second to last column of the table. Choices include:
                     Accept, Reject or Review."),
-             actionButton("help_doc_explore", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore', '_blank')"),
+             actionButton("help_doc_explore", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#visualize-and-explore', '_blank')"),
              h4("Step 3: Exporting your data", style = "font-weight: bold"),
              h5("When you have either finished ranking your neoantigen candidates or need to pause and would like to save your current evaluations, 
                     you can export the current main aggregate report using the export page."),
@@ -66,7 +66,7 @@ upload_tab <- tabItem(
                     The excel format is user-friendly for downstream visualization and manipulation. However, if you plan on to continuing editing the aggregate report 
                     and would like to load it back in pVACview with the previous evaluations preloaded, you will <b>need</b> to download the file in a <b>tsv format</b>. 
                     This serves as a way to save your progress as your evaluations are cleared upon closing or refreshing the pVACview app.</h5>"),
-             actionButton("help_doc_export", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#export', '_blank')")
+             actionButton("help_doc_export", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#export', '_blank')")
            )
     ),
   )
@@ -100,7 +100,7 @@ explore_tab <- tabItem(
                     uiOutput("percentile_threshold_ui"),
                     uiOutput("dna_cutoff_ui"),
                     uiOutput("allele_expr_ui"),
-                    h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
+                    h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
                     actionButton("submit", "Recalculate Tiering with new parameters"),
                     style = "overflow-x: scroll;font-size:100%"),
                 style = "padding:0px;"
