@@ -107,7 +107,7 @@ server <- shinyServer(function(input, output, session) {
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
     setButtonStyling(mainData$Evaluation)
-    mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onClick(\"accept_eval\",  this.id, {priority: "event"})')
+    mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})')
     mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})')
     mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})')
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
