@@ -1845,7 +1845,7 @@ server <- shinyServer(function(input, output, session) {
     features <- names(df)[sapply(df, is.numeric)]
     sorted_features <- features[order(!grepl("^\\*", features))]
 
-    default_selection <- "*NetMHCpan_bestAffinity_affinity"
+    default_selection <- "*NetMHCpan bestAffinity affinity"
 
     pickerInput(inputId = "xvrbl",
                 label = "X-Axis Variable",
@@ -1872,7 +1872,7 @@ server <- shinyServer(function(input, output, session) {
 
     features <- names(df)[sapply(df, is.numeric)]
     sorted_features <- features[order(!grepl("^\\*", features))]
-    default_selection <- "*NetMHCpan_bestAffinity_affinityWT"
+    default_selection <- "*NetMHCpan bestAffinity affinityWT"
 
     pickerInput(inputId = "yvrbl",
                 label = "Y-Axis Variable",
@@ -1995,7 +1995,7 @@ server <- shinyServer(function(input, output, session) {
     features <- names(df)[sapply(df, is.numeric)]
     sorted_features <- features[order(!grepl("^\\*", features))]
 
-    default_selection <- "*Tcell_predictor"
+    default_selection <- "*Tcell predictor"
     pickerInput(inputId = "color_scatter",
                 label = "Color",
                 choices = sorted_features,
