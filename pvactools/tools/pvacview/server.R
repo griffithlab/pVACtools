@@ -107,9 +107,9 @@ server <- shinyServer(function(input, output, session) {
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
     setButtonStyling(mainData$Evaluation)
-    mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})')
-    mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})')
-    mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})')
+    mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
     mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
@@ -198,9 +198,9 @@ server <- shinyServer(function(input, output, session) {
        mainData <- mainData[-1, ]
        row.names(mainData) <- NULL
        setButtonStyling(mainData$Evaluation)
-       mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})')
-       mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})')
-       mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})')
+       mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+       mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+       mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
        mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
        mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
        mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
@@ -605,7 +605,7 @@ server <- shinyServer(function(input, output, session) {
   #capture last selected row so that it still displays data from that row when
   #a row is deselected (instead of switching back to the first row)
   observe({
-      if (!is.null(df$mainTable) && !is.null(input$mainTable_rows_selected)) {
+      if (!is.null(df$mainTable) && !is.null(input$mainTable_rows_selected) && df$lastSelectedRow != input$mainTable_rows_selected) {
         df$lastSelectedRow <- input$mainTable_rows_selected
       }
   })
@@ -1528,9 +1528,9 @@ server <- shinyServer(function(input, output, session) {
     df_neofox$mainTable_neofox <- cbind(ID = rownames(df_neofox$mainTable_neofox), df_neofox$mainTable_neofox)
     df_neofox$evaluations <- df_neofox$mainTable_neofox[c("ID", "Evaluation")]
     df_neofox$mainTable_neofox$Evaluation <- NULL
-    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\", this.id, {priority: "event"})')
-    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\", this.id, {priority: "event"})')
-    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\", this.id, {priority: "event"})')
+    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
 
     if ("Comments" %in% colnames(df_neofox$mainTable_neofox)) {
       df_neofox$comments <- data.frame(data = df_neofox$mainTable_neofox$`Comments`, nrow = nrow(df_neofox$mainTable_neofox), ncol = 1)
@@ -1610,9 +1610,9 @@ server <- shinyServer(function(input, output, session) {
     df_neofox$mainTable_neofox <- cbind(ID = rownames(df_neofox$mainTable_neofox), df_neofox$mainTable_neofox)
     df_neofox$evaluations <- df_neofox$mainTable_neofox[c("ID", "Evaluation")]
     df_neofox$mainTable_neofox$Evaluation <- NULL
-    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\", this.id, {priority: "event"})')
-    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\", this.id, {priority: "event"})')
-    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\", this.id, {priority: "event"})')
+    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
 
     if ("Comments" %in% colnames(df_neofox$mainTable_neofox)) {
       df_neofox$comments <- data.frame(data = df_neofox$mainTable_neofox$`Comments`, nrow = nrow(df_neofox$mainTable_neofox), ncol = 1)
