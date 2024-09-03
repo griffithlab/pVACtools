@@ -696,28 +696,28 @@ server <- shinyServer(function(input, output, session) {
   })
   output$selectedPeptide <- reactive({
     if (is.null(input$mainTable_rows_selected)) {
-      df$mainTable$`Best Peptide`[1]
+      df$mainTable$`Best Peptide`[df$lastSelectedRow]
     }else {
       df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
     }
   })
   output$selectedAAChange <- reactive({
     if (is.null(input$mainTable_rows_selected)) {
-      df$mainTable$`AA Change`[1]
+      df$mainTable$`AA Change`[df$lastSelectedRow]
     }else {
       df$mainTable$`AA Change`[input$mainTable_rows_selected]
     }
   })
   output$selectedPos <- reactive({
     if (is.null(input$mainTable_rows_selected)) {
-      df$mainTable$`Pos`[1]
+      df$mainTable$`Pos`[df$lastSelectedRow]
     }else {
       df$mainTable$`Pos`[input$mainTable_rows_selected]
     }
   })
   output$selectedGene <- reactive({
     if (is.null(input$mainTable_rows_selected)) {
-      df$mainTable$`Gene`[1]
+      df$mainTable$`Gene`[df$lastSelectedRow]
     }else {
       df$mainTable$`Gene`[input$mainTable_rows_selected]
     }
@@ -1286,15 +1286,15 @@ server <- shinyServer(function(input, output, session) {
   ##Best Peptide with mutated positions marked
   output$referenceMatchPlot <- renderPlot({
     withProgress(message = "Loading Reference Match Best Peptide Plot", value = 0, {
-      selectedPosition <- if (is.null(df$selectedRow)) {
-        df$mainTable$`Pos`[1]
+      selectedPosition <- if (is.null(input$mainTable_rows_selected)) {
+        df$mainTable$`Pos`[df$lastSelectedRow]
       }else {
-        df$mainTable$`Pos`[df$selectedRow]
+        df$mainTable$`Pos`[input$mainTable_rows_selected]
       }
-      selectedPeptide <- if (is.null(df$selectedRow)) {
-        df$mainTable$`Best Peptide`[1]
+      selectedPeptide <- if (is.null(input$mainTable_rows_selected)) {
+        df$mainTable$`Best Peptide`[df$lastSelectedRow]
       }else {
-        df$mainTable$`Best Peptide`[df$selectedRow]
+        df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
       }
       #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
       mutation_pos <- range_str_to_seq(selectedPosition)
@@ -1323,25 +1323,25 @@ server <- shinyServer(function(input, output, session) {
       print(p2)
     })
   }, height = 20, width = function(){
-    selectedPeptide <- if (is.null(df$selectedRow)) {
+    selectedPeptide <- if (is.null(df$lastSelectedRow)) {
       df$mainTable$`Best Peptide`[1]
     }else {
-      df$mainTable$`Best Peptide`[df$selectedRow]
+      df$mainTable$`Best Peptide`[df$lastSelectedRow]
     }
     nchar(selectedPeptide) * 20
   } )
   ##Best Peptide with best peptide highlighted and mutated positions marked
   output$referenceMatchQueryPlot <- renderPlot({
     withProgress(message = "Loading Reference Match Query Peptide Plot", value = 0, {
-      selectedPosition <- if (is.null(df$selectedRow)) {
-        df$mainTable$`Pos`[1]
+      selectedPosition <- if (is.null(input$mainTable_rows_selected)) {
+        df$mainTable$`Pos`[df$lastSelectedRow]
       }else {
-        df$mainTable$`Pos`[df$selectedRow]
+        df$mainTable$`Pos`[input$mainTable_rows_selected]
       }
-      selectedPeptide <- if (is.null(df$selectedRow)) {
-        df$mainTable$`Best Peptide`[1]
+      selectedPeptide <- if (is.null(input$mainTable_rows_selected)) {
+        df$mainTable$`Best Peptide`[df$lastSelectedRow]
       }else {
-        df$mainTable$`Best Peptide`[df$selectedRow]
+        df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
       }
       mutation_pos <- range_str_to_seq(selectedPosition)
       #remove leading amino acids from the selectedPeptide that don't occur in
