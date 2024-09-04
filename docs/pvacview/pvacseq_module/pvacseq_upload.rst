@@ -10,8 +10,8 @@
 .. role:: large
 .. role:: bold
 
-Upload
----------------
+Usage
+-----
 
 The pVACview user interface has four sections:
 

@@ -4,8 +4,8 @@
 
 .. _custom_upload:
 
-Custom Upload
--------------
+Usage
+-----
 
 Upload
 ______

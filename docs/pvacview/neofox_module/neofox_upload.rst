@@ -4,8 +4,8 @@
 
 .. _neofox_upload:
 
-NeoFox Upload
----------------
+Usage
+-----
 
 Upload
 ______
@@ -19,7 +19,7 @@ The module expects all NeoFox annotated features to be in in the file but can al
 .. figure:: ../../images/screenshots/pvacview-neofox-upload.png
     :width: 1000px
     :align: right
-    :alt: pVACview Upload
+    :alt: Screenshot of NeoFox module upload interface
     :figclass: align-left
 
 
@@ -34,7 +34,7 @@ Upon successfully uploading the correct data file, users can now explore the dif
 .. figure:: ../../images/screenshots/pvacview-neofox-maintable.png
     :width: 1000px
     :align: right
-    :alt: pVACview Upload
+    :alt: Screenshot of NeoFox module annotated neoantigen candidates table
     :figclass: align-left
 
 There are three features that can be used to explore data:
@@ -42,6 +42,10 @@ There are three features that can be used to explore data:
 - **Annotated Neoantigen Candidates Table**
 
   - Main table showcasing all candidates
+  - Pre-selected columns of interest (denoted by an asterisk)
+  - Colored heatmap and horizontal barplot cell backgrounds help quickly interpret the value of expression, VAF,
+    binding affinity and rank columns
+  - Evaluate candidates as accepted, rejected, or requiring further review
 
 - **Comparative Violin Plots**
 
@@ -64,7 +68,7 @@ To investigate different candidates simple click one or more row from the **Anno
 .. figure:: ../../images/screenshots/pvacview-neofox-violinplots_selected.png
     :width: 1000px
     :align: right
-    :alt: pVACview Upload
+    :alt: Screenshot of NeoFox module violin plot
     :figclass: align-left
 
 Users can explore all candidates together using the **Dynamic Scatter Plot**. To identify a candidates of interest from the scatter plot, simple mouse-over the point of interest for the specific information about that candidate to be shown.
@@ -72,5 +76,35 @@ Users can explore all candidates together using the **Dynamic Scatter Plot**. To
 .. figure:: ../../images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png
     :width: 1000px
     :align: right
-    :alt: pVACview Upload
+    :alt: Screenshot NeoFox module dynamic scatter plot
+    :figclass: align-left
+
+Evaluating and Commenting
+*************************
+
+The evaluation buttons at the right of each candidate row can be used to capture the final decision on whether to
+accept, reject, or further review the candidate. The total counts for each type of evaluation are displayed in the
+"Peptide Evaluation Overview" panel.
+
+Users are able to leave a comment on all selected candidates by using the form in the panel on the top right of the
+page. This panel also displays the comments left on each selected candidate. Both the selected evaluation and
+comment are included in the exported table."),
+
+.. figure:: ../../images/screenshots/pvacview-neofox-evaluation.png
+    :width: 1000px
+    :align: right
+    :alt: Screenshot of NeoFox module Evaluation and Comment functionality
+    :figclass: align-left
+
+Export
+______
+
+After investigating and evaluating each candidate, users can export the main table, including the final evaluation
+and comment for each candidate. After browsing to the "Export Data" tab, clicking the "Download as TSV" or "Download
+as excel" button will download the table in the desired file format."
+
+.. figure:: ../../images/screenshots/pvacview-neofox-export.png
+    :width: 1000px
+    :align: right
+    :alt: Screenshot of NeoFox module export interface
     :figclass: align-left
