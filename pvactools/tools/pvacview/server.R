@@ -648,8 +648,8 @@ server <- shinyServer(function(input, output, session) {
     df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Accept"
     html <- paste0("#button-acpt_", selectedRow ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'))
-    removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'), multiple = TRUE)
   })
   observeEvent(input$reject_eval, {
     if (is.null(df$mainTable)) {
@@ -660,8 +660,8 @@ server <- shinyServer(function(input, output, session) {
     df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Reject"
     html <- paste0("#button-rej_", selectedRow ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'))
-    removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'), multiple = TRUE)
   })
   observeEvent(input$review_eval, {
     if (is.null(df$mainTable)) {
@@ -672,8 +672,8 @@ server <- shinyServer(function(input, output, session) {
     df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Review"
     html <- paste0("#button-rev_", selectedRow ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'))
-    removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'), multiple = TRUE)
   })
   ##selected row text box
   output$selected <- renderText({
@@ -1721,8 +1721,8 @@ server <- shinyServer(function(input, output, session) {
     df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Accept"
     html <- paste0("#button-neofox-acpt_", selectedRow ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedRow, ')'))
-    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedRow, ')'), multiple = TRUE)
   })
   observeEvent(input$reject_neofox_eval, {
     if (is.null(df_neofox$mainTable_neofox)) {
@@ -1732,8 +1732,8 @@ server <- shinyServer(function(input, output, session) {
     df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Reject"
     html <- paste0("#button-neofox-rej_", selectedRow ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedRow, ')'))
-    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedRow, ')'), multiple = TRUE)
   })
   observeEvent(input$review_neofox_eval, {
     if (is.null(df_neofox$mainTable_neofox)) {
@@ -1743,8 +1743,8 @@ server <- shinyServer(function(input, output, session) {
     df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Review"
     html <- paste0("#button-neofox-rev_", selectedRow ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedRow, ')'))
-    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedRow, ')'))
+    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedRow, ')'), multiple = TRUE)
   })
 
   # NeoFox evalutation overview table
