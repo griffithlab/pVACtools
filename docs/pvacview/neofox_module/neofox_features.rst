@@ -12,12 +12,19 @@ _____________________________________
 
 The **Annotated Neoantigen Candidates** table is generated as output from NeoFox and includes many annotations based on published neoantigen features.
 Users can page through the candidates, sort by any feature, and select one or more candidates for further investgation. We have marked the
-features we find most informative with an asterisk.
+features we find most informative with an asterisk. These columns are selected by default but additional columns can
+be selected using the "Column Visibility" dropdown.
+
+Colored heatmap cell backgrounds on binding affinity and rank columns indicate where the value falls in comparison
+to the default 500 nM binding affinity and 0.5 percentile thresholds, respectively. Green background colors indicate
+a value below the threshold while yellow to red colors indicate a progressively higher value above the threshold.
+Horizontal barplot backgrounds on the expression and VAF columns reflect how close the values are to the "ideal"
+values of 50 and 1, respectively.
 
 .. figure:: ../../images/screenshots/pvacview-neofox-maintable.png
     :width: 1000px
     :align: right
-    :alt: pVACview Upload
+    :alt: Screenshot of NeoFox module annotated neoantigen candidates table
     :figclass: align-left
 
 Comparative Violin Plots
@@ -29,7 +36,8 @@ five features which we found informative.
 
 .. figure:: ../../images/screenshots/pvacview-neofox-violin-two.png
             :width: 1000px
-            :align: left
+            :align: right
+            :alt: Screenshot of NeoFox module violin plots
             :figclass: align-left
 
 Dynamic Scatter Plot
@@ -44,7 +52,8 @@ by using the camera icon at the top right corner of the plot.
 
 .. figure:: ../../images/screenshots/pvacview-neofox-dynamic-scatter.png
             :width: 1000px
-            :align: left
+            :align: right
+            :alt: Screenshot of NeoFox module dynamic scatter plots
             :figclass: align-left
 
 
