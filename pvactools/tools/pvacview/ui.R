@@ -650,18 +650,25 @@ tutorial_tab <- tabItem("tutorial",
         The module expects all all NeoFox annotated features to be in in the file and can handle input with other annotations
         you might append to the neoantigen candidates."
       ),
-      img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-neofox-table-violinplot.png?raw=true", align = "center", width = "1500px"),
+      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-maintable.png?raw=true", align = "center", width = "1500px"),
       h4("Features", style = "font-weight: bold; text-decoration: underline;"),
       h5("Annotated Neoantigen Table", style = "font-weight: bold;"),
       p("The annotated neoantigen table is generated as output from NeoFox and includes many annotations based on published neoantigen features. 
         You can page through the candidates, sort by any feature, and select one or more candidates for further investgation. We have marked the 
-        features we find most informative with an asterick. "
+        features we find most informative with an asterisk. These columns are selected by default but additional columns can be selected using
+        the \"Column Visibility\" dropdown."
+      ),
+      p("Colored heatmap cell backgrounds on binding affinity and rank columns indicate where the value falls in comparison to the default 500 nM
+        binding affinity and 0.5 percentile thresholds, respectively. Green background colors indicate a value below the threshold while yellow to
+        red colors indicate a progressively higher value above the threshold. Horizontal barplot backgrounds on the expression and VAF columns
+        reflect how close the values are to the \"ideal\" values of 50 and 1, respectively."
       ),
       h5("Comparative Violin Plots", style = "font-weight: bold;"),
       p("You can understand how selected candidates relate to the the rest of the dataset using the comparative violin plots. You can select as many candidates 
         as you would like which will then be highlighted in red in the violin plots. You can also select up to six features to view at a time. We have pre-selected
         five features which we found informative. "
       ),
+      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-table-violinplot.png?raw=true", align = "center", width = "1500px"),
       h5("Dynamic Scatter Plot", style = "font-weight: bold;"),
       p("You can also further investigate the data using the dynamic scatter plot where you can choose any feature to be the X-axis, Y-axis,
         color, or size variable. The X and Y scale can be transformed and a range of values subsetted. The color represents the minimum
@@ -670,7 +677,20 @@ tutorial_tab <- tabItem("tutorial",
       p("To view information about different points on the plot simply mouse over individual points. You can also export the current scatter plot 
         by using the camera icon at the top right corner of the plot."
       ),
-        img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png?raw=true", align = "center", width = "1500px")
+      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png?raw=true", align = "center", width = "1500px"),
+      h5("Evaluation and Commenting", style = "font-weight: bold;"),
+      p("The evaluation buttons at the right of each candidate row can be used to capture the final decision on whether to accept, reject, or 
+        further review the candidate. The total counts for each type of evaluation are displayed in the \"Peptide Evaluation Overview\" panel."
+      ),
+      p("You are able to leave a comment on all selected candidates by using the form in the panel on the top right of the page. This panel also displays
+        the comments left on each selected candidate. Both the selected evaluation and comment are included in the exported table."),
+      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-evaluation.png?raw=true", align = "center", width = "1500px"),
+      h5("Exporting", style = "font-weight: bold;"),
+      p("After investigating and evaluating your candidates, you can export the main table, including the final evaluation and comment for each candidate.
+        After browsing to the \"Export Data\" tab, click the \"Download as TSV\" or \"Download as excel\" button to download the table in your desired
+        file format."
+      ),
+      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-export.png?raw=true", align = "center", width = "1500px")
     ),
     tabPanel("Custom Module",
         fluidRow(
