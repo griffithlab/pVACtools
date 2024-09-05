@@ -131,8 +131,8 @@ def main(args_input = sys.argv[1:]):
     base_output_dir = os.path.abspath(args.output_dir)
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = pvactools.lib.run_utils.split_algorithms(args.prediction_algorithms)
-    (class_i_alleles, class_ii_alleles, species) = pvactools.lib.run_utils.split_alleles(args.allele)
-    class_ii_alleles = pvactools.lib.run_utils.combine_class_ii_alleles(class_ii_alleles)
+    alleles = pvactools.lib.run_utils.combine_class_ii_alleles(args.allele)
+    (class_i_alleles, class_ii_alleles, species) = pvactools.lib.run_utils.split_alleles(alleles)
 
     shared_arguments = {
         'input_file_type'           : 'fasta',
