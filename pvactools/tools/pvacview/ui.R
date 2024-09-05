@@ -224,7 +224,7 @@ explore_tab <- tabItem(
                         fluidRow(
                             column(width = 6,
                                    div(style = 'overflow-y:scroll;height: 500px;',
-                                       h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
+                                       h4("Allele specific anchor prediction heatmap for top 15 candidates in peptide table."),
                                        h5("HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
                                           " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
                                        plotOutput(outputId = "peptideFigureLegend", height = "50px"),
