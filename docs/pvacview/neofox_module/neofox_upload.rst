@@ -88,7 +88,7 @@ accept, reject, or further review the candidate. The total counts for each type 
 
 Users are able to leave a comment on all selected candidates by using the form in the panel on the top right of the
 page. This panel also displays the comments left on each selected candidate. Both the selected evaluation and
-comment are included in the exported table."),
+comment are included in the exported table.
 
 .. figure:: ../../images/screenshots/pvacview-neofox-evaluation.png
     :width: 1000px
