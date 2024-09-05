@@ -434,8 +434,8 @@ tutorial_tab <- tabItem("tutorial",
                    "The Hits table will display the peptides that match the query sequence and the genes, transcripts, and Hit IDs of the found matches.")
           ),
           column(width = 9,
-                 img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Reference_Match.png",
-                     align = "center", height = "300px", width = "1200px"),
+                 img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Reference_Match.png",
+                     align = "center", width = "1200px"),
           )
         )
     ),
