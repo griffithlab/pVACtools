@@ -58,44 +58,34 @@ New in Release |release|
 
 This is a minor feature release. It adds the following features:
 
-- Add a new helper command ``pvacseq|pvacfuse|pvacbind|pvacvector valid_algorithms``
-  by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1108
-- When running the ``pvacseq generate_protein_fasta`` command with the ``--phased-proximal-variants-vcf``
-  argument, output the intermediate ``proximal_variants.tsv`` file by @evelyn-schmidt
-  in https://github.com/griffithlab/pVACtools/pull/1091
-- In pVACview, clear the comment text input box after saving the comment by @ldhtnp
-  in https://github.com/griffithlab/pVACtools/pull/1113
-- Add support for mouse allele anchor positions by @ldhtnp in
-  https://github.com/griffithlab/pVACtools/pull/1110
-- Skip variants where VEP didn't predict an amino acid change by @susannasiebert
-  in https://github.com/griffithlab/pVACtools/pull/1121
-- Update the ordering of the fasta file output of the ``pvacseq|pvacfuse generate_protein_fasta``
-  command when running with the ``--input-tsv`` argument so that the order of the fasta sequences
-  is consistent with the order of the neoantigen candidates in the input TSV by @mhoang22 in
-  https://github.com/griffithlab/pVACtools/pull/1002
-- Updat the ``pvacfuse generate_protein_fasta`` command to allow aggregated TSVs as an input TSV
-  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1134
-- Update pVACview to display the anchor positions currently applied to the data by @susannasiebert
-  in https://github.com/griffithlab/pVACtools/pull/1114
+- Various updates to the pVACview main interface:
+
+  - Users can no select a row to investigate by clicking on the row
+  - Users are now able to select an evaluation for a candidate by clicking on
+    one of three buttons on the right of the candidate's row.
+
+- Various updates to the pVACview NeoFox interface:
+
+  - By default, only a subset of NeoFox columns will be shown in order to
+    reduce the width of the table. Additional columns can be enabled by
+    selecting them in the "Column visibility" dropdown.
+  - We have added heatmap cell backgrounds to IC50 binding affinity and rank
+    columns.
+  - We have added horizontal barplot background to VAF and expression columns.
+  - Users are now able to select an evaluation for each candidate.
+  - Users are now able to leave a comment on selected candidates.
+  - The NeoFox table, including the selected evaluations and comments, can now
+    be exported in TSV and excel format.
+
+by @susannasiebert and @evelyn-schmidt in https://github.com/griffithlab/pVACtools/pull/1137
 
 This release also fixes the following bug(s):
 
-- Handle invalid pVACfuse characters by trimming the sequence instead of skipping it. The previous
-  implementation would lead to missing sequences in certain downstream steps, resulting in errors.
-  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1130
-- Add new pVACview R files to the list of files getting copied into the pVACseq output folder.
-  These files were previsouly not copied in the the results folder, leading to error when running
-  the ``pvacview run`` commands on a pVACseq output directory. by @susannasiebert in
-  https://github.com/griffithlab/pVACtools/pull/1126
-- Remove single DP and DQ alpha and beta chain alleles from the list of supported alleles in MHCnuggetsII.
-  This is because those alleles need to be defined as a pair of alpha- and beta-chains in order to be
-  meaningful. Also remove DRA alleles from the same list since the DR locus is defined only by the beta
-  chain because functional variation in mature DRA gene products is absent. by @susannasiebert in
-  https://github.com/griffithlab/pVACtools/pull/1133
-- Fix errors in the rounding of the min and max values of the sliders in the custom pVACview module by
-  @evelyn-schmidt in https://github.com/griffithlab/pVACtools/pull/1116
-- Remove unused code in the Frameshift.pm VEP plugin that causes errors with certain types of variants
-  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1122
+- A previous change would no longer allow standalone alpha/beta chain DP and DQ alleles. This change
+  would filter out such alleles before trying to combine them into valid
+  alpha-beta-chain pairs. This update once again enables automatic combination
+  of DP and DQ alleles in to alpha and beta chain pairs.
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1139
 
 Past release notes can be found on our :ref:`releases` page.
 

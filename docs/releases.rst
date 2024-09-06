@@ -4,6 +4,7 @@ Release Notes
 =============
 
 .. toctree::
+   :maxdepth: 1
    :glob:
 
    releases/1_0
@@ -19,3 +20,4 @@ Release Notes
    releases/4_1
    releases/4_2
    releases/4_3
+   releases/4_4
