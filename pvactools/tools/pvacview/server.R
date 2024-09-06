@@ -11,6 +11,7 @@ library("stringr")
 library(plotly)
 library(shinyWidgets)
 library(colourpicker)
+library(purrr)
 
 source("anchor_and_helper_functions.R", local = TRUE)
 source("styling.R")
@@ -53,6 +54,32 @@ server <- shinyServer(function(input, output, session) {
       }
     }))
   }
+  #set button styling based on values in Evaluation column
+  setButtonStyling <- function(evaluations) {
+    for (i in 1:length(evaluations)){
+      evaluation <- evaluations[i]
+      if (evaluation == 'Accept') {
+        html <- paste0("#button-acpt_", i ," { color: red !important; }")
+        insertUI("head", ui = tags$style(HTML(html)))
+        removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
+      } else if (evaluation == 'Reject') {
+        html <- paste0("#button-rej_", i ," { color: red !important; }")
+        insertUI("head", ui = tags$style(HTML(html)))
+        removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
+      } else if (evaluation == 'Review') {
+        html <- paste0("#button-rev_", i ," { color: red !important; }")
+        insertUI("head", ui = tags$style(HTML(html)))
+        removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
+      } else if (evaluation == 'Pending') {
+        removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
+      }
+    }
+  }
   #reactive values defined for row selection, main table, metrics data, additional data, and dna cutoff
   df <- reactiveValues(
     selectedRow = 1,
@@ -79,14 +106,18 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
-    mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
-    mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
+    setButtonStyling(mainData$Evaluation)
+    mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
-    mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
+    mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
     mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+    df$evaluations <- mainData[c("ID", "Evaluation")]
     df$mainTable <- mainData
     df$metricsData <- NULL
+    df$lastSelectedRow <- 1
   })
   #Option 1: User uploaded metrics file
   observeEvent(input$metricsDataInput, {
@@ -114,7 +145,7 @@ server <- shinyServer(function(input, output, session) {
     }
     columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                         "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
-                        "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
+                        "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
     if ("Comments" %in% colnames(df$mainTable)) {
       columns_needed <- c(columns_needed, "Comments")
       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
@@ -122,7 +153,7 @@ server <- shinyServer(function(input, output, session) {
       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
     }
     df$mainTable <- df$mainTable[, columns_needed]
-    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$percentile_threshold))
     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     rownames(df$comments) <- df$mainTable$ID
     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
@@ -166,12 +197,15 @@ server <- shinyServer(function(input, output, session) {
        colnames(mainData) <- mainData[1, ]
        mainData <- mainData[-1, ]
        row.names(mainData) <- NULL
-       mainData$`Eval` <- shinyInput(mainData, selectInput, nrow(mainData), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
-       mainData$Select <- shinyInputSelect(actionButton, nrow(mainData), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
+       setButtonStyling(mainData$Evaluation)
+       mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+       mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+       mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
        mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
        mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
-       mainData$`RNA Depth` <- as.integer(mainData$`RNA Depth`)
+       mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
        mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+       df$evaluations <- mainData[c("ID", "Evaluation")]
        df$mainTable <- mainData
        incProgress(0.1)
        ## Class I demo metrics file
@@ -202,7 +236,7 @@ server <- shinyServer(function(input, output, session) {
        }
        columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                            "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
-                           "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Evaluation", "Eval", "Select")
+                           "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
        if ("Comments" %in% colnames(df$mainTable)) {
          columns_needed <- c(columns_needed, "Comments")
          df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
@@ -210,7 +244,7 @@ server <- shinyServer(function(input, output, session) {
          df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
        }
        df$mainTable <- df$mainTable[, columns_needed]
-       df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+       df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$percentile_threshold))
        df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
        if ("Comments" %in% colnames(df$mainTable)) {
          df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
@@ -247,6 +281,7 @@ server <- shinyServer(function(input, output, session) {
          df$mainTable$`Percentile Fail` <- apply(df$mainTable, 1, function(x) {ifelse(as.numeric(x["%ile MT"]) > as.numeric(df$percentile_threshold), TRUE, FALSE)})
        }
        df$mainTable$`Has Prob Pos` <- apply(df$mainTable, 1, function(x) {ifelse(x["Prob Pos"] != "None", TRUE, FALSE)})
+       df$lastSelectedRow <- 1
       updateTabItems(session, "tabs", "explore")
       incProgress(0.1)
      })
@@ -317,20 +352,23 @@ server <- shinyServer(function(input, output, session) {
     session$sendCustomMessage("unbind-DT", "mainTable")
     df$binding_threshold <- input$binding_threshold
     df$use_allele_specific_binding_thresholds <- input$allele_specific_binding
-    df$percentile_threshold <- input$percentile_threshold
+    if (is.na(input$percentile_threshold)) {
+      df$percentile_threshold <- NULL
+    } else {
+      df$percentile_threshold <- input$percentile_threshold
+    }
     df$dna_cutoff <- input$dna_cutoff
     df$allele_expr <- input$allele_expr
     df$allele_specific_anchors <- input$use_anchor
     df$anchor_contribution <- input$anchor_contribution
-    df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
     if (input$use_anchor) {
       df$anchor_mode <- "allele-specific"
       df$anchor_contribution <- input$anchor_contribution
     }else {
       df$anchor_mode <- "default"
     }
-    df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold))
-    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+    df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$percentile_threshold))
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, input$dna_cutoff, input$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$percentile_threshold))
     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
     df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse((is.null(df$percentile_threshold) || is.na(df$percentile_threshold)), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
     if (is.null(df$percentile_threshold) || is.na(df$percentile_threshold)) {
@@ -349,8 +387,6 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Rank` <- NULL
     df$mainTable$`Rank_ic50` <- NULL
     df$mainTable$`Rank_expr` <- NULL
-    df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
   })
   #reset tier-ing with original parameters
   observeEvent(input$reset_params, {
@@ -364,9 +400,8 @@ server <- shinyServer(function(input, output, session) {
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
-    df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-    df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold))
-    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold))
+    df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$percentile_threshold))
+    df$mainTable$`Tier Count` <- apply(df$mainTable, 1, function(x) tier_numbers(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, x["Pos"], x["Allele"], x["TSL"], df$metricsData[1:15], df$anchor_mode, df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$percentile_threshold))
     df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
     df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
     if (is.null(df$percentile_threshold)) {
@@ -385,8 +420,6 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`Rank` <- NULL
     df$mainTable$`Rank_ic50` <- NULL
     df$mainTable$`Rank_expr` <- NULL
-    df$mainTable$Select <- shinyInputSelect(actionButton, nrow(df$mainTable), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"select_button\",  this.id)')
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
   })
   #determine hla allele count in order to generate column tooltip locations correctly
   hla_count <- reactive({
@@ -483,15 +516,6 @@ server <- shinyServer(function(input, output, session) {
     }
     HTML(paste(df$comments[selectedID(), 1]))
   })
-  observeEvent(input$page_length, {
-    if (is.null(df$mainTable)) {
-      return()
-    }
-    df$pageLength <- as.numeric(input$page_length)
-    session$sendCustomMessage("unbind-DT", "mainTable")
-    df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
-  })
   output$filesUploaded <- reactive({
     val <- !(is.null(df$mainTable) | is.null(df$metricsData))
     print(val)
@@ -503,34 +527,51 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Evaluation") & !(colnames(df$mainTable) == "Comments")],
-                escape = FALSE, callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)), class = "stripe",
-                options = list(lengthChange = FALSE, dom = "Bfrtip", pageLength = df$pageLength,
+      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Comments")],
+                escape = FALSE,
+                callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)),
+                class = "stripe",
+                options = list(lengthChange = TRUE, pageLength = df$pageLength,
+                               dom = "Bfrtilp",
                                columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
-                                                 list(className = "dt-center", targets = c(0:hla_count() - 1)), list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
-                                                 list(orderable = TRUE, targets = 0)), buttons = list(I("colvis")),
+                                                 list(className = "dt-center", targets = c(0:hla_count() - 1)),
+                                                 list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
+                                                 list(orderable = TRUE, targets = 0)
+                               ),
+                               buttons = list(I("colvis")),
+                               drawCallback = htmlwidgets::JS(
+                                    "function (oSettings, json) {
+                                        $('td').each(function(i) {
+                                            var bgcolor = $(this).css('background-color');
+                                            var bg = $(this).css('background');
+                                            var color = $(this).css('color');
+                                            var fw = $(this).css('font-weight');
+                                            var border = $(this).css('border');
+                                            $(this).attr('style', 'background-color: '+bgcolor+' !important; background: '+bg+' !important; color: '+color+' !important; font-weight: '+fw+' !important; border: '+border+' !important');
+                                        })
+                                    }"
+                               ),
                                initComplete = htmlwidgets::JS(
                                  "function(settings, json) {",
                                  paste("$(this.api().table().header()).css({'font-size': '", "10pt", "'});"),
-                                 "}"),
-                               rowCallback = JS(rowcallback(hla_count(), df$selectedRow - 1)),
-                               preDrawCallback = JS("function() {
-                                        Shiny.unbindAll(this.api().table().node()); }"),
-                               drawCallback = JS("function() { 
-                                     Shiny.bindAll(this.api().table().node()); } ")),
-                selection = "none",
-                extensions = c("Buttons"))
+                                 "}")
+                ),
+                selection = list(mode = "single", selected = c(1)),
+                extensions = c("Buttons")
+      )
     }
-    %>% formatStyle("IC50 MT", "Scaled BA", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
-                                                                            c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
-                    , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
-    %>% formatStyle("%ile MT", "Scaled percentile", backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2),
-                                                                                    c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+    %>% formatStyle("IC50 MT", "Scaled BA",
+        backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
+        #fontWeight = styleInterval(c(1000), c("normal", "bold")),
+        #border = styleInterval(c(1000), c("normal", "2px solid red"))
+    )
+    %>% formatStyle("%ile MT", "Scaled percentile",
+        backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
     %>% formatStyle("Tier", color = styleEqual(c("Pass", "Poor", "Anchor", "Subclonal", "LowExpr", "NoExpr"), c("green", "orange", "#b0b002", "#D4AC0D", "salmon", "red")))
+    %>% formatStyle(c("RNA Depth"), "Col RNA Depth", background = styleColorBar(range(0, 200), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("RNA VAF"), "Col RNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("DNA VAF"), "Col DNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("RNA Expr"), "Col RNA Expr", background = styleColorBar(range(0, 50), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
-    %>% formatStyle(c("RNA Depth"), "Col RNA Depth", background = styleColorBar(range(0, 200), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("Allele Expr"), "Col Allele Expr", background = styleColorBar(range(0, (max(as.numeric(as.character(unlist(df$mainTable["Col RNA VAF"]))) * 50))), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
     %>% formatStyle(c("Allele Expr"), "Tier Count", fontWeight = styleEqual(c("2"), c("bold")), border = styleEqual(c("2"), c("2px solid red")))
     %>% formatStyle(c("IC50 MT", "Allele Expr"), "Tier Count", fontWeight = styleEqual(c("3"), c("bold")), border = styleEqual(c("3"), c("2px solid red")))
@@ -561,6 +602,13 @@ server <- shinyServer(function(input, output, session) {
     %>% formatStyle(c("Ref Match"), "Ref Match", fontWeight = styleEqual(c("True"), c("bold")), border = styleEqual(c("True"), c("2px solid red")))
     %>% formatStyle("Best Peptide", fontFamily="monospace")
     , server = FALSE)
+  #capture last selected row so that it still displays data from that row when
+  #a row is deselected (instead of switching back to the first row)
+  observe({
+      if (!is.null(df$mainTable) && !is.null(input$mainTable_rows_selected) && df$lastSelectedRow != input$mainTable_rows_selected) {
+        df$lastSelectedRow <- input$mainTable_rows_selected
+      }
+  })
   #help menu for main table
   observeEvent(input$help, {
     showModal(modalDialog(
@@ -591,59 +639,87 @@ server <- shinyServer(function(input, output, session) {
       ),
     ))
   })
-  ##update table upon selecting to investigate each individual row
-  observeEvent(input$select_button, {
+  observeEvent(input$accept_eval, {
     if (is.null(df$mainTable)) {
       return()
     }
-    df$selectedRow <- as.numeric(strsplit(input$select_button, "_")[[1]][2])
-    session$sendCustomMessage("unbind-DT", "mainTable")
-    df$mainTable$`Evaluation` <- shinyValue("selecter_", nrow(df$mainTable), df$mainTable)
-    df$mainTable$`Eval` <- shinyInput(df$mainTable, selectInput, nrow(df$mainTable), "selecter_", choices = c("Pending", "Accept", "Reject", "Review"), width = "90px")
-    dataTableProxy("mainTable") %>%
-      selectPage((df$selectedRow - 1) %/% df$pageLength + 1)
+    selectedRow <- as.numeric(strsplit(input$accept_eval, "_")[[1]][2])
+    selectedID <- df$mainTable$ID[selectedRow]
+    df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Accept"
+    html <- paste0("#button-acpt_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'), multiple = TRUE)
+  })
+  observeEvent(input$reject_eval, {
+    if (is.null(df$mainTable)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$reject_eval, "_")[[1]][2])
+    selectedID <- df$mainTable$ID[selectedRow]
+    df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Reject"
+    html <- paste0("#button-rej_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'), multiple = TRUE)
+  })
+  observeEvent(input$review_eval, {
+    if (is.null(df$mainTable)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$review_eval, "_")[[1]][2])
+    selectedID <- df$mainTable$ID[selectedRow]
+    df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Review"
+    html <- paste0("#button-rev_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'), multiple = TRUE)
   })
   ##selected row text box
   output$selected <- renderText({
     if (is.null(df$mainTable)) {
       return()
     }
-    df$selectedRow
+    if (is.null(input$mainTable_rows_selected)) {
+        df$lastSelectedRow
+    } else {
+        input$mainTable_rows_selected
+    }
   })
   ##selected id update
   selectedID <- reactive({
-    if (is.null(df$selectedRow)) {
-      df$mainTable$ID[1]
+    if (is.null(input$mainTable_rows_selected)) {
+      df$mainTable$ID[df$lastSelectedRow]
     }else {
-      df$mainTable$ID[df$selectedRow]
+      df$mainTable$ID[input$mainTable_rows_selected]
     }
   })
   output$selectedPeptide <- reactive({
-    if (is.null(df$selectedRow)) {
-      df$mainTable$`Best Peptide`[1]
+    if (is.null(input$mainTable_rows_selected)) {
+      df$mainTable$`Best Peptide`[df$lastSelectedRow]
     }else {
-      df$mainTable$`Best Peptide`[df$selectedRow]
+      df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
     }
   })
   output$selectedAAChange <- reactive({
-    if (is.null(df$selectedRow)) {
-      df$mainTable$`AA Change`[1]
+    if (is.null(input$mainTable_rows_selected)) {
+      df$mainTable$`AA Change`[df$lastSelectedRow]
     }else {
-      df$mainTable$`AA Change`[df$selectedRow]
+      df$mainTable$`AA Change`[input$mainTable_rows_selected]
     }
   })
   output$selectedPos <- reactive({
-    if (is.null(df$selectedRow)) {
-      df$mainTable$`Pos`[1]
+    if (is.null(input$mainTable_rows_selected)) {
+      df$mainTable$`Pos`[df$lastSelectedRow]
     }else {
-      df$mainTable$`Pos`[df$selectedRow]
+      df$mainTable$`Pos`[input$mainTable_rows_selected]
     }
   })
   output$selectedGene <- reactive({
-    if (is.null(df$selectedRow)) {
-      df$mainTable$`Gene`[1]
+    if (is.null(input$mainTable_rows_selected)) {
+      df$mainTable$`Gene`[df$lastSelectedRow]
     }else {
-      df$mainTable$`Gene`[df$selectedRow]
+      df$mainTable$`Gene`[input$mainTable_rows_selected]
     }
   })
   ## Update comments section based on selected row
@@ -1210,15 +1286,15 @@ server <- shinyServer(function(input, output, session) {
   ##Best Peptide with mutated positions marked
   output$referenceMatchPlot <- renderPlot({
     withProgress(message = "Loading Reference Match Best Peptide Plot", value = 0, {
-      selectedPosition <- if (is.null(df$selectedRow)) {
-        df$mainTable$`Pos`[1]
+      selectedPosition <- if (is.null(input$mainTable_rows_selected)) {
+        df$mainTable$`Pos`[df$lastSelectedRow]
       }else {
-        df$mainTable$`Pos`[df$selectedRow]
+        df$mainTable$`Pos`[input$mainTable_rows_selected]
       }
-      selectedPeptide <- if (is.null(df$selectedRow)) {
-        df$mainTable$`Best Peptide`[1]
+      selectedPeptide <- if (is.null(input$mainTable_rows_selected)) {
+        df$mainTable$`Best Peptide`[df$lastSelectedRow]
       }else {
-        df$mainTable$`Best Peptide`[df$selectedRow]
+        df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
       }
       #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
       mutation_pos <- range_str_to_seq(selectedPosition)
@@ -1247,25 +1323,25 @@ server <- shinyServer(function(input, output, session) {
       print(p2)
     })
   }, height = 20, width = function(){
-    selectedPeptide <- if (is.null(df$selectedRow)) {
+    selectedPeptide <- if (is.null(df$lastSelectedRow)) {
       df$mainTable$`Best Peptide`[1]
     }else {
-      df$mainTable$`Best Peptide`[df$selectedRow]
+      df$mainTable$`Best Peptide`[df$lastSelectedRow]
     }
     nchar(selectedPeptide) * 20
   } )
   ##Best Peptide with best peptide highlighted and mutated positions marked
   output$referenceMatchQueryPlot <- renderPlot({
     withProgress(message = "Loading Reference Match Query Peptide Plot", value = 0, {
-      selectedPosition <- if (is.null(df$selectedRow)) {
-        df$mainTable$`Pos`[1]
+      selectedPosition <- if (is.null(input$mainTable_rows_selected)) {
+        df$mainTable$`Pos`[df$lastSelectedRow]
       }else {
-        df$mainTable$`Pos`[df$selectedRow]
+        df$mainTable$`Pos`[input$mainTable_rows_selected]
       }
-      selectedPeptide <- if (is.null(df$selectedRow)) {
-        df$mainTable$`Best Peptide`[1]
+      selectedPeptide <- if (is.null(input$mainTable_rows_selected)) {
+        df$mainTable$`Best Peptide`[df$lastSelectedRow]
       }else {
-        df$mainTable$`Best Peptide`[df$selectedRow]
+        df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
       }
       mutation_pos <- range_str_to_seq(selectedPosition)
       #remove leading amino acids from the selectedPeptide that don't occur in
@@ -1329,13 +1405,11 @@ server <- shinyServer(function(input, output, session) {
   ##############################EXPORT TAB##############################################
   #evalutation overview table
   output$checked <- renderTable({
-    if (is.null(df$mainTable)) {
+    if (is.null(df$evaluations)) {
       return()
     }
-    Evaluation <- data.frame(selected = shinyValue("selecter_", nrow(df$mainTable), df$mainTable))
-    data <- as.data.frame(table(Evaluation))
-    data$Count <- data$Freq
-    data$Freq <- NULL
+    data <- as.data.frame(table(df$evaluations$Evaluation))
+    colnames(data) <- c("Evaluation","Count")
     data
   })
   #export table display with options to download
@@ -1345,10 +1419,10 @@ server <- shinyServer(function(input, output, session) {
     }
     colsToDrop <- colnames(df$mainTable) %in% c("Evaluation", "Eval", "Select", "Scaled BA", "Scaled percentile", "Tier Count", "Bad TSL",
                                                 "Comments", "Gene of Interest", "Bad TSL", "Col RNA Expr", "Col RNA VAF", "Col Allele Expr",
-                                                "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos")
+                                                "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos", "Acpt", "Rej", "Rev")
     data <- df$mainTable[, !(colsToDrop)]
     col_names <- colnames(data)
-    data <- data.frame(data, Evaluation = shinyValue("selecter_", nrow(df$mainTable), df$mainTable))
+    data <- plyr::join(data, df$evaluations, by='ID')
     colnames(data) <- c(col_names, "Evaluation")
     comments <- data.frame("ID" = row.names(df$comments), Comments = df$comments[, 1])
     data <- join(data, comments)
@@ -1381,7 +1455,9 @@ server <- shinyServer(function(input, output, session) {
   
   ############### NeoFox Tab ##########################
   df_neofox <- reactiveValues(
-    mainTable_neofox = NULL
+    mainTable_neofox = NULL,
+    binding_threshold = 500,
+    percentile_threshold = 0.5
   )
   
   # Option 1: User uploaded
@@ -1391,29 +1467,81 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData_neofox) <- mainData_neofox[1, ]
     mainData_neofox <- mainData_neofox[-1, ]
     row.names(mainData_neofox) <- NULL
-    
+
+    rename_lookup <- c("PRIME_bestScore_allele" = "PRIME_best_allele", "PRIME_bestScore_peptide" = "PRIME_best_peptide", "PRIME_bestScore_rank" = "PRIME_best_rank", "PRIME_bestScore_score" = "PRIME_best_score")
+    mainData_neofox <- mainData_neofox %>% rename(any_of(rename_lookup))
+    mainData_neofox <- rename_with(mainData_neofox, ~ gsub("_", " ", .x, fixed = TRUE))
+
     # Columns that have been reviewed as most interesting
     columns_to_star <- c(
       "dnaVariantAlleleFrequency", "rnaExpression", "imputedGeneExpression",
-      "rnaVariantAlleleFrequency", "NetMHCpan_bestRank_rank", "NetMHCpan_bestAffinity_affinity",
-      "NetMHCpan_bestAffinity_affinityWT", "NetMHCpan_bestRank_rankWT", "PHBR_I",
-      "NetMHCIIpan_bestRank_rank", "NetMHCIIpan_bestRank_rankWT", "PHBR_II", "Amplitude_MHCI_bestAffinity",
-      "Pathogensimiliarity_MHCI_bestAffinity9mer", "DAI_MHCI_bestAffinity", "Tcell_predictor",
-      "Selfsimilarity_MHCI", "Selfsimilarity_MHCII", "IEDB_Immunogenicity_MHCI", "IEDB_Immunogenicity_MHCII",
-      "MixMHCpred_bestScore_score", "MixMHCpred_bestScore_rank", "MixMHC2pred_bestRank_peptide",
-      "MixMHC2pred_bestRank_rank", "Dissimilarity_MHCI", "Dissimilarity_MHCII", "Vaxrank_bindingScore",
-      "PRIME_bestScore_rank", "PRIME_bestScore_score"
+      "rnaVariantAlleleFrequency", "NetMHCpan bestRank rank", "NetMHCpan bestAffinity affinity",
+      "NetMHCpan bestAffinity affinityWT", "NetMHCpan bestRank rankWT", "PHBR I",
+      "NetMHCIIpan bestRank rank", "NetMHCIIpan bestRank rankWT", "PHBR II", "Amplitude MHCI bestAffinity",
+      "Pathogensimiliarity MHCI bestAffinity9mer", "DAI MHCI bestAffinity", "Tcell predictor",
+      "Selfsimilarity MHCI", "Selfsimilarity MHCII", "IEDB Immunogenicity MHCI", "IEDB Immunogenicity MHCII",
+      "MixMHCpred bestScore score", "MixMHCpred bestScore rank", "MixMHC2pred bestRank peptide",
+      "MixMHC2pred bestRank rank", "Dissimilarity MHCI", "Dissimilarity MHCII", "Vaxrank bindingScore",
+      "PRIME bestScore rank", "PRIME bestScore score"
     )
-    
+
     # Check if each column is present in the dataframe and modify the names
-    for (col_name in columns_to_star) {
-      if (col_name %in% names(mainData_neofox)) {
-        new_col_name <- paste0("*", col_name)
-        names(mainData_neofox)[names(mainData_neofox) == col_name] <- new_col_name
+    starred_column_names <- map(names(mainData_neofox), function(x) {
+      if (x %in% columns_to_star) {
+        paste0("*", x)
+      } else {
+        x
       }
-    }   
-    
+    })
+    names(mainData_neofox) <- starred_column_names
     df_neofox$mainTable_neofox <- mainData_neofox
+    
+    # Add scaling columns for coloring and barplots
+    # There are no checks if user uploads data without one of these columns
+    # Maybe an easy solution would be to just create a dummy column in the
+    # for loop above for missing columns?
+    
+    # Add scaling columns for coloring and barplots
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan bestAffinity affinity"]), as.numeric(x["*NetMHCpan bestAffinity affinity"]) / (df_neofox$binding_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity_WT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan bestAffinity affinityWT"]), as.numeric(x["*NetMHCpan bestAffinity affinityWT"]) / (df_neofox$binding_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCpan bestRank rank"]), as.numeric(x["*NetMHCpan bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestRank_rankWT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCpan bestRank rankWT"]), as.numeric(x["*NetMHCpan bestRank rankWT"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCIIpan_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCIIpan bestRank rank"]), as.numeric(x["*NetMHCIIpan bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCIIpan_bestRank_rankWT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCIIpan bestRank rankWT"]), as.numeric(x["*NetMHCIIpan bestRank rankWT"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled MixMHCpred_bestScore_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*MixMHCpred bestScore rank"]), as.numeric(x["*MixMHCpred bestScore rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled MixMHC2pred_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*MixMHC2pred bestRank rank"]), as.numeric(x["*MixMHC2pred bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled PRIME_bestScore_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*PRIME bestScore rank"]), as.numeric(x["*PRIME bestScore rank"]) / (df_neofox$percentile_threshold))})
+    # DAI is a measure of agrotopicity - so we want a a high DAI where the MT BA is low and the WT is BA is high, not sure if this is the correct scale
+    df_neofox$mainTable_neofox$`Scaled DAI_MHCI_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(1), as.numeric(x["*DAI MHCI bestAffinity"]), as.numeric(x["*DAI MHCI bestAffinity"]) / 10000)})
+    
+    df_neofox$mainTable_neofox$`Col DNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*dnaVariantAlleleFrequency"]), 0, x["*dnaVariantAlleleFrequency"])})
+    df_neofox$mainTable_neofox$`Col RNA Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaExpression"]), 0, x["*rnaExpression"])})
+    df_neofox$mainTable_neofox$`Col Gene Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*imputedGeneExpression"]), 0, x["*imputedGeneExpression"])})
+    df_neofox$mainTable_neofox$`Col RNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaVariantAlleleFrequency"]), 0, x["*rnaVariantAlleleFrequency"])})
+
+    len <- nrow(df_neofox$mainTable_neofox)
+    if ('Evaluation' %in% colnames(df_neofox$mainTable_neofox)) {
+        setButtonStyling(df_neofox$mainTable_neofox$Evaluation)
+    } else {
+        df_neofox$mainTable_neofox["Evaluation"] = "Pending"
+    }
+    df_neofox$mainTable_neofox <- cbind(ID = rownames(df_neofox$mainTable_neofox), df_neofox$mainTable_neofox)
+    df_neofox$evaluations <- df_neofox$mainTable_neofox[c("ID", "Evaluation")]
+    df_neofox$mainTable_neofox$Evaluation <- NULL
+    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+
+    if ("Comments" %in% colnames(df_neofox$mainTable_neofox)) {
+      df_neofox$comments <- data.frame(data = df_neofox$mainTable_neofox$`Comments`, nrow = nrow(df_neofox$mainTable_neofox), ncol = 1)
+      df_neofox$mainTable_neofox$Comments <- NULL
+    }else {
+      df_neofox$comments <- data.frame(matrix("No comments", nrow = nrow(df_neofox$mainTable_neofox)), ncol = 1)
+    }
+    rownames(df_neofox$comments) <- df_neofox$mainTable_neofox$ID
+
+    df_neofox$default_neofox_columns <- c("patientIdentifier", "gene", "mutatedXmer", "wildTypeXmer", "position", map(columns_to_star, function(x) { paste0("*", x) }), "Acpt", "Rej", "Rev")
+    df_neofox$hidden_columns <- setdiff(colnames(df_neofox$mainTable_neofox), df_neofox$default_neofox_columns)
   })
   
   # Option 2: Demo Data
@@ -1424,29 +1552,79 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData_neofox) <- mainData_neofox[1, ]
     mainData_neofox <- mainData_neofox[-1, ]
     row.names(mainData_neofox) <- NULL
-    
+    mainData_neofox <- type.convert(mainData_neofox, as.is = TRUE)
+
+    rename_lookup <- c("PRIME_bestScore_allele" = "PRIME_best_allele", "PRIME_bestScore_peptide" = "PRIME_best_peptide", "PRIME_bestScore_rank" = "PRIME_best_rank", "PRIME_bestScore_score" = "PRIME_best_score")
+    mainData_neofox <- mainData_neofox %>% rename(any_of(rename_lookup))
+    mainData_neofox <- rename_with(mainData_neofox, ~ gsub("_", " ", .x, fixed = TRUE))
+
     # Columns that have been reviewed as most interesting
     columns_to_star <- c(
       "dnaVariantAlleleFrequency", "rnaExpression", "imputedGeneExpression",
-      "rnaVariantAlleleFrequency", "NetMHCpan_bestRank_rank", "NetMHCpan_bestAffinity_affinity",
-      "NetMHCpan_bestAffinity_affinityWT", "NetMHCpan_bestRank_rankWT", "PHBR_I",
-      "NetMHCIIpan_bestRank_rank", "NetMHCIIpan_bestRank_rankWT", "PHBR_II", "Amplitude_MHCI_bestAffinity",
-      "Pathogensimiliarity_MHCI_bestAffinity9mer", "DAI_MHCI_bestAffinity", "Tcell_predictor",
-      "Selfsimilarity_MHCI", "Selfsimilarity_MHCII", "IEDB_Immunogenicity_MHCI", "IEDB_Immunogenicity_MHCII",
-      "MixMHCpred_bestScore_score", "MixMHCpred_bestScore_rank", "MixMHC2pred_bestRank_peptide",
-      "MixMHC2pred_bestRank_rank", "Dissimilarity_MHCI", "Dissimilarity_MHCII", "Vaxrank_bindingScore",
-      "PRIME_bestScore_rank", "PRIME_bestScore_score"
+      "rnaVariantAlleleFrequency", "NetMHCpan bestRank rank", "NetMHCpan bestAffinity affinity",
+      "NetMHCpan bestAffinity affinityWT", "NetMHCpan bestRank rankWT", "PHBR I",
+      "NetMHCIIpan bestRank rank", "NetMHCIIpan bestRank rankWT", "PHBR II", "Amplitude MHCI bestAffinity",
+      "Pathogensimiliarity MHCI bestAffinity9mer", "DAI MHCI bestAffinity", "Tcell predictor",
+      "Selfsimilarity MHCI", "Selfsimilarity MHCII", "IEDB Immunogenicity MHCI", "IEDB Immunogenicity MHCII",
+      "MixMHCpred bestScore score", "MixMHCpred bestScore rank", "MixMHC2pred bestRank peptide",
+      "MixMHC2pred bestRank rank", "Dissimilarity MHCI", "Dissimilarity MHCII", "Vaxrank bindingScore",
+      "PRIME bestScore rank", "PRIME bestScore score"
     )
     
     # Check if each column is present in the dataframe and modify the names
-    for (col_name in columns_to_star) {
-      if (col_name %in% names(mainData_neofox)) {
-        new_col_name <- paste0("*", col_name)
-        names(mainData_neofox)[names(mainData_neofox) == col_name] <- new_col_name
+    starred_column_names <- map(names(mainData_neofox), function(x) {
+      if (x %in% columns_to_star) {
+        paste0("*", x)
+      } else {
+        x
       }
-    }    
+    })
+    names(mainData_neofox) <- starred_column_names
     
     df_neofox$mainTable_neofox <- mainData_neofox
+    
+    # Add scaling columns for coloring and barplots
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan bestAffinity affinity"]), as.numeric(x["*NetMHCpan bestAffinity affinity"]) / (df_neofox$binding_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestAffinity_WT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$binding_threshold), as.numeric(x["*NetMHCpan bestAffinity affinityWT"]), as.numeric(x["*NetMHCpan bestAffinity affinityWT"]) / (df_neofox$binding_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCpan bestRank rank"]), as.numeric(x["*NetMHCpan bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCpan_bestRank_rankWT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCpan bestRank rankWT"]), as.numeric(x["*NetMHCpan bestRank rankWT"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCIIpan_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCIIpan bestRank rank"]), as.numeric(x["*NetMHCIIpan bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled NetMHCIIpan_bestRank_rankWT` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*NetMHCIIpan bestRank rankWT"]), as.numeric(x["*NetMHCIIpan bestRank rankWT"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled MixMHCpred_bestScore_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*MixMHCpred bestScore rank"]), as.numeric(x["*MixMHCpred bestScore rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled MixMHC2pred_bestRank_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*MixMHC2pred bestRank rank"]), as.numeric(x["*MixMHC2pred bestRank rank"]) / (df_neofox$percentile_threshold))})
+    df_neofox$mainTable_neofox$`Scaled PRIME_bestScore_rank` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(df_neofox$percentile_threshold), as.numeric(x["*PRIME bestScore rank"]), as.numeric(x["*PRIME bestScore rank"]) / (df_neofox$percentile_threshold))})
+    # DAI is a measure of agrotopicity - so we want a a high DAI where the MT BA is low and the WT is BA is high, not sure if this is the correct scale
+    df_neofox$mainTable_neofox$`Scaled DAI_MHCI_bestAffinity` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.null(1), as.numeric(x["*DAI MHCI bestAffinity"]), as.numeric(x["*DAI MHCI bestAffinity"]) / 10000)})
+    
+    df_neofox$mainTable_neofox$`Col DNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*dnaVariantAlleleFrequency"]), 0, x["*dnaVariantAlleleFrequency"])})
+    df_neofox$mainTable_neofox$`Col RNA Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaExpression"]), 0, x["*rnaExpression"])})
+    df_neofox$mainTable_neofox$`Col Gene Expr` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*imputedGeneExpression"]), 0, x["*imputedGeneExpression"])})
+    df_neofox$mainTable_neofox$`Col RNA VAF` <- apply(df_neofox$mainTable_neofox, 1, function(x) {ifelse(is.na(x["*rnaVariantAlleleFrequency"]), 0, x["*rnaVariantAlleleFrequency"])})
+
+    len <- nrow(df_neofox$mainTable_neofox)
+    if ('Evaluation' %in% colnames(df_neofox$mainTable_neofox)) {
+        setButtonStyling(df_neofox$mainTable_neofox$Evaluation)
+    } else {
+        df_neofox$mainTable_neofox["Evaluation"] = "Pending"
+    }
+    df_neofox$mainTable_neofox <- cbind(ID = rownames(df_neofox$mainTable_neofox), df_neofox$mainTable_neofox)
+    df_neofox$evaluations <- df_neofox$mainTable_neofox[c("ID", "Evaluation")]
+    df_neofox$mainTable_neofox$Evaluation <- NULL
+    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+
+    if ("Comments" %in% colnames(df_neofox$mainTable_neofox)) {
+      df_neofox$comments <- data.frame(data = df_neofox$mainTable_neofox$`Comments`, nrow = nrow(df_neofox$mainTable_neofox), ncol = 1)
+      df_neofox$mainTable_neofox$Comments <- NULL
+    }else {
+      df_neofox$comments <- data.frame(matrix("No comments", nrow = nrow(df_neofox$mainTable_neofox)), ncol = 1)
+    }
+    rownames(df_neofox$comments) <- df_neofox$mainTable_neofox$ID
+
+    df_neofox$default_neofox_columns <- c("patientIdentifier", "gene", "mutatedXmer", "wildTypeXmer", "position", map(columns_to_star, function(x) { paste0("*", x) }), "Acpt", "Rej", "Rev")
+    df_neofox$hidden_columns <- setdiff(colnames(df_neofox$mainTable_neofox), df_neofox$default_neofox_columns)
+
     updateTabItems(session, "neofox_tabs", "neofox_explore")
   })
   
@@ -1470,9 +1648,58 @@ server <- shinyServer(function(input, output, session) {
       return(datatable(df_neofox$mainTable_neofox,
                 escape = FALSE,
                 selection = "multiple",
-                extensions = c("Buttons")
-      ))
-    })
+                extensions = c("Buttons"),
+                options = list(
+                  dom = "Bfrtilp",
+                  columnDefs = list(
+                    list(visible = FALSE, targets = match(df_neofox$hidden_columns, names(df_neofox$mainTable_neofox)))
+                  ),
+                  buttons = list(I("colvis")),
+                  drawCallback = htmlwidgets::JS(
+                    "function (oSettings, json) {
+                        $('td').each(function(i) {
+                            var bgcolor = $(this).css('background-color');
+                            var bg = $(this).css('background');
+                            var color = $(this).css('color');
+                            var fw = $(this).css('font-weight');
+                            var border = $(this).css('border');
+                            $(this).attr('style', 'background-color: '+bgcolor+' !important; background: '+bg+' !important; color: '+color+' !important; font-weight: '+fw+' !important; border: '+border+' !important');
+                        })
+                    }"
+                  )
+                )
+             )
+             %>% formatStyle(c("*dnaVariantAlleleFrequency"), "Col DNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
+             %>% formatStyle(c("*rnaExpression"), "Col RNA Expr", background = styleColorBar(range(0, 50), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
+             %>% formatStyle(c("*imputedGeneExpression"), "Col Gene Expr", background = styleColorBar(range(0, 50), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
+             %>% formatStyle(c("*rnaVariantAlleleFrequency"), "Col RNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
+             
+             %>% formatStyle("*NetMHCpan bestAffinity affinity", "Scaled NetMHCpan_bestAffinity", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
+                                                                                     c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
+                             , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
+            %>% formatStyle("*NetMHCpan bestAffinity affinityWT", "Scaled NetMHCpan_bestAffinity_WT", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
+                                                                                                                           c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
+                      , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
+            %>% formatStyle("*NetMHCpan bestRank rank", "Scaled NetMHCpan_bestRank_rank",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*NetMHCpan bestRank rankWT", "Scaled NetMHCpan_bestRank_rankWT",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*NetMHCIIpan bestRank rank", "Scaled NetMHCIIpan_bestRank_rank",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*NetMHCIIpan bestRank rankWT", "Scaled NetMHCIIpan_bestRank_rankWT",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*MixMHCpred bestScore rank", "Scaled MixMHCpred_bestScore_rank",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*MixMHC2pred bestRank rank", "Scaled MixMHC2pred_bestRank_rank",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*PRIME bestScore rank", "Scaled PRIME_bestScore_rank",
+                backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+            %>% formatStyle("*DAI MHCI bestAffinity", "Scaled DAI_MHCI_bestAffinity", backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2),
+                                                                                                                           c("#FF9999", "#F1C664", "#F0CD5B", "#F3DD6F", "#F3E770", "#F3F171", "#3F9750", "#47AA5A", "#4FBD65", "#58D16F", "#60E47A", "#68F784"))
+                      , fontWeight = styleInterval(c(1000), c("normal", "bold")), border = styleInterval(c(1000), c("normal", "2px solid red")))
+      )
+    } 
+  )
   
   output$neofox_selected <- renderText({
     if (is.null(df_neofox$mainTable_neofox)) {
@@ -1480,9 +1707,78 @@ server <- shinyServer(function(input, output, session) {
     }
     input$neofoxTable_rows_selected
   })
-  
+  output$neofox_last_selected <- renderText({
+    if (is.null(df_neofox$mainTable_neofox) || is.null(input$neofoxTable_rows_selected)) {
+      return()
+    }
+    input$neofoxTable_rows_selected[length(input$neofoxTable_rows_selected)]
+  })
+  observeEvent(input$accept_neofox_eval, {
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$accept_neofox_eval, "_")[[1]][2])
+    df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Accept"
+    html <- paste0("#button-neofox-acpt_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedRow, ')'), multiple = TRUE)
+  })
+  observeEvent(input$reject_neofox_eval, {
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$reject_neofox_eval, "_")[[1]][2])
+    df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Reject"
+    html <- paste0("#button-neofox-rej_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedRow, ')'), multiple = TRUE)
+  })
+  observeEvent(input$review_neofox_eval, {
+    if (is.null(df_neofox$mainTable_neofox)) {
+      return()
+    }
+    selectedRow <- as.numeric(strsplit(input$review_neofox_eval, "_")[[1]][2])
+    df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Review"
+    html <- paste0("#button-neofox-rev_", selectedRow ," { color: red !important; }")
+    insertUI("head", ui = tags$style(HTML(html)))
+    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedRow, ')'), multiple = TRUE)
+  })
+
+  # NeoFox evalutation overview table
+  output$neofox_checked <- renderTable({
+    if (is.null(df_neofox$evaluations)) {
+      return()
+    }
+    data <- as.data.frame(table(df_neofox$evaluations$Evaluation))
+    colnames(data) <- c("Evaluation","Count")
+    data
+  })
+  # NeoFox comment text of last selected row
+  output$neofox_comment_text <- renderTable({
+    if (is.null(df_neofox$mainTable_neofox) || is.null(input$neofoxTable_rows_selected)) {
+      return(HTML("No variants selected"))
+    }
+    data <- filter(df_neofox$comments, row.names(df_neofox$comments) %in% input$neofoxTable_rows_selected)
+    colnames(data) <- c("Comment")
+    data$ID <- row.names(data)
+    data[c("ID", "Comment")]
+  })
+  ## Update NeoFox comments section based on selected row
+  observeEvent(input$neofox_comment, {
+    if (is.null(df_neofox$mainTable_neofox) || is.null(input$neofoxTable_rows_selected)) {
+      return()
+    }
+    updateTextAreaInput(session, "neofox_comments", value = "")
+    for (i in input$neofoxTable_rows_selected) {
+      df_neofox$comments[i, 1] <- input$neofox_comments
+    }
+  })
+
   ### NeoFox Violin Plots
-  
+
   ## Drop down to select what features to show violin plots for
   output$noefox_features_ui <- renderUI({
     df <- df_neofox$mainTable_neofox
@@ -1493,8 +1789,8 @@ server <- shinyServer(function(input, output, session) {
     sorted_features <- features[order(!grepl("^\\*", features))]
 
 
-    default_selection <- c("*IEDB_Immunogenicity_MHCI", "*IEDB_Immunogenicity_MHCII", "*PHBR_I",
-      "*MixMHCpred_bestScore_score", "*MixMHCpred_bestScore_rank", "*MixMHC2pred_bestRank_peptide")
+    default_selection <- c("*IEDB Immunogenicity MHCI", "*IEDB Immunogenicity MHCII", "*PHBR I",
+      "*MixMHCpred bestScore score", "*MixMHCpred bestScore rank", "*MixMHC2pred bestRank peptide")
 
     pickerInput(inputId = "neofox_features",
                 label = "Plots to Display",
@@ -1549,7 +1845,7 @@ server <- shinyServer(function(input, output, session) {
     features <- names(df)[sapply(df, is.numeric)]
     sorted_features <- features[order(!grepl("^\\*", features))]
 
-    default_selection <- "*NetMHCpan_bestAffinity_affinity"
+    default_selection <- "*NetMHCpan bestAffinity affinity"
 
     pickerInput(inputId = "xvrbl",
                 label = "X-Axis Variable",
@@ -1576,7 +1872,7 @@ server <- shinyServer(function(input, output, session) {
 
     features <- names(df)[sapply(df, is.numeric)]
     sorted_features <- features[order(!grepl("^\\*", features))]
-    default_selection <- "*NetMHCpan_bestAffinity_affinityWT"
+    default_selection <- "*NetMHCpan bestAffinity affinityWT"
 
     pickerInput(inputId = "yvrbl",
                 label = "Y-Axis Variable",
@@ -1699,7 +1995,7 @@ server <- shinyServer(function(input, output, session) {
     features <- names(df)[sapply(df, is.numeric)]
     sorted_features <- features[order(!grepl("^\\*", features))]
 
-    default_selection <- "*Tcell_predictor"
+    default_selection <- "*Tcell predictor"
     pickerInput(inputId = "color_scatter",
                 label = "Color",
                 choices = sorted_features,
@@ -1800,6 +2096,45 @@ server <- shinyServer(function(input, output, session) {
       }
     })
   })
+
+  #export NeoFox table display with options to download
+  output$NeofoxExportTable <- renderDataTable(
+    {
+        if (is.null(df_neofox$mainTable_neofox)) {
+          return()
+        }
+        colsToDrop <- colnames(df_neofox$mainTable_neofox) %in% c("Scaled NetMHCpan_bestAffinity", "Scaled NetMHCpan_bestAffinity_WT", "Scaled DAI_MHCI_bestAffinity",
+                                                    "Comments", "Col RNA Expr", "Col RNA VAF", "Col Allele Expr", "Col Gene Expr",
+                                                    "Col RNA Depth", "Col DNA VAF", "Acpt", "Rej", "Rev")
+        data <- df_neofox$mainTable_neofox[, !(colsToDrop)]
+        col_names <- colnames(data)
+        data <- plyr::join(data, df_neofox$evaluations, by='ID')
+        colnames(data) <- c(col_names, "Evaluation")
+        comments <- data.frame("ID" = row.names(df_neofox$comments), Comments = df_neofox$comments[, 1])
+        data <- join(data, comments)
+        #data[is.na(data)] <- "NA"
+        data
+    },
+    escape = FALSE, server = FALSE, rownames = FALSE,
+    options = list(dom = "Bfrtip",
+                 buttons = list(
+                   list(extend = "csvHtml5",
+                        filename = input$exportNeofoxFileName,
+                        fieldSeparator = "\t",
+                        text = "Download as TSV",
+                        extension = ".tsv"),
+                   list(extend = "excel",
+                        filename = input$exportNeofoxFileName,
+                        text = "Download as excel")
+                 ),
+                 initComplete = htmlwidgets::JS(
+                   "function(settings, json) {",
+                   paste0("$(this.api().table().header()).css({'font-size': '", "8pt", "'});"),
+                   "}")
+  ),
+  selection = "none",
+  extensions = c("Buttons"))
+
 
   ############### Custom Tab ##########################
   df_custom <- reactiveValues(
