@@ -52,6 +52,16 @@ csscode <- HTML("
 .sidebar-mini.sidebar-collapse #tohide {
   display: none;
 }
+table.dataTable tbody tr.selected td {
+  box-shadow: inset 0 0 0 9999px rgba(55, 55, 55, 0.3) !important;
+}
+.dataTables_length {
+  margin-left: 20px;
+  padding-top: 6px;
+}
+div #neofox_last_selected {
+  display: inline;
+}
 ")
 
 # Create the theme

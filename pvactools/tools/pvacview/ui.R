@@ -50,7 +50,7 @@ upload_tab <- tabItem(
                     and the <b>metrics json file</b> contains additional transcript and peptide level information.</h5>"),
              h5("You have the option of uploading an additional file to supplement the data you are exploring. This includes: additional class I or II information and
                     a gene-of-interest tsv file."),
-             actionButton("help_doc_upload", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#upload', '_blank')"),
+             actionButton("help_doc_upload", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#id1', '_blank')"),
              h4("Step 2: Exploring your data", style = "font-weight: bold"),
              HTML("<h5>To explore the different aspects of your neoantigen candidates, you will need to navigate to the <b>Aggregate Report of Best Candidate by Variant</b> on the visualize and explore tab.
                     For detailed variant, transcript and peptide information for each candidate listed, you will need to click on the <b>Investigate button</b> for the specific row of interest.
@@ -58,7 +58,7 @@ upload_tab <- tabItem(
              h5("By hovering over each column header, you will be able to see a brief description of the corresponding column and for more details, you can click on the tooltip located at the top right of the aggregate report table.", br(),
                 "After investigating each candidate, you can label the candidate using the dropdown menu located at the second to last column of the table. Choices include:
                     Accept, Reject or Review."),
-             actionButton("help_doc_explore", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore', '_blank')"),
+             actionButton("help_doc_explore", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#visualize-and-explore', '_blank')"),
              h4("Step 3: Exporting your data", style = "font-weight: bold"),
              h5("When you have either finished ranking your neoantigen candidates or need to pause and would like to save your current evaluations, 
                     you can export the current main aggregate report using the export page."),
@@ -66,7 +66,7 @@ upload_tab <- tabItem(
                     The excel format is user-friendly for downstream visualization and manipulation. However, if you plan on to continuing editing the aggregate report 
                     and would like to load it back in pVACview with the previous evaluations preloaded, you will <b>need</b> to download the file in a <b>tsv format</b>. 
                     This serves as a way to save your progress as your evaluations are cleared upon closing or refreshing the pVACview app.</h5>"),
-             actionButton("help_doc_export", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#export', '_blank')")
+             actionButton("help_doc_export", "More details", onclick = "window.open('https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#export', '_blank')")
            )
     ),
   )
@@ -100,7 +100,7 @@ explore_tab <- tabItem(
                     uiOutput("percentile_threshold_ui"),
                     uiOutput("dna_cutoff_ui"),
                     uiOutput("allele_expr_ui"),
-                    h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/getting_started.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
+                    h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
                     actionButton("submit", "Recalculate Tiering with new parameters"),
                     style = "overflow-x: scroll;font-size:100%"),
                 style = "padding:0px;"
@@ -159,7 +159,6 @@ explore_tab <- tabItem(
                 status = "primary", solidHeader = TRUE, collapsible = TRUE,
                 enable_sidebar = TRUE, sidebar_width = 25, sidebar_start_open = TRUE,
                 dropdownMenu = boxDropdown(boxDropdownItem("Help", id = "help", icon = icon("question-circle"))),
-                selectInput("page_length", "Number of variants displayed per page:", selected = "10", c("10", "20", "50", "100"), width = "280px"),
                 DTOutput("mainTable") %>% withSpinner(color = "#8FCCFA"),
                 span("Currently investigating row: ", verbatimTextOutput("selected")),
                 style = "overflow-x: scroll;font-size:100%")
@@ -225,7 +224,7 @@ explore_tab <- tabItem(
                         fluidRow(
                             column(width = 6,
                                    div(style = 'overflow-y:scroll;height: 500px;',
-                                       h4("Allele specific anchor prediction heatmap for top 20 candidates in peptide table."),
+                                       h4("Allele specific anchor prediction heatmap for top 15 candidates in peptide table."),
                                        h5("HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
                                           " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
                                        plotOutput(outputId = "peptideFigureLegend", height = "50px"),
@@ -435,8 +434,8 @@ tutorial_tab <- tabItem("tutorial",
                    "The Hits table will display the peptides that match the query sequence and the genes, transcripts, and Hit IDs of the found matches.")
           ),
           column(width = 9,
-                 img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Reference_Match.png",
-                     align = "center", height = "300px", width = "1200px"),
+                 img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Reference_Match.png",
+                     align = "center", width = "1200px"),
           )
         )
     ),
@@ -651,18 +650,25 @@ tutorial_tab <- tabItem("tutorial",
         The module expects all all NeoFox annotated features to be in in the file and can handle input with other annotations
         you might append to the neoantigen candidates."
       ),
-      img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-neofox-table-violinplot.png?raw=true", align = "center", width = "1500px"),
+      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-maintable.png?raw=true", align = "center", width = "1500px"),
       h4("Features", style = "font-weight: bold; text-decoration: underline;"),
       h5("Annotated Neoantigen Table", style = "font-weight: bold;"),
       p("The annotated neoantigen table is generated as output from NeoFox and includes many annotations based on published neoantigen features. 
         You can page through the candidates, sort by any feature, and select one or more candidates for further investgation. We have marked the 
-        features we find most informative with an asterick. "
+        features we find most informative with an asterisk. These columns are selected by default but additional columns can be selected using
+        the \"Column Visibility\" dropdown."
+      ),
+      p("Colored heatmap cell backgrounds on binding affinity and rank columns indicate where the value falls in comparison to the default 500 nM
+        binding affinity and 0.5 percentile thresholds, respectively. Green background colors indicate a value below the threshold while yellow to
+        red colors indicate a progressively higher value above the threshold. Horizontal barplot backgrounds on the expression and VAF columns
+        reflect how close the values are to the \"ideal\" values of 50 and 1, respectively."
       ),
       h5("Comparative Violin Plots", style = "font-weight: bold;"),
       p("You can understand how selected candidates relate to the the rest of the dataset using the comparative violin plots. You can select as many candidates 
         as you would like which will then be highlighted in red in the violin plots. You can also select up to six features to view at a time. We have pre-selected
         five features which we found informative. "
       ),
+      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-table-violinplot.png?raw=true", align = "center", width = "1500px"),
       h5("Dynamic Scatter Plot", style = "font-weight: bold;"),
       p("You can also further investigate the data using the dynamic scatter plot where you can choose any feature to be the X-axis, Y-axis,
         color, or size variable. The X and Y scale can be transformed and a range of values subsetted. The color represents the minimum
@@ -671,7 +677,20 @@ tutorial_tab <- tabItem("tutorial",
       p("To view information about different points on the plot simply mouse over individual points. You can also export the current scatter plot 
         by using the camera icon at the top right corner of the plot."
       ),
-        img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png?raw=true", align = "center", width = "1500px")
+      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png?raw=true", align = "center", width = "1500px"),
+      h5("Evaluation and Commenting", style = "font-weight: bold;"),
+      p("The evaluation buttons at the right of each candidate row can be used to capture the final decision on whether to accept, reject, or 
+        further review the candidate. The total counts for each type of evaluation are displayed in the \"Peptide Evaluation Overview\" panel."
+      ),
+      p("You are able to leave a comment on all selected candidates by using the form in the panel on the top right of the page. This panel also displays
+        the comments left on each selected candidate. Both the selected evaluation and comment are included in the exported table."),
+      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-evaluation.png?raw=true", align = "center", width = "1500px"),
+      h5("Exporting", style = "font-weight: bold;"),
+      p("After investigating and evaluating your candidates, you can export the main table, including the final evaluation and comment for each candidate.
+        After browsing to the \"Export Data\" tab, click the \"Download as TSV\" or \"Download as excel\" button to download the table in your desired
+        file format."
+      ),
+      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-export.png?raw=true", align = "center", width = "1500px")
     ),
     tabPanel("Custom Module",
         fluidRow(

@@ -34,6 +34,17 @@ neofox_tab <- tabItem("neofox",
         ),
         tabPanel(title = "Explore Data", value = "neofox_explore",
             fluidRow(
+                box(width = 4, solidHeader = TRUE, title = "Peptide Evaluation Overview", status = "primary",
+                    tableOutput("neofox_checked"), style = "overflow-x: scroll;font-size:100%"),
+                box(width = 8,
+                    title = "Add Comments for last selected variant(s)",
+                    status = "primary", solidHeader = TRUE, collapsible = TRUE,
+                    textAreaInput("neofox_comments", label = "Please add/update your comments for the selected variant(s)", value = ""),
+                    actionButton("neofox_comment", "Update Comment Section"),
+                    h5("Comment:"), tableOutput("neofox_comment_text"),
+                    style = "font-size:100%")
+            ),
+            fluidRow(
                     box(width = 12,
                         title = "Annotated Neoantigen Candidates using NeoFox",
                         status = "primary", solidHeader = TRUE, collapsible = TRUE,
@@ -42,22 +53,18 @@ neofox_tab <- tabItem("neofox",
                         DTOutput("neofoxTable") %>% withSpinner(color = "#8FCCFA"),
                         span("Currently investigating row(s): ", verbatimTextOutput("neofox_selected")),
                         style = "overflow-x: scroll;font-size:100%",
-                        "* indicates variable of interested designated by authors"
+                        "* indicates variable of interest designated by authors"
                         )
-                    
             ),
-
             fluidRow(
               box(width = 12, 
                   title = "Comparative Violin Plots",  status = "primary", solidHeader = TRUE, collapsible = TRUE,
                   h4("Violin Plots showing distribution of various neoantigen features for selected variants."),
                   uiOutput("noefox_features_ui"),
                   plotOutput(outputId = "neofox_violin_plots_row1") %>% withSpinner(color = "#8FCCFA"),
-                  "* indicates variable of interested designated by authors"
+                  "* indicates variable of interest designated by authors"
                   )
-              
             ),
-            
             fluidRow(
               box(width = 12,
                   title = "Dynamic Scatter Plot", status = "primary", solidHeader = TRUE, collapsible = TRUE,
@@ -77,16 +84,24 @@ neofox_tab <- tabItem("neofox",
                       uiOutput("max_color"),
                       # size
                       uiOutput("size_neofox"),
-                      "* indicates variable of interested designated by authors"
+                      "* indicates variable of interest designated by authors"
                     ),
                     mainPanel(
                       align = "center",
                       plotlyOutput(outputId = "scatter", height = "800px") %>% withSpinner(color = "#8FCCFA"),
                     )
-                  
               )
             )
-
+        ),
+        ## EXPORT TAB ##
+        tabPanel(title = "Export Data", value = "neofox_export",
+          fluidRow(
+            textInput("exportNeofoxFileName", "Export filename: ", value = "Annotated.Neoantigen_Candidates", width = NULL, placeholder = NULL)
+          ),
+          fluidRow(
+            column(12,
+                   DTOutput("NeofoxExportTable") %>% withSpinner(color = "#8FCCFA"))
+          )
         )
     )
 )
