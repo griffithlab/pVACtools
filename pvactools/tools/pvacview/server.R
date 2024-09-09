@@ -144,7 +144,7 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
     columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
-                        "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
+                        "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
     if ("Comments" %in% colnames(df$mainTable)) {
       columns_needed <- c(columns_needed, "Comments")
@@ -235,7 +235,7 @@ server <- shinyServer(function(input, output, session) {
          df$mainTable$`Ref Match` <- "Not Run"
        }
        columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
-                           "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
+                           "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                            "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
        if ("Comments" %in% colnames(df$mainTable)) {
          columns_needed <- c(columns_needed, "Comments")
