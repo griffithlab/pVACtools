@@ -1,7 +1,7 @@
 ID	DRB1*11:01	E*01:01	G*01:09	Best Peptide	Prob Pos	Num Included Peptides	Num Passing Peptides	IC50 MT	%ile MT	Tier	Evaluation
 41	6	2	1	GWEFLASTRLTSELN	None	9	5	4.800	0.210	Pass	Pending
 42	7	2	2	GWEFLAFTRLTSELN	None	11	6	5.600	0.340	Pass	Pending
-30	608	180	85	RRNWIEALRKTVRPT	None	848	208	6.900	0.610	Pass	Pending
+30	15			RRNWIEALRKTVRPT	None	15	15	6.900	0.610	Pass	Pending
 44	7	1	2	VSLFGALVRSRTYDM	None	10	6	16.700	2.850	Pass	Pending
 44_duplicate	7	1	2	VSLFGALVRSRTYDM	None	10	6	16.700	2.850	Pass	Pending
 40	7			KTTVVVTTQKRNSRR	None	7	7	24.000	4.390	Pass	Pending

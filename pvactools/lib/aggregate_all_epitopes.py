@@ -217,6 +217,7 @@ class AggregateAllEpitopes:
                 'vaf_subclonal': round(vaf_clonal/2, 3),
                 'binding_threshold': self.binding_threshold,
                 'aggregate_inclusion_binding_threshold': self.aggregate_inclusion_binding_threshold,
+                'aggregate_inclusion_count_limit': self.aggregate_inclusion_count_limit,
                 'trna_vaf': self.trna_vaf,
                 'trna_cov': self.trna_cov,
                 'allele_expr_threshold': self.allele_expr_threshold,
@@ -271,6 +272,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             allele_specific_anchors=False,
             anchor_contribution_threshold=0.8,
             aggregate_inclusion_binding_threshold=5000,
+            aggregate_inclusion_count_limit=15,
         ):
         self.input_file = input_file
         self.output_file = output_file
@@ -279,6 +281,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.percentile_threshold = percentile_threshold
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
+        self.aggregate_inclusion_count_limit = aggregate_inclusion_count_limit
         self.allele_expr_threshold = trna_vaf * expn_val * 10
         self.trna_cov = trna_cov
         self.trna_vaf = trna_vaf
@@ -387,7 +390,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             anchor_residue_pass_df = prob_pos_df
 
         #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
-        anchor_residue_pass_df.sort_values(by=["{} MT IC50 Score".format(self.mt_top_score_metric), "Transcript Support Level", "Transcript Length"], inplace=True, ascending=[True, True, False])
+        anchor_residue_pass_df.sort_values(by=[
+            "{} MT IC50 Score".format(self.mt_top_score_metric),
+            "Transcript Support Level",
+            "Transcript Length",
+        ], inplace=True, ascending=[True, True, False])
         return anchor_residue_pass_df.iloc[0].to_dict()
 
     def is_anchor_residue_pass(self, mutation):
@@ -509,7 +516,53 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return "Poor"
 
     def get_included_df(self, df):
-        return df[df["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold]
+        binding_df = df[df["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold]
+        if binding_df.shape[0] == 0:
+            return binding_df
+        else:
+            peptides = list(set(binding_df["MT Epitope Seq"]))
+            if len(peptides) <= self.aggregate_inclusion_count_limit:
+                return binding_df
+
+            best_peptide_entries = []
+            for peptide in peptides:
+                peptide_df = binding_df[binding_df["MT Epitope Seq"] == peptide]
+                best_peptide_entries.append(self.get_best_binder(peptide_df))
+            best_peptide_entries_df = pd.DataFrame(best_peptide_entries)
+            top_n_best_peptide_entries_df = self.sort_included_df(best_peptide_entries_df).iloc[:self.aggregate_inclusion_count_limit]
+            top_n_best_peptides = list(set(top_n_best_peptide_entries_df["MT Epitope Seq"]))
+            return binding_df[binding_df["MT Epitope Seq"].isin(top_n_best_peptides)]
+
+    def sort_included_df(self, df):
+        df['biotype_sort'] = df['Biotype'].apply(lambda x: 1 if x == 'protein_coding' else 2)
+        df['tsl_sort'] = df['Transcript Support Level'].apply(lambda x: 6 if pd.isnull(x) or x == 'Not Supported' else int(x))
+        if self.problematic_positions_exist():
+            df['problematic_positions_sort'] = df['Problematic Positions'].apply(lambda x: 1 if x == "None" else 2)
+        df['anchor_residue_pass_sort'] = df.apply(lambda x: 1 if self.is_anchor_residue_pass(x) else 2, axis=1)
+        if self.problematic_positions_exist():
+            sort_columns = [
+                "biotype_sort",
+                "tsl_sort",
+                "problematic_positions_sort",
+                "anchor_residue_pass_sort",
+                "{} MT IC50 Score".format(self.mt_top_score_metric),
+                "Transcript Length",
+                "{} MT Percentile".format(self.mt_top_score_metric),
+            ]
+            sort_order = [True, True, True, True, True, False, True]
+        else:
+            sort_columns = [
+                "biotype_sort",
+                "tsl_sort",
+                "anchor_residue_pass_sort",
+                "{} MT IC50 Score".format(self.mt_top_score_metric),
+                "Transcript Length",
+                "{} MT Percentile".format(self.mt_top_score_metric),
+            ]
+            sort_order = [True, True, True, True, False, True]
+        df.sort_values(by=sort_columns, inplace=True, ascending=sort_order)
+        df.drop(columns = ['biotype_sort', 'tsl_sort', 'problematic_positions_sort', 'anchor_residue_pass_sort'], inplace=True, errors='ignore')
+        return df
 
     def get_unique_peptide_hla_counts(self, included_df):
         return pd.DataFrame(included_df.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
@@ -775,6 +828,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
             aggregate_inclusion_binding_threshold=5000,
+            aggregate_inclusion_count_limit=15,
         ):
         self.input_file = input_file
         self.output_file = output_file
@@ -782,6 +836,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         self.percentile_threshold = percentile_threshold
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
+        self.aggregate_inclusion_count_limit = aggregate_inclusion_count_limit
         if top_score_metric == 'median':
             self.top_score_metric = "Median"
         else:
@@ -812,7 +867,26 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return df.iloc[0]
 
     def get_included_df(self, df):
-        return df[df["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold]
+        binding_df = df[df["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold]
+        if binding_df.shape[0] == 0:
+            return binding_df
+        else:
+            peptides = list(set(binding_df["Epitope Seq"]))
+            if len(peptides) <= self.aggregate_inclusion_count_limit:
+                return binding_df
+
+            best_peptide_entries = []
+            for peptide in peptides:
+                peptide_df = binding_df[binding_df["Epitope Seq"] == peptide]
+                best_peptide_entries.append(self.get_best_binder(peptide_df))
+            best_peptide_entries_df = pd.DataFrame(best_peptide_entries)
+            top_n_best_peptide_entries_df = self.sort_included_df(best_peptide_entries_df).iloc[:self.aggregate_inclusion_count_limit]
+            top_n_best_peptides = list(set(top_n_best_peptide_entries_df["Epitope Seq"]))
+            return binding_df[binding_df["Epitope Seq"].isin(top_n_best_peptides)]
+
+    def sort_included_df(self, df):
+        df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
+        return df
 
     def get_unique_peptide_hla_counts(self, included_df):
         return pd.DataFrame(included_df.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
@@ -874,7 +948,8 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         top_score_metric="median",
         read_support=5,
         expn_val=0.1,
-        aggregate_inclusion_binding_threshold=5000
+        aggregate_inclusion_binding_threshold=5000,
+        aggregate_inclusion_count_limit=15,
     ):
         UnmatchedSequenceAggregateAllEpitopes.__init__(
             self,
@@ -884,7 +959,8 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             percentile_threshold=percentile_threshold,
             allele_specific_binding_thresholds=allele_specific_binding_thresholds,
             top_score_metric=top_score_metric,
-            aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold
+            aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
+            aggregate_inclusion_count_limit=aggregate_inclusion_count_limit,
         )
         self.read_support = read_support
         self.expn_val = expn_val
