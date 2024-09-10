@@ -3,7 +3,7 @@ ID	DRB1*11:01	Best Peptide	Prob Pos	Num Included Peptides	Num Passing Peptides	I
 41	7	GWEFLASTRLTSELN	None	7	7	15.400	1.400	Pass	True	Pending
 42	7	GWEFLAFTRLTSELN	None	7	7	16.200	1.600	Pass	True	Pending
 40	7	TTVVVTTQKRNSRRQ	None	7	6	18.200	1.800	Pass	True	Pending
-30	670	WRDLLGLLRAPGEGV	None	670	190	18.600	1.800	Pass	True	Pending
+30	15	WRDLLGLLRAPGEGV	None	15	15	18.600	1.800	Pass	True	Pending
 44	7	SLFGALVRSRTYDMD	None	7	6	31.000	3.200	Pass	True	Pending
 44_duplicate	7	SLFGALVRSRTYDMD	None	7	6	31.000	3.200	Pass	True	Pending
 25	7	SHLSYLSVRGGFNMS	None	7	5	68.400	6.600	Pass	True	Pending
