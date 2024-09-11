@@ -220,7 +220,7 @@ The candidate being investigated has a good binding affinity (median IC50 score 
     :figclass: align-left
 
 The mutation is not in an anchor position (see ``Anchor heatmap`` tab). A list of anchor positions for each allele-length combination
-is previded in the ``Anchor Positions`` panel below. Additional, the underlying anchor prediction scores for each amino acid position are
+is provided in the ``Anchor Positions`` panel below. Additionally, the underlying anchor prediction scores for each amino acid position are
 provided in the ``Anchor Weights`` panel at the bottom. Both mutant and wildtype peptides are good binders, yet the mutant peptide
 is a stronger binder. This is scenario number 2 (WT strong binder, MT strong binder, MT not in an anchor position) according to the Scenario
 Guide, where the neoantigen candidate is favorable and can be accepted.
