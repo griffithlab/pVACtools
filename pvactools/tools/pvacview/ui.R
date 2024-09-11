@@ -233,7 +233,7 @@ explore_tab <- tabItem(
                             ) %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll; overflow-y: scroll",
                             column(width = 6,
                                    h4("Anchor vs Mutation position Scenario Guide",
-                                      img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/anchor.jpg",
+                                      img(src = "https://github.com/griffithlab/pVACtools/raw/f19788ccdb313a14a57350557cd70e1aa6bdca9a/pvactools/tools/pvacview/www/anchor.jpg",
                                           align = "center", width = "100%")
                                    )
                             )
@@ -579,7 +579,7 @@ tutorial_tab <- tabItem("tutorial",
                 p(strong("Scenario 4 : "), code(" I + III"), strong(" -> Accept"))
             ),
             column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/anchor.jpg",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/f19788ccdb313a14a57350557cd70e1aa6bdca9a/pvactools/tools/pvacview/www/anchor.jpg",
                     align = "center", height = "350px", width = "600px"), br(), br()
             )
         )
