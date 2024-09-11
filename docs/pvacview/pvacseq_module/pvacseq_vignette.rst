@@ -219,7 +219,11 @@ The candidate being investigated has a good binding affinity (median IC50 score 
     :alt: pVACview Vignette
     :figclass: align-left
 
-The mutation is not in an anchor position (see ``Anchor heatmap`` tab). Anchor prediction scores for each amino acid position are provided in the ``Anchor Weights`` tab at the bottom. Both mutant and wildtype peptides are good binders, yet the mutant peptide is a stronger binder. This is scenario number 2 (WT strong binder, MT strong binder, MT not in an anchor position) according to the Scenario Guide, where the neoantigen candidate is favorable and can be accepted.
+The mutation is not in an anchor position (see ``Anchor heatmap`` tab). A list of anchor positions for each allele-length combination
+is previded in the ``Anchor Positions`` panel below. Additional, the underlying anchor prediction scores for each amino acid position are
+provided in the ``Anchor Weights`` panel at the bottom. Both mutant and wildtype peptides are good binders, yet the mutant peptide
+is a stronger binder. This is scenario number 2 (WT strong binder, MT strong binder, MT not in an anchor position) according to the Scenario
+Guide, where the neoantigen candidate is favorable and can be accepted.
 
 .. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_5_AnchorHeatmap.png
     :width: 1000px
@@ -330,7 +334,9 @@ The candidate also has good elution scores (elution scores close to 1). It's unc
     :alt: pVACview Vignette
     :figclass: align-left
 
-Altogether, both the candidate (mutant peptide - MT) and its wildtype (WT) peptide are strong binders. The figure below shows the mutated amino acid (V) in the candidate is not in an anchor position. This fits into Scenario 4 in the guide, where the candidate is likely to elicit strong recognition from the immune system.
+Altogether, both the candidate (mutant peptide - MT) and its wildtype (WT) peptide are strong binders. The figure below shows the mutated
+amino acid (V) in the candidate (AERMGFTVV) is not in an anchor position for allele HLA-B*45:01. This fits into Scenario 4 in the guide,
+where the candidate is likely to elicit strong recognition from the immune system.
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_5_AnchorHeatmap_TranscriptSet1.png
     :width: 1000px
