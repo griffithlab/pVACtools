@@ -254,7 +254,7 @@ server <- shinyServer(function(input, output, session) {
        rownames(df$comments) <- df$mainTable$ID
        incProgress(0.2)
        ## Class II additional demo aggregate report
-       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/646536796a15bf61cef4ee69bb8c9cab7da99a01/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
        addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(addData) <- addData[1, ]
        addData <- addData[-1, ]
