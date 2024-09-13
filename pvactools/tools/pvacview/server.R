@@ -930,6 +930,9 @@ server <- shinyServer(function(input, output, session) {
   })
   ##Add legend for anchor heatmap
   output$peptideFigureLegend <- renderPlot({
+    if (is.null(df$metricsData)) {
+      return()
+    }
     colors <- colorRampPalette(c("lightblue", "blue"))(99)[seq(1, 99, 7)]
     color_pos <- data.frame(d = as.character(seq(1, 99, 7)), x1 = seq(0.1, 1.5, 0.1), x2 = seq(0.2, 1.6, 0.1), y1 = rep(1, 15), y2 = rep(1.1, 15), colors = colors)
     color_label <- data.frame(x = c(0.1, 0.8, 1.6), y = rep(0.95, 3), score = c(0, 0.5, 1))
@@ -944,7 +947,15 @@ server <- shinyServer(function(input, output, session) {
     print(p1)
   })
   ##Anchor Heatmap overlayed on selected peptide sequences
-  output$anchorPlot <- renderPlot({
+  anchorPlotHeight <- reactive({
+    if (is.null(df$metricsData)) {
+      return(0)
+    }
+    peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
+    peptide_names <- names(peptide_data)
+    (length(peptide_names)) * 2 * 15
+  })
+  observe({output$anchorPlot <- renderPlot({
     if (is.null(df$metricsData)) {
       return()
     }
@@ -964,7 +975,7 @@ server <- shinyServer(function(input, output, session) {
           peptide_data[[peptide_names[[i]]]]$individual_el_percentile_calls <- NULL
         }
         peptide_data <- as.data.frame(peptide_data)
-        p1 <- ggplot() + scale_x_continuous(limits = c(0, 80)) + scale_y_continuous(limits = c(-31, 1))
+        p1 <- ggplot() + scale_x_continuous(limits = c(0, 80)) + scale_y_continuous(limits = c((length(peptide_names) * 2 + 1) * -1, 1))
         all_peptides <- list()
         incProgress(0.1)
         for (i in 1:length(peptide_names)) {
@@ -1028,7 +1039,7 @@ server <- shinyServer(function(input, output, session) {
         print(p1)
       }
     })
-  }, height = 400, width = 800)
+  }, height = anchorPlotHeight(), width = 800)})
   #anchor score tables for each HLA allele
   output$anchorWeights<- renderDT({
     withProgress(message = "Loading Anchor Weights Table", value = 0, {
