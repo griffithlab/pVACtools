@@ -34,3 +34,20 @@ This release also fixes the following bug(s):
   alpha-beta-chain pairs. This update once again enables automatic combination
   of DP and DQ alleles in to alpha and beta chain pairs.
   by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1139
+
+Version 4.4.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- Previously, pVACview would add an additional header line to Excel spreadsheets
+  when exporting a TSV. This has been fixed so that the first line in the spreadsheet
+  is the actual header line.
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1143
+- One of the pVACview figures used to describe various anchor scenarios has been updated
+  so that the ordering of the scenarios is consistent with other figures and descriptions
+  throughout. Screenshots and documentation has been updated appropriately.
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1144
+- The class II pVACview demo data was out-of-date and not reflecting recent updates to the
+  HLA alpha-beta chain handling. This file has now been updated.
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1145
