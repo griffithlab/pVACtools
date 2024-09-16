@@ -1181,7 +1181,7 @@ server <- shinyServer(function(input, output, session) {
         binding_data["Score"] <- paste(round(as.numeric(binding_data$`IC50 Score`), 2), " (%: ", round(as.numeric(binding_data$`% Score`), 2), ")", sep = "")
         binding_data["IC50 Score"] <- NULL
         binding_data["% Score"] <- NULL
-        binding_reformat <- dcast(binding_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+        binding_reformat <- reshape2::dcast(binding_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
         incProgress(1)
         dtable <- datatable(binding_reformat, options = list(
           pageLength = 10,
@@ -1245,7 +1245,7 @@ server <- shinyServer(function(input, output, session) {
           elution_data["Score"] <- paste(round(as.numeric(elution_data$`Elution Score`), 2), " (%: ", round(as.numeric(elution_data$`% Score`), 2), ")", sep = "")
           elution_data["Elution Score"] <- NULL
           elution_data["% Score"] <- NULL
-          elution_reformat <- dcast(elution_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+          elution_reformat <- reshape2::dcast(elution_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
           incProgress(1)
           dtable <- datatable(elution_reformat, options = list(
             pageLength = 10,
