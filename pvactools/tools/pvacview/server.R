@@ -884,9 +884,10 @@ server <- shinyServer(function(input, output, session) {
         peptide_names <- names(peptide_data)
         for (i in 1:length(peptide_names)) {
           peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
-          peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_ic50_percentile_calls <- NULL
           peptide_data[[peptide_names[[i]]]]$individual_el_calls <- NULL
           peptide_data[[peptide_names[[i]]]]$individual_el_percentile_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
         }
         incProgress(0.5)
         peptide_data <- as.data.frame(peptide_data)
@@ -970,9 +971,10 @@ server <- shinyServer(function(input, output, session) {
         peptide_names <- names(peptide_data)
         for (i in 1:length(peptide_names)) {
           peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
-          peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_ic50_percentile_calls <- NULL
           peptide_data[[peptide_names[[i]]]]$individual_el_calls <- NULL
           peptide_data[[peptide_names[[i]]]]$individual_el_percentile_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
         }
         peptide_data <- as.data.frame(peptide_data)
         p1 <- ggplot() + scale_x_continuous(limits = c(0, 80)) + scale_y_continuous(limits = c((length(peptide_names) * 2 + 1) * -1, 1))
@@ -1114,6 +1116,23 @@ server <- shinyServer(function(input, output, session) {
   ##updating percentile binding score for selected peptide pair
   bindingScoreDataPercentile <- reactive({
     if (length(df$metricsData[[selectedID()]]$sets) != 0) {
+      algorithm_names <- data.frame(algorithms = selectedPeptideData()$individual_ic50_percentile_calls$algorithms)
+      wt_data <- as.data.frame(selectedPeptideData()$individual_ic50_percentile_calls$WT, check.names = FALSE)
+      colnames(wt_data) <- paste(colnames(wt_data), "_WT_Score", sep = "")
+      mt_data <- as.data.frame(selectedPeptideData()$individual_ic50_percentile_calls$MT, check.names = FALSE)
+      colnames(mt_data) <- paste(colnames(mt_data), "_MT_Score", sep = "")
+      full_data <- cbind(algorithm_names, mt_data, wt_data) %>%
+        gather("col", "val", colnames(mt_data)[1]:tail(colnames(wt_data), n = 1)) %>%
+        separate(col, c("HLA_allele", "Mutant", "Score"), sep = "\\_") %>%
+        spread("Score", val)
+      full_data
+    }else {
+      return()
+    }
+  })
+  ##updating combined BA and EL percentile binding score for selected peptide pair
+  combinedBindingElutionDataPercentile <- reactive({
+    if (length(df$metricsData[[selectedID()]]$sets) != 0) {
       algorithm_names <- data.frame(algorithms = selectedPeptideData()$individual_percentile_calls$algorithms)
       wt_data <- as.data.frame(selectedPeptideData()$individual_percentile_calls$WT, check.names = FALSE)
       colnames(wt_data) <- paste(colnames(wt_data), "_WT_Score", sep = "")
@@ -1133,12 +1152,12 @@ server <- shinyServer(function(input, output, session) {
     withProgress(message = "Loading Binding Score Plot (Percentile)", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
         line.data <- data.frame(yintercept = c(0.5, 2), Cutoffs = c("0.5%", "2%"), color = c("#28B463", "#EC7063"))
-        hla_allele_count <- length(unique(bindingScoreDataPercentile()$HLA_allele))
+        hla_allele_count <- length(unique(combinedBindingElutionDataPercentile()$HLA_allele))
         incProgress(0.5)
-        p <- ggplot(data = bindingScoreDataPercentile(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
+        p <- ggplot(data = combinedBindingElutionDataPercentile(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
           stat_summary(fun.y = mean, fun.ymin = mean, fun.ymax = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
-          geom_jitter(data = bindingScoreDataPercentile(), aes(shape = algorithms), size = 5, stroke = 1, position = position_jitter(0.3)) +
-          scale_shape_manual(values = 0:8) +
+          geom_jitter(data = combinedBindingElutionDataPercentile(), aes(shape = algorithms), size = 5, stroke = 1, position = position_jitter(0.3)) +
+          scale_shape_manual(values = 0:10) +
           geom_hline(aes(yintercept = yintercept, linetype = Cutoffs), line.data, color = rep(line.data$color, hla_allele_count)) +
           scale_color_manual(values = rep(c("MT" = "#D2B4DE", "WT" = "#F7DC6F"), hla_allele_count)) +
           theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
