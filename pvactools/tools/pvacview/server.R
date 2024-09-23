@@ -24,7 +24,7 @@ options(shiny.port = 3333)
 server <- shinyServer(function(input, output, session) {
   ## pVACtools version
 
-  output$version <- renderText({"pVACtools version 4.4.1"})
+  output$version <- renderText({"pVACtools version 4.4.0"})
 
   ##############################DATA UPLOAD TAB###################################
   ## helper function defined for generating shinyInputs in mainTable (Evaluation dropdown menus)
@@ -144,7 +144,7 @@ server <- shinyServer(function(input, output, session) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
     columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
-                        "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
+                        "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
     if ("Comments" %in% colnames(df$mainTable)) {
       columns_needed <- c(columns_needed, "Comments")
@@ -190,7 +190,7 @@ server <- shinyServer(function(input, output, session) {
      ## Class I demo aggregate report
      #session$sendCustomMessage("unbind-DT", "mainTable")
      withProgress(message = "Loading Demo Data", value = 0, {
-       load(url("https://github.com/griffithlab/pVACtools/raw/e4761c6eaea9d2868db3ffe3c410211f5bb4351f/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
+       load(url("https://github.com/griffithlab/pVACtools/raw/90f2004009cf7974be27e4ec7ad88c54dc317d1d/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
        incProgress(0.3)
        #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
        #mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
@@ -235,7 +235,7 @@ server <- shinyServer(function(input, output, session) {
          df$mainTable$`Ref Match` <- "Not Run"
        }
        columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
-                           "Pos", "Prob Pos", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
+                           "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                            "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
        if ("Comments" %in% colnames(df$mainTable)) {
          columns_needed <- c(columns_needed, "Comments")
@@ -254,7 +254,7 @@ server <- shinyServer(function(input, output, session) {
        rownames(df$comments) <- df$mainTable$ID
        incProgress(0.2)
        ## Class II additional demo aggregate report
-       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/646536796a15bf61cef4ee69bb8c9cab7da99a01/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c7a8455876a37d31400b2d38194d5d9ad780ab7c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
        addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(addData) <- addData[1, ]
        addData <- addData[-1, ]
@@ -930,6 +930,9 @@ server <- shinyServer(function(input, output, session) {
   })
   ##Add legend for anchor heatmap
   output$peptideFigureLegend <- renderPlot({
+    if (is.null(df$metricsData)) {
+      return()
+    }
     colors <- colorRampPalette(c("lightblue", "blue"))(99)[seq(1, 99, 7)]
     color_pos <- data.frame(d = as.character(seq(1, 99, 7)), x1 = seq(0.1, 1.5, 0.1), x2 = seq(0.2, 1.6, 0.1), y1 = rep(1, 15), y2 = rep(1.1, 15), colors = colors)
     color_label <- data.frame(x = c(0.1, 0.8, 1.6), y = rep(0.95, 3), score = c(0, 0.5, 1))
@@ -944,7 +947,15 @@ server <- shinyServer(function(input, output, session) {
     print(p1)
   })
   ##Anchor Heatmap overlayed on selected peptide sequences
-  output$anchorPlot <- renderPlot({
+  anchorPlotHeight <- reactive({
+    if (is.null(df$metricsData)) {
+      return(0)
+    }
+    peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
+    peptide_names <- names(peptide_data)
+    (length(peptide_names)) * 2 * 15
+  })
+  observe({output$anchorPlot <- renderPlot({
     if (is.null(df$metricsData)) {
       return()
     }
@@ -964,7 +975,7 @@ server <- shinyServer(function(input, output, session) {
           peptide_data[[peptide_names[[i]]]]$individual_el_percentile_calls <- NULL
         }
         peptide_data <- as.data.frame(peptide_data)
-        p1 <- ggplot() + scale_x_continuous(limits = c(0, 80)) + scale_y_continuous(limits = c(-31, 1))
+        p1 <- ggplot() + scale_x_continuous(limits = c(0, 80)) + scale_y_continuous(limits = c((length(peptide_names) * 2 + 1) * -1, 1))
         all_peptides <- list()
         incProgress(0.1)
         for (i in 1:length(peptide_names)) {
@@ -1028,7 +1039,7 @@ server <- shinyServer(function(input, output, session) {
         print(p1)
       }
     })
-  }, height = 400, width = 800)
+  }, height = anchorPlotHeight(), width = 800)})
   #anchor score tables for each HLA allele
   output$anchorWeights<- renderDT({
     withProgress(message = "Loading Anchor Weights Table", value = 0, {
@@ -1438,8 +1449,7 @@ server <- shinyServer(function(input, output, session) {
                         extension = ".tsv"),
                    list(extend = "excel",
                         filename = input$exportFileName,
-                        text = "Download as excel",
-                        title = NULL)
+                        text = "Download as excel")
                  ),
                  initComplete = htmlwidgets::JS(
                    "function(settings, json) {",
@@ -2126,8 +2136,7 @@ server <- shinyServer(function(input, output, session) {
                         extension = ".tsv"),
                    list(extend = "excel",
                         filename = input$exportNeofoxFileName,
-                        text = "Download as excel",
-                        title = NULL)
+                        text = "Download as excel")
                  ),
                  initComplete = htmlwidgets::JS(
                    "function(settings, json) {",

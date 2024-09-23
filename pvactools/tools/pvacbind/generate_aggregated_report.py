@@ -44,6 +44,11 @@ def define_parser():
         default=5000,
     )
     parser.add_argument(
+        '--aggregate-inclusion-count-limit', type=int,
+        help="Limit neoantigen candidates included in the aggregate report to only the best n candidates per variant.",
+        default=15,
+    )
+    parser.add_argument(
         '-m', '--top-score-metric',
         choices=['lowest', 'median'],
         default='median',
@@ -69,6 +74,7 @@ def main(args_input = sys.argv[1:]):
         percentile_threshold=args.percentile_threshold,
         top_score_metric=args.top_score_metric,
         aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,
+        aggregate_inclusion_count_limit=args.aggregate_inclusion_count_limit,
     ).execute()
     print("Completed")
 

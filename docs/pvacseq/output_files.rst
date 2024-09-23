@@ -74,32 +74,10 @@ documentation for more information on each individual filter. The standalone
 filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
 
-Prediction Algorithms Supporting Percentile Information
-_______________________________________________________
-
-pVACseq outputs binding affinity percentile rank information when provided by
-a chosen prediction algorithm. The following prediction algorithms calculate a
-percentile rank:
-
-- MHCflurry
-- NetMHC
-- NetMHCcons
-- NetMHCpan
-- NetMHCIIpan
-- NNalign
-- PickPocket
-- SMM
-- SMMPMBEC
-- SMMalign
-
-The following prediction algorithms do not provide a percentile rank:
-
-- MHCnuggets
-
 Prediction Algorithms Supporting Elution Scores
 _______________________________________________
 
-- MHCflurryEL
+- MHCflurryEL (Presentation and Processing)
 - NetMHCpanEL
 - NetMHCIIpanEL
 - BigMHC_EL
@@ -112,6 +90,29 @@ ______________________________________________________
 
 Please note that when running pVACseq with only elution or immunogenicity algorithms, no
 aggregate report and pVACview files are created.
+
+Prediction Algorithms Supporting Percentile Information
+_______________________________________________________
+
+pVACseq outputs percentile rank information when provided by
+a chosen binding affinity, elution, or immunogenicity prediction algorithm.
+The following prediction algorithms calculate a
+percentile rank:
+
+- MHCflurry
+- MHCflurryEL (Presentation)
+- MHCnuggets
+- NetMHC
+- NetMHCcons
+- NetMHCpan
+- NetMHCpanEL
+- NetMHCIIpan
+- NetMHCIIpanEL
+- NNalign
+- PickPocket
+- SMM
+- SMMPMBEC
+- SMMalign
 
 .. _all_ep_and_filtered:
 
@@ -277,13 +278,23 @@ total number of well-scoring epitopes for each variant, the number of
 transcripts covered by those epitopes, as well as the HLA alleles that those
 epitopes are well-binding to. Lastly, the report will bin variants into tiers
 that offer suggestions as to the suitability of variants for use in vaccines.
-Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
-Whether the median or the lowest binding affinity metrics are output in the ``IC50 MT``,
-``IC50 WT``, ``%ile MT``, and ``%ile WT`` columns is controlled by the
-``--top-score-metric`` parameter.
 
-Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
-Whether the median or the lowest binding affinity metrics are output in the ``IC50 MT``,
+Only epitopes meeting the ``--aggregate-inclusion-binding-threshold`` are included in this report (default: 5000).
+If the number of unique epitopes for a mutation meeting this threshold exceeds the
+``--aggregate-inclusion-count-limit``, only the top n epitopes up to this
+limit are included (default: 15). The method for selecting the top n epitopes is analogous to
+the one used to determine the :ref:`best-scoring epitope <pvacseq_best_peptide>`. For
+each epitope of a mutation, all result entries (i.e. for different HLA
+alleles and transcripts) meeting the
+``--aggregate-inclusion-binding-threshold`` are considered and the best
+entry is selected. The selection of best entry for each epitope are then sorted
+by the transcript biotype, the transcript support level, whether or not the
+anchor criteria was passed, the MT IC50 score, the transcript length,
+and the MT percentile. From this sorted list the top n entries are selected up
+to the ``--aggregate-inclusion-count-limit``.
+
+Whether the median or the lowest binding affinity metrics are used for determining the
+included eptiopes, selecting the best-scoring epitope, and which values are output in the ``IC50 MT``,
 ``IC50 WT``, ``%ile MT``, and ``%ile WT`` columns is controlled by the
 ``--top-score-metric`` parameter.
 
@@ -322,8 +333,12 @@ Whether the median or the lowest binding affinity metrics are output in the ``IC
      - A list of positions in the Best Peptide that are problematic.
        ``None`` if the ``--problematic-pos`` parameter was not set during
        the pVACseq run
+   * - ``Num Included Peptides``
+     - The number of included peptides according to the
+       ``--aggregate-inclusion-binding-threshold`` and
+       ``--aggregate-inclusion-count-limit``
    * - ``Num Passing Peptides``
-     - The number of unique well-binding peptides for this mutation.
+     - The number of included peptides for this mutation that are well-binding.
    * - ``IC50 MT``
      - Median or lowest ic50 binding affinity of the best-binding mutant epitope across all prediction algorithms used
    * - ``IC50 WT``
@@ -355,7 +370,8 @@ Best Peptide Criteria
 _____________________
 
 To determine the Best Peptide, all peptides meeting the
-``--aggregate-inclusion-threshold`` are evaluated as follows:
+``--aggregate-inclusion-threshold`` and ``--aggregate-inclusion-count-limit``
+(see above) are evaluated as follows:
 
 - Pick all entries with a variant transcript that have a ``protein_coding`` Biotype
 - Of the remaining entries, pick the ones with a variant transcript having
