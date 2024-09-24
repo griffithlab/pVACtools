@@ -145,8 +145,8 @@ There are five different tabs in this section of the app, providing peptide-leve
 
 - :bold:`IC50 Plot:`
 
-  Shown in this tab are violin plots of the individual IC50-based binding affinity predictions of the MT and WT peptides for HLA alleles were the MT binds well to.
-  These peptides each have up to 8 binding algorithm scores for Class I alleles or up to 4 algorithm scores for Class II alleles.
+  Shown in this tab are violin plots of the individual IC50-based binding affinity predictions of the MT and WT peptides for HLA alleles that have predictions
+  included in the aggregate report. These peptides each have up to 8 binding algorithm scores for Class I alleles or up to 4 algorithm scores for Class II alleles.
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_1.png
       :width: 1000px
@@ -157,8 +157,9 @@ There are five different tabs in this section of the app, providing peptide-leve
 
 - :bold:`%ile Plot:`
 
-  Shown in this tab are violin plots of the individual percentile-based binding affinity predictions of the MT and WT peptides for HLA alleles were the MT binds well to.
-  These peptides each have up to 8 binding algorithm scores for Class I alleles or up to 4 algorithm scores for Class II alleles.
+  Shown in this tab are violin plots of the individual percentile-based binding affinity and elution predictions
+  of the MT and WT peptides for HLA alleles that have predictions included in the aggregate report. These peptides
+  each have up to 10 binding and elution algorithm scores for Class I alleles or up to 4 algorithm scores for Class II alleles.
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_2.png
       :width: 1000px

@@ -78,7 +78,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -126,6 +126,32 @@
                 "HLA-G*01:09": []
               }
             },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  0.17000000178813934,
+                  1.399999976158142
+                ],
+                "HLA-G*01:09": [
+                  "NA",
+                  6.800000190734863
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  0.33,
+                  2.2
+                ],
+                "HLA-G*01:09": [
+                  "NA",
+                  6.9
+                ]
+              }
+            },
             "wt_peptide": "LLPLLLLLL"
           },
           "LLPLLLLLG": {
@@ -170,7 +196,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -204,6 +230,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  14.0,
+                  5.900000095367432
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  60.0,
+                  81.0
+                ]
               }
             },
             "wt_peptide": "LPLLLLLLG"
@@ -744,7 +788,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -778,6 +822,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  24.0,
+                  1.399999976158142
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  20.0,
+                  0.5
+                ]
               }
             },
             "wt_peptide": "WTRSRDPEG"
@@ -873,7 +935,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -907,6 +969,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  3.299999952316284
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  12.0
+                ]
               }
             },
             "wt_peptide": "LAYCLQKCN"
@@ -1002,7 +1082,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -1036,6 +1116,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  7.300000190734863
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  15.0
+                ]
               }
             },
             "wt_peptide": "SVNEALNHL"
@@ -1186,7 +1284,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -1220,6 +1318,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  0.5699999928474426,
+                  0.30000001192092896
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  1.8,
+                  0.3
+                ]
               }
             },
             "wt_peptide": "QRPGSSPTT"
@@ -1266,7 +1382,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -1300,6 +1416,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  2.700000047683716
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  4.3
+                ]
               }
             },
             "wt_peptide": "WYQQRPGSS"
@@ -1346,7 +1480,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -1380,6 +1514,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  18.0,
+                  5.199999809265137
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  21.0,
+                  0.8
+                ]
               }
             },
             "wt_peptide": "SSPTTVIYE"
@@ -1520,7 +1672,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -1554,6 +1706,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  4.099999904632568
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  21.0
+                ]
               }
             },
             "wt_peptide": "MVCELAGNP"
@@ -1649,7 +1819,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -1683,6 +1853,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  12.0,
+                  4.0
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  13.0,
+                  3.9
+                ]
               }
             },
             "wt_peptide": "NMSSFKLKE"
@@ -1778,7 +1966,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -1812,6 +2000,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  0.5699999928474426,
+                  0.4000000059604645
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  1.6,
+                  4.8
+                ]
               }
             },
             "wt_peptide": "PRPPQQPVP"
@@ -1858,7 +2064,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -1892,6 +2098,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  2.0,
+                  1.7999999523162842
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  0.64,
+                  1.7
+                ]
               }
             },
             "wt_peptide": "PEPPRPPQQ"
@@ -2005,7 +2229,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2039,6 +2263,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  9.800000190734863,
+                  0.6000000238418579
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  14.0,
+                  0.6
+                ]
               }
             },
             "wt_peptide": "YQPCDDMDC"
@@ -2085,7 +2327,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2119,6 +2361,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  0.5
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  0.5
+                ]
               }
             },
             "wt_peptide": "MYQPCDDMDC"
@@ -2165,7 +2425,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2199,6 +2459,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  1.7000000476837158,
+                  3.0
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  1.5,
+                  7.0
+                ]
               }
             },
             "wt_peptide": "CLSDRCKIL"
@@ -2294,7 +2572,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2328,6 +2606,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  12.0,
+                  4.199999809265137
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  7.7,
+                  1.3
+                ]
               }
             },
             "wt_peptide": "AMSHFEPNE"
@@ -2374,7 +2670,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2408,6 +2704,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  28.0,
+                  6.199999809265137
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  31.0,
+                  9.9
+                ]
               }
             },
             "wt_peptide": "CQRAKVAMS"
@@ -2503,7 +2817,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2537,6 +2851,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  0.5
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  0.6
+                ]
               }
             },
             "wt_peptide": "KFNPETDYL"
@@ -2583,7 +2915,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2617,6 +2949,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  12.0,
+                  1.399999976158142
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  15.0,
+                  1.2
+                ]
               }
             },
             "wt_peptide": "FNPETDYLT"
@@ -2663,7 +3013,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2697,6 +3047,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  53.0,
+                  0.4000000059604645
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  59.0,
+                  0.3
+                ]
               }
             },
             "wt_peptide": "FNPETDYLTG"
@@ -2792,7 +3160,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2826,6 +3194,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  0.30000001192092896
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  0.4
+                ]
               }
             },
             "wt_peptide": "LYYSYGLLHT"
@@ -2872,7 +3258,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2906,6 +3292,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  1.0
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  0.9
+                ]
               }
             },
             "wt_peptide": "HTYGSGGYA"
@@ -2952,7 +3356,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -2986,6 +3390,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  4.699999809265137
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  2.8
+                ]
               }
             },
             "wt_peptide": "YSYGLLHTY"
@@ -3032,7 +3454,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -3066,6 +3488,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  0.800000011920929
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  0.7
+                ]
               }
             },
             "wt_peptide": "HTYGSGGYAL"
@@ -3112,7 +3552,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -3146,6 +3586,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  6.300000190734863
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  5.0
+                ]
               }
             },
             "wt_peptide": "LLHTYGSGG"
@@ -3192,7 +3650,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -3226,6 +3684,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  40.0,
+                  6.0
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  53.0,
+                  6.3
+                ]
               }
             },
             "wt_peptide": "YYSYGLLHT"
@@ -3339,7 +3815,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -3373,6 +3849,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  29.0,
+                  2.700000047683716
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  22.0,
+                  2.4
+                ]
               }
             },
             "wt_peptide": "FLASTRLTS"
@@ -3419,7 +3913,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -3453,6 +3947,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  4.800000190734863
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  16.0
+                ]
               }
             },
             "wt_peptide": "ASTRLTSEL"
@@ -3548,7 +4060,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -3582,6 +4094,24 @@
               },
               "WT": {
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  6.300000190734863
+                ]
+              },
+              "WT": {
+                "HLA-G*01:09": [
+                  "NA",
+                  15.0
+                ]
               }
             },
             "wt_peptide": "HSRTYDMDV"
@@ -3628,7 +4158,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -3662,6 +4192,24 @@
               },
               "WT": {
                 "HLA-E*01:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  3.200000047683716,
+                  5.699999809265137
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  3.4,
+                  13.0
+                ]
               }
             },
             "wt_peptide": "LVHSRTYDM"
@@ -3967,7 +4515,7 @@
                 ]
               }
             },
-            "individual_percentile_calls": {
+            "individual_ic50_percentile_calls": {
               "algorithms": [
                 "NetMHC",
                 "PickPocket"
@@ -4013,6 +4561,32 @@
               "WT": {
                 "HLA-E*01:01": [],
                 "HLA-G*01:09": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "NetMHC",
+                "PickPocket"
+              ],
+              "MT": {
+                "HLA-E*01:01": [
+                  0.11999999731779099,
+                  0.8999999761581421
+                ],
+                "HLA-G*01:09": [
+                  "NA",
+                  6.099999904632568
+                ]
+              },
+              "WT": {
+                "HLA-E*01:01": [
+                  5.1,
+                  2.5
+                ],
+                "HLA-G*01:09": [
+                  "NA",
+                  19.0
+                ]
               }
             },
             "wt_peptide": "ATLSRTLLA"
