@@ -246,7 +246,10 @@ class FastaGenerator(metaclass=ABCMeta):
                 #we would need to recalculate the downstream protein sequence taking all downstream variants into account.
                 mutant_subsequence = re.sub('^%s' % left_flanking_subsequence, left_flanking_subsequence_with_proximal_variants, mutant_subsequence)
             else:
-                mutation_start_position, wildtype_subsequence = self.get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, line)
+                if variant_type == 'inframe_ins':
+                    mutation_start_position, wildtype_subsequence = self.get_wildtype_subsequence(position, full_wildtype_sequence, len(mutant_amino_acid), line)
+                else:
+                    mutation_start_position, wildtype_subsequence = self.get_wildtype_subsequence(position, full_wildtype_sequence, wildtype_amino_acid_length, line)
                 mutation_end_position = mutation_start_position + wildtype_amino_acid_length
                 if wildtype_amino_acid != '-' and wildtype_amino_acid != wildtype_subsequence[mutation_start_position:mutation_end_position]:
                     if line['amino_acid_change'].split('/')[0].count('*') > 1:
