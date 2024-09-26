@@ -498,7 +498,7 @@ tutorial_tab <- tabItem("tutorial",
                 for HLA alleles that the MT binds well to.", br())
             ),
             column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/0f008c1c/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png",
                 align = "center", width = "1500px"), br(), br()
             )
         ),

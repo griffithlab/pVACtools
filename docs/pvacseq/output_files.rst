@@ -305,6 +305,8 @@ included eptiopes, selecting the best-scoring epitope, and which values are outp
      - Description
    * - ``ID``
      - A unique identifier for the variant
+   * - ``Index``
+     - A unique identifier for the variant and Best Transcript
    * - ``HLA Alleles`` (multiple)
      - For each HLA allele in the run, the number of this variant's epitopes that bound well
        to the HLA allele (with median/lowest mutant binding affinity < binding_threshold)

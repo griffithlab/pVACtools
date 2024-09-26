@@ -1,2 +1,2 @@
-ID	E*01:01	G*01:09	Gene	AA Change	Num Passing Transcripts	Best Peptide	Best Transcript	TSL	Allele	Pos	Prob Pos	Num Passing Peptides	IC50 MT	IC50 WT	%ile MT	%ile WT	RNA Expr	RNA VAF	Allele Expr	RNA Depth	DNA VAF	Tier	Evaluation
-22-41920894-41920895-G-C	2	1	ACO2	N1453S	1	KFNPQTDYL	ENSMUST00000027032	Not Supported	HLA-G*01:09	5	None	3	1262.760	1318.61	0.500	0.6	NA	NA	NA	NA	0.250	Poor	Pending
+ID	Index	E*01:01	G*01:09	Gene	AA Change	Num Passing Transcripts	Best Peptide	Best Transcript	TSL	Allele	Pos	Prob Pos	Num Passing Peptides	IC50 MT	IC50 WT	%ile MT	%ile WT	RNA Expr	RNA VAF	Allele Expr	RNA Depth	DNA VAF	Tier	Evaluation
+22-41920894-41920895-G-C	1.Rp1.ENSMUST00000027032.missense.1453N/S	2	1	ACO2	N1453S	1	KFNPQTDYL	ENSMUST00000027032	Not Supported	HLA-G*01:09	5	None	3	1262.760	1318.61	0.500	0.6	NA	NA	NA	NA	0.250	Poor	Pending

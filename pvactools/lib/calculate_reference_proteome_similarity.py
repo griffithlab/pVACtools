@@ -259,22 +259,10 @@ class CalculateReferenceProteomeSimilarity:
 
 
     def _input_tsv_type(self, line):
-        if self.file_type == 'pVACseq' and 'Index' in line:
-            return 'full'
-        elif self.file_type != 'pVACseq' and 'Mutation' in line:
-            return 'full'
-        else:
+        if 'Best Peptide' in line:
             return 'aggregated'
-
-    def _get_full_peptide(self, line, mt_records_dict, wt_records_dict):
-        for record_id in mt_records_dict.keys():
-            (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
-            (count, gene, transcript) = rest_record_id.split(".", 2)
-            (parsed_aa_change, pos, wt_aa, mt_aa) = index_to_aggregate_report_aa_change(aa_change, variant_type)
-            if line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
-                return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, mt_aa, wt_aa)
-        print("Unable to find full_peptide for variant {}".format(line['ID']))
-        return (None, None, variant_type, mt_aa, wt_aa)
+        else:
+            return 'full'
 
     def _get_peptide(self, line, mt_records_dict, wt_records_dict):
         ## Get epitope, peptide and full_peptide
@@ -287,28 +275,17 @@ class CalculateReferenceProteomeSimilarity:
         else:
             if self._input_tsv_type(line) == 'aggregated':
                 epitope = line['Best Peptide']
-                (full_peptide, wt_peptide, variant_type, mt_amino_acids, wt_amino_acids) = self._get_full_peptide(line, mt_records_dict, wt_records_dict)
-                if full_peptide is None:
-                    return None, None
-                if variant_type != 'FS':
-                    if line['Pos'] == 'NA':
-                        mt_pos = None
-                        for i,(wt_aa,mt_aa) in enumerate(zip(wt_peptide,full_peptide)):
-                            if wt_aa != mt_aa:
-                                mt_pos = i
-                                break
-                        if mt_pos is None:
-                            return None, full_peptide
-                    else:
-                        mt_pos = int(line['Pos'].split('-')[0])
+                (rest_record_id, variant_type, aa_change) = line['Index'].rsplit(".", 2)
+                (_, mt_pos, wt_amino_acids, mt_amino_acids) = index_to_aggregate_report_aa_change(aa_change, variant_type)
+                mt_pos = int(line['Pos'].split('-')[0])
             else:
                 epitope = line['MT Epitope Seq']
-                full_peptide = mt_records_dict[line['Index']]
-                wt_peptide = wt_records_dict[line['Index']]
                 variant_type = line['Variant Type']
                 if variant_type != 'FS':
                     mt_pos = int(line['Mutation Position'].split('-')[0])
                     (wt_amino_acids, mt_amino_acids) = line['Mutation'].split('/')
+            full_peptide = mt_records_dict[line['Index']]
+            wt_peptide = wt_records_dict[line['Index']]
 
             # get peptide
             subpeptide_position = full_peptide.index(epitope)
