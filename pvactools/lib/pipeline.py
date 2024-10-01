@@ -253,10 +253,14 @@ class Pipeline(metaclass=ABCMeta):
                 generate_fasta_params['input_file'] = self.tsv_file_path()
                 generate_fasta_params['output_file_prefix'] = split_fasta_file_path
                 generate_fasta_params['epitope_lengths'] = self.epitope_lengths
-                generate_fasta_params['spacers'] = self.spacers
+                generate_fasta_params['junctions_to_test'] = self.junctions_to_test
+                generate_fasta_params['spacer'] = self.spacer
+                generate_fasta_params['clip_length'] = self.clip_length
                 status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
                 fasta_generator = self.fasta_generator(generate_fasta_params)
                 fasta_generator.execute()
+                for file_name in fasta_generator.output_files:
+                    shutil.copy(file_name, self.output_dir)
             else:
                 for epitope_length in self.epitope_lengths:
                     split_fasta_file_path = "{}_{}".format(self.split_fasta_basename(epitope_length), fasta_chunk)
