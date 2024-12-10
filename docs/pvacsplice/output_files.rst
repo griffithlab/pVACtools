@@ -201,7 +201,7 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Index``
      - A unique idenitifer for this variant-transcript combination
    * - ``Fasta Key``
-     -
+     - the number identifier for corresponding altered peptide isoform in pvac output fasta
    * - ``Individual Prediction Algorithm  IC50 Scores and Percentiles`` (multiple)
      - ic50 binding affintity and percentile ranks for the ``Epitope Seq`` for the individual prediction algorithms used
    * - ``MHCflurryEL WT and MT Processing Score and Presentation Score and Percentile`` (optional)
@@ -266,7 +266,7 @@ Whether the median or the lowest binding affinity metrics are output in the ``IC
      - Description
 
    * - ``ID``
-     - A unique identifier for the variant
+     - A unique identifier for the junction (Gene name . transcript. Junction ID . variant chr . variant start - variant stop . junction type)
    * - ``HLA Alleles`` (multiple)
      - For each HLA allele in the run, the number of this variant's epitopes that bound well
        to the HLA allele (with median/lowest mutant binding affinity < binding_threshold)
@@ -275,7 +275,7 @@ Whether the median or the lowest binding affinity metrics are output in the ``IC
    * - ``Transcript``
      - The Ensembl ID of the affected transcript
    * - ``Junction Name``
-     -
+     - junction ID from regtools output
    * - ``AA Change``
      - The amino acid change for the mutation
    * - ``Best Peptide``
