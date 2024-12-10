@@ -122,15 +122,15 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Variant``
      - The alt allele
    * - ``Junction``
-     -
+     - Junction ID in regtools output
    * - ``Junction Start``
-     -
+     - The start position of this junction in the zero-based, half-open coordinate system
    * - ``Junction Stop``
-     -
+     - The stop position of this junction in the zero-based, half-open coordinate system
    * - ``Junction Score``
-     -
+     - The number of reads supporting the junction. (integer)
    * - ``Junction Anchor``
-     -
+     - Field that specifies the donor, acceptor configuration. See `Notes <https://regtools.readthedocs.io/en/latest/commands/junctions-annotate/#notes>`_ (D/A/DA/NDA/N) 
    * - ``Transcript``
      - The Ensembl ID of the affected transcript
    * - ``Transcript Support Level``
@@ -152,13 +152,13 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``HGVSp``
      - The HGVS protein sequence variant name
    * - ``WT Protein Length``
-     -
+     - Length of fully-translated wildtype protein
    * - ``ALT Protein Length``
-     -
+     - Length of fully-translated alternate protein
    * - ``Frameshift Event``
-     -
-   * - ``Protein Positions``
-     -
+     - Is the variant a frameshift event? (yes/no)
+   * - ``Protein Position``
+     - Starting position of Epitope (Position of the first amino acid of selected epitope in the fully-translated protein)
    * - ``HLA Allele``
      - The HLA allele for this prediction
    * - ``Peptide Length``
