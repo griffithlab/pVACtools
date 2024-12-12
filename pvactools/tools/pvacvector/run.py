@@ -442,8 +442,8 @@ def main(args_input=sys.argv[1:]):
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
 
-    (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
-    class_ii_alleles = combine_class_ii_alleles(class_ii_alleles)
+    alleles = combine_class_ii_alleles(args.allele)
+    (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)
     if len(class_i_alleles) == 0:
         print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
     elif len(class_ii_alleles) == 0:

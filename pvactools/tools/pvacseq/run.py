@@ -75,8 +75,8 @@ def main(args_input = sys.argv[1:]):
     base_output_dir = os.path.abspath(args.output_dir)
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
-    (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
-    class_ii_alleles = combine_class_ii_alleles(class_ii_alleles)
+    alleles = combine_class_ii_alleles(args.allele)
+    (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)
 
     shared_arguments = {
         'input_file'                : args.input_file,
@@ -118,6 +118,7 @@ def main(args_input = sys.argv[1:]):
         'allele_specific_anchors'   : args.allele_specific_anchors,
         'anchor_contribution_threshold' : args.anchor_contribution_threshold,
         'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
+        'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:

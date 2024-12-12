@@ -132,7 +132,9 @@ To set your own Tier-setting parameters, expand the **Advanced Options: Regenera
 
 The second row of the page spans the **Aggregate Report of Best Candidates by Variant** section, which lists all neoantigen candidates in the provided input. Candidates with a higher Tier will be shown first, followed by candidates of lower Tiers (Order of Tiers: ``Pass``, ``Anchor``, ``Subclonal``, ``Low Expr``, ``NoExpr``, ``Poor`` - see `Tiering criteria <https://pvactools.readthedocs.io/en/latest/pvacseq/output_files.html#tiers>`_). Genes that match with the user-input genes of interest list will have a green box around them (for example, ARID1B and MSH6 are covered by a green box in this demo). This feature can be useful for highlighting neoantigens derived from cancer driver genes.
 
-To view the variant, transcript, and peptide level information of a desired candidate, click on the ``Investigate`` button on the right side of the row for that candidate. The candidate currently under investigation will be framed in blue. The number of the row currently being investigated is indicated at the bottom of this section.
+To view the variant, transcript, and peptide level information of a desired candidate, click on the candidate's row
+to select it. The candidate currently under investigation will have a grey background. The number of the row
+currently being investigated is indicated at the bottom of this section.
 
 .. figure:: ../../images/screenshots/vignette/pvacview-aggrReportTable_withCGCgenesHighlighted.png
     :width: 1000px
@@ -217,7 +219,11 @@ The candidate being investigated has a good binding affinity (median IC50 score 
     :alt: pVACview Vignette
     :figclass: align-left
 
-The mutation is not in an anchor position (see ``Anchor heatmap`` tab). Anchor prediction scores for each amino acid position are provided in the ``Anchor Weights`` tab at the bottom. Both mutant and wildtype peptides are good binders, yet the mutant peptide is a stronger binder. This is scenario number 2 (WT strong binder, MT strong binder, MT not in an anchor position) according to the Scenario Guide, where the neoantigen candidate is favorable and can be accepted.
+The mutation is not in an anchor position (see ``Anchor heatmap`` tab). A list of anchor positions for each allele-length combination
+is provided in the ``Anchor Positions`` panel below. Additionally, the underlying anchor prediction scores for each amino acid position are
+provided in the ``Anchor Weights`` panel at the bottom. Both mutant and wildtype peptides are good binders, yet the mutant peptide
+is a stronger binder. This is scenario number 2 (WT strong binder, MT strong binder, MT not in an anchor position) according to the Scenario
+Guide, where the neoantigen candidate is favorable and can be accepted.
 
 .. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_5_AnchorHeatmap.png
     :width: 1000px
@@ -237,23 +243,19 @@ Beside Class-I peptide, the best predicted Class-II peptide from user-input can 
 
 **Decision:**
 
-Given all the information above, we may conclude that the reviewed Class I peptide is potentially a good binder and choose to Accept this candidate in the ``Eval`` drop-down menu.
-
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_11_Decision_1.png
+.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_11_Decision.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
     :figclass: align-left
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_11_Decision_2.png
-    :width: 1000px
-    :align: right
-    :alt: pVACview Vignette
-    :figclass: align-left
+Given all the information above, we may conclude that the reviewed Class I peptide is potentially a good binder and
+choose to accept this candidate by clicking the thumbs-up button.
 
 
 Example 2: a good candidate derived from a variant with multiple transcript sets: ADAR-E806V: AERMGFTVV
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. figure:: ../../images/screenshots/vignette/ADAR/ADAR_0.png
     :width: 1000px
     :align: right
@@ -332,7 +334,9 @@ The candidate also has good elution scores (elution scores close to 1). It's unc
     :alt: pVACview Vignette
     :figclass: align-left
 
-Altogether, both the candidate (mutant peptide - MT) and its wildtype (WT) peptide are strong binders. The figure below shows the mutated amino acid (V) in the candidate is not in an anchor position. This fits into Scenario 4 in the guide, where the candidate is likely to elicit strong recognition from the immune system.
+Altogether, both the candidate (mutant peptide - MT) and its wildtype (WT) peptide are strong binders. The figure below shows the mutated
+amino acid (V) in the candidate (AERMGFTVV) is not in an anchor position for allele HLA-B*45:01. This fits into Scenario 4 in the guide,
+where the candidate is likely to elicit strong recognition from the immune system.
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_5_AnchorHeatmap_TranscriptSet1.png
     :width: 1000px
@@ -350,7 +354,8 @@ The candidate sequence also has no match with any known peptide in the human pro
 
 **Decision:**
 
-Given all the information above, we can conclude that the reviewed Class I peptide is potentially a good binder and choose to Accept this candidate in the ``Eval`` drop-down menu.
+Given all the information above, we can conclude that the reviewed Class I peptide is potentially a good binder and
+choose to accept by clicking the thumbs-up button.
 
 Example 3: a bad candidate: ZNF141-H389Y: KIYTGEKPY
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -376,7 +381,8 @@ These potentially problematic characteristics are also flagged by the red boxes 
 
 **Decision:**
 
-Since the candidate peptide has a match in the reference proteome, we will reject this candidate.
+Since the candidate peptide has a match in the reference proteome, we will reject this candidate by clicking the
+thumbs-down button.
 
 
 Export

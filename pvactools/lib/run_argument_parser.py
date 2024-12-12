@@ -84,6 +84,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=5000,
         )
         parser.add_argument(
+            '--aggregate-inclusion-count-limit', type=int,
+            help="Limit neoantigen candidates included in the aggregate report to only the best n candidates per variant.",
+            default=15,
+        )
+        parser.add_argument(
             '-m', '--top-score-metric',
             choices=['lowest', 'median'],
             default='median',

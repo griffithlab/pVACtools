@@ -255,9 +255,14 @@ transcripts covered by those epitopes, as well as the HLA alleles that those
 epitopes are well-binding to. Lastly, the report will bin variants into tiers
 that offer suggestions as to the suitability of variants for use in vaccines.
 
-Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
-Whether the median or the lowest binding affinity metrics are output in the ``IC50 MT`` and
-``%ile MT`` columns is controlled by the ``--top-score-metric`` parameter.
+Only epitopes meeting the ``--aggregate-inclusion-binding-threshold`` are included in this report (default: 5000).
+If the number of unique epitopes for a variant meeting this threshold exceeds the
+``--aggregate-inclusion-count-limit``, only the n best-binding epitopes up to this
+limit are included (default: 15).
+
+Whether the median or the lowest binding affinity metrics are used for determining the
+included eptiopes, selecting the best-scoring epitope, and which values are output in the ``IC50 MT``
+and ``%ile MT`` columns is controlled by the ``--top-score-metric`` parameter.
 
 .. list-table::
    :header-rows: 1
@@ -321,7 +326,8 @@ Best Peptide Criteria
 _____________________
 
 To determine the Best Peptide, all peptides meeting the
-``--aggregate-inclusion-threshold`` are evaluated as follows:
+``--aggregate-inclusion-threshold`` and ``--aggregate-inclusion-count-limit``
+(see above) are evaluated as follows:
 
 - Pick the entries with no Problematic Positions.
 - Of the remaining entries, pick the one with the lowest median/best MT IC50
