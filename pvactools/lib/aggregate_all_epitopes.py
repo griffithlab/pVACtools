@@ -165,7 +165,7 @@ class AggregateAllEpitopes:
 
     def determine_columns_used_for_aggregation(self, prediction_algorithms, el_algorithms):
         used_columns = [
-            "Chromosome", "Start", "Stop", "Reference", "Variant",
+            "Index", "Chromosome", "Start", "Stop", "Reference", "Variant",
             "Transcript", "Transcript Support Level", "Biotype", "Transcript Length", "Variant Type", "Mutation",
             "Protein Position", "Gene Name", "HLA Allele",
             "Mutation Position", "MT Epitope Seq", "WT Epitope Seq",
@@ -754,7 +754,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
         tsl = best['Transcript Support Level'] if best['Transcript Support Level'] == "Not Supported" or pd.isna(best['Transcript Support Level']) else str(int(best['Transcript Support Level']))
 
-        out_dict = { 'ID': key }
+        out_dict = { 'ID': key, 'Index': best['Index'] }
         out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
         out_dict.update({
             'Gene': best["Gene Name"],
