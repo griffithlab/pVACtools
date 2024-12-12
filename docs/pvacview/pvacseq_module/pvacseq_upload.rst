@@ -10,8 +10,8 @@
 .. role:: large
 .. role:: bold
 
-Upload
----------------
+Usage
+-----
 
 The pVACview user interface has four sections:
 
@@ -160,18 +160,21 @@ used originally by clicking the ``Reset to original paramters`` button.
 Investigating Different Variants
 ********************************
 
-To investigate a specific variant in detail (on both the transcript and peptide levels), you will need to click on the investigate button located in the select column of the main aggregate report table (last column).
-Afterwards, you may choose to select a rating for the neoantigen candidate using the Eval column. By default, all peptides are initially in a Pending state when the report is generated from pVACseq. Based on
-exploration and evaluation of the features provided, you can mark the peptide as either ``Accept``, ``Reject``, or ``Review``. Your current state of selections are also counted and shown in the ``Peptide Evaluation Overview`` box.
+To investigate a specific variant in detail (on both the transcript and peptide levels), you will need to click on
+the candidate's row in the main aggregate report table. Afterwards, you may choose to select a rating for the
+neoantigen candidate using the three buttons on the right of the candidate's row. By default, all peptides are initially in a Pending state when the report is generated from pVACseq. Based on
+exploration and evaluation of the features provided an none of the buttons are selected. You can mark the peptide as
+either "Accept" (thumb-up button), "Reject" (thumbs-down button), or "Review" (flag button). Your current state of
+selections are also counted and shown in the ``Peptide Evaluation Overview`` box.
 
 .. figure:: ../../images/screenshots/pvacview-comments.png
     :width: 800px
     :align: right
-    :alt: pVACview Upload
+    :alt: pVACview comment interface
     :figclass: align-left
 
 Users can add comments to each line of variants they are investigating. These comments can be reviewed in the Export page
-and will be in the final output (either tsv or excel) when downloaded. This column is by default ``N/A`` unless the input
+and will be in the final output (either tsv or excel) when downloaded. This column is by default ``No comments`` unless the input
 aggregate report has a ``Comments`` column pre-specified.
 
 :large:`Export`

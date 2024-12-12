@@ -45,8 +45,13 @@ def define_parser():
     )
     parser.add_argument(
         '--aggregate-inclusion-binding-threshold', type=int,
-        help="Threshold for including epitopes when creating the aggregate report",
+        help="Binding threshold for including epitopes when creating the aggregate report",
         default=5000,
+    )
+    parser.add_argument(
+        '--aggregate-inclusion-count-limit', type=int,
+        help="Limit neoantigen candidates included in the aggregate report to only the best n candidates per variant. This ensures performance when loading results into pVACview, e.g. for frameshifts with potentially hundreds of predictions.",
+        default=15,
     )
     parser.add_argument(
         '-m', '--top-score-metric',
@@ -122,6 +127,7 @@ def main(args_input = sys.argv[1:]):
         allele_specific_anchors=args.allele_specific_anchors,
         anchor_contribution_threshold=args.anchor_contribution_threshold,
         aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,
+        aggregate_inclusion_count_limit=args.aggregate_inclusion_count_limit,
     ).execute()
     print("Completed")
 

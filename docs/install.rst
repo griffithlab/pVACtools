@@ -266,7 +266,8 @@ Docker and CWL
 Versioned Docker containers for pVACtools are available on DockerHub using the
 `griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo.
 The Docker container contains pVACtools as well as installations of the
-standalone IEDB MHC Class I and Class II software. These are installed at
+standalone IEDB MHC Class I and Class II software and all other supported prediction
+algorithms (MHCflurry, MHCnuggets, BigMHC, and DeepImmuno). Standalone IEDB is installed at
 ``/opt/iedb`` (``--iedb-install-directory /opt/iedb``).
 
 An example on how to run pVACseq using Docker can be found on the :ref:`Getting Started <pvacseq_docker>` page.
