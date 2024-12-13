@@ -14,7 +14,7 @@ import random
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-import pvactools.lib.run_utils
+from pvactools.lib.run_utils import *
 
 methods = ['cterm', '20s']
 
@@ -26,25 +26,32 @@ class NetChop:
         self.method = method
         self.threshold = float(threshold)
         self.file_type = file_type
+        self.flanking_sequence_length = 9
 
     def get_mt_peptides(self):
         records = list(SeqIO.parse(self.input_fasta, "fasta"))
         if self.file_type == 'pVACseq':
             records_dict = {re.sub('^%s' % "MT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
+        elif self.file_type == 'pVACsplice':
+            records_dict = {re.sub('^%s' % "ALT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('ALT.'), records)}
         else:
             records_dict = {x.id: str(x.seq) for x in records}
         return records_dict
 
+    def get_wt_peptides(self):
+        records = list(SeqIO.parse(self.input_fasta, "fasta"))
+        records_dict = {re.sub('^%s' % "WT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('WT.'), records)}
+        return records_dict
+
     def extract_flanked_epitope(self, full_peptide, epitope, seq_id):
-        flanking_sequence_length = 9
         if epitope not in full_peptide:
             raise Exception("FASTA entry {} ({}) does not contain epitope {}. Please check that the FASTA file matches the input TSV.".format(seq_id, full_peptide, epitope))
         ep_start = full_peptide.index(epitope)
-        start = ep_start - flanking_sequence_length
+        start = ep_start - self.flanking_sequence_length
         if start < 0:
             start = 0
         start_diff = ep_start - start
-        end = ep_start + len(epitope) + flanking_sequence_length
+        end = ep_start + len(epitope) + self.flanking_sequence_length
         return full_peptide[start:end], start_diff
 
     def execute(self):
@@ -56,6 +63,8 @@ class NetChop:
         success_searcher = re.compile(r'NetChop 3.0 predictions')
 
         mt_records_dict = self.get_mt_peptides()
+        if self.file_type == 'pVACsplice':
+            wt_records_dict = self.get_wt_peptides()
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
             reader = csv.DictReader(input_fh, delimiter='\t')
             cleavage_cols = ['Best Cleavage Position', 'Best Cleavage Score', 'Cleavage Sites']
@@ -69,7 +78,7 @@ class NetChop:
             x = 0
             i=1
             http = self.setup_adapter()
-            for chunk in pvactools.lib.run_utils.split_file(reader, 100):
+            for chunk in split_file(reader, 100):
                 staging_file = tempfile.NamedTemporaryFile(mode='w+')
                 current_buffer = {}
                 seqs_start_diff = {}
@@ -79,13 +88,22 @@ class NetChop:
                     if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                         index = line['Mutation']
                         epitope = line['Epitope Seq']
+                    elif self.file_type == 'pVACsplice':
+                        index = line['Index']
+                        epitope = line['Epitope Seq']
                     else:
                         index = line['Index']
                         epitope = line['MT Epitope Seq']
                     if index not in mt_records_dict:
                         raise Exception("FASTA entry for index {} not found. Please check that the FASTA file matches the input TSV.".format(index))
-                    full_peptide = mt_records_dict[index]
-                    peptide, start_diff = self.extract_flanked_epitope(full_peptide, epitope, index)
+                    if self.file_type == 'pVACsplice':
+                        mt_peptide = mt_records_dict[index]
+                        wt_peptide = wt_records_dict[index]
+                        peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.flanking_sequence_length)
+                        start_diff = self.flanking_sequence_length
+                    else:
+                        full_peptide = mt_records_dict[index]
+                        peptide, start_diff = self.extract_flanked_epitope(full_peptide, epitope, index)
                     staging_file.write(peptide+'\n')
                     current_buffer[sequence_id] = {k:line[k] for k in line}
                     seqs_start_diff[sequence_id] = (start_diff, len(epitope))

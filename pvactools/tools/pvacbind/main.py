@@ -2,7 +2,6 @@ import argparse
 import sys
 from subprocess import call
 import os
-import pkg_resources
 from pvactools.tools.pvacbind import *
 
 def main():

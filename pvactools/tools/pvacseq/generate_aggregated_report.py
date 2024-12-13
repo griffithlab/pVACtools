@@ -21,9 +21,8 @@ def define_parser():
         help="The file path to write the aggregated report tsv to"
     )
     parser.add_argument(
-        "--tumor-purity",
+        "--tumor-purity", type=float_range(0.0, 1.0),
         help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used during aggregate report creation for a simple estimation of whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.",
-        type=float,
     )
     parser.add_argument(
         '-b', '--binding-threshold', type=int,
@@ -63,7 +62,7 @@ def define_parser():
              + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
     )
     parser.add_argument(
-        '--trna-vaf', type=float,
+        '--trna-vaf', type=float_range(0.0, 1.0),
         help="Tumor RNA VAF Cutoff. Used to calculate the allele expression cutoff for tiering.",
         default=0.25
     )
@@ -110,15 +109,9 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    if args.tumor_purity is not None:
-        if args.tumor_purity > 1:
-            raise Exception("--tumor-purity must be a float between 0 and 1. Value too large: {}".format(args.tumor_purity))
-        elif args.tumor_purity < 0:
-            raise Exception("--tumor-purity must be a float between 0 and 1. Value too small: {}".format(args.tumor_purity))
-
     tmp_fh = tempfile.NamedTemporaryFile()
 
-    print("Creating Aggreggated Report")
+    print("Creating Aggregated Report")
     PvacseqAggregateAllEpitopes(
         args.input_file,
         args.output_file,

@@ -7,6 +7,7 @@ import py_compile
 
 from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes
 from pvactools.lib.run_utils import *
+from pvactools.lib.prediction_class_utils import *
 from tests.utils import *
 
 #python -m unittest tests/test_run_utils.py
