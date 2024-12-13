@@ -12,7 +12,6 @@ import random
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
 import itertools
 import json
 import platform
@@ -22,7 +21,8 @@ from pvactools.lib.vector_visualization import VectorVisualization
 from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
 from pvactools.lib.pvacvector_input_fasta_generator import PvacvectorInputFastaGenerator
 from pvactools.lib.pipeline import *
-import pvactools.lib.run_utils
+from pvactools.lib.run_utils import *
+from pvactools.lib.prediction_class_utils import *
 
 def define_parser():
     return PvacvectorRunArgumentParser().parser
@@ -335,7 +335,7 @@ def create_dna_backtranslation(results_file, dna_results_file):
     dna_sequence = ""
     for amino_acid in peptide:
         dna_sequence += get_codon_for_amino_acid(amino_acid)
-    output_record = SeqRecord(Seq(dna_sequence, IUPAC.unambiguous_dna), id=str(seq_num), description=str(seq_num))
+    output_record = SeqRecord(Seq(dna_sequence), id=str(seq_num), description=str(seq_num))
     SeqIO.write([output_record], dna_results_file, 'fasta')
 
 def main(args_input=sys.argv[1:]):
@@ -363,14 +363,14 @@ def main(args_input=sys.argv[1:]):
     if args.n_threads > 1 and platform.system() == "Darwin":
         raise Exception("Multithreading is not supported on MacOS")
 
-    (class_i_prediction_algorithms, class_ii_prediction_algorithms) = pvactools.lib.run_utils.split_algorithms(args.prediction_algorithms)
+    (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     if len(class_i_prediction_algorithms) == 0:
         print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
     elif len(class_ii_prediction_algorithms) == 0:
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
 
-    alleles = pvactools.lib.run_utils.combine_class_ii_alleles(args.allele)
-    (class_i_alleles, class_ii_alleles, species) = pvactools.lib.run_utils.split_alleles(alleles)
+    alleles = combine_class_ii_alleles(args.allele)
+    (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)
     if len(class_i_alleles) == 0:
         print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
     elif len(class_ii_alleles) == 0:
@@ -444,7 +444,7 @@ def main(args_input=sys.argv[1:]):
             'Unable to find path. ' +
             'A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
             '1) decreasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
-            #'2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)'
+            '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)'
         )
     else:
         if 'DISPLAY' in os.environ.keys():
@@ -459,7 +459,7 @@ def main(args_input=sys.argv[1:]):
                     shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
                     shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
 
-    pvactools.lib.run_utils.change_permissions_recursive(base_output_dir, 0o755, 0o644)
+    change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
 if __name__ == "__main__":
     main()

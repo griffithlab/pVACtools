@@ -6,7 +6,6 @@ from Bio.Blast import NCBIXML
 from Bio import SeqIO, SearchIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
 import shutil
 import re
 import os
@@ -190,13 +189,15 @@ class CalculateReferenceProteomeSimilarity:
         # Create mt record dictionary
         if self.file_type == 'pVACseq':
             records_dict = {re.sub('^%s' % "MT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
+        elif self.file_type == 'pVACsplice':
+            records_dict = {re.sub('^%s' % "ALT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('ALT.'), records)}
         else:
             records_dict = {x.id: str(x.seq) for x in records}
         return records_dict
 
 
     def get_wt_peptides(self):
-        if self.file_type == 'pVACseq':
+        if self.file_type == 'pVACseq' or self.file_type == 'pVACsplice':
             # make a list of SeqRecords from the input_fasta
             records = list(SeqIO.parse(self.input_fasta, "fasta"))
 
@@ -259,22 +260,10 @@ class CalculateReferenceProteomeSimilarity:
 
 
     def _input_tsv_type(self, line):
-        if self.file_type == 'pVACseq' and 'Index' in line:
-            return 'full'
-        elif self.file_type != 'pVACseq' and 'Mutation' in line:
-            return 'full'
-        else:
+        if 'Best Peptide' in line:
             return 'aggregated'
-
-    def _get_full_peptide(self, line, mt_records_dict, wt_records_dict):
-        for record_id in mt_records_dict.keys():
-            (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
-            (count, gene, transcript) = rest_record_id.split(".", 2)
-            (parsed_aa_change, pos, wt_aa, mt_aa) = index_to_aggregate_report_aa_change(aa_change, variant_type)
-            if line['Best Transcript'] == transcript and line['AA Change'] == parsed_aa_change:
-                return (mt_records_dict[record_id], wt_records_dict[record_id], variant_type, mt_aa, wt_aa)
-        print("Unable to find full_peptide for variant {}".format(line['ID']))
-        return (None, None, variant_type, mt_aa, wt_aa)
+        else:
+            return 'full'
 
     def _get_peptide(self, line, mt_records_dict, wt_records_dict):
         ## Get epitope, peptide and full_peptide
@@ -284,31 +273,29 @@ class CalculateReferenceProteomeSimilarity:
             else:
                 peptide = mt_records_dict[line['Mutation']]
             full_peptide = peptide
+        elif self.file_type == 'pVACsplice':
+            if self._input_tsv_type(line) == 'aggregated':
+                identifier = line['ID']
+            else:
+                identifier = line['Mutation']
+            wt_peptide = wt_records_dict[identifier]
+            mt_peptide = mt_records_dict[identifier]
+            peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+            full_peptide = peptide
         else:
             if self._input_tsv_type(line) == 'aggregated':
                 epitope = line['Best Peptide']
-                (full_peptide, wt_peptide, variant_type, mt_amino_acids, wt_amino_acids) = self._get_full_peptide(line, mt_records_dict, wt_records_dict)
-                if full_peptide is None:
-                    return None, None
-                if variant_type != 'FS':
-                    if line['Pos'] == 'NA':
-                        mt_pos = None
-                        for i,(wt_aa,mt_aa) in enumerate(zip(wt_peptide,full_peptide)):
-                            if wt_aa != mt_aa:
-                                mt_pos = i
-                                break
-                        if mt_pos is None:
-                            return None, full_peptide
-                    else:
-                        mt_pos = int(line['Pos'].split('-')[0])
+                (rest_record_id, variant_type, aa_change) = line['Index'].rsplit(".", 2)
+                (_, mt_pos, wt_amino_acids, mt_amino_acids) = index_to_aggregate_report_aa_change(aa_change, variant_type)
+                mt_pos = int(line['Pos'].split('-')[0])
             else:
                 epitope = line['MT Epitope Seq']
-                full_peptide = mt_records_dict[line['Index']]
-                wt_peptide = wt_records_dict[line['Index']]
                 variant_type = line['Variant Type']
                 if variant_type != 'FS':
                     mt_pos = int(line['Mutation Position'].split('-')[0])
                     (wt_amino_acids, mt_amino_acids) = line['Mutation'].split('/')
+            full_peptide = mt_records_dict[line['Index']]
+            wt_peptide = wt_records_dict[line['Index']]
 
             # get peptide
             subpeptide_position = full_peptide.index(epitope)
@@ -334,7 +321,7 @@ class CalculateReferenceProteomeSimilarity:
         if self.blastp_path is not None: # if blastp installed locally, perform BLAST with it
 
             # create a SeqRecord of full_peptide and write it to a tmp file
-            record = SeqRecord(Seq(full_peptide, IUPAC.protein), id="1", description="")
+            record = SeqRecord(Seq(full_peptide), id="1", description="")
             tmp_peptide_fh = tempfile.NamedTemporaryFile('w', delete=False)
             SeqIO.write([record], tmp_peptide_fh.name, "fasta")
 
@@ -626,9 +613,9 @@ class CalculateReferenceProteomeSimilarity:
         parser.add_argument(
             'input_fasta',
             help="For pVACbind, the original input FASTA file. "
-            + "For pVACseq and pVACfuse a FASTA file with mutant peptide sequences for each variant isoform. "
+            + "For pVACseq, pVACfuse, and pVACsplice a FASTA file with mutant peptide sequences for each variant isoform. "
             + "This file can be found in the same directory as the input filtered.tsv/all_epitopes.tsv file. "
-            + "Can also be generated by running `pvacseq|pvacfuse generate_protein_fasta`.")
+            + "Can also be generated by running `pvacseq|pvacfuse|pvacsplice generate_protein_fasta`.")
         parser.add_argument(
             'output_file',
             help="Output TSV filename of report file with epitopes with reference matches marked."
