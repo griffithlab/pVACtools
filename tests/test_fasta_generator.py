@@ -4,6 +4,7 @@ import unittest
 import tempfile
 from filecmp import cmp
 import py_compile
+import itertools
 
 from pvactools.lib.fasta_generator import FastaGenerator, FusionFastaGenerator, VectorFastaGenerator
 from tests.utils import *
@@ -861,12 +862,17 @@ class FastaGeneratorTests(unittest.TestCase):
         generate_fasta_input_file  = os.path.join(self.test_data_dir, 'pvacvector.fa')
         generate_fasta_output_file = tempfile.NamedTemporaryFile()
 
+        peptides = ['MT.FAT3.R4848T', 'MT.PRDM15.G654W', 'MT.DTX3L.G501R', 'MT.SUMF2.G23A', 'MT.POM121C.G3107R', 'MT.PEX1.V356I', 'MT.NRCAM.P838H', 'MT.CASP10.S654R', 'MT.ACSL3.S345N', 'MT.TP53.R157H']
+        junctions_to_test = list(itertools.permutations(peptides, 2))
+
         generate_fasta_params = {
             'input_file'                : generate_fasta_input_file,
             'epitope_lengths'           : [epitope_length],
             'output_file_prefix'        : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
-            'spacers'                   : ['None','HH','HHC','HHH','HHHD','HHHC','AAY','HHHH','HHAA','HHL','AAL'],
+            'spacer'                    : 'HH',
+            'junctions_to_test'         : junctions_to_test,
+            'clip_length'               : 1
         }
         generator = VectorFastaGenerator(**generate_fasta_params)
 
