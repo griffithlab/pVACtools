@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from collections import defaultdict, Counter
 import json
-from Bio import SeqIO
 import os
 import shutil
 from abc import ABCMeta, abstractmethod
@@ -35,7 +34,7 @@ class AggregateAllEpitopes:
     @abstractmethod
     def read_input_file(self, used_columns, dtypes):
         raise Exception("Must implement method in child class")
-    
+
     @abstractmethod
     def get_sub_df(self, df, key):
         raise Exception("Must implement method in child class")
@@ -73,7 +72,7 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, peptide_count, good_binder_count):
+    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count):
         raise Exception("Must implement method in child class")
 
     @abstractmethod
@@ -115,7 +114,7 @@ class AggregateAllEpitopes:
             good_binder_count = 0
 
         #assemble the line
-        out_dict = self.assemble_result_line(best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count);
+        out_dict = self.assemble_result_line(best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count)
 
         metric = self.get_metrics(peptides, best)
         return (out_dict, metric)
@@ -145,6 +144,12 @@ class AggregateAllEpitopes:
     def problematic_positions_exist(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
         return 'Problematic Positions' in headers
+
+    def calculate_allele_expr(self, line):
+        if line['Gene Expression'] == 'NA' or line['Tumor RNA VAF'] == 'NA':
+            return 'NA'
+        else:
+            return round(float(line['Gene Expression']) * float(line['Tumor RNA VAF']), 3)
 
     def determine_used_el_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
@@ -219,7 +224,7 @@ class AggregateAllEpitopes:
         ##do a crude estimate of clonal vaf/purity
         vaf_clonal = self.calculate_clonal_vaf()
 
-        if vaf_clonal is not None:
+        if self.__class__.__name__ == 'PvacseqAggregateAllEpitopes':
             metrics = {
                 'tumor_purity': self.tumor_purity,
                 'vaf_clonal': round(vaf_clonal, 3),
@@ -741,12 +746,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             (wt_aa, mt_aa) = best["Mutation"].split("/")
             return "".join([wt_aa, best["Protein Position"], mt_aa])
 
-    def calculate_allele_expr(self, line):
-        if line['Gene Expression'] == 'NA' or line['Tumor RNA VAF'] == 'NA':
-            return 'NA'
-        else:
-            return round(float(line['Gene Expression']) * float(line['Tumor RNA VAF']), 3)
-
     def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count):
         allele_expr = self.calculate_allele_expr(best)
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
@@ -804,7 +803,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     #sort the table in our preferred manner
     def sort_table(self, df):
         #make sure the tiers sort in the expected order
-        tier_sorter = ["Pass", "Relaxed", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr"]
+        tier_sorter = ["Pass", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
 
@@ -858,13 +857,15 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         super().__init__()
 
-
     def get_list_unique_mutation_keys(self, df):
         keys = df["Mutation"].values.tolist()
         return sorted(list(set(keys)))
 
     def calculate_clonal_vaf(self):
-        return None
+        if self.__class__.__name__ == 'PvacspliceAggregateAllEpitopes':
+            return PvacseqAggregateAllEpitopes.calculate_clonal_vaf(self)
+        else:
+            return None
 
     def read_input_file(self, used_columns, dtypes):
         df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Mutation": str})
@@ -877,8 +878,16 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return (df, key)
 
     def get_best_binder(self, df):
-        df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
-        return df.iloc[0]
+        #subset dataframe to only include entries with no problematic positions
+        if self.problematic_positions_exist():
+            prob_pos_df = df[df['Problematic Positions'] == "None"]
+            #if this results in an empty dataframe, reset to previous dataframe
+            if prob_pos_df.shape[0] == 0:
+                prob_pos_df = df
+        else:
+            prob_pos_df = df
+        prob_pos_df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
+        return prob_pos_df.iloc[0]
 
     def get_included_df(self, df):
         binding_df = df[df["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold]
@@ -939,7 +948,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     def sort_table(self, df):
         df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
 
-        tier_sorter = ["Pass", "Relaxed", "Poor"]
+        tier_sorter = ["Pass", "Poor"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
 
@@ -1049,6 +1058,25 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
 
         return "Poor"
 
+    def sort_table(self, df):
+        df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
+
+        tier_sorter = ["Pass", "LowReadSupport", "LowExpr", "Poor"]
+        sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
+        df["rank_tier"] = df['Tier'].map(sorter_index)
+
+        df["rank_ic50"] = df["IC50 MT"].rank(ascending=True, method='dense')
+        df["rank_expr"] = pd.to_numeric(df["Expr"], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
+        df["rank"] = df["rank_ic50"] + df["rank_expr"]
+
+        df.sort_values(by=["rank_tier", "rank", "IC50 MT", "ID"], inplace=True, ascending=True)
+
+        df.drop(labels='rank_tier', axis=1, inplace=True)
+        df.drop(labels='rank_ic50', axis=1, inplace=True)
+        df.drop(labels='rank_expr', axis=1, inplace=True)
+        df.drop(labels='rank', axis=1, inplace=True)
+        return df
+
 
 class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
     def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count):
@@ -1083,3 +1111,181 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
                 return "Pass"
 
         return "Poor"
+
+
+class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABCMeta):
+    def __init__(
+        self,
+        input_file,
+        output_file,
+        tumor_purity=None,
+        binding_threshold=500,
+        percentile_threshold=None,
+        allele_specific_binding_thresholds=False,
+        aggregate_inclusion_binding_threshold=5000,
+        top_score_metric="median",
+        trna_vaf=0.25,
+        trna_cov=10,
+        expn_val=1,
+        maximum_transcript_support_level=1,
+    ):
+        PvacbindAggregateAllEpitopes.__init__(
+            self,
+            input_file,
+            output_file,
+            binding_threshold=binding_threshold,
+            percentile_threshold=percentile_threshold,
+            allele_specific_binding_thresholds=allele_specific_binding_thresholds,
+            aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
+            top_score_metric=top_score_metric,
+        )
+        self.tumor_purity = tumor_purity
+        self.trna_vaf = trna_vaf
+        self.trna_cov = trna_cov
+        self.expn_val = expn_val
+        self.allele_expr_threshold = trna_vaf * expn_val * 10
+        self.maximum_transcript_support_level = maximum_transcript_support_level
+
+    # pvacbind w/ Index instead of Mutation
+    def get_list_unique_mutation_keys(self, df):
+        keys = df["Index"].values.tolist()
+        return sorted(list(set(keys)))
+
+    # pvacbind w/ Index instead of Mutation
+    def read_input_file(self, used_columns, dtypes):
+        return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False,
+                           na_values="NA", keep_default_na=False, dtype={"Index": str})
+
+    # pvacbind w/ Index instead of Mutation
+    def get_sub_df(self, all_epitopes_df, df_key):
+        df = (all_epitopes_df[lambda x: (x['Index'] == df_key)]).copy()
+        return df, df_key
+
+    def get_tier(self, mutation, vaf_clonal):
+        if self.use_allele_specific_binding_thresholds and mutation['HLA Allele'] in self.allele_specific_binding_thresholds:
+            binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
+        else:
+            binding_threshold = self.binding_threshold
+
+        tsl_pass = True
+        if mutation["Transcript Support Level"] == "Not Supported":
+            pass
+        elif pd.isna(mutation["Transcript Support Level"]):
+            tsl_pass = False
+        else:
+            if mutation["Transcript Support Level"] > self.maximum_transcript_support_level:
+                tsl_pass = False
+
+        allele_expr_pass = True
+        if (mutation['Tumor RNA VAF'] != 'NA' and mutation['Gene Expression'] != 'NA' and
+            mutation['Tumor RNA VAF'] * mutation['Gene Expression'] <= self.allele_expr_threshold):
+            allele_expr_pass = False
+
+        vaf_clonal_pass = True
+        if (mutation['Tumor DNA VAF'] != 'NA' and mutation['Tumor DNA VAF'] < (vaf_clonal/2)):
+            vaf_clonal_pass = False
+
+        #writing these out as explicitly as possible for ease of understanding
+        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+           allele_expr_pass and
+           vaf_clonal_pass and
+           tsl_pass):
+            if self.percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
+                    return "Pass"
+            else:
+                return "Pass"
+
+        #not in founding clone
+        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+           allele_expr_pass and
+           not vaf_clonal_pass and
+           tsl_pass):
+            if self.percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
+                    return "Subclonal"
+            else:
+                return "Subclonal"
+
+        #relax expression.  Include sites that have reasonable vaf but zero overall gene expression
+        lowexpr=False
+        if mutation['Tumor RNA VAF'] != 'NA' and mutation['Gene Expression'] != 'NA' and ['Tumor RNA Depth'] != 'NA':
+            if ((mutation["Tumor RNA VAF"] * mutation["Gene Expression"] > 0) or
+               (mutation["Gene Expression"] == 0 and
+               mutation["Tumor RNA Depth"] > self.trna_cov and
+               mutation["Tumor RNA VAF"] > self.trna_vaf)):
+                lowexpr=True
+
+        #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
+        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+           lowexpr and
+           vaf_clonal_pass and
+           tsl_pass):
+            if self.percentile_threshold:
+                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
+                    return "LowExpr"
+            else:
+                return "LowExpr"
+
+        #zero expression
+        if (mutation["Gene Expression"] == 0 or mutation["Tumor RNA VAF"] == 0) and not lowexpr:
+            return "NoExpr"
+
+        #everything else
+        return "Poor"
+
+    def sort_table(self, df):
+        #make sure the tiers sort in the expected order
+        tier_sorter = ["Pass", "LowExpr", "Subclonal", "Poor", "NoExpr"]
+        sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
+        df["rank_tier"] = df['Tier'].map(sorter_index)
+
+        df["rank_ic50"] = df["IC50 MT"].rank(ascending=True, method='dense')
+        df["rank_expr"] = pd.to_numeric(df["Allele Expr"], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
+        df["rank"] = df["rank_ic50"] + df["rank_expr"]
+
+        df.sort_values(by=["rank_tier", "rank", "Gene", "Transcript", "AA Change"], inplace=True, ascending=True)
+
+        df.drop(labels='rank_tier', axis=1, inplace=True)
+        df.drop(labels='rank_ic50', axis=1, inplace=True)
+        df.drop(labels='rank_expr', axis=1, inplace=True)
+        df.drop(labels='rank', axis=1, inplace=True)
+
+        return df
+
+    # pvacbind w/ vaf and expression info included
+    def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count):
+        tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
+
+        out_dict = {'ID': key}
+        out_dict.update({k.replace('HLA-', ''): v for k, v in sorted(hla.items())})
+
+        gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
+        transcript = best['Transcript'] if 'Transcript' in best else 'NA'
+        problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
+        tsl = best['Transcript Support Level'] if best['Transcript Support Level'] == "Not Supported" or pd.isna(best['Transcript Support Level']) else str(int(best['Transcript Support Level']))
+        allele_expr = self.calculate_allele_expr(best)
+
+        out_dict.update({
+            'Gene': gene,
+            'Transcript': transcript,
+            'Junction Name': best['Junction'],
+            'AA Change': best['Amino Acid Change'],
+            'Best Peptide': best["Epitope Seq"],
+            'TSL': tsl,
+            'Allele': best["HLA Allele"],
+            'Pos': best['Protein Position'],
+            'Prob Pos': problematic_positions,
+            'Num Included Peptides': included_peptide_count,
+            'Num Passing Peptides': good_binder_count,
+            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
+            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
+            'RNA Expr': best["Gene Expression"],
+            'RNA VAF': best["Tumor RNA VAF"],
+            'Allele Expr': allele_expr,
+            'RNA Depth': best["Tumor RNA Depth"],
+            'DNA VAF': best["Tumor DNA VAF"],
+            'Tier': tier,
+            'Evaluation': 'Pending',
+        })
+        return out_dict

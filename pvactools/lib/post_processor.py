@@ -2,10 +2,10 @@ import tempfile
 import shutil
 
 from pvactools.lib.identify_problematic_amino_acids import IdentifyProblematicAminoAcids
-from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes
+from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes, PvacspliceAggregateAllEpitopes
 from pvactools.lib.binding_filter import BindingFilter
 from pvactools.lib.filter import Filter, FilterCriterion
-from pvactools.lib.top_score_filter import PvacseqTopScoreFilter, PvacfuseTopScoreFilter, PvacbindTopScoreFilter
+from pvactools.lib.top_score_filter import PvacseqTopScoreFilter, PvacfuseTopScoreFilter, PvacbindTopScoreFilter, PvacspliceTopScoreFilter
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.calculate_reference_proteome_similarity import CalculateReferenceProteomeSimilarity
 from pvactools.lib.net_chop import NetChop
@@ -14,7 +14,7 @@ from pvactools.lib.netmhc_stab import NetMHCStab
 class PostProcessor:
     def __init__(self, **kwargs):
         for (k,v) in kwargs.items():
-           setattr(self, k, v)
+            setattr(self, k, v)
         self.aggregate_report = self.input_file.replace('.tsv', '.aggregated.tsv')
         self.identify_problematic_amino_acids_fh = tempfile.NamedTemporaryFile()
         self.binding_filter_fh = tempfile.NamedTemporaryFile()
@@ -122,6 +122,21 @@ class PostProcessor:
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
                 aggregate_inclusion_count_limit=self.aggregate_inclusion_count_limit,
             ).execute()
+        elif self.file_type == 'pVACsplice':
+            PvacspliceAggregateAllEpitopes(
+                self.input_file,
+                self.aggregate_report,
+                tumor_purity=self.tumor_purity,
+                binding_threshold=self.binding_threshold,
+                percentile_threshold=self.percentile_threshold,
+                allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
+                top_score_metric=self.top_score_metric,
+                trna_vaf=self.trna_vaf,
+                trna_cov=self.trna_cov,
+                expn_val=self.expn_val,
+                maximum_transcript_support_level=self.maximum_transcript_support_level,
+            ).execute()
         print("Completed")
 
     def calculate_manufacturability(self):
@@ -162,6 +177,15 @@ class PostProcessor:
                 filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf, exclude_nas=self.exclude_NAs))
                 filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
                 filter_criteria.append(FilterCriterion("Transcript Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
+            # excluding transcript expression filter for pvacsplice
+            elif self.file_type == 'pVACsplice':
+                filter_criteria.append(FilterCriterion("Normal Depth", '>=', self.normal_cov, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Normal VAF", '<=', self.normal_vaf, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', self.tdna_cov, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', self.tdna_vaf, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', self.trna_cov, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
             elif self.file_type == 'pVACfuse':
                 filter_criteria.append(FilterCriterion("Read Support", '>=', self.read_support, exclude_nas=self.exclude_NAs))
                 filter_criteria.append(FilterCriterion("Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
@@ -211,6 +235,13 @@ class PostProcessor:
                 self.transcript_support_level_filter_fh.name,
                 self.top_score_filter_fh.name,
                 top_score_metric = self.top_score_metric,
+            ).execute()
+        elif self.file_type == 'pVACsplice':
+            PvacspliceTopScoreFilter(
+                self.transcript_support_level_filter_fh.name,
+                self.top_score_filter_fh.name,
+                top_score_metric = self.top_score_metric,
+                maximum_transcript_support_level=self.maximum_transcript_support_level,
             ).execute()
         print("Completed")
 

@@ -19,6 +19,12 @@ __all__ = [
     "run_utils",
     "post_processor",
     "vector_visualization",
+    'filter_regtools_results',
+    'junction_to_fasta',
+    'fasta_to_kmers',
+    'combine_inputs',
+    'load_gtf_data',
+    'splice_pipeline',
 ]
 
 from . import *

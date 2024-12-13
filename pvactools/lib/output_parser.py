@@ -4,6 +4,7 @@ import csv
 import re
 import operator
 import os
+import pandas as pd
 from math import ceil, inf
 from statistics import median
 import yaml
@@ -758,6 +759,7 @@ class OutputParser(metaclass=ABCMeta):
         tmp_output_filehandle.close()
         os.replace(tmp_output_file, self.output_file)
 
+
 class DefaultOutputParser(OutputParser):
     def parse_iedb_file(self, tsv_entries):
         with open(self.key_file, 'r') as key_file_reader:
@@ -1003,3 +1005,212 @@ class UnmatchedSequencesOutputParser(OutputParser):
         tmp_output_filehandle.close()
         os.replace(tmp_output_file, self.output_file)
 
+
+class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
+    def parse_iedb_file(self):
+        # input key file
+        with open(self.key_file, 'r') as key_file_reader:
+            protein_identifiers_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
+        # final output
+        iedb_results = {}
+        for input_iedb_file in self.input_iedb_files:
+            # input iedb file
+            with open(input_iedb_file, 'r') as reader:
+                iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
+                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
+                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
+                # header: allele, seq_num, start, end, length, peptide, ic50, percentile_rank
+                for line in iedb_tsv_reader:
+                    if "Warning: Potential DNA sequence(s)" in line['allele']:
+                        continue
+                    allele         = line['allele']
+                    fasta_label    = int(line['seq_num'])
+                    epitope        = line['peptide']
+                    peptide_length = len(epitope)
+                    scores         = self.get_scores(line, method)
+                    percentiles    = self.get_percentiles(line, method)
+                    # get fasta_id/combined_name from fasta key file
+                    if protein_identifiers_from_label[fasta_label] is not None:
+                        # comma-separated string (1 or more ids) as 1 entry in list
+                        protein_label = protein_identifiers_from_label[fasta_label][0]
+                        # one index at a time
+                        for key in protein_label.split(','):
+
+                            if key not in iedb_results:
+                                iedb_results[key]                   = {}
+                                iedb_results[key]['mt_scores']      = {}
+                                iedb_results[key]['mt_percentiles'] = {}
+                                iedb_results[key]['mt_epitope_seq'] = epitope
+                                iedb_results[key]['fasta_id']       = fasta_label
+                                iedb_results[key]['tsv_index']      = key
+                                iedb_results[key]['allele']         = allele
+                                iedb_results[key]['peptide_length'] = peptide_length
+                            iedb_results[key]['mt_scores'][method]  = scores
+                            iedb_results[key]['mt_percentiles'][method] = percentiles
+
+        return iedb_results
+
+    def flatten_iedb_results(self, iedb_results):
+        #transform the iedb_results dictionary into a two-dimensional list
+        flattened_iedb_results = list((
+            value['fasta_id'],
+            value['mt_scores'],
+            value['mt_percentiles'],
+            value['mt_epitope_seq'],
+            value['tsv_index'],
+            value['allele'],
+            value['best_mt_score'],
+            value['best_mt_score_method'],
+            value['median_mt_score'],
+            value['best_mt_percentile'],
+            value['best_mt_percentile_method'],
+            value['median_mt_percentile'],
+        ) for value in iedb_results.values())
+        return flattened_iedb_results
+
+    def base_headers(self):
+        return[
+            'Chromosome',
+            'Start',
+            'Stop',
+            'Reference',
+            'Variant',
+            'Junction',
+            'Junction Start',
+            'Junction Stop',
+            'Junction Score',
+            'Junction Anchor',
+            'Transcript',
+            'Transcript Support Level',
+            'Biotype',
+            'Ensembl Gene ID',
+            'Variant Type',
+            'Amino Acid Change',
+            'Gene Name',
+            'HGVSc',
+            'HGVSp',
+            'WT Protein Length',
+            'ALT Protein Length',
+            'Frameshift Event',
+            'Protein Position', # start position of peptide in alt protein
+            'HLA Allele',
+            'Peptide Length',
+            'Epitope Seq',
+            'Median IC50 Score',
+            'Best IC50 Score',
+            'Best IC50 Score Method',
+            'Median Percentile',
+            'Best Percentile',
+            'Best Percentile Method',
+            'Tumor DNA Depth',
+            'Tumor DNA VAF',
+            'Tumor RNA Depth',
+            'Tumor RNA VAF',
+            'Normal Depth',
+            'Normal VAF',
+            'Gene Expression',
+            'Transcript Expression',
+            'Index', # this is junction index
+            'Fasta Key', # unique num for traceback to correct sequence - key to combined fasta header
+        ]
+
+    def execute(self):
+        tmp_output_file = self.output_file + '.tmp'
+        tmp_output_filehandle = open(tmp_output_file, 'w')
+        tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
+        tsv_writer.writeheader()
+        
+        # added for pvacsplice - variant info
+        tsv_entries = self.parse_input_tsv_file()
+        
+        # get binding info from iedb files
+        iedb_results = self.process_input_iedb_file()
+
+        # from input iedb files
+        for (
+            fasta_id,
+            mt_scores,
+            mt_percentiles,
+            mt_epitope_seq,
+            tsv_index,
+            allele,
+            best_mt_score,
+            best_mt_score_method,
+            median_mt_score,
+            best_mt_percentile,
+            best_mt_percentile_method,
+            median_mt_percentile,
+        ) in iedb_results:
+            # get unique index
+            (final_index, protein_position) = tsv_index.rsplit('.', 1)
+            tsv_entry = tsv_entries[final_index]
+            row = {
+                'Chromosome'          : tsv_entry['chromosome_name'],
+                'Start'               : tsv_entry['start'],
+                'Stop'                : tsv_entry['stop'],
+                'Reference'           : tsv_entry['reference'],
+                'Variant'             : tsv_entry['variant'],
+                'Transcript'          : tsv_entry['transcript_name'],
+                'Transcript Support Level': tsv_entry['transcript_support_level'],
+                'Biotype'             : tsv_entry['biotype'],
+                ### junction info from RegTools
+                'Junction'            : tsv_entry['name'],
+                'Junction Start'      : tsv_entry['junction_start'],
+                'Junction Stop'       : tsv_entry['junction_stop'],
+                'Junction Score'      : tsv_entry['score'],
+                'Junction Anchor'     : tsv_entry['anchor'],
+                ###
+                'Ensembl Gene ID'     : tsv_entry['gene_name'],
+                'Variant Type'        : tsv_entry['variant_type'],
+                'Amino Acid Change'   : tsv_entry['amino_acid_change'],
+                'Protein Position' : protein_position,
+                'Gene Name'           : tsv_entry['gene_name'],
+                'HGVSc'               : tsv_entry['hgvsc'],
+                'HGVSp'               : tsv_entry['hgvsp'],
+                'Index'               : final_index,
+                'Fasta Key'           : fasta_id,
+                'WT Protein Length' : tsv_entry['wt_protein_length'],
+                'ALT Protein Length': tsv_entry['alt_protein_length'],
+                'Frameshift Event'     : tsv_entry['frameshift_event'],
+                ### pvacbind info
+                'HLA Allele'          : allele,
+                'Peptide Length'      : len(mt_epitope_seq),
+                'Epitope Seq'         : mt_epitope_seq,
+                'Median IC50 Score'   : round(median_mt_score, 3),
+                'Best IC50 Score'     : best_mt_score,
+                'Best IC50 Score Method' : PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
+                'Best Percentile'     : best_mt_percentile,
+                ###
+            }
+            row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
+            row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
+
+            for method in self.prediction_methods():
+                pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
+                self.add_pretty_row(row, mt_scores, method, pretty_method, 'IC50 Score')
+                if pretty_method not in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
+                    self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
+
+            for (tsv_key, row_key) in zip(['gene_expression', 'transcript_expression', 'normal_vaf', 'tdna_vaf', 'trna_vaf'], ['Gene Expression', 'Transcript Expression', 'Normal VAF', 'Tumor DNA VAF', 'Tumor RNA VAF']):
+                if tsv_key in tsv_entry:
+                    if tsv_entry[tsv_key] == 'NA':
+                        row[row_key] = 'NA'
+                    else:
+                        # no --normal-sample-name parameter causes ValueError here bc tries to convert empty string to float
+                        if 'normal' in tsv_key and tsv_entry[tsv_key] == '':
+                            row[row_key] = 'NA'
+                        else:
+                            row[row_key] = round(float(tsv_entry[tsv_key]), 3)
+
+            for (tsv_key, row_key) in zip(['normal_depth', 'tdna_depth', 'trna_depth'], ['Normal Depth', 'Tumor DNA Depth', 'Tumor RNA Depth']):
+                if tsv_key in tsv_entry:
+                    row[row_key] = tsv_entry[tsv_key]
+                elif 'normal' in tsv_key and tsv_entry[tsv_key] == '':
+                    row[row_key] = 'NA'
+
+            if self.add_sample_name:
+                row['Sample Name'] = self.sample_name
+            tsv_writer.writerow(row)
+
+        tmp_output_filehandle.close()
+        os.replace(tmp_output_file, self.output_file)
