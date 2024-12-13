@@ -15,7 +15,7 @@ def define_parser():
     )
     parser.add_argument(
         'input_file',
-        help="The final report .tsv file to filter"
+        help="The all_epitopes.tsv or filtered.tsv pVACseq report file to filter."
     )
     parser.add_argument(
         'output_file',

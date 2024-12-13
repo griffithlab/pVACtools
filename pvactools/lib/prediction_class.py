@@ -16,6 +16,8 @@ import uuid
 import io
 from datetime import datetime
 
+import pvactools.lib.run_utils
+
 class IEDB(metaclass=ABCMeta):
     @classmethod
     def iedb_prediction_methods(cls):
@@ -334,12 +336,6 @@ class PredictionClass(metaclass=ABCMeta):
         if allele not in valid_alleles:
             sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, self.__class__.__name__, self.__class__.__name__))
 
-    def determine_neoepitopes(self, sequence, length):
-        epitopes = {}
-        for i in range(0, len(sequence)-length+1):
-            epitopes[i+1] = sequence[i:i+length]
-        return epitopes
-
 
 class MHCI(PredictionClass, metaclass=ABCMeta):
     @property
@@ -370,7 +366,7 @@ class DeepImmuno(MHCI):
         for record in SeqIO.parse(input_file, "fasta"):
             seq_num = record.id
             peptide = str(record.seq)
-            epitopes = self.determine_neoepitopes(peptide, epitope_length)
+            epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
             all_epitopes.extend(epitopes.values())
         all_epitopes = list(set(all_epitopes))
 
@@ -402,7 +398,7 @@ class DeepImmuno(MHCI):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 peptide = str(record.seq)
-                epitopes = self.determine_neoepitopes(peptide, epitope_length)
+                epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
                 for start, epitope in epitopes.items():
                     epitope_df = df[df['peptide'] == epitope]
                     epitope_df['seq_num'] = seq_num
@@ -431,7 +427,7 @@ class BigMHC(metaclass=ABCMeta):
         for record in SeqIO.parse(input_file, "fasta"):
             seq_num = record.id
             peptide = str(record.seq)
-            epitopes = self.determine_neoepitopes(peptide, epitope_length)
+            epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
             all_epitopes.extend(epitopes.values())
         all_epitopes = list(set(all_epitopes))
 
@@ -464,7 +460,7 @@ class BigMHC(metaclass=ABCMeta):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 peptide = str(record.seq)
-                epitopes = self.determine_neoepitopes(peptide, epitope_length)
+                epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
                 for start, epitope in epitopes.items():
                     epitope_df = df[df['peptide'] == epitope]
                     epitope_df['seq_num'] = seq_num
@@ -500,7 +496,7 @@ class MHCflurry(MHCI):
         for record in SeqIO.parse(input_file, "fasta"):
             seq_num = record.id
             peptide = str(record.seq)
-            epitopes = self.determine_neoepitopes(peptide, epitope_length)
+            epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
             all_epitopes.extend(epitopes.values())
 
         all_epitopes = list(set(all_epitopes))
@@ -531,7 +527,7 @@ class MHCflurry(MHCI):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 peptide = str(record.seq)
-                epitopes = self.determine_neoepitopes(peptide, epitope_length)
+                epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
                 for start, epitope in epitopes.items():
                     epitope_df = df[df['peptide'] == epitope]
                     epitope_df['seq_num'] = seq_num
