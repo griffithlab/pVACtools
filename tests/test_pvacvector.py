@@ -200,7 +200,7 @@ class TestPvacvector(unittest.TestCase):
                 os.path.join(self.test_data_dir, "Test.vector.results.output.dna.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, '0', 'None', 'junctions.tsv'),
+                os.path.join(output_dir.name, 'junctions.tsv'),
                 os.path.join(self.test_data_dir, 'Test.vector.results.output.junctions.tsv')
             ))
 
@@ -332,6 +332,32 @@ class TestPvacvector(unittest.TestCase):
         self.assertTrue(compare(
             os.path.join(output_dir.name, "test_pvacvector_produces_expected_output_results.fa"),
             os.path.join(self.test_data_dir, "clipped.result.fa")
+        ))
+
+        output_dir.cleanup()
+
+    def test_pvacvector_percentile_threshold(self):
+        output_dir = tempfile.TemporaryDirectory()
+
+        run.main([
+            self.input_tsv,
+            self.test_run_name,
+            self.allele,
+            self.method,
+            output_dir.name,
+            '-v', self.input_vcf,
+            '-e1', self.epitope_length,
+            '-n', self.input_n_mer,
+            '-k',
+            '-b', '32000',
+            '--percentile-threshold', '80',
+            '--max-clip-length', '0',
+            '--spacers', 'None',
+        ])
+
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "0", "None", "junctions.tsv"),
+            os.path.join(self.test_data_dir, "percentile_threshold.junctions.tsv")
         ))
 
         output_dir.cleanup()
