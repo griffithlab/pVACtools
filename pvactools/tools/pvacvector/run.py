@@ -96,7 +96,7 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
 def write_junctions_file(graph, current_output_dir):
     junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
     with open(junctions_file, 'w') as fh:
-        fieldnames = ['left_peptide', 'left_partner_clip', 'spacer', 'right_partner_clip', 'right_peptide', 'junction_score']
+        fieldnames = ['left_peptide', 'left_partner_clip', 'spacer', 'right_partner_clip', 'right_peptide', 'junction_score', 'percentile']
         writer = csv.DictWriter(fh, delimiter="\t", fieldnames=fieldnames)
         writer.writeheader()
         for (left_peptide, right_peptide, edge_data) in graph.edges.data():
@@ -107,10 +107,11 @@ def write_junctions_file(graph, current_output_dir):
                 'right_partner_clip': edge_data['right_partner_trim'],
                 'right_peptide': right_peptide,
                 'junction_score': edge_data['weight'],
+                'percentile': edge_data['percentile'],
             }
             writer.writerow(row)
 
-def find_min_scores(parsed_output_files, current_output_dir, args, min_scores):
+def find_min_scores(parsed_output_files, current_output_dir, args, min_scores, min_percentiles):
     #min_scores_rows = {}
     junctions_with_good_binders = set()
     #find junctions that contain a good binder so that they can be excluded from further processing
@@ -118,6 +119,7 @@ def find_min_scores(parsed_output_files, current_output_dir, args, min_scores):
     #Find min score of all the epitopes of each of the remaining peptide-spacer-peptide combinations 
     processed_junctions = set()
     junction_min_scores = {}
+    junction_min_percentiles = {}
     for parsed_output_file in parsed_output_files:
         with open(parsed_output_file, 'r') as parsed:
             reader = csv.DictReader(parsed, delimiter="\t")
@@ -127,8 +129,10 @@ def find_min_scores(parsed_output_files, current_output_dir, args, min_scores):
 
                 if args.top_score_metric == 'lowest':
                     score = float(row['Best IC50 Score'])
+                    percentile = float(row['Best Percentile'])
                 elif args.top_score_metric == 'median':
                     score = float(row['Median IC50 Score'])
+                    percentile = float(row['Median Percentile'])
                 if args.allele_specific_binding_thresholds:
                     allele = row['HLA Allele']
                     threshold = PredictionClass.cutoff_for_allele(allele)
@@ -136,6 +140,8 @@ def find_min_scores(parsed_output_files, current_output_dir, args, min_scores):
                 else:
                     threshold = float(args.binding_threshold)
                 if score < threshold:
+                    junctions_with_good_binders.add(index)
+                if args.percentile_threshold is not None and percentile < args.percentile_threshold:
                     junctions_with_good_binders.add(index)
 
                 if index not in junction_min_scores:
@@ -146,11 +152,20 @@ def find_min_scores(parsed_output_files, current_output_dir, args, min_scores):
                     junction_min_scores[index] = score
                 else:
                     continue
+                if index not in junction_min_percentiles:
+                    #"initialize" with the first percentile encountered
+                    junction_min_percentiles[index] = percentile
+                elif percentile < junction_min_percentiles[index]:
+                    #if the current percentile is lower than the saved one, update the saved one
+                    junction_min_percentiles[index] = percentile
+                else:
+                    continue
     good_junctions = processed_junctions - junctions_with_good_binders
     for good_junction in good_junctions:
         min_scores[good_junction] = junction_min_scores[good_junction]
+        min_percentiles[good_junction] = junction_min_percentiles[good_junction]
 
-    return min_scores
+    return min_scores, min_percentiles
 
 def initialize_graph(seq_keys):
     graph = nx.DiGraph()
@@ -158,8 +173,9 @@ def initialize_graph(seq_keys):
         graph.add_node(key)
     return graph
 
-def add_valid_junctions_to_graph(graph, min_scores):
+def add_valid_junctions_to_graph(graph, min_scores, min_percentiles):
     for key, worst_case in min_scores.items():
+        percentile = min_percentiles[key]
         if (key.count("|") == 3):
             (id_1, left_partner_trim, right_partner_trim, id_2) = key.split("|")
             spacer = "None"
@@ -167,11 +183,12 @@ def add_valid_junctions_to_graph(graph, min_scores):
             (id_1, left_partner_trim, spacer, right_partner_trim, id_2) = key.split("|")
         if graph.has_edge(id_1, id_2) and graph[id_1][id_2]['weight'] < worst_case:
             graph[id_1][id_2]['weight'] = worst_case
+            graph[id_1][id_2]['percentile'] = percentile
             graph[id_1][id_2]['spacer'] = spacer
             graph[id_1][id_2]['left_partner_trim'] = int(left_partner_trim)
             graph[id_1][id_2]['right_partner_trim'] = int(right_partner_trim)
         elif not graph.has_edge(id_1, id_2):
-            graph.add_edge(id_1, id_2, weight=worst_case, spacer=spacer, left_partner_trim=int(left_partner_trim), right_partner_trim=int(right_partner_trim))
+            graph.add_edge(id_1, id_2, weight=worst_case, percentile=percentile, spacer=spacer, left_partner_trim=int(left_partner_trim), right_partner_trim=int(right_partner_trim))
     return graph
 
 def check_graph_valid(Paths, seq_dict):
@@ -402,6 +419,7 @@ def main(args_input=sys.argv[1:]):
     tries = 0
     results_file = None
     min_scores = {}
+    min_percentiles = {}
     while results_file is None and tries < max_tries:
         print("Processing clip length {}".format(tries))
         for spacer in args.spacers:
@@ -419,8 +437,8 @@ def main(args_input=sys.argv[1:]):
                 class_i_alleles,
                 class_ii_alleles
             )
-            min_scores = find_min_scores(parsed_output_files, current_output_dir, args, min_scores)
-            add_valid_junctions_to_graph(graph, min_scores)
+            min_scores, min_percentiles = find_min_scores(parsed_output_files, current_output_dir, args, min_scores, min_percentiles)
+            add_valid_junctions_to_graph(graph, min_scores, min_percentiles)
             write_junctions_file(graph, current_output_dir)
             (valid, error) = check_graph_valid(graph, seq_dict)
             if not valid:
@@ -444,7 +462,8 @@ def main(args_input=sys.argv[1:]):
             'Unable to find path. ' +
             'A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
             '1) decreasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
-            '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)'
+            '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)\n' +
+            '3) if running with a percentile threshold set, either remove this parameter or reduce the acceptable threshold to allow more possible connections (--percentile-threshold parameter)'
         )
     else:
         if 'DISPLAY' in os.environ.keys():
