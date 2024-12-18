@@ -1,30 +1,24 @@
-import sys
-from abc import ABCMeta, abstractmethod
-import os
-import csv
-import datetime
-import time
-import shutil
 import copy
-import yaml
+import logging
+import shutil
+import sys
+from collections import OrderedDict
+
 import pkg_resources
 import pymp
-from threading import Lock
-from Bio import SeqIO
+import yaml
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
-from collections import OrderedDict
-import logging
 
 from pvactools.lib.prediction_class import *
 from pvactools.lib.input_file_converter import VcfConverter
 from pvactools.lib.fasta_generator import FastaGenerator, VectorFastaGenerator
-from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser
+from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser, PvacspliceOutputParser
 from pvactools.lib.post_processor import PostProcessor
 from pvactools.lib.run_utils import *
 import pvactools.lib.call_iedb
 import pvactools.lib.combine_parsed_outputs
+
 
 def status_message(msg):
     print(msg)
@@ -37,13 +31,12 @@ class Pipeline(metaclass=ABCMeta):
         self.flurry_state                = self.get_flurry_state()
         self.starfusion_file             = kwargs.pop('starfusion_file', None)
         self.proximal_variants_file      = None
-        tmp_dir = os.path.join(self.output_dir, 'tmp')
-        os.makedirs(tmp_dir, exist_ok=True)
-        self.tmp_dir = tmp_dir
+        self.tmp_dir = os.path.join(self.output_dir, 'tmp')
+        os.makedirs(self.tmp_dir, exist_ok=True)
 
     def log_dir(self):
         dir = os.path.join(self.output_dir, 'log')
-        os.makedirs(dir, exist_ok=True)
+        os.makedirs(dir, exist_ok=True),
         return dir
 
     def print_log(self):
@@ -97,6 +90,8 @@ class Pipeline(metaclass=ABCMeta):
     def tsv_file_path(self):
         if self.input_file_type == 'pvacvector_input_fasta':
             return self.input_file
+        elif self.input_file_type == 'junctions':
+            return os.path.join(self.junctions_dir, f'{self.sample_name}_combined.tsv')
         else:
             tsv_file = self.sample_name + '.tsv'
             return os.path.join(self.output_dir, tsv_file)
@@ -112,6 +107,7 @@ class Pipeline(metaclass=ABCMeta):
     def converter(self, params):
         converter_types = {
             'vcf'  : 'VcfConverter',
+            'junctions' : 'PvacspliceVcfConverter',
         }
         converter_type = converter_types[self.input_file_type]
         converter = getattr(sys.modules[__name__], converter_type)
@@ -128,9 +124,10 @@ class Pipeline(metaclass=ABCMeta):
 
     def output_parser(self, params):
         parser_types = {
-            'vcf'  : 'DefaultOutputParser',
+            'vcf': 'DefaultOutputParser',
             'pvacvector_input_fasta': 'UnmatchedSequencesOutputParser',
             'fasta': 'UnmatchedSequencesOutputParser',
+            'junctions': 'PvacspliceOutputParser',
         }
         parser_type = parser_types[self.input_file_type]
         parser = getattr(sys.modules[__name__], parser_type)
@@ -141,9 +138,10 @@ class Pipeline(metaclass=ABCMeta):
             self.input_file,
             str(epitope_flank_length + max(self.epitope_lengths) - 1),
             fasta_path,
+            "--sample-name", self.sample_name,
+            "--biotypes" , ",".join(self.biotypes),
         ]
         import pvactools.tools.pvacseq.generate_protein_fasta as generate_combined_fasta
-        params.extend(["--sample-name", self.sample_name])
         if self.phased_proximal_variants_vcf is not None:
             params.extend(["--phased-proximal-variants-vcf", self.phased_proximal_variants_vcf])
         if self.downstream_sequence_length is not None:
@@ -166,6 +164,7 @@ class Pipeline(metaclass=ABCMeta):
             'output_file': self.tsv_file_path(),
             'sample_name': self.sample_name,
             'pass_only': self.pass_only,
+            'biotypes': self.biotypes,
         }
         if self.normal_sample_name is not None:
             convert_params['normal_sample_name'] = self.normal_sample_name
@@ -253,10 +252,14 @@ class Pipeline(metaclass=ABCMeta):
                 generate_fasta_params['input_file'] = self.tsv_file_path()
                 generate_fasta_params['output_file_prefix'] = split_fasta_file_path
                 generate_fasta_params['epitope_lengths'] = self.epitope_lengths
-                generate_fasta_params['spacers'] = self.spacers
+                generate_fasta_params['junctions_to_test'] = self.junctions_to_test
+                generate_fasta_params['spacer'] = self.spacer
+                generate_fasta_params['clip_length'] = self.clip_length
                 status_message("Generating Variant Peptide FASTA and Key Files - Entries %s" % (fasta_chunk))
                 fasta_generator = self.fasta_generator(generate_fasta_params)
                 fasta_generator.execute()
+                for file_name in fasta_generator.output_files:
+                    shutil.copy(file_name, self.output_dir)
             else:
                 for epitope_length in self.epitope_lengths:
                     split_fasta_file_path = "{}_{}".format(self.split_fasta_basename(epitope_length), fasta_chunk)
@@ -361,7 +364,7 @@ class Pipeline(metaclass=ABCMeta):
         split_parsed_output_files = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
-            if self.input_file_type == 'fasta':
+            if self.input_file_type in ['fasta', 'junctions']:
                 fasta_chunk = tsv_chunk
             else:
                 fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
@@ -429,6 +432,8 @@ class Pipeline(metaclass=ABCMeta):
         ]
         if self.input_file_type == 'fasta':
             params.extend(['--file-type', 'pVACbind'])
+        elif self.input_file_type == 'junctions':
+            params.extend(['--file-type', 'pVACsplice'])
         pvactools.lib.combine_parsed_outputs.main(params)
         status_message("Completed")
 
@@ -513,7 +518,7 @@ class PvacbindPipeline(Pipeline):
         uniq_records = []
         keys = {}
         for sequence, ids in fasta_sequences.items():
-            record = SeqRecord(Seq(sequence, IUPAC.protein), id=str(count), description=str(count))
+            record = SeqRecord(Seq(sequence), id=str(count), description=str(count))
             uniq_records.append(record)
             keys[count] = ids
             count += 1
@@ -532,7 +537,7 @@ class PvacbindPipeline(Pipeline):
                 logging.warning("Record {} contains unsupported amino acids. Skipping.".format(record.id))
                 continue
             if len(sequence) >= length:
-                record.seq = Seq(sequence, IUPAC.protein)
+                record.seq = Seq(sequence)
                 records.append(record)
         SeqIO.write(records, self.fasta_basename(length), "fasta")
 
@@ -600,7 +605,7 @@ class PvacbindPipeline(Pipeline):
         warning_messages = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
-            if self.input_file_type == 'fasta':
+            if self.input_file_type == 'fasta' or self.input_file_type == 'junctions':
                 fasta_chunk = tsv_chunk
             else:
                 fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
@@ -669,7 +674,7 @@ class PvacbindPipeline(Pipeline):
         split_parsed_output_files = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
-            if self.input_file_type == 'fasta':
+            if self.input_file_type == 'fasta' or self.input_file_type == 'junctions':
                 fasta_chunk = tsv_chunk
             else:
                 fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
@@ -709,12 +714,14 @@ class PvacbindPipeline(Pipeline):
                         'key_file'               : split_fasta_key_file_path,
                         'output_file'            : split_parsed_file_path,
                     }
+                    if self.input_file_type == 'junctions':
+                        params['input_tsv_file'] = self.tsv_file_path()
                     params['sample_name'] = self.sample_name
                     params['flurry_state'] = self.flurry_state
                     if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
                         params['add_sample_name_column'] = True 
                     parser = self.output_parser(params)
-                    parser.execute() 
+                    parser.execute()
                     status_message("Parsing prediction file for Allele %s and Epitope Length %s - Entries %s - Completed" % (a, length, fasta_chunk))
 
                     split_parsed_output_files.append(split_parsed_file_path)
@@ -758,6 +765,30 @@ class PvacbindPipeline(Pipeline):
         else:
             post_processing_params['run_netmhc_stab'] = False
         PostProcessor(**post_processing_params).execute()
+
+        if self.keep_tmp_files is False:
+            shutil.rmtree(self.tmp_dir, ignore_errors=True)
+
+
+class PvacsplicePipeline(PvacbindPipeline):
+    def execute(self):
+        self.print_log()
+
+        # mv fasta file to temp dir
+        shutil.copy(self.input_file, os.path.join(self.tmp_dir, os.path.basename(self.input_file)))
+
+        split_parsed_output_files = []
+        chunks = self.split_fasta_file(self.epitope_lengths)
+        self.call_iedb(chunks, self.epitope_lengths)
+        # parse iedb output files
+        split_parsed_output_files.extend(self.parse_outputs(chunks, self.epitope_lengths))  # chunks - list of lists
+
+        if len(split_parsed_output_files) == 0:
+            status_message("No output files were created. Aborting.")
+            return
+
+        # creates all_epitopes.tsv
+        self.combined_parsed_outputs(split_parsed_output_files)
 
         if self.keep_tmp_files is False:
             shutil.rmtree(self.tmp_dir, ignore_errors=True)

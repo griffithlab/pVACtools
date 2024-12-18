@@ -90,8 +90,8 @@ Download the archives for `class II <http://tools.iedb.org/mhcii/download/>`_ an
 .. code-block:: none
 
    apt-get update && apt-get install -y tcsh gawk
-   wget https://downloads.iedb.org/tools/mhcii/3.1.11/IEDB_MHC_II-3.1.11.tar.gz
-   tar -zxvf IEDB_MHC_II-3.1.11.tar.gz
+   wget https://downloads.iedb.org/tools/mhcii/3.1.12/IEDB_MHC_II-3.1.12.tar.gz
+   tar -zxvf IEDB_MHC_II-3.1.12.tar.gz
    cd mhc_ii
    ./configure.py
 

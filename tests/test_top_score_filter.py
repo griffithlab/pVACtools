@@ -5,7 +5,7 @@ import py_compile
 import tempfile
 from filecmp import cmp
 
-from pvactools.lib.top_score_filter import PvacseqTopScoreFilter, PvacfuseTopScoreFilter, PvacbindTopScoreFilter
+from pvactools.lib.top_score_filter import PvacseqTopScoreFilter, PvacfuseTopScoreFilter, PvacbindTopScoreFilter, PvacspliceTopScoreFilter
 from tests.utils import *
 
 class TopScoreFilterTests(unittest.TestCase):
@@ -53,4 +53,13 @@ class TopScoreFilterTests(unittest.TestCase):
         PvacbindTopScoreFilter(input_file, output_file.name, top_score_metric='median').execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_pvacbind.tsv')
+        self.assertTrue(cmp(output_file.name, expected_output_file))
+
+    def test_runs_and_creates_expected_file_pvacsplice(self):
+        input_file = os.path.join(self.test_data_dir, 'input_pvacsplice.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+
+        PvacspliceTopScoreFilter(input_file, output_file.name, top_score_metric='median').execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice.tsv')
         self.assertTrue(cmp(output_file.name, expected_output_file))

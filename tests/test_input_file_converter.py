@@ -7,7 +7,7 @@ import py_compile
 import logging
 from testfixtures import LogCapture, StringComparison as S
 
-from pvactools.lib.input_file_converter import VcfConverter, FusionInputConverter
+from pvactools.lib.input_file_converter import VcfConverter, FusionInputConverter, PvacspliceVcfConverter
 from tests.utils import *
 
 class InputFileConverterTests(unittest.TestCase):
@@ -55,6 +55,7 @@ class InputFileConverterTests(unittest.TestCase):
             convert_vcf_params = {
                 'input_file'        : convert_vcf_input_file,
                 'output_file'       : convert_vcf_output_file.name,
+                'biotypes'          : ['nonsense_mediated_decay', 'protein_coding', 'polymorphic_pseudogene'],
             }
             converter = VcfConverter(**convert_vcf_params)
             converter.execute()
@@ -428,6 +429,7 @@ class InputFileConverterTests(unittest.TestCase):
             'output_file'       : convert_vcf_output_file.name,
             'sample_name'       : 'H_NJ-HCC1395-HCC1395',
             'normal_sample_name': 'H_NJ-HCC1395-HCC1395_BL',
+            'biotypes'          : ['nonsense_mediated_decay', 'protein_coding'],
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -524,6 +526,62 @@ class InputFileConverterTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_arriba.tsv')
         self.assertTrue(compare(convert_output_file.name, expected_output_file))
 
+    def test_pvacsplice_input_generates_expected_tsv(self):
+        convert_input_file  = os.path.join(self.test_data_dir, '..', 'pvacsplice', 'inputs', 'annotated.expression_chr1.vcf.gz')
+        convert_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'        : convert_input_file,
+            'output_file'       : convert_output_file.name,
+            'sample_name'       : 'HCC1395_TUMOR_DNA',
+            'normal_sample_name': 'HCC1395_NORMAL_DNA',
+            'biotypes'          : ['CTCF_binding_site', 'TF_binding_site', 'enhancer', 'lncRNA', 'miRNA', 'misc_RNA', 'nonsense_mediated_decay', 'open_chromatin_region',
+                                   'processed_pseudogene', 'processed_transcript', 'promoter', 'promoter_flanking_region', 'protein_coding', 'retained_intron',
+                                   'snRNA', 'snoRNA', 'transcribed_unprocessed_pseudogene'],
+        }
+        converter = PvacspliceVcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice.tsv')
+        self.assertTrue(compare(convert_output_file.name, expected_output_file))
+
+    def test_pvacsplice_pass_only_input_generates_expected_tsv(self):
+        convert_input_file  = os.path.join(self.test_data_dir, '..', 'pvacsplice', 'inputs', 'annotated.expression_chr1.vcf.gz')
+        convert_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'        : convert_input_file,
+            'output_file'       : convert_output_file.name,
+            'sample_name'       : 'HCC1395_TUMOR_DNA',
+            'normal_sample_name': 'HCC1395_NORMAL_DNA',
+            'biotypes'          : ['CTCF_binding_site', 'TF_binding_site', 'enhancer', 'lncRNA', 'miRNA', 'misc_RNA', 'nonsense_mediated_decay', 'open_chromatin_region',
+                                   'processed_pseudogene', 'processed_transcript', 'promoter', 'promoter_flanking_region', 'protein_coding', 'retained_intron',
+                                   'snRNA', 'snoRNA', 'transcribed_unprocessed_pseudogene'],
+            'pass_only'         : True,
+        }
+        converter = PvacspliceVcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice.pass_only.tsv')
+        self.assertTrue(compare(convert_output_file.name, expected_output_file))
+
+    def test_pvacsplice_protein_coding_input_generates_expected_tsv(self):
+        convert_input_file  = os.path.join(self.test_data_dir, '..', 'pvacsplice', 'inputs', 'annotated.expression_chr1.vcf.gz')
+        convert_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'        : convert_input_file,
+            'output_file'       : convert_output_file.name,
+            'sample_name'       : 'HCC1395_TUMOR_DNA',
+            'normal_sample_name': 'HCC1395_NORMAL_DNA',
+            'biotypes'          : ['protein_coding'],
+        }
+        converter = PvacspliceVcfConverter(**convert_vcf_params)
+
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice.protein_coding.tsv')
+        self.assertTrue(compare(convert_output_file.name, expected_output_file))
+
     def test_proximal_variants_input(self):
         convert_input_file = os.path.join(self.test_data_dir, 'somatic.vcf.gz')
         convert_input_proximal_variants_file = os.path.join(self.test_data_dir, 'phased.vcf.gz')
@@ -568,6 +626,7 @@ class InputFileConverterTests(unittest.TestCase):
             'input_file'        : convert_vcf_input_file,
             'output_file'       : convert_vcf_output_file.name,
             'sample_name'       : 'TUMOR',
+            'biotypes'          : ['nonsense_mediated_decay', 'protein_coding'],
         }
         converter = VcfConverter(**convert_vcf_params)
 
@@ -583,6 +642,7 @@ class InputFileConverterTests(unittest.TestCase):
             'input_file'        : convert_vcf_input_file,
             'output_file'       : convert_vcf_output_file.name,
             'sample_name'       : 'TUMOR',
+            'biotypes'          : ['nonsense_mediated_decay'],
         }
         converter = VcfConverter(**convert_vcf_params)
 
