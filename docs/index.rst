@@ -25,7 +25,7 @@ tools:
    users in reviewing, exploring and prioritizing neoantigens from the results of
    pVACtools processes for personalized cancer vaccine design.
 
-.. image:: images/pVACtools_main-figure_v7.png
+.. image:: images/pVACtools_main-figure_v8.png
     :align: center
     :alt: pVACtools immunotherapy workflow
 
@@ -57,22 +57,42 @@ Contents
    contact
    mailing_list
 
-New in Release |release|
+New in Version |version|
 ------------------------
 
-This is a bugfix release. It fixes the following problem(s):
+This is a major version release. Please note that pVACtools 5.0 is not guaranteed to be
+backwards-compatible and certain changes could break old workflows.
 
-- Previously, pVACview would add an additional header line to Excel spreadsheets
-  when exporting a TSV. This has been fixed so that the first line in the spreadsheet
-  is the actual header line.
-  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1143
-- One of the pVACview figures used to describe various anchor scenarios has been updated
-  so that the ordering of the scenarios is consistent with other figures and descriptions
-  throughout. Screenshots and documentation has been updated appropriately.
-  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1144
-- The class II pVACview demo data was out-of-date and not reflecting recent updates to the
-  HLA alpha-beta chain handling. This file has now been updated.
-  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1145
+New Tools
+_________
+
+This release adds a new tool, pVACsplice, for prediction neoantigens from
+splice sites. Please see the :ref:`full tool documentation <pvacsplice>` for more information.
+by @mrichters in https://github.com/griffithlab/pVACtools/pull/911
+
+New Features
+____________
+
+- This release refactors the pVACvector graph building algorithm in order to increase the probability
+  for finding a solution and reduce the number of iterations needed before a solution is found. Please
+  see the PR describtion for the full details. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1163
+- Add a new ``--aggregate-inclusion-count-limit`` parameter to set the maximum number of epitopes
+  to include in the metrics.json detailed data for variants that have a large number of candidate
+  neoantigens (e.g., frameshifts). by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1147
+- Add support for additional alleles that weren't previously supported, includings ones for dog,
+  mouse, and MHC class II. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1148
+
+Bugfixes
+________
+
+- This relase fixes a bug with the ``--agregate-inclusion-binding-threshold`` which would not be used if
+  the ``--allele-specific-binding-thresholds`` flag was set. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1147
+- The pVACview percentile plots have been updated to include percentiles from elution and immunogenicity
+  algorithms. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1149
+- This release fixes a bug where the incorrect neoantigen fasta entry may be used for the reference proteome
+  search if there were multiple variants or alt alleles located at the same genomic position. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1153
+- Add additional trailing amino acids for frameshift insertions when creating fasta in order to capture a
+  matched wildtype entry in large repetitive regions. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1155
 
 Past release notes can be found on our :ref:`releases` page.
 
