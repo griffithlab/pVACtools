@@ -157,7 +157,7 @@ class TestPvacvector(unittest.TestCase):
 
     def test_valid_alleles_runs(self):
         valid_alleles.main(["-p", "SMM"])
-    
+
     def test_valid_algorithms_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.base_dir,
@@ -200,8 +200,8 @@ class TestPvacvector(unittest.TestCase):
                 os.path.join(self.test_data_dir, "Test.vector.results.output.dna.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, '0', 'None', 'junction_scores.tsv'),
-                os.path.join(self.test_data_dir, 'Test.vector.results.output.junction_scores.tsv')
+                os.path.join(output_dir.name, 'junctions.tsv'),
+                os.path.join(self.test_data_dir, 'Test.vector.results.output.junctions.tsv')
             ))
 
             if 'DISPLAY' in os.environ.keys():
@@ -274,27 +274,90 @@ class TestPvacvector(unittest.TestCase):
             output_dir.cleanup()
 
     def test_pvacvector_clipping(self):
-        with self.assertRaises(Exception) as context:
-            output_dir = tempfile.TemporaryDirectory()
+        output_dir = tempfile.TemporaryDirectory()
 
-            run.main([
-                self.input_tsv,
-                self.test_run_name,
-                self.allele,
-                self.method,
-                output_dir.name,
-                '-v', self.input_vcf,
-                '-e1', self.epitope_length,
-                '-n', self.input_n_mer,
-                '-k',
-                '-b', '50000',
-                '--max-clip-length', '1',
-                '--spacers', 'None',
-            ])
+        run.main([
+            self.input_tsv,
+            self.test_run_name,
+            self.allele,
+            self.method,
+            output_dir.name,
+            '-v', self.input_vcf,
+            '-e1', self.epitope_length,
+            '-n', self.input_n_mer,
+            '-k',
+            '-b', '32000',
+            '--max-clip-length', '1',
+            '--spacers', 'None,AAY',
+        ])
 
-            self.assertTrue(compare(
-                os.path.join(output_dir.name, "1", "vector_input.fa"),
-                os.path.join(self.test_data_dir, "clipped.fa")
-            ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "0", "None", "junctions.tsv"),
+            os.path.join(self.test_data_dir, "clipped.0.None.junctions.tsv")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "0", "AAY", "junctions.tsv"),
+            os.path.join(self.test_data_dir, "clipped.0.AAY.junctions.tsv")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "1", "None", "junctions.tsv"),
+            os.path.join(self.test_data_dir, "clipped.1.None.junctions.tsv")
+        ))
 
-            output_dir.cleanup()
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "0", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(self.test_data_dir, "clipped.0.None.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "0", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(self.test_data_dir, "clipped.0.None.fa.key")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "0", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(self.test_data_dir, "clipped.0.AAY.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "0", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(self.test_data_dir, "clipped.0.AAY.fa.key")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "1", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(self.test_data_dir, "clipped.1.None.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "1", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(self.test_data_dir, "clipped.1.None.fa.key")
+        ))
+
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "test_pvacvector_produces_expected_output_results.fa"),
+            os.path.join(self.test_data_dir, "clipped.result.fa")
+        ))
+
+        output_dir.cleanup()
+
+    def test_pvacvector_percentile_threshold(self):
+        output_dir = tempfile.TemporaryDirectory()
+
+        run.main([
+            self.input_tsv,
+            self.test_run_name,
+            self.allele,
+            self.method,
+            output_dir.name,
+            '-v', self.input_vcf,
+            '-e1', self.epitope_length,
+            '-n', self.input_n_mer,
+            '-k',
+            '-b', '32000',
+            '--percentile-threshold', '80',
+            '--max-clip-length', '0',
+            '--spacers', 'None',
+        ])
+
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "0", "None", "junctions.tsv"),
+            os.path.join(self.test_data_dir, "percentile_threshold.junctions.tsv")
+        ))
+
+        output_dir.cleanup()
