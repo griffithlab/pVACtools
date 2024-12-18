@@ -78,6 +78,7 @@ class PostProcessor:
 
     def aggregate_all_epitopes(self):
         if self.el_only:
+            print("WARNING: No binding affinity algorithm(s) specified, skipping aggregated report creation.")
             return
         print("Creating aggregated report")
         if self.file_type == 'pVACseq':
