@@ -24,6 +24,8 @@ ____________
 - Add a new ``--aggregate-inclusion-count-limit`` parameter to set the maximum number of epitopes
   to include in the metrics.json detailed data for variants that have a large number of candidate
   neoantigens (e.g., frameshifts). by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1147
+- Add a new ``--biotypes`` parameter which defines a list of transcript consequence biotypes that the
+  predictions from pVACseq and pVACsplice should be limited to. by @mrichters in https://github.com/griffithlab/pVACtools/pull/911
 - Add support for additional alleles that weren't previously supported, includings ones for dog,
   mouse, and MHC class II. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1148
 
