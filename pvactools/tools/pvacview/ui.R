@@ -224,9 +224,9 @@ explore_tab <- tabItem(
                         fluidRow(
                             column(width = 6,
                                    div(style = 'overflow-y:scroll;height: 500px;',
-                                       h4("Allele specific anchor prediction heatmap for top 15 candidates in peptide table."),
-                                       h5("HLA allele specific anchor predictions overlaying good-binding peptide sequences generated from each specific transcript.", br(),
-                                          " Current version supports the first 15 MT/WT peptide sequence pairs (first 30 rows of the peptide table)."), br(),
+                                       h4("Allele specific anchor prediction heatmap for the candidates in peptide table."),
+                                       h5("HLA allele specific anchor predictions overlaying candidate peptide sequences for selected transcript set."),
+                                       br(),
                                        plotOutput(outputId = "peptideFigureLegend", height = "50px"),
                                        plotOutput(outputId = "anchorPlot")
                                    )
@@ -498,7 +498,7 @@ tutorial_tab <- tabItem("tutorial",
                 for HLA alleles that the MT binds well to.", br())
             ),
             column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png",
+                img(src = "https://github.com/griffithlab/pVACtools/raw/0f008c1c/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png",
                 align = "center", width = "1500px"), br(), br()
             )
         ),

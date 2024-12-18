@@ -71,6 +71,7 @@ class PvacseqTests(unittest.TestCase):
             "allele_specific_cutoffs",
             "binding_filter",
             "coverage_filter",
+            "transcript_support_level_filter",
             "download_example_data",
             "generate_aggregated_report",
             "generate_protein_fasta",
@@ -80,7 +81,6 @@ class PvacseqTests(unittest.TestCase):
             "netmhc_stab",
             "calculate_reference_proteome_similarity",
             "top_score_filter",
-            "transcript_support_level_filter",
             "valid_alleles",
             "valid_algorithms",
             'identify_problematic_amino_acids',
@@ -278,11 +278,21 @@ class PvacseqTests(unittest.TestCase):
         identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
 
     def test_pvacseq_pipeline(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             test_data_directory()
-        ))) as mock_request:
+        ))) as mock_request, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+            data,
+            files,
+            self.test_data_directory,
+            'net_chop.html'
+        ))), patch('pvactools.lib.netmhc_stab.NetMHCStab.query_netmhcstabpan_server',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+            data,
+            files,
+            self.test_data_directory,
+            'Netmhcstab.html'
+        ))):
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
@@ -302,6 +312,7 @@ class PvacseqTests(unittest.TestCase):
                 '--pass-only',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,
+                '--biotypes', 'IG_V_gene,protein_coding',
             ])
 
             run.main([
@@ -316,6 +327,7 @@ class PvacseqTests(unittest.TestCase):
                 '-d', 'full',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,
+                '--biotypes', 'IG_V_gene,protein_coding',
             ])
             close_mock_fhs()
 
@@ -434,6 +446,7 @@ class PvacseqTests(unittest.TestCase):
                     '--keep-tmp-files',
                     '--run-reference-proteome-similarity',
                     '--peptide-fasta', self.peptide_fasta,
+                    '--biotypes', 'IG_V_gene,protein_coding',
                 ])
             self.assertEqual(
                 str(cm.exception),
@@ -460,7 +473,8 @@ class PvacseqTests(unittest.TestCase):
             '-e2', '15',
             '-a', 'sample_name',
             '-d', 'full',
-            '--top-score-metric', 'lowest'
+            '--top-score-metric', 'lowest',
+            '--biotypes', 'IG_V_gene,protein_coding',
         ]
         run.main(params)
         output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'Test.filtered.tsv')
@@ -486,6 +500,7 @@ class PvacseqTests(unittest.TestCase):
             '-s', '1000',
             '-k',
             '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz'),
+            '--biotypes', 'IG_V_gene,protein_coding',
         ]
         run.main(params)
 
@@ -525,6 +540,7 @@ class PvacseqTests(unittest.TestCase):
             '--top-score-metric=lowest',
             '--keep-tmp-files',
             '-d', 'full',
+            '--biotypes', 'IG_V_gene,protein_coding',
         ])
 
         for file_name in (
@@ -565,6 +581,7 @@ class PvacseqTests(unittest.TestCase):
                 'PickPocket',
                 output_dir.name,
                 '-e1', '9,10',
+                '--biotypes', 'IG_V_gene,protein_coding',
                 '--problematic-amino-acids', 'C',
             ])
 

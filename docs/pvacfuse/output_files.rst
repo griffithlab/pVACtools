@@ -22,15 +22,8 @@ created):
 
    * - File Name
      - Description
-   * - ``<sample_name>.tsv``
-     - An intermediate file with variant and transcript information parsed from the input file(s).
-   * - ``<sample_name>.tsv_<chunks>`` (multiple)
-     - The above file but split into smaller chunks for easier processing with IEDB.
    * - ``<sample_name>.fasta``
-     - A fasta file with mutant peptide subsequences for all
-       processable fusion combinations.
-   * - ``<sample_name>.net_chop.fa``
-     - A fasta file with mutant peptide subsequences specific for use in running the net_chop tool.
+     - A fasta file with mutant peptide subsequences for each fusion.
    * - ``<sample_name>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``.
@@ -42,6 +35,10 @@ created):
        the best epitope for each mutation in an easy-to-read format. Not generated when running with elution algorithms only.
    * - ``<sample_name>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
+
+Additionally, each folder will contain subfolders, one for each selected
+epitope length, that contains intermediate files that are specific to each
+epitope length.
 
 Filters applied to the filtered.tsv file
 ----------------------------------------
@@ -58,34 +55,10 @@ documentation for more information on each individual filter. The standalone
 filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
 
-.. _pvacfuse_all_ep_and_filtered:
-
-Prediction Algorithms Supporting Percentile Information
-_______________________________________________________
-
-pVACfuse outputs binding affinity percentile rank information when provided by
-a chosen prediction algorithm. The following prediction algorithms calculate a
-percentile rank:
-
-- MHCflurry
-- NetMHC
-- NetMHCcons
-- NetMHCpan
-- NetMHCIIpan
-- NNalign
-- PickPocket
-- SMM
-- SMMPMBEC
-- SMMalign
-
-The following prediction algorithms do not provide a percentile rank:
-
-- MHCnuggets
-
 Prediction Algorithms Supporting Elution Scores
 _______________________________________________
 
-- MHCflurryEL
+- MHCflurryEL (Presentation and Processing)
 - NetMHCpanEL
 - NetMHCIIpanEL
 - BigMHC_EL
@@ -97,7 +70,32 @@ ______________________________________________________
 - DeepImmuno
 
 Please note that when running pVACfuse with only elution or immunogenicity algorithms, no
-aggregate report is created.
+aggregate report and pVACview files are created.
+
+Prediction Algorithms Supporting Percentile Information
+_______________________________________________________
+
+pVACfuse outputs percentile rank information when provided by
+a chosen binding affinity, elution, or immunogenicity prediction algorithm.
+The following prediction algorithms calculate a
+percentile rank:
+
+- MHCflurry
+- MHCflurryEL (Presentation)
+- MHCnuggets
+- NetMHC
+- NetMHCcons
+- NetMHCpan
+- NetMHCpanEL
+- NetMHCIIpan
+- NetMHCIIpanEL
+- NNalign
+- PickPocket
+- SMM
+- SMMPMBEC
+- SMMalign
+
+.. _pvacfuse_all_ep_and_filtered:
 
 all_epitopes.tsv and filtered.tsv Report Columns
 ------------------------------------------------
@@ -202,10 +200,14 @@ total number of well-scoring epitopes for each variant as well as the HLA allele
 epitopes are well-binding to. Lastly, the report will bin variants into tiers
 that offer suggestions as to the suitability of variants for use in vaccines.
 
-Only epitopes meeting the ``--aggregate-inclusion-threshold`` are included in this report (default: 5000).
-Whether the median or the lowest binding affinity metrics are output in the
-``IC50 MT`` and ``%ile MT`` columns is controlled by the
-``--top-score-metric`` parameter.
+Only epitopes meeting the ``--aggregate-inclusion-binding-threshold`` are included in this report (default: 5000).
+If the number of unique epitopes for a fusion meeting this threshold exceeds the
+``--aggregate-inclusion-count-limit``, only the n best-binding epitopes up to this
+limit are included (default: 15).
+
+Whether the median or the lowest binding affinity metrics are used for determining the
+included eptiopes, selecting the best-scoring epitope, and which values are output in the ``IC50 MT``
+and ``%ile MT`` columns is controlled by the ``--top-score-metric`` parameter.
 
 .. list-table::
    :header-rows: 1
@@ -227,8 +229,12 @@ Whether the median or the lowest binding affinity metrics are output in the
      - The Allele that the Best Peptide is binding to
    * - ``Prob Pos``
      - A list of positions in the Best Peptide that are problematic. ``None`` if the ``--problematic-pos`` parameter was not set during the pVACfuse run
+   * - ``Num Included Peptides``
+     - The number of included peptides according to the
+       ``--aggregate-inclusion-binding-threshold`` and
+       ``--aggregate-inclusion-count-limit``
    * - ``Num Passing Peptides``
-     - The number of unique well-binding peptides for this fusion
+     - The number of included peptides for this fisoopm that are well-binding.
    * - ``IC50 MT``
      - Median or lowest IC50 binding affinity of the best-binding epitope across all prediction algorithms used
    * - ``%ile MT``
