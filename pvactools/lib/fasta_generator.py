@@ -357,44 +357,37 @@ class VectorFastaGenerator():
         self.input_file         = kwargs['input_file']
         self.output_file_prefix = kwargs['output_file_prefix']
         self.epitope_lengths    = kwargs['epitope_lengths']
-        self.spacers            = kwargs['spacers']
+        self.spacer             = kwargs['spacer']
+        self.junctions_to_test  = kwargs['junctions_to_test']
+        self.clip_length        = kwargs['clip_length']
+        self.output_files = []
 
     def execute(self):
         seq_dict = dict()
         for record in SeqIO.parse(self.input_file, "fasta"):
-            data = {'seq': str(record.seq)}
-            if record.id != record.description:
-                data.update(json.loads(record.description.split(' ', 1)[1]))
-                contains_problematic_peptides = True
-            else:
-                contains_problematic_peptides = False
-            seq_dict[record.id] = data
-        seq_keys = sorted(seq_dict)
-
-        if contains_problematic_peptides:
-            seq_tuples = self.combine_problematic_peptides(seq_dict)
-        else:
-            seq_tuples = list(itertools.permutations(seq_keys, 2))
+            seq_dict[record.id] = str(record.seq)
 
         for length in self.epitope_lengths:
             epitopes = dict()
             fasta_sequences = OrderedDict()
             wingspan_length = length - 1
-            for comb in seq_tuples:
-                seq1 = comb[0]
-                seq2 = comb[1]
-                seq1_seq = seq_dict[seq1]['seq']
-                seq2_seq = seq_dict[seq2]['seq']
-                trunc_seq1 = seq1_seq[(len(seq1_seq) - wingspan_length):len(seq1_seq)]
-                trunc_seq2 = seq2_seq[0:wingspan_length]
+            for (seq1, seq2) in self.junctions_to_test:
+                seq1_seq = seq_dict[seq1]
+                seq2_seq = seq_dict[seq2]
+                for left_clip_length in range(0, self.clip_length+1):
+                    for right_clip_length in range(0, self.clip_length+1):
+                        #These combinations would've already been tested in previous attempts with lower clip lengths and can be skipped
+                        if left_clip_length < self.clip_length and right_clip_length < self.clip_length:
+                            continue
+                        trunc_seq1 = seq1_seq[(len(seq1_seq) - wingspan_length):(len(seq1_seq) - left_clip_length)]
+                        trunc_seq2 = seq2_seq[(0 + right_clip_length):wingspan_length]
 
-                for this_spacer in self.spacers:
-                    if this_spacer != 'None':
-                        seq_ID = seq1 + "|" + this_spacer + "|" + seq2
-                        epitopes[seq_ID] = (trunc_seq1 + this_spacer + trunc_seq2)
-                    else:
-                        seq_ID = seq1 + "|" + seq2
-                        epitopes[seq_ID] = trunc_seq1 + trunc_seq2
+                        if self.spacer != 'None':
+                            seq_ID = "{}|{}|{}|{}|{}".format(seq1, left_clip_length, self.spacer, right_clip_length, seq2)
+                            epitopes[seq_ID] = (trunc_seq1 + self.spacer + trunc_seq2)
+                        else:
+                            seq_ID = "{}|{}|{}|{}".format(seq1, left_clip_length, right_clip_length, seq2)
+                            epitopes[seq_ID] = trunc_seq1 + trunc_seq2
 
             for seq_id in epitopes:
                 sequence = epitopes[seq_id]
@@ -403,6 +396,7 @@ class VectorFastaGenerator():
                 fasta_sequences.setdefault(sequence, []).append(seq_id)
 
             output_file = "{}.{}.tsv".format(self.output_file_prefix, length)
+            self.output_files.append(output_file)
             output_key_file = "{}.key".format(output_file)
             writer = open(output_file, 'w')
             key_writer = open(output_key_file, 'w')
