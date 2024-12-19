@@ -40,3 +40,12 @@ ________
   search if there were multiple variants or alt alleles located at the same genomic position. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1153
 - Add additional trailing amino acids for frameshift insertions when creating fasta in order to capture a
   matched wildtype entry in large repetitive regions. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1155
+
+Version 5.0.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- The ``--aggregate-inclusion-count-limit`` was not being passed along to the
+  aggregate report module in the pVACsplice pipeline correctly. This release
+  fixes that issue. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1167
