@@ -57,6 +57,15 @@ Contents
    contact
    mailing_list
 
+New in Version |release|
+------------------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+- The ``--aggregate-inclusion-count-limit`` was not being passed along to the
+  aggregate report module in the pVACsplice pipeline correctly. This release
+  fixes that issue. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1167
+
 New in Version |version|
 ------------------------
 
