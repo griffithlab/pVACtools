@@ -1123,6 +1123,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         percentile_threshold=None,
         allele_specific_binding_thresholds=False,
         aggregate_inclusion_binding_threshold=5000,
+        aggregate_inclusion_count_limit=15,
         top_score_metric="median",
         trna_vaf=0.25,
         trna_cov=10,
@@ -1137,6 +1138,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             percentile_threshold=percentile_threshold,
             allele_specific_binding_thresholds=allele_specific_binding_thresholds,
             aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
+            aggregate_inclusion_count_limit=aggregate_inclusion_count_limit,
             top_score_metric=top_score_metric,
         )
         self.tumor_purity = tumor_purity
