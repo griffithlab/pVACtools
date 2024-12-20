@@ -187,6 +187,7 @@ class TestPvacvector(unittest.TestCase):
                 output_dir.name,
                 '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
+                '--allow-n-peptide-exclusion', '0',
                 '-k'
             ])
 
@@ -229,6 +230,7 @@ class TestPvacvector(unittest.TestCase):
                 '-v', self.input_vcf,
                 '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
+                '--allow-n-peptide-exclusion', '0',
                 '-k',
             ])
 
@@ -264,6 +266,7 @@ class TestPvacvector(unittest.TestCase):
                 '-v', os.path.join(self.test_data_dir, "input_negative_start.vcf.gz"),
                 '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
+                '--allow-n-peptide-exclusion', '0',
                 '-k',
             ])
 
@@ -288,6 +291,7 @@ class TestPvacvector(unittest.TestCase):
             '-k',
             '-b', '32000',
             '--max-clip-length', '1',
+            '--allow-n-peptide-exclusion', '0',
             '--spacers', 'None,AAY',
         ])
 
@@ -352,12 +356,71 @@ class TestPvacvector(unittest.TestCase):
             '-b', '32000',
             '--percentile-threshold', '80',
             '--max-clip-length', '0',
+            '--allow-n-peptide-exclusion', '0',
             '--spacers', 'None',
         ])
 
         self.assertTrue(compare(
             os.path.join(output_dir.name, "0", "None", "junctions.tsv"),
             os.path.join(self.test_data_dir, "percentile_threshold.junctions.tsv")
+        ))
+
+        output_dir.cleanup()
+
+    def test_pvacvector_remove_peptides(self):
+        output_dir = tempfile.TemporaryDirectory()
+
+        run.main([
+            self.input_file,
+            self.test_run_name,
+            self.allele,
+            self.method,
+            output_dir.name,
+            '-e1', self.epitope_length,
+            '-n', self.input_n_mer,
+            '-k',
+            '-b', '22000',
+            '--max-clip-length', '0',
+            '--spacers', 'None',
+        ])
+
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "without_MT.CASP10.S654R", "test_pvacvector_produces_expected_output_results.fa"),
+            os.path.join(self.test_data_dir, "without_MT.CASP10.S654R.test_pvacvector_produces_expected_output_results.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "without_MT.FAT3.R4848T", "test_pvacvector_produces_expected_output_results.fa"),
+            os.path.join(self.test_data_dir, "without_MT.FAT3.R4848T.test_pvacvector_produces_expected_output_results.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "without_MT.PEX1.V356I", "test_pvacvector_produces_expected_output_results.fa"),
+            os.path.join(self.test_data_dir, "without_MT.PEX1.V356I.test_pvacvector_produces_expected_output_results.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "without_MT.POM121C.G3107R", "test_pvacvector_produces_expected_output_results.fa"),
+            os.path.join(self.test_data_dir, "without_MT.POM121C.G3107R.test_pvacvector_produces_expected_output_results.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "without_MT.PRDM15.G654W", "test_pvacvector_produces_expected_output_results.fa"),
+            os.path.join(self.test_data_dir, "without_MT.PRDM15.G654W.test_pvacvector_produces_expected_output_results.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "without_MT.SUMF2.G23A", "test_pvacvector_produces_expected_output_results.fa"),
+            os.path.join(self.test_data_dir, "without_MT.SUMF2.G23A.test_pvacvector_produces_expected_output_results.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "without_MT.TP53.R157H", "test_pvacvector_produces_expected_output_results.fa"),
+            os.path.join(self.test_data_dir, "without_MT.TP53.R157H.test_pvacvector_produces_expected_output_results.fa")
+        ))
+
+        self.assertFalse(os.path.exists(
+            os.path.join(output_dir.name, "without_MT.ACSL3.S345N", "test_pvacvector_produces_expected_output_results.fa"),
+        ))
+        self.assertFalse(os.path.exists(
+            os.path.join(output_dir.name, "without_MT.DTX3L.G501R", "test_pvacvector_produces_expected_output_results.fa"),
+        ))
+        self.assertFalse(os.path.exists(
+            os.path.join(output_dir.name, "without_MT.NRCAM.P838H", "test_pvacvector_produces_expected_output_results.fa"),
         ))
 
         output_dir.cleanup()
