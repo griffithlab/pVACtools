@@ -371,6 +371,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Number of amino acids to permit clipping from the start and/or end of peptides in order to test novel junction epitopes when the first pass on the full peptide fails.",
             default=3,
         )
+        self.parser.add_argument(
+            '--allow-n-peptide-exclusion', type=int,
+            help="If no solution is found after adding spacers and clipping peptides, attempt to find partial solutions with up to n peptides removed.",
+            default=2,
+        )
 
 class PvacbindRunArgumentParser(RunArgumentParser):
     def __init__(self):
