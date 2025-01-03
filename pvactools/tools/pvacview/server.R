@@ -950,7 +950,10 @@ server <- shinyServer(function(input, output, session) {
   ##Anchor Heatmap overlayed on selected peptide sequences
   anchorPlotHeight <- reactive({
     if (is.null(df$metricsData)) {
-      return(0)
+      return(100)
+    }
+    if (length(df$metricsData[[selectedID()]]$good_binders) == 0) {
+      return(100)
     }
     peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
     peptide_names <- names(peptide_data)
