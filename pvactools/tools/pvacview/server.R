@@ -59,7 +59,7 @@ server <- shinyServer(function(input, output, session) {
     for (i in 1:length(evaluations)){
       evaluation <- evaluations[i]
       if (evaluation == 'Accept') {
-        html <- paste0("#button-acpt_", i ," { color: red !important; }")
+        html <- paste0("#button-acpt_", i ," { color: green !important; }")
         insertUI("head", ui = tags$style(HTML(html)))
         removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
         removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
@@ -69,7 +69,7 @@ server <- shinyServer(function(input, output, session) {
         removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
         removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
       } else if (evaluation == 'Review') {
-        html <- paste0("#button-rev_", i ," { color: red !important; }")
+        html <- paste0("#button-rev_", i ," { color: orange !important; }")
         insertUI("head", ui = tags$style(HTML(html)))
         removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
         removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
@@ -646,7 +646,7 @@ server <- shinyServer(function(input, output, session) {
     selectedRow <- as.numeric(strsplit(input$accept_eval, "_")[[1]][2])
     selectedID <- df$mainTable$ID[selectedRow]
     df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Accept"
-    html <- paste0("#button-acpt_", selectedRow ," { color: red !important; }")
+    html <- paste0("#button-acpt_", selectedRow ," { color: green !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
     removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'), multiple = TRUE)
     removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'), multiple = TRUE)
@@ -670,7 +670,7 @@ server <- shinyServer(function(input, output, session) {
     selectedRow <- as.numeric(strsplit(input$review_eval, "_")[[1]][2])
     selectedID <- df$mainTable$ID[selectedRow]
     df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Review"
-    html <- paste0("#button-rev_", selectedRow ," { color: red !important; }")
+    html <- paste0("#button-rev_", selectedRow ," { color: orange !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
     removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'), multiple = TRUE)
     removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'), multiple = TRUE)
