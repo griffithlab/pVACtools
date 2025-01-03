@@ -1100,12 +1100,12 @@ server <- shinyServer(function(input, output, session) {
         hla_allele_count <- length(unique(bindingScoreDataIC50()$HLA_allele))
         incProgress(0.5)
         p <- ggplot(data = bindingScoreDataIC50(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
-          stat_summary(fun.y = mean, fun.ymin = mean, fun.ymax = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
-          geom_jitter(data = bindingScoreDataIC50(), aes(shape = algorithms), sizes = 5, stroke = 1, position = position_jitter(0.3)) +
+          stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
+          geom_jitter(data = bindingScoreDataIC50(), aes(shape = algorithms), size = 5, stroke = 1, position = position_jitter(0.3)) +
           scale_shape_manual(values = 0:8) +
           geom_hline(aes(yintercept = yintercept, linetype = Cutoffs), line.data, color = rep(line.data$color, hla_allele_count)) +
           scale_color_manual(values = rep(c("MT" = "#D2B4DE", "WT" = "#F7DC6F"), hla_allele_count)) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
         incProgress(0.5)
         print(p)
       }else {
@@ -1158,12 +1158,12 @@ server <- shinyServer(function(input, output, session) {
         hla_allele_count <- length(unique(combinedBindingElutionDataPercentile()$HLA_allele))
         incProgress(0.5)
         p <- ggplot(data = combinedBindingElutionDataPercentile(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
-          stat_summary(fun.y = mean, fun.ymin = mean, fun.ymax = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
+          stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
           geom_jitter(data = combinedBindingElutionDataPercentile(), aes(shape = algorithms), size = 5, stroke = 1, position = position_jitter(0.3)) +
           scale_shape_manual(values = 0:10) +
           geom_hline(aes(yintercept = yintercept, linetype = Cutoffs), line.data, color = rep(line.data$color, hla_allele_count)) +
           scale_color_manual(values = rep(c("MT" = "#D2B4DE", "WT" = "#F7DC6F"), hla_allele_count)) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
         incProgress(0.5)
         print(p)
       }else {
@@ -1855,7 +1855,7 @@ server <- shinyServer(function(input, output, session) {
            scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409")) +
           labs(x = NULL) +
           facet_wrap(~Feature, scales="free", ncol=6) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 10), axis.ticks = element_line(size = 3), legend.text = element_text(size = 10), legend.title = element_text(size = 10))
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 10), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 10), legend.title = element_text(size = 10))
 
         incProgress(0.5)
         print(p_neofox)
@@ -2114,7 +2114,7 @@ server <- shinyServer(function(input, output, session) {
                                                      "Gene:", .data[["gene"]]))) +
           geom_point(aes(color = .data[[input$color_scatter]], size = .data[[input$size_scatter]])) +  # Correct placement of aes() here
           scale_color_gradient(low = input$min_col, high = input$max_col) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
 
         scatter_plot <- ggplotly(scatter_plot)
 
@@ -2613,7 +2613,7 @@ server <- shinyServer(function(input, output, session) {
             strip.text = element_text(size = 15),
             axis.text = element_text(size = 10),
             axis.title = element_text(size = 15),
-            axis.ticks = element_line(size = 3),
+            axis.ticks = element_line(linewidth = 3),
             legend.text = element_text(size = 15),
             legend.title = element_text(size = 15)
           )
