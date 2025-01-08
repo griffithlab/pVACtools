@@ -298,6 +298,10 @@ and ``%ile MT`` columns is controlled by the ``--top-score-metric`` parameter.
      - A list of positions in the Best Peptide that are problematic.
        ``None`` if the ``--problematic-pos`` parameter was not set during
        the pVACseq run
+   * - ``Num Included Peptides``
+     - The number of included peptides according to the
+       ``--aggregate-inclusion-binding-threshold`` and
+       ``--aggregate-inclusion-count-limit``
    * - ``Num Passing Peptides``
      - The number of unique well-binding peptides for this mutation.
    * - ``IC50 MT``
