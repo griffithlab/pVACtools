@@ -97,21 +97,18 @@ class AggregateAllEpitopes:
 
         #these are all lines meeting the aggregate inclusion binding threshold
         included_df = self.get_included_df(df)
-        if len(included_df) > 0:
-            peptide_hla_counts = self.get_unique_peptide_hla_counts(included_df)
-            hla_counts = Counter(peptide_hla_counts["HLA Allele"])
-            hla = dict(map(lambda x : (x, hla_counts[x]) if x in hla_counts else (x, ""), self.hla_types))
-            #get a list of all unique gene/transcript/aa_change combinations
-            #store a count of all unique peptides that passed
-            (peptides, anno_count) = self.get_included_df_metrics(included_df, prediction_algorithms, el_algorithms, percentile_algorithms)
-            included_peptide_count = self.calculate_unique_peptide_count(included_df)
-            good_binder_count = self.calculate_good_binder_count(included_df)
-        else:
-            hla = dict(map(lambda x : (x, ""), self.hla_types))
-            peptides = {}
-            anno_count = self.get_default_annotation_count()
-            included_peptide_count = 0
-            good_binder_count = 0
+        best_df = pd.DataFrame.from_dict([best])
+        if not best_df.index.isin(included_df.index).all():
+            included_df = pd.concat([included_df, best_df])
+        best_df = best_df.to_dict()
+        peptide_hla_counts = self.get_unique_peptide_hla_counts(included_df)
+        hla_counts = Counter(peptide_hla_counts["HLA Allele"])
+        hla = dict(map(lambda x : (x, hla_counts[x]) if x in hla_counts else (x, ""), self.hla_types))
+        #get a list of all unique gene/transcript/aa_change combinations
+        #store a count of all unique peptides that passed
+        (peptides, anno_count) = self.get_included_df_metrics(included_df, prediction_algorithms, el_algorithms, percentile_algorithms)
+        included_peptide_count = self.calculate_unique_peptide_count(included_df)
+        good_binder_count = self.calculate_good_binder_count(included_df)
 
         #assemble the line
         out_dict = self.assemble_result_line(best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count)
@@ -362,7 +359,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
     def read_input_file(self, used_columns, dtypes):
         df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, usecols=used_columns, dtype=dtypes)
-        df = df.dropna(subset=["{} MT IC50 Score".format(self.mt_top_score_metric)]).reset_index()
         df = df.astype({"{} MT IC50 Score".format(self.mt_top_score_metric):'float'})
         return df
 
@@ -409,7 +405,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             "Transcript Support Level",
             "Transcript Length",
         ], inplace=True, ascending=[True, True, False])
-        return anchor_residue_pass_df.iloc[0].to_dict()
+        return anchor_residue_pass_df.iloc[0]
 
     def is_anchor_residue_pass(self, mutation):
         if self.use_allele_specific_binding_thresholds and mutation['HLA Allele'] in self.allele_specific_binding_thresholds:
