@@ -15,6 +15,7 @@ from Bio.SeqRecord import SeqRecord
 import itertools
 import json
 import platform
+import shutil
 
 from pvactools.lib.optimal_peptide import OptimalPeptide
 from pvactools.lib.vector_visualization import VectorVisualization
@@ -251,72 +252,72 @@ def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, args):
     peptide.copy_strategy = "slice"
     peptide.save_state_on_exit = False
     state, e = peptide.anneal()
-    print("%i distance :" % e)
 
+    names = list()
+    cumulative_weight = 0
+    all_scores = list()
+    problematic_junctions = []
+    for i in range(0, (len(state) - 1)):
+        names.append(state[i])
+        if graph.has_edge(state[i], state[i + 1]):
+            edge = graph[state[i]][state[i + 1]]
+            try:
+                min_score = min(min_score, edge['weight'])
+            except:
+                min_score = edge['weight']
+            cumulative_weight += edge['weight']
+            all_scores.append(str(edge['weight']))
+            spacer = edge['spacer']
+            if spacer != 'None':
+                names.append(spacer)
+        else:
+            problematic_junctions.append("{} - {}".format(state[i], state[i+1]))
+    names.append(state[-1])
+    if len(problematic_junctions) > 0:
+        return (None, "No valid junction between peptides: {}".format(", ".join(problematic_junctions)))
+
+    print("%i distance :" % e)
     for id in state:
         print("\t", id)
 
+    median_score = str(cumulative_weight/len(all_scores))
+    peptide_id_list = ','.join(names)
+    score_list = ','.join(all_scores)
+    output = list()
+    output.append(">")
+    output.append(peptide_id_list)
+    output.append("|Median_Junction_Score:")
+    output.append(median_score)
+    output.append("|Lowest_Junction_Score:")
+    output.append(str(min_score))
+    output.append("|All_Junction_Scores:")
+    output.append(score_list)
+    output.append("\n")
+    for (i, name) in enumerate(names):
+        if name in args.spacers:
+            output.append(name)
+        else:
+            full_sequence = seq_dict[name]
+            if i > 0:
+                left_name = names[i-1]
+                if left_name in args.spacers:
+                    left_name = names[i-2]
+                left_clip = graph.edges[(left_name, name)]['right_partner_trim']
+            else:
+                left_clip = 0
+            if i < (len(names) - 1):
+                right_name = names[i+1]
+                if right_name in args.spacers:
+                    right_name = names[i+2]
+                right_clip = graph.edges[(name, right_name)]['left_partner_trim']
+            else:
+                right_clip = 0
+            clipped_sequence = full_sequence[left_clip:len(full_sequence) - right_clip]
+            output.append(clipped_sequence)
+
+        output.append("\n")
     results_file = os.path.join(base_output_dir, args.sample_name + '_results.fa')
     with open(results_file, 'w') as f:
-        names = list()
-        cumulative_weight = 0
-        all_scores = list()
-
-        problematic_junctions = []
-        for i in range(0, (len(state) - 1)):
-            names.append(state[i])
-            if graph.has_edge(state[i], state[i + 1]):
-                edge = graph[state[i]][state[i + 1]]
-                try:
-                    min_score = min(min_score, edge['weight'])
-                except:
-                    min_score = edge['weight']
-                cumulative_weight += edge['weight']
-                all_scores.append(str(edge['weight']))
-                spacer = edge['spacer']
-                if spacer != 'None':
-                    names.append(spacer)
-            else:
-                problematic_junctions.append("{} - {}".format(state[i], state[i+1]))
-        if len(problematic_junctions) > 0:
-            return (None, "No valid junction between peptides: {}".format(", ".join(problematic_junctions)))
-        names.append(state[-1])
-        median_score = str(cumulative_weight/len(all_scores))
-        peptide_id_list = ','.join(names)
-        score_list = ','.join(all_scores)
-        output = list()
-        output.append(">")
-        output.append(peptide_id_list)
-        output.append("|Median_Junction_Score:")
-        output.append(median_score)
-        output.append("|Lowest_Junction_Score:")
-        output.append(str(min_score))
-        output.append("|All_Junction_Scores:")
-        output.append(score_list)
-        output.append("\n")
-        for (i, name) in enumerate(names):
-            if name in args.spacers:
-                output.append(name)
-            else:
-                full_sequence = seq_dict[name]
-                if i > 0:
-                    left_name = names[i-1]
-                    if left_name in args.spacers:
-                        left_name = names[i-2]
-                    left_clip = graph.edges[(left_name, name)]['right_partner_trim']
-                else:
-                    left_clip = 0
-                if i < (len(names) - 1):
-                    right_name = names[i+1]
-                    if right_name in args.spacers:
-                        right_name = names[i+2]
-                    right_clip = graph.edges[(name, right_name)]['left_partner_trim']
-                else:
-                    right_clip = 0
-                clipped_sequence = full_sequence[left_clip:len(full_sequence) - right_clip]
-                output.append(clipped_sequence)
-
-            output.append("\n")
         f.write(''.join(output))
     return (results_file, None)
 
@@ -451,21 +452,12 @@ def main(args_input=sys.argv[1:]):
                 print("No valid path found. {}".format(error))
                 junctions_to_process = identify_problematic_junctions(graph, seq_tuples)
             else:
-                junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
-                import shutil
-                shutil.copy(junctions_file, base_output_dir)
                 break
         tries += 1
+    junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
+    shutil.copy(junctions_file, base_output_dir)
 
-    if results_file is None:
-        print(
-            'Unable to find path. ' +
-            'A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
-            '1) decreasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
-            '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)\n' +
-            '3) if running with a percentile threshold set, either remove this parameter or reduce the acceptable threshold to allow more possible connections (--percentile-threshold parameter)'
-        )
-    else:
+    if results_file is not None:
         if 'DISPLAY' in os.environ.keys():
             VectorVisualization(results_file, base_output_dir, args.spacers).draw()
 
@@ -477,6 +469,64 @@ def main(args_input=sys.argv[1:]):
                 for spacer in processed_spacers:
                     shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
                     shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
+
+        change_permissions_recursive(base_output_dir, 0o755, 0o644)
+        return
+
+    solution_found = False
+    if results_file is None:
+        for n_nodes_to_remove in range(1, args.allow_n_peptide_exclusion+1):
+            node_sets_to_remove = list(itertools.combinations(seq_keys, n_nodes_to_remove))
+            for node_set in node_sets_to_remove:
+                print("Removing nodes: {}".format(', '.join(node_set)))
+                #Creating output directory
+                current_output_dir = os.path.join(base_output_dir, "without_{}".format('_'.join(node_set)))
+                os.makedirs(current_output_dir, exist_ok=True)
+                #Creating junctions file with node_set removed
+                junctions_file = os.path.join(base_output_dir, 'junctions.tsv')
+                modified_junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
+                with open(junctions_file) as input_fh, open(modified_junctions_file, 'w') as output_fh:
+                    reader = csv.DictReader(input_fh, delimiter='\t')
+                    writer = csv.DictWriter(output_fh, delimiter='\t', fieldnames=reader.fieldnames)
+                    writer.writeheader()
+                    for line in reader:
+                        for node in node_set:
+                            if line['left_peptide'] == node or line['right_peptide'] == node:
+                                continue
+                            writer.writerow(line)
+                #Modify graph to remove node_set and test it
+                modified_graph = graph.copy()
+                modified_graph.remove_nodes_from(node_set)
+                modified_seq_dict = seq_dict.copy()
+                for node in node_set:
+                    del modified_seq_dict[node]
+                (valid, error) = check_graph_valid(modified_graph, modified_seq_dict)
+                if not valid:
+                    print("No valid path found after removing nodes: {}".format(', '.join(node_set)))
+                    continue
+                distance_matrix = create_distance_matrix(modified_graph)
+                (results_file, error) = find_optimal_path(modified_graph, distance_matrix, modified_seq_dict, current_output_dir, args)
+                if results_file is None:
+                    print("No valid path found after removing nodes: {}".format(', '.join(node_set)))
+                    continue
+                else:
+                    solution_found = True
+                    if 'DISPLAY' in os.environ.keys():
+                        VectorVisualization(results_file, current_output_dir, args.spacers).draw()
+                    dna_results_file = os.path.join(current_output_dir, args.sample_name + '_results.dna.fa')
+                    create_dna_backtranslation(results_file, dna_results_file)
+            if solution_found:
+                break
+
+    if not solution_found:
+        print(
+            'Unable to find path. ' +
+            'A vaccine design using the parameters specified could not be found. Some options that you may want to consider:\n' +
+            '1) decreasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
+            '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)\n' +
+            '3) if running with a percentile threshold set, either remove this parameter or reduce the acceptable threshold to allow more possible connections (--percentile-threshold parameter)\n' +
+            '4) increase the number of peptides that can be excluded from the vector (--allow-n-peptide-exclusion parameter)'
+        )
 
     change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
