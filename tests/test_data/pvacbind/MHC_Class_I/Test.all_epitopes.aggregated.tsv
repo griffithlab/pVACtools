@@ -34,16 +34,16 @@ ID	E*01:01	G*01:09	Best Peptide	Prob Pos	Num Included Peptides	Num Passing Pepti
 23	1		FNCECDLFG	None	1	0	4778.520	6.200	Poor	True	Pending
 12		1	SVNEALNNL	None	1	0	4989.870	7.300	Poor	True	Pending
 29	1		GQHWARLRG	None	1	0	4989.870	6.700	Poor	True	Pending
-45			RTEASGSES	None	0	0	5267.250	7.900	Poor	True	Pending
-11			KSVNEALNH	None	0	0	5441.030	8.100	Poor	True	Pending
-46			GYESRVEPP	None	0	0	5620.540	8.700	Poor	True	Pending
-14			ANQDAAQGI	None	0	0	5681.680	8.800	Poor	False	Pending
-13			AVQGIANED	None	0	0	5743.490	9.000	Poor	False	Pending
-20			KHGGVSLSK	None	0	0	6539.790	13.000	Poor	True	Pending
-39			KRNSRRQLP	None	0	0	7860.430	18.000	Poor	True	Pending
-40			KRNSRRQLP	None	0	0	7860.430	18.000	Poor	True	Pending
-19			IGKPGGVSL	None	0	0	7945.940	1.400	Poor	True	Pending
-15			TRSSGSIAS	None	0	0	8571.130	20.000	Poor	True	Pending
-3			VIPTVSTPPP	None	0	0	8664.370	1.800	Poor	True	Pending
-4			VIPTVSTPPP	None	0	0	8664.370	1.800	Poor	True	Pending
-16			KTVTISCTG	None	0	0	9447.760	19.000	Poor	True	Pending
+45		1	RTEASGSES	None	1	0	5267.250	7.900	Poor	True	Pending
+11	1		KSVNEALNH	None	1	0	5441.030	8.100	Poor	True	Pending
+46		1	GYESRVEPP	None	1	0	5620.540	8.700	Poor	True	Pending
+14		1	ANQDAAQGI	None	1	0	5681.680	8.800	Poor	False	Pending
+13		1	AVQGIANED	None	1	0	5743.490	9.000	Poor	False	Pending
+20	1		KHGGVSLSK	None	1	0	6539.790	13.000	Poor	True	Pending
+39	1		KRNSRRQLP	None	1	0	7860.430	18.000	Poor	True	Pending
+40	1		KRNSRRQLP	None	1	0	7860.430	18.000	Poor	True	Pending
+19	1		IGKPGGVSL	None	1	0	7945.940	1.400	Poor	True	Pending
+15	1		TRSSGSIAS	None	1	0	8571.130	20.000	Poor	True	Pending
+3	1		VIPTVSTPPP	None	1	0	8664.370	1.800	Poor	True	Pending
+4	1		VIPTVSTPPP	None	1	0	8664.370	1.800	Poor	True	Pending
+16		1	KTVTISCTG	None	1	0	9447.760	19.000	Poor	True	Pending

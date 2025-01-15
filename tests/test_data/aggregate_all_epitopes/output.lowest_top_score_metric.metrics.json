@@ -11204,11 +11204,194 @@
     "best_hla_allele": "HLA-A*02:01"
   },
   "22-37966274-37966275-C-G": {
-    "good_binders": {},
-    "sets": [],
-    "transcript_counts": [],
-    "peptide_counts": [],
-    "set_expr": [],
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "NMSSFKLKQ": {
+            "ic50s_MT": [
+              5560.06005859375,
+              "X"
+            ],
+            "percentiles_MT": [
+              16.06100082397461,
+              "X"
+            ],
+            "ic50s_WT": [
+              4288.48,
+              "X"
+            ],
+            "percentiles_WT": [
+              16.061,
+              "X"
+            ],
+            "hla_types": [
+              "HLA-A*02:01",
+              "HLA-B*35:01"
+            ],
+            "mutation_position": "9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "MHCflurry",
+                "MHCnuggetsI",
+                "NetMHC",
+                "NetMHCcons",
+                "NetMHCpan",
+                "PickPocket",
+                "SMM",
+                "SMMPMBEC"
+              ],
+              "MT": {
+                "HLA-A*02:01": [
+                  23159.70167587253,
+                  5796.07,
+                  26623.75,
+                  23957.42,
+                  24620.69,
+                  5560.06,
+                  53840.61,
+                  51573.9
+                ]
+              },
+              "WT": {
+                "HLA-A*02:01": [
+                  23171.763315324777,
+                  5822.96,
+                  29451.39,
+                  28485.48,
+                  21363.54,
+                  4288.48,
+                  91224.19,
+                  72016.17
+                ]
+              }
+            },
+            "individual_ic50_percentile_calls": {
+              "algorithms": [
+                "MHCflurry",
+                "MHCnuggetsI",
+                "NetMHC",
+                "NetMHCcons",
+                "NetMHCpan",
+                "PickPocket",
+                "SMM",
+                "SMMPMBEC"
+              ],
+              "MT": {
+                "HLA-A*02:01": [
+                  16.061124801635742,
+                  "NA",
+                  47.0,
+                  33.0,
+                  32.0,
+                  34.0,
+                  41.0,
+                  40.0
+                ]
+              },
+              "WT": {
+                "HLA-A*02:01": [
+                  16.061125000000004,
+                  "NA",
+                  54.0,
+                  44.0,
+                  27.0,
+                  30.0,
+                  47.0,
+                  44.0
+                ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "MHCflurry",
+                "MHCnuggetsI",
+                "NetMHC",
+                "NetMHCcons",
+                "NetMHCpan",
+                "PickPocket",
+                "SMM",
+                "SMMPMBEC"
+              ],
+              "MT": {
+                "HLA-A*02:01": [
+                  16.061124801635742,
+                  "NA",
+                  47.0,
+                  33.0,
+                  32.0,
+                  34.0,
+                  41.0,
+                  40.0
+                ]
+              },
+              "WT": {
+                "HLA-A*02:01": [
+                  16.061125000000004,
+                  "NA",
+                  54.0,
+                  44.0,
+                  27.0,
+                  30.0,
+                  47.0,
+                  44.0
+                ]
+              }
+            },
+            "wt_peptide": "NMSSFKLKE"
+          }
+        },
+        "transcripts": [
+          "ENST00000215886.4-LGALS2-E/Q-132"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "tsl": [
+          "Not Supported"
+        ],
+        "biotype": [
+          "protein_coding"
+        ],
+        "transcript_length": [
+          132
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0
+    ],
     "DNA VAF": 0.496,
     "RNA VAF": "NA",
     "gene_expr": "NA",
@@ -18857,11 +19040,194 @@
     "best_hla_allele": "HLA-A*02:01"
   },
   "22-50555769-50555770-G-A": {
-    "good_binders": {},
-    "sets": [],
-    "transcript_counts": [],
-    "peptide_counts": [],
-    "set_expr": [],
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "TTVVVTTQKR": {
+            "ic50s_MT": [
+              5574.97021484375,
+              "X"
+            ],
+            "percentiles_MT": [
+              19.725000381469727,
+              "X"
+            ],
+            "ic50s_WT": [
+              5581.59,
+              "X"
+            ],
+            "percentiles_WT": [
+              18.527,
+              "X"
+            ],
+            "hla_types": [
+              "HLA-A*02:01",
+              "HLA-B*35:01"
+            ],
+            "mutation_position": "7",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "MHCflurry",
+                "MHCnuggetsI",
+                "NetMHC",
+                "NetMHCcons",
+                "NetMHCpan",
+                "PickPocket",
+                "SMM",
+                "SMMPMBEC"
+              ],
+              "MT": {
+                "HLA-A*02:01": [
+                  24841.35422970731,
+                  5574.97,
+                  35483.9,
+                  37132.0,
+                  37574.55,
+                  50000.0,
+                  144371.01,
+                  176937.55
+                ]
+              },
+              "WT": {
+                "HLA-A*02:01": [
+                  24463.09556790621,
+                  5581.59,
+                  33212.18,
+                  37333.42,
+                  34773.18,
+                  50000.0,
+                  184280.76,
+                  206928.35
+                ]
+              }
+            },
+            "individual_ic50_percentile_calls": {
+              "algorithms": [
+                "MHCflurry",
+                "MHCnuggetsI",
+                "NetMHC",
+                "NetMHCcons",
+                "NetMHCpan",
+                "PickPocket",
+                "SMM",
+                "SMMPMBEC"
+              ],
+              "MT": {
+                "HLA-A*02:01": [
+                  19.72512435913086,
+                  "NA",
+                  72.0,
+                  73.0,
+                  64.0,
+                  54.0,
+                  73.0,
+                  76.0
+                ]
+              },
+              "WT": {
+                "HLA-A*02:01": [
+                  18.52725,
+                  "NA",
+                  65.0,
+                  74.0,
+                  54.0,
+                  54.0,
+                  77.0,
+                  78.0
+                ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*02:01": []
+              },
+              "WT": {
+                "HLA-A*02:01": []
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "MHCflurry",
+                "MHCnuggetsI",
+                "NetMHC",
+                "NetMHCcons",
+                "NetMHCpan",
+                "PickPocket",
+                "SMM",
+                "SMMPMBEC"
+              ],
+              "MT": {
+                "HLA-A*02:01": [
+                  19.72512435913086,
+                  "NA",
+                  72.0,
+                  73.0,
+                  64.0,
+                  54.0,
+                  73.0,
+                  76.0
+                ]
+              },
+              "WT": {
+                "HLA-A*02:01": [
+                  18.52725,
+                  "NA",
+                  65.0,
+                  74.0,
+                  54.0,
+                  54.0,
+                  77.0,
+                  78.0
+                ]
+              }
+            },
+            "wt_peptide": "TTVVVTAQKR"
+          }
+        },
+        "transcripts": [
+          "ENST00000262794.5-MOV10L1-A/T-482"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "tsl": [
+          "Not Supported"
+        ],
+        "biotype": [
+          "protein_coding"
+        ],
+        "transcript_length": [
+          1211
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0
+    ],
     "DNA VAF": 0.042,
     "RNA VAF": "NA",
     "gene_expr": "NA",
