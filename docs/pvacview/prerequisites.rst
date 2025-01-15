@@ -46,7 +46,7 @@ Additionally, there are a number of packages you will need to install in your R/
   install.packages("shinycssloaders", dependencies=TRUE)
   install.packages("RCurl", dependencies=TRUE)
   install.packages("curl", dependencies=TRUE)
-  install.packages("string", dependencies=TRUE)
+  install.packages("stringr", dependencies=TRUE)
   install.packages("shinycssloaders", dependencies=TRUE)
   install.packages("plotly", dependencies=TRUE)
   install.packages("shinyWidgets", dependencies=TRUE)
