@@ -6,6 +6,7 @@ import shutil
 import yaml
 import csv
 import re
+import json
 from collections import OrderedDict
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -125,14 +126,15 @@ def generate_fasta(flanking_sequence_length, downstream_sequence_length, temp_di
 def parse_input_tsv(input_tsv):
     if input_tsv is None:
         return (None, None)
+    indexes = []
     with open(input_tsv, 'r') as fh:
         reader = csv.DictReader(fh, delimiter = "\t")
-        if 'Index' in reader.fieldnames:
-            indexes = parse_full_input_tsv(reader)
-            file_type = 'full'
-        else:
+        if 'Best Peptide' in reader.fieldnames:
             indexes = parse_aggregated_input_tsv(reader)
             file_type = 'aggregated'
+        else:
+            indexes = parse_full_input_tsv(reader)
+            file_type = 'full'
     return (indexes, file_type)
 
 def parse_full_input_tsv(reader):
@@ -142,9 +144,9 @@ def parse_full_input_tsv(reader):
     return indexes
 
 def parse_aggregated_input_tsv(reader):
-    indexes = []
+    indexes = {}
     for line in reader:
-        indexes.append(line)
+        indexes[line['Index']] = line
     return indexes
 
 def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_evaluation):
@@ -155,7 +157,7 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
     with open(fasta_key_file_path, 'r') as fasta_key_file:
         keys = yaml.load(fasta_key_file, Loader=yaml.FullLoader)
 
-    (tsv_indexes, tsv_file_type) = parse_input_tsv(input_tsv)
+    (tsv_indexes, file_type) = parse_input_tsv(input_tsv)
 
     dataframe = OrderedDict()
     output_records = []
@@ -165,33 +167,28 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
             if mutant_only and record_id.startswith('WT.'):
                 continue
             if tsv_indexes is not None:
-                if tsv_file_type == 'full':
-                    sequence_type, index = record_id.split('.', 1)
-                    if index not in tsv_indexes:
-                        continue
-                else:
-                    (rest_record_id, variant_type, aa_change) = record_id.rsplit(".", 2)
-                    (peptide_type, count, gene, transcript) = rest_record_id.split(".", 3)
-                    (parsed_aa_change, _, _, _) = index_to_aggregate_report_aa_change(aa_change, variant_type)
-                    matches = [i for i in tsv_indexes if i['Best Transcript'] == transcript and i['AA Change'] == parsed_aa_change and i['Evaluation'] in aggregate_report_evaluation]
-                    if len(matches) == 0:
-                        continue
-            new_record = SeqRecord(record.seq, id=record_id, description=record_id)
-            output_records.append(new_record)
+                sequence_type, index = record_id.split('.', 1)
+                if file_type == 'full':
+                    if index in tsv_indexes:
+                        new_record = SeqRecord(record.seq, id=record_id, description=record_id)
+                        output_records.append(new_record)
+                elif file_type == 'aggregated':
+                    if index in tsv_indexes.keys() and tsv_indexes[index]['Evaluation'] in aggregate_report_evaluation:
+                        if record_id.startswith('MT.'):
+                            annotations = { 'Best Peptide': tsv_indexes[index]['Best Peptide'] }
+                            new_record = SeqRecord(record.seq, id=record_id, description=json.dumps(annotations))
+                        else:
+                            new_record = SeqRecord(record.seq, id=record_id, description=record_id)
+                        output_records.append(new_record)
+            else:
+                new_record = SeqRecord(record.seq, id=record_id, description=record_id)
+                output_records.append(new_record)
 
     if tsv_indexes is not None:
         ordered_output_records = []
         for tsv_index in tsv_indexes:
-            if tsv_file_type == 'full':
-                records = [r for r in output_records if r.id.split('.', 1)[1] == tsv_index]
-                ordered_output_records.extend(records)
-            else:
-                for output_record in output_records:
-                    (rest_record_id, variant_type, aa_change) = output_record.id.rsplit(".", 2)
-                    (peptide_type, count, gene, transcript) = rest_record_id.split(".", 3)
-                    (parsed_aa_change, _, _, _) = index_to_aggregate_report_aa_change(aa_change, variant_type)
-                    if tsv_index['Best Transcript'] == transcript and tsv_index['AA Change'] == parsed_aa_change:
-                        ordered_output_records.append(output_record)
+            records = [r for r in output_records if r.id.split('.', 1)[1] == tsv_index]
+            ordered_output_records.extend(records)
         output_records = ordered_output_records
 
     SeqIO.write(output_records, output_file, "fasta")
