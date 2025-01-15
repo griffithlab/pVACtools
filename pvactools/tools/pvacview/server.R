@@ -36,10 +36,10 @@ server <- shinyServer(function(input, output, session) {
     inputs
   }
   ## helper function defined for generating shinyInputs in mainTable (Investigate button)
-  shinyInputSelect <- function(FUN, len, id, ...) {
-    inputs <- character(len)
-    for (i in seq_len(len)) {
-      inputs[i] <- as.character(FUN(paste0(id, i), ...))
+  shinyInputSelect <- function(FUN, row_ids, button_label, ...) {
+    inputs <- character(nrow(row_ids))
+    for (i in 1:nrow(row_ids)) {
+      inputs[i] <- as.character(FUN(paste0(button_label, row_ids[i, "ID"]), ...))
     }
     inputs
   }
@@ -55,28 +55,29 @@ server <- shinyServer(function(input, output, session) {
     }))
   }
   #set button styling based on values in Evaluation column
-  setButtonStyling <- function(evaluations) {
+  setButtonStyling <- function(evaluations, ids) {
     for (i in 1:length(evaluations)){
       evaluation <- evaluations[i]
+      id <- ids[i]
       if (evaluation == 'Accept') {
-        html <- paste0("#button-acpt_", i ," { color: red !important; }")
+        html <- paste0("#button-acpt_", id ," { color: green !important; }")
         insertUI("head", ui = tags$style(HTML(html)))
-        removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
-        removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-rej_", id, ')'))
+        removeUI(selector = paste0("style:contains(#button-rev_", id, ')'))
       } else if (evaluation == 'Reject') {
-        html <- paste0("#button-rej_", i ," { color: red !important; }")
+        html <- paste0("#button-rej_", id ," { color: red !important; }")
         insertUI("head", ui = tags$style(HTML(html)))
-        removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
-        removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-acpt_", id, ')'))
+        removeUI(selector = paste0("style:contains(#button-rev_", id, ')'))
       } else if (evaluation == 'Review') {
-        html <- paste0("#button-rev_", i ," { color: red !important; }")
+        html <- paste0("#button-rev_", id ," { color: orange !important; }")
         insertUI("head", ui = tags$style(HTML(html)))
-        removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
-        removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-acpt_", id, ')'))
+        removeUI(selector = paste0("style:contains(#button-rej_", id, ')'))
       } else if (evaluation == 'Pending') {
-        removeUI(selector = paste0("style:contains(#button-acpt_", i, ')'))
-        removeUI(selector = paste0("style:contains(#button-rej_", i, ')'))
-        removeUI(selector = paste0("style:contains(#button-rev_", i, ')'))
+        removeUI(selector = paste0("style:contains(#button-acpt_", id, ')'))
+        removeUI(selector = paste0("style:contains(#button-rej_", id, ')'))
+        removeUI(selector = paste0("style:contains(#button-rev_", id, ')'))
       }
     }
   }
@@ -106,15 +107,15 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
-    setButtonStyling(mainData$Evaluation)
-    mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
-    mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
-    mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    setButtonStyling(mainData$Evaluation, mainData$ID)
+    mainData$Acpt <- shinyInputSelect(actionButton, mainData["ID"], "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    mainData$Rej <- shinyInputSelect(actionButton, mainData["ID"], "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    mainData$Rev <- shinyInputSelect(actionButton, mainData["ID"], "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
     mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
     mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
-    df$evaluations <- mainData[c("ID", "Evaluation")]
+    df$evaluations <- data.frame(data = mainData$Evaluation, row.names = mainData$ID)
     df$mainTable <- mainData
     df$metricsData <- NULL
     df$lastSelectedRow <- 1
@@ -197,15 +198,15 @@ server <- shinyServer(function(input, output, session) {
        colnames(mainData) <- mainData[1, ]
        mainData <- mainData[-1, ]
        row.names(mainData) <- NULL
-       setButtonStyling(mainData$Evaluation)
-       mainData$Acpt <- shinyInputSelect(actionButton, nrow(mainData), "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
-       mainData$Rej <- shinyInputSelect(actionButton, nrow(mainData), "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
-       mainData$Rev <- shinyInputSelect(actionButton, nrow(mainData), "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+       setButtonStyling(mainData$Evaluation, mainData$ID)
+       mainData$Acpt <- shinyInputSelect(actionButton, mainData["ID"], "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+       mainData$Rej <- shinyInputSelect(actionButton, mainData["ID"], "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+       mainData$Rev <- shinyInputSelect(actionButton, mainData["ID"], "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
        mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
        mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
        mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
        mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
-       df$evaluations <- mainData[c("ID", "Evaluation")]
+       df$evaluations <- data.frame(data = mainData$Evaluation, row.names = mainData$ID)
        df$mainTable <- mainData
        incProgress(0.1)
        ## Class I demo metrics file
@@ -643,37 +644,34 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable)) {
       return()
     }
-    selectedRow <- as.numeric(strsplit(input$accept_eval, "_")[[1]][2])
-    selectedID <- df$mainTable$ID[selectedRow]
-    df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Accept"
-    html <- paste0("#button-acpt_", selectedRow ," { color: red !important; }")
+    selectedID <- strsplit(input$accept_eval, "_")[[1]][2]
+    df$evaluations[selectedID, 1] <- "Accept"
+    html <- paste0("#button-acpt_", selectedID ," { color: green !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'), multiple = TRUE)
-    removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-rej_", selectedID, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-rev_", selectedID, ')'), multiple = TRUE)
   })
   observeEvent(input$reject_eval, {
     if (is.null(df$mainTable)) {
       return()
     }
-    selectedRow <- as.numeric(strsplit(input$reject_eval, "_")[[1]][2])
-    selectedID <- df$mainTable$ID[selectedRow]
-    df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Reject"
-    html <- paste0("#button-rej_", selectedRow ," { color: red !important; }")
+    selectedID <- strsplit(input$reject_eval, "_")[[1]][2]
+    df$evaluations[selectedID, 1] <- "Reject"
+    html <- paste0("#button-rej_", selectedID ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'), multiple = TRUE)
-    removeUI(selector = paste0("style:contains(#button-rev_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-acpt_", selectedID, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-rev_", selectedID, ')'), multiple = TRUE)
   })
   observeEvent(input$review_eval, {
     if (is.null(df$mainTable)) {
       return()
     }
-    selectedRow <- as.numeric(strsplit(input$review_eval, "_")[[1]][2])
-    selectedID <- df$mainTable$ID[selectedRow]
-    df$evaluations[df$evaluations$ID == selectedID, "Evaluation"] <- "Review"
-    html <- paste0("#button-rev_", selectedRow ," { color: red !important; }")
+    selectedID <- strsplit(input$review_eval, "_")[[1]][2]
+    df$evaluations[selectedID, 1] <- "Review"
+    html <- paste0("#button-rev_", selectedID ," { color: orange !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-acpt_", selectedRow, ')'), multiple = TRUE)
-    removeUI(selector = paste0("style:contains(#button-rej_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-acpt_", selectedID, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-rej_", selectedID, ')'), multiple = TRUE)
   })
   ##selected row text box
   output$selected <- renderText({
@@ -950,7 +948,10 @@ server <- shinyServer(function(input, output, session) {
   ##Anchor Heatmap overlayed on selected peptide sequences
   anchorPlotHeight <- reactive({
     if (is.null(df$metricsData)) {
-      return(0)
+      return(100)
+    }
+    if (length(df$metricsData[[selectedID()]]$good_binders) == 0) {
+      return(100)
     }
     peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
     peptide_names <- names(peptide_data)
@@ -1097,12 +1098,12 @@ server <- shinyServer(function(input, output, session) {
         hla_allele_count <- length(unique(bindingScoreDataIC50()$HLA_allele))
         incProgress(0.5)
         p <- ggplot(data = bindingScoreDataIC50(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
-          stat_summary(fun.y = mean, fun.ymin = mean, fun.ymax = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
-          geom_jitter(data = bindingScoreDataIC50(), aes(shape = algorithms), sizes = 5, stroke = 1, position = position_jitter(0.3)) +
+          stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
+          geom_jitter(data = bindingScoreDataIC50(), aes(shape = algorithms), size = 5, stroke = 1, position = position_jitter(0.3)) +
           scale_shape_manual(values = 0:8) +
           geom_hline(aes(yintercept = yintercept, linetype = Cutoffs), line.data, color = rep(line.data$color, hla_allele_count)) +
           scale_color_manual(values = rep(c("MT" = "#D2B4DE", "WT" = "#F7DC6F"), hla_allele_count)) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
         incProgress(0.5)
         print(p)
       }else {
@@ -1155,12 +1156,12 @@ server <- shinyServer(function(input, output, session) {
         hla_allele_count <- length(unique(combinedBindingElutionDataPercentile()$HLA_allele))
         incProgress(0.5)
         p <- ggplot(data = combinedBindingElutionDataPercentile(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
-          stat_summary(fun.y = mean, fun.ymin = mean, fun.ymax = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
+          stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
           geom_jitter(data = combinedBindingElutionDataPercentile(), aes(shape = algorithms), size = 5, stroke = 1, position = position_jitter(0.3)) +
           scale_shape_manual(values = 0:10) +
           geom_hline(aes(yintercept = yintercept, linetype = Cutoffs), line.data, color = rep(line.data$color, hla_allele_count)) +
           scale_color_manual(values = rep(c("MT" = "#D2B4DE", "WT" = "#F7DC6F"), hla_allele_count)) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
         incProgress(0.5)
         print(p)
       }else {
@@ -1432,16 +1433,16 @@ server <- shinyServer(function(input, output, session) {
       return(nchar(df$metricsData[[selectedID()]]$reference_matches$query_peptide) * 20)
     }
   } )
-  ##############################EXPORT TAB##############################################
   #evalutation overview table
   output$checked <- renderTable({
     if (is.null(df$evaluations)) {
       return()
     }
-    data <- as.data.frame(table(df$evaluations$Evaluation))
+    data <- as.data.frame(table(df$evaluations))
     colnames(data) <- c("Evaluation","Count")
     data
   })
+  ##############################EXPORT TAB##############################################
   #export table display with options to download
   output$ExportTable <- renderDataTable({
     if (is.null(df$mainTable)) {
@@ -1452,8 +1453,8 @@ server <- shinyServer(function(input, output, session) {
                                                 "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos", "Acpt", "Rej", "Rev")
     data <- df$mainTable[, !(colsToDrop)]
     col_names <- colnames(data)
-    data <- plyr::join(data, df$evaluations, by='ID')
-    colnames(data) <- c(col_names, "Evaluation")
+    evaluations <- data.frame("ID" = row.names(df$evaluations), Evaluation = df$evaluations[, 1])
+    data <- join(data, evaluations)
     comments <- data.frame("ID" = row.names(df$comments), Comments = df$comments[, 1])
     data <- join(data, comments)
     data[is.na(data)] <- "NA"
@@ -1551,16 +1552,16 @@ server <- shinyServer(function(input, output, session) {
 
     len <- nrow(df_neofox$mainTable_neofox)
     if ('Evaluation' %in% colnames(df_neofox$mainTable_neofox)) {
-        setButtonStyling(df_neofox$mainTable_neofox$Evaluation)
+        setButtonStyling(df_neofox$mainTable_neofox$Evaluation, df_neofox$mainTable_neofox$ID)
     } else {
         df_neofox$mainTable_neofox["Evaluation"] = "Pending"
     }
     df_neofox$mainTable_neofox <- cbind(ID = rownames(df_neofox$mainTable_neofox), df_neofox$mainTable_neofox)
     df_neofox$evaluations <- df_neofox$mainTable_neofox[c("ID", "Evaluation")]
     df_neofox$mainTable_neofox$Evaluation <- NULL
-    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
-    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
-    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, df_neofox$mainTable_neofox["ID"], "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, df_neofox$mainTable_neofox["ID"], "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, df_neofox$mainTable_neofox["ID"], "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
 
     if ("Comments" %in% colnames(df_neofox$mainTable_neofox)) {
       df_neofox$comments <- data.frame(data = df_neofox$mainTable_neofox$`Comments`, nrow = nrow(df_neofox$mainTable_neofox), ncol = 1)
@@ -1633,16 +1634,16 @@ server <- shinyServer(function(input, output, session) {
 
     len <- nrow(df_neofox$mainTable_neofox)
     if ('Evaluation' %in% colnames(df_neofox$mainTable_neofox)) {
-        setButtonStyling(df_neofox$mainTable_neofox$Evaluation)
+        setButtonStyling(df_neofox$mainTable_neofox$Evaluation, df_neofox$mainTable_neofox$ID)
     } else {
         df_neofox$mainTable_neofox["Evaluation"] = "Pending"
     }
     df_neofox$mainTable_neofox <- cbind(ID = rownames(df_neofox$mainTable_neofox), df_neofox$mainTable_neofox)
     df_neofox$evaluations <- df_neofox$mainTable_neofox[c("ID", "Evaluation")]
     df_neofox$mainTable_neofox$Evaluation <- NULL
-    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
-    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
-    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, nrow(mainData_neofox), "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Acpt <- shinyInputSelect(actionButton, df_neofox$mainTable_neofox["ID"], "button-neofox-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rej <- shinyInputSelect(actionButton, df_neofox$mainTable_neofox["ID"], "button-neofox-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
+    df_neofox$mainTable_neofox$Rev <- shinyInputSelect(actionButton, df_neofox$mainTable_neofox["ID"], "button-neofox-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_neofox_eval\", this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
 
     if ("Comments" %in% colnames(df_neofox$mainTable_neofox)) {
       df_neofox$comments <- data.frame(data = df_neofox$mainTable_neofox$`Comments`, nrow = nrow(df_neofox$mainTable_neofox), ncol = 1)
@@ -1747,34 +1748,34 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df_neofox$mainTable_neofox)) {
       return()
     }
-    selectedRow <- as.numeric(strsplit(input$accept_neofox_eval, "_")[[1]][2])
-    df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Accept"
-    html <- paste0("#button-neofox-acpt_", selectedRow ," { color: red !important; }")
+    selectedID <- strsplit(input$accept_neofox_eval, "_")[[1]][2]
+    df_neofox$evaluations[df_neofox$evaluations$ID == selectedID, "Evaluation"] <- "Accept"
+    html <- paste0("#button-neofox-acpt_", selectedID ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedRow, ')'), multiple = TRUE)
-    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedID, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedID, ')'), multiple = TRUE)
   })
   observeEvent(input$reject_neofox_eval, {
     if (is.null(df_neofox$mainTable_neofox)) {
       return()
     }
-    selectedRow <- as.numeric(strsplit(input$reject_neofox_eval, "_")[[1]][2])
-    df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Reject"
-    html <- paste0("#button-neofox-rej_", selectedRow ," { color: red !important; }")
+    selectedID <- as.numeric(strsplit(input$reject_neofox_eval, "_")[[1]][2])
+    df_neofox$evaluations[df_neofox$evaluations$ID == selectedID, "Evaluation"] <- "Reject"
+    html <- paste0("#button-neofox-rej_", selectedID ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedRow, ')'), multiple = TRUE)
-    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedID, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-rev_", selectedID, ')'), multiple = TRUE)
   })
   observeEvent(input$review_neofox_eval, {
     if (is.null(df_neofox$mainTable_neofox)) {
       return()
     }
-    selectedRow <- as.numeric(strsplit(input$review_neofox_eval, "_")[[1]][2])
-    df_neofox$evaluations[df_neofox$evaluations$ID == selectedRow, "Evaluation"] <- "Review"
-    html <- paste0("#button-neofox-rev_", selectedRow ," { color: red !important; }")
+    selectedID <- as.numeric(strsplit(input$review_neofox_eval, "_")[[1]][2])
+    df_neofox$evaluations[df_neofox$evaluations$ID == selectedID, "Evaluation"] <- "Review"
+    html <- paste0("#button-neofox-rev_", selectedID ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
-    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedRow, ')'), multiple = TRUE)
-    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedRow, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-acpt_", selectedID, ')'), multiple = TRUE)
+    removeUI(selector = paste0("style:contains(#button-neofox-rej_", selectedID, ')'), multiple = TRUE)
   })
 
   # NeoFox evalutation overview table
@@ -1852,7 +1853,7 @@ server <- shinyServer(function(input, output, session) {
            scale_color_manual(values = c("No" = "#939094", "Yes" = "#f42409")) +
           labs(x = NULL) +
           facet_wrap(~Feature, scales="free", ncol=6) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 10), axis.ticks = element_line(size = 3), legend.text = element_text(size = 10), legend.title = element_text(size = 10))
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 10), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 10), legend.title = element_text(size = 10))
 
         incProgress(0.5)
         print(p_neofox)
@@ -2111,7 +2112,7 @@ server <- shinyServer(function(input, output, session) {
                                                      "Gene:", .data[["gene"]]))) +
           geom_point(aes(color = .data[[input$color_scatter]], size = .data[[input$size_scatter]])) +  # Correct placement of aes() here
           scale_color_gradient(low = input$min_col, high = input$max_col) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(size = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
 
         scatter_plot <- ggplotly(scatter_plot)
 
@@ -2309,7 +2310,8 @@ server <- shinyServer(function(input, output, session) {
     df_custom$group_inds <- row_ind_df
     row_ind_top <- apply(row_ind_df, 1, function(x) {unlist(x[1])[1]})
     df_custom$mainTable_custom <- as.data.frame(reformat_data[row_ind_top, ])
-    df_custom$mainTable_custom <- cbind(Select = shinyInputSelect(actionButton, nrow(df_custom$mainTable_custom), "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"custom_select_button\",  this.id)'), df_custom$mainTable_custom)
+    df_custom$mainTable_custom["ID"] <- 1:nrow(df_custom$mainTable_custom)
+    df_custom$mainTable_custom <- cbind(Select = shinyInputSelect(actionButton, df_custom$mainTable_custom["ID"], "button_", label = "Investigate", onclick = 'Shiny.onInputChange(\"custom_select_button\",  this.id)'), df_custom$mainTable_custom)
     df_custom$metricsData <- get_group_inds(df_custom$fullData, df_custom$group_inds)
     df_custom$peptide_features <- input$peptide_features
     updateTabItems(session, "custom_tabs", "custom_explore")
@@ -2610,7 +2612,7 @@ server <- shinyServer(function(input, output, session) {
             strip.text = element_text(size = 15),
             axis.text = element_text(size = 10),
             axis.title = element_text(size = 15),
-            axis.ticks = element_line(size = 3),
+            axis.ticks = element_line(linewidth = 3),
             legend.text = element_text(size = 15),
             legend.title = element_text(size = 15)
           )
