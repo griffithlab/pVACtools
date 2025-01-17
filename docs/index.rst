@@ -91,8 +91,8 @@ It also fixes the following problem(s):
   associated with incorrect variants. Additionally, it fixes several
   deprecation warnings and typos. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1173
 
-New in Version |version|
-------------------------
+New in Version 5
+----------------
 
 This is a major version release. Please note that pVACtools 5.0 is not guaranteed to be
 backwards-compatible and certain changes could break old workflows.
