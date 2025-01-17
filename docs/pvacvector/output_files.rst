@@ -5,15 +5,7 @@
 Output Files
 ============
 
-The pVACseq pipeline will write its results in separate folders depending on
-which prediction algorithms were chosen:
-
-- ``MHC_Class_I``: for MHC class I prediction algorithms
-- ``MHC_Class_II``: for MHC class II prediction algorithms
-- ``combined``: If both MHC class I and MHC class II prediction algorithms were run, this folder combines the neoepitope predictions from both
-
-Each folder will contain the same list of output files (listed in the order
-created):
+pVACvector will create the following output files:
 
 .. list-table::
    :header-rows: 1
@@ -30,10 +22,19 @@ created):
      - The final output file with the peptide sequences and best spacers in the optimal order.
    * - ``junctions.tsv``
      - A tab-separated file listing all of the valid junctions found by pVACvector including spacer and clipping information.
-   * - ``vector.jpg``
-     - A JPEG visualization of the above result.
+   * - ``vector.png``
+     - A PNG visualization of the above result.
    * - ``<sample_name>_results.dna.fa``
      - The final output file with the backtranslated DNA sequences of the included peptides and best spacers in the optimal order.
+   * - ``without_<peptide_id(s)>`` (directory
+     - If no solution was found with spacers and clipping peptides, these
+       directories contain result files for partial solutions obtained by removing
+       peptide(s) as indicated in each directory name. These directories
+       in turn contain a ``junctions.tsv`` file of all of the junctions
+       remaining after the respective peptide(s) were removed, as well as a
+       ``<sample_name>_results.fa``, a ``<sample_name>_results.dna.fa``, and a
+       ``vector.png`` file if a solution was found by removing the indicated
+       peptide(s).
 
 .. figure:: ../images/vector.jpg
    :align: center

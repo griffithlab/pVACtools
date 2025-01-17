@@ -60,11 +60,36 @@ Contents
 New in Version |release|
 ------------------------
 
-This is a bugfix release. It fixes the following problem(s):
+This is a minor feature release. It adds the following features:
 
-- The ``--aggregate-inclusion-count-limit`` was not being passed along to the
-  aggregate report module in the pVACsplice pipeline correctly. This release
-  fixes that issue. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1167
+- This update allows pVACvector to remove peptides in order to find a partial solution if a full solution cannot be found.
+  The number of peptides permitted to be removed can be controlled by the ``--allow-n-peptide-exclusion`` parameter. by
+  @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1168
+- This update adds functionalities to pVACvector to prevent the core neoantigen candidate from getting clipped. by
+  @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1174
+- When only elution algorithms are chosen and no binding affinity algorithms,
+  the pipelines will now output a warning message that no aggregated report
+  can be created. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1165
+- When creating the aggregated report, the Best Peptide for some variants
+  may not match the aggregate inclusion criteria and no detail information
+  would be available for this peptide when investigating the variant. This
+  update ensures that the Best Peptide is always included in the metrics file
+  and counted toward the Num Included Peptides count. by @susannasiebert in
+  https://github.com/griffithlab/pVACtools/pull/1177
+- The evaluation buttons in pVACview will now be colored green for Accept, red
+  for Reject, and orange for Review to visually differentiate the different
+  statuses. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1173
+
+It also fixes the following problem(s):
+
+- This release removes two parameters from pVACvector: ``--aggregate-inclusion-binding-threshold`` and ``--aggregate-inclusion-count-limit``
+  which are not applicable to this pipeline. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1180
+- This release fixes various pVACview bugs. Specifically, it fixes a bug that
+  would result in pVACview crashing when a variant with a Num Included
+  Peptides of 0 was selected. It also fixes a bug where re-tiering the
+  candidates before selecting evaluations would result in evaluations being
+  associated with incorrect variants. Additionally, it fixes several
+  deprecation warnings and typos. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1173
 
 New in Version |version|
 ------------------------
