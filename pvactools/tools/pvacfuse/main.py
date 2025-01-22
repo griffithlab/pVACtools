@@ -85,6 +85,13 @@ def define_parser():
     )
     valid_algorithms_parser.set_defaults(func=valid_algorithms)
 
+    netmhc_pan_version_parser = subparsers.add_parser(
+        "valid_netmhcpan_versions",
+        help="Show a list of valid versions of NetMHCIIpan and NetMHCIIpanEL that can be used.",
+        add_help=False
+    )
+    netmhc_pan_version_parser.set_defaults(func=netmhc_pan_version)
+
     identify_problematic_amino_acids_parser = subparsers.add_parser(
         "identify_problematic_amino_acids",
         help="Mark problematic amino acid positions in each epitope or filter entries that have problematic amino acids.",

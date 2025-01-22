@@ -74,6 +74,11 @@ def main(args_input = sys.argv[1:]):
     input_file_type = 'vcf'
     base_output_dir = os.path.abspath(args.output_dir)
 
+    if (args.netmhc_pan_version and ("NetMHCIIpan" in args.prediction_algorithms or "NetMHCIIpanEL" in args.prediction_algorithms)):
+        NetMHCIIVersion.netmhcii_pan_version = args.netmhc_pan_version
+    elif (args.netmhc_pan_version and not ("NetMHCIIpan" in args.prediction_algorithms or "NetMHCIIpanEL" in args.prediction_algorithms or "all_class_ii" in args.prediction_algorithms)):
+        raise Exception("NetMHCIIpan and NetMHCIIpanEL version was specified but neither algorithm was selected.")
+
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     alleles = combine_class_ii_alleles(args.allele)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)

@@ -9,6 +9,7 @@ __all__ = [
     'top_score_filter',
     'net_chop',
     'netmhc_stab',
+    'netmhc_pan_version',
     'calculate_reference_proteome_similarity',
     'generate_protein_fasta',
     "generate_aggregated_report",
