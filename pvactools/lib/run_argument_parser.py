@@ -111,6 +111,12 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=1,
             help="Number of threads to use for parallelizing peptide-MHC binding prediction calls.",
         )
+        parser.add_argument(
+            "--netmhc_pan_version",
+            choices=["4.3", "4.2", "4.1", "4.0"],
+            default=None,
+            help="Specify the version of NetMHCIIpan or NetMHCIIpanEL to be used during the run.",
+        )
         self.parser = parser
 
     def prediction_args(self):

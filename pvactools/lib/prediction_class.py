@@ -653,9 +653,13 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
     def parse_iedb_allele_file(self):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
         #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/
+        file_name = next(
+            (name for name in ["NetMHCIIpan", "netmhciipan_el"] if name in self.iedb_prediction_method),
+            self.iedb_prediction_method
+        )
         base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
         iedb_alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_ii')
-        iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % self.iedb_prediction_method)
+        iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % file_name)
         alleles = []
         with open(iedb_alleles_file_name) as iedb_alleles_file:
             for row in iedb_alleles_file:
@@ -675,14 +679,21 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
         allele = allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
         return [iedb_executable_path, method, allele, input_file, str(epitope_length)]
 
+class NetMHCIIVersion:
+    netmhcii_pan_version = None
+
 class NetMHCIIpan(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
+        if NetMHCIIVersion.netmhcii_pan_version:
+            return 'NetMHCIIpan-' + NetMHCIIVersion.netmhcii_pan_version
         return 'NetMHCIIpan'
 
 class NetMHCIIpanEL(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
+        if NetMHCIIVersion.netmhcii_pan_version:
+            return 'netmhciipan_el-' + NetMHCIIVersion.netmhcii_pan_version
         return 'netmhciipan_el'
 
 class NNalign(IEDBMHCII):
