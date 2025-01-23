@@ -654,7 +654,7 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
         #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/
         file_name = next(
-            (name for name in ["NetMHCIIpan", "netmhciipan_el"] if name in self.iedb_prediction_method),
+            (name for name in ["netmhciipan", "netmhciipan_el"] if name in self.iedb_prediction_method),
             self.iedb_prediction_method
         )
         base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
@@ -685,14 +685,14 @@ class NetMHCIIVersion:
 class NetMHCIIpan(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
-        if NetMHCIIVersion.netmhcii_pan_version:
-            return 'NetMHCIIpan-' + NetMHCIIVersion.netmhcii_pan_version
-        return 'NetMHCIIpan'
+        if NetMHCIIVersion.netmhcii_pan_version in ['4.0', '4.2', '4.3']:
+            return 'netmhciipan_ba-' + NetMHCIIVersion.netmhcii_pan_version
+        return 'netmhciipan_ba'
 
 class NetMHCIIpanEL(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
-        if NetMHCIIVersion.netmhcii_pan_version:
+        if NetMHCIIVersion.netmhcii_pan_version in ['4.0', '4.2', '4.3']:
             return 'netmhciipan_el-' + NetMHCIIVersion.netmhcii_pan_version
         return 'netmhciipan_el'
 
