@@ -11,7 +11,7 @@ import pandas as pd
 from mock import patch
 
 import pvactools.lib.call_iedb
-from pvactools.lib.prediction_class import PredictionClass, IEDB
+from pvactools.lib.prediction_class import PredictionClass, IEDB, NetMHCIIpan, NetMHCIIpanEL, NetMHCIIVersion
 
 from tests.utils import *
 
@@ -211,6 +211,62 @@ class CallIEDBClassIITests(CallIEDBTests):
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+
+    def test_netmhciipan_method_with_version(self):
+        temp_dir = tempfile.TemporaryDirectory()
+        log_dir = tempfile.TemporaryDirectory()
+
+        prediction_class = getattr(sys.modules[__name__], "NetMHCIIpan")
+        prediction_class_object = prediction_class()
+        NetMHCIIVersion.netmhcii_pan_version = '4.2'
+
+        (response_text, output_mode) = prediction_class_object.predict(
+            self.input_file,
+            'DRB1*01:01',
+            12,
+            None,
+            '5',
+            temp_dir.name,
+            log_dir.name
+        )
+        
+        with tempfile.NamedTemporaryFile(mode='w+', delete=False) as output_file:
+            output_file.write(response_text)
+            output_file.seek(0)
+            actual_df = pd.read_csv(output_file.name, sep="\t", index_col=[0, 2, 3])
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_netmhciipan-4.2.tsv')
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
+
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+    
+    def test_netmhciipan_el_method_with_version(self):
+        temp_dir = tempfile.TemporaryDirectory()
+        log_dir = tempfile.TemporaryDirectory()
+
+        prediction_class = getattr(sys.modules[__name__], "NetMHCIIpanEL")
+        prediction_class_object = prediction_class()
+        NetMHCIIVersion.netmhcii_pan_version = '4.2'
+
+        (response_text, output_mode) = prediction_class_object.predict(
+            self.input_file,
+            'DRB1*01:01',
+            12,
+            None,
+            '5',
+            temp_dir.name,
+            log_dir.name
+        )
+        
+        with tempfile.NamedTemporaryFile(mode='w+', delete=False) as output_file:
+            output_file.write(response_text)
+            output_file.seek(0)
+            actual_df = pd.read_csv(output_file.name, sep="\t", index_col=[0, 2, 3])
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_netmhciipan_el-4.2.tsv')
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
+
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
 
 if __name__ == '__main__':
