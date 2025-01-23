@@ -2,7 +2,7 @@ import argparse
 
 
 class NetMHCPanVersion:
-    valid_versions = ["4.3", "4.2", "4.1", "4.0"]
+    valid_versions = ["4.3", "4.2", "4.1", "4.0 (Not supported by standalone IEDB)"]
 
     def __init__(self, list):
         self.list = list
