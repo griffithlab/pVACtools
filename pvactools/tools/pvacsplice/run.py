@@ -117,6 +117,10 @@ def main(args_input = sys.argv[1:]):
     junctions_dir = os.path.abspath(args.output_dir)
     os.makedirs(junctions_dir, exist_ok=True)
 
+    if (args.netmhciipan_version == '4.0' and args.iedb_install_directory is not None):
+        raise Exception("Standalone IEDB does not support version 4.0")
+    NetMHCIIVersion.netmhciipan_version = args.netmhciipan_version
+
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
 

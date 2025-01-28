@@ -9,7 +9,7 @@ __all__ = [
     'identify_problematic_amino_acids',
     'net_chop',
     'netmhc_stab',
-    'netmhc_pan_version',
+    'valid_netmhciipan_versions',
     'run',
     'top_score_filter',
     'transcript_support_level_filter',

@@ -3,7 +3,7 @@ __all__ = [
     'visualize',
     'valid_alleles',
     'valid_algorithms',
-    'netmhc_pan_version',
+    'valid_netmhciipan_versions',
     'allele_specific_cutoffs',
     'download_example_data',
 ]
