@@ -680,20 +680,20 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
         return [iedb_executable_path, method, allele, input_file, str(epitope_length)]
 
 class NetMHCIIVersion:
-    netmhcii_pan_version = None
+    netmhciipan_version = None
 
 class NetMHCIIpan(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
-        if NetMHCIIVersion.netmhcii_pan_version in ['4.0', '4.2', '4.3']:
-            return 'netmhciipan_ba-' + NetMHCIIVersion.netmhcii_pan_version
+        if NetMHCIIVersion.netmhciipan_version in ['4.0', '4.2', '4.3']:
+            return 'netmhciipan_ba-' + NetMHCIIVersion.netmhciipan_version
         return 'netmhciipan_ba'
 
 class NetMHCIIpanEL(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
-        if NetMHCIIVersion.netmhcii_pan_version in ['4.0', '4.2', '4.3']:
-            return 'netmhciipan_el-' + NetMHCIIVersion.netmhcii_pan_version
+        if NetMHCIIVersion.netmhciipan_version in ['4.0', '4.2', '4.3']:
+            return 'netmhciipan_el-' + NetMHCIIVersion.netmhciipan_version
         return 'netmhciipan_el'
 
 class NNalign(IEDBMHCII):

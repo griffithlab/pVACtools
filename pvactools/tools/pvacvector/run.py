@@ -22,6 +22,7 @@ from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
 from pvactools.lib.pvacvector_input_fasta_generator import PvacvectorInputFastaGenerator
 from pvactools.lib.pipeline import *
 from pvactools.lib.run_utils import *
+from pvactools.lib.prediction_class import NetMHCIIVersion
 from pvactools.lib.prediction_class_utils import *
 
 def define_parser():
@@ -454,6 +455,10 @@ def main(args_input=sys.argv[1:]):
 
     base_output_dir = os.path.abspath(args.output_dir)
     os.makedirs(base_output_dir, exist_ok=True)
+
+    if (args.netmhciipan_version == '4.0' and args.iedb_install_directory is not None):
+        raise Exception("Standalone IEDB does not support version 4.0")
+    NetMHCIIVersion.netmhciipan_version = args.netmhciipan_version
 
     if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
         random.seed(0.5)

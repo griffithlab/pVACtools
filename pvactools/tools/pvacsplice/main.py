@@ -100,12 +100,12 @@ def define_parser():
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
 
-    netmhc_pan_version_parser = subparsers.add_parser(
-        "valid_netmhcpan_versions",
+    valid_netmhciipan_versions_parser = subparsers.add_parser(
+        "valid_netmhciipan_versions",
         help="Show a list of valid versions of NetMHCIIpan and NetMHCIIpanEL that can be used.",
         add_help=False
     )
-    netmhc_pan_version_parser.set_defaults(func=netmhc_pan_version)
+    valid_netmhciipan_versions_parser.set_defaults(func=valid_netmhciipan_versions)
 
     allele_specific_cutoffs_parser = subparsers.add_parser(
         "allele_specific_cutoffs",
