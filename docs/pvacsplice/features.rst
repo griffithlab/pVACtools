@@ -1,6 +1,7 @@
-.. .. image:: ../images/pVACseq_logo_trans-bg_sm_v4b.png
+.. image:: ../images/pVACsplice_logo_trans-bg_v4b.png
     :align: right
     :alt: pVACsplice logo
+    :width: 175px
 
 Features
 ========

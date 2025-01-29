@@ -86,16 +86,6 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true',
         )
         parser.add_argument(
-            '--aggregate-inclusion-binding-threshold', type=int,
-            help="Threshold for including epitopes when creating the aggregate report",
-            default=5000,
-        )
-        parser.add_argument(
-            '--aggregate-inclusion-count-limit', type=int,
-            help="Limit neoantigen candidates included in the aggregate report to only the best n candidates per variant.",
-            default=15,
-        )
-        parser.add_argument(
             '-m', '--top-score-metric',
             choices=['lowest', 'median'],
             default='median',
@@ -259,6 +249,18 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=['protein_coding']
         )
 
+    def aggregated_report_args(self):
+        self.parser.add_argument(
+            '--aggregate-inclusion-binding-threshold', type=int,
+            help="Threshold for including epitopes when creating the aggregate report",
+            default=5000,
+        )
+        self.parser.add_argument(
+            '--aggregate-inclusion-count-limit', type=int,
+            help="Limit neoantigen candidates included in the aggregate report to only the best n candidates per variant.",
+            default=15,
+        )
+
     def pvacfuse(self):
         self.parser.add_argument(
             '--starfusion-file',
@@ -378,6 +380,11 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Number of amino acids to permit clipping from the start and/or end of peptides in order to test novel junction epitopes when the first pass on the full peptide fails.",
             default=3,
         )
+        self.parser.add_argument(
+            '--allow-n-peptide-exclusion', type=int,
+            help="If no solution is found after adding spacers and clipping peptides, attempt to find partial solutions with up to n peptides removed.",
+            default=2,
+        )
 
 class PvacbindRunArgumentParser(RunArgumentParser):
     def __init__(self):
@@ -385,6 +392,7 @@ class PvacbindRunArgumentParser(RunArgumentParser):
         input_file_help = "A FASTA file"
         RunArgumentParser.__init__(self, tool_name, input_file_help)
         self.prediction_args()
+        self.aggregated_report_args()
 
 class PvacfuseRunArgumentParser(RunArgumentParser):
     def __init__(self):
@@ -393,6 +401,7 @@ class PvacfuseRunArgumentParser(RunArgumentParser):
         RunArgumentParser.__init__(self, tool_name, input_file_help)
         self.prediction_args()
         self.fasta_generation()
+        self.aggregated_report_args()
         self.pvacfuse()
 
 class PvacspliceRunArgumentParser(RunArgumentParser):
@@ -403,6 +412,7 @@ class PvacspliceRunArgumentParser(RunArgumentParser):
         self.pass_only_args()
         self.expression_coverage_args()
         self.prediction_args()
+        self.aggregated_report_args()
         self.pvacsplice()
 
 
@@ -419,6 +429,7 @@ class PvacseqRunArgumentParser(RunArgumentParser):
         self.expression_coverage_args()
         self.prediction_args()
         self.fasta_generation()
+        self.aggregated_report_args()
         self.pvacseq()
 
 class PvacvectorRunArgumentParser(RunArgumentParser):
