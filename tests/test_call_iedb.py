@@ -219,7 +219,7 @@ class CallIEDBClassIITests(CallIEDBTests):
 
         prediction_class = getattr(sys.modules[__name__], "NetMHCIIpan")
         prediction_class_object = prediction_class()
-        NetMHCIIVersion.netmhcii_pan_version = '4.2'
+        NetMHCIIVersion.netmhciipan_version = '4.2'
 
         (response_text, output_mode) = prediction_class_object.predict(
             self.input_file,
@@ -247,7 +247,7 @@ class CallIEDBClassIITests(CallIEDBTests):
 
         prediction_class = getattr(sys.modules[__name__], "NetMHCIIpanEL")
         prediction_class_object = prediction_class()
-        NetMHCIIVersion.netmhcii_pan_version = '4.2'
+        NetMHCIIVersion.netmhciipan_version = '4.2'
 
         (response_text, output_mode) = prediction_class_object.predict(
             self.input_file,
