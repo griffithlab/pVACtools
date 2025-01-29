@@ -74,8 +74,8 @@ class RunArgumentParser(metaclass=ABCMeta):
         parser.add_argument(
             '--percentile-threshold-strategy',
             choices=['conservative', 'exploratory'],
-            help="Specify the candidate inclusion strategy. Conservative requires a candidate to pass BOTH the binding threshold and percentile threshold."
-                 + " Exploratory requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
+            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default)."
+                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
             default="conservative",
         )
         parser.add_argument(
