@@ -1,3 +1,8 @@
+.. image:: ../images/pVACsplice_logo_trans-bg_v4b.png
+    :align: right
+    :alt: pVACsplice logo
+    :width: 175px
+
 .. _pvacsplice_prerequisites_label:
 
 Input File Preparation

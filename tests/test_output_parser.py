@@ -437,7 +437,4 @@ class OutputParserTests(unittest.TestCase):
 
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "complex_inframe_insertion", "output.iedb.parsed.tsv")
-        import shutil
-        shutil.copy(parse_output_output_file.name, expected_output_file)
-
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))

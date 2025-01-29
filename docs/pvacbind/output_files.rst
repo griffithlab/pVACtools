@@ -170,7 +170,8 @@ that offer suggestions as to the suitability of variants for use in vaccines.
 Only epitopes meeting the ``--aggregate-inclusion-binding-threshold`` are included in this report (default: 5000).
 If the number of unique epitopes for a mutation meeting this threshold exceeds the
 ``--aggregate-inclusion-count-limit``, only the n best-binding epitopes up to this
-limit are included (default: 15).
+limit are included (default: 15). If the Best Peptide does not meet the aggregate inclusion criteria, it will be still be
+counted in the ``Num Included Peptides``.
 
 Whether the median or the lowest binding affinity metrics are used for determining the
 included eptiopes, selecting the best-scoring epitope, and which values are output in the ``IC50 MT``
