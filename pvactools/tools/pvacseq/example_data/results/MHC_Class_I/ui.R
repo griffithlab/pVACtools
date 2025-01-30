@@ -275,7 +275,7 @@ explore_tab <- tabItem(
                           DTOutput(outputId = "bindingDatatable"), style = "overflow-x: scroll;"
                  ),
                  tabPanel("Elution and Immunogenicity Data",
-                          h4("Prediction score table showing exact MHC scpres for elution, immunogenicity, and percentile calculations."),
+                          h4("Prediction score table showing exact MHC scores for elution, immunogenicity, and percentile calculations."),
                           DTOutput(outputId = "elutionDatatable"),
                           br(),
                           strong("BigMHC_EL / BigMHC_IM"), span(": A deep learning tool for predicting MHC-I (neo)epitope presentation and immunogenicity. ("),

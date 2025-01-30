@@ -279,7 +279,13 @@ transcripts covered by those epitopes, as well as the HLA alleles that those
 epitopes are well-binding to. Lastly, the report will bin variants into tiers
 that offer suggestions as to the suitability of variants for use in vaccines.
 
-Only epitopes meeting the ``--aggregate-inclusion-binding-threshold`` are included in this report (default: 5000).
+Additionally, a metrics.json file gets created, containing metadata about the
+Best Peptide as well as alternate neoantigen canddiates for each variant. This
+file can be loaded into pVACview in conjunction with the aggregated report in
+order to visualize the candidates. In order to limit the size of the
+metrics.json file, only a limited number of neoantigen candidates are included
+in this file. Only neoantigen candidates meeting the ``--aggregate-inclusion-binding-threshold``
+are included in this file (default: 5000).
 If the number of unique epitopes for a mutation meeting this threshold exceeds the
 ``--aggregate-inclusion-count-limit``, only the top n epitopes up to this
 limit are included (default: 15). The method for selecting the top n epitopes is analogous to
@@ -293,8 +299,12 @@ anchor criteria was passed, the MT IC50 score, the transcript length,
 and the MT percentile. From this sorted list the top n entries are selected up
 to the ``--aggregate-inclusion-count-limit``.
 
+If the Best Peptide does not meet the aggregate inclusion criteria, it will be still be
+included in the metrics.json file and counted in the ``Num Included
+Peptides``.
+
 Whether the median or the lowest binding affinity metrics are used for determining the
-included eptiopes, selecting the best-scoring epitope, and which values are output in the ``IC50 MT``,
+included epitopes, selecting the best-scoring epitope, and which values are output in the ``IC50 MT``,
 ``IC50 WT``, ``%ile MT``, and ``%ile WT`` columns is controlled by the
 ``--top-score-metric`` parameter.
 
@@ -371,9 +381,7 @@ included eptiopes, selecting the best-scoring epitope, and which values are outp
 Best Peptide Criteria
 _____________________
 
-To determine the Best Peptide, all peptides meeting the
-``--aggregate-inclusion-threshold`` and ``--aggregate-inclusion-count-limit``
-(see above) are evaluated as follows:
+To determine the Best Peptide, all peptides for a variant are evaluated as follows:
 
 - Pick all entries with a variant transcript that have a ``protein_coding`` Biotype
 - Of the remaining entries, pick the ones with a variant transcript having

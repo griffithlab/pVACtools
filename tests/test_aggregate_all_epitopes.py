@@ -8,7 +8,7 @@ import py_compile
 from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes, PvacspliceAggregateAllEpitopes
 from tests.utils import *
 
-class AggregateAllEptiopesTests(unittest.TestCase):
+class AggregateAllEpitopesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         #locate the bin and test_data directories

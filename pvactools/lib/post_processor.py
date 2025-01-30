@@ -78,6 +78,7 @@ class PostProcessor:
 
     def aggregate_all_epitopes(self):
         if self.el_only:
+            print("WARNING: No binding affinity algorithm(s) specified, skipping aggregated report creation.")
             return
         print("Creating aggregated report")
         if self.file_type == 'pVACseq':
@@ -131,6 +132,7 @@ class PostProcessor:
                 percentile_threshold=self.percentile_threshold,
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
+                aggregate_inclusion_count_limit=self.aggregate_inclusion_count_limit,
                 top_score_metric=self.top_score_metric,
                 trna_vaf=self.trna_vaf,
                 trna_cov=self.trna_cov,

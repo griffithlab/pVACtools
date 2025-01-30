@@ -134,7 +134,7 @@ from a VCF and run bam-readcount. Information on that Docker container can be fo
 .. code-block:: none
 
    /usr/bin/python /usr/bin/bam_readcount_helper.py \
-   <decomposed_vcf> <sample_name> <reference_fasta> <bam_file> <output_dir>
+   <decomposed_vcf> <sample_name> <reference_fasta> <bam_file> NOPREFIX <output_dir>
 
 This will write two bam-readcount files to the ``<output_dir>``:
 ``<sample_name>_bam_readcount_snv.tsv`` and
