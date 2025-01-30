@@ -15,6 +15,7 @@ from Bio.SeqRecord import SeqRecord
 import itertools
 import json
 import platform
+import shutil
 
 from pvactools.lib.optimal_peptide import OptimalPeptide
 from pvactools.lib.vector_visualization import VectorVisualization
@@ -28,16 +29,18 @@ from pvactools.lib.prediction_class_utils import *
 def define_parser():
     return PvacvectorRunArgumentParser().parser
 
-def run_pipelines(input_file, base_output_dir, args, spacer, class_i_prediction_algorithms, class_ii_prediction_algorithms, class_i_alleles, class_ii_alleles):
+def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, tries, class_i_prediction_algorithms, class_ii_prediction_algorithms, class_i_alleles, class_ii_alleles):
     shared_arguments = {
         'input_file'      : input_file,
         'input_file_type' : 'pvacvector_input_fasta',
         'sample_name'     : args.sample_name,
         'n_threads'       : args.n_threads,
-        'spacers'         : [spacer],
+        'spacer'          : spacer,
+        'clip_length'     : tries,
         'downstream_sequence_length': 200,
         'iedb_retries'    : args.iedb_retries,
         'additional_report_columns' : None,
+        'junctions_to_test': junctions_to_test,
     }
 
     parsed_output_files = []
@@ -92,78 +95,46 @@ def run_pipelines(input_file, base_output_dir, args, spacer, class_i_prediction_
 
     return parsed_output_files
 
-def write_min_scores(min_scores_rows, directory, args):
-    #This will write the junction scores for all tested spacers
-    min_scores_file = os.path.join(directory, 'junction_scores.tsv')
-    rows = []
-    with open(min_scores_file, 'w') as fh:
-        fieldnames = ['left_peptide', 'spacer', 'right_peptide', 'junction_score', 'epitope', 'allele', 'method']
+def write_junctions_file(graph, current_output_dir):
+    junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
+    with open(junctions_file, 'w') as fh:
+        fieldnames = ['left_peptide', 'left_partner_clip', 'spacer', 'right_partner_clip', 'right_peptide', 'junction_score', 'percentile']
         writer = csv.DictWriter(fh, delimiter="\t", fieldnames=fieldnames)
         writer.writeheader()
-        for row in min_scores_rows:
-            index_parts = row['Mutation'].split('|')
-            left_peptide = index_parts[0]
-            if len(index_parts) == 2:
-                spacer = 'None'
-                right_peptide = index_parts[1]
-            else:
-                spacer = index_parts[1]
-                right_peptide = index_parts[2]
-            new_row = {
+        for (left_peptide, right_peptide, edge_data) in graph.edges.data():
+            row = {
                 'left_peptide': left_peptide,
-                'spacer': spacer,
+                'left_partner_clip': edge_data['left_partner_trim'],
+                'spacer': edge_data['spacer'],
+                'right_partner_clip': edge_data['right_partner_trim'],
                 'right_peptide': right_peptide,
-                'epitope': row['Epitope Seq'],
-                'allele': row['HLA Allele'],
+                'junction_score': edge_data['weight'],
+                'percentile': edge_data['percentile'],
             }
-            if args.top_score_metric == 'lowest':
-                new_row['junction_score'] = float(row['Best IC50 Score'])
-                new_row['method'] = row['Best IC50 Score Method']
-            elif args.top_score_metric == 'median':
-                new_row['junction_score'] = float(row['Median IC50 Score'])
-                new_row['method'] = 'median'
-            rows.append(new_row)
-        sorted_rows = sorted(rows, key=lambda k: k['junction_score'])
-        writer.writerows(sorted_rows)
+            writer.writerow(row)
 
-    #This will filter `rows` to only the ones with the best spacer for each junction
-    best_spacers_min_scores = {}
-    best_spacers_min_scores_rows = {}
-    for row in rows:
-        index = (row['left_peptide'], row['right_peptide'])
-        score = row['junction_score']
-        if index in best_spacers_min_scores and score >= best_spacers_min_scores[index]:
-            continue
-        else:
-            best_spacers_min_scores[index] = score
-            best_spacers_min_scores_rows[index] = row
-    sorted_best_spacers_min_scores_rows = sorted(best_spacers_min_scores_rows.values(), key=lambda k: k['junction_score'])
-    best_spacers_min_scores_file = os.path.join(directory, 'junction_scores.best_spacers.tsv')
-    with open(best_spacers_min_scores_file, 'w') as fh:
-        fieldnames = ['left_peptide', 'spacer', 'right_peptide', 'junction_score', 'epitope', 'allele', 'method']
-        writer = csv.DictWriter(fh, delimiter="\t", fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(sorted_best_spacers_min_scores_rows)
-
-def find_min_scores(parsed_output_files, current_output_dir, args, old_min_scores):
-    min_scores_rows = {}
-    indexes_with_good_binders = []
-    #find indexes that contain a good binder so that they can be excluded from further processing
-    #we don't want any peptide-spacer-peptide combination (aka index) that contains a good binder
+def find_min_scores(parsed_output_files, current_output_dir, args, min_scores, min_percentiles):
+    #min_scores_rows = {}
+    junctions_with_good_binders = set()
+    #find junctions that contain a good binder so that they can be excluded from further processing
+    #we don't want any peptide|left_clip|spacer|right_clip|peptide combination (aka junctions) that contains a good binder
     #Find min score of all the epitopes of each of the remaining peptide-spacer-peptide combinations 
-    reprocessed_indexes = []
-    reprocessed_min_scores = {}
+    processed_junctions = set()
+    junction_min_scores = {}
+    junction_min_percentiles = {}
     for parsed_output_file in parsed_output_files:
         with open(parsed_output_file, 'r') as parsed:
             reader = csv.DictReader(parsed, delimiter="\t")
             for row in reader:
                 index = row['Mutation']
-                reprocessed_indexes.append(index)
+                processed_junctions.add(index)
 
                 if args.top_score_metric == 'lowest':
                     score = float(row['Best IC50 Score'])
+                    percentile = float(row['Best Percentile'])
                 elif args.top_score_metric == 'median':
                     score = float(row['Median IC50 Score'])
+                    percentile = float(row['Median Percentile'])
                 if args.allele_specific_binding_thresholds:
                     allele = row['HLA Allele']
                     threshold = PredictionClass.cutoff_for_allele(allele)
@@ -171,53 +142,56 @@ def find_min_scores(parsed_output_files, current_output_dir, args, old_min_score
                 else:
                     threshold = float(args.binding_threshold)
                 if score < threshold:
-                    indexes_with_good_binders.append(index)
+                    junctions_with_good_binders.add(index)
+                if args.percentile_threshold is not None and percentile < args.percentile_threshold:
+                    junctions_with_good_binders.add(index)
 
-                if index in reprocessed_min_scores and score >= reprocessed_min_scores[index]:
-                    continue
+                if index not in junction_min_scores:
+                    #"initialize" with the first score encountered
+                    junction_min_scores[index] = score
+                elif score < junction_min_scores[index]:
+                    #if the current score is lower than the saved one, update the saved one
+                    junction_min_scores[index] = score
                 else:
-                    reprocessed_min_scores[index] = score
-                    min_scores_rows[index] = row
-    for index, data in reprocessed_min_scores.items():
-        old_min_scores[index] = data
+                    continue
+                if index not in junction_min_percentiles:
+                    #"initialize" with the first percentile encountered
+                    junction_min_percentiles[index] = percentile
+                elif percentile < junction_min_percentiles[index]:
+                    #if the current percentile is lower than the saved one, update the saved one
+                    junction_min_percentiles[index] = percentile
+                else:
+                    continue
+    good_junctions = processed_junctions - junctions_with_good_binders
+    for good_junction in good_junctions:
+        min_scores[good_junction] = junction_min_scores[good_junction]
+        min_percentiles[good_junction] = junction_min_percentiles[good_junction]
 
-    write_min_scores(min_scores_rows.values(), current_output_dir, args)
+    return min_scores, min_percentiles
 
-    for index in indexes_with_good_binders:
-        if index in old_min_scores:
-            del old_min_scores[index]
+def initialize_graph(seq_keys):
+    graph = nx.DiGraph()
+    for key in seq_keys:
+        graph.add_node(key)
+    return graph
 
-    return old_min_scores
-
-def create_graph(iedb_results, seq_tuples, spacers):
-    Paths = nx.DiGraph()
-    for ep in seq_tuples:
-        ID_1 = ep[0]
-        ID_2 = ep[1]
-        for spacer in spacers:
-            if spacer == 'None':
-                key = str(ID_1 + "|" + ID_2)
-            else:
-                key = str(ID_1 + "|" + spacer + "|" + ID_2)
-            if key in iedb_results:
-                worst_case = iedb_results[key]
-            else:
-                continue
-
-            if not Paths.has_node(ID_1):
-                Paths.add_node(ID_1)
-
-            if not Paths.has_node(ID_2):
-                Paths.add_node(ID_2)
-
-            if Paths.has_edge(ID_1, ID_2) and Paths[ID_1][ID_2]['weight'] < worst_case:
-                Paths[ID_1][ID_2]['weight'] = worst_case
-                Paths[ID_1][ID_2]['spacer'] = spacer
-            elif not Paths.has_edge(ID_1, ID_2):
-                Paths.add_edge(ID_1, ID_2, weight=worst_case, spacer=spacer)
-
-    print("Graph contains " + str(len(Paths)) + " nodes (peptides) and " + str(Paths.size()) + " edges (junctions).")
-    return Paths
+def add_valid_junctions_to_graph(graph, min_scores, min_percentiles):
+    for key, worst_case in min_scores.items():
+        percentile = min_percentiles[key]
+        if (key.count("|") == 3):
+            (id_1, left_partner_trim, right_partner_trim, id_2) = key.split("|")
+            spacer = "None"
+        elif (key.count("|") == 4):
+            (id_1, left_partner_trim, spacer, right_partner_trim, id_2) = key.split("|")
+        if graph.has_edge(id_1, id_2) and graph[id_1][id_2]['weight'] < worst_case:
+            graph[id_1][id_2]['weight'] = worst_case
+            graph[id_1][id_2]['percentile'] = percentile
+            graph[id_1][id_2]['spacer'] = spacer
+            graph[id_1][id_2]['left_partner_trim'] = int(left_partner_trim)
+            graph[id_1][id_2]['right_partner_trim'] = int(right_partner_trim)
+        elif not graph.has_edge(id_1, id_2):
+            graph.add_edge(id_1, id_2, weight=worst_case, percentile=percentile, spacer=spacer, left_partner_trim=int(left_partner_trim), right_partner_trim=int(right_partner_trim))
+    return graph
 
 def check_graph_valid(Paths, seq_dict):
     graph_valid = True
@@ -252,6 +226,13 @@ def check_graph_valid(Paths, seq_dict):
     else:
         return(graph_valid, "\n".join(errors))
 
+def identify_problematic_junctions(graph, seq_tuples):
+    tuples_to_process = []
+    for (seq1, seq2) in seq_tuples:
+        if not graph.has_edge(seq1, seq2):
+            tuples_to_process.append([seq1, seq2])
+    return tuples_to_process
+
 def create_distance_matrix(Paths):
     print("Finding path.")
     distance_matrix = {}
@@ -264,118 +245,82 @@ def create_distance_matrix(Paths):
             distance_matrix[ID_1][ID_2] = Paths[ID_1][ID_2]['weight']
     return distance_matrix
 
-def find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args):
-    init_state = sorted(Paths.nodes())
+def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, args):
+    init_state = sorted(graph.nodes())
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
     peptide = OptimalPeptide(init_state, distance_matrix)
     peptide.copy_strategy = "slice"
     peptide.save_state_on_exit = False
     state, e = peptide.anneal()
-    print("%i distance :" % e)
 
+    names = list()
+    cumulative_weight = 0
+    all_scores = list()
+    problematic_junctions = []
+    for i in range(0, (len(state) - 1)):
+        names.append(state[i])
+        if graph.has_edge(state[i], state[i + 1]):
+            edge = graph[state[i]][state[i + 1]]
+            try:
+                min_score = min(min_score, edge['weight'])
+            except:
+                min_score = edge['weight']
+            cumulative_weight += edge['weight']
+            all_scores.append(str(edge['weight']))
+            spacer = edge['spacer']
+            if spacer != 'None':
+                names.append(spacer)
+        else:
+            problematic_junctions.append("{} - {}".format(state[i], state[i+1]))
+    names.append(state[-1])
+    if len(problematic_junctions) > 0:
+        return (None, "No valid junction between peptides: {}".format(", ".join(problematic_junctions)))
+
+    print("%i distance :" % e)
     for id in state:
         print("\t", id)
 
+    median_score = str(cumulative_weight/len(all_scores))
+    peptide_id_list = ','.join(names)
+    score_list = ','.join(all_scores)
+    output = list()
+    output.append(">")
+    output.append(peptide_id_list)
+    output.append("|Median_Junction_Score:")
+    output.append(median_score)
+    output.append("|Lowest_Junction_Score:")
+    output.append(str(min_score))
+    output.append("|All_Junction_Scores:")
+    output.append(score_list)
+    output.append("\n")
+    for (i, name) in enumerate(names):
+        if name in args.spacers:
+            output.append(name)
+        else:
+            full_sequence = seq_dict[name]
+            if i > 0:
+                left_name = names[i-1]
+                if left_name in args.spacers:
+                    left_name = names[i-2]
+                left_clip = graph.edges[(left_name, name)]['right_partner_trim']
+            else:
+                left_clip = 0
+            if i < (len(names) - 1):
+                right_name = names[i+1]
+                if right_name in args.spacers:
+                    right_name = names[i+2]
+                right_clip = graph.edges[(name, right_name)]['left_partner_trim']
+            else:
+                right_clip = 0
+            clipped_sequence = full_sequence[left_clip:len(full_sequence) - right_clip]
+            output.append(clipped_sequence)
+
+        output.append("\n")
     results_file = os.path.join(base_output_dir, args.sample_name + '_results.fa')
     with open(results_file, 'w') as f:
-        name = list()
-        problematic_ends = []
-        problematic_starts = []
-        problematic_junctions = []
-        cumulative_weight = 0
-        all_scores = list()
-
-        for i in range(0, (len(state) - 1)):
-            name.append(state[i])
-            if Paths.has_edge(state[i], state[i + 1]):
-                edge = Paths[state[i]][state[i + 1]]
-                try:
-                    min_score = min(min_score, edge['weight'])
-                except:
-                    min_score = edge['weight']
-                cumulative_weight += edge['weight']
-                all_scores.append(str(edge['weight']))
-                spacer = edge['spacer']
-                if spacer != 'None':
-                    name.append(spacer)
-            else:
-                problematic_ends.append(state[i])
-                problematic_starts.append(state[i+1])
-                problematic_junctions.append("{} - {}".format(state[i], state[i+1]))
-        if len(problematic_junctions) > 0:
-            return (None, "No valid junction between peptides: {}".format(", ".join(problematic_junctions)), problematic_starts, problematic_ends)
-        name.append(state[-1])
-        median_score = str(cumulative_weight/len(all_scores))
-        peptide_id_list = ','.join(name)
-        score_list = ','.join(all_scores)
-        output = list()
-        output.append(">")
-        output.append(peptide_id_list)
-        output.append("|Median_Junction_Score:")
-        output.append(median_score)
-        output.append("|Lowest_Junction_Score:")
-        output.append(str(min_score))
-        output.append("|All_Junction_Scores:")
-        output.append(score_list)
-        output.append("\n")
-        for id in name:
-            try:
-                output.append(seq_dict[id])
-            except KeyError:
-                output.append(id)
-            output.append("\n")
         f.write(''.join(output))
-    return (results_file, None, None, None)
-
-def shorten_problematic_peptides(input_file, problematic_start, problematic_end, output_dir):
-    print("Shortening problematic peptides")
-    records = []
-    for record in SeqIO.parse(input_file, "fasta"):
-        if record.id in problematic_start and record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)[1:-1]), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': True}))
-        elif record.id in problematic_start:
-            record_new = SeqRecord(Seq(str(record.seq)[1:]), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': False}))
-        elif record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)[:-1]), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': True}))
-        else:
-            record_new = SeqRecord(Seq(str(record.seq)), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': False}))
-        records.append(record_new)
-    os.makedirs(output_dir, exist_ok=True)
-    new_input_file = os.path.join(output_dir, "vector_input.fa")
-    SeqIO.write(records, new_input_file, "fasta")
-    return new_input_file
-
-def mark_problematic_peptides_in_fasta(input_file, problematic_start, problematic_end, output_dir):
-    print("Marking problematic peptides in fasta")
-    records = []
-    for record in SeqIO.parse(input_file, "fasta"):
-        if record.id in problematic_start and record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': True}))
-        elif record.id in problematic_start:
-            record_new = SeqRecord(Seq(str(record.seq)), id=record.id, description=json.dumps({'problematic_start': True, 'problematic_end': False}))
-        elif record.id in problematic_end:
-            record_new = SeqRecord(Seq(str(record.seq)), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': True}))
-        else:
-            record_new = SeqRecord(Seq(str(record.seq)), id=record.id, description=json.dumps({'problematic_start': False, 'problematic_end': False}))
-        records.append(record_new)
-    os.makedirs(output_dir, exist_ok=True)
-    new_input_file = os.path.join(output_dir, "vector_input.fa")
-    SeqIO.write(records, new_input_file, "fasta")
-    return new_input_file
-
-def identify_problematic_peptides(Paths, seq_dict):
-    problematic_start = set(seq_dict.keys()) - set(Paths.nodes())
-    problematic_end = set(seq_dict.keys()) - set(Paths.nodes())
-    for node in Paths.nodes():
-        if len(Paths.out_edges(node)) == 0 and len(Paths.in_edges(node)) == 0:
-            problematic_start.add(node)
-            problematic_end.add(node)
-        elif len(Paths.out_edges(node)) == 0:
-            problematic_end.add(node)
-        elif len(Paths.in_edges(node)) == 0:
-            problematic_start.add(node)
-    return (problematic_start, problematic_end)
+    return (results_file, None)
 
 def get_codon_for_amino_acid(amino_acid):
     amino_acid_to_codon = {
@@ -467,53 +412,57 @@ def main(args_input=sys.argv[1:]):
         generator.execute()
         input_file = generator.output_file
 
-    results_file = None
+    seq_dict = dict()
+    for record in SeqIO.parse(input_file, "fasta"):
+        seq_dict[record.id] = str(record.seq)
+    seq_keys = sorted(seq_dict)
+    graph = initialize_graph(seq_keys)
+
+    seq_tuples = list(itertools.permutations(seq_keys, 2))
+    junctions_to_process = seq_tuples
+
     max_tries = args.max_clip_length + 1
     tries = 0
+    results_file = None
     min_scores = {}
+    min_percentiles = {}
     while results_file is None and tries < max_tries:
-        if tries > 0:
-            input_file = shorten_problematic_peptides(input_file, problematic_start, problematic_end, os.path.join(base_output_dir, str(tries)))
-        seq_dict = dict()
-        for record in SeqIO.parse(input_file, "fasta"):
-            seq_dict[record.id] = str(record.seq)
-        seq_keys = sorted(seq_dict)
-        seq_tuples = list(itertools.permutations(seq_keys, 2))
-
-        processed_spacers = []
-        results_file = None
+        print("Processing clip length {}".format(tries))
         for spacer in args.spacers:
             print("Processing spacer {}".format(spacer))
-            processed_spacers.append(spacer)
             current_output_dir = os.path.join(base_output_dir, str(tries), spacer)
-            try:
-                input_file = mark_problematic_peptides_in_fasta(input_file, problematic_start, problematic_end, current_output_dir)
-            except:
-                pass
-            parsed_output_files = run_pipelines(input_file, current_output_dir, args, spacer, class_i_prediction_algorithms, class_ii_prediction_algorithms, class_i_alleles, class_ii_alleles)
-            min_scores = find_min_scores(parsed_output_files, current_output_dir, args, min_scores)
-            Paths = create_graph(min_scores, seq_tuples, processed_spacers)
-            (valid, error) = check_graph_valid(Paths, seq_dict)
+            parsed_output_files = run_pipelines(
+                input_file,
+                current_output_dir,
+                args,
+                junctions_to_process,
+                spacer,
+                tries,
+                class_i_prediction_algorithms,
+                class_ii_prediction_algorithms,
+                class_i_alleles,
+                class_ii_alleles
+            )
+            min_scores, min_percentiles = find_min_scores(parsed_output_files, current_output_dir, args, min_scores, min_percentiles)
+            add_valid_junctions_to_graph(graph, min_scores, min_percentiles)
+            write_junctions_file(graph, current_output_dir)
+            (valid, error) = check_graph_valid(graph, seq_dict)
             if not valid:
-                (problematic_start, problematic_end) = identify_problematic_peptides(Paths, seq_dict)
+                junctions_to_process = identify_problematic_junctions(graph, seq_tuples)
                 print("No valid path found. {}".format(error))
                 continue
-            distance_matrix = create_distance_matrix(Paths)
-            (results_file, error, problematic_start, problematic_end) = find_optimal_path(Paths, distance_matrix, seq_dict, seq_keys, base_output_dir, args)
-            if results_file is not None:
-                break
-            else:
+            distance_matrix = create_distance_matrix(graph)
+            (results_file, error) = find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, args)
+            if results_file is None:
                 print("No valid path found. {}".format(error))
+                junctions_to_process = identify_problematic_junctions(graph, seq_tuples)
+            else:
+                break
         tries += 1
+    junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
+    shutil.copy(junctions_file, base_output_dir)
 
-    if results_file is None:
-        print(
-            'Unable to find path. ' +
-            'A vaccine design using the parameters specified could not be found.  Some options that you may want to consider:\n' +
-            '1) increasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
-            '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)'
-        )
-    else:
+    if results_file is not None:
         if 'DISPLAY' in os.environ.keys():
             VectorVisualization(results_file, base_output_dir, args.spacers).draw()
 
@@ -525,6 +474,64 @@ def main(args_input=sys.argv[1:]):
                 for spacer in processed_spacers:
                     shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
                     shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
+
+        change_permissions_recursive(base_output_dir, 0o755, 0o644)
+        return
+
+    solution_found = False
+    if results_file is None:
+        for n_nodes_to_remove in range(1, args.allow_n_peptide_exclusion+1):
+            node_sets_to_remove = list(itertools.combinations(seq_keys, n_nodes_to_remove))
+            for node_set in node_sets_to_remove:
+                print("Removing nodes: {}".format(', '.join(node_set)))
+                #Creating output directory
+                current_output_dir = os.path.join(base_output_dir, "without_{}".format('_'.join(node_set)))
+                os.makedirs(current_output_dir, exist_ok=True)
+                #Creating junctions file with node_set removed
+                junctions_file = os.path.join(base_output_dir, 'junctions.tsv')
+                modified_junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
+                with open(junctions_file) as input_fh, open(modified_junctions_file, 'w') as output_fh:
+                    reader = csv.DictReader(input_fh, delimiter='\t')
+                    writer = csv.DictWriter(output_fh, delimiter='\t', fieldnames=reader.fieldnames)
+                    writer.writeheader()
+                    for line in reader:
+                        for node in node_set:
+                            if line['left_peptide'] == node or line['right_peptide'] == node:
+                                continue
+                            writer.writerow(line)
+                #Modify graph to remove node_set and test it
+                modified_graph = graph.copy()
+                modified_graph.remove_nodes_from(node_set)
+                modified_seq_dict = seq_dict.copy()
+                for node in node_set:
+                    del modified_seq_dict[node]
+                (valid, error) = check_graph_valid(modified_graph, modified_seq_dict)
+                if not valid:
+                    print("No valid path found after removing nodes: {}".format(', '.join(node_set)))
+                    continue
+                distance_matrix = create_distance_matrix(modified_graph)
+                (results_file, error) = find_optimal_path(modified_graph, distance_matrix, modified_seq_dict, current_output_dir, args)
+                if results_file is None:
+                    print("No valid path found after removing nodes: {}".format(', '.join(node_set)))
+                    continue
+                else:
+                    solution_found = True
+                    if 'DISPLAY' in os.environ.keys():
+                        VectorVisualization(results_file, current_output_dir, args.spacers).draw()
+                    dna_results_file = os.path.join(current_output_dir, args.sample_name + '_results.dna.fa')
+                    create_dna_backtranslation(results_file, dna_results_file)
+            if solution_found:
+                break
+
+    if not solution_found:
+        print(
+            'Unable to find path. ' +
+            'A vaccine design using the parameters specified could not be found. Some options that you may want to consider:\n' +
+            '1) decreasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
+            '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)\n' +
+            '3) if running with a percentile threshold set, either remove this parameter or reduce the acceptable threshold to allow more possible connections (--percentile-threshold parameter)\n' +
+            '4) increase the number of peptides that can be excluded from the vector (--allow-n-peptide-exclusion parameter)'
+        )
 
     change_permissions_recursive(base_output_dir, 0o755, 0o644)
 

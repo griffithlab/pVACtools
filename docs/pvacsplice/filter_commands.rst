@@ -1,6 +1,7 @@
-.. .. image:: ../images/pVACseq_logo_trans-bg_sm_v4b.png
+.. image:: ../images/pVACsplice_logo_trans-bg_v4b.png
     :align: right
-    :alt: pVACseq logo
+    :alt: pVACsplice logo
+    :width: 175px
 
 .. _pvacsplice_filter_commands:
 
