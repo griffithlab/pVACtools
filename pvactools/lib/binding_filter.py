@@ -7,11 +7,12 @@ from pvactools.lib.allele_specific_binding_filter import AlleleSpecificBindingFi
 from pvactools.lib.run_utils import *
 
 class BindingFilter:
-    def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, exclude_nas, allele_specific_cutoffs, percentile_threshold, file_type='pVACseq'):
+    def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, exclude_nas, allele_specific_cutoffs, percentile_threshold, percentile_threshold_strategy, file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
         self.binding_threshold = binding_threshold
         self.percentile_threshold = percentile_threshold
+        self.percentile_threshold_strategy = percentile_threshold_strategy
         self.minimum_fold_change = minimum_fold_change
         self.top_score_metric = top_score_metric
         self.exclude_nas = exclude_nas
@@ -22,7 +23,7 @@ class BindingFilter:
         filter_criteria = []
 
         if self.allele_specific_cutoffs:
-            AlleleSpecificBindingFilter(self.input_file, self.output_file, self.binding_threshold, self.minimum_fold_change, self.top_score_metric, self.exclude_nas, self.percentile_threshold, self.file_type).execute()
+            AlleleSpecificBindingFilter(self.input_file, self.output_file, self.binding_threshold, self.minimum_fold_change, self.top_score_metric, self.exclude_nas, self.percentile_threshold, self.file_type, self.percentile_threshold_strategy).execute()
         else:
             if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse' or self.file_type == 'pVACsplice':
                 if self.top_score_metric == 'median':
@@ -49,7 +50,7 @@ class BindingFilter:
                     column = 'Corresponding Fold Change'
                 filter_criteria.append(FilterCriterion(column, '>=', self.minimum_fold_change, exclude_nas=self.exclude_nas))
 
-            Filter(self.input_file, self.output_file, filter_criteria).execute()
+            Filter(self.input_file, self.output_file, filter_criteria, [], self.percentile_threshold_strategy).execute()
 
     @classmethod
     def parser(cls, tool):
