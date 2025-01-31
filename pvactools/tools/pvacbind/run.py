@@ -69,6 +69,7 @@ def main(args_input = sys.argv[1:]):
         'top_score_metric'          : args.top_score_metric,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
+        'percentile_threshold_strategy': args.percentile_threshold_strategy,
         'allele_specific_binding_thresholds': args.allele_specific_binding_thresholds,
         'net_chop_fasta'            : args.input_file,
         'net_chop_method'           : args.net_chop_method,
