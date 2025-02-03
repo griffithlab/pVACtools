@@ -50,7 +50,7 @@ class BindingFilter:
                     column = 'Corresponding Fold Change'
                 filter_criteria.append(FilterCriterion(column, '>=', self.minimum_fold_change, exclude_nas=self.exclude_nas))
 
-            Filter(self.input_file, self.output_file, filter_criteria, [], self.percentile_threshold_strategy).execute()
+            Filter(self.input_file, self.output_file, filter_criteria, [], 0 if self.percentile_threshold_strategy == 'conservative' else 1).execute()
 
     @classmethod
     def parser(cls, tool):
@@ -78,6 +78,13 @@ class BindingFilter:
             '-p', '--percentile-threshold', type=float_range(0.0,100.0),
             help="Report only epitopes where the mutant allele "
                  +"has a percentile rank below this value."
+        )
+        parser.add_argument(
+            '--percentile-threshold-strategy',
+            choices=['conservative', 'exploratory'],
+            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default)."
+                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
+            default="conservative",
         )
         if tool == 'pvacseq':
             parser.add_argument(
