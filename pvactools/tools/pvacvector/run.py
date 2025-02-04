@@ -532,7 +532,7 @@ def main(args_input=sys.argv[1:]):
             'A vaccine design using the parameters specified could not be found. Some options that you may want to consider:\n' +
             '1) decreasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
             '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)\n' +
-            '3) if running with a percentile threshold set, either remove this parameter or reduce the acceptable threshold to allow more possible connections (--percentile-threshold parameter)\n' +
+            '3) if running with a percentile threshold set, either remove this parameter, reduce the acceptable threshold to allow more possible connections (--percentile-threshold parameter) or use the \'exploratory\' strategry (--percentile-threshold-strategy parameter)\n' +
             '4) increase the number of peptides that can be excluded from the vector (--allow-n-peptide-exclusion parameter)'
         )
 
