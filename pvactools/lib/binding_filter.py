@@ -7,7 +7,7 @@ from pvactools.lib.allele_specific_binding_filter import AlleleSpecificBindingFi
 from pvactools.lib.run_utils import *
 
 class BindingFilter:
-    def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, exclude_nas, allele_specific_cutoffs, percentile_threshold, percentile_threshold_strategy, file_type='pVACseq'):
+    def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, exclude_nas, allele_specific_cutoffs, percentile_threshold, percentile_threshold_strategy='conservative', file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
         self.binding_threshold = binding_threshold
@@ -49,8 +49,7 @@ class BindingFilter:
                 elif self.top_score_metric == 'lowest':
                     column = 'Corresponding Fold Change'
                 filter_criteria.append(FilterCriterion(column, '>=', self.minimum_fold_change, exclude_nas=self.exclude_nas))
-
-            Filter(self.input_file, self.output_file, filter_criteria, [], 0 if self.percentile_threshold_strategy == 'conservative' else 1).execute()
+            Filter(self.input_file, self.output_file, filter_criteria, [], "AND" if self.percentile_threshold_strategy == 'conservative' else "OR").execute()
 
     @classmethod
     def parser(cls, tool):

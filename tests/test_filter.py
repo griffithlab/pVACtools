@@ -203,6 +203,8 @@ class FilterTests(unittest.TestCase):
                 "16000",
                 exclude_nas=False
             )],
+            [],
+            "AND"
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -230,7 +232,7 @@ class FilterTests(unittest.TestCase):
                 exclude_nas=False
             )],
             [],
-            1
+            "OR"
         ).execute())
         self.assertTrue(cmp(
             output_file.name,

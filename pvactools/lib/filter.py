@@ -5,7 +5,7 @@ import sys
 pd.options.mode.chained_assignment = None
 
 class Filter:
-    def __init__(self, input_file, output_file, filter_criteria, int_filter_columns=[], filter_strategy=0):
+    def __init__(self, input_file, output_file, filter_criteria, int_filter_columns=[], filter_strategy="AND"):
         self.input_file = input_file
         self.output_file = output_file
         self.filter_criteria = filter_criteria
@@ -22,18 +22,17 @@ class Filter:
 
                 process_criterion = lambda criterion: (
                     (line[criterion.column] == 'NA' and criterion.exclude_nas) or
-                    (line[criterion.column] != 'NA' and criterion.skip_value is not None and line[criterion.column] == criterion.skip_value) or
-                    (line[criterion.column] != 'NA' and criterion.skip_value is None and not eval("{} {} {}".format(
+                    (line[criterion.column] != 'NA' and criterion.skip_value != line[criterion.column] and not eval("{} {} {}".format(
                         line[criterion.column] if line[criterion.column] != 'inf' else sys.maxsize,
                         criterion.operator,
                         criterion.threshold
                     )))
                 )
 
-                if self.filter_strategy:
-                    to_filter = all(process_criterion(criterion) for criterion in self.filter_criteria)
-                else:
+                if self.filter_strategy == "AND":
                     to_filter = any(process_criterion(criterion) for criterion in self.filter_criteria)
+                else:
+                    to_filter = all(process_criterion(criterion) for criterion in self.filter_criteria)
                 
                 if not to_filter:
                     writer.writerow(line)
