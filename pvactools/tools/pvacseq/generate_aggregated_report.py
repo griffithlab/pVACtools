@@ -44,6 +44,13 @@ def define_parser():
              + "when the mutant allele has percentile scores below double this value.",
     )
     parser.add_argument(
+            '--percentile-threshold-strategy',
+            choices=['conservative', 'exploratory'],
+            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default)."
+                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
+            default="conservative",
+        )
+    parser.add_argument(
         '--aggregate-inclusion-binding-threshold', type=int,
         help="Binding threshold for including epitopes when creating the aggregate report",
         default=5000,
@@ -119,6 +126,7 @@ def main(args_input = sys.argv[1:]):
         binding_threshold=args.binding_threshold,
         allele_specific_binding_thresholds=args.allele_specific_binding_thresholds,
         percentile_threshold=args.percentile_threshold,
+        percentile_threshold_strategy=args.percentile_threshold_strategy,
         trna_vaf=args.trna_vaf,
         trna_cov=args.trna_cov,
         expn_val=args.expn_val,
