@@ -140,10 +140,18 @@ def find_min_scores(parsed_output_files, current_output_dir, args, min_scores, m
                     threshold = float(args.binding_threshold) if threshold is None else float(threshold)
                 else:
                     threshold = float(args.binding_threshold)
-                if score < threshold:
-                    junctions_with_good_binders.add(index)
-                if args.percentile_threshold is not None and percentile < args.percentile_threshold:
-                    junctions_with_good_binders.add(index)
+                if args.percentile_threshold is None:
+                    if score < threshold:
+                        junctions_with_good_binders.add(index)
+                else:
+                    if args.percentile_threshold_strategy == 'conservative':
+                        #a conservative strategy would invalidate junctions that fail the binding threshold or the percentile threshold
+                        if score < threshold or percentile < args.percentile_threshold:
+                            junctions_with_good_binders.add(index)
+                    elif args.percentile_threshold_strategy == 'exploratory':
+                        #a exploratory strategy is more relaxed and only invalidates a junction if it fails both the binding and percentile thresholds
+                        if score < threshold and percentile < args.percentile_threshold:
+                            junctions_with_good_binders.add(index)
 
                 if index not in junction_min_scores:
                     #"initialize" with the first score encountered
