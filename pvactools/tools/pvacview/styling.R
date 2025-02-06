@@ -20,7 +20,7 @@ callback <- function(hla_count, score_mode) {
     "        'Allele',",
     "        'Pos - The one-based position of the start of the mutation within the epitope sequence. 0 if the start of the mutation is before the epitope (as can occur downstream of frameshift mutations).',",
     "        'Prob Pos - Problematic positions within the best peptide.',",
-    "        'Num Included Peptides - The total number of peptides for this mutation.',",
+    "        'Num Included Peptides - The number of top-scoring, unique peptides included for review.',",
     "        'Num Passing Peptides - The number of unique well-binding peptides for this mutation.',",
     gsub("X", score_mode,"      'IC50 MT - X IC50 binding affinity of the best-binding mutant epitope across all prediction algorithms used.', "),
     "        'IC50 WT - IC50 binding affinity of the corresponding wildtype epitope.',",
@@ -32,10 +32,13 @@ callback <- function(hla_count, score_mode) {
     "        'RNA Depth - Tumor RNA depth at this position.',",
     "        'DNA VAF - Tumor DNA variant allele frequency (VAF) at this position.',",
     "        'Tier - A tier suggesting the suitability of variants for use in vaccines.',",
-    "        'Ref Match - Indicates if the query sequence has a hit in the reference proteome.'],",
+    "        'Ref Match - Indicates if the query sequence has a hit in the reference proteome.',",
+    "        'Acpt - Click the thumbs-up button to accept a neoantigen candidate.',",
+    "        'Rej - Click the thumbs-down button to reject a neoantigen candidate.',",
+    "        'Rev - Click the flag button to mark a neoantigen candidate for review.'],",
     "header = table.columns().header();",
-    gsub("7", hla_count, "for (var i = 7; i-7 < tips.length; i++) {"),
-    gsub("7", hla_count, "$(header[i]).attr('title', tips[i-7]);"),
+    gsub("7", hla_count, "for (var i = 5; i-5 < tips.length; i++) {"),
+    gsub("7", hla_count, "$(header[i]).attr('title', tips[i-5]);"),
     "}"
   )
 }
