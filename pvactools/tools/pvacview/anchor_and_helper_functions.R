@@ -214,15 +214,14 @@ all_anchors <- function(hla_alleles, peptide_lengths, allele_specific_anchors, a
   all_anchors_df
 }
 
-#converts string range (e.g. '2-4', '6') to associated list
-range_str_to_seq <- function(mutation_position) {
-  rnge <- strsplit(mutation_position, "-")[[1]]
-  if (length(rnge) == 2) {
-    return(seq(rnge[1], rnge[2]))
-  }else {
-    return(c(strtoi(rnge[1])))
+#converts mutation string  (e.g. '2, 3, 4', '6') to associated list
+pos_str_to_seq <- function(mutation_position) {
+  if (is.na(mutation_position)) {
+    return(0)
+  } else {
+    positions <- lapply(strsplit(mutation_position, ", "), FUN = as.numeric)[[1]]
+    return(positions)
   }
-  return(0)
 }
 
 #get data from metrics file associated with peptide if available
@@ -285,27 +284,20 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
     }
   }
   anchor_residue_pass <- TRUE
-  # if all of mutated positions in anchors
-  if (grepl("-", mutation_pos_list, fixed = TRUE)) {
-    range_start <- as.numeric(strsplit(mutation_pos_list, "-")[[1]][1])
-    if (range_start == 0) {
-      range_start <- 1
-    }
-    range_stop <- as.numeric(strsplit(mutation_pos_list, "-")[[1]][2])
-    mutation_pos_list <- c(range_start:range_stop)
-    if (all(mutation_pos_list %in% anchor_list)) {
-      if (is.na(wt_binding)) {
-        anchor_residue_pass <- FALSE
-      }else if (wt_binding < binding_threshold) {
-        anchor_residue_pass <- FALSE
-      }
-    }
-  }else if (!is.na(mutation_pos_list)) {
-    if (all(as.numeric(mutation_pos_list) %in% anchor_list)) {
-      if (is.na(wt_binding)) {
-        anchor_residue_pass <- FALSE
-      }else if (wt_binding < binding_threshold) {
-        anchor_residue_pass <- FALSE
+  if (is.na(mutation_pos_list)) {
+    anchor_residue_pass <- TRUE
+  } else {
+    positions <- lapply(strsplit(mutation_pos_list, ", "), FUN = as.numeric)[[1]]
+    if (length(positions) > 2) {
+      anchor_residue_pass <- TRUE
+    } else {
+      anchor_residue_pass <- TRUE
+      if (all(positions %in% anchor_list)) {
+        if (is.na(wt_binding)) {
+          anchor_residue_pass <- FALSE
+        }else if (wt_binding < binding_threshold) {
+          anchor_residue_pass <- FALSE
+        }
       }
     }
   }
@@ -405,29 +397,20 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
     }
   }
   anchor_residue_pass <- TRUE
-  # if all of mutated positions in anchors
-  if (grepl("-", mutation_pos_list, fixed = TRUE)) {
-    range_start <- as.numeric(strsplit(mutation_pos_list, "-")[[1]][1])
-    if (range_start == 0) {
-      range_start <- 1
-    }
-    range_stop <- as.numeric(strsplit(mutation_pos_list, "-")[[1]][2])
-    mutation_pos_list <- c(range_start:range_stop)
-    if (all(mutation_pos_list %in% anchor_list)) {
-      if (is.na(wt_binding)) {
-        anchor_residue_pass <- FALSE
-      }else if (wt_binding < binding_threshold) {
-        anchor_residue_pass <- FALSE
-      }
-    }
-  }else if (!is.na(mutation_pos_list)) {
-    if (all(as.numeric(mutation_pos_list) %in% anchor_list)) {
-      if (is.na(wt_binding)) {
-        anchor_residue_pass <- FALSE
-      }else if (wt_binding < binding_threshold) {
-        anchor_residue_pass <- FALSE
-      }else if (!is.null(percentile_threshold) && (wt_percent) < percentile_threshold) {
-        anchor_residue_pass <- FALSE
+  if (is.na(mutation_pos_list)) {
+    anchor_residue_pass <- TRUE
+  } else {
+    positions <- lapply(strsplit(mutation_pos_list, ", "), FUN = as.numeric)[[1]]
+    if (length(positions) > 2) {
+      anchor_residue_pass <- TRUE
+    } else {
+      anchor_residue_pass <- TRUE
+      if (all(positions %in% anchor_list)) {
+        if (is.na(wt_binding)) {
+          anchor_residue_pass <- FALSE
+        }else if (wt_binding < binding_threshold) {
+          anchor_residue_pass <- FALSE
+        }
       }
     }
   }
