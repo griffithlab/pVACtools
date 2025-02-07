@@ -208,23 +208,23 @@ class CalculateReferenceProteomeSimilarity:
         return records_dict
 
 
-    def extract_n_mer(self, full_peptide, subpeptide_position, mutation_position, mt_length, variant_type):
+    def extract_n_mer(self, mt_peptide, wt_peptide):
         #For non-frameshifts this ensures that we only test match_length epitopes that overlap the mutation
         #If we extract a larger region, we will get false-positive matches against the reference proteome
         #from the native wildtype portion of the peptide
         flanking_sequence_length = self.match_length - 1
-        if variant_type == 'inframe_del':
-            mt_start = subpeptide_position + (mutation_position)
+        for i in range(len(mt_peptide)):
+            if wt_peptide[i] != mt_peptide[i]:
+                first_mut_aa_pos = i
+                break
+        for i in range(len(mt_peptide)):
+            if wt_peptide[i * -1] != mt_peptide[i * -1]:
+                last_mut_aa_pos = len(mt_peptide) - i
+                break
+        if last_mut_aa_pos >= first_mut_aa_pos:
+            return mt_peptide[first_mut_aa_pos-flanking_sequence_length:last_mut_aa_pos+flanking_sequence_length+1]
         else:
-            mt_start = subpeptide_position + (mutation_position-1)
-        start = mt_start - flanking_sequence_length
-        if start < 0:
-            start = 0
-        if variant_type == 'inframe_del':
-            end = mt_start + flanking_sequence_length
-        else:
-            end = mt_start + mt_length + flanking_sequence_length
-        return full_peptide[start:end]
+            return mt_peptide[last_mut_aa_pos-flanking_sequence_length:first_mut_aa_pos+flanking_sequence_length+1]
 
 
     def extract_n_mer_from_fs(self, full_peptide, wt_peptide, epitope, subpeptide_position):
@@ -284,16 +284,16 @@ class CalculateReferenceProteomeSimilarity:
             full_peptide = peptide
         else:
             if self._input_tsv_type(line) == 'aggregated':
-                epitope = line['Best Peptide']
                 (rest_record_id, variant_type, aa_change) = line['Index'].rsplit(".", 2)
-                (_, mt_pos, wt_amino_acids, mt_amino_acids) = index_to_aggregate_report_aa_change(aa_change, variant_type)
-                mt_pos = int(line['Pos'].split('-')[0])
+                epitope = line['Best Peptide']
+            #    first_mt_pos = int(line['Pos'].split(', ')[0])
+            #    last_mt_pos = int(line['Pos'].split(', ')[-1])
             else:
                 epitope = line['MT Epitope Seq']
                 variant_type = line['Variant Type']
-                if variant_type != 'FS':
-                    mt_pos = int(line['Mutation Position'].split('-')[0])
-                    (wt_amino_acids, mt_amino_acids) = line['Mutation'].split('/')
+            #    if variant_type != 'FS':
+            #        first_mt_pos = int(line['Mutation Position'].split(', ')[0])
+            #        last_mt_pos = int(line['Mutation Position'].split(', ')[-1])
             full_peptide = mt_records_dict[line['Index']]
             wt_peptide = wt_records_dict[line['Index']]
 
@@ -302,17 +302,7 @@ class CalculateReferenceProteomeSimilarity:
             if variant_type == 'FS':
                 peptide = self.extract_n_mer_from_fs(full_peptide, wt_peptide, epitope, subpeptide_position)
             else:
-                if mt_amino_acids == '-':
-                    mt_amino_acids = ''
-                if len(mt_amino_acids) == len(wt_amino_acids) and len(mt_amino_acids) > 1:
-                    #remove leading and trailing identical amino acids
-                    shortened_mt_amino_acids = ""
-                    for mt_aa, wt_aa in zip(mt_amino_acids, wt_amino_acids):
-                        if wt_aa != mt_aa:
-                            shortened_mt_amino_acids += mt_aa
-                else:
-                    shortened_mt_amino_acids = mt_amino_acids
-                peptide = self.extract_n_mer(full_peptide, subpeptide_position, mt_pos, len(shortened_mt_amino_acids), variant_type)
+                peptide = self.extract_n_mer(full_peptide, wt_peptide)
         return peptide, full_peptide
 
 
