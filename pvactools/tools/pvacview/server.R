@@ -983,7 +983,7 @@ server <- shinyServer(function(input, output, session) {
         incProgress(0.1)
         for (i in 1:length(peptide_names)) {
           #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
-          mutation_pos <- range_str_to_seq(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`mutation_position`)
+          mutation_pos <- pos_str_to_seq(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`mutation_position`)
           mt_peptide_length <- nchar(peptide_names[i])
           mutation_pos <- mutation_pos[mutation_pos <= mt_peptide_length]
           #set associated wt peptide to current mt peptide
@@ -1327,8 +1327,7 @@ server <- shinyServer(function(input, output, session) {
       }else {
         df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
       }
-      #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
-      mutation_pos <- range_str_to_seq(selectedPosition)
+      mutation_pos <- pos_str_to_seq(selectedPosition)
       peptide_length <- nchar(selectedPeptide)
       mutation_pos <- mutation_pos[mutation_pos <= peptide_length]
       #create dataframes
@@ -1374,7 +1373,7 @@ server <- shinyServer(function(input, output, session) {
       }else {
         df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
       }
-      mutation_pos <- range_str_to_seq(selectedPosition)
+      mutation_pos <- pos_str_to_seq(selectedPosition)
       #remove leading amino acids from the selectedPeptide that don't occur in
       #the query peptide
       if (mutation_pos[1] > 8) {

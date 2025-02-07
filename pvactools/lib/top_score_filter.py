@@ -240,21 +240,19 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         anchors = get_anchor_positions(line['HLA Allele'], len(line['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
         # parse out mutation position from str
         position = line["Mutation Position"]
-        if '-' in position:
-            d_ind = position.index('-')
-            if all(pos in anchors for pos in range(int(position[0:d_ind]), int(position[d_ind+1:])+1)):
+        if position == 'NA':
+            return True
+        else:
+            positions = position.split(", ")
+            if len(positions) > 2:
+                return True
+            anchor_residue_pass = True
+            if all(int(pos) in anchors for pos in positions):
                 if line["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
                     anchor_residue_pass = False
                 elif float(line["{} WT IC50 Score".format(self.wt_top_score_metric)]) < binding_threshold:
                     anchor_residue_pass = False
-        elif position != "NA":
-            if int(float(position)) in anchors:
-                if line["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
-                    anchor_residue_pass = False
-                elif float(line["{} WT IC50 Score".format(self.wt_top_score_metric)]) < binding_threshold:
-                    anchor_residue_pass = False
-        return anchor_residue_pass
-
+            return anchor_residue_pass
 
 
 class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):

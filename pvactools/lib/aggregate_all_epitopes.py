@@ -413,18 +413,22 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         else:
             binding_threshold = self.binding_threshold
 
-        anchor_residue_pass = True
         anchors = get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
         # parse out mutation positions from str
         position = mutation["Mutation Position"]
         if pd.isna(position):
+            return True
+        else:
+            positions = position.split(", ")
+            if len(positions) > 2:
+                return True
+            anchor_residue_pass = True
+            if all(int(pos) in anchors for pos in positions):
+                if pd.isna(mutation["{} WT IC50 Score".format(self.wt_top_score_metric)]):
+                    anchor_residue_pass = False
+                elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
+                    anchor_residue_pass = False
             return anchor_residue_pass
-        for pos in position.split(", "):
-            if pd.isna(mutation["{} WT IC50 Score".format(self.wt_top_score_metric)]):
-                anchor_residue_pass = False
-            elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
-                anchor_residue_pass = False
-        return anchor_residue_pass
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
