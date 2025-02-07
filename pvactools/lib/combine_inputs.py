@@ -15,7 +15,7 @@ class CombineInputs:
 
         # remove version number in annotated to compare with filtered junctions file
         var_df[['transcript_id', 'transcript_version']] = var_df['transcript_name'].str.split('.', expand=True)
-        var_df = var_df.loc[var_df['transcript_id'].str.startswith('ENST') == True]
+        var_df = var_df.loc[var_df['transcript_id'].str.contains(r'^ENS.*T', regex=True)]
         var_df['transcript_version'] = var_df['transcript_version'].astype('int64')
 
         # create new cols
