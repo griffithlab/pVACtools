@@ -316,7 +316,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         )
         self.parser.add_argument(
             "ref_fasta",
-            help="A reference FASTA file. Note: this input should be the same as the RegTools vcf input."
+            help="A reference DNA FASTA file. Note: this input should be the same as the RegTools fasta input."
         )
         self.parser.add_argument(
             "gtf_file",
