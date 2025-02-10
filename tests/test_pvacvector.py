@@ -290,7 +290,7 @@ class TestPvacvector(unittest.TestCase):
             '-n', self.input_n_mer,
             '-k',
             '-b', '32000',
-            '--max-clip-length', '1',
+            '--max-clip-length', '2',
             '--allow-n-peptide-exclusion', '0',
             '--spacers', 'None,AAY',
         ])
@@ -306,6 +306,14 @@ class TestPvacvector(unittest.TestCase):
         self.assertTrue(compare(
             os.path.join(output_dir.name, "1", "None", "junctions.tsv"),
             os.path.join(self.test_data_dir, "clipped.1.None.junctions.tsv")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "1", "AAY", "junctions.tsv"),
+            os.path.join(self.test_data_dir, "clipped.1.AAY.junctions.tsv")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "2", "None", "junctions.tsv"),
+            os.path.join(self.test_data_dir, "clipped.2.None.junctions.tsv")
         ))
 
         self.assertTrue(compare(
@@ -331,6 +339,22 @@ class TestPvacvector(unittest.TestCase):
         self.assertTrue(compare(
             os.path.join(output_dir.name, "1", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
             os.path.join(self.test_data_dir, "clipped.1.None.fa.key")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "1", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(self.test_data_dir, "clipped.1.AAY.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "1", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(self.test_data_dir, "clipped.1.AAY.fa.key")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "2", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(self.test_data_dir, "clipped.2.None.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "2", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(self.test_data_dir, "clipped.2.None.fa.key")
         ))
 
         self.assertTrue(compare(

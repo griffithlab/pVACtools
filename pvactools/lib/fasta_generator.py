@@ -402,8 +402,8 @@ class VectorFastaGenerator():
                             if right_clip_length > first_position:
                                 warnings.add("Clipping {} amino acids off the start of peptide {} would clip the best peptide. Skipping.".format(right_clip_length, seq2))
                                 continue
-                        trunc_seq1 = seq1_seq[(len(seq1_seq) - wingspan_length):(len(seq1_seq) - left_clip_length)]
-                        trunc_seq2 = seq2_seq[(0 + right_clip_length):wingspan_length]
+                        trunc_seq1 = seq1_seq[(len(seq1_seq) - wingspan_length - left_clip_length):(len(seq1_seq) - left_clip_length)]
+                        trunc_seq2 = seq2_seq[(0 + right_clip_length):wingspan_length + right_clip_length]
 
                         if self.spacer != 'None':
                             seq_ID = "{}|{}|{}|{}|{}".format(seq1, left_clip_length, self.spacer, right_clip_length, seq2)
