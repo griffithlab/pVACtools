@@ -173,10 +173,12 @@ class OutputParser(metaclass=ABCMeta):
         elif method.lower() == 'netmhcpan_el':
             return {'score': float(line['score'])}
         elif 'netmhciipan_el' in method.lower():
-            try:
+            if 'score' in line:
                 return {'score': float(line['score'])}
-            except:
-                return {'ic50': float(line['ic50'])}
+            elif 'ic50' in line:
+                return {'score': float(line['ic50'])}
+            else:
+                raise Exception("Missing expected columns: 'score' or 'ic50' in NetMHCIIpanEL output")
         else:
             return {'ic50': float(line['ic50'])}
 
