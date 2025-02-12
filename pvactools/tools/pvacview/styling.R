@@ -37,8 +37,8 @@ callback <- function(hla_count, score_mode) {
     "        'Rej - Click the thumbs-down button to reject a neoantigen candidate.',",
     "        'Rev - Click the flag button to mark a neoantigen candidate for review.'],",
     "header = table.columns().header();",
-    gsub("7", hla_count, "for (var i = 5; i-5 < tips.length; i++) {"),
-    gsub("7", hla_count, "$(header[i]).attr('title', tips[i-5]);"),
+    gsub("7", hla_count, "for (var i = 7; i-7 < tips.length; i++) {"),
+    gsub("7", hla_count, "$(header[i]).attr('title', tips[i-7]);"),
     "}"
   )
 }
