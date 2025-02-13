@@ -421,6 +421,11 @@ To tier the Best Peptide, several cutoffs can be adjusted using arguments provid
    * - ``--percentile-threshold``
      - When set, use this threshold to filter epitopes on the %ile MT score in addition to having to meet the binding threshold.
      - None
+   * - ``--percentile-threshold-strategy``
+     - Specify the candidate inclusion strategy. The ``conservative`` option requires a candidate to pass BOTH the binding threshold
+       and percentile threshold (if set). The ``exploratory`` option requires a candidate to pass EITHER the binding threshold or
+       the percentile threshold.
+     - conservative
    * - ``--tumor-purity``
      - Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used for a simple estimation of
        whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.
@@ -483,9 +488,11 @@ Criteria Details
 .. list-table::
 
    * - Binding Criteria
-     - Pass if Best Peptide is a strong binder
+     - Pass if Best Peptide is strong binder
      - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
-       (if ``--percentile-threshold`` parameter is set)
+       (if ``--percentile-threshold`` parameter is set and 'conservative' ``--percentile-threshold-strategy`` is used) or
+       ``IC50 MT < binding_threshold`` or ``%ile MT < percentile_threshold``
+       (if 'exploratory' ``--percentile-threshold-strategy`` is used)
    * - Expression Criteria
      - Pass if Best Transcript is expressed
      - ``Allele Expr > trna_vaf * expn_val``
