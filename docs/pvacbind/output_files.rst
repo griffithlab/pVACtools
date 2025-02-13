@@ -234,6 +234,11 @@ provided to the pVACfuse run:
    * - ``--percentile-threshold``
      - When set, use this threshold to filter epitopes on the %ile MT score in addition to having to meet the binding threshold.
      - None
+   * - ``--percentile-threshold-strategy``
+     - Specify the candidate inclusion strategy. The ``conservative`` option requires a candidate to pass BOTH the binding threshold
+       and percentile threshold (if set). The ``exploratory`` option requires a candidate to pass EITHER the binding threshold or
+       the percentile threshold.
+     - conservative
 
 Tiers
 *****
@@ -259,7 +264,9 @@ Criteria Details
    * - Binding Criteria
      - Pass if Best Peptide is strong binder
      - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
-       (if ``--percentile-threshold`` parameter is set)
+       (if ``--percentile-threshold`` parameter is set and 'conservative' ``--percentile-threshold-strategy`` is used) or
+       ``IC50 MT < binding_threshold`` or ``%ile MT < percentile_threshold``
+       (if 'exploratory' ``--percentile-threshold-strategy`` is used)
 
 
 .. _pvacbind_reference_matches:
