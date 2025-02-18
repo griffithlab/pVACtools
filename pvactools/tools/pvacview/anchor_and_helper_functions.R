@@ -216,7 +216,7 @@ all_anchors <- function(hla_alleles, peptide_lengths, allele_specific_anchors, a
 
 #converts mutation string  (e.g. '2, 3, 4', '6') to associated list
 pos_str_to_seq <- function(mutation_position) {
-  if (is.na(mutation_position)) {
+  if (is.na(mutation_position) || mutation_position == "NA") {
     return(0)
   } else {
     positions <- lapply(strsplit(mutation_position, ", "), FUN = as.numeric)[[1]]
