@@ -110,7 +110,7 @@ setup(
         'packaging',
         'pyarrow',
         'polars==0.16.18',
-        'deepdiff==7.0.1',
+        'deepdiff',
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,
