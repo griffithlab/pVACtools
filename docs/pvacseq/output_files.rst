@@ -499,7 +499,7 @@ Criteria Details
      - Best Peptide is likely in the founding clone of the tumor
      - ``DNA VAF > tumor_purity / 4``
    * - Anchor Criteria
-     - Fail if all mutated amino acids of the Best Peptide (``Pos``) are at an anchor position and the WT peptide has good binding ``(IC50 WT < binding_threshold)``
+     - Fail if if there are <= 2 mutated amino acids and all mutated amino acids of the Best Peptide (``Pos``) are at an anchor position and the WT peptide has good binding ``(IC50 WT < binding_threshold)``
      -
 
 .. _reference_matches:
