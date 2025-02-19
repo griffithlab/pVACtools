@@ -193,7 +193,7 @@ server <- shinyServer(function(input, output, session) {
      ## Class I demo aggregate report
      #session$sendCustomMessage("unbind-DT", "mainTable")
      withProgress(message = "Loading Demo Data", value = 0, {
-       load(url("https://github.com/griffithlab/pVACtools/raw/a3cc6d2b190a344d846438c1f0e5073e748dbd52/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
+       load(url("https://github.com/griffithlab/pVACtools/raw/834cc9514dc215a3a9595cddcff05090a1b7605c/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
        incProgress(0.3)
        #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
        #mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
@@ -258,7 +258,7 @@ server <- shinyServer(function(input, output, session) {
        rownames(df$comments) <- df$mainTable$ID
        incProgress(0.2)
        ## Class II additional demo aggregate report
-       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/a3cc6d2b190a344d846438c1f0e5073e748dbd52/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/834cc9514dc215a3a9595cddcff05090a1b7605c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
        addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(addData) <- addData[1, ]
        addData <- addData[-1, ]
@@ -999,7 +999,7 @@ server <- shinyServer(function(input, output, session) {
         incProgress(0.1)
         for (i in 1:length(peptide_names)) {
           #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
-          mutation_pos <- range_str_to_seq(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`mutation_position`)
+          mutation_pos <- pos_str_to_seq(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`mutation_position`)
           mt_peptide_length <- nchar(peptide_names[i])
           mutation_pos <- mutation_pos[mutation_pos <= mt_peptide_length]
           #set associated wt peptide to current mt peptide
@@ -1343,8 +1343,7 @@ server <- shinyServer(function(input, output, session) {
       }else {
         df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
       }
-      #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
-      mutation_pos <- range_str_to_seq(selectedPosition)
+      mutation_pos <- pos_str_to_seq(selectedPosition)
       peptide_length <- nchar(selectedPeptide)
       mutation_pos <- mutation_pos[mutation_pos <= peptide_length]
       #create dataframes
@@ -1390,7 +1389,7 @@ server <- shinyServer(function(input, output, session) {
       }else {
         df$mainTable$`Best Peptide`[input$mainTable_rows_selected]
       }
-      mutation_pos <- range_str_to_seq(selectedPosition)
+      mutation_pos <- pos_str_to_seq(selectedPosition)
       #remove leading amino acids from the selectedPeptide that don't occur in
       #the query peptide
       if (mutation_pos[1] > 8) {
