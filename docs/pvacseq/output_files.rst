@@ -165,7 +165,7 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Sub-peptide Position``
      - The one-based position of the epitope within the protein sequence used to make the prediction
    * - ``Mutation Position``
-     - The one-based positional range (inclusive) of the mutation within the epitope sequence. If the mutation is a deletion, the amino acids flanking the deletion are recorded. Note that in the case of ambiguous amino acid changes, this reflects the change that is left-aligned, starting from the first changed amino acid; this may differ from the ``Mutation`` column.
+     - A comma-separated list of all amino acid positions in the ``MT Epitope Seq`` that are different from the ``WT Epitope Seq``. ``NA`` if the ``WT Epitope Seq`` is ``NA``.
    * - ``MT Epitope Seq``
      - The mutant epitope sequence
    * - ``WT Epitope Seq``
@@ -339,8 +339,7 @@ included epitopes, selecting the best-scoring epitope, and which values are outp
    * - ``Allele``
      - The Allele that the Best Peptide is binding to
    * - ``Pos``
-     - The one-based position of the start of the mutation within the epitope sequence. ``0`` if the
-       start of the mutation is before the epitope (as can occur downstream of frameshift mutations)
+     - A comma-separated list of all amino acid positions in the ``MT Epitope Seq`` that are different from the ``WT Epitope Seq``. ``NA`` if the ``WT Epitope Seq`` is ``NA``.
    * - ``Prob Pos``
      - A list of positions in the Best Peptide that are problematic.
        ``None`` if the ``--problematic-pos`` parameter was not set during
@@ -507,7 +506,7 @@ Criteria Details
      - Best Peptide is likely in the founding clone of the tumor
      - ``DNA VAF > tumor_purity / 4``
    * - Anchor Criteria
-     - Fail if all mutated amino acids of the Best Peptide (``Pos``) are at an anchor position and the WT peptide has good binding ``(IC50 WT < binding_threshold)``
+     - Fail if if there are <= 2 mutated amino acids and all mutated amino acids of the Best Peptide (``Pos``) are at an anchor position and the WT peptide has good binding ``(IC50 WT < binding_threshold)``
      -
 
 .. _reference_matches:
