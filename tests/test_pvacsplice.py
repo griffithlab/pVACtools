@@ -81,6 +81,7 @@ class PvacspliceTests(unittest.TestCase):
             "netmhc_stab",
             "calculate_reference_proteome_similarity",
             "valid_alleles",
+            "valid_netmhciipan_versions",
             'identify_problematic_amino_acids',
             ]:
             result = subprocess_run([
@@ -246,6 +247,19 @@ class PvacspliceTests(unittest.TestCase):
 
     def test_valid_alleles_runs(self):
         valid_alleles.main(["-p", "SMM"])
+    
+    def test_valid_netmhciipan_versions_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacsplice",
+            "valid_netmhciipan_versions.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_netmhciipan_versions_runs(self):
+        valid_netmhciipan_versions.main("")
 
     def test_identify_problematic_amino_acids_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
