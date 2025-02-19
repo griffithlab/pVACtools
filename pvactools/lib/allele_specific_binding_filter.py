@@ -3,7 +3,7 @@ import sys
 from pvactools.lib.prediction_class import PredictionClass
 
 class AlleleSpecificBindingFilter:
-    def __init__(self, input_file, output_file, default_threshold, minimum_fold_change, top_score_metric, exclude_nas, percentile_threshold, file_type='pVACseq'):
+    def __init__(self, input_file, output_file, default_threshold, minimum_fold_change, top_score_metric, exclude_nas, percentile_threshold, file_type='pVACseq', percentile_threshold_strategy="conservative"):
         self.input_file = input_file
         self.output_file = output_file
         self.default_threshold = default_threshold
@@ -12,6 +12,7 @@ class AlleleSpecificBindingFilter:
         self.exclude_nas = exclude_nas
         self.percentile_threshold = percentile_threshold
         self.file_type = file_type
+        self.percentile_threshold_strategy = percentile_threshold_strategy
 
     def execute(self):
         with open(self.input_file, 'r') as input_fh:
@@ -45,18 +46,23 @@ class AlleleSpecificBindingFilter:
                             fold_change = sys.maxsize if entry['Corresponding Fold Change'] == 'NA' else float(entry['Corresponding Fold Change'])
                         percentile_column = 'Best MT Percentile'
 
-                if self.percentile_threshold is not None:
-                    if float(entry[percentile_column]) > self.percentile_threshold:
-                        continue
-
                 threshold = PredictionClass.cutoff_for_allele(entry['HLA Allele'])
                 threshold = self.default_threshold if threshold is None else float(threshold)
 
                 if score == 'NA':
                     if self.exclude_nas:
                         continue
-                elif float(score) > threshold:
-                    continue
+                else:
+                    if self.percentile_threshold is not None:
+                        if self.percentile_threshold_strategy == 'conservative':
+                            if float(score) > threshold or float(entry[percentile_column]) > self.percentile_threshold:
+                                continue
+                        else:
+                            if float(score) > threshold and float(entry[percentile_column]) > self.percentile_threshold:
+                                continue
+                    else:
+                        if float(score) > threshold:
+                            continue
 
                 if self.minimum_fold_change is not None and fold_change < self.minimum_fold_change:
                     continue

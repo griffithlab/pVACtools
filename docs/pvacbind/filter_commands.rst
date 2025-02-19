@@ -55,6 +55,12 @@ to ``lowest``, this threshold is applied to the ``Best Percentile`` column. When
 it is set to ``median``, the threshold is applied to the ``Median
 Percentile`` column.
 
+When the ``--percentile-threshold`` flag is set, the candidate inclusion strategy can be
+specified by using the ``--percentile-threshold-strategy`` parameter. The parameter has two
+options ``conservative`` (default) and ``exploratory``. The 'conservative' option requires a candidate 
+to pass BOTH the binding threshold and percentile threshold, while the 'exploratory' option requires
+a candidate to pass EITHER the binding threshold or percentile threshold.
+
 By default, entries with ``NA`` values will be included in the output. This
 behavior can be turned off by using the ``--exclude-NAs`` flag.
 

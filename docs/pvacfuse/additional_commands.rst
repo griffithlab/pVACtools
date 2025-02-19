@@ -41,6 +41,11 @@ List Valid Algorithms
     :func: define_parser
     :prog: pvacfuse valid_algorithms
 
+List Valid NetMHCIIpan/NetMHCIIpanEL Versions
+---------------------------------------------
+
+.. program-output:: pvacfuse valid_netmhciipan_versions -h
+
 List Allele-Specific Cutoffs
 ----------------------------
 

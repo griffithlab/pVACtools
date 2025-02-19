@@ -10,6 +10,7 @@
   "allele_expr_threshold": 2.5,
   "maximum_transcript_support_level": 1,
   "percentile_threshold": null,
+  "percentile_threshold_strategy": "conservative",
   "use_allele_specific_binding_thresholds": true,
   "mt_top_score_metric": "Median",
   "wt_top_score_metric": "Median",
