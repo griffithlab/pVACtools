@@ -82,6 +82,7 @@ class TestPvacvector(unittest.TestCase):
             "visualize",
             "valid_alleles",
             "valid_algorithms",
+            "valid_netmhciipan_versions",
             "allele_specific_cutoffs",
             "download_example_data",
             ]:
@@ -170,6 +171,19 @@ class TestPvacvector(unittest.TestCase):
 
     def test_valid_algorithms_runs(self):
         valid_algorithms.main("")
+    
+    def test_valid_netmhciipan_versions_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.base_dir,
+            'pvactools',
+            "tools",
+            "pvacvector",
+            "valid_netmhciipan_versions.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_netmhciipan_versions_runs(self):
+        valid_netmhciipan_versions.main("")
 
     def test_pvacvector_fa_input_runs_and_produces_expected_output(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data: make_response(

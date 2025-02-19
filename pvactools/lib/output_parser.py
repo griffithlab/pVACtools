@@ -172,8 +172,13 @@ class OutputParser(metaclass=ABCMeta):
             return {'score': float(line['BigMHC_IM'])}
         elif method.lower() == 'netmhcpan_el':
             return {'score': float(line['score'])}
-        elif method.lower() == 'netmhciipan_el':
-            return {'score': float(line['score'])}
+        elif 'netmhciipan_el' in method.lower():
+            if 'score' in line:
+                return {'score': float(line['score'])}
+            elif 'ic50' in line:
+                return {'score': float(line['ic50'])}
+            else:
+                raise Exception("Missing expected columns: 'score' or 'ic50' in NetMHCIIpanEL output")
         else:
             return {'ic50': float(line['ic50'])}
 
@@ -596,7 +601,7 @@ class OutputParser(metaclass=ABCMeta):
                 headers.append("%s MT Score" % pretty_method)
                 continue
 
-            if method in ['netmhcpan_el', 'netmhciipan_el']:
+            if 'netmhciipan_el' in method or 'netmhcpan_el' in method:
                 headers.append("%s WT Score" % pretty_method)
                 headers.append("%s MT Score" % pretty_method)
             else:
@@ -620,9 +625,12 @@ class OutputParser(metaclass=ABCMeta):
 
     def prediction_methods(self):
         methods = set()
+        pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
+        
         for input_iedb_file in self.input_iedb_files:
-            # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
-            method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
+            filename = os.path.basename(input_iedb_file)
+            match = pattern.match(filename)
+            method = match.group(1)
             methods.add(method)
 
         return sorted(list(methods))
@@ -761,6 +769,7 @@ class OutputParser(metaclass=ABCMeta):
 
 
 class DefaultOutputParser(OutputParser):
+
     def parse_iedb_file(self, tsv_entries):
         with open(self.key_file, 'r') as key_file_reader:
             protein_identifiers_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
@@ -769,8 +778,12 @@ class DefaultOutputParser(OutputParser):
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
-                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
+                filename = os.path.basename(input_iedb_file)
+
+                pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
+                match = pattern.match(filename)
+                method = match.group(1)
+
                 for line in iedb_tsv_reader:
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
                         continue
@@ -831,8 +844,12 @@ class UnmatchedSequencesOutputParser(OutputParser):
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
-                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
+                filename = os.path.basename(input_iedb_file)
+        
+                pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
+                match = pattern.match(filename)
+                method = match.group(1)
+
                 for line in iedb_tsv_reader:
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
                         continue
@@ -946,7 +963,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 headers.append("%s Score" % pretty_method)
                 continue
 
-            if method in ['netmhcpan_el', 'netmhciipan_el']:
+            if 'netmhciipan_el' in method or 'netmhcpan_el' in method:
                 headers.append("%s Score" % pretty_method)
             else:
                 headers.append("%s IC50 Score" % pretty_method)
@@ -1017,8 +1034,12 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             # input iedb file
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
-                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
+                filename = os.path.basename(input_iedb_file)
+        
+                pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
+                match = pattern.match(filename)
+                method = match.group(1)
+
                 # header: allele, seq_num, start, end, length, peptide, ic50, percentile_rank
                 for line in iedb_tsv_reader:
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
