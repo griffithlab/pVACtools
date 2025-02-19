@@ -183,3 +183,59 @@ class FilterTests(unittest.TestCase):
             os.path.join(self.test_data_path, "output.inf.tsv"),
             False
         ))
+    
+    def test_conservative(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(Filter(
+            os.path.join(
+                self.test_data_path,
+                'Test.combined.parsed.tsv'
+            ),
+            output_file.name,
+            [FilterCriterion(
+                "Median MT IC50 Score",
+                "<",
+                "500",
+                exclude_nas=False
+            ), FilterCriterion(
+                "Corresponding Fold Change",
+                "<",
+                "16000",
+                exclude_nas=False
+            )],
+            [],
+            "AND"
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_path, "Test.filtered.lt.tsv"),
+            False
+        ))
+    
+    def test_exploratory(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(Filter(
+            os.path.join(
+                self.test_data_path,
+                'Test.combined.parsed.tsv'
+            ),
+            output_file.name,
+            [FilterCriterion(
+                "Median MT IC50 Score",
+                "<",
+                "500",
+                exclude_nas=False
+            ), FilterCriterion(
+                "Corresponding Fold Change",
+                ">",
+                "16000",
+                exclude_nas=False
+            )],
+            [],
+            "OR"
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_path, "Test.filtered.lt.tsv"),
+            False
+        ))

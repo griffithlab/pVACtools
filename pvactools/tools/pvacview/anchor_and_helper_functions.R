@@ -12,10 +12,10 @@ anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/griffith
 
 ## Load Mouse Anchor data
 mouse_anchor_data <- list()
-mouse_anchor_data[[8]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/2a44403d9844a27cfca05bb158b87b747aba3ae2/pvactools/tools/pvacview/data/mouse_anchor_predictions_8_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-mouse_anchor_data[[9]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/2a44403d9844a27cfca05bb158b87b747aba3ae2/pvactools/tools/pvacview/data/mouse_anchor_predictions_9_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-mouse_anchor_data[[10]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/2a44403d9844a27cfca05bb158b87b747aba3ae2/pvactools/tools/pvacview/data/mouse_anchor_predictions_10_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-mouse_anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/2a44403d9844a27cfca05bb158b87b747aba3ae2/pvactools/tools/pvacview/data/mouse_anchor_predictions_11_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[8]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/9f6f29936a051db28b913eb9e9ee23c4b7b8176f/pvactools/tools/pvacview/data/mouse_anchor_predictions_8_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[9]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/bf19ff76c82cec63ba351ecb8ed8dfe07ab975a1/pvactools/tools/pvacview/data/mouse_anchor_predictions_9_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[10]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/bf19ff76c82cec63ba351ecb8ed8dfe07ab975a1/pvactools/tools/pvacview/data/mouse_anchor_predictions_10_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mouse_anchor_data[[11]] <- read.table(curl("https://raw.githubusercontent.com/griffithlab/pVACtools/9f6f29936a051db28b913eb9e9ee23c4b7b8176f/pvactools/tools/pvacview/data/mouse_anchor_predictions_11_mer.tsv"), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 #get binding affinity colors cutoffs given HLA
 
@@ -253,7 +253,7 @@ calculate_mutation_info <- function(metrics_data_row) {
   return(diff_positions)
 }
 ##Generate Tiering for given variant with specific cutoffs
-tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode, use_allele_specific_binding_thresholds, binding_threshold, percentile_threshold) {
+tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode, use_allele_specific_binding_thresholds, binding_threshold, percentile_threshold, percentile_threshold_strategy) {
   mt_binding <- as.numeric(variant_info["IC50 MT"])
   wt_binding <- as.numeric(variant_info["IC50 WT"])
   mt_percent <- as.numeric(variant_info["%ile MT"])
@@ -263,16 +263,13 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   rna_vaf <- as.numeric(variant_info["RNA VAF"])
   rna_depth <- as.numeric(variant_info["RNA Depth"])
   allele_expr <- as.numeric(variant_info["Allele Expr"])
-  if (use_allele_specific_binding_thresholds && hla_allele %in% names(meta_data[["allele_specific_binding_thresholds"]][hla_allele])) {
-    binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
-  }
-  trna_vaf <- as.numeric(meta_data["trna_vaf"])
-  trna_cov <- as.numeric(meta_data["trna_cov"])
   percentile_filter <- FALSE
   if (!is.null(percentile_threshold)) {
     percentile_threshold <- as.numeric(percentile_threshold)
     percentile_filter <- TRUE
   }
+  trna_vaf <- as.numeric(meta_data["trna_vaf"])
+  trna_cov <- as.numeric(meta_data["trna_cov"])
   tsl_max <- as.numeric(meta_data["maximum_transcript_support_level"])
   mutation_pos_list <- mutation_pos_list[["Pos"]]
   if (anchor_mode == "default") {
@@ -282,6 +279,20 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
     if (anchor_list[[1]] == "NA") {
       anchor_list <- c(1, 2, nchar(variant_info[["Best Peptide"]]), nchar(variant_info[["Best Peptide"]]) - 1)
     }
+  }
+  if (use_allele_specific_binding_thresholds && hla_allele %in% names(meta_data[["allele_specific_binding_thresholds"]][hla_allele])) {
+    binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
+  }
+  ic50_pass <- (mt_binding < binding_threshold)
+  percentile_pass <- TRUE
+  if (percentile_filter && mt_percent > percentile_threshold) {
+    percentile_pass <- FALSE
+  }
+  binding_pass <- TRUE
+  if (percentile_threshold_strategy == 'conservative') {
+    binding_pass <- (ic50_pass && percentile_pass)
+  } else {
+    binding_pass <- (ic50_pass || percentile_pass)
   }
   anchor_residue_pass <- TRUE
   if (is.na(mutation_pos_list)) {
@@ -317,33 +328,15 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
     vaf_clonal_pass <- FALSE
   }
   ## Assign Tiering
-  if ((mt_binding < binding_threshold) && allele_expr_pass && vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
-    if (percentile_filter) {
-      if (mt_percent <= percentile_threshold) {
-        return("Pass")
-      }
-    }else {
-      return("Pass")
-    }
+  if (binding_pass && allele_expr_pass && vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
+    return("Pass")
   }
-  
-  if ((mt_binding < binding_threshold) && allele_expr_pass && vaf_clonal_pass && tsl_pass && !anchor_residue_pass) {
-    if (percentile_filter) {
-      if (mt_percent <= percentile_threshold) {
-        return("Anchor")
-      }
-    }else {
-      return("Anchor")
-    }
+
+  if (binding_pass && allele_expr_pass && vaf_clonal_pass && tsl_pass && !anchor_residue_pass) {
+    return("Anchor")
   }
-  if ((mt_binding < binding_threshold) && allele_expr_pass && !vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
-    if (percentile_filter) {
-      if (mt_percent <= percentile_threshold) {
-        return("Subclonal")
-      }
-    }else {
-      return("Subclonal")
-    }
+  if (binding_pass && allele_expr_pass && !vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
+    return("Subclonal")
   }
   lowexpr <- FALSE
   if (!is.na(rna_vaf) && !is.na(gene_expr) && !is.na(rna_depth)) {
@@ -351,14 +344,8 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
       lowexpr <- TRUE
     }
   }
-  if ((mt_binding < binding_threshold) && lowexpr && vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
-    if (percentile_filter) {
-      if (mt_percent <= percentile_threshold) {
-        return("LowExpr")
-      }
-    }else {
-      return("LowExpr")
-    }
+  if (binding_pass && lowexpr && vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
+    return("LowExpr")
   }
   if (!is.na(allele_expr) && ((gene_expr == 0) || (rna_vaf == 0)) && !lowexpr) {
     return("NoExpr")
@@ -366,7 +353,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   return("Poor")
 }
 #Determine the Tier Count for given variant with specific cutoffs
-tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode, allele_specific_binding_thresholds, use_allele_specific_binding_thresholds, binding_threshold, percentile_threshold) {
+tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cutoff, mutation_pos_list, hla_allele, tsl, meta_data, anchor_mode, allele_specific_binding_thresholds, use_allele_specific_binding_thresholds, binding_threshold, percentile_threshold, percentile_threshold_strategy) {
   mt_binding <- as.numeric(variant_info["IC50 MT"])
   wt_binding <- as.numeric(variant_info["IC50 WT"])
   mt_percent <- as.numeric(variant_info["%ile MT"])
@@ -376,9 +363,6 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
   rna_vaf <- as.numeric(variant_info["RNA VAF"])
   rna_depth <- as.numeric(variant_info["RNA Depth"])
   allele_expr <- as.numeric(variant_info["Allele Expr"])
-  if (use_allele_specific_binding_thresholds && hla_allele %in% names(meta_data[["allele_specific_binding_thresholds"]][hla_allele])) {
-    binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
-  }
   trna_vaf <- as.numeric(meta_data["trna_vaf"])
   trna_cov <- as.numeric(meta_data["trna_cov"])
   percentile_filter <- FALSE
@@ -387,6 +371,20 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
     percentile_filter <- TRUE
   }
   tsl_max <- as.numeric(meta_data["maximum_transcript_support_level"])
+  if (use_allele_specific_binding_thresholds && hla_allele %in% names(meta_data[["allele_specific_binding_thresholds"]][hla_allele])) {
+    binding_threshold <- as.numeric(meta_data[["allele_specific_binding_thresholds"]][hla_allele])
+  }
+  ic50_pass <- (mt_binding < binding_threshold)
+  percentile_pass <- TRUE
+  if (percentile_filter && mt_percent > percentile_threshold) {
+    percentile_pass <- FALSE
+  }
+  binding_pass <- TRUE
+  if (percentile_threshold_strategy == 'conservative') {
+    binding_pass <- (ic50_pass && percentile_pass)
+  } else {
+    binding_pass <- (ic50_pass || percentile_pass)
+  }
   mutation_pos_list <- mutation_pos_list[["Pos"]]
   if (anchor_mode == "default") {
     anchor_list <- c(1, 2, nchar(variant_info[["Best Peptide"]]), nchar(variant_info[["Best Peptide"]]) - 1)
@@ -430,33 +428,15 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
     vaf_clonal_pass <- FALSE
   }
   ## Pass
-  if ((mt_binding < binding_threshold) && allele_expr_pass && vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
-    if (percentile_filter) {
-      if (mt_percent <= percentile_threshold) {
-        return(1)
-      }
-    }else {
-      return(1)
-    }
+  if (binding_pass && allele_expr_pass && vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
+    return(1)
   }
   ## Anchor
-  if ((mt_binding < binding_threshold) && allele_expr_pass && vaf_clonal_pass && tsl_pass && !anchor_residue_pass) {
-    if (percentile_filter) {
-      if (mt_percent <= percentile_threshold) {
-        return(5)
-      }
-    }else {
-      return(5)
-    }
+  if (binding_pass && allele_expr_pass && vaf_clonal_pass && tsl_pass && !anchor_residue_pass) {
+    return(5)
   }
-  if ((mt_binding < binding_threshold) && allele_expr_pass && !vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
-    if (percentile_filter) {
-      if (mt_percent <= percentile_threshold) {
-        return(6)
-      }
-    }else {
-      return(6)
-    }
+  if (binding_pass && allele_expr_pass && !vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
+    return(6)
   }
   lowexpr <- FALSE
   if (!is.na(rna_vaf) && !is.na(gene_expr) && !is.na(rna_depth)) {
@@ -464,21 +444,11 @@ tier_numbers <- function(variant_info, anchor_contribution, dna_cutoff, allele_e
       lowexpr <- TRUE
     }
   }
-  if ((mt_binding < binding_threshold) && (lowexpr) && vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
-    if (percentile_filter) {
-      if (mt_percent <= percentile_threshold) {
-        if (allele_expr > 0) {
-          return(7)
-        }else if ((gene_expr == 0) && (rna_depth > trna_cov) && (rna_vaf > trna_vaf)) {
-          return(8)
-        }
-      }
-    }else {
-      if (allele_expr > 0) {
-        return(7)
-      }else if ((gene_expr == 0) && (rna_depth > trna_cov) && (rna_vaf > trna_vaf)) {
-        return(8)
-      }
+  if (binding_pass && lowexpr && vaf_clonal_pass && tsl_pass && anchor_residue_pass) {
+    if (allele_expr > 0) {
+      return(7)
+    }else if ((gene_expr == 0) && (rna_depth > trna_cov) && (rna_vaf > trna_vaf)) {
+      return(8)
     }
   }
   if (!is.na(allele_expr) && ((gene_expr == 0) || (rna_vaf == 0)) && !lowexpr) {

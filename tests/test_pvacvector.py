@@ -82,6 +82,7 @@ class TestPvacvector(unittest.TestCase):
             "visualize",
             "valid_alleles",
             "valid_algorithms",
+            "valid_netmhciipan_versions",
             "allele_specific_cutoffs",
             "download_example_data",
             ]:
@@ -170,6 +171,19 @@ class TestPvacvector(unittest.TestCase):
 
     def test_valid_algorithms_runs(self):
         valid_algorithms.main("")
+    
+    def test_valid_netmhciipan_versions_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.base_dir,
+            'pvactools',
+            "tools",
+            "pvacvector",
+            "valid_netmhciipan_versions.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_netmhciipan_versions_runs(self):
+        valid_netmhciipan_versions.main("")
 
     def test_pvacvector_fa_input_runs_and_produces_expected_output(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data: make_response(
@@ -290,7 +304,7 @@ class TestPvacvector(unittest.TestCase):
             '-n', self.input_n_mer,
             '-k',
             '-b', '32000',
-            '--max-clip-length', '1',
+            '--max-clip-length', '2',
             '--allow-n-peptide-exclusion', '0',
             '--spacers', 'None,AAY',
         ])
@@ -306,6 +320,14 @@ class TestPvacvector(unittest.TestCase):
         self.assertTrue(compare(
             os.path.join(output_dir.name, "1", "None", "junctions.tsv"),
             os.path.join(self.test_data_dir, "clipped.1.None.junctions.tsv")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "1", "AAY", "junctions.tsv"),
+            os.path.join(self.test_data_dir, "clipped.1.AAY.junctions.tsv")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "2", "None", "junctions.tsv"),
+            os.path.join(self.test_data_dir, "clipped.2.None.junctions.tsv")
         ))
 
         self.assertTrue(compare(
@@ -331,6 +353,22 @@ class TestPvacvector(unittest.TestCase):
         self.assertTrue(compare(
             os.path.join(output_dir.name, "1", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
             os.path.join(self.test_data_dir, "clipped.1.None.fa.key")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "1", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(self.test_data_dir, "clipped.1.AAY.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "1", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(self.test_data_dir, "clipped.1.AAY.fa.key")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "2", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(self.test_data_dir, "clipped.2.None.fa")
+        ))
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "2", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(self.test_data_dir, "clipped.2.None.fa.key")
         ))
 
         self.assertTrue(compare(
@@ -438,7 +476,6 @@ class TestPvacvector(unittest.TestCase):
                 output_dir.name,
                 '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
-                '-k',
                 '-b', '22000',
                 '--spacers', 'None',
             ])

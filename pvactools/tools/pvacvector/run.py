@@ -23,6 +23,7 @@ from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
 from pvactools.lib.pvacvector_input_fasta_generator import PvacvectorInputFastaGenerator
 from pvactools.lib.pipeline import *
 from pvactools.lib.run_utils import *
+from pvactools.lib.prediction_class import NetMHCIIVersion
 from pvactools.lib.prediction_class_utils import *
 
 def define_parser():
@@ -140,10 +141,18 @@ def find_min_scores(parsed_output_files, current_output_dir, args, min_scores, m
                     threshold = float(args.binding_threshold) if threshold is None else float(threshold)
                 else:
                     threshold = float(args.binding_threshold)
-                if score < threshold:
-                    junctions_with_good_binders.add(index)
-                if args.percentile_threshold is not None and percentile < args.percentile_threshold:
-                    junctions_with_good_binders.add(index)
+                if args.percentile_threshold is None:
+                    if score < threshold:
+                        junctions_with_good_binders.add(index)
+                else:
+                    if args.percentile_threshold_strategy == 'conservative':
+                        #a conservative strategy would invalidate junctions that fail the binding threshold or the percentile threshold
+                        if score < threshold or percentile < args.percentile_threshold:
+                            junctions_with_good_binders.add(index)
+                    elif args.percentile_threshold_strategy == 'exploratory':
+                        #a exploratory strategy is more relaxed and only invalidates a junction if it fails both the binding and percentile thresholds
+                        if score < threshold and percentile < args.percentile_threshold:
+                            junctions_with_good_binders.add(index)
 
                 if index not in junction_min_scores:
                     #"initialize" with the first score encountered
@@ -356,6 +365,13 @@ def create_dna_backtranslation(results_file, dna_results_file):
     output_record = SeqRecord(Seq(dna_sequence), id=str(seq_num), description=str(seq_num))
     SeqIO.write([output_record], dna_results_file, 'fasta')
 
+def delete_tmp_files(keep_tmp_files, base_output_dir, max_clip_length, spacers):
+    if not keep_tmp_files:
+        for subdirectory in range(max_clip_length):
+            for spacer in spacers:
+                shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
+                shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
+
 def main(args_input=sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
@@ -399,6 +415,10 @@ def main(args_input=sys.argv[1:]):
 
     base_output_dir = os.path.abspath(args.output_dir)
     os.makedirs(base_output_dir, exist_ok=True)
+
+    if (args.netmhciipan_version == '4.0' and args.iedb_install_directory is not None):
+        raise Exception("Standalone IEDB does not support version 4.0")
+    NetMHCIIVersion.netmhciipan_version = args.netmhciipan_version
 
     if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
         random.seed(0.5)
@@ -463,13 +483,7 @@ def main(args_input=sys.argv[1:]):
 
         dna_results_file = os.path.join(base_output_dir, args.sample_name + '_results.dna.fa')
         create_dna_backtranslation(results_file, dna_results_file)
-
-        if not args.keep_tmp_files:
-            for subdirectory in range(tries):
-                for spacer in processed_spacers:
-                    shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
-                    shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
-
+        delete_tmp_files(args.keep_tmp_files, base_output_dir, args.max_clip_length, args.spacers)
         change_permissions_recursive(base_output_dir, 0o755, 0o644)
         return
 
@@ -524,10 +538,11 @@ def main(args_input=sys.argv[1:]):
             'A vaccine design using the parameters specified could not be found. Some options that you may want to consider:\n' +
             '1) decreasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
             '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)\n' +
-            '3) if running with a percentile threshold set, either remove this parameter or reduce the acceptable threshold to allow more possible connections (--percentile-threshold parameter)\n' +
+            '3) if running with a percentile threshold set, either remove this parameter, reduce the acceptable threshold to allow more possible connections (--percentile-threshold parameter) or use the \'exploratory\' strategry (--percentile-threshold-strategy parameter)\n' +
             '4) increase the number of peptides that can be excluded from the vector (--allow-n-peptide-exclusion parameter)'
         )
 
+    delete_tmp_files(args.keep_tmp_files, base_output_dir, args.max_clip_length, args.spacers)
     change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
 if __name__ == "__main__":
