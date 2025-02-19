@@ -365,6 +365,13 @@ def create_dna_backtranslation(results_file, dna_results_file):
     output_record = SeqRecord(Seq(dna_sequence), id=str(seq_num), description=str(seq_num))
     SeqIO.write([output_record], dna_results_file, 'fasta')
 
+def delete_tmp_files(keep_tmp_files, base_output_dir, max_clip_length, spacers):
+    if not keep_tmp_files:
+        for subdirectory in range(max_clip_length):
+            for spacer in spacers:
+                shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
+                shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
+
 def main(args_input=sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
@@ -476,13 +483,7 @@ def main(args_input=sys.argv[1:]):
 
         dna_results_file = os.path.join(base_output_dir, args.sample_name + '_results.dna.fa')
         create_dna_backtranslation(results_file, dna_results_file)
-
-        if not args.keep_tmp_files:
-            for subdirectory in range(tries):
-                for spacer in processed_spacers:
-                    shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_I'), ignore_errors=True)
-                    shutil.rmtree(os.path.join(base_output_dir, str(subdirectory), spacer, 'MHC_Class_II'), ignore_errors=True)
-
+        delete_tmp_files(args.keep_tmp_files, base_output_dir, args.max_clip_length, args.spacers)
         change_permissions_recursive(base_output_dir, 0o755, 0o644)
         return
 
@@ -541,6 +542,7 @@ def main(args_input=sys.argv[1:]):
             '4) increase the number of peptides that can be excluded from the vector (--allow-n-peptide-exclusion parameter)'
         )
 
+    delete_tmp_files(args.keep_tmp_files, base_output_dir, args.max_clip_length, args.spacers)
     change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
 if __name__ == "__main__":

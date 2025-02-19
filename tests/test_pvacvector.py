@@ -452,7 +452,6 @@ class TestPvacvector(unittest.TestCase):
                 output_dir.name,
                 '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
-                '-k',
                 '-b', '22000',
                 '--spacers', 'None',
             ])
