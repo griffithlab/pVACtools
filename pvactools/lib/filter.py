@@ -5,11 +5,12 @@ import sys
 pd.options.mode.chained_assignment = None
 
 class Filter:
-    def __init__(self, input_file, output_file, filter_criteria, int_filter_columns=[]):
+    def __init__(self, input_file, output_file, filter_criteria, int_filter_columns=[], filter_strategy="AND"):
         self.input_file = input_file
         self.output_file = output_file
         self.filter_criteria = filter_criteria
         self.int_filter_columns = int_filter_columns
+        self.filter_strategy = filter_strategy
 
     def execute(self):
         with open(self.input_file, 'r') as read_fh, open(self.output_file, 'w') as write_fh:
@@ -18,18 +19,21 @@ class Filter:
             writer.writeheader()
             for line in reader:
                 to_filter = False
-                for criterion in self.filter_criteria:
-                    value = line[criterion.column]
-                    if value == 'inf':
-                        value = sys.maxsize
-                    if value == 'NA':
-                        if criterion.exclude_nas:
-                            to_filter = True
-                    elif criterion.skip_value is not None and value == criterion.skip_value:
-                        pass
-                    else:
-                        if not eval("{} {} {}".format(value, criterion.operator, criterion.threshold)):
-                            to_filter = True
+
+                process_criterion = lambda criterion: (
+                    (line[criterion.column] == 'NA' and criterion.exclude_nas) or
+                    (line[criterion.column] != 'NA' and criterion.skip_value != line[criterion.column] and not eval("{} {} {}".format(
+                        line[criterion.column] if line[criterion.column] != 'inf' else sys.maxsize,
+                        criterion.operator,
+                        criterion.threshold
+                    )))
+                )
+
+                if self.filter_strategy == "AND":
+                    to_filter = any(process_criterion(criterion) for criterion in self.filter_criteria)
+                else:
+                    to_filter = all(process_criterion(criterion) for criterion in self.filter_criteria)
+                
                 if not to_filter:
                     writer.writerow(line)
 

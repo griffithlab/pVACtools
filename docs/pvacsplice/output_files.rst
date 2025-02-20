@@ -368,6 +368,11 @@ To tier the Best Peptide, several cutoffs can be adjusted using arguments provid
    * - ``--percentile-threshold``
      - When set, use this threshold to filter epitopes on the %ile MT score in addition to having to meet the binding threshold.
      - None
+   * - ``--percentile-threshold-strategy``
+     - Specify the candidate inclusion strategy. The ``conservative`` option requires a candidate to pass BOTH the binding threshold
+       and percentile threshold (if set). The ``exploratory`` option requires a candidate to pass EITHER the binding threshold or
+       the percentile threshold.
+     - conservative
    * - ``--tumor-purity``
      - Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used for a simple estimation of
        whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.
@@ -385,17 +390,6 @@ To tier the Best Peptide, several cutoffs can be adjusted using arguments provid
      - The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL).
        Transcript support level needs to be <= this cutoff to be included in most tiers.
      - 1
-   * - ``--allele-specific-anchors``
-     - Use allele-specific anchor positions when tiering epitopes in the aggregate report. This option is available for 8, 9, 10, and
-       11mers and only for HLA-A, B, and C alleles. If this option is not enabled or as a fallback for unsupported lengths and alleles,
-       the default positions of [1, 2, epitope length - 1, and epitope length] are used. Please see https://doi.org/10.1101/2020.12.08.416271 for more details.
-     - False
-   * - ``--anchor-contribution-threshold``
-     - For determining allele-specific anchors, each position is assigned a score based on how binding is influenced by mutations. From these scores, the relative
-       contribution of each position to the overall binding is calculated. Starting with the highest relative contribution, positions whose score together account for the
-       selected contribution threshold are assigned as anchor locations. As a result, a higher threshold leads to the inclusion of more positions to be considered
-       anchors.
-     - 0.8
 
 Tiers
 *****
@@ -408,7 +402,7 @@ Given the thresholds provided above, the Best Peptide is evaluated and binned in
    * - Tier
      - Citeria
    * - ``Pass``
-     - Best Peptide passes the binding, expression, tsl, clonal, and anchor criteria
+     - Best Peptide passes the binding, expression, tsl, and clonal criteria
    * - ``Subclonal``
      - Best Peptide fails the clonal criteria but passes the binding, tsl, and
        anchor criteria
@@ -427,9 +421,11 @@ Criteria Details
 .. list-table::
 
    * - Binding Criteria
-     - Pass if Best Peptide is a strong binder
+     - Pass if Best Peptide is strong binder
      - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
-       (if ``--percentile-threshold`` parameter is set)
+       (if ``--percentile-threshold`` parameter is set and 'conservative' ``--percentile-threshold-strategy`` is used) or
+       ``IC50 MT < binding_threshold`` or ``%ile MT < percentile_threshold``
+       (if 'exploratory' ``--percentile-threshold-strategy`` is used)
    * - Expression Criteria
      - Pass if Best Transcript is expressed
      - ``Allele Expr > trna_vaf * expn_val``

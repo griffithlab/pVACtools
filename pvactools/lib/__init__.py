@@ -12,6 +12,7 @@ __all__ = [
     "output_parser",
     "valid_alleles",
     'valid_algorithms',
+    'valid_netmhciipan_versions',
     'net_chop',
     "netmhc_stab",
     "filter",

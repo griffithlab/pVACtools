@@ -10,6 +10,7 @@
   "allele_expr_threshold": 2.5,
   "maximum_transcript_support_level": 1,
   "percentile_threshold": null,
+  "percentile_threshold_strategy": "conservative",
   "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Best",
   "wt_top_score_metric": "Corresponding",
@@ -49,7 +50,7 @@
               "HLA-E*01:01",
               "HLA-G*01:09"
             ],
-            "mutation_position": "6-7",
+            "mutation_position": "6",
             "problematic_positions": "None",
             "anchor_fails": "None",
             "individual_ic50_calls": {
@@ -175,7 +176,7 @@
               "HLA-E*01:01",
               "HLA-G*01:09"
             ],
-            "mutation_position": "3-4",
+            "mutation_position": "2, 3",
             "problematic_positions": "None",
             "anchor_fails": "None",
             "individual_ic50_calls": {
@@ -292,11 +293,11 @@
     "best_peptide_wt": "LLPLLLLLL",
     "best_hla_allele": "HLA-E*01:01",
     "reference_matches": {
-      "count": 129,
-      "query_peptide": "PPLLPLLPLLLLLGASG",
+      "count": 27,
+      "query_peptide": "PPLLPLLPLLLLLGA",
       "matches": [
         {
-          "Matched Peptide": "PPLLPLLPLLLLL",
+          "Matched Peptide": "PPLLPLLPLLL",
           "Genes": "NRXN2",
           "Transcripts": "ENST00000301894.6, ENST00000423049.2",
           "Hit IDs": [
@@ -305,140 +306,31 @@
           ]
         },
         {
-          "Matched Peptide": "LPLLPLLLLLG",
-          "Genes": "NRG1",
-          "Transcripts": "ENST00000520407.5, ENST00000614767.1",
-          "Hit IDs": [
-            "ENSP00000483727.1",
-            "ENSP00000434640.1"
-          ]
-        },
-        {
-          "Matched Peptide": "PLLPLLLLL",
-          "Genes": "CPAMD8, CRLF1, PLAUR",
-          "Transcripts": "ENST00000597107.1, ENST00000601723.5, ENST00000651564.2, ENST00000684169.1",
-          "Hit IDs": [
-            "ENSP00000506849.1",
-            "ENSP00000498697.2",
-            "ENSP00000471881.1",
-            "ENSP00000471307.1"
-          ]
-        },
-        {
           "Matched Peptide": "LLPLLPLLL",
           "Genes": "PILRA",
-          "Transcripts": "ENST00000432297.6",
+          "Transcripts": "ENST00000198536.7, ENST00000350573.2, ENST00000394000.6, ENST00000432297.6, ENST00000453419.5",
           "Hit IDs": [
-            "ENSP00000415111.2"
-          ]
-        },
-        {
-          "Matched Peptide": "PLLPLLLLL",
-          "Genes": "CPAMD8, ITGA5",
-          "Transcripts": "ENST00000435631.6, ENST00000443236.7",
-          "Hit IDs": [
-            "ENSP00000405865.2",
-            "ENSP00000402505.3"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLPLLL",
-          "Genes": "PILRA",
-          "Transcripts": "ENST00000394000.6, ENST00000453419.5",
-          "Hit IDs": [
+            "ENSP00000415111.2",
             "ENSP00000390026.1",
-            "ENSP00000377569.2"
-          ]
-        },
-        {
-          "Matched Peptide": "PLLPLLLLL",
-          "Genes": "CRLF1",
-          "Transcripts": "ENST00000392386.8",
-          "Hit IDs": [
-            "ENSP00000376188.2"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLLLLG",
-          "Genes": "SUSD1",
-          "Transcripts": "ENST00000374263.7, ENST00000374264.6, ENST00000374270.8",
-          "Hit IDs": [
-            "ENSP00000363388.4",
-            "ENSP00000363382.2",
-            "ENSP00000363381.3"
-          ]
-        },
-        {
-          "Matched Peptide": "PLLPLLLLL",
-          "Genes": "PLAUR",
-          "Transcripts": "ENST00000339082.7",
-          "Hit IDs": [
-            "ENSP00000342049.2"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLPLLL",
-          "Genes": "PILRA",
-          "Transcripts": "ENST00000350573.2",
-          "Hit IDs": [
-            "ENSP00000340109.2"
-          ]
-        },
-        {
-          "Matched Peptide": "PLLPLLLLL",
-          "Genes": "C3, CPAMD8, ITGA5, PLAUR, WFIKKN1",
-          "Transcripts": "ENST00000291440.4, ENST00000293379.9, ENST00000319070.3, ENST00000326474.5, ENST00000340093.8",
-          "Hit IDs": [
-            "ENSP00000339328.3",
-            "ENSP00000324763.2",
-            "ENSP00000313324.3",
-            "ENSP00000293379.4",
-            "ENSP00000291440.4"
-          ]
-        },
-        {
-          "Matched Peptide": "LLLLLGASG",
-          "Genes": "IGFBP2",
-          "Transcripts": "ENST00000233809.9",
-          "Hit IDs": [
-            "ENSP00000233809.4"
-          ]
-        },
-        {
-          "Matched Peptide": "PLLPLLLLL",
-          "Genes": "EFNA2, IGFBP2, PLAUR",
-          "Transcripts": "ENST00000215368.4, ENST00000221264.8, ENST00000233809.9",
-          "Hit IDs": [
-            "ENSP00000233809.4",
-            "ENSP00000221264.3",
-            "ENSP00000215368.1"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLPLLL",
-          "Genes": "PILRA",
-          "Transcripts": "ENST00000198536.7",
-          "Hit IDs": [
+            "ENSP00000377569.2",
+            "ENSP00000340109.2",
             "ENSP00000198536.2"
           ]
         },
         {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "APLP1, PCDHAC2, PI16, PILRB, PRKCSH, PTPRE, SLC27A3, VASN",
-          "Transcripts": "ENST00000471218.5, ENST00000608825.1, ENST00000609309.3, ENST00000611814.4, ENST00000615316.1, ENST00000622615.1, ENST00000623839.3, ENST00000624995.4, ENST00000647861.1, ENST00000652533.1, ENST00000676823.1, ENST00000677123.1",
+          "Matched Peptide": "LPLLLLLG",
+          "Genes": "NRG1",
+          "Transcripts": "ENST00000614767.1",
           "Hit IDs": [
-            "ENSP00000503163.1",
-            "ENSP00000503072.1",
-            "ENSP00000498366.1",
-            "ENSP00000497550.1",
-            "ENSP00000485585.1",
-            "ENSP00000485061.2",
-            "ENSP00000481884.1",
-            "ENSP00000478888.1",
-            "ENSP00000478629.1",
-            "ENSP00000477365.1",
-            "ENSP00000476607.1",
-            "ENSP00000474102.1"
+            "ENSP00000483727.1"
+          ]
+        },
+        {
+          "Matched Peptide": "LPLLPLLL",
+          "Genes": "NRG1",
+          "Transcripts": "ENST00000614767.1",
+          "Hit IDs": [
+            "ENSP00000483727.1"
           ]
         },
         {
@@ -458,52 +350,19 @@
           ]
         },
         {
-          "Matched Peptide": "LLLLLGAS",
-          "Genes": "ANGPTL6",
-          "Transcripts": "ENST00000592641.5",
+          "Matched Peptide": "LPLLLLLG",
+          "Genes": "NRG1",
+          "Transcripts": "ENST00000520407.5",
           "Hit IDs": [
-            "ENSP00000467930.1"
+            "ENSP00000434640.1"
           ]
         },
         {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "APLP1, PRKCSH",
-          "Transcripts": "ENST00000587327.5, ENST00000587509.5, ENST00000588269.1, ENST00000589126.5, ENST00000590561.5, ENST00000592741.5",
+          "Matched Peptide": "LPLLPLLL",
+          "Genes": "NRG1",
+          "Transcripts": "ENST00000520407.5",
           "Hit IDs": [
-            "ENSP00000467566.1",
-            "ENSP00000466623.1",
-            "ENSP00000466134.1",
-            "ENSP00000466012.1",
-            "ENSP00000465889.1",
-            "ENSP00000465821.1"
-          ]
-        },
-        {
-          "Matched Peptide": "LLLLLGAS",
-          "Genes": "ANGPTL6",
-          "Transcripts": "ENST00000589181.5",
-          "Hit IDs": [
-            "ENSP00000465597.1"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "ITGA5, LRRC24, PRKCSH, RAMP3, SLC27A3, TAOK2, TMUB1",
-          "Transcripts": "ENST00000476627.5, ENST00000481345.1, ENST00000482202.5, ENST00000496212.5, ENST00000529415.7, ENST00000533758.1, ENST00000543033.5, ENST00000553071.1, ENST00000575439.5, ENST00000589838.5, ENST00000591462.6, ENST00000591946.5, ENST00000593101.5",
-          "Hit IDs": [
-            "ENSP00000465489.1",
-            "ENSP00000465461.1",
-            "ENSP00000465047.1",
-            "ENSP00000464835.1",
-            "ENSP00000458504.1",
-            "ENSP00000447347.1",
-            "ENSP00000440336.1",
-            "ENSP00000435653.1",
-            "ENSP00000434849.1",
-            "ENSP00000419214.1",
-            "ENSP00000419012.1",
-            "ENSP00000418709.1",
-            "ENSP00000418460.1"
+            "ENSP00000434640.1"
           ]
         },
         {
@@ -515,34 +374,11 @@
           ]
         },
         {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "PILRB, PTPRE, SHISA5, TMUB1",
-          "Transcripts": "ENST00000424965.5, ENST00000431140.5, ENST00000441507.1, ENST00000448382.5, ENST00000455661.5, ENST00000462940.1",
-          "Hit IDs": [
-            "ENSP00000417519.1",
-            "ENSP00000416939.1",
-            "ENSP00000416342.1",
-            "ENSP00000415775.1",
-            "ENSP00000415097.1",
-            "ENSP00000412811.1"
-          ]
-        },
-        {
           "Matched Peptide": "LPLLLLLG",
           "Genes": "SLC35C1",
           "Transcripts": "ENST00000442528.2",
           "Hit IDs": [
             "ENSP00000412408.2"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "NUCB1, PILRB, PTPRE",
-          "Transcripts": "ENST00000411700.5, ENST00000442830.5, ENST00000457519.5",
-          "Hit IDs": [
-            "ENSP00000411261.1",
-            "ENSP00000410540.1",
-            "ENSP00000410519.1"
           ]
         },
         {
@@ -555,124 +391,23 @@
         },
         {
           "Matched Peptide": "LLPLLPLL",
-          "Genes": "TMEM52",
-          "Transcripts": "ENST00000416272.1",
+          "Genes": "CACNA2D2, TMEM52",
+          "Transcripts": "ENST00000416272.1, ENST00000423994.6, ENST00000424201.7, ENST00000429770.5",
           "Hit IDs": [
-            "ENSP00000409669.1"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "PILRB, VMO1",
-          "Transcripts": "ENST00000438028.5, ENST00000438231.2, ENST00000441199.2",
-          "Hit IDs": [
-            "ENSP00000409411.1",
-            "ENSP00000408425.1",
-            "ENSP00000408166.2"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLPLL",
-          "Genes": "CACNA2D2",
-          "Transcripts": "ENST00000423994.6, ENST00000429770.5",
-          "Hit IDs": [
+            "ENSP00000409669.1",
             "ENSP00000407393.2",
-            "ENSP00000404631.1"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "NUCB1, PILRB, SHISA5, TAOK2, VMO1",
-          "Transcripts": "ENST00000415268.1, ENST00000416307.6, ENST00000416441.2, ENST00000419749.5, ENST00000443308.6, ENST00000443526.5, ENST00000443560.1, ENST00000451312.5, ENST00000452089.5",
-          "Hit IDs": [
-            "ENSP00000404321.1",
-            "ENSP00000403757.1",
-            "ENSP00000400498.1",
-            "ENSP00000397608.1",
-            "ENSP00000397201.1",
-            "ENSP00000395373.2",
-            "ENSP00000393048.2",
-            "ENSP00000391748.1",
-            "ENSP00000390450.2"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLPLL",
-          "Genes": "CACNA2D2",
-          "Transcripts": "ENST00000424201.7",
-          "Hit IDs": [
+            "ENSP00000404631.1",
             "ENSP00000390329.2"
           ]
         },
         {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "CNPY3, CRELD2, HTRA1, IGFBPL1, NUCB1, PI16, PILRB, TMUB1",
-          "Transcripts": "ENST00000368984.8, ENST00000372836.5, ENST00000373674.4, ENST00000377694.2, ENST00000392818.7, ENST00000403427.3, ENST00000404488.7, ENST00000405315.9, ENST00000407032.5, ENST00000407217.7, ENST00000422808.5, ENST00000424608.1, ENST00000450207.5, ENST00000452087.5",
-          "Hit IDs": [
-            "ENSP00000389856.1",
-            "ENSP00000389734.1",
-            "ENSP00000389007.1",
-            "ENSP00000387769.1",
-            "ENSP00000386034.3",
-            "ENSP00000385923.3",
-            "ENSP00000385211.1",
-            "ENSP00000384111.3",
-            "ENSP00000383938.3",
-            "ENSP00000376565.3",
-            "ENSP00000366923.1",
-            "ENSP00000362778.3",
-            "ENSP00000361926.4",
-            "ENSP00000357980.3"
-          ]
-        },
-        {
-          "Matched Peptide": "PLLPLLLL",
-          "Genes": "ASTN2",
-          "Transcripts": "ENST00000361209.6, ENST00000361477.8",
-          "Hit IDs": [
-            "ENSP00000355116.5",
-            "ENSP00000354504.2"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "CRELD2, IGDCC3, VMO1",
-          "Transcripts": "ENST00000327987.9, ENST00000328268.9, ENST00000354194.4",
-          "Hit IDs": [
-            "ENSP00000346133.4",
-            "ENSP00000332773.4",
-            "ENSP00000332223.4"
-          ]
-        },
-        {
-          "Matched Peptide": "PLLPLLLL",
-          "Genes": "FAM174B",
-          "Transcripts": "ENST00000327355.6",
-          "Hit IDs": [
-            "ENSP00000329040.5"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "VMO1",
-          "Transcripts": "ENST00000328739.6",
-          "Hit IDs": [
-            "ENSP00000328397.5"
-          ]
-        },
-        {
-          "Matched Peptide": "PLLPLLLL",
-          "Genes": "ASTN2",
-          "Transcripts": "ENST00000313400.9",
-          "Hit IDs": [
-            "ENSP00000314038.4"
-          ]
-        },
-        {
           "Matched Peptide": "LPLLLLLG",
-          "Genes": "SLC35C1",
-          "Transcripts": "ENST00000314134.4",
+          "Genes": "SLC35C1, SUSD1",
+          "Transcripts": "ENST00000314134.4, ENST00000374263.7, ENST00000374264.6, ENST00000374270.8",
           "Hit IDs": [
+            "ENSP00000363388.4",
+            "ENSP00000363382.2",
+            "ENSP00000363381.3",
             "ENSP00000313318.3"
           ]
         },
@@ -686,57 +421,11 @@
         },
         {
           "Matched Peptide": "LLPLLPLL",
-          "Genes": "TMEM52",
-          "Transcripts": "ENST00000310991.8",
+          "Genes": "CACNA2D2, TMEM52",
+          "Transcripts": "ENST00000266039.7, ENST00000310991.8",
           "Hit IDs": [
-            "ENSP00000311122.3"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "DCHS1, PCDHAC2, SHISA5, SLC27A3, TAOK2, TMUB1, VASN",
-          "Transcripts": "ENST00000271857.6, ENST00000289269.7, ENST00000296444.7, ENST00000297533.9, ENST00000299441.5, ENST00000304735.4, ENST00000308893.9",
-          "Hit IDs": [
-            "ENSP00000310094.4",
-            "ENSP00000306864.3",
-            "ENSP00000299441.3",
-            "ENSP00000297533.4",
-            "ENSP00000296444.2",
-            "ENSP00000289269.5",
-            "ENSP00000271857.2"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLPLL",
-          "Genes": "CACNA2D2",
-          "Transcripts": "ENST00000266039.7",
-          "Hit IDs": [
+            "ENSP00000311122.3",
             "ENSP00000266039.3"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "PTPRE",
-          "Transcripts": "ENST00000254667.8",
-          "Hit IDs": [
-            "ENSP00000254667.3"
-          ]
-        },
-        {
-          "Matched Peptide": "LLLLLGAS",
-          "Genes": "ANGPTL6",
-          "Transcripts": "ENST00000253109.5",
-          "Hit IDs": [
-            "ENSP00000253109.3"
-          ]
-        },
-        {
-          "Matched Peptide": "LLPLLLLL",
-          "Genes": "APLP1, RAMP3",
-          "Transcripts": "ENST00000221891.9, ENST00000242249.8",
-          "Hit IDs": [
-            "ENSP00000242249.4",
-            "ENSP00000221891.4"
           ]
         }
       ]
@@ -2706,7 +2395,7 @@
               "HLA-E*01:01",
               "HLA-G*01:09"
             ],
-            "mutation_position": "1-9",
+            "mutation_position": "NA",
             "problematic_positions": "None",
             "anchor_fails": "None",
             "individual_ic50_calls": {
@@ -5205,7 +4894,7 @@
               "HLA-E*01:01",
               "HLA-G*01:09"
             ],
-            "mutation_position": "8-9",
+            "mutation_position": "9",
             "problematic_positions": "None",
             "anchor_fails": "None",
             "individual_ic50_calls": {
@@ -5322,175 +5011,9 @@
     "best_peptide_wt": "SAAAAAAAA",
     "best_hla_allele": "HLA-E*01:01",
     "reference_matches": {
-      "count": 144,
-      "query_peptide": "AAAAAAAVIPTVST",
-      "matches": [
-        {
-          "Matched Peptide": "AAAAAAAVIPTVST",
-          "Genes": "RBM47",
-          "Transcripts": "ENST00000295971.12, ENST00000381793.6, ENST00000381795.10, ENST00000514014.1",
-          "Hit IDs": [
-            "ENSP00000423243.1",
-            "ENSP00000371214.6",
-            "ENSP00000371212.2",
-            "ENSP00000295971.7"
-          ]
-        },
-        {
-          "Matched Peptide": "AAAAAAAVI",
-          "Genes": "ZMAT1",
-          "Transcripts": "ENST00000651725.2",
-          "Hit IDs": [
-            "ENSP00000498446.1"
-          ]
-        },
-        {
-          "Matched Peptide": "AAAAAAAV",
-          "Genes": "ALKBH5, ARX, ATRN, C11, CHD3, CHD4, CHD5, CHD7, CNNM1, DMBX1, EIF4G3, EN1, FOXB2, GLI2, IRF2BPL, IRS2, KCNN2, KMT5A, MAP3K4, MAZ, MEGF9, MLLT6, MSI1, OLIG2, POU3F3, RBM14, RBM4, RTF1, RUNX2, RXRB, SELENON, SRRM1, TLE1, TMEM158, UBR3, ZFP91, ZFX, ZIC2, ZMIZ1, ZNF384, ZNF385D, ZNF865",
-          "Transcripts": "ENST00000219782.10, ENST00000238647.5, ENST00000257552.7, ENST00000262450.8, ENST00000262919.10, ENST00000264773.7, ENST00000272793.11, ENST00000281523.8, ENST00000295206.7, ENST00000304543.10, ENST00000310092.12, ENST00000316059.7, ENST00000319770.7, ENST00000322945.11, ENST00000323848.14, ENST00000330494.12, ENST00000333337.3, ENST00000334512.10, ENST00000338565.3, ENST00000341310.10, ENST00000354177.9, ENST00000355772.8, ENST00000356713.5, ENST00000357008.7, ENST00000358181.8, ENST00000359524.7, ENST00000360032.4, ENST00000361360.4, ENST00000361492.9, ENST00000361547.7, ENST00000361959.7, ENST00000366920.6, ENST00000371432.7, ENST00000371436.10, ENST00000371438.5, ENST00000371956.8, ENST00000373930.4, ENST00000374315.1, ENST00000374389.8, ENST00000374680.4, ENST00000374685.8, ENST00000375856.5, ENST00000376335.8, ENST00000376484.2, ENST00000376499.8, ENST00000376708.1, ENST00000379044.5, ENST00000379177.5, ENST00000379188.7, ENST00000380358.9, ENST00000382357.4, ENST00000383216.8, ENST00000383217.8, ENST00000389629.9, ENST00000389919.8, ENST00000392142.9, ENST00000396801.7, ENST00000399138.5, ENST00000402868.8, ENST00000408993.6, ENST00000409406.1, ENST00000412278.2, ENST00000415157.6, ENST00000415909.6, ENST00000418323.6, ENST00000423902.7, ENST00000431161.6, ENST00000431820.6, ENST00000433812.1, ENST00000436753.6, ENST00000437950.5, ENST00000438299.5, ENST00000438576.3, ENST00000443603.6, ENST00000445186.5, ENST00000446916.2, ENST00000449692.3, ENST00000452319.6, ENST00000452447.1, ENST00000452692.5, ENST00000455462.6, ENST00000456244.6, ENST00000462174.5, ENST00000463338.5, ENST00000465169.5, ENST00000468440.5, ENST00000478660.6, ENST00000482119.6, ENST00000483281.5, ENST00000485267.5, ENST00000494537.2, ENST00000496404.1, ENST00000503771.2, ENST00000510173.6, ENST00000512097.9, ENST00000524602.5, ENST00000539115.5, ENST00000544040.7, ENST00000544041.5, ENST00000544484.6, ENST00000545521.5, ENST00000545942.6, ENST00000545946.1, ENST00000546985.1, ENST00000562337.5, ENST00000563012.1, ENST00000568411.5, ENST00000568544.5, ENST00000568956.2, ENST00000576263.5, ENST00000618876.2, ENST00000621332.5, ENST00000625924.1, ENST00000631899.2, ENST00000634879.2, ENST00000642594.1, ENST00000642810.1, ENST00000642879.1, ENST00000643335.1, ENST00000644137.1, ENST00000644289.1, ENST00000644480.2, ENST00000644801.1, ENST00000645005.1, ENST00000645022.1, ENST00000645095.1, ENST00000645645.1, ENST00000646268.1, ENST00000646519.1, ENST00000646806.1, ENST00000647337.2, ENST00000672274.1, ENST00000672838.1, ENST00000673685.1, ENST00000674056.1, ENST00000683879.1, ENST00000685872.1, ENST00000693470.1, ENST00000696687.1",
-          "Hit IDs": [
-            "ENSP00000512809.1",
-            "ENSP00000509442.1",
-            "ENSP00000509295.1",
-            "ENSP00000508308.1",
-            "ENSP00000507462.1",
-            "ENSP00000502423.1",
-            "ENSP00000501239.1",
-            "ENSP00000501036.1",
-            "ENSP00000500734.1",
-            "ENSP00000500513.1",
-            "ENSP00000496707.1",
-            "ENSP00000496660.1",
-            "ENSP00000496634.1",
-            "ENSP00000496543.1",
-            "ENSP00000496517.1",
-            "ENSP00000496358.1",
-            "ENSP00000496163.1",
-            "ENSP00000495816.1",
-            "ENSP00000495497.1",
-            "ENSP00000495160.1",
-            "ENSP00000495023.1",
-            "ENSP00000494574.1",
-            "ENSP00000494456.1",
-            "ENSP00000493629.2",
-            "ENSP00000493619.1",
-            "ENSP00000493471.1",
-            "ENSP00000489051.2",
-            "ENSP00000487849.2",
-            "ENSP00000485863.1",
-            "ENSP00000479910.1",
-            "ENSP00000477969.1",
-            "ENSP00000473311.1",
-            "ENSP00000460188.1",
-            "ENSP00000458178.1",
-            "ENSP00000457715.1",
-            "ENSP00000455913.1",
-            "ENSP00000455911.1",
-            "ENSP00000455794.1",
-            "ENSP00000455726.1",
-            "ENSP00000455473.1",
-            "ENSP00000446710.1",
-            "ENSP00000445018.1",
-            "ENSP00000443956.1",
-            "ENSP00000440542.2",
-            "ENSP00000440392.1",
-            "ENSP00000438233.1",
-            "ENSP00000437506.1",
-            "ENSP00000437061.1",
-            "ENSP00000435471.1",
-            "ENSP00000434208.1",
-            "ENSP00000433676.1",
-            "ENSP00000433265.1",
-            "ENSP00000432690.1",
-            "ENSP00000431369.1",
-            "ENSP00000431353.1",
-            "ENSP00000427120.4",
-            "ENSP00000422431.1",
-            "ENSP00000422301.2",
-            "ENSP00000416587.2",
-            "ENSP00000415773.1",
-            "ENSP00000415199.2",
-            "ENSP00000411238.2",
-            "ENSP00000410468.2",
-            "ENSP00000409681.3",
-            "ENSP00000405861.1",
-            "ENSP00000403715.1",
-            "ENSP00000402590.2",
-            "ENSP00000402506.2",
-            "ENSP00000402383.1",
-            "ENSP00000400593.1",
-            "ENSP00000400104.2",
-            "ENSP00000398992.1",
-            "ENSP00000398350.2",
-            "ENSP00000397488.1",
-            "ENSP00000393870.2",
-            "ENSP00000393286.2",
-            "ENSP00000392028.1",
-            "ENSP00000390436.1",
-            "ENSP00000388552.2",
-            "ENSP00000386894.1",
-            "ENSP00000386561.2",
-            "ENSP00000384629.3",
-            "ENSP00000382091.4",
-            "ENSP00000380019.3",
-            "ENSP00000375986.4",
-            "ENSP00000374280.4",
-            "ENSP00000372704.4",
-            "ENSP00000372703.4",
-            "ENSP00000371794.3",
-            "ENSP00000369716.4",
-            "ENSP00000368486.4",
-            "ENSP00000368475.1",
-            "ENSP00000368332.4",
-            "ENSP00000365898.1",
-            "ENSP00000365682.3",
-            "ENSP00000365667.2",
-            "ENSP00000365514.3",
-            "ENSP00000365016.3",
-            "ENSP00000363817.4",
-            "ENSP00000363812.3",
-            "ENSP00000363510.3",
-            "ENSP00000363434.1",
-            "ENSP00000363040.3",
-            "ENSP00000361024.4",
-            "ENSP00000360493.1",
-            "ENSP00000360491.6",
-            "ENSP00000360486.4",
-            "ENSP00000355887.2",
-            "ENSP00000355141.2",
-            "ENSP00000355001.2",
-            "ENSP00000354592.3",
-            "ENSP00000354586.5",
-            "ENSP00000353132.3",
-            "ENSP00000352514.5",
-            "ENSP00000350907.4",
-            "ENSP00000349508.3",
-            "ENSP00000349147.4",
-            "ENSP00000348018.4",
-            "ENSP00000346109.5",
-            "ENSP00000344473.6",
-            "ENSP00000343384.3",
-            "ENSP00000339030.5",
-            "ENSP00000334474.5",
-            "ENSP00000332628.7",
-            "ENSP00000331040.3",
-            "ENSP00000326261.8",
-            "ENSP00000321650.4",
-            "ENSP00000313362.6",
-            "ENSP00000309166.8",
-            "ENSP00000304985.5",
-            "ENSP00000295206.5",
-            "ENSP00000281523.2",
-            "ENSP00000272793.5",
-            "ENSP00000264773.2",
-            "ENSP00000262919.5",
-            "ENSP00000262450.3",
-            "ENSP00000257552.2",
-            "ENSP00000238647.3",
-            "ENSP00000219782.6"
-          ]
-        }
-      ]
+      "count": 0,
+      "query_peptide": "VSTP",
+      "matches": []
     }
   },
   "6-41754573-41754573-C-CCTT": {
@@ -5663,8 +5186,8 @@
     "best_peptide_wt": "ATLSRTLLA",
     "best_hla_allele": "HLA-E*01:01",
     "reference_matches": {
-      "count": 5,
-      "query_peptide": "TLSRTLLLAAAGGSS",
+      "count": 1,
+      "query_peptide": "SATLSRTLLLAAAGGSS",
       "matches": [
         {
           "Matched Peptide": "LSRTLLLAAA",
@@ -5672,17 +5195,6 @@
           "Transcripts": "ENST00000618550.5",
           "Hit IDs": [
             "ENSP00000482374.1"
-          ]
-        },
-        {
-          "Matched Peptide": "LLAAAGGSS",
-          "Genes": "PRICKLE4",
-          "Transcripts": "ENST00000335515.10, ENST00000359201.6, ENST00000394260.2, ENST00000458694.6",
-          "Hit IDs": [
-            "ENSP00000404911.1",
-            "ENSP00000377803.1",
-            "ENSP00000352128.6",
-            "ENSP00000335185.6"
           ]
         }
       ]

@@ -61,11 +61,20 @@ class OutputParser(metaclass=ABCMeta):
                 matches += 1
         return matches
 
-    def find_mutation_position(self, wt_epitope_seq, mt_epitope_seq):
+    def find_first_mutation_position(self, wt_epitope_seq, mt_epitope_seq):
         for i,(wt_aa,mt_aa) in enumerate(zip(wt_epitope_seq,mt_epitope_seq)):
             if wt_aa != mt_aa:
                 return i+1
-        return 0
+
+    def find_mutation_positions(self, wt_epitope_seq, mt_epitope_seq):
+        mutated_positions = []
+        for i,(wt_aa,mt_aa) in enumerate(zip(wt_epitope_seq,mt_epitope_seq)):
+            if wt_aa != mt_aa:
+                mutated_positions.append(i+1)
+        if len(mutated_positions) == 0:
+            return "NA"
+        else:
+            return ", ".join([str(x) for x in mutated_positions])
 
     def aa_ins_change_len(self, aa_change):
         aac = aa_change.split('/')
@@ -172,8 +181,13 @@ class OutputParser(metaclass=ABCMeta):
             return {'score': float(line['BigMHC_IM'])}
         elif method.lower() == 'netmhcpan_el':
             return {'score': float(line['score'])}
-        elif method.lower() == 'netmhciipan_el':
-            return {'score': float(line['score'])}
+        elif 'netmhciipan_el' in method.lower():
+            if 'score' in line:
+                return {'score': float(line['score'])}
+            elif 'ic50' in line:
+                return {'score': float(line['ic50'])}
+            else:
+                raise Exception("Missing expected columns: 'score' or 'ic50' in NetMHCIIpanEL output")
         else:
             return {'ic50': float(line['ic50'])}
 
@@ -206,24 +220,12 @@ class OutputParser(metaclass=ABCMeta):
             result['wt_epitope_seq'] = wt_epitope_seq
             result['wt_scores']      = wt_result['wt_scores']
             result['wt_percentiles'] = wt_result['wt_percentiles']
+            result['mutation_position'] = self.find_mutation_positions(wt_epitope_seq, mt_epitope_seq)
         else:
             result['wt_epitope_seq'] = 'NA'
             result['wt_scores']      = self.format_match_na(result, 'score')
             result['wt_percentiles'] = self.format_match_na(result, 'percentile')
-
-        if mt_epitope_seq == wt_epitope_seq:
             result['mutation_position'] = 'NA'
-        else:
-            if previous_result:
-                previous_mutation_position = self.position_to_tuple(previous_result['mutation_position'])
-                if previous_mutation_position == 'NA':
-                    result['mutation_position'] = str(self.find_mutation_position(wt_epitope_seq, mt_epitope_seq))
-                elif previous_mutation_position[0] > 0:
-                    result['mutation_position'] = str(previous_mutation_position[0] - 1)
-                else:
-                    result['mutation_position'] = '0'
-            else:
-                result['mutation_position'] = str(self.find_mutation_position(wt_epitope_seq, mt_epitope_seq))
 
     def match_wildtype_and_mutant_entry_for_frameshift(self, result, mt_position, wt_results, previous_result):
         #vars for later use
@@ -236,13 +238,15 @@ class OutputParser(metaclass=ABCMeta):
             result['wt_scores']      = self.format_match_na(result, 'score')
             result['wt_percentiles'] = self.format_match_na(result, 'percentile')
             result['wt_epitope_position'] = 'NA'
-            previous_mutation_position = self.position_to_tuple(previous_result['mutation_position'])
-            if previous_mutation_position == 'NA':
-                result['mutation_position'] = 'NA'
-            elif previous_mutation_position[0] == 1:
-                result['mutation_position'] = '1-{}'.format(peptide_length)
-            else:
-                result['mutation_position'] = '{}-{}'.format(previous_mutation_position[0]-1, peptide_length)
+            result['mutation_position'] = 'NA'
+
+            #previous_mutation_position = self.position_to_tuple(previous_result['mutation_position'])
+            #if previous_mutation_position == 'NA':
+            #    result['mutation_position'] = 'NA'
+            #elif previous_mutation_position[0] == 1:
+            #    result['mutation_position'] = '1-{}'.format(peptide_length)
+            #else:
+            #    result['mutation_position'] = '{}-{}'.format(previous_mutation_position[0]-1, peptide_length)
             return
 
         mt_epitope_seq = result['mt_epitope_seq']
@@ -250,7 +254,7 @@ class OutputParser(metaclass=ABCMeta):
         wt_epitope_seq = wt_result['wt_epitope_seq']
         if mt_epitope_seq == wt_epitope_seq:
             #The MT epitope does not overlap the frameshift mutation
-            result['wt_epitope_seq']    = wt_result['wt_epitope_seq']
+            result['wt_epitope_seq']    = wt_epitope_seq
             result['wt_scores']         = wt_result['wt_scores']
             result['wt_percentiles']    = wt_result['wt_percentiles']
             result['mutation_position'] = 'NA'
@@ -263,6 +267,7 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_epitope_seq'] = wt_result['wt_epitope_seq']
                 result['wt_scores']      = wt_result['wt_scores']
                 result['wt_percentiles'] = wt_result['wt_percentiles']
+                result['mutation_position'] = self.find_mutation_positions(wt_epitope_seq, mt_epitope_seq)
             else:
                 #The minimum amino acid match count is not met
                 #Even though there is a matching WT epitope there are not enough overlapping amino acids
@@ -270,11 +275,7 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_epitope_seq'] = 'NA'
                 result['wt_scores']      = self.format_match_na(result, 'score')
                 result['wt_percentiles'] = self.format_match_na(result, 'percentile')
-            mutation_position = self.find_mutation_position(wt_epitope_seq, mt_epitope_seq)
-            if mutation_position == peptide_length:
-                result['mutation_position'] = '{}'.format(mutation_position)
-            else:
-                result['mutation_position'] = '{}-{}'.format(mutation_position, peptide_length)
+                result['wt_epitope_seq'] = 'NA'
             result['wt_epitope_position'] = match_position
 
     def match_wildtype_and_mutant_entry_for_inframe_indel(self, result, mt_position, wt_results, previous_result, iedb_results_for_wt_iedb_result_key):
@@ -284,16 +285,16 @@ class OutputParser(metaclass=ABCMeta):
             best_match_position           = previous_result['wt_epitope_position'] + 1
             result['wt_epitope_position'] = best_match_position
             result['match_direction']     = 'right'
-            result['mutation_position']   = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
 
             #We need to ensure that the matched WT eptiope has enough overlapping amino acids with the MT epitope
             best_match_wt_result = wt_results[str(best_match_position)]
-            total_matches        = self.determine_total_matches(result['mt_epitope_seq'], best_match_wt_result['wt_epitope_seq'])
+            total_matches = self.determine_total_matches(result['mt_epitope_seq'], best_match_wt_result['wt_epitope_seq'])
             if total_matches and total_matches >= self.min_match_count(int(result['peptide_length'])):
                 #The minimum amino acid match count is met
                 result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
                 result['wt_scores']      = best_match_wt_result['wt_scores']
                 result['wt_percentiles'] = best_match_wt_result['wt_percentiles']
+                result['mutation_position'] = self.find_mutation_positions(mt_epitope_seq, best_match_wt_result['wt_epitope_seq'])
             else:
                 #The minimum amino acid match count is not met
                 #Even though there is a matching WT epitope there are not enough overlapping amino acids
@@ -301,6 +302,7 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_epitope_seq'] = 'NA'
                 result['wt_scores']      = self.format_match_na(result, 'score')
                 result['wt_percentiles'] = self.format_match_na(result, 'percentile')
+                result['mutation_position'] = 'NA'
             return
 
         #In all other cases the WT epitope at the same position is used as the baseline match
@@ -312,12 +314,9 @@ class OutputParser(metaclass=ABCMeta):
             result['wt_epitope_seq'] = 'NA'
             result['wt_scores']      = self.format_match_na(result, 'score')
             result['wt_percentiles'] = self.format_match_na(result, 'percentile')
-            #We then infer the mutation position and match direction from the previous MT epitope
+            result['mutation_position'] = 'NA'
+            #We then infer the match direction from the previous MT epitope
             result['match_direction'] = previous_result['match_direction']
-            if previous_result['mutation_position'] == 'NA' or previous_result['mutation_position'] == '1':
-                result['mutation_position'] = 'NA'
-            else:
-                result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
             return
 
         baseline_best_match_wt_result      = wt_results[baseline_best_match_position]
@@ -368,6 +367,7 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
                 result['wt_scores']      = best_match_wt_result['wt_scores']
                 result['wt_percentiles'] = best_match_wt_result['wt_percentiles']
+                result['mutation_position'] = self.find_mutation_positions(best_match_wt_result['wt_epitope_seq'], mt_epitope_seq)
             else:
                 #The minimum amino acid match count is not met
                 #Even though there is a matching WT epitope there are not enough overlapping amino acids
@@ -375,22 +375,8 @@ class OutputParser(metaclass=ABCMeta):
                 result['wt_epitope_seq'] = 'NA'
                 result['wt_scores']      = self.format_match_na(result, 'score')
                 result['wt_percentiles'] = self.format_match_na(result, 'percentile')
+                result['mutation_position'] = 'NA'
 
-            if result['variant_type'] == 'inframe_ins':
-                mutation_position = self.find_ins_mut_position(baseline_best_match_wt_epitope_seq, mt_epitope_seq, result['amino_acid_change'], match_direction)
-                if mutation_position is None:
-                    result['mutation_position'] = 'NA'
-                else:
-                    if previous_result is None:
-                        result['mutation_position'] = '{}-{}'.format(mutation_position[0], mutation_position[1]) if len(mutation_position)==2 else '{}'.format(mutation_position[0])
-                    else:
-                        if previous_result['mutation_position'] == 'NA':
-                            result['mutation_position'] = '{}-{}'.format(mutation_position[0], mutation_position[1]) if len(mutation_position)==2 else '{}'.format(mutation_position[0])
-                        else:
-                            result['mutation_position'] = self.determine_ins_mut_position_from_previous_result(previous_result, mt_epitope_seq, result)
-            elif result['variant_type'] == 'inframe_del':
-                mutation_position = self.find_mutation_position(baseline_best_match_wt_epitope_seq, mt_epitope_seq)
-                result['mutation_position']   = '{}-{}'.format(mutation_position-1, mutation_position)
             result['match_direction']     = match_direction
             result['wt_epitope_position'] = best_match_position
 
@@ -596,7 +582,7 @@ class OutputParser(metaclass=ABCMeta):
                 headers.append("%s MT Score" % pretty_method)
                 continue
 
-            if method in ['netmhcpan_el', 'netmhciipan_el']:
+            if 'netmhciipan_el' in method or 'netmhcpan_el' in method:
                 headers.append("%s WT Score" % pretty_method)
                 headers.append("%s MT Score" % pretty_method)
             else:
@@ -620,9 +606,12 @@ class OutputParser(metaclass=ABCMeta):
 
     def prediction_methods(self):
         methods = set()
+        pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
+        
         for input_iedb_file in self.input_iedb_files:
-            # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
-            method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
+            filename = os.path.basename(input_iedb_file)
+            match = pattern.match(filename)
+            method = match.group(1)
             methods.add(method)
 
         return sorted(list(methods))
@@ -761,6 +750,7 @@ class OutputParser(metaclass=ABCMeta):
 
 
 class DefaultOutputParser(OutputParser):
+
     def parse_iedb_file(self, tsv_entries):
         with open(self.key_file, 'r') as key_file_reader:
             protein_identifiers_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
@@ -769,8 +759,12 @@ class DefaultOutputParser(OutputParser):
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
-                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
+                filename = os.path.basename(input_iedb_file)
+
+                pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
+                match = pattern.match(filename)
+                method = match.group(1)
+
                 for line in iedb_tsv_reader:
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
                         continue
@@ -831,8 +825,12 @@ class UnmatchedSequencesOutputParser(OutputParser):
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
-                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
+                filename = os.path.basename(input_iedb_file)
+        
+                pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
+                match = pattern.match(filename)
+                method = match.group(1)
+
                 for line in iedb_tsv_reader:
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
                         continue
@@ -946,7 +944,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 headers.append("%s Score" % pretty_method)
                 continue
 
-            if method in ['netmhcpan_el', 'netmhciipan_el']:
+            if 'netmhciipan_el' in method or 'netmhcpan_el' in method:
                 headers.append("%s Score" % pretty_method)
             else:
                 headers.append("%s IC50 Score" % pretty_method)
@@ -1017,8 +1015,12 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             # input iedb file
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                # we remove "sample_name." prefix from filename and then first part before a dot is the method name 
-                method = (os.path.basename(input_iedb_file)[len(self.sample_name)+1:]).split('.', 1)[0]
+                filename = os.path.basename(input_iedb_file)
+        
+                pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
+                match = pattern.match(filename)
+                method = match.group(1)
+
                 # header: allele, seq_num, start, end, length, peptide, ic50, percentile_rank
                 for line in iedb_tsv_reader:
                     if "Warning: Potential DNA sequence(s)" in line['allele']:
