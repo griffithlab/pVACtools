@@ -30,8 +30,7 @@ parameter specifies how to evaluate junctional epitopes. The ``conservative``
 option fails a junction if a junctional epitope fails EITHER the binding threshold
 OR the percentile threshold (default). The ``exploratory`` option fails a junction
 only if a junctional epitope fails BOTH the binding threshold AND the percentile threshold.
-The latter will lead to greater possibility of a successful run since a
-junction is less likely to be invalidated.
+The latter will increase the odds of a successful run (since a junction is less likely to be invalidated) but also increase the odds of a true junctional epitope.
 
 Running pVACvector with spacer amino acid sequences may help eliminate junctional
 epitopes. The list of spacers to be tested is specified using the ``--spacers``
