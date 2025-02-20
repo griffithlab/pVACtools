@@ -161,7 +161,7 @@ class JunctionToFasta():
         final_seq = ''
         for x in coordinates:
             start = int(x.split(',')[0]); end = int(x.split(',')[1])
-            seq = self.personal_fasta.get_seq(self.chrom, start, end)
+            seq = self.personal_fasta.get_seq(str(self.chrom), start, end)
             final_seq += str(seq)
         # using Seq from Bio.Seq to translate str_seq
         # positive strand
