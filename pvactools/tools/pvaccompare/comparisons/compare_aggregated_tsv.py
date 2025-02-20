@@ -1,4 +1,4 @@
-from ..run_utils import *
+from pvactools.tools.pvaccompare.run_utils import *
 import logging
 
 

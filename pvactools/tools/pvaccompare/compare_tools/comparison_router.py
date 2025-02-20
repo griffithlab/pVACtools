@@ -1,7 +1,7 @@
 import glob
 import os
 import logging
-from ..runners import *
+from pvactools.tools.pvaccompare.runners import *
 
 
 def find_file(results_folder, subfolder, pattern):

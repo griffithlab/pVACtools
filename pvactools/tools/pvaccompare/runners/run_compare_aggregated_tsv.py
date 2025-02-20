@@ -1,5 +1,5 @@
-from ..comparisons import CompareAggregatedTSV
-from ..run_utils import *
+from pvactools.tools.pvaccompare.comparisons import CompareAggregatedTSV
+from pvactools.tools.pvaccompare.run_utils import *
 import logging
 
 
