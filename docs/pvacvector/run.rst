@@ -25,6 +25,13 @@ of a design, while more conservative settings of 1000nM and lowest/best binding
 value (``--top-score-metric lowest``) will give more confidence that there are
 no junctional neoepitopes.
 
+When running pVACvector with a ``--percentile-threshold`` the ``--percentile-threshold-strategy``
+parameter specifies how to evaluate junctional epitopes. The ``conservative``
+option fails a junction if a junctional epitope fails EITHER the binding threshold
+OR the percentile threshold (default). The ``exploratory`` option fails a junction
+only if a junctional epitope fails BOTH the binding threshold AND the percentile threshold.
+The latter will increase the odds of a successful run (since a junction is less likely to be invalidated) but also increase the odds of a true junctional epitope.
+
 Running pVACvector with spacer amino acid sequences may help eliminate junctional
 epitopes. The list of spacers to be tested is specified using the ``--spacers``
 parameter. Peptide combinations without a spacer can be tested by including
