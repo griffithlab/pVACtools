@@ -1,5 +1,5 @@
-from ..run_utils import *
-from ..comparisons import CompareReferenceMatchesTSV
+from pvactools.tools.pvaccompare.run_utils import *
+from pvactools.tools.pvaccompare.comparisons import CompareReferenceMatchesTSV
 import logging
 
 

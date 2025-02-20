@@ -1,6 +1,6 @@
 import logging
-from ..run_utils import *
-from ..comparisons import CompareYML
+from pvactools.tools.pvaccompare.run_utils import *
+from pvactools.tools.pvaccompare.comparisons import CompareYML
 
 
 def main(input_file1, input_file2, output_path, class_type):
