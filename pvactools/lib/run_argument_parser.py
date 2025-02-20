@@ -42,56 +42,8 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="The directory for writing all result files."
         )
         parser.add_argument(
-            "-e1", "--class-i-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
-            default=[8,9,10,11],
-            help="Length of MHC Class I subpeptides (neoepitopes) to predict. "
-                 + "Multiple epitope lengths can be specified using a comma-separated list. "
-                 + "Typical epitope lengths vary between 8-15. "
-                 + "Required for Class I prediction algorithms.",
-        )
-        parser.add_argument(
-                "-e2", "--class-ii-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
-            default=[12,13,14,15,16,17,18],
-            help="Length of MHC Class II subpeptides (neoepitopes) to predict. "
-                 + "Multiple epitope lengths can be specified using a comma-separated list. "
-                 + "Typical epitope lengths vary between 11-30. "
-                 + "Required for Class II prediction algorithms.",
-        )
-        parser.add_argument(
             "--iedb-install-directory",
             help="Directory that contains the local installation of IEDB MHC I and/or MHC II."
-        )
-        parser.add_argument(
-            "-b","--binding-threshold", type=int,
-            default=500,
-            help="Report only epitopes where the mutant allele has ic50 binding scores below this value.",
-        )
-        parser.add_argument(
-            '--percentile-threshold', type=float_range(0.0,100.0),
-            help="Report only epitopes where the mutant allele "
-                 +"has a percentile rank below this value."
-        )
-        parser.add_argument(
-            '--percentile-threshold-strategy',
-            choices=['conservative', 'exploratory'],
-            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default)."
-                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
-            default="conservative",
-        )
-        parser.add_argument(
-            '--allele-specific-binding-thresholds',
-            help="Use allele-specific binding thresholds. To print the allele-specific binding thresholds run `%s allele_specific_cutoffs`. " % tool_name
-                 + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
-            default=False,
-            action='store_true',
-        )
-        parser.add_argument(
-            '-m', '--top-score-metric',
-            choices=['lowest', 'median'],
-            default='median',
-            help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
-                 + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
-                 + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
         )
         parser.add_argument(
             "-r", "--iedb-retries",type=int,
@@ -115,6 +67,58 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Specify the version of NetMHCIIpan or NetMHCIIpanEL to be used during the run.",
         )
         self.parser = parser
+
+    def epitope_args(self):
+        self.parser.add_argument(
+            "-e1", "--class-i-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+            default=[8,9,10,11],
+            help="Length of MHC Class I subpeptides (neoepitopes) to predict. "
+                 + "Multiple epitope lengths can be specified using a comma-separated list. "
+                 + "Typical epitope lengths vary between 8-15. "
+                 + "Required for Class I prediction algorithms.",
+        )
+        self.parser.add_argument(
+                "-e2", "--class-ii-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+            default=[12,13,14,15,16,17,18],
+            help="Length of MHC Class II subpeptides (neoepitopes) to predict. "
+                 + "Multiple epitope lengths can be specified using a comma-separated list. "
+                 + "Typical epitope lengths vary between 11-30. "
+                 + "Required for Class II prediction algorithms.",
+        )
+
+    def binding_args(self, tool_name):
+        self.parser.add_argument(
+            "-b","--binding-threshold", type=int,
+            default=500,
+            help="Report only epitopes where the mutant allele has ic50 binding scores below this value.",
+        )
+        self.parser.add_argument(
+            '--percentile-threshold', type=float_range(0.0,100.0),
+            help="Report only epitopes where the mutant allele "
+                 +"has a percentile rank below this value."
+        )
+        self.parser.add_argument(
+            '--percentile-threshold-strategy',
+            choices=['conservative', 'exploratory'],
+            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default)."
+                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
+            default="conservative",
+        )
+        self.parser.add_argument(
+            '--allele-specific-binding-thresholds',
+            help="Use allele-specific binding thresholds. To print the allele-specific binding thresholds run `%s allele_specific_cutoffs`. " % tool_name
+                 + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
+            default=False,
+            action='store_true',
+        )
+        self.parser.add_argument(
+            '-m', '--top-score-metric',
+            choices=['lowest', 'median'],
+            default='median',
+            help="The ic50 scoring metric to use when filtering epitopes by binding-threshold or minimum fold change. "
+                 + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
+                 + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
+        )
 
     def prediction_args(self):
         self.parser.add_argument(
@@ -397,6 +401,8 @@ class PvacbindRunArgumentParser(RunArgumentParser):
         tool_name = "pvacbind"
         input_file_help = "A FASTA file"
         RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.epitope_args()
+        self.binding_args(tool_name)
         self.prediction_args()
         self.aggregated_report_args()
 
@@ -405,6 +411,8 @@ class PvacfuseRunArgumentParser(RunArgumentParser):
         tool_name = "pvacfuse"
         input_file_help="An AGFusion output directory or Arriba fusion.tsv output file."
         RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.epitope_args()
+        self.binding_args(tool_name)
         self.prediction_args()
         self.fasta_generation()
         self.aggregated_report_args()
@@ -415,6 +423,8 @@ class PvacspliceRunArgumentParser(RunArgumentParser):
         tool_name = "pvacsplice"
         input_file_help = "RegTools junctions output TSV file"
         RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.epitope_args()
+        self.binding_args(tool_name)
         self.pass_only_args()
         self.expression_coverage_args()
         self.prediction_args()
@@ -431,6 +441,8 @@ class PvacseqRunArgumentParser(RunArgumentParser):
             "The VCF may be gzipped (requires tabix index)."
         )
         RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.epitope_args()
+        self.binding_args(tool_name)
         self.pass_only_args()
         self.expression_coverage_args()
         self.prediction_args()
@@ -443,4 +455,53 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
         tool_name = 'pvacvector'
         input_file_help = "A .fa file with peptides or a pVACseq .tsv file with epitopes to use for vector design."
         RunArgumentParser.__init__(self, tool_name, input_file_help)
+        self.parser.add_argument(
+            "-e1", "--class-i-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+            default=[8,9,10,11],
+            help="Length of MHC Class I junctional epitopes to predict. "
+                 + "Multiple epitope lengths can be specified using a comma-separated list. "
+                 + "Typical epitope lengths vary between 8-15. "
+                 + "Required for Class I prediction algorithms.",
+        )
+        self.parser.add_argument(
+                "-e2", "--class-ii-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
+            default=[12,13,14,15,16,17,18],
+            help="Length of MHC Class II junctional epitopes to predict. "
+                 + "Multiple epitope lengths can be specified using a comma-separated list. "
+                 + "Typical epitope lengths vary between 11-30. "
+                 + "Required for Class II prediction algorithms.",
+        )
+        self.parser.add_argument(
+            "-b","--binding-threshold", type=int,
+            default=500,
+            help="Fail junctions where any junctional epitope has ic50 binding scores below this value.",
+        )
+        self.parser.add_argument(
+            '--percentile-threshold', type=float_range(0.0,100.0),
+            help="Fail junctions where any junctional epitope "
+                 +"has a percentile rank below this value."
+        )
+        self.parser.add_argument(
+            '--percentile-threshold-strategy',
+            choices=['conservative', 'exploratory'],
+            help="Specify the how to evaluate junctional epitopes if a percentile threshold is set. "
+                 + " The 'conservative' option fails a junction if a junctional epitope fails EITHER the binding threshold OR the percentile threshold (default)."
+                 + " The 'exploratory' option fails a junction only if a junctional epitope fails BOTH the binding threshold AND the percentile threshold.",
+            default="conservative",
+        )
+        self.parser.add_argument(
+            '--allele-specific-binding-thresholds',
+            help="Use allele-specific binding thresholds when evaluating junctional epitopes. To print the allele-specific binding thresholds run `pvacvector allele_specific_cutoffs`. "
+                 + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
+            default=False,
+            action='store_true',
+        )
+        self.parser.add_argument(
+            '-m', '--top-score-metric',
+            choices=['lowest', 'median'],
+            default='median',
+            help="The ic50 scoring metric to use when evaluating junctional epitopes by binding-threshold. "
+                 + "lowest: Use the best MT Score (i.e. the lowest MT ic50 binding score of all chosen prediction methods). "
+                 + "median: Use the median MT Score (i.e. the  median MT ic50 binding score of all chosen prediction methods)."
+        )
         self.pvacvector()
