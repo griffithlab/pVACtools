@@ -22,6 +22,10 @@ A cancer immunotherapy pipeline for identifying and prioritizing neoantigens fro
 
 A tool for detecting neoantigens resulting from gene fusions.
 
+**pVACsplice**
+
+A tool for detecting neoantigens resulting from splice site variants.
+
 **pVACvector**
 
 A tool designed to aid specifically in the construction of DNA vector-based cancer vaccines.
