@@ -2,10 +2,10 @@ from setuptools import setup
 import os
 
 import sys
-if (sys.version_info.major, sys.version_info.minor) < (3,7):
-    print("This python version is not supported:")
+if (sys.version_info.major, sys.version_info.minor) < (3, 9) or (sys.version_info.major, sys.version_info.minor) > (3, 11):
+    print("This Python version is not supported:")
     print(sys.version)
-    print("pVACtools requires python 3.7 or greater")
+    print("pVACtools supports Python versions 3.9, 3.10, and 3.11")
     sys.exit(1)
 
 try:
@@ -116,8 +116,6 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
 
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
