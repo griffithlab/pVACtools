@@ -62,34 +62,46 @@ New in Version |release|
 
 This is a minor feature release. It adds the following features:
 
-- This update allows pVACvector to remove peptides in order to find a partial solution if a full solution cannot be found.
-  The number of peptides permitted to be removed can be controlled by the ``--allow-n-peptide-exclusion`` parameter. by
-  @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1168
-- This update adds functionalities to pVACvector to prevent the core neoantigen candidate from getting clipped. by
-  @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1174
-- When only elution algorithms are chosen and no binding affinity algorithms,
-  the pipelines will now output a warning message that no aggregated report
-  can be created. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1165
-- When creating the aggregated report, the Best Peptide for some variants
-  may not match the aggregate inclusion criteria and no detail information
-  would be available for this peptide when investigating the variant. This
-  update ensures that the Best Peptide is always included in the metrics file
-  and counted toward the Num Included Peptides count. by @susannasiebert in
-  https://github.com/griffithlab/pVACtools/pull/1177
-- The evaluation buttons in pVACview will now be colored green for Accept, red
-  for Reject, and orange for Review to visually differentiate the different
-  statuses. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1173
+- Add a new parameter ``--percentile-threshold-strategy`` that controls
+  filtering and tiering behavior when a percentile threshold is set.
+  If this parameter is set to ``conservative`` a candidate has to pass both
+  the binding affinity and percentile score thresholds. If it is set to
+  ``exploratory`` it only has to pass either the binding affinity or the
+  percentile score threshold. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1185
+- Add a new parameter ``--netmhciipan-version`` that controls which version
+  of ``NetMHCIIpan`` and ``NetMHCIIpanEL`` are being run. The default remains
+  version 4.1. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1181
+- The meaning of the Mutation Position column (in the all_epitopes.tsv and filtered.tsv pVACseq reports)
+  and the Pos column (in the aggregated pVACseq report) has been updated to reflect the position(s) in
+  the mutant epitope that are different from the matched wildtype epitope.
+
+  - This is different from the previous behaviors, particular for indels, where previously
+    this column was trying to reflect where the mutation occurred. However, this has proven
+    difficult to programmatically determine correctly for cases with proximal variants,
+    in repetitive regions, or where the mutant amino acid(s) are similar the wildtype amino
+    acid(s).
+  - For inframe indels, this change might now result in some positions getting marked as different
+    from the matched wildtype amino acid even though they aren't technically
+    part of the variant because wildtype amino acids are shifted in relation to the mutant in this
+    type of variants. These shifted amino acids, although not mutated, are now different
+    between mutant and matched wildtype epitope and marked as such. We do believe that this is the better approach
+    because it allows us to evaluate the absolute differences between the matched wildtype and mutant epitopes.
+  - These columns are now always ``NA`` if the wildtype epitope is ``NA``
+  - For making the anchor position evaluation, epitopes with more than two Mutation Position/Pos entries are auto-passed.
 
 It also fixes the following problem(s):
 
-- This release removes two parameters from pVACvector: ``--aggregate-inclusion-binding-threshold`` and ``--aggregate-inclusion-count-limit``
-  which are not applicable to this pipeline. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1180
-- This release fixes various pVACview bugs. Specifically, it fixes a bug that
-  would result in pVACview crashing when a variant with a Num Included
-  Peptides of 0 was selected. It also fixes a bug where re-tiering the
-  candidates before selecting evaluations would result in evaluations being
-  associated with incorrect variants. Additionally, it fixes several
-  deprecation warnings and typos. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1173
+- Fix a bug in the Mutation Position/Pos column where proximal variants and
+  certain inframe indels might result in the incorrect position(s) being
+  identified. As part of this bugfix, the meaning of these columns has been
+  updated (see above.)
+- Fix Mutation Position column by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1206
+- Fix pVACvector bug that would result in not all junctional epitopes getting tested on clipping. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1200
+- Fix a pVACvector bug that would result in an error if the ``-k`` flag was not set in a run. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1186
+- Fix warning related to new lines in the mouse anchor data files in pVACview. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1184
+- Fix the column tooltips in pVACview which were previously shifted by a couple of columns. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1189
+- Fix description of the ``ref_fasta`` positional parameter in pvacsplice. by @mhoang22 in https://github.com/griffithlab/pVACtools/pull/1201
+- Fix an issue in pVACsplice which would throw an error with non-human transcripts. by @mhoang22 in https://github.com/griffithlab/pVACtools/pull/1198
 
 New in Version 5
 ----------------
