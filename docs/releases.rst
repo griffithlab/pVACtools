@@ -23,3 +23,4 @@ Release Notes
    releases/4_4
    releases/5_0
    releases/5_1
+   releases/5_2
