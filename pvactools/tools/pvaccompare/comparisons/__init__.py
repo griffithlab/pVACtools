@@ -1,0 +1,5 @@
+from .compare_aggregated_tsv import CompareAggregatedTSV
+from .compare_json import CompareJSON
+from .compare_reference_matches_tsv import CompareReferenceMatchesTSV
+from .compare_unaggregated_tsv import CompareUnaggregatedTSV
+from .compare_yml import CompareYML
