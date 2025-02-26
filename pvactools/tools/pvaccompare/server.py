@@ -13,6 +13,10 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Pragma", "no-cache")
         self.send_header("Expires", "0")
         super().end_headers()
+    
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.end_headers()
 
 
 def main():
