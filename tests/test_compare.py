@@ -5,27 +5,54 @@ import time
 import py_compile
 import argparse
 import os
-import pvactools.tools.compare as pvaccompare_main
+import tempfile
+import argparse
+from unittest.mock import MagicMock
+import pvactools.tools.compare as compare_main
+import pvactools.tools.pvaccompare.compare_tools.comparison_router as comparison_router
+import pvactools.tools.pvaccompare.compare_tools.validators as comparison_validators
 
 # python -m unittest tests/test_compare.py
 # python -m unittest discover -s tests
 class TestRunCompare(unittest.TestCase):
-    def setUp(self):
-        self.server_process = subprocess.Popen(
+    @classmethod
+    def setUpClass(cls):
+        cls.url = "http://localhost:8080/pvactools/tools/pvaccompare/html_report/main.html"
+        cls.data_dir = "tests/test_data/pvaccompare/"
+        cls.aggregated_columns = ["Best Peptide", "Best Transcript"]
+        cls.unaggregated_columns = ["Median MT IC50 Score", "Median WT IC50 Score"]
+        cls.reference_match_columns = ["Peptide", "Hit Definition"]
+        cls.server_process = subprocess.Popen(
             ["python", "-m", "pvactools.tools.pvaccompare.server"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
         time.sleep(1)
 
-    def tearDown(self):
-        self.server_process.terminate()
-        self.server_process.wait()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server_process.terminate()
+        cls.server_process.wait()
+
 
     def test_compare_server(self):
-        url = "http://localhost:8080/pvactools/tools/pvaccompare/html_report/main.html"
-        response = requests.get(url)
+        response = requests.get(self.url)
         self.assertEqual(response.status_code, 200)
+
+
+    def test_cors_headers(self):
+        response = requests.get(self.url)
+        self.assertEqual(response.headers.get("Access-Control-Allow-Origin"), "*")
+        self.assertEqual(response.headers.get("Access-Control-Allow-Methods"), "GET, OPTIONS")
+        self.assertIn("x-requested-with", response.headers.get("Access-Control-Allow-Headers", ""))
+
+
+    def test_options_request(self):
+        response = requests.options(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers.get("Access-Control-Allow-Methods"), "GET, OPTIONS")
+
 
     def test_compare_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -34,7 +61,88 @@ class TestRunCompare(unittest.TestCase):
             "compare.py"
         ))
         self.assertTrue(compiled_pvac_path)
-    
+
+
     def test_compare_parser(self):
-        parser = pvaccompare_main.define_parser()
+        parser = compare_main.define_parser()
         self.assertEqual(type(parser), argparse.ArgumentParser)
+
+
+    def test_compare_aggregated_validator(self):
+        aggregated_columns = self.aggregated_columns + ["Test1"]
+
+        parser = compare_main.define_parser()
+        parser.error = MagicMock()
+        comparison_validators.validate_aggregated_columns(aggregated_columns, parser)
+        parser.error.assert_called_once()
+        error_msg = parser.error.call_args[0][0]
+        self.assertIn("Invalid aggregated column 'Test1' specified.", error_msg)
+    
+
+    def test_compare_unaggregated_validator(self):
+        unaggregated_columns = self.unaggregated_columns + ["Test1"]
+
+        parser = compare_main.define_parser()
+        parser.error = MagicMock()
+        comparison_validators.validate_unaggregated_columns(unaggregated_columns, parser)
+        parser.error.assert_called_once()
+        error_msg = parser.error.call_args[0][0]
+        self.assertIn("Invalid unaggregated column 'Test1' specified.", error_msg)
+    
+
+    def test_compare_reference_match_validator(self):
+        reference_match_columns = self.reference_match_columns + ["Test1"]
+
+        parser = compare_main.define_parser()
+        parser.error = MagicMock()
+        comparison_validators.validate_reference_match_columns(reference_match_columns, parser)
+        parser.error.assert_called_once()
+        error_msg = parser.error.call_args[0][0]
+        self.assertIn("Invalid reference match column 'Test1' specified.", error_msg)
+
+
+    def test_run_comparison(self):
+        with tempfile.TemporaryDirectory() as input1, tempfile.TemporaryDirectory() as input2, tempfile.TemporaryDirectory() as output:
+            input1_mhc_class_i = os.path.join(input1, "MHC_Class_I")
+            input2_mhc_class_i = os.path.join(input2, "MHC_Class_I")
+            output_mhc_class_i = os.path.join(output, "mhc_class_i")
+            
+            os.makedirs(input1_mhc_class_i)
+            os.makedirs(input2_mhc_class_i)
+            os.makedirs(output_mhc_class_i)
+
+            test_data_files = {
+                "all_epitopes.aggregated.metrics.json": self.data_dir + "json_input1.json",
+                "all_epitopes.aggregated.tsv": self.data_dir + "aggregated_input1.tsv",
+                "all_epitopes.tsv": self.data_dir + "unaggregated_input1.tsv",
+                "reference_matches": self.data_dir + "reference_matches_input1.tsv"
+            }
+
+            for file_name, test_data_path in test_data_files.items():
+                file_path_input1 = os.path.join(input1_mhc_class_i, file_name)
+                file_path_input2 = os.path.join(input2_mhc_class_i, file_name)
+
+                with open(test_data_path, "r") as test_file:
+                    test_data = test_file.read()
+
+                with open(file_path_input1, "w") as temp_file1:
+                    temp_file1.write(test_data)
+
+                with open(file_path_input2, "w") as temp_file2:
+                    temp_file2.write(test_data)
+
+            with self.assertLogs(level="INFO") as log:
+                comparison_router.run_comparison(
+                    "1",
+                    input1,
+                    input2,
+                    output,
+                    self.aggregated_columns,
+                    self.unaggregated_columns,
+                    self.reference_match_columns
+                )
+            self.assertIn("ERROR:root:ERROR: Could not locate the input YML file in either results folder for MHC Class I.", log.output)
+            self.assertIn("INFO:root:The JSON metric inputs are identical.", log.output)
+            self.assertIn("INFO:root:The Unaggregated TSV files are identical.", log.output)
+            self.assertIn("INFO:root:The Aggregated TSV files are identical.", log.output)
+            self.assertIn("INFO:root:Successfully generated MHC Class I comparison report.", log.output)
