@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="ico" href="assets/favicon.ico">
+    <link rel="stylesheet" href="libs/quasar/quasar.prod.css">
+    <link rel="stylesheet" href="libs/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>pVACcompare - Report</title>
+</head>
+<body>
+    <div id="app">
+        <directory-selection
+            v-if="!selectedDirectory"
+            @directory-selected="onDirectorySelected">
+        </directory-selection>
+        <template v-if="selectedDirectory">
+            <navbar
+                :current-page-id="currentPageId"
+                :current-class="currentClass"
+                :comparison-items="comparisonItems"
+                :has-mhc-class-i="hasMhcClassI"
+                :has-mhc-class-i-i="hasMhcClassII"
+                @change-directory="onDirectoryChanged"
+                @change-page="onPageChanged"
+                @change-class="onClassChanged">
+            </navbar>
+            <header-template
+                :current-directory="currentDirectory"
+                :current-page-id="currentPageId"
+                :current-comparison="currentComparison"
+                :comparison-items="comparisonItems"
+                :aggregated-data="aggregatedData"
+                :unaggregated-data="unaggregatedData"
+                :input-yml-data="inputYmlData"
+                :json-input-data="jsonInputData"
+                :reference-matches-data="referenceMatchesData">
+            </header-template>
+            <summary-template
+                :current-page-id="currentPageId"
+                :current-comparison="currentComparison"
+                :comparison-items="comparisonItems"
+                :aggregated-data="aggregatedData"
+                :unaggregated-data="unaggregatedData"
+                :input-yml-data="inputYmlData"
+                :json-input-data="jsonInputData"
+                :reference-matches-data="referenceMatchesData">
+            </summary-template>
+            <differences
+                :current-page-id="currentPageId"
+                :current-comparison="currentComparison"
+                :comparison-items="comparisonItems"
+                :aggregated-data="aggregatedData"
+                :unaggregated-data="unaggregatedData"
+                :input-yml-data="inputYmlData"
+                :json-input-data="jsonInputData"
+                :reference-matches-data="referenceMatchesData"
+                :has-unique-variants="hasUniqueVariants">
+            </differences>
+            <variants
+                :current-page-id="currentPageId"
+                :current-comparison="currentComparison"
+                :comparison-items="comparisonItems"
+                :aggregated-data="aggregatedData"
+                :unaggregated-data="unaggregatedData"
+                :input-yml-data="inputYmlData"
+                :json-input-data="jsonInputData"
+                :reference-matches-data="referenceMatchesData"
+                @has-unique-variants-changed="onHasUniqueVariantsChanged">
+            </variants>
+        </template>
+    </div>
+
+    <script src="libs/vue.global.js"></script>
+    <script src="libs/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="libs/quasar/quasar.umd.prod.js"></script>
+    <script type="module">
+        import DirectorySelection from './components/DirectorySelection.js';
+        import Navbar from './components/Navbar.js';
+        import Header from './components/Header.js';
+        import Summary from './components/Summary.js';
+        import Differences from './components/Differences.js';
+        import Variants from './components/Variants.js';
+
+
+        const app = Vue.createApp({
+            data() {
+                return {
+                    selectedDirectory: false,
+                    currentDirectory: null,
+                    currentPageId: 0,
+                    currentClass: 1,
+                    comparisonItems: [],
+                    mhcClassI: [],
+                    mhcClassII: [],
+                    aggregatedData: null,
+                    unaggregatedData: null,
+                    inputYmlData: null,
+                    jsonInputData: null,
+                    referenceMatchesData: null,
+                    hasUniqueVariants: false,
+                };
+            },
+
+            computed: {
+                currentComparison() {
+                    const item = this.comparisonItems[this.currentPageId];
+                    return item ? item : "Unavailable";
+                },
+
+                hasMhcClassI() {
+                    return this.mhcClassI.length > 0;
+                },
+
+                hasMhcClassII() {
+                    return this.mhcClassII.length > 0;
+                },
+            },
+
+            methods: {
+                onDirectoryChanged() {
+                    this.selectedDirectory = false;
+                    this.currentDirectory = null;
+                    this.currentPageId = 0;
+                    this.currentClass = 1;
+                    this.comparisonItems = [];
+                    this.mhcClassI = [];
+                    this.mhcClassII = [];
+                    this.aggregatedData = null;
+                    this.unaggregatedData = null;
+                    this.inputYmlData = null;
+                    this.jsonInputData = null;
+                    this.referenceMatchesData = null;
+                    this.hasUniqueVariants = false;
+                },
+
+                onDirectorySelected(directory, files, mhcClassI, mhcClassII) {
+                    this.selectedDirectory = true;
+                    this.currentDirectory = directory;
+                    this.currentClass = mhcClassI.length === 0 ? 2: 1;
+                    this.mhcClassI = mhcClassI;
+                    this.mhcClassII = mhcClassII;
+                    this.loadJsonFiles();
+                    this.$nextTick(() => {
+                        this.updateComparisonItems();
+                    });
+                },
+
+                onPageChanged(id) {
+                    this.currentPageId = id;
+                },
+
+                onClassChanged(id) {
+                    this.currentClass = id;
+                    this.currentPageId = 0;
+
+                    this.aggregatedData = null;
+                    this.unaggregatedData = null;
+                    this.inputYmlData = null;
+                    this.jsonInputData = null;
+                    this.referenceMatchesData = null;
+
+                    this.loadJsonFiles();
+                    this.updateComparisonItems();
+                },
+
+                onHasUniqueVariantsChanged(value) {
+                    this.hasUniqueVariants = value;
+                },
+
+                loadJsonFiles() {
+                    const filesToLoad = (this.currentClass === 1) ? this.mhcClassI : this.mhcClassII;
+
+                    for (const file of filesToLoad) {
+                        this[file.key] = JSON.parse(file.content);
+                    }
+                },
+
+                updateComparisonItems() {
+                    let count = 0;
+                    const items = [];
+                    if (this.inputYmlData) {
+                        items.push({ id: count++, key: "inputYmlData", file: "log/inputs.yml", name: "Input YML Report" });
+                    }
+                    if (this.unaggregatedData) {
+                        items.push({ id: count++, key: "unaggregatedData", file: "all_epitopes.tsv", name: "All Epitopes Report" });
+                    }
+                    if (this.aggregatedData) {
+                        items.push({ id: count++, key: "aggregatedData", file: "all_epitopes.aggregated.tsv", name: "Aggregated Epitopes Report" });
+                    }
+                    if (this.referenceMatchesData) {
+                        items.push({ id: count++, key: "referenceMatchesData", file: "all_epitopes.aggregated.tsv.reference_matches", name: "Reference Matches Report" });
+                    }
+                    if (this.jsonInputData) {
+                        items.push({ id: count++, key: "jsonInputData", file: "all_epitopes.aggregated.metrics.json", name: "Metrics JSON Report" });
+                    }
+                    this.comparisonItems = items;
+                }
+            }
+        });
+
+        app.component('directory-selection', DirectorySelection);
+        app.component('navbar', Navbar);
+        app.component('header-template', Header);
+        app.component('summary-template', Summary);
+        app.component('differences', Differences);
+        app.component('variants', Variants);
+
+        app.use(Quasar);
+        app.mount('#app');
+    </script>
+</body>
+</html>
