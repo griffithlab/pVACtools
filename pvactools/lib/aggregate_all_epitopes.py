@@ -234,6 +234,7 @@ class AggregateAllEpitopes:
                 'allele_expr_threshold': self.allele_expr_threshold,
                 'maximum_transcript_support_level': self.maximum_transcript_support_level,
                 'percentile_threshold': self.percentile_threshold,
+                'percentile_threshold_strategy': self.percentile_threshold_strategy,
                 'use_allele_specific_binding_thresholds': self.use_allele_specific_binding_thresholds,
                 'mt_top_score_metric': self.mt_top_score_metric,
                 'wt_top_score_metric': self.wt_top_score_metric,
@@ -278,6 +279,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             expn_val=1,
             maximum_transcript_support_level=1,
             percentile_threshold=None,
+            percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
             allele_specific_anchors=False,
@@ -291,6 +293,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.binding_threshold = binding_threshold
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.percentile_threshold = percentile_threshold
+        self.percentile_threshold_strategy = percentile_threshold_strategy
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         self.aggregate_inclusion_count_limit = aggregate_inclusion_count_limit
         self.allele_expr_threshold = trna_vaf * expn_val * 10
@@ -413,26 +416,22 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         else:
             binding_threshold = self.binding_threshold
 
-        anchor_residue_pass = True
         anchors = get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
-        # parse out mutation position from str
+        # parse out mutation positions from str
         position = mutation["Mutation Position"]
         if pd.isna(position):
-            return anchor_residue_pass
-        elif '-' in position:
-            d_ind = position.index('-')
-            if all(pos in anchors for pos in range(int(position[0:d_ind]), int(position[d_ind+1:])+1)):
-                if pd.isna(mutation["{} WT IC50 Score".format(self.wt_top_score_metric)]):
-                    anchor_residue_pass = False
-                elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
-                    anchor_residue_pass = False
+            return True
         else:
-            if int(float(position)) in anchors:
+            positions = position.split(", ")
+            if len(positions) > 2:
+                return True
+            anchor_residue_pass = True
+            if all(int(pos) in anchors for pos in positions):
                 if pd.isna(mutation["{} WT IC50 Score".format(self.wt_top_score_metric)]):
                     anchor_residue_pass = False
                 elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
                     anchor_residue_pass = False
-        return anchor_residue_pass
+            return anchor_residue_pass
 
     #assign mutations to a "Classification" based on their favorability
     def get_tier(self, mutation, vaf_clonal):
@@ -440,6 +439,17 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
         else:
             binding_threshold = self.binding_threshold
+        
+        ic50_pass = mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold
+        percentile_pass = (
+            self.percentile_threshold is None or 
+            mutation["{} MT Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold
+        )
+        binding_pass = (
+            (ic50_pass and percentile_pass) 
+            if self.percentile_threshold_strategy == 'conservative' 
+            else (ic50_pass or percentile_pass)
+        )
 
         anchor_residue_pass = self.is_anchor_residue_pass(mutation)
 
@@ -462,40 +472,28 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             vaf_clonal_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
-        if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold and
+        if (binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
            tsl_pass and
            anchor_residue_pass):
-            if self.percentile_threshold:
-                if mutation["{} MT Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
-                    return "Pass"
-            else:
-                return "Pass"
+            return "Pass"
 
         #anchor residues
-        if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold and
+        if (binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
            tsl_pass and
            not anchor_residue_pass):
-            if self.percentile_threshold:
-                if mutation["{} MT Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
-                    return "Anchor"
-            else:
-                return "Anchor"
+            return "Anchor"
 
         #not in founding clone
-        if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold and
+        if (binding_pass and
            allele_expr_pass and
            not vaf_clonal_pass and
            tsl_pass and
            anchor_residue_pass):
-            if self.percentile_threshold:
-                if mutation["{} MT Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
-                    return "Subclonal"
-            else:
-                return "Subclonal"
+            return "Subclonal"
 
         #relax expression.  Include sites that have reasonable vaf but zero overall gene expression
         lowexpr=False
@@ -507,16 +505,12 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 lowexpr=True
 
         #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
-        if (mutation["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold and
+        if (binding_pass and
            lowexpr and
            vaf_clonal_pass and
            tsl_pass and
            anchor_residue_pass):
-            if self.percentile_threshold:
-                if mutation["{} MT Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
-                    return "LowExpr"
-            else:
-                return "LowExpr"
+            return "LowExpr"
 
         #zero expression
         if (mutation["Gene Expression"] == 0 or mutation["Tumor RNA VAF"] == 0) and not lowexpr:
@@ -834,6 +828,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             output_file,
             binding_threshold=500,
             percentile_threshold=None,
+            percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
             aggregate_inclusion_binding_threshold=5000,
@@ -843,6 +838,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         self.output_file = output_file
         self.binding_threshold = binding_threshold
         self.percentile_threshold = percentile_threshold
+        self.percentile_threshold_strategy = percentile_threshold_strategy
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         self.aggregate_inclusion_count_limit = aggregate_inclusion_count_limit
@@ -963,6 +959,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         output_file,
         binding_threshold=500,
         percentile_threshold=None,
+        percentile_threshold_strategy='conservative',
         allele_specific_binding_thresholds=False,
         top_score_metric="median",
         read_support=5,
@@ -976,6 +973,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             output_file,
             binding_threshold=binding_threshold,
             percentile_threshold=percentile_threshold,
+            percentile_threshold_strategy = percentile_threshold_strategy,
             allele_specific_binding_thresholds=allele_specific_binding_thresholds,
             top_score_metric=top_score_metric,
             aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
@@ -1014,6 +1012,17 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
         else:
             binding_threshold = self.binding_threshold
+        
+        ic50_pass = mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold
+        percentile_pass = (
+            self.percentile_threshold is None or 
+            mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold
+        )
+        binding_pass = (
+            (ic50_pass and percentile_pass) 
+            if self.percentile_threshold_strategy == 'conservative' 
+            else (ic50_pass or percentile_pass)
+        )
 
         low_read_support = False
         if mutation['Read Support'] != 'NA' and mutation['Read Support'] < self.read_support:
@@ -1023,34 +1032,22 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         if mutation['Expression'] != 'NA' and mutation['Expression'] < self.expn_val:
             low_expr = True
 
-        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+        if (binding_pass and
           not low_read_support and
           not low_expr):
-            if self.percentile_threshold:
-                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
-                    return "Pass"
-            else:
-                return "Pass"
+            return "Pass"
 
         #low read support
-        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+        if (binding_pass and
           low_read_support and
           not low_expr):
-            if self.percentile_threshold:
-                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
-                    return "LowReadSupport"
-            else:
-                return "LowReadSupport"
+            return "LowReadSupport"
 
         #low expression
-        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+        if (binding_pass and
           not low_read_support and
           low_expr):
-            if self.percentile_threshold:
-                if mutation["{} MT IC50 Percentile".format(self.mt_top_score_metric)] < self.percentile_threshold:
-                    return "LowExpr"
-            else:
-                return "LowExpr"
+            return "LowExpr"
 
         return "Poor"
 
@@ -1098,13 +1095,20 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
         else:
             binding_threshold = self.binding_threshold
+        
+        ic50_pass = mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold
+        percentile_pass = (
+            self.percentile_threshold is None or 
+            mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold
+        )
+        binding_pass = (
+            (ic50_pass and percentile_pass) 
+            if self.percentile_threshold_strategy == 'conservative' 
+            else (ic50_pass or percentile_pass)
+        )
 
-        if mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
-            if self.percentile_threshold:
-                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
-                    return "Pass"
-            else:
-                return "Pass"
+        if binding_pass:
+            return "Pass"
 
         return "Poor"
 
@@ -1117,6 +1121,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         tumor_purity=None,
         binding_threshold=500,
         percentile_threshold=None,
+        percentile_threshold_strategy='conservative',
         allele_specific_binding_thresholds=False,
         aggregate_inclusion_binding_threshold=5000,
         aggregate_inclusion_count_limit=15,
@@ -1132,6 +1137,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             output_file,
             binding_threshold=binding_threshold,
             percentile_threshold=percentile_threshold,
+            percentile_threshold_strategy = percentile_threshold_strategy,
             allele_specific_binding_thresholds=allele_specific_binding_thresholds,
             aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
             aggregate_inclusion_count_limit=aggregate_inclusion_count_limit,
@@ -1164,6 +1170,17 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
         else:
             binding_threshold = self.binding_threshold
+        
+        ic50_pass = mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold
+        percentile_pass = (
+            self.percentile_threshold is None or 
+            mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold
+        )
+        binding_pass = (
+            (ic50_pass and percentile_pass) 
+            if self.percentile_threshold_strategy == 'conservative' 
+            else (ic50_pass or percentile_pass)
+        )
 
         tsl_pass = True
         if mutation["Transcript Support Level"] == "Not Supported":
@@ -1184,26 +1201,18 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             vaf_clonal_pass = False
 
         #writing these out as explicitly as possible for ease of understanding
-        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+        if (binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
            tsl_pass):
-            if self.percentile_threshold:
-                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
-                    return "Pass"
-            else:
-                return "Pass"
+            return "Pass" 
 
         #not in founding clone
-        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+        if (binding_pass and
            allele_expr_pass and
            not vaf_clonal_pass and
            tsl_pass):
-            if self.percentile_threshold:
-                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
-                    return "Subclonal"
-            else:
-                return "Subclonal"
+            return "Subclonal"
 
         #relax expression.  Include sites that have reasonable vaf but zero overall gene expression
         lowexpr=False
@@ -1215,15 +1224,11 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
                 lowexpr=True
 
         #if low expression is the only strike against it, it gets lowexpr label (multiple strikes will pass through to poor)
-        if (mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold and
+        if (binding_pass and
            lowexpr and
            vaf_clonal_pass and
            tsl_pass):
-            if self.percentile_threshold:
-                if mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold:
-                    return "LowExpr"
-            else:
-                return "LowExpr"
+            return "LowExpr"
 
         #zero expression
         if (mutation["Gene Expression"] == 0 or mutation["Tumor RNA VAF"] == 0) and not lowexpr:

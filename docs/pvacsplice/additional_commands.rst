@@ -22,6 +22,11 @@ List Valid Alleles
 
 .. program-output:: pvacsplice valid_alleles -h
 
+List Valid NetMHCIIpan/NetMHCIIpanEL Versions
+---------------------------------------------
+
+.. program-output:: pvacsplice valid_netmhciipan_versions -h
+
 List Allele-Specific Cutoffs
 ----------------------------
 
