@@ -69,6 +69,7 @@ class PvacbindTests(unittest.TestCase):
             'binding_filter',
             'valid_alleles',
             'valid_algorithms',
+            'valid_netmhciipan_versions',
             'allele_specific_cutoffs',
             'download_example_data',
             "net_chop",
@@ -377,3 +378,16 @@ class PvacbindTests(unittest.TestCase):
 
     def test_valid_algorithms_runs(self):
         valid_algorithms.main("")
+    
+    def test_valid_netmhciipan_versions_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacbind",
+            "valid_netmhciipan_versions.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_valid_netmhciipan_versions_runs(self):
+        valid_netmhciipan_versions.main("")

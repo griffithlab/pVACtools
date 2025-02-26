@@ -208,23 +208,29 @@ class CalculateReferenceProteomeSimilarity:
         return records_dict
 
 
-    def extract_n_mer(self, full_peptide, subpeptide_position, mutation_position, mt_length, variant_type):
+    def extract_n_mer(self, mt_peptide, wt_peptide):
         #For non-frameshifts this ensures that we only test match_length epitopes that overlap the mutation
         #If we extract a larger region, we will get false-positive matches against the reference proteome
         #from the native wildtype portion of the peptide
         flanking_sequence_length = self.match_length - 1
-        if variant_type == 'inframe_del':
-            mt_start = subpeptide_position + (mutation_position)
+        for i in range(len(mt_peptide)):
+            if len(wt_peptide) < i:
+                first_mut_aa_pos = 0
+                break
+            if wt_peptide[i] != mt_peptide[i]:
+                first_mut_aa_pos = i
+                break
+        for i in range(len(mt_peptide)):
+            if len(wt_peptide) < i:
+                last_mut_aa_pos = len(mt_peptide)
+                break
+            if wt_peptide[i * -1] != mt_peptide[i * -1]:
+                last_mut_aa_pos = len(mt_peptide) - i
+                break
+        if last_mut_aa_pos >= first_mut_aa_pos:
+            return mt_peptide[first_mut_aa_pos-flanking_sequence_length:last_mut_aa_pos+flanking_sequence_length+1]
         else:
-            mt_start = subpeptide_position + (mutation_position-1)
-        start = mt_start - flanking_sequence_length
-        if start < 0:
-            start = 0
-        if variant_type == 'inframe_del':
-            end = mt_start + flanking_sequence_length
-        else:
-            end = mt_start + mt_length + flanking_sequence_length
-        return full_peptide[start:end]
+            return mt_peptide[last_mut_aa_pos-flanking_sequence_length:first_mut_aa_pos+flanking_sequence_length+1]
 
 
     def extract_n_mer_from_fs(self, full_peptide, wt_peptide, epitope, subpeptide_position):
@@ -273,6 +279,7 @@ class CalculateReferenceProteomeSimilarity:
             else:
                 peptide = mt_records_dict[line['Mutation']]
             full_peptide = peptide
+            wt_peptide = None
         elif self.file_type == 'pVACsplice':
             if self._input_tsv_type(line) == 'aggregated':
                 identifier = line['ID']
@@ -282,18 +289,14 @@ class CalculateReferenceProteomeSimilarity:
             mt_peptide = mt_records_dict[identifier]
             peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
             full_peptide = peptide
+            wt_peptide = None
         else:
             if self._input_tsv_type(line) == 'aggregated':
                 epitope = line['Best Peptide']
                 (rest_record_id, variant_type, aa_change) = line['Index'].rsplit(".", 2)
-                (_, mt_pos, wt_amino_acids, mt_amino_acids) = index_to_aggregate_report_aa_change(aa_change, variant_type)
-                mt_pos = int(line['Pos'].split('-')[0])
             else:
                 epitope = line['MT Epitope Seq']
                 variant_type = line['Variant Type']
-                if variant_type != 'FS':
-                    mt_pos = int(line['Mutation Position'].split('-')[0])
-                    (wt_amino_acids, mt_amino_acids) = line['Mutation'].split('/')
             full_peptide = mt_records_dict[line['Index']]
             wt_peptide = wt_records_dict[line['Index']]
 
@@ -302,18 +305,8 @@ class CalculateReferenceProteomeSimilarity:
             if variant_type == 'FS':
                 peptide = self.extract_n_mer_from_fs(full_peptide, wt_peptide, epitope, subpeptide_position)
             else:
-                if mt_amino_acids == '-':
-                    mt_amino_acids = ''
-                if len(mt_amino_acids) == len(wt_amino_acids) and len(mt_amino_acids) > 1:
-                    #remove leading and trailing identical amino acids
-                    shortened_mt_amino_acids = ""
-                    for mt_aa, wt_aa in zip(mt_amino_acids, wt_amino_acids):
-                        if wt_aa != mt_aa:
-                            shortened_mt_amino_acids += mt_aa
-                else:
-                    shortened_mt_amino_acids = mt_amino_acids
-                peptide = self.extract_n_mer(full_peptide, subpeptide_position, mt_pos, len(shortened_mt_amino_acids), variant_type)
-        return peptide, full_peptide
+                peptide = self.extract_n_mer(full_peptide, wt_peptide)
+        return peptide, full_peptide, wt_peptide
 
 
     def _call_blast(self, full_peptide, p):
@@ -354,7 +347,7 @@ class CalculateReferenceProteomeSimilarity:
         return results
 
 
-    def _generate_reference_match_dict_from_blast_records(self, blast_records, peptide):
+    def _generate_reference_match_dict_from_blast_records(self, blast_records, peptide, full_wt_peptide):
         reference_match_dict = []
         for blast_record in blast_records:
             if len(blast_record.alignments) > 0: # if there is at least one alignment
@@ -366,7 +359,9 @@ class CalculateReferenceProteomeSimilarity:
                             for match in matches:
                                 # 'windows' of query peptides that match subject peptides
                                 windows = [match[i:i+self.match_length] for i in range(len(match)-(self.match_length-1))]
-                                for window in windows: 
+                                for window in windows:
+                                    if full_wt_peptide is not None and window in full_wt_peptide:
+                                        continue
                                     if window in peptide:
                                         reference_match_dict.append({
                                             'Hit ID': alignment.hit_id,
@@ -392,10 +387,12 @@ class CalculateReferenceProteomeSimilarity:
             })
         return self._combine_reference_match_entries(reference_match_dict)
 
-    def _generate_reference_match_dict_from_peptide_fasta_results(self, results, peptide, transcript):
+    def _generate_reference_match_dict_from_peptide_fasta_results(self, results, peptide, transcript, full_wt_peptide):
         reference_match_dict = []
         for transcript_seq, epitope, match_start in results:
             if transcript in transcript_seq.description:
+                continue
+            if full_wt_peptide is not None and epitope in full_wt_peptide:
                 continue
             reference_match_dict.append({
                 'Transcript': transcript,
@@ -444,7 +441,7 @@ class CalculateReferenceProteomeSimilarity:
             metric_writer.writeheader()
 
             for line in reader:
-                peptide, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
+                peptide, full_peptide, full_wt_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
 
                 if self.peptide_fasta:
                     if peptide is None:
@@ -471,11 +468,11 @@ class CalculateReferenceProteomeSimilarity:
                             transcript = line['Transcript']
                         else:
                             transcript = line['Best Transcript']
-                        reference_matches = self._generate_reference_match_dict_from_peptide_fasta_results(results, peptide, transcript)
+                        reference_matches = self._generate_reference_match_dict_from_peptide_fasta_results(results, peptide, transcript, full_wt_peptide)
                     else:
                         reference_matches = self._generate_reference_match_dict_from_peptide_fasta_results_for_pvacbind(results, peptide)
                 else:
-                    reference_matches = self._generate_reference_match_dict_from_blast_records(results, peptide)
+                    reference_matches = self._generate_reference_match_dict_from_blast_records(results, peptide, full_wt_peptide)
 
                 if len(reference_matches) > 0:
                     if self._input_tsv_type(line) == 'aggregated':
@@ -559,7 +556,7 @@ class CalculateReferenceProteomeSimilarity:
         with open(self.input_file) as input_fh:
             reader = csv.DictReader(input_fh, delimiter='\t')
             for line in reader:
-                peptide, full_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
+                peptide, full_peptide, full_wt_peptide = self._get_peptide(line, mt_records_dict, wt_records_dict)
                 if self.peptide_fasta:
                     if peptide is not None:
                         unique_peptides.add(peptide)

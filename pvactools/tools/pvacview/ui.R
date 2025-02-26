@@ -98,6 +98,7 @@ explore_tab <- tabItem(
                     uiOutput("binding_threshold_ui"),
                     uiOutput("allele_specific_binding_ui"),
                     uiOutput("percentile_threshold_ui"),
+                    uiOutput("percentile_threshold_strategy_ui"),
                     uiOutput("dna_cutoff_ui"),
                     uiOutput("allele_expr_ui"),
                     h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),

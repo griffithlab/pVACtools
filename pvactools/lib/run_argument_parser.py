@@ -72,6 +72,13 @@ class RunArgumentParser(metaclass=ABCMeta):
                  +"has a percentile rank below this value."
         )
         parser.add_argument(
+            '--percentile-threshold-strategy',
+            choices=['conservative', 'exploratory'],
+            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default)."
+                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
+            default="conservative",
+        )
+        parser.add_argument(
             '--allele-specific-binding-thresholds',
             help="Use allele-specific binding thresholds. To print the allele-specific binding thresholds run `%s allele_specific_cutoffs`. " % tool_name
                  + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
@@ -100,6 +107,12 @@ class RunArgumentParser(metaclass=ABCMeta):
             "-t", "--n-threads",type=int,
             default=1,
             help="Number of threads to use for parallelizing peptide-MHC binding prediction calls.",
+        )
+        parser.add_argument(
+            "--netmhciipan-version",
+            choices=["4.3", "4.2", "4.1", "4.0"],
+            default="4.1",
+            help="Specify the version of NetMHCIIpan or NetMHCIIpanEL to be used during the run.",
         )
         self.parser = parser
 
@@ -316,7 +329,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         )
         self.parser.add_argument(
             "ref_fasta",
-            help="A reference FASTA file. Note: this input should be the same as the RegTools vcf input."
+            help="A reference DNA FASTA file. Note: this input should be the same as the RegTools fasta input."
         )
         self.parser.add_argument(
             "gtf_file",
