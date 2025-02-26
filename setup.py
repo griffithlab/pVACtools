@@ -97,7 +97,7 @@ setup(
         'mhcflurry==2.0.6',
         'testfixtures',
         'gtfparse==2.0.1',
-        'pyfaidx==0.7.1',
+        'pyfaidx>=0.7.1',
         'packaging',
         'pyarrow',
         'polars==0.16.18',

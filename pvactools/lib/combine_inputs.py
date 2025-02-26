@@ -43,7 +43,7 @@ class CombineInputs:
         var_df = var_df.rename(columns={'ensembl_gene_id': 'gene_id'}).drop(columns=['transcript_support_level'])
 
         # format junction variant info to match vcf
-        var_df['variant_info'] = var_df['chromosome_name'] + ':' + var_df['variant_start'].astype('string') + '-' + var_df['variant_stop'].astype('string')
+        var_df['variant_info'] = var_df['chromosome_name'].astype(str) + ':' + var_df['variant_start'].astype(str) + '-' + var_df['variant_stop'].astype(str)
 
         return var_df
 

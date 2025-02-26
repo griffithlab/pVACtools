@@ -18,6 +18,9 @@ class CombineInputsTests(unittest.TestCase):
         # inputs 
         cls.junctions_df = pd.read_csv(os.path.join(cls.test_data_dir, 'Test.10_100_filtered.tsv'), sep='\t', na_values="NA", dtype={'transcript_support_level': str}) # default filters
         cls.variant_file = os.path.join(cls.test_data_dir, 'Test.annotated.tsv')
+        # inputs non-human (mouse)
+        cls.mouse_junctions_df = pd.read_csv(os.path.join(cls.test_data_dir, 'results_mouse', 'Test.filtered.tsv'), sep='\t', na_values="NA", dtype={'transcript_support_level': str}) # default filters
+        cls.mouse_variant_file = os.path.join(cls.test_data_dir, 'results_mouse', 'Test.annotated.tsv')
 
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
@@ -35,6 +38,28 @@ class CombineInputsTests(unittest.TestCase):
         combined_df.to_csv(output_file, sep='\t', index=False)
 
         expected_file = os.path.join(self.test_data_dir, 'Test.combined.tsv')
+        self.assertTrue(cmp(
+                output_file,
+                expected_file),
+                "files don't match {} - {}".format(output_file, expected_file)
+            )
+
+        output_dir.cleanup()
+
+
+    def test_combine_inputs_runs_and_produces_expected_output_mouse(self):
+        output_dir = tempfile.TemporaryDirectory() 
+        output_file = os.path.join(output_dir.name, 'sample_combined.tsv')
+        params = {
+            'junctions_df' : self.mouse_junctions_df,
+            'variant_file' : self.mouse_variant_file,
+            'output_file'  : output_file,
+            'output_dir'   : output_dir.name,
+        }
+        combined_df = CombineInputs(**params).execute()
+        combined_df.to_csv(output_file, sep='\t', index=False)
+
+        expected_file = os.path.join(self.test_data_dir,'results_mouse', 'Test.combined.tsv')
         self.assertTrue(cmp(
                 output_file,
                 expected_file),
