@@ -9,7 +9,7 @@ jobs:
   iedb:
     name: "Check IEDB Class I and Class II APIs"
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: ['3.7']
