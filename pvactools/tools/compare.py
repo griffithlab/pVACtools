@@ -127,7 +127,7 @@ def define_parser():
     parser.add_argument("results_folder2", nargs="?", help="Path to second results input folder")
     parser.add_argument(
         "--output-dir",
-        default="output",
+        default="compare_output",
         help="Specify where the output directory should be generated",
     )
     parser.add_argument(

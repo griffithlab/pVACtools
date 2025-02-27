@@ -1,9 +1,9 @@
 export default {
     template: `
-        <div v-if="hasUniqueVariants" class="mx-5 mt-5">
-            <h1>Variants</h1>
+        <div v-if="hasUniqueEntries" class="mx-5 mt-5">
+            <h1>Entries</h1>
             <div class="mx-4">
-                <div class="mt-3" v-for="(entries, section) in unique_variants" :key="section">
+                <div class="mt-3" v-for="(entries, section) in unique_entries" :key="section">
                     <template v-if="entries && Object.keys(entries).length">
                         <h4 v-if="entries"><u>{{ section }}</u></h4>
                         <div class="q-pa-md">
@@ -62,14 +62,14 @@ export default {
     ],
     data() {
         return {
-            unique_variants: {},
+            unique_entries: {},
             idFormat: ""
         };
     },
 
     computed: {
-        hasUniqueVariants() {
-            return Object.values(this.unique_variants).some(
+        hasUniqueEntries() {
+            return Object.values(this.unique_entries).some(
                 (entries) => Array.isArray(entries) ? entries.length > 0 : Object.keys(entries).length > 0
             );
         }
@@ -78,32 +78,32 @@ export default {
     watch: {
         comparisonItems: function(items) {
             if (items.length > 0) {
-                this.loadVariants();
+                this.loadEntries();
             }
         },
         currentPageId(newPageId, oldPageId) {
             if (newPageId !== oldPageId) {
-                this.loadVariants();
+                this.loadEntries();
             }
         },
-        hasUniqueVariants: function(value) {
-            this.$emit('has-unique-variants-changed', value);
+        hasUniqueEntries: function(value) {
+            this.$emit('has-unique-entries-changed', value);
         }
     },
 
     methods: {
-        loadVariants() {
+        loadEntries() {
             const key = this.currentComparison.key;
-            if (!this[key] || !this[key].variants) {
+            if (!this[key] || !this[key].entries) {
                 return null;
             }
 
             this.idFormat = this[key].id_format;
-            const unique_variants = this[key].variants;
+            const unique_entries = this[key].entries;
             if (key === 'inputYmlData' || key === 'jsonInputData') {
-                this.unique_variants = {};
+                this.unique_entries = {};
             }
-            this.unique_variants = unique_variants;
+            this.unique_entries = unique_entries;
         },
 
         formattedEntries(entries) {

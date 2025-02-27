@@ -25,9 +25,9 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
         comparer.df1, comparer.df2, comparer.columns_to_compare
     )
 
-    common_variants = get_common_variants(comparer.df1, comparer.df2)
-    unique_variants_file1, unique_variants_file2 = get_unique_variants(
-        comparer.df1, comparer.df2, common_variants
+    common_entries = get_common_entries(comparer.df1, comparer.df2)
+    unique_entries_file1, unique_entries_file2 = get_unique_entries(
+        comparer.df1, comparer.df2, common_entries
     )
 
     if comparer.check_duplicate_ids():
@@ -39,8 +39,8 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
         )
 
     if (
-        not unique_variants_file1
-        and not unique_variants_file2
+        not unique_entries_file1
+        and not unique_entries_file2
         and not duplicate_ids
         and not differences
     ):
@@ -55,9 +55,9 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
         class_type,
         id_format,
         comparer.run_notes,
-        common_variants,
-        unique_variants_file1,
-        unique_variants_file2,
+        common_entries,
+        unique_entries_file1,
+        unique_entries_file2,
         comparer.hits_file1,
         comparer.hits_file2,
         duplicate_ids,
