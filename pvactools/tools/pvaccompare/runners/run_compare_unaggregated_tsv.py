@@ -24,16 +24,16 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
         comparer.df1, comparer.df2, comparer.columns_to_compare
     )
 
-    common_variants = get_common_variants(comparer.df1, comparer.df2)
-    unique_variants_file1, unique_variants_file2 = get_unique_variants(
-        comparer.df1, comparer.df2, common_variants
+    common_entries = get_common_entries(comparer.df1, comparer.df2)
+    unique_entries_file1, unique_entries_file2 = get_unique_entries(
+        comparer.df1, comparer.df2, common_entries
     )
 
     differences = get_file_differences(
         comparer.df1, comparer.df2, comparer.columns_to_compare
     )
 
-    if not unique_variants_file1 and not unique_variants_file2 and not differences:
+    if not unique_entries_file1 and not unique_entries_file2 and not differences:
         logging.info("The Unaggregated TSV files are identical.")
 
     export_to_json(
@@ -45,9 +45,9 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
         class_type,
         id_format,
         run_notes,
-        common_variants,
-        unique_variants_file1,
-        unique_variants_file2,
+        common_entries,
+        unique_entries_file1,
+        unique_entries_file2,
     )
 
 

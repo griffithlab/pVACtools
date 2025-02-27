@@ -60,7 +60,7 @@ export default {
                 </div>
             </div>
         </div>
-        <div v-else-if="!hasUniqueVariants" class="identical-msg mx-5 mt-5">
+        <div v-else-if="!hasUniqueEntries" class="identical-msg mx-5 mt-5">
             <h4>The files are identical</h4>
         </div>
     `,
@@ -73,7 +73,7 @@ export default {
         'inputYmlData',
         'jsonInputData',
         'referenceMatchesData',
-        'hasUniqueVariants'
+        'hasUniqueEntries'
     ],
 
     data() {
@@ -82,8 +82,9 @@ export default {
             loadedSections: {},
             currentSectionIndex: {},
             loadBatchSize: 1000,
-            fields: ["ID", "File 1 Value", "File 2 Value", "File 1 Line", "File 2 Line"],
-            idFormat: ""
+            fields: ["Entry #", "ID", "File 1 Value", "File 2 Value", "File 1 Line", "File 2 Line"],
+            idFormat: "",
+            idNum: 1
         };
     },
 

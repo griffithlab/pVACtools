@@ -3,10 +3,10 @@ aggregate_inclusion_binding_threshold: 1500
 allele_specific_anchors: true
 allele_specific_binding_thresholds: false
 alleles:
-- HLA-A*29:02
 - HLA-B*45:01
-- HLA-B*82:02
 - HLA-C*06:02
+- HLA-B*82:02
+- HLA-A*29:02
 anchor_contribution_threshold: 0.7
 binding_threshold: 500
 downstream_sequence_length: 100

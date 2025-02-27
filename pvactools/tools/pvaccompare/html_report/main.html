@@ -57,9 +57,9 @@
                 :input-yml-data="inputYmlData"
                 :json-input-data="jsonInputData"
                 :reference-matches-data="referenceMatchesData"
-                :has-unique-variants="hasUniqueVariants">
+                :has-unique-entries="hasUniqueEntries">
             </differences>
-            <variants
+            <entries
                 :current-page-id="currentPageId"
                 :current-comparison="currentComparison"
                 :comparison-items="comparisonItems"
@@ -68,8 +68,8 @@
                 :input-yml-data="inputYmlData"
                 :json-input-data="jsonInputData"
                 :reference-matches-data="referenceMatchesData"
-                @has-unique-variants-changed="onHasUniqueVariantsChanged">
-            </variants>
+                @has-unique-entries-changed="onHasUniqueEntriesChanged">
+            </entries>
         </template>
     </div>
 
@@ -82,7 +82,7 @@
         import Header from './components/Header.js';
         import Summary from './components/Summary.js';
         import Differences from './components/Differences.js';
-        import Variants from './components/Variants.js';
+        import Entries from './components/Entries.js';
 
 
         const app = Vue.createApp({
@@ -100,7 +100,7 @@
                     inputYmlData: null,
                     jsonInputData: null,
                     referenceMatchesData: null,
-                    hasUniqueVariants: false,
+                    hasUniqueEntries: false,
                 };
             },
 
@@ -133,7 +133,7 @@
                     this.inputYmlData = null;
                     this.jsonInputData = null;
                     this.referenceMatchesData = null;
-                    this.hasUniqueVariants = false;
+                    this.hasUniqueEntries = false;
                 },
 
                 onDirectorySelected(directory, files, mhcClassI, mhcClassII) {
@@ -166,8 +166,8 @@
                     this.updateComparisonItems();
                 },
 
-                onHasUniqueVariantsChanged(value) {
-                    this.hasUniqueVariants = value;
+                onHasUniqueEntriesChanged(value) {
+                    this.hasUniqueEntries = value;
                 },
 
                 loadJsonFiles() {
@@ -206,7 +206,7 @@
         app.component('header-template', Header);
         app.component('summary-template', Summary);
         app.component('differences', Differences);
-        app.component('variants', Variants);
+        app.component('entries', Entries);
 
         app.use(Quasar);
         app.mount('#app');

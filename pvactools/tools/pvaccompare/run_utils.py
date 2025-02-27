@@ -65,7 +65,7 @@ def find_dropped_cols(df1, df2, original_columns):
     return run_notes
 
 
-def get_common_variants(df1, df2):
+def get_common_entries(df1, df2):
     """
     Purpose:    Find and store IDs shared between the two given dataframes
     Modifies:   Nothing
@@ -101,15 +101,15 @@ def check_columns_to_compare(df1, df2, columns_to_compare):
     return columns_to_keep
 
 
-def get_unique_variants(df1, df2, common_variants, contains_id=True):
+def get_unique_entries(df1, df2, common_entries, contains_id=True):
     """
-    Purpose:    Find, store, and sort unique variants to each dataframe
+    Purpose:    Find, store, and sort unique entries to each dataframe
     Modifies:   Nothing
     Returns:    Two sets containing IDs unique to the corresponding dataframes
     """
-    return sort_unique_variants(
-        set(df1["ID"]).difference(common_variants),
-        set(df2["ID"]).difference(common_variants),
+    return sort_unique_entries(
+        set(df1["ID"]).difference(common_entries),
+        set(df2["ID"]).difference(common_entries),
         contains_id,
     )
 
@@ -146,18 +146,18 @@ def split_replaced_id(id_str):
         return "", ""
 
 
-def sort_unique_variants(unique_variants_file1, unique_variants_file2, contains_id):
-    if unique_variants_file1:
+def sort_unique_entries(unique_entries_file1, unique_entries_file2, contains_id):
+    if unique_entries_file1:
         if contains_id:
-            unique_variants_file1 = sorted(unique_variants_file1, key=extract_id_parts)
+            unique_entries_file1 = sorted(unique_entries_file1, key=extract_id_parts)
         else:
-            unique_variants_file1 = sorted(unique_variants_file1, key=split_replaced_id)
-    if unique_variants_file2:
+            unique_entries_file1 = sorted(unique_entries_file1, key=split_replaced_id)
+    if unique_entries_file2:
         if contains_id:
-            unique_variants_file2 = sorted(unique_variants_file2, key=extract_id_parts)
+            unique_entries_file2 = sorted(unique_entries_file2, key=extract_id_parts)
         else:
-            unique_variants_file2 = sorted(unique_variants_file2, key=split_replaced_id)
-    return unique_variants_file1, unique_variants_file2
+            unique_entries_file2 = sorted(unique_entries_file2, key=split_replaced_id)
+    return unique_entries_file1, unique_entries_file2
 
 
 def get_file_differences(
@@ -170,7 +170,7 @@ def get_file_differences(
     """
     Purpose:    Find and store differences found between the two dataframes
     Modifies:   Nothing
-    Returns:    Dictionary of differences and a dictionary of unique variants
+    Returns:    Dictionary of differences and a dictionary of unique entries
     """
     df1_selected = df1[["ID", "line"] + columns_to_compare]
     df2_selected = df2[["ID", "line"] + columns_to_compare]
@@ -242,28 +242,29 @@ def preprocess_differences(differences, chunk_size=1000):
     transformed_differences = {}
 
     for section, entries in differences.items():
+        entry_num = 1
         chunked_entries = [
             entries[i : i + chunk_size] for i in range(0, len(entries), chunk_size)
         ]
 
         section_data = {"num_sections": len(chunked_entries)}
 
-        section_data.update(
-            {
-                f"section{idx + 1}": [
-                    {
-                        "ID": entry["ID"],
-                        "File 1 Value": entry.get(f"{section}_file1"),
-                        "File 2 Value": entry.get(f"{section}_file2"),
-                        "File 1 Line": entry.get("line_file1"),
-                        "File 2 Line": entry.get("line_file2"),
-                    }
-                    for entry in chunk
-                ]
-                for idx, chunk in enumerate(chunked_entries)
-            }
-        )
+        section_content = {}
+        for idx, chunk in enumerate(chunked_entries):
+            section_content[f"section{idx + 1}"] = [
+                {
+                    "Entry #": entry_num+i,
+                    "ID": entry["ID"],
+                    "File 1 Value": entry.get(f"{section}_file1"),
+                    "File 2 Value": entry.get(f"{section}_file2"),
+                    "File 1 Line": entry.get("line_file1"),
+                    "File 2 Line": entry.get("line_file2"),
+                }
+                for i, entry in enumerate(chunk)
+            ]
+            entry_num += len(chunk)
 
+        section_data.update(section_content)
         transformed_differences[section] = section_data
 
     return transformed_differences
@@ -278,9 +279,9 @@ def export_to_json(
     class_type,
     id_format="",
     run_notes=[],
-    common_variants=[],
-    unique_variants_file1=[],
-    unique_variants_file2=[],
+    common_entries=[],
+    unique_entries_file1=[],
+    unique_entries_file2=[],
     hits_file1={},
     hits_file2={},
     duplicate_ids=False,
@@ -290,13 +291,13 @@ def export_to_json(
     if filename != "yml_input_data.json" and filename != "json_input_data.json":
         summary_data = {
             "Notes": run_notes,
-            "Variants": {
-                "Total number of variants": get_total_number_variants(
-                    common_variants, unique_variants_file1, unique_variants_file2
+            "Entries": {
+                "Total number of entries": get_total_number_entries(
+                    common_entries, unique_entries_file1, unique_entries_file2
                 ),
-                "Number of common variants": len(common_variants),
-                "Number of variants unique to file 1": len(unique_variants_file1),
-                "Number of variants unique to file 2": len(unique_variants_file2),
+                "Number of common entries": len(common_entries),
+                "Number of entries unique to file 1": len(unique_entries_file1),
+                "Number of entries unique to file 2": len(unique_entries_file2),
             },
             "Section Differences": {},
         }
@@ -310,12 +311,12 @@ def export_to_json(
     else:
         summary_data = {}
 
-    variant_data = {
-        "Variants Unique to File 1" if not duplicate_ids else "Hits in File 1": (
-            list(unique_variants_file1) if not duplicate_ids else hits_file1
+    entry_data = {
+        "Entries Unique to File 1" if not duplicate_ids else "Hits in File 1": (
+            list(unique_entries_file1) if not duplicate_ids else hits_file1
         ),
-        "Variants Unique to File 2" if not duplicate_ids else "Hits in File 2": (
-            list(unique_variants_file2) if not duplicate_ids else hits_file2
+        "Entries Unique to File 2" if not duplicate_ids else "Hits in File 2": (
+            list(unique_entries_file2) if not duplicate_ids else hits_file2
         ),
     }
 
@@ -326,23 +327,23 @@ def export_to_json(
         "id_format": id_format,
         "summary": summary_data,
         "differences": differences,
-        "variants": variant_data,
+        "entries": entry_data,
     }
 
     with open(file_path, "w") as f:
         json.dump(data, f, indent=4)
 
 
-def get_total_number_variants(
-    common_variants, unique_variants_file1, unique_variants_file2
+def get_total_number_entries(
+    common_entries, unique_entries_file1, unique_entries_file2
 ):
     """
-    Purpose:    Get the total number of variants between the two files
+    Purpose:    Get the total number of entries between the two files
     Modifies:   Nothing
-    Returns:    Integer of the total number of variants
+    Returns:    Integer of the total number of entries
     """
     return (
-        len(common_variants) + len(unique_variants_file1) + len(unique_variants_file2)
+        len(common_entries) + len(unique_entries_file1) + len(unique_entries_file2)
     )
 
 
