@@ -146,7 +146,7 @@ server <- shinyServer(function(input, output, session) {
     if (!("Ref Match" %in% colnames(df$mainTable))) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
-    columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+    columns_needed <- c("ID", "Index", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                         "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
     if ("Comments" %in% colnames(df$mainTable)) {
@@ -238,7 +238,7 @@ server <- shinyServer(function(input, output, session) {
        if (!("Ref Match" %in% colnames(df$mainTable))) {
          df$mainTable$`Ref Match` <- "Not Run"
        }
-       columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+       columns_needed <- c("ID", "Index", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                            "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                            "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
        if ("Comments" %in% colnames(df$mainTable)) {
@@ -544,7 +544,7 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Comments")],
+      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Index") & !(colnames(df$mainTable) == "Comments")],
                 escape = FALSE,
                 callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)),
                 class = "stripe",

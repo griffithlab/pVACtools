@@ -338,6 +338,7 @@ tutorial_tab <- tabItem("tutorial",
                                                "complements the ", code("all_epitopes_aggregated.tsv"), "and is required for the tool's proper functioning."), br(),
                                              p(strong("Column Names : Description")),
                                              p(code("ID"), " : ", "A unique identifier for the variant"),
+                                             p(code("Index"), " : ", "A unique identifier for the variant and best neoantigen candidate"),
                                              p(code("HLA Alleles"), " : ", "For each HLA allele in the run, the number of this variant’s 
         epitopes that bound well to the HLA allele (with ", code("lowest"), " or ", code("median"),
                                                " mutant binding affinity < ", code("aggregate_inclusion_binding_threshold"), ")"),
