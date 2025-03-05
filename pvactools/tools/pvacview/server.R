@@ -550,9 +550,9 @@ server <- shinyServer(function(input, output, session) {
                 class = "stripe",
                 options = list(lengthChange = TRUE, pageLength = df$pageLength,
                                dom = "Bfrtilp",
-                               columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
+                               columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 6, (hla_count() + 11):(hla_count() + 18))),
                                                  list(className = "dt-center", targets = c(0:hla_count() - 1)),
-                                                 list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
+                                                 list(visible = FALSE, targets = c(1:(hla_count()-2), (hla_count()+1), (hla_count()+3), -1:-12)),
                                                  list(orderable = TRUE, targets = 0)
                                ),
                                buttons = list(I("colvis")),
