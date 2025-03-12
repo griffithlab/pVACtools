@@ -122,7 +122,9 @@ def main(args_input = sys.argv[1:]):
     NetMHCIIVersion.netmhciipan_version = args.netmhciipan_version
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
-    (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
+
+    alleles = combine_class_ii_alleles(args.allele)
+    (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)
 
     # all input file check
     print_log(os.path.join(junctions_dir, 'log'), vars(args), 'inputs')
