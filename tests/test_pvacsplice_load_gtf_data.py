@@ -58,3 +58,23 @@ class LoadGtfDataTests(unittest.TestCase):
             )
 
         output_dir.cleanup()
+
+    def test_load_gtf_data_GENCODE_runs_and_produces_expected_output(self):
+        gtf_file = os.path.join(self.test_data_path, 'inputs', 'Homo_sapiens.GENCODE.GRCh37.chr6_chr9.sorted.gtf.gz')
+        output_dir = tempfile.TemporaryDirectory()
+        output_file = os.path.join(output_dir.name, 'sample_gtf.GENCODE.tsv')
+        params = {
+            'gtf_file'   : gtf_file,
+            'output_file': output_file,
+            'save_gtf'   : True,
+        }
+        LoadGtfData(**params).execute()
+        expected_file = os.path.join(self.test_data_path, 'results', 'Test.gtf.GENCODE.tsv')
+        self.assertTrue(cmp(
+                    output_file,
+                    expected_file,
+                    False
+                ), "files don't match {} - {}".format(output_file, expected_file)
+            )
+
+        output_dir.cleanup()
