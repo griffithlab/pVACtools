@@ -16,7 +16,7 @@ class FilterRegtoolsResults:
     def filter_junction_rows(self):
         # open file, rename junction cols for clarity
         junctions = pd.read_csv(self.input_file, sep='\t')
-        junctions['transcripts'] = junctions['transcripts'].astype(str)
+        junctions['transcripts'] = junctions['transcripts'].astype(str).apply(lambda transcripts: ','.join([t.split('.')[0] for t in transcripts.split(',')]))
         junctions = junctions.rename(columns={'chrom':'junction_chrom', 'start':'junction_start', 'end':'junction_stop'})
 
         # filter on score, strand, and anchor
@@ -36,7 +36,7 @@ class FilterRegtoolsResults:
 
     def pc_junction_rows(self, filter_junctions):
         # example entry: 0: {'gene_ids': 'ENSG00000122483', 'transcripts': 'ENST00000343253,ENST00000370276,ENST00000401026,ENST00000421014,ENST00000455267'}
-        tscript_dict = {i:{'gene_ids': x, 'transcripts': ','.join([t.split('.')[0] for t in y.split(',')])} for i,(x,y) in enumerate(zip(filter_junctions['gene_ids'], filter_junctions['transcripts']))}
+        tscript_dict = {i:{'gene_ids': x, 'transcripts': y} for i,(x,y) in enumerate(zip(filter_junctions['gene_ids'], filter_junctions['transcripts']))}
 
         # filter transcripts by protein_coding and transcript_id
         pc_junctions = pd.DataFrame()
