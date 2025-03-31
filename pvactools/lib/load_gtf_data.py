@@ -17,6 +17,9 @@ class LoadGtfData:
             'transcript_biotype', 'transcript_version', 'transcript_support_level', 'exon_number', 'gene_name',
             'gene_id'], result_type='pandas')
 
+        if 'transcript_version' not in gtf_df_all.columns:
+            gtf_df_all[['transcript_id', 'transcript_version']] = gtf_df_all['transcript_id'].astype(str).str.extract(r'([^.]*)\.?(.*)') #this match zero or one dot
+
         if 'transcript_support_level' in gtf_df_all:
             gtf_df_all['transcript_support_level'] = gtf_df_all['transcript_support_level'].str.replace(r' (assigned to previous version \d)', '', regex=True)
             gtf_df_all['transcript_support_level'] = gtf_df_all['transcript_support_level'].str.replace(r'^$', 'NA', regex=True)
