@@ -64,3 +64,26 @@ class CombineInputsTests(unittest.TestCase):
             )
 
         output_dir.cleanup()
+
+    def test_combine_inputs_runs_and_produces_expected_output_mouse(self):
+        mouse_junctions_df = pd.read_csv(os.path.join(self.test_data_dir, 'results_mouse', 'Test.filtered.tsv'), sep='\t', na_values="NA", dtype={'transcript_support_level': str}) # default filters
+        mouse_variant_file = os.path.join(self.test_data_dir, 'results_mouse', 'Test.annotated.tsv')
+        output_dir = tempfile.TemporaryDirectory() 
+        output_file = os.path.join(output_dir.name, 'sample_combined.tsv')
+        params = {
+            'junctions_df' : mouse_junctions_df,
+            'variant_file' : mouse_variant_file,
+            'output_file'  : output_file,
+            'output_dir'   : output_dir.name,
+        }
+        combined_df = CombineInputs(**params).execute()
+        combined_df.to_csv(output_file, sep='\t', index=False)
+
+        expected_file = os.path.join(self.test_data_dir,'results_mouse', 'Test.combined.tsv')
+        self.assertTrue(cmp(
+                output_file,
+                expected_file),
+                "files don't match {} - {}".format(output_file, expected_file)
+            )
+
+        output_dir.cleanup()
