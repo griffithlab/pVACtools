@@ -515,7 +515,8 @@ def main(args_input=sys.argv[1:]):
             for node_set in node_sets_to_remove:
                 print("Removing nodes: {}".format(', '.join(node_set)))
                 #Creating output directory
-                current_output_dir = os.path.join(base_output_dir, "without_{}".format('_'.join(node_set)))
+                renamed_node_set = [n.replace('/', '-') for n in node_set]
+                current_output_dir = os.path.join(base_output_dir, "without_{}".format('_'.join(renamed_node_set)))
                 os.makedirs(current_output_dir, exist_ok=True)
                 #Creating junctions file with node_set removed
                 junctions_file = os.path.join(base_output_dir, 'junctions.tsv')
