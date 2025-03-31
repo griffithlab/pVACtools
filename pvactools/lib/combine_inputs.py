@@ -49,21 +49,36 @@ class CombineInputs:
 
     def merge_and_write(self, j_df, var_df):
         # if protein change/seq is NA in var_df, go ahead and remove the lines bc if there is no protein change, then can't create alt transcript
-        j_df['transcript_version'] = j_df['transcript_version'].astype('int64')
+        if 'transcript_version' in j_df.columns:
+            j_df['transcript_version'] = j_df['transcript_version'].astype('int64')
 
-        # removed gene_name, gene_id - do these need to be skipped?
-        merged_df = j_df.merge(var_df, on=['gene_name', 'transcript_id', 'transcript_version', 'variant_info', 'gene_id'])
+            # removed gene_name, gene_id - do these need to be skipped?
+            merged_df = j_df.merge(var_df, on=['gene_name', 'transcript_id', 'transcript_version', 'variant_info', 'gene_id'])
 
-        # check that everything is merging
-        left_merge = j_df.merge(var_df, on=['variant_info', 'gene_name', 'transcript_id', 'transcript_version', 'gene_id'], how='left', indicator=True)
-        not_merged_lines = left_merge.loc[left_merge['_merge'] != 'both']
-        if not not_merged_lines.empty:
-            # warning: if there are any that don't merge,
-            print(not_merged_lines[['variant_info', 'gene_name', 'transcript_id', 'transcript_version']])
-            # make this back into a warning
-            print(
-                'Warning: The above variant/transcript/gene combination is present in the junctions file, but not in the VEP-annotated VCF. Skipping.'
-            )
+            # check that everything is merging
+            left_merge = j_df.merge(var_df, on=['variant_info', 'gene_name', 'transcript_id', 'transcript_version', 'gene_id'], how='left', indicator=True)
+            not_merged_lines = left_merge.loc[left_merge['_merge'] != 'both']
+            if not not_merged_lines.empty:
+                # warning: if there are any that don't merge,
+                print(not_merged_lines[['variant_info', 'gene_name', 'transcript_id', 'transcript_version']])
+                # make this back into a warning
+                print(
+                    'Warning: The above variant/transcript/gene combination is present in the junctions file, but not in the VEP-annotated VCF. Skipping.'
+                )
+        else:
+            # removed gene_name, gene_id - do these need to be skipped?
+            merged_df = j_df.merge(var_df, on=['gene_name', 'transcript_id', 'variant_info', 'gene_id'])
+
+            # check that everything is merging
+            left_merge = j_df.merge(var_df, on=['variant_info', 'gene_name', 'transcript_id', 'gene_id'], how='left', indicator=True)
+            not_merged_lines = left_merge.loc[left_merge['_merge'] != 'both']
+            if not not_merged_lines.empty:
+                # warning: if there are any that don't merge,
+                print(not_merged_lines[['variant_info', 'gene_name', 'transcript_id']])
+                # make this back into a warning
+                print(
+                    'Warning: The above variant/transcript/gene combination is present in the junctions file, but not in the VEP-annotated VCF. Skipping.'
+                )
 
         # create index to match with kmers
         merged_df['index'] = merged_df['gene_name'] + '.' + merged_df['transcript_id'] + '.' + merged_df['name'] + '.' + merged_df['variant_info'] + '.' + merged_df['anchor']
