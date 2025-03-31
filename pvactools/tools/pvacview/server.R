@@ -1481,10 +1481,12 @@ server <- shinyServer(function(input, output, session) {
                         filename = input$exportFileName,
                         fieldSeparator = "\t",
                         text = "Download as TSV",
-                        extension = ".tsv"),
+                        extension = ".tsv",
+                        title = NULL),
                    list(extend = "excel",
                         filename = input$exportFileName,
-                        text = "Download as excel")
+                        text = "Download as excel",
+                        title = NULL)
                  ),
                  initComplete = htmlwidgets::JS(
                    "function(settings, json) {",
@@ -2168,10 +2170,12 @@ server <- shinyServer(function(input, output, session) {
                         filename = input$exportNeofoxFileName,
                         fieldSeparator = "\t",
                         text = "Download as TSV",
-                        extension = ".tsv"),
+                        extension = ".tsv",
+                        title = NULL),
                    list(extend = "excel",
                         filename = input$exportNeofoxFileName,
-                        text = "Download as excel")
+                        text = "Download as excel",
+                        title = NULL)
                  ),
                  initComplete = htmlwidgets::JS(
                    "function(settings, json) {",
