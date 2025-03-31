@@ -98,6 +98,7 @@ setup(
         'testfixtures',
         'gtfparse==2.0.1',
         'pyfaidx>=0.7.1',
+        'fsspec<=2025.3.0',
         'packaging',
         'pyarrow',
         'polars==0.16.18',
