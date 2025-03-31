@@ -163,6 +163,8 @@ def main(args_input = sys.argv[1:]):
     final_sequences = {}
     for (index, mt_sequence) in mt_sequences.items():
         wt_sequence = wt_sequences[index]
+        if mt_sequence in wt_sequence:
+            continue
         final_sequences[index] = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, args.flanking_sequence_length)
 
     (tsv_indexes, tsv_file_type) = parse_input_tsv(args.input_tsv)
