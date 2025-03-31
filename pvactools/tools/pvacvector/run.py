@@ -112,6 +112,7 @@ def write_junctions_file(graph, current_output_dir):
                 'percentile': edge_data['percentile'],
             }
             writer.writerow(row)
+    return junctions_file
 
 def find_min_scores(parsed_output_files, current_output_dir, args, min_scores, min_percentiles):
     #min_scores_rows = {}
@@ -253,7 +254,7 @@ def create_distance_matrix(Paths):
             distance_matrix[ID_1][ID_2] = Paths[ID_1][ID_2]['weight']
     return distance_matrix
 
-def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, args):
+def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, junctions_file, args):
     init_state = sorted(graph.nodes())
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
@@ -284,6 +285,27 @@ def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, args):
     names.append(state[-1])
     if len(problematic_junctions) > 0:
         return (None, "No valid junction between peptides: {}".format(", ".join(problematic_junctions)))
+
+    junctions = []
+    fieldnames = None
+    with open(junctions_file, 'r') as read_fh:
+        reader = csv.DictReader(read_fh, delimiter="\t")
+        fieldnames = reader.fieldnames
+        for line in reader:
+            line['selected'] = 'False'
+            junctions.append(line)
+    for i in range(0, (len(state) - 1)):
+        left_peptide = state[i]
+        right_peptide = state[i + 1]
+        selected_junction_idx = next((index for (index, d) in enumerate(junctions) if d['left_peptide'] == left_peptide and d['right_peptide'] == right_peptide), None)
+        selected_junction = junctions[selected_junction_idx]
+        selected_junction['selected'] = 'True'
+        junctions[selected_junction_idx] = selected_junction
+    with open(junctions_file, 'w') as write_fh:
+        fieldnames.append('selected')
+        writer = csv.DictWriter(write_fh, delimiter="\t", fieldnames = fieldnames)
+        writer.writeheader()
+        writer.writerows(junctions)
 
     print("%i distance :" % e)
     for id in state:
@@ -460,21 +482,20 @@ def main(args_input=sys.argv[1:]):
             )
             min_scores, min_percentiles = find_min_scores(parsed_output_files, current_output_dir, args, min_scores, min_percentiles)
             add_valid_junctions_to_graph(graph, min_scores, min_percentiles)
-            write_junctions_file(graph, current_output_dir)
+            junctions_file = write_junctions_file(graph, current_output_dir)
             (valid, error) = check_graph_valid(graph, seq_dict)
             if not valid:
                 junctions_to_process = identify_problematic_junctions(graph, seq_tuples)
                 print("No valid path found. {}".format(error))
                 continue
             distance_matrix = create_distance_matrix(graph)
-            (results_file, error) = find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, args)
+            (results_file, error) = find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, junctions_file, args)
             if results_file is None:
                 print("No valid path found. {}".format(error))
                 junctions_to_process = identify_problematic_junctions(graph, seq_tuples)
             else:
                 break
         tries += 1
-    junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
     shutil.copy(junctions_file, base_output_dir)
 
     if results_file is not None:
@@ -519,7 +540,7 @@ def main(args_input=sys.argv[1:]):
                     print("No valid path found after removing nodes: {}".format(', '.join(node_set)))
                     continue
                 distance_matrix = create_distance_matrix(modified_graph)
-                (results_file, error) = find_optimal_path(modified_graph, distance_matrix, modified_seq_dict, current_output_dir, args)
+                (results_file, error) = find_optimal_path(modified_graph, distance_matrix, modified_seq_dict, current_output_dir, modified_junctions_file, args)
                 if results_file is None:
                     print("No valid path found after removing nodes: {}".format(', '.join(node_set)))
                     continue
