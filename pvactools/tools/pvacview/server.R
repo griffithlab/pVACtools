@@ -146,7 +146,7 @@ server <- shinyServer(function(input, output, session) {
     if (!("Ref Match" %in% colnames(df$mainTable))) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
-    columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+    columns_needed <- c("ID", "Index", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                         "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
     if ("Comments" %in% colnames(df$mainTable)) {
@@ -238,7 +238,7 @@ server <- shinyServer(function(input, output, session) {
        if (!("Ref Match" %in% colnames(df$mainTable))) {
          df$mainTable$`Ref Match` <- "Not Run"
        }
-       columns_needed <- c("ID", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+       columns_needed <- c("ID", "Index", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                            "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                            "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
        if ("Comments" %in% colnames(df$mainTable)) {
@@ -544,15 +544,15 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Comments")],
+      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Index") & !(colnames(df$mainTable) == "Comments")],
                 escape = FALSE,
                 callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)),
                 class = "stripe",
                 options = list(lengthChange = TRUE, pageLength = df$pageLength,
                                dom = "Bfrtilp",
-                               columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 10, (hla_count() + 12):(hla_count() + 17))),
+                               columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 6, (hla_count() + 11):(hla_count() + 18))),
                                                  list(className = "dt-center", targets = c(0:hla_count() - 1)),
-                                                 list(visible = FALSE, targets = c(1:(hla_count()-1), (hla_count()+2), (hla_count()+4), -1:-12)),
+                                                 list(visible = FALSE, targets = c(1:(hla_count()-2), (hla_count()+1), (hla_count()+3), -1:-12)),
                                                  list(orderable = TRUE, targets = 0)
                                ),
                                buttons = list(I("colvis")),
