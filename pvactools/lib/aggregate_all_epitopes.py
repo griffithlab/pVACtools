@@ -426,7 +426,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             if len(positions) > 2:
                 return True
             anchor_residue_pass = True
-            if all(int(pos) in anchors for pos in positions):
+            if all(int(float(pos)) in anchors for pos in positions):
                 if pd.isna(mutation["{} WT IC50 Score".format(self.wt_top_score_metric)]):
                     anchor_residue_pass = False
                 elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
