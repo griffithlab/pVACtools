@@ -25,6 +25,13 @@ def define_parser():
         )
     download_wdls_parser.set_defaults(func=download_wdls)
 
+    compare_parser = subparsers.add_parser(
+        "compare",
+        help="Run a comparison between two output results folders",
+        add_help=False
+        )
+    compare_parser.set_defaults(func=compare)
+
     parser.add_argument(
         "-v", "--version",
         action="store_true",

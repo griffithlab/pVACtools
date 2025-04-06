@@ -1,0 +1,27 @@
+{
+    "tumor_purity": null,
+    "vaf_clonal": 0.5,
+    "vaf_subclonal": 0.25,
+    "binding_threshold": 500,
+    "aggregate_inclusion_binding_threshold": 1500,
+    "trna_vaf": 0.1,
+    "trna_cov": 10,
+    "allele_expr_threshold": 1.0,
+    "maximum_transcript_support_level": 1,
+    "percentile_threshold": null,
+    "use_allele_specific_binding_thresholds": false,
+    "mt_top_score_metric": "Median",
+    "wt_top_score_metric": "Median",
+    "allele_specific_binding_thresholds": {
+      "HLA-A*29:02": 641.0
+    },
+    "allele_specific_anchors": true,
+    "alleles": [
+      "HLA-A*29:02",
+      "HLA-B*45:01",
+      "HLA-B*82:02",
+      "HLA-C*06:02"
+    ],
+    "anchor_contribution_threshold": 0.8,
+    "chr1-16006133-16006134-G-T": {}
+}
