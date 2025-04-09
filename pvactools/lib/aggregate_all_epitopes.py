@@ -1152,7 +1152,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
 
     # pvacbind w/ Index instead of Mutation
     def get_list_unique_mutation_keys(self, df):
-        keys = df["Index"].values.tolist()
+        keys = df["Junction"].values.tolist()
         return sorted(list(set(keys)))
 
     # pvacbind w/ Index instead of Mutation
@@ -1162,23 +1162,54 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
 
     # pvacbind w/ Index instead of Mutation
     def get_sub_df(self, all_epitopes_df, df_key):
-        df = (all_epitopes_df[lambda x: (x['Index'] == df_key)]).copy()
+        df = (all_epitopes_df[lambda x: (x['Junction'] == df_key)]).copy()
         return df, df_key
+
+    def get_best_binder(self, df):
+        #get all entries with Biotype 'protein_coding'
+        biotype_df = df[df['Biotype'] == 'protein_coding']
+        #if there are none, reset to previous dataframe
+        if biotype_df.shape[0] == 0:
+            biotype_df = df
+
+        #subset protein_coding dataframe to only include entries with a TSL < maximum_transcript_support_level
+        tsl_df = biotype_df[biotype_df['Transcript Support Level'].notnull()]
+        tsl_df = tsl_df[tsl_df['Transcript Support Level'] != 'Not Supported']
+        tsl_df = tsl_df[tsl_df['Transcript Support Level'] <= self.maximum_transcript_support_level]
+        #if this results in an empty dataframe, reset to previous dataframe
+        if tsl_df.shape[0] == 0:
+            tsl_df = biotype_df
+
+        #subset tsl dataframe to only include entries with no problematic positions
+        if self.problematic_positions_exist():
+            prob_pos_df = tsl_df[tsl_df['Problematic Positions'] == "None"]
+            #if this results in an empty dataframe, reset to previous dataframe
+            if prob_pos_df.shape[0] == 0:
+                prob_pos_df = tsl_df
+        else:
+            prob_pos_df = tsl_df
+
+        #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
+        prob_pos_df.sort_values(by=[
+            "{} IC50 Score".format(self.top_score_metric),
+            "Transcript Support Level",
+        ], inplace=True, ascending=[True, True])
+        return prob_pos_df.iloc[0]
 
     def get_tier(self, mutation, vaf_clonal):
         if self.use_allele_specific_binding_thresholds and mutation['HLA Allele'] in self.allele_specific_binding_thresholds:
             binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
         else:
             binding_threshold = self.binding_threshold
-        
+
         ic50_pass = mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold
         percentile_pass = (
-            self.percentile_threshold is None or 
+            self.percentile_threshold is None or
             mutation["{} Percentile".format(self.top_score_metric)] < self.percentile_threshold
         )
         binding_pass = (
             (ic50_pass and percentile_pass) 
-            if self.percentile_threshold_strategy == 'conservative' 
+            if self.percentile_threshold_strategy == 'conservative'
             else (ic50_pass or percentile_pass)
         )
 
@@ -1260,7 +1291,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
     def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count):
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
 
-        out_dict = {'ID': key}
+        out_dict = {'ID': best['Index']}
         out_dict.update({k.replace('HLA-', ''): v for k, v in sorted(hla.items())})
 
         gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
