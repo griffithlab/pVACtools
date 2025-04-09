@@ -66,6 +66,7 @@ class PvacfuseTests(unittest.TestCase):
             "valid_alleles",
             "valid_algorithms",
             "download_example_data",
+            'mark_genes_of_interest',
             "net_chop",
             "netmhc_stab",
             "calculate_reference_proteome_similarity",
@@ -194,6 +195,21 @@ class PvacfuseTests(unittest.TestCase):
         output_file = tempfile.NamedTemporaryFile()
         identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
 
+    def test_mark_genes_of_interest_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacfuse",
+            "mark_genes_of_interest.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_mark_genes_of_interest_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        mark_genes_of_interest.main([input_file, output_file.name])
+
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,
@@ -206,7 +222,7 @@ class PvacfuseTests(unittest.TestCase):
 
     def test_valid_alleles_runs(self):
         valid_alleles.main(["-p", "SMM"])
-    
+
     def test_valid_algorithms_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,
