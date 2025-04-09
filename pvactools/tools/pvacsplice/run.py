@@ -186,6 +186,7 @@ def main(args_input = sys.argv[1:]):
         'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'run_post_processor'        : True,
         'exclude_NAs'               : args.exclude_NAs,
+        'genes_of_interest_file': args.genes_of_interest_file,
     }
     junction_arguments.update(additional_args)
 
