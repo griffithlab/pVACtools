@@ -259,6 +259,14 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=['protein_coding']
         )
 
+    def genes_of_interest_args(self):
+        self.parser.add_argument(
+            '--genes-of-interest-file',
+            help="A genes of interest file. Predictions resulting from variants on genes in this list will be marked in the result files. "
+                 + "The file should be formatted to have each gene on a separate line without a header line. "
+                 + "If no file is specified, the Cancer Gene Census list of high-confidence genes is used as the default."
+        )
+
     def aggregated_report_args(self):
         self.parser.add_argument(
             '--aggregate-inclusion-binding-threshold', type=int,
@@ -415,6 +423,7 @@ class PvacfuseRunArgumentParser(RunArgumentParser):
         self.binding_args(tool_name)
         self.prediction_args()
         self.fasta_generation()
+        self.genes_of_interest_args()
         self.aggregated_report_args()
         self.pvacfuse()
 
@@ -428,6 +437,7 @@ class PvacspliceRunArgumentParser(RunArgumentParser):
         self.pass_only_args()
         self.expression_coverage_args()
         self.prediction_args()
+        self.genes_of_interest_args()
         self.aggregated_report_args()
         self.pvacsplice()
 
@@ -447,6 +457,7 @@ class PvacseqRunArgumentParser(RunArgumentParser):
         self.expression_coverage_args()
         self.prediction_args()
         self.fasta_generation()
+        self.genes_of_interest_args()
         self.aggregated_report_args()
         self.pvacseq()
 
