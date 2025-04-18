@@ -11,14 +11,7 @@ class CompareReferenceMatchesTSV:
         self.run_notes = []
         self.hits_file1 = {}
         self.hits_file2 = {}
-
-    def create_id_column(self):
-        """
-        Purpose:    Combines multiple columns into a singular unique ID column in both dataframes
-        Modifies:   df1 and df2
-        Returns:    None
-        """
-        id_columns = [
+        self.original_id_columns = [
             "Chromosome",
             "Start",
             "Stop",
@@ -30,15 +23,6 @@ class CompareReferenceMatchesTSV:
             "Match Start",
             "Match Stop",
         ]
-        self.df1["ID"] = self.df1[id_columns].apply(
-            lambda x: "-".join(map(str, x)), axis=1
-        )
-        self.df2["ID"] = self.df2[id_columns].apply(
-            lambda x: "-".join(map(str, x)), axis=1
-        )
-
-        self.df1.drop(columns=id_columns, inplace=True)
-        self.df2.drop(columns=id_columns, inplace=True)
 
     def check_duplicate_ids(self):
         """

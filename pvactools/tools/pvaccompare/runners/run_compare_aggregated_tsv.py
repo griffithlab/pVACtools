@@ -14,18 +14,23 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
     check_column_formatting(comparer.df1, comparer.df2)
     comparer.check_id()
 
-    id_format = (
-        "Chromosome-Start-Stop-Reference-Variant"
+    id_columns = (
+        comparer.original_id_columns
         if comparer.contains_id
-        else "Gene (AA_Change)"
+        else comparer.ID_replacement_cols
     )
 
     run_notes = find_dropped_cols(
-        comparer.df1, comparer.df2, comparer.columns_to_compare
+        comparer.df1,
+        comparer.df2,
+        comparer.columns_to_compare,
+        comparer.original_id_columns,
     )
 
     if not comparer.contains_id:
         run_notes.append("Replaced ID with Gene and AA Change")
+    else:
+        comparer.split_id_columns()
 
     comparer.columns_to_compare = check_columns_to_compare(
         comparer.df1, comparer.df2, comparer.columns_to_compare
@@ -39,6 +44,7 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
     differences = get_file_differences(
         comparer.df1,
         comparer.df2,
+        id_columns,
         comparer.columns_to_compare,
         comparer.contains_id,
     )
@@ -53,7 +59,7 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
         "aggregated_data.json",
         output_path,
         class_type,
-        id_format,
+        id_columns,
         run_notes,
         common_entries,
         unique_entries_file1,

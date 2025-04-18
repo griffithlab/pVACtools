@@ -9,15 +9,19 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
     Modifies:   Nothing
     Returns:    None
     """
-    id_format = "Chromosome-Start-Stop-Reference-Variant-HLA_Allele-Sub_peptide_Position-Mt_Epitope_Seq-Index"
-
     comparer = CompareUnaggregatedTSV(input_file1, input_file2, columns_to_compare)
     add_line_numbers(comparer.df1, comparer.df2)
     check_column_formatting(comparer.df1, comparer.df2)
-    comparer.create_id_column()
+    updated_id_columns = check_id_columns(
+        comparer.df1, comparer.df2, comparer.original_id_columns
+    )
+    create_id_column(comparer.df1, comparer.df2, updated_id_columns)
 
     run_notes = find_dropped_cols(
-        comparer.df1, comparer.df2, comparer.columns_to_compare
+        comparer.df1,
+        comparer.df2,
+        comparer.columns_to_compare,
+        comparer.original_id_columns,
     )
 
     comparer.columns_to_compare = check_columns_to_compare(
@@ -30,7 +34,7 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
     )
 
     differences = get_file_differences(
-        comparer.df1, comparer.df2, comparer.columns_to_compare
+        comparer.df1, comparer.df2, updated_id_columns, comparer.columns_to_compare
     )
 
     if not unique_entries_file1 and not unique_entries_file2 and not differences:
@@ -43,7 +47,7 @@ def main(input_file1, input_file2, columns_to_compare, output_path, class_type):
         "unaggregated_data.json",
         output_path,
         class_type,
-        id_format,
+        updated_id_columns,
         run_notes,
         common_entries,
         unique_entries_file1,

@@ -61,13 +61,18 @@ class CompareJSON:
                 if k not in filtered_data1
             },
             "Values Changed": {
-                k: f"{sorted(filtered_data1[k])} -> {sorted(filtered_data2[k])}"
-                if isinstance(filtered_data1[k], list) and isinstance(filtered_data2[k], list)
-                else f"{filtered_data1[k]} -> {filtered_data2[k]}"
+                k: (
+                    f"{sorted(filtered_data1[k])} -> {sorted(filtered_data2[k])}"
+                    if isinstance(filtered_data1[k], list)
+                    and isinstance(filtered_data2[k], list)
+                    else f"{filtered_data1[k]} -> {filtered_data2[k]}"
+                )
                 for k in sorted(filtered_data1)
-                if k in filtered_data2 and (
+                if k in filtered_data2
+                and (
                     sorted(filtered_data1[k]) != sorted(filtered_data2[k])
-                    if isinstance(filtered_data1[k], list) and isinstance(filtered_data2[k], list)
+                    if isinstance(filtered_data1[k], list)
+                    and isinstance(filtered_data2[k], list)
                     else filtered_data1[k] != filtered_data2[k]
                 )
             },

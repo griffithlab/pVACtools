@@ -11,6 +11,13 @@ class CompareAggregatedTSV:
         self.replaced_id = False
         self.ID_replacement_cols = ["Gene", "AA Change"]
         self.columns_to_compare = columns_to_compare
+        self.original_id_columns = [
+            "Chromosome",
+            "Start",
+            "Stop",
+            "Reference",
+            "Variant",
+        ]
 
     def check_id(self):
         """
@@ -48,5 +55,18 @@ class CompareAggregatedTSV:
             + ")"
         )
 
-        self.df1.drop(columns=self.ID_replacement_cols, inplace=True)
-        self.df2.drop(columns=self.ID_replacement_cols, inplace=True)
+    def split_id_columns(self):
+        """
+        Purpose:    Split the combined ID column into Chromosome, Start, Stop, Reference, and Variant
+        Modifies:   df1 and df2
+        Returns:    None
+        """
+
+        def split_id(df):
+            split_df = df["ID"].str.split("-", expand=True)
+            split_df.columns = self.original_id_columns
+            for col in self.original_id_columns:
+                df[col] = split_df[col]
+
+        split_id(self.df1)
+        split_id(self.df2)
