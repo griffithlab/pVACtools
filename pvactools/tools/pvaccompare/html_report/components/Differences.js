@@ -19,9 +19,6 @@ export default {
                                     <thead class="thead-sticky text-left">
                                         <tr>
                                             <th v-for="field in fields" :key="field">
-                                                <q-tooltip v-if="field === 'ID'" anchor="top middle" self="top middle">
-                                                    {{ idFormat }}
-                                                </q-tooltip>
                                                 {{ field }}
                                             </th>
                                         </tr>
@@ -82,9 +79,7 @@ export default {
             loadedSections: {},
             currentSectionIndex: {},
             loadBatchSize: 1000,
-            fields: ["Entry #", "ID", "File 1 Value", "File 2 Value", "File 1 Line", "File 2 Line"],
-            idFormat: "",
-            idNum: 1
+            fields: [],
         };
     },
 
@@ -160,15 +155,22 @@ export default {
 
             const key = this.currentComparison.key;
             if (this[key] && this[key].differences) {
-                this.idFormat = this[key].id_format;
                 this.visibleEntries = {};
                 this.loadedSections = {};
                 this.currentSectionIndex = {};
+                this.fields = [];
 
                 for (const section in this[key].differences) {
                     this.visibleEntries[section] = [];
                     this.loadedSections[section] = 0;
                     this.currentSectionIndex[section] = 1;
+
+                    const sectionData = this[key].differences[section];
+                    const firstSectionKey = "section1";
+                    const firstEntry = sectionData[firstSectionKey]?.[0];
+                    if (firstEntry && this.fields.length === 0) {
+                        this.fields = Object.keys(firstEntry);
+                    }
 
                     this.loadSection(section);
                 }

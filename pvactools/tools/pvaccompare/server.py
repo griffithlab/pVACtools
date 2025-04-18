@@ -13,7 +13,7 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Pragma", "no-cache")
         self.send_header("Expires", "0")
         super().end_headers()
-    
+
     def do_OPTIONS(self):
         self.send_response(200)
         self.end_headers()
@@ -23,13 +23,16 @@ def main():
     PORT = 8080
     server = HTTPServer(("localhost", PORT), CORSRequestHandler)
     print("Starting local server...")
-    print(f"View reports at http://localhost:{PORT}/pvactools/tools/pvaccompare/html_report/main.html")
+    print(
+        f"View reports at http://localhost:{PORT}/pvactools/tools/pvaccompare/html_report/main.html"
+    )
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\nShutting down server.")
         server.server_close()
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

@@ -6,6 +6,11 @@ import json
 
 
 def add_line_numbers(df1, df2):
+    """
+    Purpose:    Add line number information to each row of the given DataFrames.
+    Modifies:   df1 and df2
+    Returns:    None
+    """
     df1["line"] = range(2, len(df1) + 2)
     df2["line"] = range(2, len(df2) + 2)
 
@@ -43,7 +48,7 @@ def check_column_formatting(df1, df2):
                 break
 
 
-def find_dropped_cols(df1, df2, original_columns):
+def find_dropped_cols(df1, df2, original_columns, id_columns):
     """
     Purpose:    Outputs the dropped comparison columns to the terminal and creates an array of notes for the html report
     Modifies:   Nothing
@@ -51,17 +56,23 @@ def find_dropped_cols(df1, df2, original_columns):
     """
     run_notes = []
     for col in original_columns:
+        prefix = "ID " if col in id_columns else ""
         if col not in df1.columns and col not in df2.columns:
-            logging.info(
-                "\u2022 Column dropped: '%s' is not present in either file", col
+            message = (
+                f"\u2022 {prefix}Column dropped: '{col}' is not present in either file"
             )
-            run_notes.append(f"Column dropped: '{col}' is not present in either file")
         elif col not in df1.columns:
-            logging.info("\u2022 Column dropped: '%s' is only present in file 2", col)
-            run_notes.append(f"Column dropped: '{col}' is only present in file 2")
+            message = (
+                f"\u2022 {prefix}Column dropped: '{col}' is only present in file 2"
+            )
         elif col not in df2.columns:
-            logging.info("\u2022 Column dropped: '%s' is only present in file 1", col)
-            run_notes.append(f"Column dropped: '{col}' is only present in file 1")
+            message = (
+                f"\u2022 {prefix}Column dropped: '{col}' is only present in file 1"
+            )
+        else:
+            continue
+        logging.info(message)
+        run_notes.append(message.replace("\u2022 ", ""))
     return run_notes
 
 
@@ -142,11 +153,16 @@ def split_replaced_id(id_str):
         grp2 = rest.split("-")[0].rstrip(")")
         return grp1, grp2
     except Exception as e:
-        logging.error(f"Error splitting replaced ID: {id_str}, {e}")
+        logging.error(f"ERROR: While splitting replaced ID: {id_str}, {e}")
         return "", ""
 
 
 def sort_unique_entries(unique_entries_file1, unique_entries_file2, contains_id):
+    """
+    Purpose:    Sort unique entries by ID or Gene-AA combination depending on input
+    Modifies:   Nothing
+    Returns:    Two sorted lists of unique entries from file 1 and file 2
+    """
     if unique_entries_file1:
         if contains_id:
             unique_entries_file1 = sorted(unique_entries_file1, key=extract_id_parts)
@@ -163,6 +179,7 @@ def sort_unique_entries(unique_entries_file1, unique_entries_file2, contains_id)
 def get_file_differences(
     df1,
     df2,
+    id_columns,
     columns_to_compare,
     contains_id=True,
     tolerance=0.1,
@@ -172,8 +189,9 @@ def get_file_differences(
     Modifies:   Nothing
     Returns:    Dictionary of differences and a dictionary of unique entries
     """
-    df1_selected = df1[["ID", "line"] + columns_to_compare]
-    df2_selected = df2[["ID", "line"] + columns_to_compare]
+    id_cols = ["ID", "line"] + id_columns
+    df1_selected = df1[id_cols + columns_to_compare]
+    df2_selected = df2[id_cols + columns_to_compare]
 
     merged_df = pd.merge(
         df1_selected, df2_selected, on="ID", suffixes=("_file1", "_file2")
@@ -210,7 +228,14 @@ def get_file_differences(
                 merged_df[col_file1].isna() & merged_df[col_file2].isna()
             )
 
-        diff = merged_df[mask][["ID", col_file1, col_file2, "line_file1", "line_file2"]]
+        keep_cols = ["ID", col_file1, col_file2, "line_file1", "line_file2"]
+        for colname in id_columns:
+            if f"{colname}_file1" in merged_df.columns:
+                keep_cols.append(f"{colname}_file1")
+
+        diff = merged_df[mask][keep_cols]
+        diff = diff.rename(columns={f"{col}_file1": col for col in id_columns})
+
         if not diff.empty:
             differences[col] = diff.to_dict("records")
 
@@ -228,6 +253,11 @@ def get_file_differences(
 
 
 def replace_nan_with_none(obj):
+    """
+    Purpose:    Recursively replace NaN float values with None in nested lists or dictionaries
+    Modifies:   Nothing
+    Returns:    The same object with all NaNs replaced by None
+    """
     if isinstance(obj, float) and pd.isna(obj):
         return None
     elif isinstance(obj, dict):
@@ -237,7 +267,81 @@ def replace_nan_with_none(obj):
     return obj
 
 
-def preprocess_differences(differences, chunk_size=1000):
+def merge_hla_field(split_id_parts):
+    """
+    Purpose: Combines 'HLA' and the following part into a single element if found
+    Modifies: Nothing
+    Returns: List of properly split ID parts
+    """
+    new_parts = []
+    skip = False
+    for i, part in enumerate(split_id_parts):
+        if skip:
+            skip = False
+            continue
+        if part == "HLA" and i + 1 < len(split_id_parts):
+            new_parts.append(f"HLA-{split_id_parts[i+1]}")
+            skip = True
+        else:
+            new_parts.append(part)
+    return new_parts
+
+
+def fill_entry_dict(split_id, id_columns, entry_num, key):
+    """
+    Purpose:    Build a dictionary that maps split ID parts to their corresponding ID columns
+    Modifies:   Nothing
+    Returns:    A dictionary with ID column values and entry number, or None if mismatch occurs
+    """
+    if len(split_id) != len(id_columns):
+        logging.error(
+            f"ERROR: Mismatch between number of ID columns and split ID for key: {key}"
+        )
+        return None
+
+    entry_dict = {"Entry #": entry_num}
+    for i, col in enumerate(id_columns):
+        entry_dict[col] = split_id[i]
+    return entry_dict
+
+
+def preprocess_unique_entries(entries, id_columns):
+    """
+    Purpose:    Convert unique entry sets or dictionaries into a structured list of dictionaries
+    Modifies:   Nothing
+    Returns:    A list of structured entry dictionaries with ID fields and optional hit counts
+    """
+    transformed_entries = []
+    entry_num = 1
+
+    if isinstance(entries, dict):
+        for key, value in entries.items():
+            split_id = merge_hla_field(key.split("-"))
+            entry_dict = fill_entry_dict(split_id, id_columns, entry_num, key)
+            if entry_dict:
+                entry_dict["Number of Hits"] = value
+                transformed_entries.append(entry_dict)
+                entry_num += 1
+    elif isinstance(entries, list):
+        for entry_id in entries:
+            split_id = merge_hla_field(entry_id.split("-"))
+            entry_dict = fill_entry_dict(split_id, id_columns, entry_num, entry_id)
+            if entry_dict:
+                transformed_entries.append(entry_dict)
+                entry_num += 1
+    else:
+        logging.error(
+            "ERROR: Could not process unique entries. Must be a dictionary or a list."
+        )
+    return transformed_entries
+
+
+def preprocess_differences(differences, id_columns, chunk_size=1000):
+    """
+    Purpose:    Chunk and restructure difference records for display/export, replacing NaNs with None
+    Modifies:   Nothing
+    Returns:    A dictionary of chunked, structured difference entries with metadata
+    """
     differences = replace_nan_with_none(differences)
     transformed_differences = {}
 
@@ -248,20 +352,29 @@ def preprocess_differences(differences, chunk_size=1000):
         ]
 
         section_data = {"num_sections": len(chunked_entries)}
-
         section_content = {}
+
         for idx, chunk in enumerate(chunked_entries):
-            section_content[f"section{idx + 1}"] = [
-                {
-                    "Entry #": entry_num+i,
-                    "ID": entry["ID"],
-                    "File 1 Value": entry.get(f"{section}_file1"),
-                    "File 2 Value": entry.get(f"{section}_file2"),
-                    "File 1 Line": entry.get("line_file1"),
-                    "File 2 Line": entry.get("line_file2"),
+            section_content[f"section{idx + 1}"] = []
+
+            for i, entry in enumerate(chunk):
+                entry_dict = {
+                    "Entry #": entry_num + i,
                 }
-                for i, entry in enumerate(chunk)
-            ]
+
+                for col in id_columns:
+                    entry_dict[col] = entry.get(col)
+
+                entry_dict.update(
+                    {
+                        "File 1 Value": entry.get(f"{section}_file1"),
+                        "File 2 Value": entry.get(f"{section}_file2"),
+                        "File 1 Line": entry.get("line_file1"),
+                        "File 2 Line": entry.get("line_file2"),
+                    }
+                )
+
+                section_content[f"section{idx + 1}"].append(entry_dict)
             entry_num += len(chunk)
 
         section_data.update(section_content)
@@ -277,7 +390,7 @@ def export_to_json(
     filename,
     output_path,
     class_type,
-    id_format="",
+    id_columns=[],
     run_notes=[],
     common_entries=[],
     unique_entries_file1=[],
@@ -286,6 +399,11 @@ def export_to_json(
     hits_file2={},
     duplicate_ids=False,
 ):
+    """
+    Purpose: Exports comparison results and statistics between two input files into a JSON file
+    Modifies: Writes a structured JSON file to disk at the specified output path
+    Returns: None
+    """
     file_path = f"{output_path}/{filename}"
 
     if filename != "yml_input_data.json" and filename != "json_input_data.json":
@@ -307,16 +425,20 @@ def export_to_json(
                 summary_data["Section Differences"][
                     f"Number of differences in {col}"
                 ] = num_col_differences[col]
-        differences = preprocess_differences(differences)
+        differences = preprocess_differences(differences, id_columns)
     else:
         summary_data = {}
 
     entry_data = {
         "Entries Unique to File 1" if not duplicate_ids else "Hits in File 1": (
-            list(unique_entries_file1) if not duplicate_ids else hits_file1
+            preprocess_unique_entries(list(unique_entries_file1), id_columns)
+            if not duplicate_ids
+            else preprocess_unique_entries(hits_file1, id_columns)
         ),
         "Entries Unique to File 2" if not duplicate_ids else "Hits in File 2": (
-            list(unique_entries_file2) if not duplicate_ids else hits_file2
+            preprocess_unique_entries(list(unique_entries_file2), id_columns)
+            if not duplicate_ids
+            else preprocess_unique_entries(hits_file2, id_columns)
         ),
     }
 
@@ -324,7 +446,6 @@ def export_to_json(
         "mhc_class": class_type,
         "input_file1": input_file1,
         "input_file2": input_file2,
-        "id_format": id_format,
         "summary": summary_data,
         "differences": differences,
         "entries": entry_data,
@@ -342,9 +463,7 @@ def get_total_number_entries(
     Modifies:   Nothing
     Returns:    Integer of the total number of entries
     """
-    return (
-        len(common_entries) + len(unique_entries_file1) + len(unique_entries_file2)
-    )
+    return len(common_entries) + len(unique_entries_file1) + len(unique_entries_file2)
 
 
 def get_number_column_differences(differences):
@@ -358,3 +477,26 @@ def get_number_column_differences(differences):
         if col != "ID":
             num_col_differences[col] = len(differences)
     return num_col_differences
+
+
+def check_id_columns(df1, df2, id_cols):
+    """
+    Purpose:    Makes sure the 'ID' columns are present in both dataframes
+    Modifies:   None
+    Returns:    Updated 'ID' column list
+    """
+    updated_id_cols = []
+    for col in id_cols:
+        if col in df1.columns and col in df2.columns:
+            updated_id_cols.append(col)
+    return updated_id_cols
+
+
+def create_id_column(df1, df2, cols):
+    """
+    Purpose:    Combines multiple columns into a singular unique ID column in both dataframes
+    Modifies:   df1 and df2
+    Returns:    Modified dataframes
+    """
+    df1["ID"] = df1[cols].apply(lambda x: "-".join(map(str, x)), axis=1)
+    df2["ID"] = df2[cols].apply(lambda x: "-".join(map(str, x)), axis=1)
