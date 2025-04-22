@@ -8,6 +8,7 @@ from pvactools.lib.filter import Filter, FilterCriterion
 from pvactools.lib.top_score_filter import PvacseqTopScoreFilter, PvacfuseTopScoreFilter, PvacbindTopScoreFilter, PvacspliceTopScoreFilter
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.calculate_reference_proteome_similarity import CalculateReferenceProteomeSimilarity
+from pvactools.lib.update_tiers import PvacseqUpdateTiers, PvacbindUpdateTiers, PvacfuseUpdateTiers, PvacspliceUpdateTiers
 from pvactools.lib.net_chop import NetChop
 from pvactools.lib.netmhc_stab import NetMHCStab
 
@@ -63,8 +64,6 @@ class PostProcessor:
         self.call_net_chop()
         self.call_netmhc_stab()
         self.calculate_reference_proteome_similarity()
-        if not self.el_only:
-            shutil.copy(self.reference_similarity_fh.name, self.aggregate_report)
         shutil.copy(self.netmhc_stab_fh.name, self.filtered_report_file)
         self.close_filehandles()
         print("\nDone: Pipeline finished successfully. File {} contains list of filtered putative neoantigens.\n".format(self.filtered_report_file))
@@ -82,7 +81,7 @@ class PostProcessor:
             return
         print("Creating aggregated report")
         if self.file_type == 'pVACseq':
-            PvacseqAggregateAllEpitopes(
+            aggregator = PvacseqAggregateAllEpitopes(
                 self.input_file,
                 self.aggregate_report,
                 tumor_purity=self.tumor_purity,
@@ -99,7 +98,9 @@ class PostProcessor:
                 anchor_contribution_threshold=self.anchor_contribution_threshold,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
                 aggregate_inclusion_count_limit=self.aggregate_inclusion_count_limit,
-            ).execute()
+            )
+            aggregator.execute()
+            self.vaf_clonal = aggregator.vaf_clonal
         elif self.file_type == 'pVACfuse':
             PvacfuseAggregateAllEpitopes(
                 self.input_file,
@@ -289,6 +290,22 @@ class PostProcessor:
                 ).execute()
                 aggregate_metrics_output_file = self.reference_similarity_fh.name.replace('.tsv', '.metrics.json')
                 shutil.move(aggregate_metrics_output_file, aggregate_metrics_file)
+                shutil.copy(self.reference_similarity_fh.name, self.aggregate_report)
+
+                PvacseqUpdateTiers(
+                    self.aggregate_report,
+                    self.vaf_clonal,
+                    binding_threshold=self.binding_threshold,
+                    percentile_threshold=self.percentile_threshold,
+                    percentile_threshold_strategy=self.percentile_threshold_strategy,
+                    allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                    trna_vaf=self.trna_vaf,
+                    trna_cov=self.trna_cov,
+                    expn_val=self.expn_val,
+                    maximum_transcript_support_level=self.maximum_transcript_support_level,
+                    allele_specific_anchors=self.allele_specific_anchors,
+                    anchor_contribution_threshold=self.anchor_contribution_threshold,
+                ).execute()
             else:
                 CalculateReferenceProteomeSimilarity(
                     self.aggregate_report,
@@ -301,6 +318,26 @@ class PostProcessor:
                     blastp_db=self.blastp_db,
                     peptide_fasta=self.peptide_fasta,
                 ).execute()
+                shutil.copy(self.reference_similarity_fh.name, self.aggregate_report)
+
+                if self.file_type == 'pVACbind':
+                    PvacbindUpdateTiers(
+                        self.aggregate_report,
+                        binding_threshold=self.binding_threshold,
+                        allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                        percentile_threshold=self.percentile_threshold,
+                        percentile_threshold_strategy=self.percentile_threshold_strategy,
+                    ).execute()
+                elif self.file_type == 'pVACfuse':
+                    PvacfuseUpdateTiers(
+                        self.aggregate_report,
+                        binding_threshold=self.binding_threshold,
+                        allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                        percentile_threshold=self.percentile_threshold,
+                        percentile_threshold_strategy=self.percentile_threshold_strategy,
+                        read_support=self.read_support,
+                        expn_val=self.expn_val,
+                    ).execute()
             shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.aggregate_report))
             print("Completed")
         else:
