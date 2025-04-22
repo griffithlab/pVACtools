@@ -198,6 +198,7 @@ class PvacbindTests(unittest.TestCase):
                 'sample.name.all_epitopes.tsv',
                 'sample.name.filtered.tsv',
                 'sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.all_epitopes.aggregated.tsv.reference_matches',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -246,6 +247,7 @@ class PvacbindTests(unittest.TestCase):
                 'sample.name.all_epitopes.tsv',
                 'sample.name.filtered.tsv',
                 'sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.all_epitopes.aggregated.tsv.reference_matches',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
@@ -330,7 +332,7 @@ class PvacbindTests(unittest.TestCase):
             l.check_present(('root', 'WARNING', S("Record 1 contains unsupported amino acids. Skipping.")))
 
     def test_pvacbind_combine_and_condense_steps(self):
-        #with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+        with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
             for subdir in ['MHC_Class_I', 'MHC_Class_II']:
                 path = os.path.join(output_dir.name, subdir)
@@ -365,7 +367,7 @@ class PvacbindTests(unittest.TestCase):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
                 self.assertTrue(compare(output_file, expected_file))
-    
+
     def test_valid_algorithms_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,
@@ -378,7 +380,7 @@ class PvacbindTests(unittest.TestCase):
 
     def test_valid_algorithms_runs(self):
         valid_algorithms.main("")
-    
+
     def test_valid_netmhciipan_versions_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,
