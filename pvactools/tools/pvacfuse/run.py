@@ -36,7 +36,8 @@ def create_net_class_report(files, all_epitopes_output_file, filtered_report_fil
     else:
         post_processing_params['run_net_chop'] = False
     post_processing_params['run_netmhc_stab'] = True if run_params['netmhc_stab'] else False
-    post_processing_params['fasta'] = run_params['fasta']
+    if run_params['run_reference_proteome_similarity']:
+        post_processing_params['fasta'] = run_params['fasta']
     post_processing_params['species'] = run_params['species']
     post_processing_params['file_type'] = 'pVACfuse'
 
@@ -235,7 +236,10 @@ def main(args_input = sys.argv[1:]):
                 (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, max(epitope_lengths))
                 fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
                 shutil.copy(input_file, fasta_file)
-                run_arguments['fasta'] = fasta_file
+                if args.run_reference_proteome_similarity:
+                    epitope_flank_length = 7
+                    (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, epitope_flank_length)
+                    run_arguments['fasta'] = input_file
                 # generate and copy net_chop fasta to output dir if specified
                 if args.net_chop_method:
                     epitope_flank_length = 9

@@ -165,3 +165,19 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
             output_file = tempfile.NamedTemporaryFile()
             CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, blastp_db='refseq_select_prot', species='bonobo').execute()
             self.assertTrue("refseq_select_prot blastp database is only compatible with human and mouse species." in str(context.exception))
+
+    def test_calculate_self_similarity_with_peptide_fasta_pvacbind(self):
+        input_file = os.path.join(self.test_data_dir, 'Test.pvacbind.all_epitopes.tsv')
+        input_fasta = os.path.join(self.test_data_dir, 'Test.pvacbind.fasta')
+        output_file = tempfile.NamedTemporaryFile()
+        metric_file = "{}.reference_matches".format(output_file.name)
+        self.assertFalse(CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, peptide_fasta=self.peptide_fasta, file_type="pVACbind").execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output.pvacbind.all_epitopes.tsv"),
+        ))
+        self.assertTrue(cmp(
+            metric_file,
+            os.path.join(self.test_data_dir, "output.pvacbind.all_epitopes.tsv.reference_matches"),
+        ))
+        os.remove(metric_file)
