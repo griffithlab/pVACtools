@@ -55,7 +55,7 @@ PickPocket                                        1.1     yes
 SMM                                               1.0     yes
 SMMPMBEC                                          1.0     yes
 MHCflurry                                                 yes
-MHCnuggets                                                no
+MHCnuggets                                                yes
 ================================================= ======= ========================
 
 ================================================== ================================================================ ========================
@@ -64,7 +64,7 @@ MHC Class II Binding Affinity Prediction Algorithm Version                      
 NetMHCIIpan                                        4.0 (not supported by standalone IEDB), 4.1 (default), 4.2., 4.3 yes
 SMMalign                                           1.1                                                              yes
 NNalign                                            2.3                                                              yes
-MHCnuggets                                                                                                          no
+MHCnuggets                                                                                                          yes
 ================================================== ================================================================ ========================
 
 ======================================== ======= ========================
