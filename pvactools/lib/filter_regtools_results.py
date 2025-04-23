@@ -16,7 +16,7 @@ class FilterRegtoolsResults:
     def filter_junction_rows(self):
         # open file, rename junction cols for clarity
         junctions = pd.read_csv(self.input_file, sep='\t')
-        junctions['transcripts'] = junctions['transcripts'].astype(str)
+        junctions['transcripts'] = junctions['transcripts'].astype(str).apply(lambda transcripts: ','.join([t.split('.')[0] for t in transcripts.split(',')]))
         junctions = junctions.rename(columns={'chrom':'junction_chrom', 'start':'junction_start', 'end':'junction_stop'})
 
         # filter on score, strand, and anchor

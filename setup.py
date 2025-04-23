@@ -61,7 +61,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvaccompare/html_re
 
 setup(
     name="pvactools",
-    version="5.1.0",
+    version="5.3.0",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",
@@ -106,7 +106,8 @@ setup(
         'mhcflurry==2.0.6',
         'testfixtures',
         'gtfparse==2.0.1',
-        'pyfaidx==0.7.1',
+        'pyfaidx>=0.7.1',
+        'fsspec<=2025.3.0',
         'packaging',
         'pyarrow',
         'polars==0.16.18',
