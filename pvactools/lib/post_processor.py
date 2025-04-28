@@ -338,6 +338,19 @@ class PostProcessor:
                         read_support=self.read_support,
                         expn_val=self.expn_val,
                     ).execute()
+                elif self.file_type == 'pVACsplice':
+                    PvacspliceUpdateTiers(
+                        self.aggregate_report,
+                        self.vaf_clonal,
+                        binding_threshold=self.binding_threshold,
+                        allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                        percentile_threshold=self.percentile_threshold,
+                        percentile_threshold_strategy=self.percentile_threshold_strategy,
+                        trna_vaf=self.trna_vaf,
+                        trna_cov=self.trna_cov,
+                        expn_val=self.expn_val,
+                        maximum_transcript_support_level=self.maximum_transcript_support_level,
+                    ).execute()
             shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.aggregate_report))
             print("Completed")
         else:
