@@ -247,7 +247,7 @@ class PvacspliceTests(unittest.TestCase):
 
     def test_valid_alleles_runs(self):
         valid_alleles.main(["-p", "SMM"])
-    
+
     def test_valid_netmhciipan_versions_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,

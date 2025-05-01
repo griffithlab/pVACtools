@@ -3539,6 +3539,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           1
         ],

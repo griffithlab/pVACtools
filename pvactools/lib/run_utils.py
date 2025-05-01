@@ -5,6 +5,7 @@ import binascii
 import re
 from itertools import islice
 import argparse
+import pandas as pd
 
 def combine_reports(input_files, output_file):
     fieldnames = []
@@ -82,6 +83,24 @@ def float_range(minimum, maximum):
     # Return function handle to checking function
     return float_range_checker
 
+def transcript_prioritization_strategy():
+    """Return function handle of an argument type function for
+       ArgumentParser checking of the transcript prioritization strategy
+       checking that the specified criteria are in the list of: ['canonical', 'mane_select', 'tsl']"""
+
+    # Define the function with default arguments
+    def transcript_prioritization_strategy_checker(arg):
+        """New Type function for argparse - a comma-separated list with predefined valid values."""
+
+        arg_list = arg.split(",")
+        for argument in arg_list:
+            if argument not in ['canonical', 'mane_select', 'tsl']:
+                raise argparse.ArgumentTypeError("List element must be one of 'canonical', 'mane_select', 'tsl', not {}".format(argument))
+        return arg_list
+
+    # Return function handle to checking function
+    return transcript_prioritization_strategy_checker
+
 def supported_amino_acids():
     return ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
 
@@ -120,5 +139,34 @@ def get_anchor_positions(hla_allele, epitope_length, allele_specific_anchors, an
             values = mouse_anchor_positions[epitope_length][hla_allele]
             positions = [pos for pos, val in values.items() if val]
             return positions
-                
+
         return [1, 2, epitope_length - 1 , epitope_length]
+
+def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximum_transcript_support_level):
+    if not isinstance(mutation, pd.Series):
+        mutation = pd.Series(mutation)
+        if mutation['Canonical'] != 'Not Run':
+            mutation['Canonical'] = eval(mutation['Canonical'])
+        if mutation['MANE Select'] != 'Not Run':
+            mutation['MANE Select'] = eval(mutation['MANE Select'])
+    if 'mane_select' in transcript_prioritization_strategy:
+        if mutation['MANE Select'] == 'Not Run':
+            return True
+        elif mutation['MANE Select']:
+            return True
+    if 'canonical' in transcript_prioritization_strategy:
+        if mutation['Canonical'] == 'Not Run':
+            return True
+        elif mutation['Canonical']:
+            return True
+    if 'tsl' in transcript_prioritization_strategy:
+        col = 'TSL' if 'TSL' in mutation else 'Transcript Support Level'
+        if pd.isna(mutation[col]):
+            return True
+        elif mutation[col] == 'NA':
+            return True
+        elif mutation[col] == 'Not Supported':
+            return True
+        elif int(mutation[col]) <= maximum_transcript_support_level:
+            return True
+    return False
