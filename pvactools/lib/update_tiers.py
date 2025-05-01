@@ -7,7 +7,7 @@ import tempfile
 import shutil
 
 from pvactools.lib.prediction_class import PredictionClass
-from pvactools.lib.run_utils import get_anchor_positions
+from pvactools.lib.run_utils import get_anchor_positions, is_preferred_transcript
 
 class UpdateTiers:
     def __init__(self):
@@ -48,6 +48,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
             trna_vaf=0.25,
             trna_cov=10,
             expn_val=1,
+            transcript_prioritization_strategy=['mane_select', 'canonical', 'tsl'],
             maximum_transcript_support_level=1,
             percentile_threshold=None,
             percentile_threshold_strategy='conservative',
@@ -69,6 +70,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.allele_expr_threshold = trna_vaf * expn_val * 10
         self.trna_cov = trna_cov
         self.trna_vaf = trna_vaf
+        self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         anchor_probabilities = {}
         for length in [8, 9, 10, 11]:
@@ -119,14 +121,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
 
         anchor_residue_pass = self.is_anchor_residue_pass(mutation, binding_threshold)
 
-        tsl_pass = True
-        if mutation["TSL"] == "Not Supported":
-            pass
-        elif mutation["TSL"] == "NA":
-            tsl_pass = False
-        else:
-            if int(mutation["TSL"]) > self.maximum_transcript_support_level:
-                tsl_pass = False
+        transcript_pass = is_preferred_transcript(mutation, self.transcript_prioritization_strategy, self.maximum_transcript_support_level)
 
         refmatch_pass = True
         if 'Ref Match' in mutation:
@@ -148,7 +143,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
@@ -158,7 +153,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (not binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
@@ -168,7 +163,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            anchor_residue_pass and
            not refmatch_pass and
            probaa_pass):
@@ -178,17 +173,26 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            anchor_residue_pass and
            refmatch_pass and
            not probaa_pass):
             return "ProbPos"
 
+        #transcript doesn't match the prioritization criteria
+        if (binding_pass and
+           allele_expr_pass and
+           vaf_clonal_pass and
+           not transcript_pass and
+           refmatch_pass and
+           probaa_pass):
+            return "PoorTranscript"
+
         #anchor residues
         if (binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            not anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
@@ -198,7 +202,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and
            allele_expr_pass and
            not vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
@@ -217,7 +221,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and
            lowexpr and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
@@ -253,7 +257,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
     def sort_table(self, output_lines):
         #make sure the tiers sort in the expected order
         df = pd.DataFrame.from_dict(output_lines)
-        tier_sorter = ["Pass", "PoorBinder", "RefMatch", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
+        tier_sorter = ["Pass", "PoorBinder", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
 
@@ -405,6 +409,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         trna_vaf=0.25,
         trna_cov=10,
         expn_val=1,
+        transcript_prioritization_strategy=['mane_select', 'canonical', 'tsl'],
         maximum_transcript_support_level=1,
     ):
         self.input_file = input_file
@@ -418,6 +423,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.trna_vaf = trna_vaf
         self.trna_cov = trna_cov
         self.expn_val = expn_val
+        self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         super().__init__()
 
@@ -438,14 +444,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
             else (ic50_pass or percentile_pass)
         )
 
-        tsl_pass = True
-        if mutation["TSL"] == "Not Supported":
-            pass
-        elif mutation["TSL"] == "NA":
-            tsl_pass = False
-        else:
-            if int(mutation["TSL"]) > self.maximum_transcript_support_level:
-                tsl_pass = False
+        transcript_pass = is_preferred_transcript(mutation, self.transcript_prioritization_strategy, self.maximum_transcript_support_level)
 
         refmatch_pass = True
         if 'Ref Match' in mutation:
@@ -467,7 +466,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            refmatch_pass and
            probaa_pass):
             return "Pass"
@@ -476,7 +475,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (not binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            refmatch_pass and
            probaa_pass):
             return "PoorBinder"
@@ -485,7 +484,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            not refmatch_pass and
            probaa_pass):
             return "RefMatch"
@@ -494,16 +493,25 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and
            allele_expr_pass and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            refmatch_pass and
            not probaa_pass):
             return "ProbPos"
+
+        #transcript doesn't match the prioritization criteria
+        if (binding_pass and
+           allele_expr_pass and
+           vaf_clonal_pass and
+           not transcript_pass and
+           refmatch_pass and
+           probaa_pass):
+            return "PoorTranscript"
 
         #not in founding clone
         if (binding_pass and
            allele_expr_pass and
            not vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            refmatch_pass and
            probaa_pass):
             return "Subclonal"
@@ -521,7 +529,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and
            lowexpr and
            vaf_clonal_pass and
-           tsl_pass and
+           transcript_pass and
            refmatch_pass and
            probaa_pass):
             return "LowExpr"
@@ -539,7 +547,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         df = pd.DataFrame.from_dict(output_lines)
 
         #make sure the tiers sort in the expected order
-        tier_sorter = ["Pass", "PoorBinder", "RefMatch", "LowExpr", "Subclonal", "ProbPos", "Poor", "NoExpr"]
+        tier_sorter = ["Pass", "PoorBinder", "RefMatch", "PoorTranscript", "LowExpr", "Subclonal", "ProbPos", "Poor", "NoExpr"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
 

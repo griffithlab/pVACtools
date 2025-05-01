@@ -247,6 +247,15 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used during aggregate report creation for a simple estimation of whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.",
         )
         self.parser.add_argument(
+            "--transcript-prioritization-strategy", type=transcript_prioritization_strategy(),
+            help="Specify the criteria to consider when prioritizing or filtering transcripts of the neoantigen candidates during aggregate report creation or TSL filtering. "
+                 + "'canonical' will prioritize/select candidates resulting from variants on a Ensembl canonical transcript. "
+                 + "'mane_select' will prioritize/select candidates resulting from variants on a MANE select transcript. "
+                 + "'tsl' will prioritize/select candidates where the transcript support level (TSL) matches the --maximum-transcript-support-level. "
+                 + "When selecting more than one criteria, a transcript meeting EITHER of the selected criteria will be prioritized/selected.",
+            default=['canonical', 'mane_select', 'tsl']
+        )
+        self.parser.add_argument(
             "--maximum-transcript-support-level", type=int,
             help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
                  + "Keep all epitopes with a transcript support level <= to this cutoff.",

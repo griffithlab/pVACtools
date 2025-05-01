@@ -2575,6 +2575,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -2986,6 +2992,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -4463,6 +4475,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -5787,6 +5805,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -6895,6 +6919,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -7242,6 +7272,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -8351,6 +8387,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -8851,6 +8893,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -9046,6 +9094,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -11171,6 +11225,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -11366,6 +11426,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -12323,6 +12389,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -12518,6 +12590,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -14059,6 +14137,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -15166,6 +15250,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -16426,6 +16516,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -19007,6 +19103,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -19202,6 +19304,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -21327,6 +21435,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -22803,6 +22917,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -23302,6 +23422,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -23930,6 +24056,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -25622,6 +25754,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"

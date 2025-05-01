@@ -92,6 +92,7 @@ class PostProcessor:
                 trna_vaf=self.trna_vaf,
                 trna_cov=self.trna_cov,
                 expn_val=self.expn_val,
+                transcript_prioritization_strategy=self.transcript_prioritization_strategy,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
                 top_score_metric=self.top_score_metric,
                 allele_specific_anchors=self.allele_specific_anchors,
@@ -128,7 +129,7 @@ class PostProcessor:
                 aggregate_inclusion_count_limit=self.aggregate_inclusion_count_limit,
             ).execute()
         elif self.file_type == 'pVACsplice':
-            PvacspliceAggregateAllEpitopes(
+            aggregator = PvacspliceAggregateAllEpitopes(
                 self.input_file,
                 self.aggregate_report,
                 tumor_purity=self.tumor_purity,
@@ -142,8 +143,11 @@ class PostProcessor:
                 trna_vaf=self.trna_vaf,
                 trna_cov=self.trna_cov,
                 expn_val=self.expn_val,
+                transcript_prioritization_strategy=self.transcript_prioritization_strategy,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
-            ).execute()
+            )
+            aggregator.execute()
+            self.vaf_clonal = aggregator.vaf_clonal
         print("Completed")
 
     def calculate_manufacturability(self):
@@ -302,6 +306,7 @@ class PostProcessor:
                     trna_vaf=self.trna_vaf,
                     trna_cov=self.trna_cov,
                     expn_val=self.expn_val,
+                    transcript_prioritization_strategy=self.transcript_prioritization_strategy,
                     maximum_transcript_support_level=self.maximum_transcript_support_level,
                     allele_specific_anchors=self.allele_specific_anchors,
                     anchor_contribution_threshold=self.anchor_contribution_threshold,
@@ -349,6 +354,7 @@ class PostProcessor:
                         trna_vaf=self.trna_vaf,
                         trna_cov=self.trna_cov,
                         expn_val=self.expn_val,
+                        transcript_prioritization_strategy=self.transcript_prioritization_strategy,
                         maximum_transcript_support_level=self.maximum_transcript_support_level,
                     ).execute()
             shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.aggregate_report))

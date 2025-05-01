@@ -9,7 +9,7 @@ import itertools
 import csv
 import glob
 import ast
-from pvactools.lib.run_utils import get_anchor_positions
+from pvactools.lib.run_utils import get_anchor_positions, is_preferred_transcript
 
 from pvactools.lib.prediction_class import PredictionClass
 from pvactools.lib.update_tiers import PvacseqUpdateTiers, PvacfuseUpdateTiers, PvacspliceUpdateTiers, PvacbindUpdateTiers
@@ -139,6 +139,14 @@ class AggregateAllEpitopes:
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
         return 'Problematic Positions' in headers
 
+    def mane_select_run(self):
+        df = pd.read_csv(self.input_file, delimiter="\t", nrows=1)
+        return df.iloc[0]['MANE Select'] != 'Not Run'
+
+    def canonical_run(self):
+        df = pd.read_csv(self.input_file, delimiter="\t", nrows=1)
+        return df.iloc[0]['Canonical'] != 'Not Run'
+
     def calculate_allele_expr(self, line):
         if line['Gene Expression'] == 'NA' or line['Tumor RNA VAF'] == 'NA':
             return 'NA'
@@ -165,7 +173,7 @@ class AggregateAllEpitopes:
     def determine_columns_used_for_aggregation(self, prediction_algorithms, el_algorithms):
         used_columns = [
             "Index", "Chromosome", "Start", "Stop", "Reference", "Variant",
-            "Transcript", "Transcript Support Level", "Biotype", "Transcript Length", "Variant Type", "Mutation",
+            "Transcript", "Transcript Support Level", "MANE Select", "Canonical", "Biotype", "Transcript Length", "Variant Type", "Mutation",
             "Protein Position", "Gene Name", "HLA Allele",
             "Mutation Position", "MT Epitope Seq", "WT Epitope Seq",
             "Tumor DNA VAF", "Tumor RNA Depth",
@@ -200,6 +208,11 @@ class AggregateAllEpitopes:
             "Protein Position": "string",
             "Transcript Length": "int32",
         }
+        if self.__class__.__name__ == 'PvacseqAggregateAllEpitopes':
+            if self.mane_select_run():
+                dtypes['MANE Select'] = 'boolean'
+            if self.canonical_run():
+                dtypes['Canonical'] = 'boolean'
         for algorithm in prediction_algorithms:
             if algorithm == 'SMM' or algorithm == 'SMMPMBEC':
                 continue
@@ -275,6 +288,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             trna_vaf=0.25,
             trna_cov=10,
             expn_val=1,
+            transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
             maximum_transcript_support_level=1,
             percentile_threshold=None,
             percentile_threshold_strategy='conservative',
@@ -298,6 +312,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.allele_expr_threshold = trna_vaf * expn_val * 10
         self.trna_cov = trna_cov
         self.trna_vaf = trna_vaf
+        self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         if top_score_metric == 'median':
             self.mt_top_score_metric = "Median"
@@ -377,22 +392,21 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if biotype_df.shape[0] == 0:
             biotype_df = df
 
-        #subset protein_coding dataframe to only include entries with a TSL < maximum_transcript_support_level
-        tsl_df = biotype_df[biotype_df['Transcript Support Level'] != 'NA']
-        tsl_df = tsl_df[tsl_df['Transcript Support Level'] != 'Not Supported']
-        tsl_df = tsl_df[tsl_df['Transcript Support Level'] <= self.maximum_transcript_support_level]
+        #subset protein_coding dataframe to only preferred transcripts
+        biotype_df['transcript_pass'] = biotype_df.apply(lambda x: is_preferred_transcript(x, self.transcript_prioritization_strategy, self.maximum_transcript_support_level), axis=1)
+        transcript_df = biotype_df[biotype_df['transcript_pass']]
         #if this results in an empty dataframe, reset to previous dataframe
-        if tsl_df.shape[0] == 0:
-            tsl_df = biotype_df
+        if transcript_df.shape[0] == 0:
+            transcript_df = biotype_df
 
         #subset tsl dataframe to only include entries with no problematic positions
         if self.problematic_positions_exist():
-            prob_pos_df = tsl_df[tsl_df['Problematic Positions'] == "None"]
+            prob_pos_df = transcript_df[transcript_df['Problematic Positions'] == "None"]
             #if this results in an empty dataframe, reset to previous dataframe
             if prob_pos_df.shape[0] == 0:
-                prob_pos_df = tsl_df
+                prob_pos_df = transcript_df
         else:
-            prob_pos_df = tsl_df
+            prob_pos_df = transcript_df
 
         #subset prob_pos dataframe to only include entries that pass the anchor position check
         prob_pos_df['anchor_residue_pass'] = prob_pos_df.apply(lambda x: self.is_anchor_residue_pass(x), axis=1)
@@ -400,12 +414,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if anchor_residue_pass_df.shape[0] == 0:
             anchor_residue_pass_df = prob_pos_df
 
-        #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
+        #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
         anchor_residue_pass_df.sort_values(by=[
             "{} MT IC50 Score".format(self.mt_top_score_metric),
-            "Transcript Support Level",
             "Transcript Length",
-        ], inplace=True, ascending=[True, True, False])
+        ], inplace=True, ascending=[True, False])
         return anchor_residue_pass_df.iloc[0]
 
     def is_anchor_residue_pass(self, mutation):
@@ -579,7 +592,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             sorted_transcripts = self.sort_transcripts(annotations, included_df)
             peptides[set_name]['transcripts'] = list(sorted_transcripts.Annotation)
             peptides[set_name]['transcript_expr'] = self.replace_nas(list(sorted_transcripts.Expr))
-            peptides[set_name]['tsl'] = self.replace_nas(self.round_to_ints(list(sorted_transcripts.TSL)))
+            peptides[set_name]['mane_select'] = list(sorted_transcripts['MANE Select'])
+            peptides[set_name]['canonical'] = list(sorted_transcripts.Canonical)
+            peptides[set_name]['tsl'] = self.replace_nas(self.round_to_ints(list(sorted_transcripts['Transcript Support Level'])))
             peptides[set_name]['biotype'] = list(sorted_transcripts.Biotype)
             peptides[set_name]['transcript_length'] = [int(l) for l in list(sorted_transcripts.Length)]
             peptides[set_name]['transcript_count'] = len(annotations)
@@ -609,14 +624,15 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             data = {
                 'Annotation': line['annotation'],
                 'Biotype': line['Biotype'],
-                'TSL': line['Transcript Support Level'],
+                'MANE Select': line['MANE Select'],
+                'Canonical': line['Canonical'],
+                'Transcript Support Level': line['Transcript Support Level'],
                 'Length': line['Transcript Length'],
                 'Expr': line['Transcript Expression'],
             }
             transcript_table = pd.concat([transcript_table, pd.DataFrame.from_records(data, index=[0])], ignore_index=True)
         transcript_table['Biotype Sort'] = transcript_table.Biotype.map(lambda x: 1 if x == 'protein_coding' else 2)
-        tsl_sort_criteria = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 'NA': 6, 'Not Supported': 6}
-        transcript_table['TSL Sort'] = transcript_table.TSL.map(tsl_sort_criteria)
+        transcript_table['TSL Sort'] = transcript_table.apply(lambda x: 1 if is_preferred_transcript(x, self.transcript_prioritization_strategy, self.maximum_transcript_support_level) else 2, axis=1)
         transcript_table.sort_values(by=["Biotype Sort", "TSL Sort", "Length"], inplace=True, ascending=[True, True, False])
         return transcript_table
 
@@ -663,6 +679,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             'Num Passing Transcripts': anno_count,
             'Best Peptide': best["MT Epitope Seq"],
             'Best Transcript': best["Transcript"],
+            'MANE Select': best['MANE Select'],
+            'Canonical': best['Canonical'],
             'TSL': tsl,
             'Allele': best["HLA Allele"],
             'Pos': best["Mutation Position"],
@@ -721,6 +739,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             trna_vaf=self.trna_vaf,
             trna_cov=self.trna_cov,
             expn_val=self.expn_val,
+            transcript_prioritization_strategy=self.transcript_prioritization_strategy,
             maximum_transcript_support_level=self.maximum_transcript_support_level,
             percentile_threshold=self.percentile_threshold,
             percentile_threshold_strategy=self.percentile_threshold_strategy,
@@ -960,6 +979,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         trna_vaf=0.25,
         trna_cov=10,
         expn_val=1,
+        transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
         maximum_transcript_support_level=1,
     ):
         PvacbindAggregateAllEpitopes.__init__(
@@ -979,6 +999,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         self.trna_cov = trna_cov
         self.expn_val = expn_val
         self.allele_expr_threshold = trna_vaf * expn_val * 10
+        self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
 
     # pvacbind w/ Index instead of Mutation
@@ -1014,6 +1035,8 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             'AA Change': best['Amino Acid Change'],
             'Best Peptide': best["Epitope Seq"],
             'TSL': tsl,
+            'MANE Select': best['MANE Select'],
+            'Canonical': best['Canonical'],
             'Allele': best["HLA Allele"],
             'Pos': best['Protein Position'],
             'Prob Pos': problematic_positions,
@@ -1042,5 +1065,6 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             trna_vaf=self.trna_vaf,
             trna_cov=self.trna_cov,
             expn_val=self.expn_val,
+            transcript_prioritization_strategy=self.transcript_prioritization_strategy,
             maximum_transcript_support_level=self.maximum_transcript_support_level
         ).execute()
