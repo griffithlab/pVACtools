@@ -194,34 +194,86 @@ def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_
     SeqIO.write(output_records, output_file, "fasta")
     print("Completed")
 
+def run_generate_protein_fasta(
+    input_vcf,
+    flanking_sequence_length,
+    output_file,
+    input_tsv=None,
+    phased_proximal_variants_vcf=None,
+    pass_only=False,
+    biotypes=['protein_coding'],
+    mutant_only=False,
+    aggregate_report_evaluation=['Accept'],
+    downstream_sequence_length="1000",
+    sample_name=None
+):
+    if downstream_sequence_length == 'full':
+        downstream_sequence_length = None
+    elif downstream_sequence_length.isdigit():
+        downstream_sequence_length = int(downstream_sequence_length)
+    else:
+        sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
+
+    if not (set(aggregate_report_evaluation)).issubset(set(['Accept', 'Reject', 'Review', 'Pending'])):
+        sys.exit("Aggregate report evaluation ({}) contains invalid values.".format(aggregate_report_evaluation))
+
+    temp_dir = tempfile.mkdtemp()
+
+    try:
+        proximal_variants_tsv = convert_vcf(
+            input_vcf=input_vcf,
+            temp_dir=temp_dir,
+            sample_name=sample_name,
+            phased_proximal_variants_vcf=phased_proximal_variants_vcf,
+            flanking_sequence_length=flanking_sequence_length,
+            pass_only=pass_only,
+            biotypes=biotypes
+        )
+
+        proximal_variants_file = f"{output_file}.proximal_variants.tsv"
+        if proximal_variants_tsv is not None:
+            shutil.copy(proximal_variants_tsv, proximal_variants_file)
+
+        generate_fasta(
+            flanking_sequence_length=flanking_sequence_length,
+            downstream_sequence_length=downstream_sequence_length,
+            temp_dir=temp_dir,
+            proximal_variants_tsv=proximal_variants_tsv
+        )
+
+        parse_files(
+            output_file=output_file,
+            temp_dir=temp_dir,
+            mutant_only=mutant_only,
+            input_tsv=input_tsv,
+            aggregate_report_evaluation=aggregate_report_evaluation
+        )
+
+        manufacturability_file = f"{output_file}.manufacturability.tsv"
+        print("Calculating Manufacturability Metrics")
+        CalculateManufacturability(output_file, manufacturability_file, 'fasta').execute()
+        print("Completed")
+
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    if args.downstream_sequence_length == 'full':
-        downstream_sequence_length = None
-    elif args.downstream_sequence_length.isdigit():
-        downstream_sequence_length = int(args.downstream_sequence_length)
-    else:
-        sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
-
-    if not (set(args.aggregate_report_evaluation)).issubset(set(['Accept', 'Reject', 'Review', 'Pending'])):
-        sys.exit("Aggregate report evaluation ({}) contains invalid values.".format(args.aggregate_report_evaluation))
-
-    temp_dir = tempfile.mkdtemp()
-
-    proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only, args.biotypes)
-    proximal_variants_file = "{}.proximal_variants.tsv".format(args.output_file)
-    if proximal_variants_tsv is not None:	
-        shutil.copy(proximal_variants_tsv, proximal_variants_file)
-
-    generate_fasta(args.flanking_sequence_length, downstream_sequence_length, temp_dir, proximal_variants_tsv)
-    parse_files(args.output_file, temp_dir, args.mutant_only, args.input_tsv, args.aggregate_report_evaluation)
-    shutil.rmtree(temp_dir, ignore_errors=True)
-    manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
-    print("Calculating Manufacturability Metrics")
-    CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()
-    print("Completed")
+    run_generate_protein_fasta(
+        input_vcf=args.input_vcf,
+        flanking_sequence_length=args.flanking_sequence_length,
+        output_file=args.output_file,
+        input_tsv=args.input_tsv,
+        phased_proximal_variants_vcf=args.phased_proximal_variants_vcf,
+        pass_only=args.pass_only,
+        biotypes=args.biotypes,
+        mutant_only=args.mutant_only,
+        aggregate_report_evaluation=args.aggregate_report_evaluation,
+        downstream_sequence_length=args.downstream_sequence_length,
+        sample_name=args.sample_name
+    )
 
 if __name__ == '__main__':
     main()
