@@ -112,7 +112,7 @@ def set_underline(peptide_sequence, mutant_peptide_pos, row_ID):
     elif mutant_peptide_pos == 'nan': 
         return
     else:
-        mutant_peptide_pos = int(mutant_peptide_pos)
+        mutant_peptide_pos = int(float(mutant_peptide_pos))
 
     if frameshift:
         continue_underline = False
