@@ -5,9 +5,10 @@ import ast
 import pandas as pd
 import tempfile
 import shutil
+import argparse
 
 from pvactools.lib.prediction_class import PredictionClass
-from pvactools.lib.run_utils import get_anchor_positions, is_preferred_transcript
+from pvactools.lib.run_utils import get_anchor_positions, is_preferred_transcript, float_range, transcript_prioritization_strategy
 
 class UpdateTiers:
     def __init__(self):
@@ -39,6 +40,108 @@ class UpdateTiers:
     def sort_table(self, output_lines):
         raise Exception("Must implement method in child class")
 
+    @classmethod
+    def parser(cls, tool):
+        parser = argparse.ArgumentParser(
+            '%s update_tiers' % tool,
+            description="Update tiers in an aggregated report in order to, for example, use different thresholds or account for problematic position or reference match information if run after initial pipeline run.",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
+        parser.add_argument(
+            'input_file',
+            help="Input aggregated file with tiers to update. This file will be overwritten with the output."
+        )
+        if tool in ['pvacseq', 'pvacsplice']:
+            parser.add_argument(
+                'vaf_clonal', type=float_range(0.0, 1.0),
+                help="The RNA VAF threshold to determine whether a candidate is considered clonal. Any candidates with RNA VAF < vaf_clonal/2 will be considered subclonal."
+            )
+        parser.add_argument(
+            "-b","--binding-threshold", type=int,
+            default=500,
+            help="IC50 Binding Threshold to consider when evaluting the binding criteria. Candidates  where the mutant allele has ic50 binding scores below this value will be considered good binders.",
+        )
+        parser.add_argument(
+            '--allele-specific-binding-thresholds',
+            help="Use allele-specific binding thresholds when evaluatng the binding criteria for tiering. To print the allele-specific binding thresholds run `%s allele_specific_cutoffs`. " % tool
+                 + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
+            default=False,
+            action='store_true',
+        )
+        parser.add_argument(
+            '--percentile-threshold', type=float_range(0.0,100.0),
+            help="Account for the IC50 percentile rank when evaluating the binding criteria for tiering. A candidate's "
+                 +"percentile rank must be below this value."
+        )
+        parser.add_argument(
+            '--percentile-threshold-strategy',
+            choices=['conservative', 'exploratory'],
+            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default) in order to pass the binding criteria."
+                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
+            default="conservative",
+        )
+        if tool in ['pvacseq', 'pvacsplice']:
+            parser.add_argument(
+                '--trna-vaf', type=float_range(0.0, 1.0),
+                help="Tumor RNA VAF Cutoff in decimal format to consider when evaluating the expression criteria. Only sites above this cutoff will be considered.",
+                default=0.25
+            )
+            parser.add_argument(
+                '--trna-cov', type=int,
+                help="Tumor RNA Coverage Cutoff to consider when evaluating the expression criteria. Only sites above this read depth cutoff will be considered.",
+                default=10
+            )
+        if tool in ['pvacseq', 'pvacfuse', 'pvacsplice']:
+            parser.add_argument(
+                '--expn-val', type=float,
+                help="Expression Cutoff to consider when evaluating the expression criteria. Expression is meassured as FFPM (fusion fragments per million total reads). Sites above this cutoff will be considered.",
+                default=0.1
+            )
+        if tool == 'pvacfuse':
+            parser.add_argument(
+                '--read-support', type=int,
+                help="Read Support Cutoff. Sites above this cutoff will be considered.",
+                default=5
+            )
+        if tool in ['pvacseq', 'pvacsplice']:
+            parser.add_argument(
+                "--transcript-prioritization-strategy", type=transcript_prioritization_strategy(),
+                help="Specify the criteria to consider when evaluating transcripts of the neoantigen candidates. "
+                     + "'canonical' will consider a candidate to come from a good transcript if the transcript is a Ensembl canonical transcript. "
+                     + "'mane_select' will consider a candidate to come from a good transcript if the transcript is a MANE select transcript. "
+                     + "'tsl' will consider a candidate to come from a good transcript if the transcript's support level (TSL) passes the --maximum-transcript-support-level. "
+                     + "When selecting more than one criteria, a transcript meeting EITHER of the selected criteria will be prioritized/selected.",
+                default=['canonical', 'mane_select', 'tsl']
+            )
+            parser.add_argument(
+                "--maximum-transcript-support-level", type=int,
+                help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
+                     + "Keep all epitopes with a transcript support level <= to this cutoff.",
+                default=1,
+                choices=[1, 2, 3, 4, 5]
+            )
+        if tool == 'pvacseq':
+            parser.add_argument(
+                "--allele-specific-anchors",
+                help="Use allele-specific anchor positions when evaluating the anchor criteria for tiering epitopes in the aggregate report. This option "
+                     + "is available for 8, 9, 10, and 11mers and only for HLA-A, B, and C alleles. If this option is "
+                     + "not enabled or as a fallback for unsupported lengths and alleles, the default positions of 1, "
+                     + "2, epitope length - 1, and epitope length are used. Please see https://doi.org/10.1101/2020.12.08.416271 "
+                     + "for more details.",
+                default=False,
+                action='store_true',
+            )
+            parser.add_argument(
+                "--anchor-contribution-threshold", type=float_range(0.5,0.9),
+                help="For determining allele-specific anchors, each position is assigned a score based on how binding is "
+                     + "influenced by mutations. From these scores, the relative contribution of each position to the "
+                     + "overall binding is calculated. Starting with the highest relative contribution, positions whose "
+                     + "scores together account for the selected contribution threshold are assigned as anchor locations. "
+                     + " As a result, a higher threshold leads to the inclusion of more positions to be considered anchors.",
+                default=0.8
+            )
+        return parser
+
 class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
     def __init__(
             self,
@@ -55,8 +158,6 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
             allele_specific_binding_thresholds=False,
             allele_specific_anchors=False,
             anchor_contribution_threshold=0.8,
-            aggregate_inclusion_binding_threshold=5000,
-            aggregate_inclusion_count_limit=15,
         ):
         self.input_file = input_file
         self.output_file = tempfile.NamedTemporaryFile()
@@ -65,8 +166,6 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.percentile_threshold = percentile_threshold
         self.percentile_threshold_strategy = percentile_threshold_strategy
-        self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
-        self.aggregate_inclusion_count_limit = aggregate_inclusion_count_limit
         self.allele_expr_threshold = trna_vaf * expn_val * 10
         self.trna_cov = trna_cov
         self.trna_vaf = trna_vaf
@@ -572,7 +671,6 @@ class PvacbindUpdateTiers(UpdateTiers, metaclass=ABCMeta):
             percentile_threshold=None,
             percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
-            top_score_metric="median",
         ):
         self.input_file = input_file
         self.output_file = tempfile.NamedTemporaryFile()
@@ -646,4 +744,3 @@ class PvacbindUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         df.drop(labels='rank_tier', axis=1, inplace=True)
         df.drop(labels='ic50_num', axis=1, inplace=True)
         return df
-

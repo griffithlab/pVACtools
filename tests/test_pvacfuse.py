@@ -72,6 +72,7 @@ class PvacfuseTests(unittest.TestCase):
             "top_score_filter",
             "generate_aggregated_report",
             'identify_problematic_amino_acids',
+            'update_tiers',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -193,6 +194,21 @@ class PvacfuseTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
         identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
+
+    def test_update_tiers_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacfuse",
+            "update_tiers.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_update_tiers_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.aggregated.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        update_tiers.main([input_file])
 
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(

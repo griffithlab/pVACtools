@@ -85,6 +85,7 @@ class PvacseqTests(unittest.TestCase):
             "valid_algorithms",
             "valid_netmhciipan_versions",
             'identify_problematic_amino_acids',
+            'update_tiers',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -252,7 +253,7 @@ class PvacseqTests(unittest.TestCase):
 
     def test_valid_alleles_runs(self):
         valid_alleles.main(["-p", "SMM"])
-    
+
     def test_valid_algorithms_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,
@@ -265,7 +266,7 @@ class PvacseqTests(unittest.TestCase):
 
     def test_valid_algorithms_runs(self):
         valid_algorithms.main("")
-    
+
     def test_valid_netmhciipan_versions_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,
@@ -293,6 +294,21 @@ class PvacseqTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
         identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
+
+    def test_update_tiers_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacseq",
+            "update_tiers.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_update_tiers_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.aggregated.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        update_tiers.main([input_file, '0.5'])
 
     def test_pvacseq_pipeline(self):
         with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
