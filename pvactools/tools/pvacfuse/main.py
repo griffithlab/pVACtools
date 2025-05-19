@@ -99,6 +99,13 @@ def define_parser():
         )
     identify_problematic_amino_acids_parser.set_defaults(func=identify_problematic_amino_acids)
 
+    update_tiers_parser = subparsers.add_parser(
+        "update_tiers",
+        help="Update tiers in an aggregated report in order to, for example, use different thresholds or account for problematic position or reference match information if run after initial pipeline run.",
+        add_help = False
+        )
+    update_tiers_parser.set_defaults(func=update_tiers)
+
     allele_specific_cutoffs_parser = subparsers.add_parser(
         "allele_specific_cutoffs",
         help="Show the allele specific cutoffs",

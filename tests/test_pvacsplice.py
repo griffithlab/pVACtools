@@ -83,6 +83,7 @@ class PvacspliceTests(unittest.TestCase):
             "valid_alleles",
             "valid_netmhciipan_versions",
             'identify_problematic_amino_acids',
+            'update_tiers',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -275,6 +276,21 @@ class PvacspliceTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
         identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
+
+    def test_update_tiers_compiles(self):
+        compiled_run_path = py_compile.compile(os.path.join(
+            self.pvactools_directory,
+            'pvactools',
+            "tools",
+            "pvacsplice",
+            "update_tiers.py"
+        ))
+        self.assertTrue(compiled_run_path)
+
+    def test_update_tiers_runs(self):
+        input_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'HCC1395_TUMOR_DNA.all_epitopes.aggregated.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        update_tiers.main([input_file, '0.5'])
 
     def test_pvacsplice_pipeline_class_I(self):
         with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
