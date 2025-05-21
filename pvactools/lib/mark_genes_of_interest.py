@@ -21,9 +21,9 @@ class MarkGenesOfInterest:
             writer.writeheader()
             for line in reader:
                 if line['Gene Name'] in self.genes_of_interest:
-                    line['Gene of Interest'] = "true"
+                    line['Gene of Interest'] = "True"
                 else:
-                    line['Gene of Interest'] = "false"
+                    line['Gene of Interest'] = "False"
                 writer.writerow(line)
 
     @classmethod
