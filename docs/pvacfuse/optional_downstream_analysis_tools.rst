@@ -120,3 +120,8 @@ combination, by providing them as a comma-separated list.
 
 This tool may be used with any filtered.tsv or all_epitopes.tsv pVACfuse report
 file.
+
+Mark Genes of Interest
+--------------------------------
+
+.. program-output:: pvacfuse mark_genes_of_interest -h

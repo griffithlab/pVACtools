@@ -130,3 +130,8 @@ combination, by providing them as a comma-separated list.
 
 This tool may be used with any filtered.tsv or all_epitopes.tsv pVACsplice report
 file.
+
+Mark Genes of Interest
+--------------------------------
+
+.. program-output:: pvacsplice mark_genes_of_interest -h
