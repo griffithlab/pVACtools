@@ -242,6 +242,7 @@ class AggregateAllEpitopes:
                 'trna_vaf': self.trna_vaf,
                 'trna_cov': self.trna_cov,
                 'allele_expr_threshold': self.allele_expr_threshold,
+                'transcript_prioritization_strategy': self.transcript_prioritization_strategy,
                 'maximum_transcript_support_level': self.maximum_transcript_support_level,
                 'percentile_threshold': self.percentile_threshold,
                 'percentile_threshold_strategy': self.percentile_threshold_strategy,
