@@ -162,9 +162,9 @@ def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximu
     if 'tsl' in transcript_prioritization_strategy:
         col = 'TSL' if 'TSL' in mutation else 'Transcript Support Level'
         if pd.isna(mutation[col]):
-            return True
+            return False
         elif mutation[col] == 'NA':
-            return True
+            return False
         elif mutation[col] == 'Not Supported':
             return True
         elif int(mutation[col]) <= maximum_transcript_support_level:
