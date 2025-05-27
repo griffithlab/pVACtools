@@ -48,19 +48,6 @@ def split_file(reader, lines):
 def construct_index(count, gene, transcript, variant_type, position):
     return '{}.{}.{}.{}.{}'.format(count, gene, transcript, variant_type, position)
 
-def index_to_aggregate_report_aa_change(aa_change, variant_type):
-    regex = '^([0-9]+[\-]{0,1}[0-9]*)([A-Z|\-|\*]*)\/([A-Z|\-|\*]*)$'
-    p = re.compile(regex)
-    m = p.match(aa_change)
-    if m:
-        if variant_type == 'FS':
-            parsed_aa_change = "FS{}".format(m.group(1))
-        else:
-            parsed_aa_change = "{}{}{}".format(m.group(2), m.group(1), m.group(3))
-        return (parsed_aa_change, m.group(1), m.group(2), m.group(3))
-    else:
-        raise Exception("Unexpected amino acid format: {}".format(aa_change))
-
 def float_range(minimum, maximum):
     """Return function handle of an argument type function for
        ArgumentParser checking a float range: minimum <= arg <= maximum
