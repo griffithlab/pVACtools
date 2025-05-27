@@ -1,5 +1,6 @@
 import pandas as pd
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
+import tempfile
 import re
 
 # Function to break the pepetides ID on the . to extract gene and AA information
@@ -49,60 +50,7 @@ def make_column_unique(df, column_name):
     return df
 
 
-# Function that fills the "Variant Called by CLE Pipeline" column based on the matching variant values
-# for "VALIDATED" in the variants.final.annotated.tsv file
-def fill_variant_called_column(df, variants):
-    df.reset_index(drop=True, inplace=True)
-
-    start_pos = []
-    end_pos = []
-
-    for ref, alt, pos in zip(variants["REF"], variants["ALT"], variants["POS"]):
-        if len(ref) == len(alt):  # Substitution
-            start_pos.append(pos - len(ref))
-            end_pos.append(pos)
-        elif len(ref) < len(alt):  # Insertion
-            start_pos.append(pos)
-            end_pos.append(pos)
-        else:  # Deletion
-            start_pos.append(pos)
-            end_pos.append(pos + len(ref) - 1)
-    
-    variants["start_pos"] = start_pos
-    variants["end_pos"] = end_pos
-
-    variants["ID"] = variants["CHROM"].astype(str) + "-" + \
-                 variants["start_pos"].astype(str) + "-" + \
-                 variants["end_pos"].astype(str) + "-" + \
-                 variants["REF"].astype(str) + "-" + \
-                 variants["ALT"].astype(str)
-
-    common_variants = df.merge(variants[["ID", "VALIDATED"]], on="ID", how="left")
-    with pd.option_context('mode.chained_assignment', None):
-        df["Variant Called by CLE Pipeline"] = common_variants["VALIDATED"].fillna(False)
-
-
-def main(reviewed_candidates_path, peptides_path, classI_path, classII_path,
-         sample_name, output_file, output_path, variants_path, all_epitopes_flag):
-    # Creating the Reviewed Candidates Sheet
-    reviewed_candidates =  pd.read_csv(reviewed_candidates_path, sep="\t")
-
-    reviewed_candidates = reviewed_candidates[reviewed_candidates.Evaluation != "Pending"]
-    reviewed_candidates = reviewed_candidates[reviewed_candidates.Evaluation != "Reject"]
-
-    reviewed_candidates = reviewed_candidates.rename(columns={'Comments':'pVAC Review Comments'})
-
-    if variants_path:
-        variants = pd.read_csv(variants_path, sep="\t")
-        fill_variant_called_column(reviewed_candidates, variants)
-    
-    reviewed_candidates["IGV Review Comments"] = " "
-
-    # create sorting ID that is gene and transcript to sort in the same order as peptide
-    reviewed_candidates['sorting id'] = reviewed_candidates['Gene']  + '.' + reviewed_candidates['Best Transcript']
-    # make sure the sorting id column is unique
-    reviewed_candidates = make_column_unique(reviewed_candidates, 'sorting id')
-
+def main(peptides_path, classI_path, classII_path, sample_name, output_file, output_path, all_epitopes_flag):
     # Creating the Peptides 51mer Sheet -----------------------------------
     peptides = pd.read_csv(peptides_path, sep="\t")
     peptides =  peptides.drop(['cterm_7mer_gravy_score', 'cysteine_count', 'n_terminal_asparagine', 'asparagine_proline_bond_count', 
@@ -220,21 +168,14 @@ def main(reviewed_candidates_path, peptides_path, classI_path, classII_path,
     merged_peptide_51mer['sorting id'] = merged_peptide_51mer['full ID'].apply(extract_info) # creating a ID to sort reviewed canidates by the order of the 51mer
     merged_peptide_51mer = make_column_unique(merged_peptide_51mer, 'sorting id') # make sure every sorting id is unique
 
-    # Sorting Candidates sheet to be in the same order as Peptides Sheet -------------------------
-    reviewed_candidates = reviewed_candidates.set_index('sorting id')
-    reviewed_candidates = reviewed_candidates.reindex(index=merged_peptide_51mer['sorting id'])
-    reviewed_candidates = reviewed_candidates.reset_index()
-
     # Dropping the sorting column -------------------------
-    reviewed_candidates = reviewed_candidates.drop(columns=['sorting id'])
     merged_peptide_51mer = merged_peptide_51mer.drop(columns=['sorting id'])
 
-    # Writing the files -----------------------------
-    Peptide_file_name = f"{output_path}{output_file}_{sample_name}_Peptides_51-mer.xlsx"
+    with tempfile.NamedTemporaryFile(suffix="_Peptides_51-mer.xlsx", delete=False) as tmp:
+        Peptide_file_name = tmp.name
     merged_peptide_51mer.to_excel(Peptide_file_name, index=False)
-
-    neoantigen_canidates_file_name = f"{output_path}{output_file}_{sample_name}.Annotated.Neoantigen_Candidates.xlsx"
-    reviewed_candidates.to_excel(neoantigen_canidates_file_name, index=False)
+    
+    return Peptide_file_name
 
 
 if __name__ == "__main__":

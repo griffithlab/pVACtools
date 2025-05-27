@@ -1,5 +1,8 @@
 import pandas as pd
 from bs4 import BeautifulSoup
+import os
+import tempfile
+import xlsxwriter
 
 class AminoAcid:
 
@@ -93,6 +96,7 @@ def annotate_every_nucleotide(sequence, classI_peptide, classII_peptide,
 
     return(peptide_sequence)
 
+
 def set_underline(peptide_sequence, mutant_peptide_pos, row_ID):
 
     frameshift = False
@@ -145,7 +149,8 @@ def set_underline(peptide_sequence, mutant_peptide_pos, row_ID):
             if classI_position == int(mutant_peptide_pos):
                 peptide_sequence[i].underline = True
             i+=1
-        
+
+ 
 def set_span_tags(peptide_sequence):
 
     currently_bold = False
@@ -175,6 +180,7 @@ def set_span_tags(peptide_sequence):
         
     return(peptide_sequence)
 
+
 def create_stylized_sequence(peptide_sequence):
 
     new_string = ''
@@ -200,6 +206,73 @@ def create_stylized_sequence(peptide_sequence):
         else:
             new_string += nucleotide.nucleotide
     return(new_string)
+
+
+def generate_excel_results(output_path, output_file, sample_name, html_file):
+    with open(html_file, "r") as f:
+        html_content = f.read()
+
+    soup = BeautifulSoup(html_content, "html.parser")
+    table = soup.find("table")
+
+    workbook = xlsxwriter.Workbook(f"{output_path}{output_file}_{sample_name}.Colored_Peptides.xlsx")
+    worksheet = workbook.add_worksheet()
+
+    bold_fmt = workbook.add_format({'bold': True})
+    red_fmt = workbook.add_format({'font_color': 'red'})
+    bold_red_fmt = workbook.add_format({'bold': True, 'font_color': 'red'})
+    red_underline_fmt = workbook.add_format({'font_color': 'red', 'underline': True})
+    bold_red_underline_fmt = workbook.add_format({'bold': True, 'font_color': 'red', 'underline': True})
+
+    headers = [th.get_text(strip=True) for th in table.find_all("th")]
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header)
+
+    def parse_rich_segments(cell):
+        segments = []
+        for part in cell.contents:
+            if isinstance(part, str):
+                text = part.strip()
+                if text:
+                    segments.append(text)
+            elif part.name == "span":
+                text = part.get_text()
+                style = part.get("style", "")
+                fmt = None
+                if "bold" in style and "color:#ff0000" in style and "underline" in style:
+                    fmt = bold_red_underline_fmt
+                elif "color:#ff0000" in style and "underline" in style:
+                    fmt = red_underline_fmt
+                elif "bold" in style and "color:#ff0000" in style:
+                    fmt = bold_red_fmt
+                elif "bold" in style:
+                    fmt = bold_fmt
+                elif "color:#ff0000" in style:
+                    fmt = red_fmt
+                if fmt:
+                    segments.extend([fmt, text])
+                else:
+                    segments.append(text)
+
+        # Ensure first element is a string for write_rich_string
+        if segments and not isinstance(segments[0], str):
+            segments.insert(0, "")
+
+        return segments
+
+    for row_idx, tr in enumerate(table.find_all("tr")[1:], start=1):
+        for col_idx, td in enumerate(tr.find_all("td")):
+            if col_idx == 2:  # Special formatting column
+                segments = parse_rich_segments(td)
+                if any(isinstance(seg, xlsxwriter.format.Format) for seg in segments):
+                    worksheet.write_rich_string(row_idx, col_idx, *segments)
+                else:
+                    worksheet.write(row_idx, col_idx, "".join(segments))
+            else:
+                worksheet.write(row_idx, col_idx, td.get_text(strip=True))
+
+    workbook.close()
+
 
 def main(peptides_path, sample_name, classI_ic50_score_max, classI_ic50_percentile_max, 
          classII_ic50_score_max, classII_ic50_percentile_max, problematic_position, output_file, output_path):
@@ -301,10 +374,13 @@ def main(peptides_path, sample_name, classI_ic50_score_max, classI_ic50_percenti
 
         print()
 
-    html_file_name = f"{output_path}{output_file}_{sample_name}.Colored_Peptides.html" 
+    with tempfile.NamedTemporaryFile(suffix=".Colored_Peptides.html", delete=False, mode="w", encoding="utf-8") as tmp_html:
+        tmp_html.write(modified_html)
+        html_file_name = tmp_html.name
 
-    with open(html_file_name, "w", encoding = 'utf-8') as file:
-        file.write(modified_html)
+    generate_excel_results(output_path, output_file, sample_name, html_file_name)
+    os.remove(html_file_name)
+
 
 if __name__ == "__main__":
     main()
