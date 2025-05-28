@@ -14,8 +14,10 @@ from mock import patch
 from urllib.request import urlopen
 from shutil import copyfileobj
 from tempfile import NamedTemporaryFile
+import argparse
 
 from pvactools.lib.pipeline import PvacbindPipeline
+import pvactools.tools.pvacbind.main as pvacbind_main
 from pvactools.tools.pvacbind import *
 from tests.utils import *
 import logging
@@ -54,6 +56,10 @@ class PvacbindTests(unittest.TestCase):
             "main.py"
         ))
         self.assertTrue(compiled_pvac_path)
+
+    def test_parser(self):
+        parser = pvacbind_main.define_parser()
+        self.assertEqual(type(parser), argparse.ArgumentParser)
 
     def test_pvacbind_commands(self):
         pvac_script_path = os.path.join(
