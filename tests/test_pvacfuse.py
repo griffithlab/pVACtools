@@ -62,7 +62,6 @@ class PvacfuseTests(unittest.TestCase):
             "run",
             "valid_alleles",
             "valid_algorithms",
-            "net_chop",
             "netmhc_stab",
             "top_score_filter",
             ]:
