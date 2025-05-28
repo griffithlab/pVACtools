@@ -77,7 +77,6 @@ class PvacspliceTests(unittest.TestCase):
             "generate_protein_fasta",
             "net_chop",
             "netmhc_stab",
-            "calculate_reference_proteome_similarity",
             "valid_alleles",
             "valid_netmhciipan_versions",
             'identify_problematic_amino_acids',
@@ -192,16 +191,6 @@ class PvacspliceTests(unittest.TestCase):
             "tools",
             "pvacsplice",
             "netmhc_stab.py",
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_calculate_reference_proteome_similarity_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "calculate_reference_proteome_similarity.py",
         ))
         self.assertTrue(compiled_run_path)
 
