@@ -69,7 +69,6 @@ class PvacseqTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "transcript_support_level_filter",
-            "generate_aggregated_report",
             "generate_protein_fasta",
             "install_vep_plugin",
             "run",
@@ -99,21 +98,6 @@ class PvacseqTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_generate_aggregated_report_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "generate_aggregated_report.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_generate_aggregated_report_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        generate_aggregated_report.main([input_file, output_file.name])
 
     def test_generate_protein_fasta_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(

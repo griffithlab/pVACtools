@@ -72,7 +72,6 @@ class PvacbindTests(unittest.TestCase):
             "net_chop",
             "netmhc_stab",
             'top_score_filter',
-            'generate_aggregated_report',
             'identify_problematic_amino_acids',
             ]:
             result = subprocess_run([
@@ -93,21 +92,6 @@ class PvacbindTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_generate_aggregated_report_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacbind",
-            "generate_aggregated_report.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_generate_aggregated_report_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        generate_aggregated_report.main([input_file, output_file.name])
 
     def test_identify_problematic_amino_acids_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
