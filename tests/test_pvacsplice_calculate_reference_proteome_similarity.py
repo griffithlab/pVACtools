@@ -54,7 +54,7 @@ class PvacspliceCalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'HCC1395_TUMOR_DNA.all_epitopes.aggregated.tsv')
+        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.aggregated.short.tsv')
         input_fasta = os.path.join(self.test_data_directory, 'results', 'run', 'HCC1395_TUMOR_DNA.transcripts.fa')
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(calculate_reference_proteome_similarity.main([

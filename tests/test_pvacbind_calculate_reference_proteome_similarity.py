@@ -54,7 +54,7 @@ class PvacbindCalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.aggregated.tsv')
+        input_file = os.path.join(self.test_data_directory, 'Test.all_epitopes.aggregated.short.tsv')
         input_fasta = os.path.join(self.test_data_directory, 'input.fasta')
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(calculate_reference_proteome_similarity.main([
