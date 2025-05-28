@@ -55,4 +55,4 @@ class PvacspliceBindingFilterTests(unittest.TestCase):
     def test_runs(self):
         input_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'HCC1395_TUMOR_DNA.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
-        binding_filter.main([input_file, output_file.name])
+        self.assertFalse(binding_filter.main([input_file, output_file.name]))
