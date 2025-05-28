@@ -68,7 +68,6 @@ class PvacspliceTests(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
-            "binding_filter",
             "coverage_filter",
             "run",
             "top_score_filter",
@@ -101,21 +100,6 @@ class PvacspliceTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_binding_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "binding_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_binding_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        binding_filter.main([input_file, output_file.name])
 
     def test_coverage_filter_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
