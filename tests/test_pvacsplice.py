@@ -71,7 +71,6 @@ class PvacspliceTests(unittest.TestCase):
             "run",
             "top_score_filter",
             "transcript_support_level_filter",
-            "generate_protein_fasta",
             "net_chop",
             "netmhc_stab",
             "valid_alleles",

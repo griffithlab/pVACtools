@@ -5,6 +5,9 @@ import tempfile
 from subprocess import call
 from filecmp import cmp
 import py_compile
+from subprocess import run as subprocess_run
+from subprocess import PIPE
+import re
 
 from pvactools.tools.pvacsplice import generate_protein_fasta
 from tests.utils import *
@@ -34,6 +37,21 @@ class GenerateFastaTests(unittest.TestCase):
         cls.test_input_data_dir  = test_input_data_directory()
         cls.test_output_data_dir = test_output_data_directory()
         cls.flanking_sequence_length = '10'
+
+    def test_command(self):
+        pvac_script_path = os.path.join(
+            self.executable_dir,
+            "main.py"
+            )
+        usage_search = re.compile(r"usage: ")
+        result = subprocess_run([
+            sys.executable,
+            pvac_script_path,
+            'generate_protein_fasta',
+            '-h'
+        ], shell=False, stdout=PIPE)
+        self.assertFalse(result.returncode, "Failed `pvacsplice generate_protein_fasta -h`")
+        self.assertRegex(result.stdout.decode(), usage_search)
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
