@@ -66,7 +66,6 @@ class PvacfuseTests(unittest.TestCase):
             "download_example_data",
             "net_chop",
             "netmhc_stab",
-            "calculate_reference_proteome_similarity",
             "top_score_filter",
             "generate_aggregated_report",
             'identify_problematic_amino_acids',

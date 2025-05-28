@@ -77,7 +77,6 @@ class PvacseqTests(unittest.TestCase):
             "run",
             "net_chop",
             "netmhc_stab",
-            "calculate_reference_proteome_similarity",
             "top_score_filter",
             "valid_alleles",
             "valid_algorithms",
