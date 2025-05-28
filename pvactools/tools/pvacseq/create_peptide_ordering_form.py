@@ -2,7 +2,7 @@ import sys
 import argparse
 import os
 
-from .generate_protein_fasta import run_generate_protein_fasta
+from pvactools.tools.pvacseq.generate_protein_fasta import run_generate_protein_fasta
 from pvactools.lib.generate_reviews_files import main as run_generate_reviews_files
 from pvactools.lib.color_peptides51mer import main as run_color_peptides
 
