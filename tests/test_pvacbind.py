@@ -72,7 +72,6 @@ class PvacbindTests(unittest.TestCase):
             "net_chop",
             "netmhc_stab",
             'top_score_filter',
-            'identify_problematic_amino_acids',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -92,21 +91,6 @@ class PvacbindTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_identify_problematic_amino_acids_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacbind",
-            "identify_problematic_amino_acids.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_identify_problematic_amino_acids_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
 
     def test_process_stops(self):
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
