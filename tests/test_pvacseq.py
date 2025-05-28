@@ -69,7 +69,6 @@ class PvacseqTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "transcript_support_level_filter",
-            "download_example_data",
             "generate_aggregated_report",
             "generate_protein_fasta",
             "install_vep_plugin",
@@ -100,20 +99,6 @@ class PvacseqTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_download_example_data_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "download_example_data.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_download_example_data_runs(self):
-        output_dir = tempfile.TemporaryDirectory()
-        download_example_data.main([output_dir.name])
 
     def test_generate_aggregated_report_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(

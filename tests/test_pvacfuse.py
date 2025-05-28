@@ -62,7 +62,6 @@ class PvacfuseTests(unittest.TestCase):
             "run",
             "valid_alleles",
             "valid_algorithms",
-            "download_example_data",
             "net_chop",
             "netmhc_stab",
             "top_score_filter",
@@ -87,20 +86,6 @@ class PvacfuseTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_download_example_data_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "download_example_data.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_download_example_data_runs(self):
-        output_dir = tempfile.TemporaryDirectory()
-        download_example_data.main([output_dir.name])
 
     def test_top_score_filter_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(

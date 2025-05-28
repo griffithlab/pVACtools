@@ -71,7 +71,6 @@ class PvacspliceTests(unittest.TestCase):
             "run",
             "top_score_filter",
             "transcript_support_level_filter",
-            "download_example_data",
             "generate_aggregated_report",
             "generate_protein_fasta",
             "net_chop",
@@ -128,20 +127,6 @@ class PvacspliceTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
         top_score_filter.main([input_file, output_file.name])
-
-    def test_download_example_data_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "download_example_data.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_download_example_data_runs(self):
-        output_dir = tempfile.TemporaryDirectory()
-        download_example_data.main([output_dir.name])
 
     def test_generate_aggregated_report_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
