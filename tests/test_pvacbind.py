@@ -69,7 +69,6 @@ class PvacbindTests(unittest.TestCase):
             'valid_alleles',
             'valid_algorithms',
             'valid_netmhciipan_versions',
-            'download_example_data',
             "net_chop",
             "netmhc_stab",
             'top_score_filter',
