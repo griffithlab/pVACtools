@@ -68,7 +68,6 @@ class PvacseqTests(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
-            "allele_specific_cutoffs",
             "binding_filter",
             "coverage_filter",
             "transcript_support_level_filter",
@@ -104,19 +103,6 @@ class PvacseqTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_allele_specific_cutoffs_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "allele_specific_cutoffs.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_allele_specific_cutoffs_runs(self):
-        allele_specific_cutoffs.main([])
 
     def test_binding_filter_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
