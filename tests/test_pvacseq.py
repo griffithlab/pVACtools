@@ -68,7 +68,6 @@ class PvacseqTests(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
-            "coverage_filter",
             "transcript_support_level_filter",
             "download_example_data",
             "generate_aggregated_report",
@@ -101,21 +100,6 @@ class PvacseqTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_coverage_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "coverage_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_coverage_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        coverage_filter.main([input_file, output_file.name])
 
     def test_download_example_data_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(

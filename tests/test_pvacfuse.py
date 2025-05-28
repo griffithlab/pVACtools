@@ -60,7 +60,6 @@ class PvacfuseTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
-            "coverage_filter",
             "valid_alleles",
             "valid_algorithms",
             "download_example_data",
@@ -88,21 +87,6 @@ class PvacfuseTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_coverage_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "coverage_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_binding_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        coverage_filter.main([input_file, output_file.name])
 
     def test_download_example_data_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
