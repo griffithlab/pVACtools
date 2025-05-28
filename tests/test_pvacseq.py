@@ -69,7 +69,6 @@ class PvacseqTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "transcript_support_level_filter",
-            "generate_protein_fasta",
             "install_vep_plugin",
             "run",
             "net_chop",
