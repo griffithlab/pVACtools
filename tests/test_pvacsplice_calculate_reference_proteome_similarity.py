@@ -57,4 +57,9 @@ class PvacspliceCalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'HCC1395_TUMOR_DNA.all_epitopes.aggregated.tsv')
         input_fasta = os.path.join(self.test_data_directory, 'results', 'run', 'HCC1395_TUMOR_DNA.transcripts.fa')
         output_file = tempfile.NamedTemporaryFile()
-        calculate_reference_proteome_similarity.main([input_file, input_fasta, output_file.name, '--peptide-fasta', self.peptide_fasta])
+        self.assertFalse(calculate_reference_proteome_similarity.main([
+            input_file,
+            input_fasta,
+            output_file.name,
+            '--peptide-fasta', self.peptide_fasta
+        ]))

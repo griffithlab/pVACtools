@@ -52,4 +52,4 @@ class PvacbindAlleleSpecificCutoffsTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_runs(self):
-        allele_specific_cutoffs.main([])
+        self.assertFalse(allele_specific_cutoffs.main([]))

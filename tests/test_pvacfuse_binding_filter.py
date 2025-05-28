@@ -55,4 +55,4 @@ class PvacfuseBindingFilterTests(unittest.TestCase):
     def test_runs(self):
         input_file = os.path.join(self.test_data_directory, 'arriba_fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
-        binding_filter.main([input_file, output_file.name])
+        self.assertFalse(binding_filter.main([input_file, output_file.name]))
