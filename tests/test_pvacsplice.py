@@ -69,7 +69,6 @@ class PvacspliceTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
-            "valid_alleles",
             "valid_netmhciipan_versions",
             ]:
             result = subprocess_run([
@@ -91,19 +90,6 @@ class PvacspliceTests(unittest.TestCase):
         ))
         self.assertTrue(compiled_run_path)
 
-    def test_valid_alleles_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "valid_alleles.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_alleles_runs(self):
-        valid_alleles.main(["-p", "SMM"])
-    
     def test_valid_netmhciipan_versions_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,

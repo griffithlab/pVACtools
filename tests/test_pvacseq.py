@@ -70,7 +70,6 @@ class PvacseqTests(unittest.TestCase):
         for command in [
             "install_vep_plugin",
             "run",
-            "valid_alleles",
             "valid_netmhciipan_versions",
             ]:
             result = subprocess_run([
@@ -122,19 +121,6 @@ class PvacseqTests(unittest.TestCase):
         output_dir = tempfile.TemporaryDirectory()
         install_vep_plugin.main([output_dir.name])
 
-    def test_valid_alleles_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "valid_alleles.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_alleles_runs(self):
-        valid_alleles.main(["-p", "SMM"])
-    
     def test_valid_netmhciipan_versions_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,

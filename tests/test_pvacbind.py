@@ -72,7 +72,6 @@ class PvacbindTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
-            'valid_alleles',
             'valid_netmhciipan_versions',
             ]:
             result = subprocess_run([
