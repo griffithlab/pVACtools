@@ -62,7 +62,6 @@ class PvacfuseTests(unittest.TestCase):
             "run",
             "valid_alleles",
             "valid_algorithms",
-            "top_score_filter",
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -82,21 +81,6 @@ class PvacfuseTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_top_score_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "top_score_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_top_score_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        top_score_filter.main([input_file, output_file.name])
 
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
