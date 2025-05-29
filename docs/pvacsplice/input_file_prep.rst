@@ -18,6 +18,7 @@ instructions on how to prepare an annotated VCF file with the following differen
 
 - pVACsplice does not require annotations with the VEP Frameshift and Wildtype plugins so those parameters can be omitted when
   running VEP.
+- The VEP parameter ``--transcript_version`` is required.
 - pVACsplice does not use a phased VCF of proximal variants so that step can be skipped.
 
 Step 2: Run RegTools
