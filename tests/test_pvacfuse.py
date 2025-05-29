@@ -60,7 +60,6 @@ class PvacfuseTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
-            "valid_alleles",
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -81,19 +80,6 @@ class PvacfuseTests(unittest.TestCase):
         ))
         self.assertTrue(compiled_run_path)
 
-    def test_valid_alleles_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "valid_alleles.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_alleles_runs(self):
-        valid_alleles.main(["-p", "SMM"])
-    
     def test_pvacfuse_pipeline(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
