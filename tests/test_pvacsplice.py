@@ -69,7 +69,6 @@ class PvacspliceTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
-            "top_score_filter",
             "transcript_support_level_filter",
             "valid_alleles",
             "valid_netmhciipan_versions",
@@ -107,21 +106,6 @@ class PvacspliceTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
         transcript_support_level_filter.main([input_file, output_file.name])
-
-    def test_top_score_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "top_score_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_top_score_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        top_score_filter.main([input_file, output_file.name])
 
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
