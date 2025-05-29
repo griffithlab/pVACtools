@@ -68,7 +68,6 @@ class PvacseqTests(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
-            "install_vep_plugin",
             "run",
             ]:
             result = subprocess_run([
@@ -105,20 +104,6 @@ class PvacseqTests(unittest.TestCase):
         output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta.main([input_file, "25", output_file.name])
         os.unlink("{}.manufacturability.tsv".format(output_file.name))
-
-    def test_install_vep_pugin_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "install_vep_plugin.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_install_vep_pugin_runs(self):
-        output_dir = tempfile.TemporaryDirectory()
-        install_vep_plugin.main([output_dir.name])
 
     def test_pvacseq_pipeline(self):
         with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
