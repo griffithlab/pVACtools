@@ -69,7 +69,6 @@ class PvacspliceTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
-            "valid_netmhciipan_versions",
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -89,19 +88,6 @@ class PvacspliceTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_valid_netmhciipan_versions_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "valid_netmhciipan_versions.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_netmhciipan_versions_runs(self):
-        valid_netmhciipan_versions.main("")
 
     def test_pvacsplice_pipeline_class_I(self):
         with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
