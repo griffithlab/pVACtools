@@ -69,7 +69,6 @@ class PvacspliceTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
-            "transcript_support_level_filter",
             "valid_alleles",
             "valid_netmhciipan_versions",
             ]:
@@ -91,21 +90,6 @@ class PvacspliceTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_transcript_support_level_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "transcript_support_level_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_transcript_support_level_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        transcript_support_level_filter.main([input_file, output_file.name])
 
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
