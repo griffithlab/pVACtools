@@ -14,6 +14,7 @@ __all__ = [
     'top_score_filter',
     'transcript_support_level_filter',
     'valid_alleles',
+    'valid_algorithms',
 ]
 
 from . import *
