@@ -71,7 +71,6 @@ class PvacseqTests(unittest.TestCase):
             "transcript_support_level_filter",
             "install_vep_plugin",
             "run",
-            "netmhc_stab",
             "top_score_filter",
             "valid_alleles",
             "valid_algorithms",

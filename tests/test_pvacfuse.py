@@ -62,7 +62,6 @@ class PvacfuseTests(unittest.TestCase):
             "run",
             "valid_alleles",
             "valid_algorithms",
-            "netmhc_stab",
             "top_score_filter",
             ]:
             result = subprocess_run([

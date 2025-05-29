@@ -75,7 +75,6 @@ class PvacbindTests(unittest.TestCase):
             'valid_alleles',
             'valid_algorithms',
             'valid_netmhciipan_versions',
-            "netmhc_stab",
             'top_score_filter',
             ]:
             result = subprocess_run([
