@@ -56,6 +56,24 @@ class GenerateFastaTests(unittest.TestCase):
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
+    def test_generate_protein_fasta_runs(self):
+        input_file  = os.path.join(self.test_input_data_dir, "inputs", "splice_junctions_chr1.tsv")
+        input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "annotated.expression_chr1.vcf.gz")
+        input_fasta = os.path.join(self.test_input_data_dir, "inputs", "all_sequences_chr1.fa.gz")
+        unzipped_fasta_file = gunzip_file(input_fasta)
+        input_gtf   = os.path.join(self.test_input_data_dir, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz")
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(generate_protein_fasta.main([
+            input_file,
+            "8",
+            output_file.name,
+            input_vcf,
+            unzipped_fasta_file,
+            input_gtf,
+            '-s', 'HCC1395_TUMOR_DNA',
+        ]))
+        os.unlink("{}.manufacturability.tsv".format(output_file.name))
+
     def test_input_vcf_generates_expected_file(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "splice_junctions_chr1.tsv")
         generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "annotated.expression_chr1.vcf.gz")

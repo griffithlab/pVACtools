@@ -39,6 +39,12 @@ class GenerateFastaTests(unittest.TestCase):
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
+    def test_generate_protein_fasta_runs(self):
+        input_file = os.path.join(self.test_data_dir, 'input.vcf')
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(generate_protein_fasta.main([input_file, "25", output_file.name]))
+        os.unlink("{}.manufacturability.tsv".format(output_file.name))
+
     def test_input_vcf_generates_expected_file(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()

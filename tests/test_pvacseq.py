@@ -89,22 +89,6 @@ class PvacseqTests(unittest.TestCase):
         ))
         self.assertTrue(compiled_run_path)
 
-    def test_generate_protein_fasta_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "generate_protein_fasta.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_generate_protein_fasta_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'input.vcf')
-        output_file = tempfile.NamedTemporaryFile()
-        generate_protein_fasta.main([input_file, "25", output_file.name])
-        os.unlink("{}.manufacturability.tsv".format(output_file.name))
-
     def test_pvacseq_pipeline(self):
         with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
