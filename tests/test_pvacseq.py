@@ -68,7 +68,6 @@ class PvacseqTests(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
-            "transcript_support_level_filter",
             "install_vep_plugin",
             "run",
             "valid_alleles",
@@ -123,21 +122,6 @@ class PvacseqTests(unittest.TestCase):
     def test_install_vep_pugin_runs(self):
         output_dir = tempfile.TemporaryDirectory()
         install_vep_plugin.main([output_dir.name])
-
-    def test_transcript_support_level_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "transcript_support_level_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_transcript_support_level_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        transcript_support_level_filter.main([input_file, output_file.name])
 
     def test_valid_alleles_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
