@@ -8,6 +8,7 @@ __all__ = [
     'coverage_filter',
     'generate_protein_fasta',
     "generate_aggregated_report",
+    'create_peptide_ordering_form',
     'install_vep_plugin',
     'top_score_filter',
     'net_chop',

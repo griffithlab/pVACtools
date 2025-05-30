@@ -147,3 +147,37 @@ combination, by providing them as a comma-separated list.
 
 This tool may be used with any filtered.tsv or all_epitopes.tsv pVACseq report
 file.
+
+Create Peptide Ordering Form
+----------------------------
+
+.. program-output:: pvacseq create_peptide_ordering_form -h
+
+This tool combines several downstream steps to streamline the process of generating
+a final peptide ordering form with color-coded annotations. It incorporates protein
+sequence extraction, manufacturability assessments, 51mer peptide creation, and
+visual peptide annotation into a single command. This command is especially useful
+after candidate selection has been performed in pVACview and exported to an aggregated
+TSV file. It is designed to assist in preparing long peptides (typically 51-mers) for
+synthesis based on strong binding short epitopes.
+
+This command replaces the need to run the ``generate_protein_fasta``, ``generate_reviews_files``,
+and ``color_peptides51mer`` scripts separately. The output includes the following three files:
+
+.. list-table::
+
+ * - ``<output_file>_<sample_name>.fa``
+   - Contains the generated 51mer peptides in FASTA format for peptide synthesis.
+ * - ``<output_file>_<sample_name>.manufacturability.tsv``
+   - Manufacturability assessments for the 51mer peptides, including metrics such as cysteine
+     content, hydrophobicity, and sequence complexity.
+ * - ``<output_file>_<sample_name>.Colored_Peptides.xlsx``
+   - A color-coded Excel file summarizing peptides, annotations, manufacturability metrics,
+     and peptide positions, ready for ordering.
+
+Optional flags can further tailor the output, such as ``--include-review-candidates`` to include
+manually flagged Review epitopes, or ``--all-epitopes`` to process all available epitopes in the
+TSV, not just best hits.
+
+For custom peptide prioritization thresholds, the IC50 and percentile cutoffs for class I and II
+can be adjusted using the appropriate flags.
