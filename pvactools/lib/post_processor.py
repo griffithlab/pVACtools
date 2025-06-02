@@ -82,7 +82,7 @@ class PostProcessor:
     def mark_genes_of_interests(self):
         if self.file_type != 'pVACbind':
             print("Marking genes of interest")
-            MarkGenesOfInterest(self.input_file, self.mark_genes_of_interest_fh.name, self.genes_of_interest_file).execute()
+            MarkGenesOfInterest(self.input_file, self.mark_genes_of_interest_fh.name, self.genes_of_interest_file, file_type=self.file_type).execute()
             shutil.copy(self.mark_genes_of_interest_fh.name, self.input_file)
             print("Completed")
 
