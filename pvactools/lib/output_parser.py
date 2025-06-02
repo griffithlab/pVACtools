@@ -1178,14 +1178,14 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'HLA Allele'          : allele,
                 'Peptide Length'      : len(mt_epitope_seq),
                 'Epitope Seq'         : mt_epitope_seq,
-                'Median IC50 Score'   : round(median_mt_score, 3),
                 'Best IC50 Score'     : best_mt_score,
-                'Best IC50 Score Method' : PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
                 'Best Percentile'     : best_mt_percentile,
                 ###
             }
-            row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
+            row['Median IC50 Score'] = 'NA' if median_mt_score == 'NA' else round(median_mt_score, 3)
             row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
+            row['Best IC50 Score Method'] = 'NA' if best_mt_score_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method)
+            row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
 
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
