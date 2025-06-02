@@ -107,6 +107,13 @@ def define_parser():
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
 
+    valid_algorithms_parser = subparsers.add_parser(
+        "valid_algorithms",
+        help="Show a list of algorithms supported given the specified species and/or allele",
+        add_help=False
+    )
+    valid_algorithms_parser.set_defaults(func=valid_algorithms)
+
     valid_netmhciipan_versions_parser = subparsers.add_parser(
         "valid_netmhciipan_versions",
         help="Show a list of valid versions of NetMHCIIpan and NetMHCIIpanEL that can be used.",
