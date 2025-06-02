@@ -4,7 +4,7 @@ import csv
 
 
 class MarkGenesOfInterest:
-    def __init__(self, input_file, output_file, genes_of_interest_file=None):
+    def __init__(self, input_file, output_file, genes_of_interest_file=None, file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
         if genes_of_interest_file is None:
@@ -13,6 +13,7 @@ class MarkGenesOfInterest:
 
         with open(genes_of_interest_file) as fh:
             self.genes_of_interest = [line.rstrip() for line in fh]
+        self.file_type = file_type
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -20,10 +21,15 @@ class MarkGenesOfInterest:
             writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + ["Gene of Interest"], extrasaction='ignore', restval='NA')
             writer.writeheader()
             for line in reader:
-                if line['Gene Name'] in self.genes_of_interest:
-                    line['Gene of Interest'] = "True"
+                match = "False"
+                if self.file_type == 'pVACfuse':
+                    for gene in line['Gene Name'].split('-'):
+                        if gene in self.genes_of_interest:
+                            match = 'True'
                 else:
-                    line['Gene of Interest'] = "False"
+                    if line['Gene Name'] in self.genes_of_interest:
+                        match = "True"
+                line['Gene of Interest'] = match
                 writer.writerow(line)
 
     @classmethod
