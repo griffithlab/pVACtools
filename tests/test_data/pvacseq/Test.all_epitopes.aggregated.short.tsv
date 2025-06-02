@@ -1,0 +1,2 @@
+ID	Index	E*01:01	G*01:09	Gene	AA Change	Num Passing Transcripts	Best Peptide	Best Transcript	TSL	Allele	Pos	Prob Pos	Num Included Peptides	Num Passing Peptides	IC50 MT	IC50 WT	%ile MT	%ile WT	RNA Expr	RNA VAF	Allele Expr	RNA Depth	DNA VAF	Tier	Ref Match	Evaluation
+22-41920894-41920895-G-C	19.ACO2.ENST00000216254.4.missense.510E/Q	2	1	ACO2	E510Q	1	KFNPQTDYL	ENST00000216254.4	Not Supported	HLA-G*01:09	5	None	3	0	1262.760	1318.610	0.500	0.600	NA	NA	NA	NA	0.250	Poor	False	Pending
