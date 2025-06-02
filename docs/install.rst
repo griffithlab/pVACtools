@@ -250,7 +250,7 @@ You will also need to install either the ``refseq_select_prot`` or the
 the ``bin`` subdirectory). You will need to set the ``BLASTDB`` to point to the
 installation directory of your BLAST reference proteome databases.
 
-Downlaoding Reference Proteome FASTA file
+Downloading Reference Proteome FASTA file
 -----------------------------------------
 
 As an alternative to BLAST, a reference proteome fasta file may be used for
@@ -260,8 +260,8 @@ reference proteome fastas for many species. For example, the latest reference
 proteome fasta for human can be downloaded from `this
 link <https://ftp.ensembl.org/pub/current_fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz>`_.
 
-Docker and CWL
---------------
+Docker and CWL/WDL
+------------------
 
 Versioned Docker containers for pVACtools are available on DockerHub using the
 `griffithlab/pvactools <https://hub.docker.com/r/griffithlab/pvactools/>`_ repo.
@@ -272,10 +272,16 @@ algorithms (MHCflurry, MHCnuggets, BigMHC, and DeepImmuno). Standalone IEDB is i
 
 An example on how to run pVACseq using Docker can be found on the :ref:`Getting Started <pvacseq_docker>` page.
 
-Common Workflow Language (CWL) tool wrappers for pVACseq, pVACfuse, and pVACvector can be downloaded
-using the ``pvactools download_cwls`` command.
+Common Workflow Language (CWL) and Workflow Description Language (WDL) tool wrappers for pVACseq, pVACfuse, and
+pVACvector (CWL only) can be downloaded using the ``pvactools download_cwls`` and
+``pvactools download_wdls`` commands, repectively.
 
 Download CWL tool wrappers
 __________________________
 
 .. program-output:: pvactools download_cwls -h
+
+Download WDL tool wrappers
+__________________________
+
+.. program-output:: pvactools download_wdls -h
