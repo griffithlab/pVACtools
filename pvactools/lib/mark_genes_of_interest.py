@@ -18,7 +18,11 @@ class MarkGenesOfInterest:
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
             reader = csv.DictReader(input_fh, delimiter = "\t")
-            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + ["Gene of Interest"], extrasaction='ignore', restval='NA')
+            if 'Gene of Interest' in reader.fieldnames:
+                fieldnames = reader.fieldnames
+            else:
+                fieldnames = reader.fieldnames + ["Gene of Interest"]
+            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=fieldnames, extrasaction='ignore', restval='NA')
             writer.writeheader()
             for line in reader:
                 match = "False"
