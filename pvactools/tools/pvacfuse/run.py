@@ -168,6 +168,7 @@ def main(args_input = sys.argv[1:]):
         'peptide_fasta'             : args.peptide_fasta,
         'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
         'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,
+        'genes_of_interest_file': args.genes_of_interest_file,
     }
 
     if args.iedb_install_directory:
