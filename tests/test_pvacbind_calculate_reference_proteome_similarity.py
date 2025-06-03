@@ -23,7 +23,7 @@ class PvacbindCalculateReferenceProteomeSimilarityTests(unittest.TestCase):
     def setUpClass(cls):
         cls.pvactools_directory = pvactools_directory()
         cls.test_data_directory = test_data_directory()
-        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
 
     def test_command(self):
         pvac_script_path = os.path.join(
