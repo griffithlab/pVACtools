@@ -42,7 +42,7 @@ class PvacspliceTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
-        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
 
     def test_pvacsplice_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
