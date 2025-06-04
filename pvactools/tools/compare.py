@@ -123,15 +123,21 @@ def define_parser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument("results_folder1", nargs="?", help="Path to first results input folder")
-    parser.add_argument("results_folder2", nargs="?", help="Path to second results input folder")
+    parser.add_argument(
+        "results_folder1", nargs="?", help="Path to first results input folder"
+    )
+    parser.add_argument(
+        "results_folder2", nargs="?", help="Path to second results input folder"
+    )
     parser.add_argument(
         "--output-dir",
         default="compare_output",
         help="Specify where the output directory should be generated",
     )
     parser.add_argument(
-        "--mhc-class", choices=["1", "2"], help="Specify MHC class 1 or class 2"
+        "--mhc-class",
+        choices=["1", "2"],
+        help="Specify the MHC class to run: '1' for Class I or '2' for Class II. If not specified, both classes will be processed.",
     )
     parser.add_argument(
         "--no-server",
@@ -179,7 +185,7 @@ def prepare_results_folder(classes, base_output_dir):
     return unique_output_dir
 
 
-def main(args_input = sys.argv[1:]):
+def main(args_input=sys.argv[1:]):
     """
     Purpose:    Control function for the whole tool, calls run_comparison which calls all of the comparisons
     Modifies:   Nothing
@@ -191,9 +197,11 @@ def main(args_input = sys.argv[1:]):
     if args.start_server:
         startserver()
         return
-    
+
     if not args.results_folder1 or not args.results_folder2:
-        logging.error("Error: results_folder1 and results_folder2 are required paramaters\n")
+        logging.error(
+            "Error: results_folder1 and results_folder2 are required paramaters\n"
+        )
         parser.print_help()
         return
 
