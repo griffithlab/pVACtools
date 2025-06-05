@@ -60,14 +60,16 @@ Contents
 New in Version |release|
 ------------------------
 
-This is a bugfix release. It fixes the following problem(s):
+This is a minor feature release. It adds the following features:
 
-* Filter out epitopes in pVACsplice with unsupported amino acids. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1238
-* Fix missing netmhciipan_version processing in pVACfuse. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1231
-* Fix incorrect na comparison in aggregated report creation. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1233
-* Fix bug with pVACsplice output parsing logic when running EL algorithms only. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1240
-* Fix bug in test call to call_iedb. iedb_retries needs to be an int. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1241
-* Update pVACsplice anchor-types to be comma-separated instead of space-separated. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1242
+* Add functionality to add gene of interest identification. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1229
+
+  A new option ``--genes-of-interest-file`` has been added. This option allows
+  users to specify a file path containing genes name that are of particular
+  importance to their research. Neoantigens resulting from variants on one of
+  these genes will be marked in the all_epitopes.tsv and filtered.tsv files in
+  a new ``Gene of Interest`` column (``True``/``False``). If this option is
+  not specified, `a default list of common cancer genes <https://raw.githubusercontent.com/griffithlab/pVACtools/5eeb213deac828df5e4d2ad81971db26ae530500/pvactools/supporting_files/cancer_census_hotspot_gene_list.tsv>`_ is used.
 
 New in Version 5
 ----------------
