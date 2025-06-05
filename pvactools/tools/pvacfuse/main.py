@@ -99,6 +99,13 @@ def define_parser():
         )
     identify_problematic_amino_acids_parser.set_defaults(func=identify_problematic_amino_acids)
 
+    mark_genes_of_interest_parser = subparsers.add_parser(
+        "mark_genes_of_interest",
+        help="Mark predictions resulting from variants on a genes of interest list.",
+        add_help = False
+        )
+    mark_genes_of_interest_parser.set_defaults(func=mark_genes_of_interest)
+
     allele_specific_cutoffs_parser = subparsers.add_parser(
         "allele_specific_cutoffs",
         help="Show the allele specific cutoffs",
