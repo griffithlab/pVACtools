@@ -154,6 +154,8 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - A list of positions in the ``Epitope Seq`` that match the
        problematic amino acids defined by the ``--problematic-amino-acids``
        parameter
+   * - ``Gene of Interest`` (T/F)
+     - Is either of the 5p or 3p genes in the ``Gene Name`` found in the genes of interest list?
    * - ``cterm_7mer_gravy_score``
      - Mean hydropathy of last 7 residues on the C-terminus of the peptide
    * - ``max_7mer_gravy_score``
