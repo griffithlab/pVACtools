@@ -7,6 +7,7 @@ __all__ = [
     'allele_specific_cutoffs',
     'download_example_data',
     'top_score_filter',
+    'mark_genes_of_interest',
     'net_chop',
     'netmhc_stab',
     'valid_netmhciipan_versions',
