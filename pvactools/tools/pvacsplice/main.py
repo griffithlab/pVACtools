@@ -86,6 +86,13 @@ def define_parser():
         )
     identify_problematic_amino_acids_parser.set_defaults(func=identify_problematic_amino_acids)
 
+    mark_genes_of_interest_parser = subparsers.add_parser(
+        "mark_genes_of_interest",
+        help="Mark predictions resulting from variants on a genes of interest list.",
+        add_help = False
+        )
+    mark_genes_of_interest_parser.set_defaults(func=mark_genes_of_interest)
+
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
         help="Download example input and output files.",
@@ -99,6 +106,13 @@ def define_parser():
         add_help=False
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
+
+    valid_algorithms_parser = subparsers.add_parser(
+        "valid_algorithms",
+        help="Show a list of algorithms supported given the specified species and/or allele",
+        add_help=False
+    )
+    valid_algorithms_parser.set_defaults(func=valid_algorithms)
 
     valid_netmhciipan_versions_parser = subparsers.add_parser(
         "valid_netmhciipan_versions",

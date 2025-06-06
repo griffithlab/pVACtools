@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from pyfaidx import Fasta
 
+from pvactools.lib.run_utils import *
 
 class FastaToKmers:
     def __init__(self, **kwargs):
@@ -18,6 +19,7 @@ class FastaToKmers:
         self.final_lengths = self.choose_final_lengths()
 
     def create_kmers(self, seq_name):
+        supported_aas = supported_amino_acids()
         kmer_dict = {}
         # using personalized fasta
         sequence = str(self.tscript_fasta[seq_name])
@@ -28,10 +30,12 @@ class FastaToKmers:
                 final_seq_name = f'{seq_name};{i+1}'
                 # grab kmer sequence
                 k = sequence[i:x+i]
+                #kmer contains unsupported amino acids
+                if not all([c in supported_aas for c in k]):
+                    logging.warning("Record {} contains unsupported amino acids. Skipping.".format(k))
+                    continue
                 # if kmer matches target len
-                # if k seq does not include X (any aa); continue
-                match = re.search('X', k)
-                if not match and len(k) == x:
+                if len(k) == x:
                     # add entry to dictionary
                     kmer_dict[k] = final_seq_name
 
