@@ -11,6 +11,7 @@ __all__ = [
     'create_peptide_ordering_form',
     'install_vep_plugin',
     'top_score_filter',
+    'mark_genes_of_interest',
     'net_chop',
     'netmhc_stab',
     'valid_netmhciipan_versions',

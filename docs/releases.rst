@@ -25,3 +25,4 @@ Release Notes
    releases/5_1
    releases/5_2
    releases/5_3
+   releases/5_4
