@@ -62,16 +62,14 @@ New in Version |release|
 
 This is a minor feature release. It adds the following features:
 
-* Identify junctions included in final vector design in the junctions.tsv. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1216
-* Prevent Excel export in pVACview from creating extra title header row. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1227
+* Add functionality to add gene of interest identification. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1229
 
-It also fixes the following problem(s):
-
-* Ensure export in pVACview maintains the Index column. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1213
-* Enable auto-combination of DP and DQ alpha and beta chains in pVACsplice. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1219
-* Handle pVACsplice generate_protein_fasta cases where mutant sequence contains no epitopes different from wildtype. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1226
-* Support pVACsplice regtools/gtf input data with missing transcript_version field. by @mhoang22 in https://github.com/griffithlab/pVACtools/pull/1224
-* Ensure that the directory names generated when removing peptides in pVACvector graph don't contain "/". by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1218
+  A new option ``--genes-of-interest-file`` has been added. This option allows
+  users to specify a file path containing genes name that are of particular
+  importance to their research. Neoantigens resulting from variants on one of
+  these genes will be marked in the all_epitopes.tsv and filtered.tsv files in
+  a new ``Gene of Interest`` column (``True``/``False``). If this option is
+  not specified, `a default list of common cancer genes <https://raw.githubusercontent.com/griffithlab/pVACtools/5eeb213deac828df5e4d2ad81971db26ae530500/pvactools/supporting_files/cancer_census_hotspot_gene_list.tsv>`_ is used.
 
 New in Version 5
 ----------------

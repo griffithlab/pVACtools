@@ -2,6 +2,7 @@ import tempfile
 import shutil
 
 from pvactools.lib.identify_problematic_amino_acids import IdentifyProblematicAminoAcids
+from pvactools.lib.mark_genes_of_interest import MarkGenesOfInterest
 from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes, PvacspliceAggregateAllEpitopes
 from pvactools.lib.binding_filter import BindingFilter
 from pvactools.lib.filter import Filter, FilterCriterion
@@ -17,6 +18,7 @@ class PostProcessor:
             setattr(self, k, v)
         self.aggregate_report = self.input_file.replace('.tsv', '.aggregated.tsv')
         self.identify_problematic_amino_acids_fh = tempfile.NamedTemporaryFile()
+        self.mark_genes_of_interest_fh = tempfile.NamedTemporaryFile()
         self.binding_filter_fh = tempfile.NamedTemporaryFile()
         self.coverage_filter_fh = tempfile.NamedTemporaryFile()
         self.transcript_support_level_filter_fh = tempfile.NamedTemporaryFile()
@@ -54,6 +56,7 @@ class PostProcessor:
 
     def execute(self):
         self.identify_problematic_amino_acids()
+        self.mark_genes_of_interests()
         self.aggregate_all_epitopes()
         self.calculate_manufacturability()
         self.execute_binding_filter()
@@ -74,6 +77,13 @@ class PostProcessor:
             print("Identifying peptides with problematic amino acids")
             IdentifyProblematicAminoAcids(self.input_file, self.identify_problematic_amino_acids_fh.name, self.problematic_amino_acids, file_type=self.file_type).execute()
             shutil.copy(self.identify_problematic_amino_acids_fh.name, self.input_file)
+            print("Completed")
+
+    def mark_genes_of_interests(self):
+        if self.file_type != 'pVACbind':
+            print("Marking genes of interest")
+            MarkGenesOfInterest(self.input_file, self.mark_genes_of_interest_fh.name, self.genes_of_interest_file, file_type=self.file_type).execute()
+            shutil.copy(self.mark_genes_of_interest_fh.name, self.input_file)
             print("Completed")
 
     def aggregate_all_epitopes(self):

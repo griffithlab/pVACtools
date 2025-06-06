@@ -148,6 +148,11 @@ combination, by providing them as a comma-separated list.
 This tool may be used with any filtered.tsv or all_epitopes.tsv pVACseq report
 file.
 
+Mark Genes of Interest
+----------------------
+
+.. program-output:: pvacseq mark_genes_of_interest -h
+
 Create Peptide Ordering Form
 ----------------------------
 
