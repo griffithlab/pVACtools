@@ -20,7 +20,7 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         cls.python        = sys.executable
         cls.executable    = os.path.join(pvactools_directory(), "pvactools", "lib", "calculate_reference_proteome_similarity.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "calculate_reference_proteome_similarity")
-        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
 
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))

@@ -16,3 +16,15 @@ It also fixes the following problem(s):
 * Handle pVACsplice generate_protein_fasta cases where mutant sequence contains no epitopes different from wildtype. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1226
 * Support pVACsplice regtools/gtf input data with missing transcript_version field. by @mhoang22 in https://github.com/griffithlab/pVACtools/pull/1224
 * Ensure that the directory names generated when removing peptides in pVACvector graph don't contain "/". by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1218
+
+Version 5.3.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Filter out epitopes in pVACsplice with unsupported amino acids. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1238
+* Fix missing netmhciipan_version processing in pVACfuse. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1231
+* Fix incorrect na comparison in aggregated report creation. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1233
+* Fix bug with pVACsplice output parsing logic when running EL algorithms only. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1240
+* Fix bug in test call to call_iedb. iedb_retries needs to be an int. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1241
+* Update pVACsplice anchor-types to be comma-separated instead of space-separated. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1242

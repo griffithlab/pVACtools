@@ -61,7 +61,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvaccompare/html_re
 
 setup(
     name="pvactools",
-    version="5.3.0",
+    version="5.4.0",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",

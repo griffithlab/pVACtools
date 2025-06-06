@@ -131,6 +131,10 @@ def main(args_input = sys.argv[1:]):
 
     base_output_dir = os.path.abspath(args.output_dir)
 
+    if (args.netmhciipan_version == '4.0' and args.iedb_install_directory is not None):
+        raise Exception("Standalone IEDB does not support version 4.0")
+    NetMHCIIVersion.netmhciipan_version = args.netmhciipan_version
+
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     alleles = combine_class_ii_alleles(args.allele)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)
@@ -164,6 +168,7 @@ def main(args_input = sys.argv[1:]):
         'peptide_fasta'             : args.peptide_fasta,
         'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
         'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,
+        'genes_of_interest_file': args.genes_of_interest_file,
     }
 
     if args.iedb_install_directory:
