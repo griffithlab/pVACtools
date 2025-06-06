@@ -30,6 +30,7 @@ def define_parser():
         "RNA VAF",
         "DNA VAF",
         "Tier",
+        "Ref Match",
     ]
     valid_unaggregated_columns = [
         "Biotype",
@@ -91,6 +92,7 @@ def define_parser():
         "DeepImmuno WT Score",
         "DeepImmuno MT Score",
         "Problematic Positions",
+        "Gene of Interest",
     ]
     valid_reference_match_columns = [
         "Peptide",
