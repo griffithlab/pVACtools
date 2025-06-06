@@ -1,0 +1,5 @@
+from .run_compare_aggregated_tsv import main as run_compare_aggregated_tsv
+from .run_compare_json import main as run_compare_json
+from .run_compare_reference_matches_tsv import main as run_compare_reference_matches_tsv
+from .run_compare_unaggregated_tsv import main as run_compare_unaggregated_tsv
+from .run_compare_yml import main as run_compare_yml
