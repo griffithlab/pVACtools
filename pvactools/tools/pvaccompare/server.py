@@ -1,5 +1,7 @@
 from http.server import SimpleHTTPRequestHandler, HTTPServer
+from pathlib import Path
 import sys
+import os
 
 
 class CORSRequestHandler(SimpleHTTPRequestHandler):
@@ -20,11 +22,17 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
 
 
 def main():
+    file_path = Path(__file__).resolve()
+    html_dir = file_path.parent / "html_report"
+
+    # Make the server serve files from the html_report directory
+    os.chdir(html_dir)
+
     PORT = 8080
     server = HTTPServer(("localhost", PORT), CORSRequestHandler)
     print("Starting local server...")
     print(
-        f"View reports at http://localhost:{PORT}/pvactools/tools/pvaccompare/html_report/main.html"
+        f"View reports at http://localhost:{PORT}/main.html"
     )
     try:
         server.serve_forever()
