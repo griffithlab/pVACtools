@@ -8,7 +8,8 @@ import shutil
 import argparse
 
 from pvactools.lib.prediction_class import PredictionClass
-from pvactools.lib.run_utils import get_anchor_positions, is_preferred_transcript, float_range, transcript_prioritization_strategy
+from pvactools.lib.run_utils import is_preferred_transcript, float_range, transcript_prioritization_strategy
+from pvactools.lib.anchor_residue_pass import AnchorResiduePass
 
 class UpdateTiers:
     def __init__(self):
@@ -171,35 +172,8 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.trna_vaf = trna_vaf
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
-        anchor_probabilities = {}
-        for length in [8, 9, 10, 11]:
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "Normalized_anchor_predictions_{}_mer.tsv".format(length))
-            probs = {}
-            with open(file_name, 'r') as fh:
-                reader = csv.DictReader(fh, delimiter="\t")
-                for line in reader:
-                    hla = line.pop('HLA')
-                    probs[hla] = line
-            anchor_probabilities[length] = probs
-        self.anchor_probabilities = anchor_probabilities
-
-        mouse_anchor_positions = {}
-        for length in [8, 9, 10, 11]:
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "mouse_anchor_predictions_{}_mer.tsv".format(length))
-            values = {}
-            with open(file_name, 'r') as fh:
-                reader = csv.DictReader(fh, delimiter="\t")
-                for line in reader:
-                    allele = line.pop('Allele')
-                    values[allele] = {int(k): ast.literal_eval(v) for k, v in line.items()}
-            mouse_anchor_positions[length] = values
-        self.mouse_anchor_positions = mouse_anchor_positions
-
-        self.allele_specific_anchors = allele_specific_anchors
-        self.anchor_contribution_threshold = anchor_contribution_threshold
         super().__init__()
+        self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold)
 
     def get_tier(self, mutation):
         if self.use_allele_specific_binding_thresholds and mutation['Allele'] in self.allele_specific_binding_thresholds:
@@ -218,7 +192,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
             else (ic50_pass or percentile_pass)
         )
 
-        anchor_residue_pass = self.is_anchor_residue_pass(mutation, binding_threshold)
+        anchor_residue_pass = self.anchor_calculator.is_anchor_residue_pass(mutation)
 
         transcript_pass = is_preferred_transcript(mutation, self.transcript_prioritization_strategy, self.maximum_transcript_support_level)
 
@@ -334,24 +308,6 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
 
         #everything else
         return "Poor"
-
-    def is_anchor_residue_pass(self, mutation, binding_threshold):
-        anchors = get_anchor_positions(mutation['Allele'], len(mutation['Best Peptide']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
-        # parse out mutation positions from str
-        position = mutation["Pos"]
-        if position == 'NA':
-            return True
-        else:
-            positions = position.split(", ")
-            if len(positions) > 2:
-                return True
-            anchor_residue_pass = True
-            if all(int(pos) in anchors for pos in positions):
-                if mutation["IC50 WT"] == 'NA':
-                    anchor_residue_pass = False
-                elif float(mutation["IC50 WT"]) < binding_threshold:
-                    anchor_residue_pass = False
-            return anchor_residue_pass
 
     def sort_table(self, output_lines):
         #make sure the tiers sort in the expected order
