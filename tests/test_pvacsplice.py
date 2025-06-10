@@ -42,7 +42,7 @@ class PvacspliceTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
-        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
 
     def test_pvacsplice_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -68,22 +68,7 @@ class PvacspliceTests(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
-            "allele_specific_cutoffs",
-            "binding_filter",
-            "coverage_filter",
             "run",
-            "top_score_filter",
-            "transcript_support_level_filter",
-            "download_example_data",
-            "generate_aggregated_report",
-            "generate_protein_fasta",
-            "net_chop",
-            "netmhc_stab",
-            "calculate_reference_proteome_similarity",
-            "valid_alleles",
-            "valid_netmhciipan_versions",
-            'identify_problematic_amino_acids',
-            'update_tiers',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -103,194 +88,6 @@ class PvacspliceTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_allele_specific_cutoffs_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "allele_specific_cutoffs.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_allele_specific_cutoffs_runs(self):
-        allele_specific_cutoffs.main([])
-
-    def test_binding_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "binding_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_binding_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        binding_filter.main([input_file, output_file.name])
-
-    def test_coverage_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "coverage_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_coverage_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        coverage_filter.main([input_file, output_file.name])
-
-    def test_transcript_support_level_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "transcript_support_level_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_transcript_support_level_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        transcript_support_level_filter.main([input_file, output_file.name])
-
-    def test_top_score_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "top_score_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_top_score_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        top_score_filter.main([input_file, output_file.name])
-
-    def test_download_example_data_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "download_example_data.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_download_example_data_runs(self):
-        output_dir = tempfile.TemporaryDirectory()
-        download_example_data.main([output_dir.name])
-
-    def test_generate_aggregated_report_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "generate_aggregated_report.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_generate_aggregated_report_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        generate_aggregated_report.main([input_file, output_file.name])
-
-    def test_net_chop_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "net_chop.py",
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_netmhc_stab_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "netmhc_stab.py",
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_calculate_reference_proteome_similarity_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "calculate_reference_proteome_similarity.py",
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_alleles_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "valid_alleles.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_alleles_runs(self):
-        valid_alleles.main(["-p", "SMM"])
-
-    def test_valid_netmhciipan_versions_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "valid_netmhciipan_versions.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_netmhciipan_versions_runs(self):
-        valid_netmhciipan_versions.main("")
-
-    def test_identify_problematic_amino_acids_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "identify_problematic_amino_acids.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_identify_problematic_amino_acids_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
-
-    def test_update_tiers_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacsplice",
-            "update_tiers.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_update_tiers_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'HCC1395_TUMOR_DNA.all_epitopes.aggregated.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        update_tiers.main([input_file, '0.5'])
 
     def test_pvacsplice_pipeline_class_I(self):
         with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(

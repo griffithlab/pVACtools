@@ -1,0 +1,16 @@
+Version 5.4
+===========
+
+Version 5.4.0
+-------------
+
+This is a minor feature release. It adds the following features:
+
+* Add functionality to add gene of interest identification. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1229
+
+  A new option ``--genes-of-interest-file`` has been added. This option allows
+  users to specify a file path containing genes name that are of particular
+  importance to their research. Neoantigens resulting from variants on one of
+  these genes will be marked in the all_epitopes.tsv and filtered.tsv files in
+  a new ``Gene of Interest`` column (``True``/``False``). If this option is
+  not specified, `a default list of common cancer genes <https://raw.githubusercontent.com/griffithlab/pVACtools/5eeb213deac828df5e4d2ad81971db26ae530500/pvactools/supporting_files/cancer_census_hotspot_gene_list.tsv>`_ is used.

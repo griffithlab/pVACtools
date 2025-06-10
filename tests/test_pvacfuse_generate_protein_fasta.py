@@ -5,6 +5,9 @@ import tempfile
 from subprocess import call
 from filecmp import cmp
 import py_compile
+from subprocess import run as subprocess_run
+from subprocess import PIPE
+import re
 
 from pvactools.tools.pvacfuse import generate_protein_fasta
 from tests.utils import *
@@ -18,8 +21,29 @@ class GenerateFastaTests(unittest.TestCase):
         cls.test_data_dir  = os.path.join(pvactools_directory(), 'tests', 'test_data', 'pvacfuse_generate_protein_fasta')
         cls.flanking_sequence_length = '10'
 
+    def test_command(self):
+        pvac_script_path = os.path.join(
+            self.executable_dir,
+            "main.py"
+            )
+        usage_search = re.compile(r"usage: ")
+        result = subprocess_run([
+            sys.executable,
+            pvac_script_path,
+            'generate_protein_fasta',
+            '-h'
+        ], shell=False, stdout=PIPE)
+        self.assertFalse(result.returncode, "Failed `pvacfuse generate_protein_fasta -h`")
+        self.assertRegex(result.stdout.decode(), usage_search)
+
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
+
+    def test_generate_protein_fasta_runs(self):
+        input_file = os.path.join(self.test_data_dir, 'agfusion')
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(generate_protein_fasta.main([input_file, "25", output_file.name]))
+        os.unlink("{}.manufacturability.tsv".format(output_file.name))
 
     def test_agfusion_input_file_generates_expected_file(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'agfusion')

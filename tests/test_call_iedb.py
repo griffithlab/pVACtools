@@ -226,7 +226,7 @@ class CallIEDBClassIITests(CallIEDBTests):
             'DRB1*01:01',
             12,
             None,
-            '5',
+            5,
             temp_dir.name,
             log_dir.name
         )
@@ -254,7 +254,7 @@ class CallIEDBClassIITests(CallIEDBTests):
             'DRB1*01:01',
             12,
             None,
-            '5',
+            5,
             temp_dir.name,
             log_dir.name
         )
