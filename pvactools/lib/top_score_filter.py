@@ -12,6 +12,7 @@ from abc import ABCMeta, abstractmethod
 from pvactools.lib.run_utils import *
 import pvactools.lib.sort
 from pvactools.lib.prediction_class import PredictionClass
+from pvactools.lib.anchor_residue_pass import AnchorResiduePass
 
 class TopScoreFilter(metaclass=ABCMeta):
     @classmethod
@@ -125,32 +126,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.allele_specific_anchors = allele_specific_anchors
-        self.anchor_contribution_threshold = anchor_contribution_threshold
-        anchor_probabilities = {}
-        for length in [8, 9, 10, 11]:
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "Normalized_anchor_predictions_{}_mer.tsv".format(length))
-            probs = {}
-            with open(file_name, 'r') as fh:
-                reader = csv.DictReader(fh, delimiter="\t")
-                for line in reader:
-                    hla = line.pop('HLA')
-                    probs[hla] = line
-            anchor_probabilities[length] = probs
-        self.anchor_probabilities = anchor_probabilities
-
-        mouse_anchor_positions = {}
-        for length in [8, 9, 10, 11]:
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "mouse_anchor_predictions_{}_mer.tsv".format(length))
-            values = {}
-            with open(file_name, 'r') as fh:
-                reader = csv.DictReader(fh, delimiter="\t")
-                for line in reader:
-                    allele = line.pop('Allele')
-                    values[allele] = {int(k): ast.literal_eval(v) for k, v in line.items()}
-            mouse_anchor_positions[length] = values
-        self.mouse_anchor_positions = mouse_anchor_positions
+        self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold, self.wt_top_score_metric)
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -219,7 +195,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             prob_pos_lines = tsl_lines
 
         #subset prob_pos dataset to only include entries that pass the anchor position check
-        anchor_residue_pass_lines = [x for x in prob_pos_lines if self.is_anchor_residue_pass(x)]
+        anchor_residue_pass_lines = [x for x in prob_pos_lines if self.anchor_calculator.is_anchor_residue_pass(x)]
         if len(anchor_residue_pass_lines) == 0:
             anchor_residue_pass_lines = prob_pos_lines
 
@@ -229,30 +205,6 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             line['TSL Sort'] = tsl_sort_criteria[line['Transcript Support Level']]
         sorted_anchor_residue_pass_lines = sorted(anchor_residue_pass_lines, key=lambda d: (float(d["{} MT IC50 Score".format(self.mt_top_score_metric)]), d['TSL Sort'], -int(d['Transcript Length'])))
         return sorted_anchor_residue_pass_lines[0]
-
-    def is_anchor_residue_pass(self, line):
-        if self.use_allele_specific_binding_thresholds:
-            binding_threshold = self.allele_specific_binding_thresholds[line['HLA Allele']]
-        else:
-            binding_threshold = self.binding_threshold
-
-        anchor_residue_pass = True
-        anchors = get_anchor_positions(line['HLA Allele'], len(line['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
-        # parse out mutation position from str
-        position = line["Mutation Position"]
-        if position == 'NA':
-            return True
-        else:
-            positions = position.split(", ")
-            if len(positions) > 2:
-                return True
-            anchor_residue_pass = True
-            if all(int(pos) in anchors for pos in positions):
-                if line["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
-                    anchor_residue_pass = False
-                elif float(line["{} WT IC50 Score".format(self.wt_top_score_metric)]) < binding_threshold:
-                    anchor_residue_pass = False
-            return anchor_residue_pass
 
 
 class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):

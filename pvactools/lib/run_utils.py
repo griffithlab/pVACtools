@@ -130,22 +130,6 @@ def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_
             break
     return mt_peptide[start:stop]
 
-def get_anchor_positions(hla_allele, epitope_length, allele_specific_anchors, anchor_probabilities, anchor_contribution_threshold, mouse_anchor_positions):
-        if allele_specific_anchors and epitope_length in anchor_probabilities and hla_allele in anchor_probabilities[epitope_length]:
-            probs = anchor_probabilities[epitope_length][hla_allele]
-            positions = []
-            total_prob = 0
-            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
-                total_prob += float(prob)
-                positions.append(int(pos))
-                if total_prob > anchor_contribution_threshold:
-                    return positions
-        elif allele_specific_anchors and epitope_length in mouse_anchor_positions and hla_allele in mouse_anchor_positions[epitope_length]:
-            values = mouse_anchor_positions[epitope_length][hla_allele]
-            positions = [pos for pos, val in values.items() if val]
-            return positions
-        return [1, 2, epitope_length - 1 , epitope_length]
-
 def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximum_transcript_support_level):
     if not isinstance(mutation, pd.Series):
         mutation = pd.Series(mutation)
@@ -174,3 +158,45 @@ def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximu
         elif int(mutation[col]) <= maximum_transcript_support_level:
             return True
     return False
+
+def problematic_positions_exist():
+    return False
+
+def is_anchor_residue_pass(mutation):
+    return False
+
+def pvacseq_get_best_line(df, transcript_prioritization_strategy, maximum_transcript_support_level, top_score_metrics):
+    #get all entries with Biotype 'protein_coding'
+    biotype_df = df[df['Biotype'] == 'protein_coding']
+    #if there are none, reset to previous dataframe
+    if biotype_df.shape[0] == 0:
+        biotype_df = df
+
+    #subset protein_coding dataframe to only preferred transcripts
+    biotype_df['transcript_pass'] = biotype_df.apply(lambda x: is_preferred_transcript(x, transcript_prioritization_strategy, maximum_transcript_support_level), axis=1)
+    transcript_df = biotype_df[biotype_df['transcript_pass']]
+    #if this results in an empty dataframe, reset to previous dataframe
+    if transcript_df.shape[0] == 0:
+        transcript_df = biotype_df
+
+    #subset tsl dataframe to only include entries with no problematic positions
+    if problematic_positions_exist():
+        prob_pos_df = transcript_df[transcript_df['Problematic Positions'] == "None"]
+        #if this results in an empty dataframe, reset to previous dataframe
+        if prob_pos_df.shape[0] == 0:
+            prob_pos_df = transcript_df
+    else:
+        prob_pos_df = transcript_df
+
+    #subset prob_pos dataframe to only include entries that pass the anchor position check
+    prob_pos_df['anchor_residue_pass'] = prob_pos_df.apply(lambda x: is_anchor_residue_pass(x), axis=1)
+    anchor_residue_pass_df = prob_pos_df[prob_pos_df['anchor_residue_pass']]
+    if anchor_residue_pass_df.shape[0] == 0:
+        anchor_residue_pass_df = prob_pos_df
+
+    #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
+    anchor_residue_pass_df.sort_values(by=[
+        "{} MT IC50 Score".format(mt_top_score_metric),
+        "Transcript Length",
+    ], inplace=True, ascending=[True, False])
+    return anchor_residue_pass_df.iloc[0]

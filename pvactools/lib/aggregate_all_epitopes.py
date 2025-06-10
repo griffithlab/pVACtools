@@ -9,20 +9,21 @@ import itertools
 import csv
 import glob
 import ast
-from pvactools.lib.run_utils import get_anchor_positions, is_preferred_transcript
+from pvactools.lib.run_utils import is_preferred_transcript
 
 from pvactools.lib.prediction_class import PredictionClass
 from pvactools.lib.update_tiers import PvacseqUpdateTiers, PvacfuseUpdateTiers, PvacspliceUpdateTiers, PvacbindUpdateTiers
+from pvactools.lib.anchor_residue_pass import AnchorResiduePass
 
 class AggregateAllEpitopes:
     def __init__(self):
         self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
-        allele_specific_binding_thresholds = {}
+        thresholds = {}
         for hla_type in self.hla_types:
             threshold = PredictionClass.cutoff_for_allele(hla_type)
             if threshold is not None:
-                allele_specific_binding_thresholds[hla_type] = float(threshold)
-        self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
+                thresholds[hla_type] = float(threshold)
+        self.allele_specific_binding_thresholds = thresholds
 
     @abstractmethod
     def get_list_unique_mutation_keys(self):
@@ -250,9 +251,9 @@ class AggregateAllEpitopes:
                 'mt_top_score_metric': self.mt_top_score_metric,
                 'wt_top_score_metric': self.wt_top_score_metric,
                 'allele_specific_binding_thresholds': self.allele_specific_binding_thresholds,
-                'allele_specific_anchors': self.allele_specific_anchors,
+                'allele_specific_anchors': self.anchor_calculator.use_allele_specific_anchors,
                 'alleles': self.hla_types.tolist(),
-                'anchor_contribution_threshold': self.anchor_contribution_threshold,
+                'anchor_contribution_threshold': self.anchor_calculator.anchor_contribution_threshold,
                 'epitope_lengths': epitope_lengths,
             }
         else:
@@ -322,35 +323,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             self.mt_top_score_metric = "Best"
             self.wt_top_score_metric = "Corresponding"
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
-        anchor_probabilities = {}
-        for length in [8, 9, 10, 11]:
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "Normalized_anchor_predictions_{}_mer.tsv".format(length))
-            probs = {}
-            with open(file_name, 'r') as fh:
-                reader = csv.DictReader(fh, delimiter="\t")
-                for line in reader:
-                    hla = line.pop('HLA')
-                    probs[hla] = line
-            anchor_probabilities[length] = probs
-        self.anchor_probabilities = anchor_probabilities
-
-        mouse_anchor_positions = {}
-        for length in [8, 9, 10, 11]:
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "mouse_anchor_predictions_{}_mer.tsv".format(length))
-            values = {}
-            with open(file_name, 'r') as fh:
-                reader = csv.DictReader(fh, delimiter="\t")
-                for line in reader:
-                    allele = line.pop('Allele')
-                    values[allele] = {int(k): ast.literal_eval(v) for k, v in line.items()}
-            mouse_anchor_positions[length] = values
-        self.mouse_anchor_positions = mouse_anchor_positions
-
-        self.allele_specific_anchors = allele_specific_anchors
-        self.anchor_contribution_threshold = anchor_contribution_threshold
         super().__init__()
+        self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold, self.wt_top_score_metric)
 
     def get_list_unique_mutation_keys(self, df):
         keys = df[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']].values.tolist()
@@ -410,7 +384,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             prob_pos_df = transcript_df
 
         #subset prob_pos dataframe to only include entries that pass the anchor position check
-        prob_pos_df['anchor_residue_pass'] = prob_pos_df.apply(lambda x: self.is_anchor_residue_pass(x), axis=1)
+        prob_pos_df['anchor_residue_pass'] = prob_pos_df.apply(lambda x: self.anchor_calculator.is_anchor_residue_pass(x), axis=1)
         anchor_residue_pass_df = prob_pos_df[prob_pos_df['anchor_residue_pass']]
         if anchor_residue_pass_df.shape[0] == 0:
             anchor_residue_pass_df = prob_pos_df
@@ -421,29 +395,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             "Transcript Length",
         ], inplace=True, ascending=[True, False])
         return anchor_residue_pass_df.iloc[0]
-
-    def is_anchor_residue_pass(self, mutation):
-        if self.use_allele_specific_binding_thresholds and mutation['HLA Allele'] in self.allele_specific_binding_thresholds:
-            binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
-        else:
-            binding_threshold = self.binding_threshold
-
-        anchors = get_anchor_positions(mutation['HLA Allele'], len(mutation['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
-        # parse out mutation positions from str
-        position = mutation["Mutation Position"]
-        if pd.isna(position):
-            return True
-        else:
-            positions = position.split(", ")
-            if len(positions) > 2:
-                return True
-            anchor_residue_pass = True
-            if all(int(pos) in anchors for pos in positions):
-                if pd.isna(mutation["{} WT IC50 Score".format(self.wt_top_score_metric)]):
-                    anchor_residue_pass = False
-                elif mutation["{} WT IC50 Score".format(self.wt_top_score_metric)] < binding_threshold:
-                    anchor_residue_pass = False
-            return anchor_residue_pass
 
     def get_included_df(self, df):
         binding_df = df[df["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold]
@@ -468,7 +419,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         df['tsl_sort'] = df['Transcript Support Level'].apply(lambda x: 6 if pd.isnull(x) or x == 'Not Supported' else int(x))
         if self.problematic_positions_exist():
             df['problematic_positions_sort'] = df['Problematic Positions'].apply(lambda x: 1 if x == "None" else 2)
-        df['anchor_residue_pass_sort'] = df.apply(lambda x: 1 if self.is_anchor_residue_pass(x) else 2, axis=1)
+        df['anchor_residue_pass_sort'] = df.apply(lambda x: 1 if self.anchor_calculator.is_anchor_residue_pass(x) else 2, axis=1)
         if self.problematic_positions_exist():
             sort_columns = [
                 "biotype_sort",
@@ -547,7 +498,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                             el_calls[line['HLA Allele']] = self.replace_nas([line["{} {} Score".format(algorithm, peptide_type)] for algorithm in el_algorithms])
                             el_percentile_calls[line['HLA Allele']] = self.replace_nas(['NA' if algorithm in ['MHCflurryEL Processing', 'BigMHC_EL', 'BigMHC_IM', 'DeepImmuno'] else line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in el_algorithms])
                             all_percentile_calls[line['HLA Allele']] = self.replace_nas([line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in percentile_algorithms])
-                            if peptide_type == 'MT' and not self.is_anchor_residue_pass(line):
+                            if peptide_type == 'MT' and not self.anchor_calculator.is_anchor_residue_pass(line):
                                 anchor_fails.append(line['HLA Allele'])
                         sorted_ic50s = []
                         sorted_percentiles = []
@@ -745,8 +696,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             percentile_threshold=self.percentile_threshold,
             percentile_threshold_strategy=self.percentile_threshold_strategy,
             allele_specific_binding_thresholds=self.use_allele_specific_binding_thresholds,
-            allele_specific_anchors=self.allele_specific_anchors,
-            anchor_contribution_threshold=self.anchor_contribution_threshold,
+            allele_specific_anchors=self.anchor_calculator.use_allele_specific_anchors,
+            anchor_contribution_threshold=self.anchor_calculator.anchor_contribution_threshold,
         ).execute()
 
 
@@ -765,9 +716,9 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         self.input_file = input_file
         self.output_file = output_file
         self.binding_threshold = binding_threshold
+        self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.percentile_threshold = percentile_threshold
         self.percentile_threshold_strategy = percentile_threshold_strategy
-        self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         self.aggregate_inclusion_count_limit = aggregate_inclusion_count_limit
         if top_score_metric == 'median':
