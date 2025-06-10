@@ -7,7 +7,7 @@ from subprocess import PIPE
 from subprocess import run as subprocess_run
 from tempfile import NamedTemporaryFile
 
-from pvactools.tools.pvacseq import *
+from pvactools.tools.pvacsplice import *
 from tests.utils import *
 
 def test_data_directory():
@@ -15,10 +15,10 @@ def test_data_directory():
         pvactools_directory(),
         'tests',
         'test_data',
-        'pvacseq'
+        'pvacsplice'
     )
 
-class PvacseqTranscriptSupportLevelFilterTests(unittest.TestCase):
+class PvacspliceTranscriptFilterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.pvactools_directory = pvactools_directory()
@@ -29,17 +29,17 @@ class PvacseqTranscriptSupportLevelFilterTests(unittest.TestCase):
             self.pvactools_directory,
             'pvactools',
             'tools',
-            'pvacseq',
+            'pvacsplice',
             "main.py"
             )
         usage_search = re.compile(r"usage: ")
         result = subprocess_run([
             sys.executable,
             pvac_script_path,
-            'transcript_support_level_filter',
+            'transcript_filter',
             '-h'
         ], shell=False, stdout=PIPE)
-        self.assertFalse(result.returncode, "Failed `pvacseq transcript_support_level_filter -h`")
+        self.assertFalse(result.returncode, "Failed `pvacsplice transcript_filter -h`")
         self.assertRegex(result.stdout.decode(), usage_search)
 
     def test_compiles(self):
@@ -47,12 +47,12 @@ class PvacseqTranscriptSupportLevelFilterTests(unittest.TestCase):
             self.pvactools_directory,
             'pvactools',
             "tools",
-            "pvacseq",
-            "transcript_support_level_filter.py"
+            "pvacsplice",
+            "transcript_filter.py"
         ))
         self.assertTrue(compiled_run_path)
 
     def test_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        input_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'HCC1395_TUMOR_DNA.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
-        self.assertFalse(transcript_support_level_filter.main([input_file, output_file.name]))
+        self.assertFalse(transcript_filter.main([input_file, output_file.name]))
