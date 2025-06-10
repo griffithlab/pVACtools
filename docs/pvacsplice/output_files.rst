@@ -209,6 +209,12 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - MHCflurry elution processing score and presentation score and percentiles
        for the ``Epitope Seq`` if the run included
        MHCflurryEL as one of the prediction algorithms
+   * - ``Problematic Positions`` (optional)
+     - A list of positions in the ``MT Epitope Seq`` that match the
+       problematic amino acids defined by the ``--problematic-amino-acids``
+       parameter
+   * - ``Gene of Interest`` (T/F)
+     - Is the ``Gene Name`` found in the genes of interest list?
    * - ``cterm_7mer_gravy_score``
      - Mean hydropathy of last 7 residues on the C-terminus of the peptide
    * - ``max_7mer_gravy_score``

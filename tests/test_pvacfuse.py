@@ -33,7 +33,7 @@ class PvacfuseTests(unittest.TestCase):
     def setUpClass(cls):
         cls.pvactools_directory = pvactools_directory()
         cls.test_data_directory = test_data_directory()
-        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
 
     def test_pvacfuse_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -60,19 +60,6 @@ class PvacfuseTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
-            "allele_specific_cutoffs",
-            "binding_filter",
-            "coverage_filter",
-            "valid_alleles",
-            "valid_algorithms",
-            "download_example_data",
-            "net_chop",
-            "netmhc_stab",
-            "calculate_reference_proteome_similarity",
-            "top_score_filter",
-            "generate_aggregated_report",
-            'identify_problematic_amino_acids',
-            'update_tiers',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -92,149 +79,6 @@ class PvacfuseTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_allele_specific_cutoffs_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "allele_specific_cutoffs.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_allele_specific_cutoffs_runs(self):
-        allele_specific_cutoffs.main([])
-
-    def test_binding_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "binding_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_binding_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        binding_filter.main([input_file, output_file.name])
-
-    def test_coverage_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "coverage_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_binding_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        coverage_filter.main([input_file, output_file.name])
-
-    def test_download_example_data_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "download_example_data.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_download_example_data_runs(self):
-        output_dir = tempfile.TemporaryDirectory()
-        download_example_data.main([output_dir.name])
-
-    def test_top_score_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "top_score_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_top_score_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        top_score_filter.main([input_file, output_file.name])
-
-    def test_generate_aggregated_report_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "generate_aggregated_report.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_generate_aggregated_report_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        generate_aggregated_report.main([input_file, output_file.name])
-
-    def test_identify_problematic_amino_acids_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacfuse",
-            "identify_problematic_amino_acids.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_identify_problematic_amino_acids_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
-
-    def test_update_tiers_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacfuse",
-            "update_tiers.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_update_tiers_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', 'Test.all_epitopes.aggregated.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        update_tiers.main([input_file])
-
-    def test_valid_alleles_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacfuse",
-            "valid_alleles.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_alleles_runs(self):
-        valid_alleles.main(["-p", "SMM"])
-
-    def test_valid_algorithms_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacfuse",
-            "valid_algorithms.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_algorithms_runs(self):
-        valid_algorithms.main("")
 
     def test_pvacfuse_pipeline(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(

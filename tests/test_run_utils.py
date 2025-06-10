@@ -38,7 +38,7 @@ class RunUtilsTests(unittest.TestCase):
             sorted(combine_class_ii_alleles(["DRB9*01:02", "DRA*01:01"])),
             sorted(["DRB9*01:02", "DRA*01:01"])
         )
-    
+
     def test_get_anchor_positions(self):
         agg_obj = PvacseqAggregateAllEpitopes(input_file=os.path.join(self.test_data_dir, 'M_GC-OxParp_A-OxParp_A_FF_DNA.all_epitopes.tsv'), 
                                                    output_file="",
@@ -56,3 +56,38 @@ class RunUtilsTests(unittest.TestCase):
             get_anchor_positions("H-2-Kb", 11, agg_obj.allele_specific_anchors, agg_obj.anchor_probabilities, agg_obj.anchor_contribution_threshold, agg_obj.mouse_anchor_positions),
             [1, 2, 10, 11]
         )
+
+        # valid human allele and epitope length
+        self.assertEqual(
+            get_anchor_positions("HLA-A*01:01", 8, agg_obj.allele_specific_anchors, agg_obj.anchor_probabilities, agg_obj.anchor_contribution_threshold, agg_obj.anchor_probabilities),
+            [8, 2, 3]
+        )
+
+    def test_pvacsplice_anchors_checker(self):
+        checker = pvacsplice_anchors()
+        self.assertEqual(
+            checker("A,D,NDA"),
+            ["A", "D", "NDA"]
+        )
+
+        with self.assertRaises(Exception) as context:
+            checker("Test,A")
+
+        self.assertEqual("List element must be one of 'A', 'D', 'NDA', 'DA', 'N', not Test", str(context.exception))
+
+    def test_float_range_checker(self):
+        checker = float_range(0.0, 100.0)
+        self.assertEqual(
+            checker("0.5"),
+            0.5
+        )
+
+        with self.assertRaises(Exception) as context:
+            checker("Test")
+
+        self.assertEqual("must be a floating point number", str(context.exception))
+
+        with self.assertRaises(Exception) as context:
+            checker("102.0")
+
+        self.assertEqual("must be in range [0.0 .. 100.0]", str(context.exception))

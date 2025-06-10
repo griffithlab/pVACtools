@@ -10,6 +10,7 @@ __all__ = [
     "generate_aggregated_report",
     'install_vep_plugin',
     'top_score_filter',
+    'mark_genes_of_interest',
     'net_chop',
     'netmhc_stab',
     'valid_netmhciipan_versions',

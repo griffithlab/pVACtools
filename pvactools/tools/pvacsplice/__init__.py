@@ -7,6 +7,7 @@ __all__ = [
     'generate_aggregated_report',
     'generate_protein_fasta',
     'identify_problematic_amino_acids',
+    'mark_genes_of_interest',
     'net_chop',
     'netmhc_stab',
     'valid_netmhciipan_versions',
@@ -15,6 +16,7 @@ __all__ = [
     'transcript_support_level_filter',
     'valid_alleles',
     'update_tiers',
+    'valid_algorithms',
 ]
 
 from . import *

@@ -49,19 +49,6 @@ def split_file(reader, lines):
 def construct_index(count, gene, transcript, variant_type, position):
     return '{}.{}.{}.{}.{}'.format(count, gene, transcript, variant_type, position)
 
-def index_to_aggregate_report_aa_change(aa_change, variant_type):
-    regex = '^([0-9]+[\-]{0,1}[0-9]*)([A-Z|\-|\*]*)\/([A-Z|\-|\*]*)$'
-    p = re.compile(regex)
-    m = p.match(aa_change)
-    if m:
-        if variant_type == 'FS':
-            parsed_aa_change = "FS{}".format(m.group(1))
-        else:
-            parsed_aa_change = "{}{}{}".format(m.group(2), m.group(1), m.group(3))
-        return (parsed_aa_change, m.group(1), m.group(2), m.group(3))
-    else:
-        raise Exception("Unexpected amino acid format: {}".format(aa_change))
-
 def float_range(minimum, maximum):
     """Return function handle of an argument type function for
        ArgumentParser checking a float range: minimum <= arg <= maximum
@@ -101,6 +88,24 @@ def transcript_prioritization_strategy():
     # Return function handle to checking function
     return transcript_prioritization_strategy_checker
 
+def pvacsplice_anchors():
+    """Return function handle of an argument type function for
+       ArgumentParser checking of the pVACsplice anchors
+       checking that the specified criteria are in the list of: ['A', 'D', 'NDA', 'DA', 'N']"""
+
+    # Define the function with default arguments
+    def pvacsplice_anchors_checker(arg):
+        """New Type function for argparse - a comma-separated list with predefined valid values."""
+
+        arg_list = arg.split(",")
+        for argument in arg_list:
+            if argument not in ['A', 'D', 'NDA', 'DA', 'N']:
+                raise argparse.ArgumentTypeError("List element must be one of 'A', 'D', 'NDA', 'DA', 'N', not {}".format(argument))
+        return arg_list
+
+    # Return function handle to checking function
+    return pvacsplice_anchors_checker
+
 def supported_amino_acids():
     return ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
 
@@ -139,7 +144,6 @@ def get_anchor_positions(hla_allele, epitope_length, allele_specific_anchors, an
             values = mouse_anchor_positions[epitope_length][hla_allele]
             positions = [pos for pos, val in values.items() if val]
             return positions
-
         return [1, 2, epitope_length - 1 , epitope_length]
 
 def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximum_transcript_support_level):

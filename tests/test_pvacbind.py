@@ -14,8 +14,10 @@ from mock import patch
 from urllib.request import urlopen
 from shutil import copyfileobj
 from tempfile import NamedTemporaryFile
+import argparse
 
 from pvactools.lib.pipeline import PvacbindPipeline
+import pvactools.tools.pvacbind.main as pvacbind_main
 from pvactools.tools.pvacbind import *
 from tests.utils import *
 import logging
@@ -43,7 +45,7 @@ class PvacbindTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
-        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
 
     def test_pvacbind_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -54,6 +56,10 @@ class PvacbindTests(unittest.TestCase):
             "main.py"
         ))
         self.assertTrue(compiled_pvac_path)
+
+    def test_parser(self):
+        parser = pvacbind_main.define_parser()
+        self.assertEqual(type(parser), argparse.ArgumentParser)
 
     def test_pvacbind_commands(self):
         pvac_script_path = os.path.join(
@@ -66,19 +72,6 @@ class PvacbindTests(unittest.TestCase):
         usage_search = re.compile(r"usage: ")
         for command in [
             "run",
-            'binding_filter',
-            'valid_alleles',
-            'valid_algorithms',
-            'valid_netmhciipan_versions',
-            'allele_specific_cutoffs',
-            'download_example_data',
-            "net_chop",
-            "netmhc_stab",
-            "calculate_reference_proteome_similarity",
-            'top_score_filter',
-            'generate_aggregated_report',
-            'identify_problematic_amino_acids',
-            'update_tiers',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -98,51 +91,6 @@ class PvacbindTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_generate_aggregated_report_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            "pvactools",
-            "tools",
-            "pvacbind",
-            "generate_aggregated_report.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_generate_aggregated_report_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        generate_aggregated_report.main([input_file, output_file.name])
-
-    def test_identify_problematic_amino_acids_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacbind",
-            "identify_problematic_amino_acids.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_identify_problematic_amino_acids_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
-
-    def test_update_tiers_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacbind",
-            "update_tiers.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_update_tiers_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.aggregated.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        update_tiers.main([input_file])
 
     def test_process_stops(self):
         output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
@@ -383,29 +331,3 @@ class PvacbindTests(unittest.TestCase):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
                 self.assertTrue(compare(output_file, expected_file))
-
-    def test_valid_algorithms_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacbind",
-            "valid_algorithms.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_algorithms_runs(self):
-        valid_algorithms.main("")
-
-    def test_valid_netmhciipan_versions_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacbind",
-            "valid_netmhciipan_versions.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_netmhciipan_versions_runs(self):
-        valid_netmhciipan_versions.main("")

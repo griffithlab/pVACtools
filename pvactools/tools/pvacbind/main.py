@@ -4,7 +4,7 @@ from subprocess import call
 import os
 from pvactools.tools.pvacbind import *
 
-def main():
+def define_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subparsers = parser.add_subparsers()
 
@@ -108,6 +108,11 @@ def main():
     )
     allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
 
+    return parser
+
+
+def main():
+    parser = define_parser()
     args = parser.parse_known_args()
     try:
         args[0].func.main(args[1])
