@@ -8,8 +8,7 @@ import os
 import tempfile
 import argparse
 from unittest.mock import MagicMock
-import pvactools.tools.compare as compare_main
-import pvactools.tools.pvaccompare.compare_tools.comparison_router as comparison_router
+import pvactools.tools.compare as compare
 import pvactools.tools.pvaccompare.compare_tools.validators as comparison_validators
 
 # python -m unittest tests/test_compare.py
@@ -17,7 +16,7 @@ import pvactools.tools.pvaccompare.compare_tools.validators as comparison_valida
 class TestRunCompare(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.url = "http://localhost:8080/pvactools/tools/pvaccompare/html_report/main.html"
+        cls.url = "http://localhost:8080/main.html"
         cls.data_dir = "tests/test_data/pvaccompare/"
         cls.aggregated_columns = ["Best Peptide", "Best Transcript"]
         cls.unaggregated_columns = ["Median MT IC50 Score", "Median WT IC50 Score"]
@@ -64,14 +63,14 @@ class TestRunCompare(unittest.TestCase):
 
 
     def test_compare_parser(self):
-        parser = compare_main.define_parser()
+        parser = compare.define_parser()
         self.assertEqual(type(parser), argparse.ArgumentParser)
 
 
     def test_compare_aggregated_validator(self):
         aggregated_columns = self.aggregated_columns + ["Test1"]
 
-        parser = compare_main.define_parser()
+        parser = compare.define_parser()
         parser.error = MagicMock()
         comparison_validators.validate_aggregated_columns(aggregated_columns, parser)
         parser.error.assert_called_once()
@@ -82,7 +81,7 @@ class TestRunCompare(unittest.TestCase):
     def test_compare_unaggregated_validator(self):
         unaggregated_columns = self.unaggregated_columns + ["Test1"]
 
-        parser = compare_main.define_parser()
+        parser = compare.define_parser()
         parser.error = MagicMock()
         comparison_validators.validate_unaggregated_columns(unaggregated_columns, parser)
         parser.error.assert_called_once()
@@ -93,7 +92,7 @@ class TestRunCompare(unittest.TestCase):
     def test_compare_reference_match_validator(self):
         reference_match_columns = self.reference_match_columns + ["Test1"]
 
-        parser = compare_main.define_parser()
+        parser = compare.define_parser()
         parser.error = MagicMock()
         comparison_validators.validate_reference_match_columns(reference_match_columns, parser)
         parser.error.assert_called_once()
@@ -119,28 +118,25 @@ class TestRunCompare(unittest.TestCase):
             }
 
             for file_name, test_data_path in test_data_files.items():
-                file_path_input1 = os.path.join(input1_mhc_class_i, file_name)
-                file_path_input2 = os.path.join(input2_mhc_class_i, file_name)
+                for folder in [input1_mhc_class_i, input2_mhc_class_i]:
+                    file_path = os.path.join(folder, file_name)
+                    with open(test_data_path, "r") as test_file, open(file_path, "w") as temp_file:
+                        temp_file.write(test_file.read())
 
-                with open(test_data_path, "r") as test_file:
-                    test_data = test_file.read()
-
-                with open(file_path_input1, "w") as temp_file1:
-                    temp_file1.write(test_data)
-
-                with open(file_path_input2, "w") as temp_file2:
-                    temp_file2.write(test_data)
+            args_list = [
+                input1,
+                input2,
+                "--output-dir", output,
+                "--aggregated-columns", "Best Peptide,Best Transcript",
+                "--unaggregated-columns", "Median MT IC50 Score,Median WT IC50 Score",
+                "--reference-match-columns", "Peptide,Hit Definition",
+                "--mhc-class", "1",
+                "--no-server"
+            ]
 
             with self.assertLogs(level="INFO") as log:
-                comparison_router.run_comparison(
-                    "1",
-                    input1,
-                    input2,
-                    output,
-                    self.aggregated_columns,
-                    self.unaggregated_columns,
-                    self.reference_match_columns
-                )
+                compare.main(args_list)
+
             self.assertIn("ERROR:root:ERROR: Could not locate the input YML file in either results folder for MHC Class I.", log.output)
             self.assertIn("INFO:root:The JSON metric inputs are identical.", log.output)
             self.assertIn("INFO:root:The Unaggregated TSV files are identical.", log.output)
