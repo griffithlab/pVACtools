@@ -175,14 +175,14 @@ def define_parser():
 
 def prepare_results_folder(classes, base_output_dir):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    unique_output_dir = f"{base_output_dir}/results_{timestamp}"
+    unique_output_dir = os.path.join(base_output_dir, f"results_{timestamp}")
 
-    os.makedirs(unique_output_dir)
+    os.makedirs(unique_output_dir, exist_ok=True)
 
     if "1" in classes:
-        os.makedirs(f"{unique_output_dir}/mhc_class_i")
+        os.makedirs(os.path.join(unique_output_dir, "mhc_class_i"), exist_ok=True)
     if "2" in classes:
-        os.makedirs(f"{unique_output_dir}/mhc_class_ii")
+        os.makedirs(os.path.join(unique_output_dir, "mhc_class_ii"), exist_ok=True)
 
     return unique_output_dir
 

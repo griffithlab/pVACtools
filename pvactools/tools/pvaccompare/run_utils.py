@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 import re
 import logging
 import json
@@ -404,7 +405,7 @@ def export_to_json(
     Modifies: Writes a structured JSON file to disk at the specified output path
     Returns: None
     """
-    file_path = f"{output_path}/{filename}"
+    file_path = os.path.join(output_path, filename)
 
     if filename != "yml_input_data.json" and filename != "json_input_data.json":
         summary_data = {
