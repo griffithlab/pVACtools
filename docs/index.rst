@@ -46,6 +46,7 @@ Contents
    :maxdepth: 1
 
    install
+   helper_tools
    courses
    tools
    frequently_asked_questions
