@@ -30,12 +30,12 @@ def define_parser():
     )
     coverage_filter_parser.set_defaults(func=coverage_filter)
 
-    transcript_support_level_filter_parser = subparsers.add_parser(
-        "transcript_support_level_filter",
-        help="Filter variants processed by IEDB by transcript support level.",
+    transcript_filter_parser = subparsers.add_parser(
+        "transcript_filter",
+        help="Filter variant transcripts processed by IEDB.",
         add_help=False
     )
-    transcript_support_level_filter_parser.set_defaults(func=transcript_support_level_filter)
+    transcript_filter_parser.set_defaults(func=transcript_filter)
 
     top_score_filter_parser = subparsers.add_parser(
         "top_score_filter",
