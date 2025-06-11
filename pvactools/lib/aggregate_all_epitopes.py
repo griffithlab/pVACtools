@@ -9,11 +9,12 @@ import itertools
 import csv
 import glob
 import ast
-from pvactools.lib.run_utils import is_preferred_transcript
 
+from pvactools.lib.run_utils import is_preferred_transcript
 from pvactools.lib.prediction_class import PredictionClass
 from pvactools.lib.update_tiers import PvacseqUpdateTiers, PvacfuseUpdateTiers, PvacspliceUpdateTiers, PvacbindUpdateTiers
 from pvactools.lib.anchor_residue_pass import AnchorResiduePass
+from pvactools.lib.get_best_candidate import PvacseqBestCandidate, PvacfuseBestCandidate, PvacbindBestCandidate, PvacspliceBestCandidate
 
 class AggregateAllEpitopes:
     def __init__(self):
@@ -361,40 +362,12 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return (df, key_str)
 
     def get_best_binder(self, df):
-        #get all entries with Biotype 'protein_coding'
-        biotype_df = df[df['Biotype'] == 'protein_coding']
-        #if there are none, reset to previous dataframe
-        if biotype_df.shape[0] == 0:
-            biotype_df = df
-
-        #subset protein_coding dataframe to only preferred transcripts
-        biotype_df['transcript_pass'] = biotype_df.apply(lambda x: is_preferred_transcript(x, self.transcript_prioritization_strategy, self.maximum_transcript_support_level), axis=1)
-        transcript_df = biotype_df[biotype_df['transcript_pass']]
-        #if this results in an empty dataframe, reset to previous dataframe
-        if transcript_df.shape[0] == 0:
-            transcript_df = biotype_df
-
-        #subset tsl dataframe to only include entries with no problematic positions
-        if self.problematic_positions_exist():
-            prob_pos_df = transcript_df[transcript_df['Problematic Positions'] == "None"]
-            #if this results in an empty dataframe, reset to previous dataframe
-            if prob_pos_df.shape[0] == 0:
-                prob_pos_df = transcript_df
-        else:
-            prob_pos_df = transcript_df
-
-        #subset prob_pos dataframe to only include entries that pass the anchor position check
-        prob_pos_df['anchor_residue_pass'] = prob_pos_df.apply(lambda x: self.anchor_calculator.is_anchor_residue_pass(x), axis=1)
-        anchor_residue_pass_df = prob_pos_df[prob_pos_df['anchor_residue_pass']]
-        if anchor_residue_pass_df.shape[0] == 0:
-            anchor_residue_pass_df = prob_pos_df
-
-        #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
-        anchor_residue_pass_df.sort_values(by=[
-            "{} MT IC50 Score".format(self.mt_top_score_metric),
-            "Transcript Length",
-        ], inplace=True, ascending=[True, False])
-        return anchor_residue_pass_df.iloc[0]
+        return PvacseqBestCandidate(
+            self.transcript_prioritization_strategy,
+            self.maximum_transcript_support_level,
+            self.anchor_calculator,
+            self.mt_top_score_metric,
+        ).get(df)
 
     def get_included_df(self, df):
         binding_df = df[df["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold]
@@ -748,18 +721,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         df = (all_epitopes_df[lambda x: (x['Mutation'] == key)]).copy()
         return (df, key)
 
-    def get_best_binder(self, df):
-        #subset dataframe to only include entries with no problematic positions
-        if self.problematic_positions_exist():
-            prob_pos_df = df[df['Problematic Positions'] == "None"]
-            #if this results in an empty dataframe, reset to previous dataframe
-            if prob_pos_df.shape[0] == 0:
-                prob_pos_df = df
-        else:
-            prob_pos_df = df
-        prob_pos_df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
-        return prob_pos_df.iloc[0]
-
     def get_included_df(self, df):
         binding_df = df[df["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold]
         if binding_df.shape[0] == 0:
@@ -874,6 +835,11 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         })
         return out_dict
 
+    def get_best_binder(self, df):
+        return PvacfuseBestCandidate(
+            self.top_score_metric,
+        ).get(df)
+
     def tier_aggregated_report(self):
         PvacfuseUpdateTiers(
             self.output_file,
@@ -904,6 +870,11 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             'Evaluation': 'Pending',
         })
         return out_dict
+
+    def get_best_binder(self, df):
+        return PvacbindBestCandidate(
+            self.top_score_metric,
+        ).get(df)
 
     def tier_aggregated_report(self):
         PvacbindUpdateTiers(
@@ -1005,6 +976,13 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             'Evaluation': 'Pending',
         })
         return out_dict
+
+    def get_best_binder(self, df):
+        return PvacspliceBestCandidate(
+            self.transcript_prioritization_strategy,
+            self.maximum_transcript_support_level,
+            self.top_score_metric,
+        ).get(df)
 
     def tier_aggregated_report(self):
         PvacspliceUpdateTiers(
