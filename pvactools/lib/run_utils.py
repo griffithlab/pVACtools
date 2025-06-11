@@ -164,39 +164,3 @@ def problematic_positions_exist():
 
 def is_anchor_residue_pass(mutation):
     return False
-
-def pvacseq_get_best_line(df, transcript_prioritization_strategy, maximum_transcript_support_level, top_score_metrics):
-    #get all entries with Biotype 'protein_coding'
-    biotype_df = df[df['Biotype'] == 'protein_coding']
-    #if there are none, reset to previous dataframe
-    if biotype_df.shape[0] == 0:
-        biotype_df = df
-
-    #subset protein_coding dataframe to only preferred transcripts
-    biotype_df['transcript_pass'] = biotype_df.apply(lambda x: is_preferred_transcript(x, transcript_prioritization_strategy, maximum_transcript_support_level), axis=1)
-    transcript_df = biotype_df[biotype_df['transcript_pass']]
-    #if this results in an empty dataframe, reset to previous dataframe
-    if transcript_df.shape[0] == 0:
-        transcript_df = biotype_df
-
-    #subset tsl dataframe to only include entries with no problematic positions
-    if problematic_positions_exist():
-        prob_pos_df = transcript_df[transcript_df['Problematic Positions'] == "None"]
-        #if this results in an empty dataframe, reset to previous dataframe
-        if prob_pos_df.shape[0] == 0:
-            prob_pos_df = transcript_df
-    else:
-        prob_pos_df = transcript_df
-
-    #subset prob_pos dataframe to only include entries that pass the anchor position check
-    prob_pos_df['anchor_residue_pass'] = prob_pos_df.apply(lambda x: is_anchor_residue_pass(x), axis=1)
-    anchor_residue_pass_df = prob_pos_df[prob_pos_df['anchor_residue_pass']]
-    if anchor_residue_pass_df.shape[0] == 0:
-        anchor_residue_pass_df = prob_pos_df
-
-    #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
-    anchor_residue_pass_df.sort_values(by=[
-        "{} MT IC50 Score".format(mt_top_score_metric),
-        "Transcript Length",
-    ], inplace=True, ascending=[True, False])
-    return anchor_residue_pass_df.iloc[0]
