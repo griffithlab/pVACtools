@@ -215,7 +215,9 @@ def generate_excel_results(output_path, output_file, sample_name, html_file):
     soup = BeautifulSoup(html_content, "html.parser")
     table = soup.find("table")
 
-    workbook = xlsxwriter.Workbook(f"{output_path}{output_file}_{sample_name}.Colored_Peptides.xlsx")
+    file_name = f"{output_file}_{sample_name}.Colored_Peptides.xlsx"
+    file_path = os.path.join(output_path, file_name)
+    workbook = xlsxwriter.Workbook(file_path)
     worksheet = workbook.add_worksheet()
 
     bold_fmt = workbook.add_format({'bold': True})

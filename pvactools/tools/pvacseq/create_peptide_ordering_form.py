@@ -113,16 +113,16 @@ def main(args_input = sys.argv[1:]):
     flanking_sequence_length = 25
 
     if not args.output_path:
-        output_dir = f"{args.output_file}_results/"
+        output_dir = f"{args.output_file}_results"
         os.makedirs(output_dir, exist_ok=True)
         output_path = output_dir
     else:
-        output_path = args.output_path + "/" if args.output_path[-1] != "/" else ""
+        output_path = args.output_path
 
     run_generate_protein_fasta(
         input_vcf=args.input_vcf,
         flanking_sequence_length=flanking_sequence_length,
-        output_file=output_path + args.output_file,
+        output_file=os.path.join(output_path, args.output_file),
         input_tsv=args.input_tsv,
         phased_proximal_variants_vcf=args.phased_proximal_variants_vcf,
         pass_only=args.pass_only,
@@ -133,8 +133,8 @@ def main(args_input = sys.argv[1:]):
         sample_name=args.sample_name
     )
 
-    file_path = f"{output_path}{args.output_file}"
-    file_prefix = f"{output_path}{args.output_file}_{args.sample_name}"
+    file_path = os.path.join(output_path, args.output_file)
+    file_prefix = os.path.join(output_path, f"{args.output_file}_{args.sample_name}")
 
     os.rename(file_path, f"{file_prefix}.fa")
     os.rename(f"{file_path}.manufacturability.tsv", f"{file_prefix}.manufacturability.tsv")
