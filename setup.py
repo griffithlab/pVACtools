@@ -106,6 +106,8 @@ setup(
         'packaging',
         'pyarrow',
         'polars==0.16.18',
+        'beautifulsoup4',
+        'XlsxWriter',
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,
