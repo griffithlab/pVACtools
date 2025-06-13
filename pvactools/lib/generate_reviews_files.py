@@ -50,7 +50,7 @@ def make_column_unique(df, column_name):
     return df
 
 
-def main(peptides_path, classI_path, classII_path, sample_name, output_file, output_path, all_epitopes_flag):
+def main(peptides_path, classI_path, classII_path, sample_name, all_epitopes_flag):
     # Creating the Peptides 51mer Sheet -----------------------------------
     peptides = pd.read_csv(peptides_path, sep="\t")
     peptides =  peptides.drop(['cterm_7mer_gravy_score', 'cysteine_count', 'n_terminal_asparagine', 'asparagine_proline_bond_count', 
@@ -128,7 +128,7 @@ def main(peptides_path, classI_path, classII_path, sample_name, output_file, out
                                   "Median MT IC50 Score":"Class II IC50 MT", "Median MT Percentile":"Class II %ile MT", 
                                   "Transcript":"Class II Best Transcript"}, inplace=True)
         
-        classI['position AA Change'] = classI['Index'].split('.')[5]
+        classI['position AA Change'] = classI['Index'].apply(lambda x: x.split('.')[5])
         classI['51mer ID'] = classI['Gene Name'] + '.' + classI['Class I Best Transcript'] + '.' + classI['position AA Change'] 
         class_sequences = pd.merge(classI[['Index', 'Best Peptide Class I', '51mer ID', 'Pos', 'AA Change', 'Class I Allele', "Class I IC50 MT", "Class I %ile MT", "Class I Best Transcript"]], 
                                    classII[['Index', 'Best Peptide Class II', 'Class II Allele', "Class II IC50 MT", "Class II %ile MT", "Class II Best Transcript"]], on='ID', how='left')
@@ -143,17 +143,23 @@ def main(peptides_path, classI_path, classII_path, sample_name, output_file, out
                                   "Best Transcript":"Class II Best Transcript"}, inplace=True)
     
         def rearrange_string(s):
-            match = re.match(r'([A-Za-z]+)([\d-]+)([A-Za-z]+)', s)
-            if match:
-                letters_before = match.group(1)
-                numbers = match.group(2)
-                letters_after = match.group(3)
-                    
+            # Handle insertions like -287-288L → 287-288-/L
+            insertion_match = re.match(r'-?(\d+-\d+)([A-Za-z]+)', s)
+            if insertion_match:
+                position = insertion_match.group(1)
+                inserted = insertion_match.group(2)
+                return f"{position}-/{inserted}"
+
+            # Handle substitutions like E510Q → 510E/Q
+            substitution_match = re.match(r'([A-Za-z]+)(\d+)([A-Za-z]+)', s)
+            if substitution_match:
+                letters_before = substitution_match.group(1)
+                numbers = substitution_match.group(2)
+                letters_after = substitution_match.group(3)
                 return f"{numbers}{letters_before}/{letters_after}"
-                    # Just use the postion for the key to avoid FS problem
-                #return f"{numbers}"
-            else:
-                return s
+
+            # Return unchanged if no pattern matched
+            return s
         
     
         classI['position AA Change'] = classI['AA Change'].apply(rearrange_string)
@@ -162,7 +168,6 @@ def main(peptides_path, classI_path, classII_path, sample_name, output_file, out
                                    classII[['ID', 'Best Peptide Class II', 'Class II Allele', "Class II IC50 MT", "Class II %ile MT", "Class II Best Transcript"]], on='ID', how='left')
         class_sequences = class_sequences.drop(columns=['ID'])
 
-    
     merged_peptide_51mer = pd.merge(peptides, class_sequences, on='51mer ID', how='left')
     
     merged_peptide_51mer['sorting id'] = merged_peptide_51mer['full ID'].apply(extract_info) # creating a ID to sort reviewed canidates by the order of the 51mer
