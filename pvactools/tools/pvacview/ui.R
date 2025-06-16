@@ -101,6 +101,8 @@ explore_tab <- tabItem(
                     uiOutput("percentile_threshold_strategy_ui"),
                     uiOutput("dna_cutoff_ui"),
                     uiOutput("allele_expr_ui"),
+                    uiOutput("transcript_prioritization_strategy_ui"),
+                    uiOutput("maximum_transcript_support_level_ui"),
                     h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
                     actionButton("submit", "Recalculate Tiering with new parameters"),
                     style = "overflow-x: scroll;font-size:100%"),
