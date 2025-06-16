@@ -53,10 +53,14 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/iedb_allele
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
+for dirpath, dirnames, filenames in os.walk("pvactools/supporting_files"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
 
 setup(
     name="pvactools",
-    version="5.4.0",
+    version="5.4.1",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",
