@@ -199,7 +199,7 @@ server <- shinyServer(function(input, output, session) {
      ## Class I demo aggregate report
      #session$sendCustomMessage("unbind-DT", "mainTable")
      withProgress(message = "Loading Demo Data", value = 0, {
-       load(url("https://github.com/griffithlab/pVACtools/raw/834cc9514dc215a3a9595cddcff05090a1b7605c/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
+       load(url("https://github.com/griffithlab/pVACtools/raw/830279cfa4f7f08e5e271d785f9294345b93e18a/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
        incProgress(0.3)
        #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
        #mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
@@ -222,8 +222,8 @@ server <- shinyServer(function(input, output, session) {
        #df$metricsData <- fromJSON(txt = metricsdata)
        df$metricsData <- metricsData
        df$binding_threshold <- df$metricsData$`binding_threshold`
-       df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
        df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
+       df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
        df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
        df$percentile_threshold <- df$metricsData$`percentile_threshold`
        df$percentile_threshold_strategy <- df$metricsData$`percentile_threshold_strategy`
@@ -232,6 +232,7 @@ server <- shinyServer(function(input, output, session) {
        df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
        df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
        df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
+       df$maximum_transcript_support_level <- df$metricsData$maximum_transcript_support_level
        df$transcript_prioritization_strategy <- df$metricsData$`transcript_prioritization_strategy`
        hla <- df$metricsData$alleles
        incProgress(0.1)
@@ -256,15 +257,10 @@ server <- shinyServer(function(input, output, session) {
        }
        df$mainTable <- df$mainTable[, columns_needed]
        df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
-       if ("Comments" %in% colnames(df$mainTable)) {
-         df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
-       }else {
-         df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
-       }
        rownames(df$comments) <- df$mainTable$ID
        incProgress(0.2)
        ## Class II additional demo aggregate report
-       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/834cc9514dc215a3a9595cddcff05090a1b7605c/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/830279cfa4f7f08e5e271d785f9294345b93e18a/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
        addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(addData) <- addData[1, ]
        addData <- addData[-1, ]
@@ -272,17 +268,13 @@ server <- shinyServer(function(input, output, session) {
        df$additionalData <- addData
        incProgress(0.1)
        ## Hotspot gene list autoload
-       gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
+       gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/830279cfa4f7f08e5e271d785f9294345b93e18a/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
        gene_list <- read.table(text = gene_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        df$gene_list <- gene_list
-       df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+
+       #Helper columns for cell formatting
        df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
        df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
-       df$mainTable$`Col RNA Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Expr"]), 0, x["RNA Expr"])})
-       df$mainTable$`Col RNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA VAF"]), 0, x["RNA VAF"])})
-       df$mainTable$`Col Allele Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["Allele Expr"]), 0, x["Allele Expr"])})
-       df$mainTable$`Col RNA Depth` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Depth"]), 0, x["RNA Depth"])})
-       df$mainTable$`Col DNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["DNA VAF"]), 0, x["DNA VAF"])})
        df$mainTable$`Col RNA Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Expr"]), 0, x["RNA Expr"])})
        df$mainTable$`Col RNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA VAF"]), 0, x["RNA VAF"])})
        df$mainTable$`Col Allele Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["Allele Expr"]), 0, x["Allele Expr"])})
@@ -300,6 +292,7 @@ server <- shinyServer(function(input, output, session) {
        df$mainTable$`TSL Fail` <- apply(df$mainTable, 1, function(x) {'tsl' %in% df$transcript_prioritization_strategy && !is_tsl_pass(x["TSL"], as.numeric(df$maximum_transcript_support_level))})
        df$mainTable$`MANE Select Fail` <- apply(df$mainTable, 1, function(x) {'mane_select' %in% df$transcript_prioritization_strategy && !is_mane_select_pass(x["MANE Select"])})
        df$mainTable$`Canonical Fail` <- apply(df$mainTable, 1, function(x) {'canonical' %in% df$transcript_prioritization_strategy && !is_canonical_pass(x["Canonical"])})
+       df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
        df$lastSelectedRow <- 1
       updateTabItems(session, "tabs", "explore")
       incProgress(0.1)
