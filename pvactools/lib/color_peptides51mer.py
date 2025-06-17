@@ -136,14 +136,34 @@ def generate_formatted_excel(peptides_df, output_path, output_file, sample_name)
     file_path = os.path.join(output_path, file_name)
     workbook = xlsxwriter.Workbook(file_path)
     worksheet = workbook.add_worksheet()
+    format_cache = {}
 
-    bold_fmt = workbook.add_format({"bold": True})
-    red_fmt = workbook.add_format({"font_color": "red"})
-    bold_red_fmt = workbook.add_format({"bold": True, "font_color": "red"})
-    red_underline_fmt = workbook.add_format({"font_color": "red", "underline": True})
-    bold_red_underline_fmt = workbook.add_format(
-        {"bold": True, "font_color": "red", "underline": True}
-    )
+    def get_format(aa):
+        fmt_key = (
+            aa.bold,
+            aa.color,
+            aa.underline,
+            aa.large,
+        )
+        if fmt_key in format_cache:
+            return format_cache[fmt_key]
+
+        fmt_props = {}
+        if aa.bold:
+            fmt_props["bold"] = True
+        if aa.color:
+            fmt_props["font_color"] = "red"
+        if aa.underline:
+            fmt_props["underline"] = True
+        if aa.large:
+            fmt_props["font_size"] = 14
+
+        if fmt_props:
+            cell_format = workbook.add_format(fmt_props)
+            format_cache[fmt_key] = cell_format
+            return cell_format
+        else:
+            return None
 
     visible_columns = [col for col in peptides_df.columns if col != "Stylized Sequence"]
     for col, header in enumerate(visible_columns):
@@ -159,18 +179,7 @@ def generate_formatted_excel(peptides_df, output_path, output_file, sample_name)
                 peptide_sequence = row["Stylized Sequence"]
                 segments = []
                 for aa in peptide_sequence:
-                    fmt = None
-                    if aa.bold and aa.color and aa.underline:
-                        fmt = bold_red_underline_fmt
-                    elif aa.color and aa.underline:
-                        fmt = red_underline_fmt
-                    elif aa.bold and aa.color:
-                        fmt = bold_red_fmt
-                    elif aa.bold:
-                        fmt = bold_fmt
-                    elif aa.color:
-                        fmt = red_fmt
-
+                    fmt = get_format(aa)
                     if fmt:
                         segments.extend([fmt, aa.nucleotide])
                     else:
