@@ -47,7 +47,7 @@ class AnchorResiduePass:
 
     def get_anchor_positions(self, hla_allele, epitope_length):
         if self.use_allele_specific_anchors and epitope_length in self.anchor_probabilities and hla_allele in self.anchor_probabilities[epitope_length]:
-            probs = selfanchor_probabilities[epitope_length][hla_allele]
+            probs = self.anchor_probabilities[epitope_length][hla_allele]
             positions = []
             total_prob = 0
             for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):

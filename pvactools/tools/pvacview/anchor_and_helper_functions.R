@@ -430,7 +430,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   if (binding_pass && lowexpr && vaf_clonal_pass && transcript_pass && anchor_residue_pass && refmatch_pass && probaa_pass) {
     return("LowExpr")
   }
-  if (!is.na(allele_expr) && ((gene_expr == 0) || (rna_vaf == 0)) && !lowexpr) {
+  if (((!is.na(gene_expr) && (gene_expr == 0)) || (!is.na(rna_vaf) && rna_vaf == 0)) && !lowexpr) {
     return("NoExpr")
   }
   return("Poor")
