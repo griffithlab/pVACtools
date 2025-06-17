@@ -1,387 +1,261 @@
 import pandas as pd
-from bs4 import BeautifulSoup
 import os
-import tempfile
 import xlsxwriter
 
-class AminoAcid:
 
-    def __init__(self, nucleotide, bold, color, underline, large, position, open_tag, close_tag):
+class AminoAcid:
+    def __init__(self, nucleotide, bold, color, underline, large, position):
         self.nucleotide = nucleotide
         self.bold = bold
         self.color = color
         self.underline = underline
         self.large = large
-        self.position = position 
-        self.open_tag = open_tag
-        self.close_tag = close_tag
+        self.position = position
 
     def view(self):
         print("Nucleotide: ", self.nucleotide)
-        print("Open Tag: ", self.open_tag)
-        print("Close Tag: ", self.close_tag)
         print("Bold: ", self.bold)
-        print("Color: ",self.color)
+        print("Color: ", self.color)
         print("Underline: ", self.underline)
         print("Large: ", self.large)
 
 
-def annotate_every_nucleotide(sequence, classI_peptide, classII_peptide, 
-                              classI_ic50, classI_percentile, classII_ic50, classII_percentile, 
-                              classI_transcript, classII_transcript, 
-                              cIIC50_threshold, cIpercentile_threshold, cIIIC50_threshold, cIIpercent_threshold, probPos):
+def annotate_every_nucleotide(
+    sequence,
+    classI_peptide,
+    classII_peptide,
+    classI_ic50,
+    classI_percentile,
+    classII_ic50,
+    classII_percentile,
+    classI_transcript,
+    classII_transcript,
+    cIIC50_threshold,
+    cIpercentile_threshold,
+    cIIIC50_threshold,
+    cIIpercent_threshold,
+    probPos,
+):
 
-    peptide_sequence = [] # Create a list to hold all AA of the 51mer
+    peptide_sequence = []
 
-    # Make the sequence a list of AminoAcid objects
     for i in range(len(sequence)):
-        new_AA = AminoAcid(sequence[i], False, False, False, False, -1, False, False)
-        
-        if len(probPos) > 0 and sequence[i] in probPos:
-            new_AA.large = True
-        
+        large = sequence[i] in probPos if probPos else False
+        new_AA = AminoAcid(sequence[i], False, False, False, large, -1)
         peptide_sequence.append(new_AA)
 
-    # CLASS I
-    positions = []
-    # Get the positions in the peptide_sequence where the classI is located
-    for i in range(len(peptide_sequence)):
-        for j in range(len(classI_peptide)):
-            if peptide_sequence[i].nucleotide == classI_peptide[j]:
-                positions.append(i)
-                i+=1
-            else:
-                break
+    sequence_str = "".join(aa.nucleotide for aa in peptide_sequence)
+    start_index = sequence_str.find(classI_peptide)
 
-        if len(positions) == len(classI_peptide):
-            break
-        else:
-            positions = []
-            
-    # set those positions to red
-    # if median affinity < 1000 nm OR percentile < 2%
-    j = 0
-    if float(classI_ic50) < cIIC50_threshold or float(classI_percentile) < cIpercentile_threshold:
-        for i in range(len(peptide_sequence)):
-            if j < len(positions) and i == positions[j]:
-                peptide_sequence[i].color = True
-                j+=1
+    if start_index != -1:
+        positions = list(range(start_index, start_index + len(classI_peptide)))
+    else:
+        positions = []
+
+    if (
+        float(classI_ic50) < cIIC50_threshold
+        or float(classI_percentile) < cIpercentile_threshold
+    ):
+        for position in positions:
+            peptide_sequence[position].color = True
 
     if classI_transcript == classII_transcript:
-        # CLASS II         
-        positions = []
-        for i in range(len(peptide_sequence)):
-            for j in range(len(classII_peptide)):
-                if peptide_sequence[i].nucleotide == classII_peptide[j]:
-                    positions.append(i)
-                    i+=1
-                else:
-                    break
-
-            if len(positions) == len(classII_peptide):
-                break
-            else:
-                positions = []
-        # Set class II to bold
-        # if percentile < 2% 
-        j = 0
-        if float(classII_percentile) < cIIpercent_threshold or float(classII_ic50) < cIIIC50_threshold:
-            for i in range(len(peptide_sequence)):
-                if j < len(positions) and i == positions[j]:
-                    peptide_sequence[i].bold = True
-                    j+=1
+        start_index = sequence_str.find(classII_peptide)
+        if start_index != -1:
+            positions = list(range(start_index, start_index + len(classII_peptide)))
+        else:
+            positions = []
+        if (
+            float(classII_percentile) < cIIpercent_threshold
+            or float(classII_ic50) < cIIIC50_threshold
+        ):
+            for position in positions:
+                peptide_sequence[position].bold = True
     else:
-        print("Note: ClassII transcript different then ClassI. ClassII peptide not bolded.")
-    
+        print(
+            "Note: ClassII transcript different than ClassI. ClassII peptide not bolded."
+        )
 
-    return(peptide_sequence)
+    return peptide_sequence
 
 
-def set_underline(peptide_sequence, mutant_peptide_pos, row_ID):
-
+def set_underline(peptide_sequence, mutant_peptide_pos, full_row_ID):
     frameshift = False
     classI_position = 0
 
-    # Determine if frameshift mutation by seraching for = '-'
-    if ',' in mutant_peptide_pos:
-        positions = mutant_peptide_pos.split(",")
-        start_position = int(positions[0])
-        end_position = int(positions[1])
+    if ".FS." in full_row_ID:
         frameshift = True
-    elif '-' in mutant_peptide_pos: # to account for older versions of pvacseq
-        positions = mutant_peptide_pos.split("-")
-        start_position = int(positions[0])
-        end_position = int(positions[1])
-        frameshift = True
-    elif mutant_peptide_pos == 'nan': 
+    elif mutant_peptide_pos == "nan":
         return
     else:
         mutant_peptide_pos = int(float(mutant_peptide_pos))
 
     if frameshift:
-        continue_underline = False
-        
-        for i in range(len(peptide_sequence)):
-
+        # Find last mutated (colored) position
+        last_mut_idx = -1
+        for i in reversed(range(len(peptide_sequence))):
             if peptide_sequence[i].color:
-                classI_position += 1
-            else:
-                 classI_position = 0
-                 continue_underline = False
+                last_mut_idx = i
+                break
 
-            if classI_position == start_position:
+        if last_mut_idx == -1:
+            # No colored residues, nothing to underline
+            pass
+        else:
+            # Walk backward to find contiguous colored positions
+            start_idx = last_mut_idx
+            for i in reversed(range(0, last_mut_idx)):
+                if peptide_sequence[i].color:
+                    start_idx = i
+                else:
+                    break  # stop at first non-colored amino acid
+
+            # Walk forward to find contiguous colored positions
+            end_idx = last_mut_idx
+            for i in range(last_mut_idx + 1, len(peptide_sequence)):
+                if peptide_sequence[i].color:
+                    end_idx = i
+                else:
+                    break  # stop at first non-colored amino acid
+
+            # Underline the identified range
+            for i in range(start_idx, end_idx + 1):
                 peptide_sequence[i].underline = True
-                continue_underline = True
-            elif continue_underline:
-                peptide_sequence[i].underline = True
-            elif classI_position == end_position:
-                peptide_sequence[i].underline = True
-                continue_underline = False
-            i+=1
     else:
         for i in range(len(peptide_sequence)):
-
             if peptide_sequence[i].color:
                 classI_position += 1
             else:
-                 classI_position = 0
-
+                classI_position = 0
             if classI_position == int(mutant_peptide_pos):
                 peptide_sequence[i].underline = True
-            i+=1
-
- 
-def set_span_tags(peptide_sequence):
-
-    currently_bold = False
-    currently_red = False
-    currently_underlined = False
-    currently_large = False
-    inside_span = False
-
-    for nucleotide in peptide_sequence:
-
-        if currently_bold != nucleotide.bold or currently_red != nucleotide.color or currently_underlined != nucleotide.underline or currently_large != nucleotide.large:
-            
-            nucleotide.open_tag = True
-
-            if inside_span:
-                nucleotide.close_tag = True # only if its inside a span tag
-            else:
-                nucleotide.close_tag = False
 
 
-            currently_bold = nucleotide.bold 
-            currently_red = nucleotide.color
-            currently_underlined = nucleotide.underline
-            currently_large = nucleotide.large
-
-            inside_span = True
-        
-    return(peptide_sequence)
-
-
-def create_stylized_sequence(peptide_sequence):
-
-    new_string = ''
-
-    for nucleotide in peptide_sequence:
-
-        if nucleotide.open_tag or nucleotide.close_tag:
-            if nucleotide.close_tag:
-                new_string += '</span>'
-                
-            if nucleotide.open_tag:
-                new_string += '<span style="'
-                if nucleotide.bold:
-                    new_string += 'font-weight:bold;'
-                if nucleotide.color:
-                    new_string += 'color:#ff0000;'
-                if nucleotide.underline:
-                    new_string += 'text-decoration:underline;'
-                if nucleotide.large:
-                     new_string += 'font-size:105%;'
-                new_string += '">'
-                new_string += nucleotide.nucleotide
-        else:
-            new_string += nucleotide.nucleotide
-    return(new_string)
-
-
-def generate_excel_results(output_path, output_file, sample_name, html_file):
-    with open(html_file, "r") as f:
-        html_content = f.read()
-
-    soup = BeautifulSoup(html_content, "html.parser")
-    table = soup.find("table")
-
+def generate_formatted_excel(peptides_df, output_path, output_file, sample_name):
     file_name = f"{output_file}_{sample_name}.Colored_Peptides.xlsx"
     file_path = os.path.join(output_path, file_name)
     workbook = xlsxwriter.Workbook(file_path)
     worksheet = workbook.add_worksheet()
 
-    bold_fmt = workbook.add_format({'bold': True})
-    red_fmt = workbook.add_format({'font_color': 'red'})
-    bold_red_fmt = workbook.add_format({'bold': True, 'font_color': 'red'})
-    red_underline_fmt = workbook.add_format({'font_color': 'red', 'underline': True})
-    bold_red_underline_fmt = workbook.add_format({'bold': True, 'font_color': 'red', 'underline': True})
+    bold_fmt = workbook.add_format({"bold": True})
+    red_fmt = workbook.add_format({"font_color": "red"})
+    bold_red_fmt = workbook.add_format({"bold": True, "font_color": "red"})
+    red_underline_fmt = workbook.add_format({"font_color": "red", "underline": True})
+    bold_red_underline_fmt = workbook.add_format(
+        {"bold": True, "font_color": "red", "underline": True}
+    )
 
-    headers = [th.get_text(strip=True) for th in table.find_all("th")]
-    for col, header in enumerate(headers):
+    visible_columns = [col for col in peptides_df.columns if col != "Stylized Sequence"]
+    for col, header in enumerate(visible_columns):
         worksheet.write(0, col, header)
 
-    def parse_rich_segments(cell):
-        segments = []
-        for part in cell.contents:
-            if isinstance(part, str):
-                text = part.strip()
-                if text:
-                    segments.append(text)
-            elif part.name == "span":
-                text = part.get_text()
-                style = part.get("style", "")
-                fmt = None
-                if "bold" in style and "color:#ff0000" in style and "underline" in style:
-                    fmt = bold_red_underline_fmt
-                elif "color:#ff0000" in style and "underline" in style:
-                    fmt = red_underline_fmt
-                elif "bold" in style and "color:#ff0000" in style:
-                    fmt = bold_red_fmt
-                elif "bold" in style:
-                    fmt = bold_fmt
-                elif "color:#ff0000" in style:
-                    fmt = red_fmt
-                if fmt:
-                    segments.extend([fmt, text])
-                else:
-                    segments.append(text)
+    for row_idx, row in peptides_df.iterrows():
+        for col_idx, header in enumerate(visible_columns):
+            value = row[header]
+            if (
+                header
+                == "CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES"
+            ):
+                peptide_sequence = row["Stylized Sequence"]
+                segments = []
+                for aa in peptide_sequence:
+                    fmt = None
+                    if aa.bold and aa.color and aa.underline:
+                        fmt = bold_red_underline_fmt
+                    elif aa.color and aa.underline:
+                        fmt = red_underline_fmt
+                    elif aa.bold and aa.color:
+                        fmt = bold_red_fmt
+                    elif aa.bold:
+                        fmt = bold_fmt
+                    elif aa.color:
+                        fmt = red_fmt
 
-        # Ensure first element is a string for write_rich_string
-        if segments and not isinstance(segments[0], str):
-            segments.insert(0, "")
+                    if fmt:
+                        segments.extend([fmt, aa.nucleotide])
+                    else:
+                        segments.append(aa.nucleotide)
 
-        return segments
+                if segments and not isinstance(segments[0], str):
+                    segments.insert(0, "")
 
-    for row_idx, tr in enumerate(table.find_all("tr")[1:], start=1):
-        for col_idx, td in enumerate(tr.find_all("td")):
-            if col_idx == 2:  # Special formatting column
-                segments = parse_rich_segments(td)
-                if any(isinstance(seg, xlsxwriter.format.Format) for seg in segments):
-                    worksheet.write_rich_string(row_idx, col_idx, *segments)
-                else:
-                    worksheet.write(row_idx, col_idx, "".join(segments))
+                worksheet.write_rich_string(row_idx + 1, col_idx, *segments)
             else:
-                worksheet.write(row_idx, col_idx, td.get_text(strip=True))
+                worksheet.write(row_idx + 1, col_idx, value)
 
     workbook.close()
 
 
-def main(peptides_path, sample_name, classI_ic50_score_max, classI_ic50_percentile_max, 
-         classII_ic50_score_max, classII_ic50_percentile_max, problematic_position, output_file, output_path):
-    # read in classI and class II
-    peptides_51mer = pd.read_excel(peptides_path)
- 
-    # Fill in the Restricting HLA Allele Column
-    for index, row in peptides_51mer.iterrows():
-        restricting_alleles = ''
-        if (float(row['Class I IC50 MT']) < classI_ic50_score_max or float(row['Class I %ile MT']) <  classI_ic50_percentile_max):
-            restricting_alleles = row['Class I Allele']
-        
-        if (float(row['Class I IC50 MT']) < classII_ic50_score_max or float(row['Class I %ile MT']) <  classII_ic50_percentile_max):
-            
-            if restricting_alleles != '':
-                restricting_alleles = restricting_alleles + '/' + row['Class II Allele']
+def main(
+    peptides_path,
+    sample_name,
+    classI_ic50_score_max,
+    classI_ic50_percentile_max,
+    classII_ic50_score_max,
+    classII_ic50_percentile_max,
+    problematic_position,
+    output_file,
+    output_path,
+):
+
+    peptides_df = pd.read_excel(peptides_path)
+    peptides_df["RESTRICTING HLA ALLELE"] = ""
+    peptides_df["Stylized Sequence"] = pd.Series(
+        [[] for _ in range(len(peptides_df))], dtype=object
+    )
+
+    for index, row in peptides_df.iterrows():
+        restricting_alleles = ""
+        if (
+            float(row["Class I IC50 MT"]) < classI_ic50_score_max
+            or float(row["Class I %ile MT"]) < classI_ic50_percentile_max
+        ):
+            restricting_alleles = row["Class I Allele"]
+        if (
+            float(row["Class II IC50 MT"]) < classII_ic50_score_max
+            or float(row["Class II %ile MT"]) < classII_ic50_percentile_max
+        ):
+            if restricting_alleles:
+                restricting_alleles += "/" + row["Class II Allele"]
             else:
-                 restricting_alleles =  row['Class II Allele']
-        
-        peptides_51mer.at[index, 'RESTRICTING HLA ALLELE'] = restricting_alleles
-                
+                restricting_alleles = row["Class II Allele"]
 
-    # convert peptide 51mer to HTML
-    peptides_51mer_html = peptides_51mer.to_html(index=False) # convert to html
+        peptides_df.at[index, "RESTRICTING HLA ALLELE"] = restricting_alleles
 
-    # Creating a BeautifulSoup object and specifying the parser
-    peptides_51mer_soup = BeautifulSoup(peptides_51mer_html, 'html.parser')
+        sequence = row[
+            "CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES"
+        ]
+        classI_peptide = row["Best Peptide Class I"]
+        classI_ic50 = row["Class I IC50 MT"]
+        classI_percentile = row["Class I %ile MT"]
+        classI_transcript = row["Class I Best Transcript"]
+        classII_peptide = row["Best Peptide Class II"]
+        classII_ic50 = row["Class II IC50 MT"]
+        classII_percentile = row["Class II %ile MT"]
+        classII_transcript = row["Class II Best Transcript"]
+        mutant_peptide_pos = str(row["Pos"])
 
-    for index, row in peptides_51mer.iterrows():
-        search_string = row['51mer ID']
+        peptide_sequence = annotate_every_nucleotide(
+            sequence,
+            classI_peptide,
+            classII_peptide,
+            classI_ic50,
+            classI_percentile,
+            classII_ic50,
+            classII_percentile,
+            classI_transcript,
+            classII_transcript,
+            classI_ic50_score_max,
+            classI_ic50_percentile_max,
+            classII_ic50_score_max,
+            classII_ic50_percentile_max,
+            problematic_position,
+        )
 
-        # classII sequence 
-        classII_peptide = peptides_51mer.loc[peptides_51mer['51mer ID'] == search_string, 'Best Peptide Class II'].values[0]
-        # classI sequence 
-        classI_peptide = peptides_51mer.loc[peptides_51mer['51mer ID'] == search_string, 'Best Peptide Class I'].values[0]
-        # mutant peptide position
-        mutant_peptide_pos = str(peptides_51mer.loc[peptides_51mer['51mer ID'] == search_string, 'Pos'].values[0])
-        # classI IC50
-        classI_ic50 = peptides_51mer.loc[peptides_51mer['51mer ID'] == search_string, 'Class I IC50 MT'].values[0]
-        # classI percentile
-        classI_percentile = peptides_51mer.loc[peptides_51mer['51mer ID'] == search_string, 'Class I %ile MT'].values[0]
-        # classII IC50
-        classII_ic50 = peptides_51mer.loc[peptides_51mer['51mer ID'] == search_string, 'Class II IC50 MT'].values[0]
-        # classII percentile
-        classII_percentile = peptides_51mer.loc[peptides_51mer['51mer ID'] == search_string, 'Class II %ile MT'].values[0]
-        # classI transcript
-        classI_transcript = peptides_51mer.loc[peptides_51mer['51mer ID'] == search_string, 'Class I Best Transcript'].values[0]
-        # classI transcript
-        classII_transcript = peptides_51mer.loc[peptides_51mer['51mer ID'] == search_string, 'Class II Best Transcript'].values[0]
+        set_underline(peptide_sequence, mutant_peptide_pos, row["full ID"])
+        peptides_df.at[index, "Stylized Sequence"] = peptide_sequence
 
-
-        # Find the tag containing the search string
-        tag_with_search_string = peptides_51mer_soup.find('td', string=search_string)
-
-        if tag_with_search_string and isinstance(classII_peptide, str):
-
-            # Find the parent <tr> tag of the tag containing the search string
-            parent_tr = tag_with_search_string.find_parent('tr')    
-            # Find the next two <td> tags
-            next_td_tags = parent_tr.findChildren('td', limit=3)
-            
-            sequence = next_td_tags[2].get_text()
-
-            # make sequence the list of objects
-            peptide_sequence = annotate_every_nucleotide(sequence, classI_peptide, classII_peptide, 
-                                                         classI_ic50, classI_percentile, classII_ic50, classII_percentile,
-                                                         classI_transcript, classII_transcript,
-                                                         classI_ic50_score_max, classI_ic50_percentile_max,
-                                                         classII_ic50_score_max, classII_ic50_percentile_max, problematic_position)
-
-            # actually lets break class I and classII into two steps and handle the mutated nucleotide in class I function
-            # it should be basically like at that position in the class I set 
-            
-            set_underline(peptide_sequence, mutant_peptide_pos, row['51mer ID'])
-
-            set_span_tags(peptide_sequence) # pass by reference
-            
-            print(row['51mer ID'])
-            new_string = create_stylized_sequence(peptide_sequence)
-
-            next_td_tags[2].string = new_string
-
-            # Remove the tag_with_search_string from the BeautifulSoup tree
-            tag_with_search_string.decompose()
-
-
-        else:
-            print("\nNOT FOUND: ", search_string)
-            print("Mutant Peptide Position: ", mutant_peptide_pos)
-            print("ClassI: ", classI_peptide)
-            print("ClassII: ", classII_peptide, "\n")
-
-
-        tag_with_search_string = peptides_51mer_soup.select_one('th:-soup-contains("51mer ID")')
-        if tag_with_search_string:
-            tag_with_search_string.decompose()
-        # Now 'soup' contains the modified HTML with the tag removed
-        modified_html = peptides_51mer_soup.prettify(formatter=None)
-
-        print()
-
-    with tempfile.NamedTemporaryFile(suffix=".Colored_Peptides.html", delete=False, mode="w", encoding="utf-8") as tmp_html:
-        tmp_html.write(modified_html)
-        html_file_name = tmp_html.name
-
-    generate_excel_results(output_path, output_file, sample_name, html_file_name)
-    os.remove(html_file_name)
+    generate_formatted_excel(peptides_df, output_path, output_file, sample_name)
 
 
 if __name__ == "__main__":
