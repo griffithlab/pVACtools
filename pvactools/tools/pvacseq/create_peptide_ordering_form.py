@@ -145,8 +145,6 @@ def main(args_input = sys.argv[1:]):
         classI_path=args.classI_tsv,
         classII_path=args.classII_tsv,
         sample_name=args.sample_name,
-        output_file=args.output_file,
-        output_path=output_path,
         all_epitopes_flag=args.all_epitopes
     )
 
