@@ -3,6 +3,8 @@ import os
 import sys
 import tempfile
 from subprocess import call
+from subprocess import run as subprocess_run
+from subprocess import PIPE
 from filecmp import cmp
 import pandas as pd
 import py_compile
@@ -63,6 +65,21 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.tmpdir.cleanup()
+
+    def test_command(self):
+        pvac_script_path = os.path.join(
+            self.executable_dir,
+            "main.py"
+            )
+        usage_search = re.compile(r"usage: ")
+        result = subprocess_run([
+            sys.executable,
+            pvac_script_path,
+            'create_peptide_ordering_form',
+            '-h'
+        ], shell=False, stdout=PIPE)
+        self.assertFalse(result.returncode, "Failed `pvacseq create_peptide_ordering_form -h`")
+        self.assertRegex(result.stdout.decode(), usage_search)
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
