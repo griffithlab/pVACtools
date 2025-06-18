@@ -1,0 +1,432 @@
+Executing MHC Class I predictions
+Converting .vcf to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Converting VCF to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Generating Variant Peptide FASTA and Key File
+Completed
+Parsing the Variant Peptide FASTA and Key File
+Completed
+Calculating Manufacturability Metrics
+Completed
+Splitting TSV into smaller chunks
+Splitting TSV into smaller chunks - Entries 1-24
+Completed
+Generating Variant Peptide FASTA and Key Files
+Generating Variant Peptide FASTA and Key Files - Epitope Length 9 - Entries 1-48
+Generating Variant Peptide FASTA and Key Files - Epitope Length 10 - Entries 1-48
+Completed
+Allele HLA-G*01:09 not valid for Method NetMHC. Skipping.
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 9 with Method NetMHC - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.ann.HLA-E*01:01.9.tsv_1-48
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 9 with Method NetMHC - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.ann.HLA-E*01:01.9.tsv_1-48 - Completed
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 9 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.pickpocket.HLA-E*01:01.9.tsv_1-48
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 9 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.pickpocket.HLA-E*01:01.9.tsv_1-48 - Completed
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 10 with Method NetMHC - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.ann.HLA-E*01:01.10.tsv_1-48
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 10 with Method NetMHC - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.ann.HLA-E*01:01.10.tsv_1-48 - Completed
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 10 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.pickpocket.HLA-E*01:01.10.tsv_1-48
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 10 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.pickpocket.HLA-E*01:01.10.tsv_1-48 - Completed
+Making binding predictions on Allele HLA-G*01:09 and Epitope Length 9 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.pickpocket.HLA-G*01:09.9.tsv_1-48
+Making binding predictions on Allele HLA-G*01:09 and Epitope Length 9 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.pickpocket.HLA-G*01:09.9.tsv_1-48 - Completed
+Making binding predictions on Allele HLA-G*01:09 and Epitope Length 10 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.pickpocket.HLA-G*01:09.10.tsv_1-48
+Making binding predictions on Allele HLA-G*01:09 and Epitope Length 10 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/tmp/Test.pickpocket.HLA-G*01:09.10.tsv_1-48 - Completed
+Parsing prediction file for Allele HLA-E*01:01 and Epitope Length 9 - Entries 1-48
+Parsing prediction file for Allele HLA-E*01:01 and Epitope Length 9 - Entries 1-48 - Completed
+Parsing prediction file for Allele HLA-E*01:01 and Epitope Length 10 - Entries 1-48
+Parsing prediction file for Allele HLA-E*01:01 and Epitope Length 10 - Entries 1-48 - Completed
+Parsing prediction file for Allele HLA-G*01:09 and Epitope Length 9 - Entries 1-48
+Parsing prediction file for Allele HLA-G*01:09 and Epitope Length 9 - Entries 1-48 - Completed
+Parsing prediction file for Allele HLA-G*01:09 and Epitope Length 10 - Entries 1-48
+Parsing prediction file for Allele HLA-G*01:09 and Epitope Length 10 - Entries 1-48 - Completed
+Combining Parsed Prediction Files
+Combined Parsed: Test.all_epitopes.tsv
+Combined Path: /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/MHC_I.Test.all_epitopes.tsv
+Completed
+Combined Parsed: Test.all_epitopes.tsv
+Combined Path: /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/MHC_I.Test.all_epitopes.tsv
+Output_str: Test.filtered.tsv
+Identifying peptides with problematic amino acids
+Completed
+Marking genes of interest
+Completed
+Creating aggregated report
+Tumor clonal VAF estimated as 0.5 (estimated from Tumor DNA VAF data). Assuming variants with VAF < 0.25 are subclonal
+Completed
+Calculating Manufacturability Metrics
+Completed
+Running Binding Filters
+Completed
+Running Coverage Filters
+Completed
+Running Transcript Support Level Filter
+Complete
+Running Top Score Filter
+Completed
+
+Done: Pipeline finished successfully. File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpqqyt0l0l/MHC_Class_I/Test.filtered.tsv contains list of filtered putative neoantigens.
+
+No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.
+Executing MHC Class I predictions
+Converting .vcf to TSV
+TSV file already exists. Skipping.
+Converting VCF to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Generating Variant Peptide FASTA and Key File
+Completed
+Parsing the Variant Peptide FASTA and Key File
+Completed
+Calculating Manufacturability Metrics
+Completed
+Splitting TSV into smaller chunks
+Splitting TSV into smaller chunks - Entries 1-24
+Split TSV file for Entries 1-24 already exists. Skipping.
+Completed
+Generating Variant Peptide FASTA and Key Files
+Split FASTA file for Epitope Length 9 - Entries 1-48 already exists. Skipping.
+Split FASTA file for Epitope Length 10 - Entries 1-48 already exists. Skipping.
+Completed
+Prediction file for Allele HLA-E*01:01 and Epitope Length 9 with Method NetMHC (Entries 1-48) already exists. Skipping.
+Prediction file for Allele HLA-E*01:01 and Epitope Length 9 with Method PickPocket (Entries 1-48) already exists. Skipping.
+Prediction file for Allele HLA-E*01:01 and Epitope Length 10 with Method NetMHC (Entries 1-48) already exists. Skipping.
+Prediction file for Allele HLA-E*01:01 and Epitope Length 10 with Method PickPocket (Entries 1-48) already exists. Skipping.
+Allele HLA-G*01:09 not valid for Method NetMHC. Skipping.
+Prediction file for Allele HLA-G*01:09 and Epitope Length 9 with Method PickPocket (Entries 1-48) already exists. Skipping.
+Prediction file for Allele HLA-G*01:09 and Epitope Length 10 with Method PickPocket (Entries 1-48) already exists. Skipping.
+Parsed Output File for Allele HLA-E*01:01 and Epitope Length 9 (Entries 1-48) already exists. Skipping
+Parsed Output File for Allele HLA-E*01:01 and Epitope Length 10 (Entries 1-48) already exists. Skipping
+Parsed Output File for Allele HLA-G*01:09 and Epitope Length 9 (Entries 1-48) already exists. Skipping
+Parsed Output File for Allele HLA-G*01:09 and Epitope Length 10 (Entries 1-48) already exists. Skipping
+Combining Parsed Prediction Files
+Combined Parsed: Test.all_epitopes.tsv
+Combined Path: /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpkijxlh_k/MHC_Class_I/MHC_I.Test.all_epitopes.tsv
+Completed
+Combined Parsed: Test.all_epitopes.tsv
+Combined Path: /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpkijxlh_k/MHC_Class_I/MHC_I.Test.all_epitopes.tsv
+Output_str: Test.filtered.tsv
+Marking genes of interest
+Completed
+Creating aggregated report
+Tumor clonal VAF estimated as 0.5 (estimated from Tumor DNA VAF data). Assuming variants with VAF < 0.25 are subclonal
+Completed
+Calculating Manufacturability Metrics
+Completed
+Running Binding Filters
+Completed
+Running Coverage Filters
+Completed
+Running Transcript Support Level Filter
+Complete
+Running Top Score Filter
+Completed
+
+Done: Pipeline finished successfully. File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpkijxlh_k/MHC_Class_I/Test.filtered.tsv contains list of filtered putative neoantigens.
+
+Executing MHC Class II predictions
+Converting .vcf to TSV
+TSV file already exists. Skipping.
+Converting VCF to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Generating Variant Peptide FASTA and Key File
+Completed
+Parsing the Variant Peptide FASTA and Key File
+Completed
+Calculating Manufacturability Metrics
+Completed
+Splitting TSV into smaller chunks
+Splitting TSV into smaller chunks - Entries 1-24
+Split TSV file for Entries 1-24 already exists. Skipping.
+Completed
+Generating Variant Peptide FASTA and Key Files
+Split FASTA file for Epitope Length 15 - Entries 1-48 already exists. Skipping.
+Completed
+Prediction file for Allele DRB1*11:01 and Epitope Length 15 with Method NNalign (Entries 1-48) already exists. Skipping.
+Parsed Output File for Allele DRB1*11:01 and Epitope Length 15 (Entries 1-48) already exists. Skipping
+Combining Parsed Prediction Files
+Combined Parsed: Test.all_epitopes.tsv
+Combined Path: /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpkijxlh_k/MHC_Class_II/MHC_II.Test.all_epitopes.tsv
+Completed
+Combined Parsed: Test.all_epitopes.tsv
+Combined Path: /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpkijxlh_k/MHC_Class_II/MHC_II.Test.all_epitopes.tsv
+Output_str: Test.filtered.tsv
+Marking genes of interest
+Completed
+Creating aggregated report
+Tumor clonal VAF estimated as 0.5 (estimated from Tumor DNA VAF data). Assuming variants with VAF < 0.25 are subclonal
+Completed
+Calculating Manufacturability Metrics
+Completed
+Running Binding Filters
+Completed
+Running Coverage Filters
+Completed
+Running Transcript Support Level Filter
+Complete
+Running Top Score Filter
+Completed
+
+Done: Pipeline finished successfully. File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpkijxlh_k/MHC_Class_II/Test.filtered.tsv contains list of filtered putative neoantigens.
+
+Creating combined reports
+File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmpkijxlh_k/MHC_Class_I/Test.all_epitopes.tsv doesn't exist. Aborting.
+Executing MHC Class I predictions
+Converting .vcf to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Converting VCF to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Generating Variant Peptide FASTA and Key File
+Completed
+Parsing the Variant Peptide FASTA and Key File
+Completed
+Calculating Manufacturability Metrics
+Completed
+Splitting TSV into smaller chunks
+Splitting TSV into smaller chunks - Entries 1-24
+Completed
+Generating Variant Peptide FASTA and Key Files
+Generating Variant Peptide FASTA and Key Files - Epitope Length 9 - Entries 1-48
+Generating Variant Peptide FASTA and Key Files - Epitope Length 10 - Entries 1-48
+Completed
+Allele HLA-G*01:09 not valid for Method NetMHC. Skipping.
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 9 with Method NetMHC - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.ann.HLA-E*01:01.9.tsv_1-48
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 9 with Method NetMHC - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.ann.HLA-E*01:01.9.tsv_1-48 - Completed
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 9 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.pickpocket.HLA-E*01:01.9.tsv_1-48
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 9 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.pickpocket.HLA-E*01:01.9.tsv_1-48 - Completed
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 10 with Method NetMHC - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.ann.HLA-E*01:01.10.tsv_1-48
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 10 with Method NetMHC - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.ann.HLA-E*01:01.10.tsv_1-48 - Completed
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 10 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.pickpocket.HLA-E*01:01.10.tsv_1-48
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 10 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.pickpocket.HLA-E*01:01.10.tsv_1-48 - Completed
+Making binding predictions on Allele HLA-G*01:09 and Epitope Length 9 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.pickpocket.HLA-G*01:09.9.tsv_1-48
+Making binding predictions on Allele HLA-G*01:09 and Epitope Length 9 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.pickpocket.HLA-G*01:09.9.tsv_1-48 - Completed
+Making binding predictions on Allele HLA-G*01:09 and Epitope Length 10 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.pickpocket.HLA-G*01:09.10.tsv_1-48
+Making binding predictions on Allele HLA-G*01:09 and Epitope Length 10 with Method PickPocket - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/tmp/sample.name.pickpocket.HLA-G*01:09.10.tsv_1-48 - Completed
+Parsing prediction file for Allele HLA-E*01:01 and Epitope Length 9 - Entries 1-48
+Parsing prediction file for Allele HLA-E*01:01 and Epitope Length 9 - Entries 1-48 - Completed
+Parsing prediction file for Allele HLA-E*01:01 and Epitope Length 10 - Entries 1-48
+Parsing prediction file for Allele HLA-E*01:01 and Epitope Length 10 - Entries 1-48 - Completed
+Parsing prediction file for Allele HLA-G*01:09 and Epitope Length 9 - Entries 1-48
+Parsing prediction file for Allele HLA-G*01:09 and Epitope Length 9 - Entries 1-48 - Completed
+Parsing prediction file for Allele HLA-G*01:09 and Epitope Length 10 - Entries 1-48
+Parsing prediction file for Allele HLA-G*01:09 and Epitope Length 10 - Entries 1-48 - Completed
+Combining Parsed Prediction Files
+Combined Parsed: sample.name.all_epitopes.tsv
+Combined Path: /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/MHC_I.sample.name.all_epitopes.tsv
+Completed
+Combined Parsed: sample.name.all_epitopes.tsv
+Combined Path: /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/MHC_I.sample.name.all_epitopes.tsv
+Output_str: sample.name.filtered.tsv
+Converting VCF to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Generating Variant Peptide FASTA and Key File
+Completed
+Parsing the Variant Peptide FASTA and Key File
+Completed
+Calculating Manufacturability Metrics
+Completed
+Marking genes of interest
+Completed
+Creating aggregated report
+Tumor clonal VAF estimated as 0.5 (estimated from Tumor DNA VAF data). Assuming variants with VAF < 0.25 are subclonal
+Completed
+Calculating Manufacturability Metrics
+Completed
+Running Binding Filters
+Completed
+Running Coverage Filters
+Completed
+Running Transcript Support Level Filter
+Complete
+Running Top Score Filter
+Completed
+Submitting remaining epitopes to NetChop
+Completed
+Running NetMHCStabPan
+Completed
+Calculating Reference Proteome Similarity
+Completed
+
+Done: Pipeline finished successfully. File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_I/sample.name.filtered.tsv contains list of filtered putative neoantigens.
+
+No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.
+No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.
+Executing MHC Class II predictions
+Converting .vcf to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Converting VCF to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Generating Variant Peptide FASTA and Key File
+Completed
+Parsing the Variant Peptide FASTA and Key File
+Completed
+Calculating Manufacturability Metrics
+Completed
+Splitting TSV into smaller chunks
+Splitting TSV into smaller chunks - Entries 1-24
+Completed
+Generating Variant Peptide FASTA and Key Files
+Generating Variant Peptide FASTA and Key Files - Epitope Length 15 - Entries 1-48
+Completed
+Making binding predictions on Allele DRB1*11:01 and Epitope Length 15 with Method NNalign - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_II/tmp/sample.name.nn_align.DRB1*11:01.15.tsv_1-48
+Making binding predictions on Allele DRB1*11:01 and Epitope Length 15 with Method NNalign - File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_II/tmp/sample.name.nn_align.DRB1*11:01.15.tsv_1-48 - Completed
+Parsing prediction file for Allele DRB1*11:01 and Epitope Length 15 - Entries 1-48
+Parsing prediction file for Allele DRB1*11:01 and Epitope Length 15 - Entries 1-48 - Completed
+Combining Parsed Prediction Files
+Combined Parsed: sample.name.all_epitopes.tsv
+Combined Path: /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_II/MHC_II.sample.name.all_epitopes.tsv
+Completed
+Combined Parsed: sample.name.all_epitopes.tsv
+Combined Path: /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_II/MHC_II.sample.name.all_epitopes.tsv
+Output_str: sample.name.filtered.tsv
+Marking genes of interest
+Completed
+Creating aggregated report
+Tumor clonal VAF estimated as 0.5 (estimated from Tumor DNA VAF data). Assuming variants with VAF < 0.25 are subclonal
+Completed
+Calculating Manufacturability Metrics
+Completed
+Running Binding Filters
+Completed
+Running Coverage Filters
+Completed
+Running Transcript Support Level Filter
+Complete
+Running Top Score Filter
+Completed
+Calculating Reference Proteome Similarity
+Completed
+
+Done: Pipeline finished successfully. File /home/zmanjaroschool/pVACtools/tests/test_data/pvacseq/tmptl09il_2/MHC_Class_II/sample.name.filtered.tsv contains list of filtered putative neoantigens.
+
+No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.
+Executing MHC Class II predictions
+Converting .vcf to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Converting VCF to TSV
+Warning: Mismatch between the number of alternate alleles and number of values in the AD field for genotype Call('H_NJ-HCC1395-HCC1395', {'GT': '2/2', 'DP': 4, 'DP4': [0, 0, 2, 2], 'BQ': [33], 'SS': 2, 'AD': [0], 'DP2': 4, 'TAR': [0, 0], 'TIR': [6, 6], 'TOR': [0, 0], 'DP50': 5.73, 'FDP50': 0.34, 'SUBDP50': 0.0, 'FT': ['PASS']})
+Completed
+Generating Variant Peptide FASTA and Key File
+Completed
+Parsing the Variant Peptide FASTA and Key File
+Completed
+Calculating Manufacturability Metrics
+Completed
+Splitting TSV into smaller chunks
+Splitting TSV into smaller chunks - Entries 1-24
+Completed
+Generating Variant Peptide FASTA and Key Files
+Generating Variant Peptide FASTA and Key Files - Epitope Length 15 - Entries 1-48
+Completed
+Making binding predictions on Allele DRB1*11:01 and Epitope Length 15 with Method NNalign - File /tmp/tmplxidyyfx/MHC_Class_II/tmp/Test.nn_align.DRB1*11:01.15.tsv_1-48
+Making binding predictions on Allele DRB1*11:01 and Epitope Length 15 with Method NNalign - File /tmp/tmplxidyyfx/MHC_Class_II/tmp/Test.nn_align.DRB1*11:01.15.tsv_1-48 - Completed
+Parsing prediction file for Allele DRB1*11:01 and Epitope Length 15 - Entries 1-48
+Parsing prediction file for Allele DRB1*11:01 and Epitope Length 15 - Entries 1-48 - Completed
+Combining Parsed Prediction Files
+Combined Parsed: Test.all_epitopes.tsv
+Combined Path: /tmp/tmplxidyyfx/MHC_Class_II/MHC_II.Test.all_epitopes.tsv
+Completed
+Combined Parsed: Test.all_epitopes.tsv
+Combined Path: /tmp/tmplxidyyfx/MHC_Class_II/MHC_II.Test.all_epitopes.tsv
+Output_str: Test.filtered.tsv
+Marking genes of interest
+Completed
+Creating aggregated report
+Tumor clonal VAF estimated as 0.5 (estimated from Tumor DNA VAF data). Assuming variants with VAF < 0.25 are subclonal
+Completed
+Calculating Manufacturability Metrics
+Completed
+Running Binding Filters
+Completed
+Running Coverage Filters
+Completed
+Running Transcript Support Level Filter
+Complete
+Running Top Score Filter
+Completed
+
+Done: Pipeline finished successfully. File /tmp/tmplxidyyfx/MHC_Class_II/Test.filtered.tsv contains list of filtered putative neoantigens.
+
+Executing MHC Class I predictions
+Converting .vcf to TSV
+Warning: Proximal variant is not a missense mutation and will be skipped: chr1 36179727
+Warning: Proximal variant is not a missense mutation and will be skipped: chr1 227091906
+Warning: Proximal variant is not a missense mutation and will be skipped: chr3 44242033
+Warning: Proximal variant is not a missense mutation and will be skipped: chr7 92077883
+Warning: Proximal variant is not a missense mutation and will be skipped: chr7 132508190
+Warning: Proximal variant is not a missense mutation and will be skipped: chr8 125436372
+Warning: Proximal variant is not a missense mutation and will be skipped: chr14 94463204
+Warning: Proximal variant is not a missense mutation and will be skipped: chr16 57915347
+Warning: Proximal variant is not a missense mutation and will be skipped: chr16 69954570
+Warning: Proximal variant is not a missense mutation and will be skipped: chr19 6754996
+Warning: Proximal variant is not a missense mutation and will be skipped: chr19 14049196
+Warning: Proximal variant is not a missense mutation and will be skipped: chr19 19336127
+frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.
+chr20 57340103 CTA C ENST00000371263.7
+Warning: Proximal variant is not a missense mutation and will be skipped: chrX 154349351
+Completed
+Converting VCF to TSV
+Warning: Proximal variant is not a missense mutation and will be skipped: chr1 36179727
+Warning: Proximal variant is not a missense mutation and will be skipped: chr1 227091906
+Warning: Proximal variant is not a missense mutation and will be skipped: chr3 44242033
+Warning: Proximal variant is not a missense mutation and will be skipped: chr7 92077883
+Warning: Proximal variant is not a missense mutation and will be skipped: chr7 132508190
+Warning: Proximal variant is not a missense mutation and will be skipped: chr8 125436372
+Warning: Proximal variant is not a missense mutation and will be skipped: chr14 94463204
+Warning: Proximal variant is not a missense mutation and will be skipped: chr16 57915347
+Warning: Proximal variant is not a missense mutation and will be skipped: chr16 69954570
+Warning: Proximal variant is not a missense mutation and will be skipped: chr19 6754996
+Warning: Proximal variant is not a missense mutation and will be skipped: chr19 14049196
+Warning: Proximal variant is not a missense mutation and will be skipped: chr19 19336127
+frameshift_variant transcript does not contain a FrameshiftSequence. Skipping.
+chr20 57340103 CTA C ENST00000371263.7
+Warning: Proximal variant is not a missense mutation and will be skipped: chrX 154349351
+Completed
+Generating Variant Peptide FASTA and Key File
+Completed
+Parsing the Variant Peptide FASTA and Key File
+Completed
+Calculating Manufacturability Metrics
+Completed
+Splitting TSV into smaller chunks
+Splitting TSV into smaller chunks - Entries 1-411
+Completed
+Generating Variant Peptide FASTA and Key Files
+Generating Variant Peptide FASTA and Key Files - Epitope Length 8 - Entries 1-822
+Completed
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 8 with Method NetMHC - File /tmp/tmpwqn_206j/MHC_Class_I/tmp/Test.ann.HLA-E*01:01.8.tsv_1-822
+Making binding predictions on Allele HLA-E*01:01 and Epitope Length 8 with Method NetMHC - File /tmp/tmpwqn_206j/MHC_Class_I/tmp/Test.ann.HLA-E*01:01.8.tsv_1-822 - Completed
+Parsing prediction file for Allele HLA-E*01:01 and Epitope Length 8 - Entries 1-822
+Parsing prediction file for Allele HLA-E*01:01 and Epitope Length 8 - Entries 1-822 - Completed
+Combining Parsed Prediction Files
+Combined Parsed: Test.all_epitopes.tsv
+Combined Path: /tmp/tmpwqn_206j/MHC_Class_I/MHC_I.Test.all_epitopes.tsv
+Completed
+Combined Parsed: Test.all_epitopes.tsv
+Combined Path: /tmp/tmpwqn_206j/MHC_Class_I/MHC_I.Test.all_epitopes.tsv
+Output_str: Test.filtered.tsv
+Marking genes of interest
+Completed
+Creating aggregated report
+Tumor clonal VAF estimated as 0.5 (estimated from Tumor DNA VAF data). Assuming variants with VAF < 0.25 are subclonal
+Completed
+Calculating Manufacturability Metrics
+Completed
+Running Binding Filters
+Completed
+Running Coverage Filters
+Completed
+Running Transcript Support Level Filter
+Complete
+Running Top Score Filter
+Completed
+
+Done: Pipeline finished successfully. File /tmp/tmpwqn_206j/MHC_Class_I/Test.filtered.tsv contains list of filtered putative neoantigens.
+
+No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.

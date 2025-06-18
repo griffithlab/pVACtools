@@ -19,8 +19,8 @@ def create_combined_reports(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
 
-    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
-    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "MHC_I.{}.all_epitopes.tsv".format(args.sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "MHC_II.{}.all_epitopes.tsv".format(args.sample_name))
     if not os.path.exists(file1):
         print("File {} doesn't exist. Aborting.".format(file1))
         return
