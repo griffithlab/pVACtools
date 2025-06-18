@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import xlsxwriter
+from Bio import SeqIO, pairwise2
 
 
 class AminoAcid:
@@ -20,6 +21,44 @@ class AminoAcid:
         print("Large: ", self.large)
 
 
+def get_mutant_positions_from_fasta(fasta_path, full_id):
+    if full_id.startswith("WT.") or full_id.startswith("MT."):
+        full_id = full_id[3:]
+
+    wt_id = f"WT.{full_id}"
+    mt_id = f"MT.{full_id}"
+    wt_seq = None
+    mt_seq = None
+
+    for record in SeqIO.parse(fasta_path, "fasta"):
+        if record.id == wt_id:
+            wt_seq = str(record.seq)
+        elif record.id == mt_id:
+            mt_seq = str(record.seq)
+
+    if wt_seq is None or mt_seq is None:
+        print(f"Warning: Missing WT or MT for {full_id}")
+        return set()
+
+    # Perform global alignment
+    alignments = pairwise2.align.globalms(wt_seq, mt_seq, 2, -1, -5, -0.5)
+    wt_aligned, mt_aligned = alignments[0].seqA, alignments[0].seqB
+
+    mutant_positions = set()
+    mt_index = 0
+
+    for i in range(len(wt_aligned)):
+        wt_residue = wt_aligned[i]
+        mt_residue = mt_aligned[i]
+
+        if mt_residue != "-":
+            if wt_residue != mt_residue:
+                mutant_positions.add(mt_index)
+            mt_index += 1
+
+    return mutant_positions
+
+
 def annotate_every_nucleotide(
     sequence,
     classI_peptide,
@@ -36,7 +75,6 @@ def annotate_every_nucleotide(
     cIIpercent_threshold,
     probPos,
 ):
-
     peptide_sequence = []
 
     for i in range(len(sequence)):
@@ -79,56 +117,9 @@ def annotate_every_nucleotide(
     return peptide_sequence
 
 
-def set_underline(peptide_sequence, mutant_peptide_pos, full_row_ID):
-    frameshift = False
-    classI_position = 0
-
-    if ".FS." in full_row_ID:
-        frameshift = True
-    elif mutant_peptide_pos == "nan":
-        return
-    else:
-        mutant_peptide_pos = int(float(mutant_peptide_pos))
-
-    if frameshift:
-        # Find last mutated (colored) position
-        last_mut_idx = -1
-        for i in reversed(range(len(peptide_sequence))):
-            if peptide_sequence[i].color:
-                last_mut_idx = i
-                break
-
-        if last_mut_idx == -1:
-            # No colored residues, nothing to underline
-            pass
-        else:
-            # Walk backward to find contiguous colored positions
-            start_idx = last_mut_idx
-            for i in reversed(range(0, last_mut_idx)):
-                if peptide_sequence[i].color:
-                    start_idx = i
-                else:
-                    break  # stop at first non-colored amino acid
-
-            # Walk forward to find contiguous colored positions
-            end_idx = last_mut_idx
-            for i in range(last_mut_idx + 1, len(peptide_sequence)):
-                if peptide_sequence[i].color:
-                    end_idx = i
-                else:
-                    break  # stop at first non-colored amino acid
-
-            # Underline the identified range
-            for i in range(start_idx, end_idx + 1):
-                peptide_sequence[i].underline = True
-    else:
-        for i in range(len(peptide_sequence)):
-            if peptide_sequence[i].color:
-                classI_position += 1
-            else:
-                classI_position = 0
-            if classI_position == int(mutant_peptide_pos):
-                peptide_sequence[i].underline = True
+def set_underline(peptide_sequence, mutant_positions):
+    for pos in mutant_positions:
+        peptide_sequence[pos].underline = True
 
 
 def generate_formatted_excel(peptides_df, output_path, output_file, sample_name):
@@ -196,6 +187,7 @@ def generate_formatted_excel(peptides_df, output_path, output_file, sample_name)
 
 
 def main(
+    fasta_path,
     peptides_path,
     sample_name,
     classI_ic50_score_max,
@@ -206,7 +198,6 @@ def main(
     output_file,
     output_path,
 ):
-
     peptides_df = pd.read_excel(peptides_path)
     peptides_df["RESTRICTING HLA ALLELE"] = ""
     peptides_df["Stylized Sequence"] = pd.Series(
@@ -242,7 +233,6 @@ def main(
         classII_ic50 = row["Class II IC50 MT"]
         classII_percentile = row["Class II %ile MT"]
         classII_transcript = row["Class II Best Transcript"]
-        mutant_peptide_pos = str(row["Pos"])
 
         peptide_sequence = annotate_every_nucleotide(
             sequence,
@@ -261,7 +251,8 @@ def main(
             problematic_position,
         )
 
-        set_underline(peptide_sequence, mutant_peptide_pos, row["full ID"])
+        mutant_positions = get_mutant_positions_from_fasta(fasta_path, row["full ID"])
+        set_underline(peptide_sequence, mutant_positions)
         peptides_df.at[index, "Stylized Sequence"] = peptide_sequence
 
     generate_formatted_excel(peptides_df, output_path, output_file, sample_name)

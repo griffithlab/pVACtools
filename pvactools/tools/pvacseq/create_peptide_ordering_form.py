@@ -130,15 +130,18 @@ def main(args_input = sys.argv[1:]):
         mutant_only=True,
         aggregate_report_evaluation=['Accept', 'Review'] if args.include_review_candidates else ['Accept'],
         downstream_sequence_length=args.downstream_sequence_length,
-        sample_name=args.sample_name
+        sample_name=args.sample_name,
+        peptide_ordering_form=True
     )
 
     file_path = os.path.join(output_path, args.output_file)
     file_prefix = os.path.join(output_path, f"{args.output_file}_{args.sample_name}")
 
     os.rename(file_path, f"{file_prefix}.fa")
+    os.rename(f"{file_path}_combined", f"{file_prefix}_combined.fa")
     os.rename(f"{file_path}.manufacturability.tsv", f"{file_prefix}.manufacturability.tsv")
     peptide_manufacture_path = f"{file_prefix}.manufacturability.tsv"
+    combined_fasta_path = f"{file_prefix}_combined.fa"
 
     peptide_51mer_path = run_generate_reviews_files(
         peptides_path=peptide_manufacture_path,
@@ -149,6 +152,7 @@ def main(args_input = sys.argv[1:]):
     )
 
     run_color_peptides(
+        fasta_path=combined_fasta_path,
         peptides_path=peptide_51mer_path,
         sample_name=args.sample_name,
         classI_ic50_score_max=args.classI_IC50,
@@ -161,6 +165,7 @@ def main(args_input = sys.argv[1:]):
     )
 
     os.remove(peptide_51mer_path)
+    os.remove(combined_fasta_path)
     
 
 if __name__ == "__main__":

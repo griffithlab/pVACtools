@@ -205,7 +205,8 @@ def run_generate_protein_fasta(
     mutant_only=False,
     aggregate_report_evaluation=['Accept'],
     downstream_sequence_length="1000",
-    sample_name=None
+    sample_name=None,
+    peptide_ordering_form=False
 ):
     if downstream_sequence_length == 'full':
         downstream_sequence_length = None
@@ -248,6 +249,15 @@ def run_generate_protein_fasta(
             input_tsv=input_tsv,
             aggregate_report_evaluation=aggregate_report_evaluation
         )
+
+        if peptide_ordering_form:
+            parse_files(
+                output_file=f"{output_file}_combined",
+                temp_dir=temp_dir,
+                mutant_only=not mutant_only,
+                input_tsv=input_tsv,
+                aggregate_report_evaluation=aggregate_report_evaluation
+            )
 
         manufacturability_file = f"{output_file}.manufacturability.tsv"
         print("Calculating Manufacturability Metrics")
