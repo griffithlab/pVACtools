@@ -10,6 +10,7 @@ import pandas as pd
 import py_compile
 
 from tests.utils import *
+from pvactools.lib.color_peptides51mer import annotate_every_nucleotide, set_underline
 
 
 class CreatePeptideOrderingFormTests(unittest.TestCase):
@@ -113,6 +114,154 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
             pd.testing.assert_frame_equal(generated_df, expected_df, check_dtype=False)
         except AssertionError as e:
             self.fail(f"Generated Excel content does not match expected:\n{e}")
+    
+    def test_annotate_classi_and_classii_pass(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence="ABCDEFGHIJKL",
+            classI_peptide="DEFG",
+            classII_peptide="GHI",
+            classI_ic50="100",
+            classI_percentile="0.4",
+            classII_ic50="40",
+            classII_percentile="0.2",
+            classI_transcript="T1",
+            classII_transcript="T1",
+            cIIC50_threshold=1000,
+            cIpercentile_threshold=2,
+            cIIIC50_threshold=500,
+            cIIpercent_threshold=2,
+            probPos=""
+        )
+
+        # Check color applied to class I peptide ("DEFG")
+        color_indices = [3, 4, 5, 6]
+        for idx in color_indices:
+            assert peptide_sequence[idx].color, f"Amino acid at index {idx} should be colored"
+
+        # Check bold applied to class II peptide ("GHI")
+        bold_indices = [6, 7, 8]
+        for idx in bold_indices:
+            assert peptide_sequence[idx].bold, f"Amino acid at index {idx} should be bolded"
+    
+    def test_annotate_classi_pass(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence="ABCDEFGHIJKL",
+            classI_peptide="DEFG",
+            classII_peptide="GHI",
+            classI_ic50="100",
+            classI_percentile="0.4",
+            classII_ic50="1500",
+            classII_percentile="2.2",
+            classI_transcript="T1",
+            classII_transcript="T1",
+            cIIC50_threshold=1000,
+            cIpercentile_threshold=2,
+            cIIIC50_threshold=500,
+            cIIpercent_threshold=2,
+            probPos=""
+        )
+
+        # Check color applied to class I peptide ("DEFG")
+        color_indices = [3, 4, 5, 6]
+        for idx in color_indices:
+            assert peptide_sequence[idx].color, f"Amino acid at index {idx} should be colored"
+
+        # Check bold is NOT applied to class II peptide ("GHI")
+        bold_indices = [6, 7, 8]
+        for idx in bold_indices:
+            assert not peptide_sequence[idx].bold, f"Amino acid at index {idx} should not be bolded"
+
+    def test_annotate_classii_pass(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence="ABCDEFGHIJKL",
+            classI_peptide="DEFG",
+            classII_peptide="GHI",
+            classI_ic50="1200",
+            classI_percentile="3.0",
+            classII_ic50="40",
+            classII_percentile="0.2",
+            classI_transcript="T1",
+            classII_transcript="T1",
+            cIIC50_threshold=1000,
+            cIpercentile_threshold=2,
+            cIIIC50_threshold=500,
+            cIIpercent_threshold=2,
+            probPos=""
+        )
+
+        # Check color is NOT applied to class I peptide ("DEFG")
+        color_indices = [3, 4, 5, 6]
+        for idx in color_indices:
+            assert not peptide_sequence[idx].color, f"Amino acid at index {idx} should not be colored"
+
+        # Check bold applied to class II peptide ("GHI")
+        bold_indices = [6, 7, 8]
+        for idx in bold_indices:
+            assert peptide_sequence[idx].bold, f"Amino acid at index {idx} should be bolded"
+    
+    def test_annotate_classi_and_classii_fail(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence="ABCDEFGHIJKL",
+            classI_peptide="DEFG",
+            classII_peptide="GHI",
+            classI_ic50="1800",
+            classI_percentile="2.3",
+            classII_ic50="700",
+            classII_percentile="4.2",
+            classI_transcript="T1",
+            classII_transcript="T1",
+            cIIC50_threshold=1000,
+            cIpercentile_threshold=2,
+            cIIIC50_threshold=500,
+            cIIpercent_threshold=2,
+            probPos=["C", "H"]
+        )
+
+        # Check color is NOT applied to class I peptide ("DEFG")
+        color_indices = [3, 4, 5, 6]
+        for idx in color_indices:
+            assert not peptide_sequence[idx].color, f"Amino acid at index {idx} should not be colored"
+
+        # Check bold is NOT applied to class II peptide ("GHI")
+        bold_indices = [6, 7, 8]
+        for idx in bold_indices:
+            assert not peptide_sequence[idx].bold, f"Amino acid at index {idx} should not be bolded"
+        
+        # Check 'large' from probPos
+        assert peptide_sequence[2].large  # "C"
+        assert peptide_sequence[7].large  # "H"
+    
+    def test_frameshift_underlining(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence = "MAKRTSGEKAGCPWSGTGQHLSKELVFGQP",
+            classI_peptide = "GEKAGCPWS",
+            classII_peptide = "SGEKAGCPWSGTGQH",
+            classI_ic50 = "800",
+            classI_percentile = "1.5",
+            classII_ic50 = "400",
+            classII_percentile = "0.7",
+            classI_transcript = "ENST00000406386.3",
+            classII_transcript = "ENST00000406386.3",
+            cIIC50_threshold = 1000,
+            cIpercentile_threshold = 2,
+            cIIIC50_threshold = 500,
+            cIIpercent_threshold = 2,
+            probPos = ""
+        )
+
+        full_row_ID = "16.TRIOBP.ENST00000406386.3.FS.219GA/G"
+        mutant_peptide_pos = "1"
+        set_underline(peptide_sequence, mutant_peptide_pos, full_row_ID)
+
+        colored_positions = [i for i, aa in enumerate(peptide_sequence) if aa.color]
+        underlined_positions = [i for i, aa in enumerate(peptide_sequence) if aa.underline]
+
+        # Assert all colored AAs are underlined
+        self.assertListEqual(
+            underlined_positions,
+            colored_positions,
+            f"Expected underlining at {colored_positions}, but got {underlined_positions}",
+        )
 
     def test_fasta_output(self):
         generated_fasta = os.path.join(
