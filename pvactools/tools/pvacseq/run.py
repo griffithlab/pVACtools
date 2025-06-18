@@ -147,6 +147,7 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
+        class_i_arguments['filename_prefix']         = "MHC_I"
         pipeline = Pipeline(**class_i_arguments)
         pipeline.execute()
     elif len(class_i_prediction_algorithms) == 0:
@@ -174,6 +175,8 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
         class_ii_arguments['output_dir']              = output_dir
         class_ii_arguments['netmhc_stab']             = False
+        class_ii_arguments['filename_prefix']         = "MHC_II"
+
         pipeline = Pipeline(**class_ii_arguments)
         pipeline.execute()
     elif len(class_ii_prediction_algorithms) == 0:
