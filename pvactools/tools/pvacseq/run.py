@@ -28,9 +28,9 @@ def create_combined_reports(base_output_dir, args):
         print("File {} doesn't exist. Aborting.".format(file2))
         return
 
-    combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+    combined_output_file = os.path.join(output_dir, "Combined.{}.all_epitopes.tsv".format(args.sample_name))
     combine_reports([file1, file2], combined_output_file)
-    filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+    filtered_report_file = os.path.join(output_dir, "Combined.{}.filtered.tsv".format(args.sample_name))
 
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_output_file
@@ -42,6 +42,7 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['run_manufacturability_metrics'] = False
     post_processing_params['run_reference_proteome_similarity'] = False
     post_processing_params['file_type'] = 'pVACseq'
+    post_processing_params['filename_prefix'] = "Combined."
 
     PostProcessor(**post_processing_params).execute()
 

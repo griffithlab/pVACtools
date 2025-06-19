@@ -356,8 +356,8 @@ class PvacseqTests(unittest.TestCase):
         ])
 
         for file_name in (
-            'Test.all_epitopes.tsv',
-            'Test.filtered.tsv',
+            'Combined.Test.all_epitopes.tsv',
+            'Combined.Test.filtered.tsv',
         ):
             output_file   = os.path.join(output_dir.name, 'combined', file_name)
             expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
