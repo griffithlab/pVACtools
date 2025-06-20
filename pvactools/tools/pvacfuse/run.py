@@ -15,7 +15,7 @@ from pvactools.lib.prediction_class_utils import *
 def define_parser():
     return PvacfuseRunArgumentParser().parser
 
-def create_net_class_report(files, all_epitopes_output_file, filtered_report_file, args, run_params):
+def create_net_class_report(files, all_epitopes_output_file, filtered_report_file, post_processing_params, run_params):
     for file_name in files:
         if not os.path.exists(file_name):
             print("File {} doesn't exist. Aborting.".format(file_name))
@@ -23,7 +23,6 @@ def create_net_class_report(files, all_epitopes_output_file, filtered_report_fil
 
     combine_reports(files, all_epitopes_output_file)
 
-    post_processing_params = vars(args).copy()
     post_processing_params['input_file'] = all_epitopes_output_file
     post_processing_params['filtered_report_file'] = filtered_report_file
     post_processing_params['minimum_fold_change'] = None
@@ -61,6 +60,7 @@ def create_combined_reports(files, all_epitopes_output_file, filtered_report_fil
     post_processing_params['run_manufacturability_metrics'] = run_manufacturability_metrics
     post_processing_params['run_reference_proteome_similarity'] = False
     post_processing_params['file_type'] = 'pVACfuse'
+    post_processing_params["filename_prefix"] = "Combined."
 
     PostProcessor(**post_processing_params).execute()
 
@@ -246,11 +246,13 @@ def main(args_input = sys.argv[1:]):
                     epitope_flank_length = 9
                     (net_chop_fasta, _) = generate_fasta(args, output_dir, max(epitope_lengths), epitope_flank_length, net_chop_fasta=True)
                     run_arguments['net_chop_fasta'] = net_chop_fasta
-                all_epitopes_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
-                filtered_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+                all_epitopes_file = os.path.join(output_dir, "MHC_{}.{}.all_epitopes.tsv".format(mhc_class,args.sample_name))
+                filtered_file = os.path.join(output_dir, "MHC_{}.{}.filtered.tsv".format(mhc_class,args.sample_name))
                 #!!! make below call to create_net_class_report
                 #create_combined_reports(output_files, all_epitopes_file, filtered_file, True, args)
-                create_net_class_report(output_files, all_epitopes_file, filtered_file, args, run_arguments)
+                post_processing_params = vars(args).copy()
+                post_processing_params["filename_prefix"] = "MHC_{}.".format(mhc_class)
+                create_net_class_report(output_files, all_epitopes_file, filtered_file, post_processing_params, run_arguments)
             else:
                 print("\nNo processable fusions found. Aborting.\n")
         elif len(prediction_algorithms) == 0:
@@ -262,10 +264,10 @@ def main(args_input = sys.argv[1:]):
         print("Creating combined reports")
         output_dir = os.path.join(base_output_dir, 'combined')
         os.makedirs(output_dir, exist_ok=True)
-        file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
-        file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
-        combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
-        filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+        file1 = os.path.join(base_output_dir, 'MHC_Class_I', "MHC_I.{}.all_epitopes.tsv".format(args.sample_name))
+        file2 = os.path.join(base_output_dir, 'MHC_Class_II', "MHC_II.{}.all_epitopes.tsv".format(args.sample_name))
+        combined_output_file = os.path.join(output_dir, "Combined.{}.all_epitopes.tsv".format(args.sample_name))
+        filtered_report_file = os.path.join(output_dir, "Combined.{}.filtered.tsv".format(args.sample_name))
         create_combined_reports([file1, file2], combined_output_file, filtered_report_file, False, args)
 
     change_permissions_recursive(base_output_dir, 0o755, 0o644)
