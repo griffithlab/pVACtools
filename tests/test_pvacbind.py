@@ -159,9 +159,9 @@ class PvacbindTests(unittest.TestCase):
             close_mock_fhs()
 
             for file_name in (
-                'sample.name.all_epitopes.tsv',
-                'sample.name.filtered.tsv',
-                'sample.name.all_epitopes.aggregated.tsv',
+                'MHC_I.sample.name.all_epitopes.tsv',
+                'MHC_I.sample.name.filtered.tsv',
+                'MHC_I.sample.name.all_epitopes.aggregated.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -207,9 +207,9 @@ class PvacbindTests(unittest.TestCase):
 
             #Class II output files
             for file_name in (
-                'sample.name.all_epitopes.tsv',
-                'sample.name.filtered.tsv',
-                'sample.name.all_epitopes.aggregated.tsv',
+                'MHC_II.sample.name.all_epitopes.tsv',
+                'MHC_II.sample.name.filtered.tsv',
+                'MHC_II.sample.name.all_epitopes.aggregated.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
@@ -322,10 +322,11 @@ class PvacbindTests(unittest.TestCase):
             close_mock_fhs()
 
             for file_name in (
-                'Test.all_epitopes.tsv',
-                'Test.filtered.tsv',
-                'Test.all_epitopes.aggregated.tsv',
+                'Combined.Test.all_epitopes.tsv',
+                'Combined.Test.filtered.tsv',
+                'Combined.Test.all_epitopes.aggregated.tsv',
             ):
+
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
                 self.assertTrue(compare(output_file, expected_file))
