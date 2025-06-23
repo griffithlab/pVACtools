@@ -30,17 +30,17 @@ created):
 
    * - File Name
      - Description
-   * - ``<MHC_Class/Combined>.<sample_name>.all_epitopes.tsv``
+   * - ``<sample_name>.<MHC_Class/Combined>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information.
-   * - ``<MHC_Class/Combined>.<sample_name>.filtered.tsv``
+   * - ``<sample_name>.<MHC_Class/Combined>.filtered.tsv``
      - The above file after applying all filters, with (optionally) cleavage site, and stability
        predictions added.
-   * - ``<MHC_Class/Combined>.<sample_name>.all_epitopes.aggregated.tsv``
+   * - ``<sample_name>.<MHC_Class/Combined>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format. Not
        generated when running with elution algorithms only.
-   * - ``<MHC_Class/Combined>.<sample_name>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
+   * - ``<sample_name>.<MHC_Class/Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
 
 Additionally, each folder will contain subfolders, one for each selected
