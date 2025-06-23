@@ -421,9 +421,9 @@ class Pipeline(metaclass=ABCMeta):
 
     def combined_parsed_path(self):
         combined_parsed = "%s.all_epitopes.tsv" % self.sample_name
-        if hasattr(self, "filename_prefix"):
-            if self.filename_prefix != None:
-                combined_parsed = "{}.{}".format(self.filename_prefix, combined_parsed)
+        if hasattr(self, "filename_addition"):
+            if self.filename_addition != None:
+                combined_parsed = "{}.{}.all_epitopes.tsv".format(self.sample_name, self.filename_addition)
         return os.path.join(self.output_dir, combined_parsed)
 
     def combined_parsed_outputs(self, split_parsed_output_files):
@@ -442,9 +442,9 @@ class Pipeline(metaclass=ABCMeta):
 
     def final_path(self):
         output_str = self.sample_name + ".filtered.tsv"
-        if hasattr(self, "filename_prefix"):
-            if self.filename_prefix != None:
-                output_str = "{}.{}".format(self.filename_prefix, output_str)
+        if hasattr(self, "filename_addition"):
+            if self.filename_addition != None:
+                output_str = "{}.{}.filtered.tsv".format(self.sample_name, self.filename_addition)
         return os.path.join(self.output_dir, output_str)
 
     def execute(self):

@@ -105,9 +105,9 @@ class PvacfuseTests(unittest.TestCase):
 
             for file_name in (
                 'sample.name.fasta',
-                'MHC_I.sample.name.all_epitopes.tsv',
-                'MHC_I.sample.name.filtered.tsv',
-                'MHC_I.sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.tsv',
+                'sample.name.MHC_I.filtered.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -150,9 +150,9 @@ class PvacfuseTests(unittest.TestCase):
 
             for file_name in (
                 'sample.name.fasta',
-                'MHC_I.sample.name.all_epitopes.tsv',
-                'MHC_I.sample.name.filtered.tsv',
-                'MHC_I.sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.tsv',
+                'sample.name.MHC_I.filtered.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'fusions_agfusion_starfusion', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -189,9 +189,9 @@ class PvacfuseTests(unittest.TestCase):
 
             for file_name in (
                 'sample.name.fasta',
-                'MHC_I.sample.name.all_epitopes.tsv',
-                'MHC_I.sample.name.filtered.tsv',
-                'MHC_I.sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.tsv',
+                'sample.name.MHC_I.filtered.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'arriba_fusions', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -224,9 +224,9 @@ class PvacfuseTests(unittest.TestCase):
             close_mock_fhs()
 
             for file_name in (
-                'Combined.Test.all_epitopes.tsv',
-                'Combined.Test.filtered.tsv',
-                'Combined.Test.all_epitopes.aggregated.tsv',
+                'Test.Combined.all_epitopes.tsv',
+                'Test.Combined.filtered.tsv',
+                'Test.Combined.all_epitopes.aggregated.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combined', file_name)

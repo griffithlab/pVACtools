@@ -159,9 +159,9 @@ class PvacbindTests(unittest.TestCase):
             close_mock_fhs()
 
             for file_name in (
-                'MHC_I.sample.name.all_epitopes.tsv',
-                'MHC_I.sample.name.filtered.tsv',
-                'MHC_I.sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.tsv',
+                'sample.name.MHC_I.filtered.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -207,9 +207,9 @@ class PvacbindTests(unittest.TestCase):
 
             #Class II output files
             for file_name in (
-                'MHC_II.sample.name.all_epitopes.tsv',
-                'MHC_II.sample.name.filtered.tsv',
-                'MHC_II.sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_II.all_epitopes.tsv',
+                'sample.name.MHC_II.filtered.tsv',
+                'sample.name.MHC_II.all_epitopes.aggregated.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
@@ -322,9 +322,9 @@ class PvacbindTests(unittest.TestCase):
             close_mock_fhs()
 
             for file_name in (
-                'Combined.Test.all_epitopes.tsv',
-                'Combined.Test.filtered.tsv',
-                'Combined.Test.all_epitopes.aggregated.tsv',
+                'Test.Combined.all_epitopes.tsv',
+                'Test.Combined.filtered.tsv',
+                'Test.Combined.all_epitopes.aggregated.tsv',
             ):
 
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)

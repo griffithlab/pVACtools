@@ -144,16 +144,16 @@ class PvacspliceTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'MHC_I.HCC1395_TUMOR_DNA.all_epitopes.tsv',
+                'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', file_name)
                 self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'MHC_I.HCC1395_TUMOR_DNA.all_epitopes.aggregated.tsv',
-                'MHC_I.HCC1395_TUMOR_DNA.all_epitopes.aggregated.tsv.reference_matches',
-                'MHC_I.HCC1395_TUMOR_DNA.filtered.tsv',
+                'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv',
+                'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv.reference_matches',
+                'HCC1395_TUMOR_DNA.MHC_I.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', file_name)
@@ -161,7 +161,7 @@ class PvacspliceTests(unittest.TestCase):
 
             for length in [9, 10]:
                 for file_name in (
-                    'MHC_I.HCC1395_TUMOR_DNA.all_epitopes.tsv',
+                    'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv',
                 ):
                     output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'MHC_Class_I_{}'.format(length), file_name)
                     expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'MHC_Class_I_{}'.format(length), file_name)
@@ -260,23 +260,23 @@ class PvacspliceTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'MHC_II.HCC1395_TUMOR_DNA.all_epitopes.tsv',
+                'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_II', file_name)
                 self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'MHC_II.HCC1395_TUMOR_DNA.all_epitopes.aggregated.tsv',
-                'MHC_II.HCC1395_TUMOR_DNA.all_epitopes.aggregated.tsv.reference_matches',
-                'MHC_II.HCC1395_TUMOR_DNA.filtered.tsv',
+                'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv',
+                'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv.reference_matches',
+                'HCC1395_TUMOR_DNA.MHC_II.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_II', file_name)
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'MHC_II.HCC1395_TUMOR_DNA.all_epitopes.tsv',
+                'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'MHC_Class_II_15', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_II', 'MHC_Class_II_15', file_name)
@@ -327,15 +327,15 @@ class PvacspliceTests(unittest.TestCase):
             ])
 
             for file_name in (
-                'Combined.HCC1395_TUMOR_DNA.all_epitopes.tsv',
+                'HCC1395_TUMOR_DNA.Combined.all_epitopes.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run_combined', file_name)
                 self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'Combined.HCC1395_TUMOR_DNA.all_epitopes.aggregated.tsv',
-                'Combined.HCC1395_TUMOR_DNA.filtered.tsv',
+                'HCC1395_TUMOR_DNA.Combined.all_epitopes.aggregated.tsv',
+                'HCC1395_TUMOR_DNA.Combined.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run_combined', file_name)
