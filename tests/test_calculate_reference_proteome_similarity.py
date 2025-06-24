@@ -90,6 +90,27 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         ))
         os.remove(metric_file)
 
+    def test_calculate_self_similarity_with_aggregated_tsv_and_peptide_fasta_missing_sequence_in_fasta(self):
+        input_file = os.path.join(self.test_data_dir, 'Test.all_epitopes.aggregated.tsv')
+        input_fasta = os.path.join(self.test_data_dir, 'Test.missing_sequence.fasta')
+        output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
+        metric_file = "{}.reference_matches".format(output_file.name)
+        self.assertFalse(CalculateReferenceProteomeSimilarity(
+            input_file,
+            input_fasta,
+            output_file.name,
+            peptide_fasta=self.peptide_fasta,
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output.missing_sequence.aggregated.tsv"),
+        ))
+        self.assertTrue(cmp(
+            metric_file,
+            os.path.join(self.test_data_dir, "output.missing_sequence.aggregated.tsv.reference_matches"),
+        ))
+        os.remove(metric_file)
+
     def test_calculate_self_similarity_with_aggregated_tsv_and_peptide_fasta_pvasplice(self):
         input_file = os.path.join(self.test_data_dir, 'Test.pvacsplice.all_epitopes.aggregated.tsv')
         input_fasta = os.path.join(self.test_data_dir, 'Test.pvacsplice.fasta')
