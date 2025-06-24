@@ -10,7 +10,7 @@ import pandas as pd
 import py_compile
 
 from tests.utils import *
-from pvactools.lib.color_peptides51mer import annotate_every_nucleotide, set_underline
+from pvactools.lib.color_peptides51mer import annotate_every_nucleotide, set_underline, get_mutant_positions_from_fasta
 
 
 class CreatePeptideOrderingFormTests(unittest.TestCase):
@@ -231,9 +231,75 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
         assert peptide_sequence[2].large  # "C"
         assert peptide_sequence[7].large  # "H"
     
-    def test_frameshift_underlining(self):
+    def test_missense_formatting(self):
         peptide_sequence = annotate_every_nucleotide(
-            sequence = "MAKRTSGEKAGCPWSGTGQHLSKELVFGQP",
+            sequence = "EDAVQGIANQDAAQGIAKE",
+            classI_peptide = "ANQDAAQGI",
+            classII_peptide = "VQGIANQDAAQGIAK",
+            classI_ic50 = "800",
+            classI_percentile = "1.5",
+            classII_ic50 = "400",
+            classII_percentile = "0.7",
+            classI_transcript = "ENST00000434783.3",
+            classII_transcript = "ENST00000434783.3",
+            cIIC50_threshold = 1000,
+            cIpercentile_threshold = 2,
+            cIIIC50_threshold = 500,
+            cIIpercent_threshold = 2,
+            probPos = ""
+        )
+
+        fasta_file = os.path.join(self.test_data_dir, "test_missense.fa")
+        full_id = "8.FAM230A.ENST00000434783.3.missense.322E/Q"
+
+        mutant_positions = get_mutant_positions_from_fasta(fasta_file, full_id)
+        set_underline(peptide_sequence, mutant_positions)
+
+        expected_underlined_positions = {9}
+
+        # Assert all mutant AAs are underlined
+        self.assertSetEqual(
+            mutant_positions,
+            expected_underlined_positions,
+            f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
+        )
+    
+    def test_missense_with_proximal_variant_formatting(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence = "EDASQGIANQDAAQGIAKE",
+            classI_peptide = "ANQDAAQGI",
+            classII_peptide = "VQGIANQDAAQGIAK",
+            classI_ic50 = "800",
+            classI_percentile = "1.5",
+            classII_ic50 = "400",
+            classII_percentile = "0.7",
+            classI_transcript = "ENST00000434783.3",
+            classII_transcript = "ENST00000434783.3",
+            cIIC50_threshold = 1000,
+            cIpercentile_threshold = 2,
+            cIIIC50_threshold = 500,
+            cIIpercent_threshold = 2,
+            probPos = ""
+        )
+
+        fasta_file = os.path.join(self.test_data_dir, "test_missense_proximal_variant.fa")
+        full_id = "8.FAM230A.ENST00000434783.3.missense.322E/Q"
+
+        mutant_positions = get_mutant_positions_from_fasta(fasta_file, full_id)
+        set_underline(peptide_sequence, mutant_positions)
+
+        expected_underlined_positions = {3, 9}
+
+        # Assert all mutant AAs are underlined
+        self.assertSetEqual(
+            mutant_positions,
+            expected_underlined_positions,
+            f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
+        )
+    
+    def test_frameshift_formatting(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence = "DTGGGGRSAGSTGQGSGEKAGCPWSGTGQH",
             classI_peptide = "GEKAGCPWS",
             classII_peptide = "SGEKAGCPWSGTGQH",
             classI_ic50 = "800",
@@ -249,18 +315,184 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
             probPos = ""
         )
 
-        full_row_ID = "16.TRIOBP.ENST00000406386.3.FS.219GA/G"
-        mutant_peptide_pos = "1"
-        set_underline(peptide_sequence, mutant_peptide_pos, full_row_ID)
+        fasta_file = os.path.join(self.test_data_dir, "test_frameshift.fa")
+        full_id = "16.TRIOBP.ENST00000406386.3.FS.219GA/G"
 
-        colored_positions = [i for i, aa in enumerate(peptide_sequence) if aa.color]
-        underlined_positions = [i for i, aa in enumerate(peptide_sequence) if aa.underline]
+        mutant_positions = get_mutant_positions_from_fasta(fasta_file, full_id)
+        set_underline(peptide_sequence, mutant_positions)
 
-        # Assert all colored AAs are underlined
-        self.assertListEqual(
-            underlined_positions,
-            colored_positions,
-            f"Expected underlining at {colored_positions}, but got {underlined_positions}",
+        expected_underlined_positions = {9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26}
+
+        # Assert all mutant AAs are underlined
+        self.assertSetEqual(
+            mutant_positions,
+            expected_underlined_positions,
+            f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
+        )
+    
+    def test_frameshift_with_proximal_variant_formatting(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence = "DTSGGGRSAGSTGQGSGEKAGCPWSGTGQH",
+            classI_peptide = "GEKAGCPWS",
+            classII_peptide = "SGEKAGCPWSGTGQH",
+            classI_ic50 = "800",
+            classI_percentile = "1.5",
+            classII_ic50 = "400",
+            classII_percentile = "0.7",
+            classI_transcript = "ENST00000406386.3",
+            classII_transcript = "ENST00000406386.3",
+            cIIC50_threshold = 1000,
+            cIpercentile_threshold = 2,
+            cIIIC50_threshold = 500,
+            cIIpercent_threshold = 2,
+            probPos = ""
+        )
+
+        fasta_file = os.path.join(self.test_data_dir, "test_frameshift_proximal_variant.fa")
+        full_id = "16.TRIOBP.ENST00000406386.3.FS.219GA/G"
+
+        mutant_positions = get_mutant_positions_from_fasta(fasta_file, full_id)
+        set_underline(peptide_sequence, mutant_positions)
+
+        expected_underlined_positions = {2, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26}
+
+        # Assert all mutant AAs are underlined
+        self.assertSetEqual(
+            mutant_positions,
+            expected_underlined_positions,
+            f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
+        )
+    
+    def test_inframe_deletion_formatting(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence = "PASAAAAAAAVIPTVSTPP",
+            classI_peptide = "SAAAAAAAV",
+            classII_peptide = "SAAAAAAAVIPTVST",
+            classI_ic50 = "800",
+            classI_percentile = "1.5",
+            classII_ic50 = "400",
+            classII_percentile = "0.7",
+            classI_transcript = "ENST00000381793.2",
+            classII_transcript = "ENST00000381793.2",
+            cIIC50_threshold = 1000,
+            cIpercentile_threshold = 2,
+            cIIIC50_threshold = 500,
+            cIIpercent_threshold = 2,
+            probPos = ""
+        )
+
+        fasta_file = os.path.join(self.test_data_dir, "test_inframe_deletion.fa")
+        full_id = "2.RBM47.ENST00000381793.2.inframe_del.495-502AAAAAAAA/A"
+
+        mutant_positions = get_mutant_positions_from_fasta(fasta_file, full_id)
+        set_underline(peptide_sequence, mutant_positions)
+
+        expected_underlined_positions = {2, 3}
+
+        # Assert the two AAs surrounding the deletion are underlined
+        self.assertSetEqual(
+            mutant_positions,
+            expected_underlined_positions,
+            f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
+        )
+    
+    def test_inframe_deletion_with_proximal_variant_formatting(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence = "PASAAAAAAAVIPTVSTPL",
+            classI_peptide = "SAAAAAAAV",
+            classII_peptide = "SAAAAAAAVIPTVST",
+            classI_ic50 = "800",
+            classI_percentile = "1.5",
+            classII_ic50 = "400",
+            classII_percentile = "0.7",
+            classI_transcript = "ENST00000381793.2",
+            classII_transcript = "ENST00000381793.2",
+            cIIC50_threshold = 1000,
+            cIpercentile_threshold = 2,
+            cIIIC50_threshold = 500,
+            cIIpercent_threshold = 2,
+            probPos = ""
+        )
+
+        fasta_file = os.path.join(self.test_data_dir, "test_inframe_deletion_proximal_variant.fa")
+        full_id = "2.RBM47.ENST00000381793.2.inframe_del.495-502AAAAAAAA/A"
+
+        mutant_positions = get_mutant_positions_from_fasta(fasta_file, full_id)
+        set_underline(peptide_sequence, mutant_positions)
+
+        expected_underlined_positions = {2, 3, 18}
+
+        # Assert the two AAs surrounding the deletion are underlined
+        self.assertSetEqual(
+            mutant_positions,
+            expected_underlined_positions,
+            f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
+        )
+
+    def test_inframe_insertion_formatting(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence = "PLPPPPLLPLLPLLLLLGASGGG",
+            classI_peptide = "LLPLLPLLL",
+            classII_peptide = "LPLLPLLLLLGASGG",
+            classI_ic50 = "800",
+            classI_percentile = "1.5",
+            classII_ic50 = "400",
+            classII_percentile = "0.7",
+            classI_transcript = "ENST00000233809.4",
+            classII_transcript = "ENST00000233809.4",
+            cIIC50_threshold = 1000,
+            cIpercentile_threshold = 2,
+            cIIIC50_threshold = 500,
+            cIIpercent_threshold = 2,
+            probPos = ""
+        )
+
+        fasta_file = os.path.join(self.test_data_dir, "test_inframe_insertion.fa")
+        full_id = "1.IGFBP2.ENST00000233809.4.inframe_ins.20L/LLP"
+
+        mutant_positions = get_mutant_positions_from_fasta(fasta_file, full_id)
+        set_underline(peptide_sequence, mutant_positions)
+
+        expected_underlined_positions = {10, 11}
+
+        # Assert the differing inserted AAs are underlined
+        self.assertSetEqual(
+            mutant_positions,
+            expected_underlined_positions,
+            f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
+        )
+    
+    def test_inframe_insertion_with_proximal_variant_formatting(self):
+        peptide_sequence = annotate_every_nucleotide(
+            sequence = "PTPPPPLLPLLPLLLLLGASGGG",
+            classI_peptide = "LLPLLPLLL",
+            classII_peptide = "LPLLPLLLLLGASGG",
+            classI_ic50 = "800",
+            classI_percentile = "1.5",
+            classII_ic50 = "400",
+            classII_percentile = "0.7",
+            classI_transcript = "ENST00000233809.4",
+            classII_transcript = "ENST00000233809.4",
+            cIIC50_threshold = 1000,
+            cIpercentile_threshold = 2,
+            cIIIC50_threshold = 500,
+            cIIpercent_threshold = 2,
+            probPos = ""
+        )
+
+        fasta_file = os.path.join(self.test_data_dir, "test_inframe_insertion_proximal_variant.fa")
+        full_id = "1.IGFBP2.ENST00000233809.4.inframe_ins.20L/LLP"
+
+        mutant_positions = get_mutant_positions_from_fasta(fasta_file, full_id)
+        set_underline(peptide_sequence, mutant_positions)
+
+        expected_underlined_positions = {1, 10, 11}
+
+        # Assert the differing inserted AAs are underlined
+        self.assertSetEqual(
+            mutant_positions,
+            expected_underlined_positions,
+            f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
         )
 
     def test_fasta_output(self):
