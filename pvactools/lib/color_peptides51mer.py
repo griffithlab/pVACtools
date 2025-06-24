@@ -25,6 +25,7 @@ def get_mutant_positions_from_fasta(fasta_path, full_id):
     if full_id.startswith("WT.") or full_id.startswith("MT."):
         full_id = full_id[3:]
 
+    frameshift = ".FS." in full_id
     wt_id = f"WT.{full_id}"
     mt_id = f"MT.{full_id}"
     wt_seq = None
@@ -51,7 +52,13 @@ def get_mutant_positions_from_fasta(fasta_path, full_id):
         wt_residue = wt_aligned[i]
         mt_residue = mt_aligned[i]
 
-        if mt_residue != "-":
+        if mt_residue == "-":
+            if not frameshift:  # For inframe deletions only, underline residues adjacent to deletions
+                if mt_index > 0:
+                    mutant_positions.add(mt_index - 1)
+                if mt_index < len(mt_seq):
+                    mutant_positions.add(mt_index)
+        else:
             if wt_residue != mt_residue:
                 mutant_positions.add(mt_index)
             mt_index += 1
