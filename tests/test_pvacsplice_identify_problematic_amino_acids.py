@@ -53,6 +53,6 @@ class PvacspliceIdentifyProblematicAminoAcidsTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'Test.MHC_I.all_epitopes.tsv')
+        input_file = os.path.join(self.test_data_directory, 'results', 'Test.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(identify_problematic_amino_acids.main([input_file, output_file.name, "C"]))
