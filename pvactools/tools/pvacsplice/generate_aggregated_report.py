@@ -95,6 +95,7 @@ def main(args_input = sys.argv[1:]):
     tmp_fh = tempfile.NamedTemporaryFile()
 
     print("Creating Aggregated Report")
+    print(f"{args.input_file}: {args.output_file}")
     PvacspliceAggregateAllEpitopes(
         args.input_file,
         args.output_file,
