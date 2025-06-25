@@ -24,16 +24,16 @@ created):
      - Description
    * - ``<sample_name>.fasta``
      - A fasta file with mutant peptide subsequences for each fusion.
-   * - ``<sample_name>.<MHC_Class/Combined>.all_epitopes.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``.
-   * - ``<sample_name>.<MHC_Class/Combined>.filtered.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.filtered.tsv``
      - The above file after applying all filters, with cleavage site and stability
        predictions added.
-   * - ``<sample_name>.<MHC_Class/Combined>.all_epitopes.aggregated.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format. Not generated when running with elution algorithms only.
-   * - ``<sample_name>.<MHC_Class/Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
 
 Additionally, each folder will contain subfolders, one for each selected

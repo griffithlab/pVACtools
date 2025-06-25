@@ -32,22 +32,22 @@ created):
        processable variant-transcript combinations.
    * - ``<sample_name>.net_chop.fa``
      - A fasta file with mutant and wildtype peptide subsequences specific for use in running the net_chop tool.
-   * - ``<sample_name>.<MHC_Class/Combined>.all_epitopes.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``. Only
        epitopes resulting from supported variants (missense, inframe indels, and frameshifts)
        are included. If the ``--pass-only`` flag is
        set, variants that have a FILTER set in the VCF are excluded.
-   * - ``<sample_name>.<MHC_Class/Combined>.filtered.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.filtered.tsv``
      - The above file after applying all filters, with (optionally) cleavage site, stability
        predictions, and reference proteome similarity metrics added.
-   * - ``<sample_name>.<MHC_Class/Combined>.all_epitopes.aggregated.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format. Not
        generated when running with elution algorithms only.
-   * - ``<sample_name>.<MHC_Class/Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
-   * - ``<sample_name>.<MHC_Class/Combined>.all_epitopes.aggregated.metrics.json``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.metrics.json``
      - A JSON file with detailed information about the predicted epitopes,
        formatted for pVACview. This file, in combination with the
        aggregated.tsv file, is required to visualize your results
