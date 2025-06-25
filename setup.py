@@ -103,6 +103,7 @@ setup(
         'pyarrow',
         'polars==0.16.18',
         'XlsxWriter',
+        'openpyxl'
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,
