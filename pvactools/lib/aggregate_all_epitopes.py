@@ -660,7 +660,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                             wt_peptide = 'FS-NA'
                         elif variant_type == 'inframe_ins':
                             wt_peptide = 'INS-NA'
-                        elif variant_type == 'inframe_deletion':
+                        elif variant_type == 'inframe_del':
                             wt_peptide = 'DEL-NA'
                     results[peptide]['wt_peptide'] = wt_peptide
             peptides[set_name]['peptides'] = self.sort_peptides(results)
