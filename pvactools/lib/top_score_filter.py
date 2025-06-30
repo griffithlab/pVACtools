@@ -38,6 +38,12 @@ class TopScoreFilter(metaclass=ABCMeta):
                  + "lowest: Use the best MT Score (i.e. the lowest MT ic50 binding score of all chosen prediction methods). "
                  + "median: Use the median MT Score (i.e. the median MT ic50 binding score of all chosen prediction methods)."
         )
+        parser.add_argument(
+            '-m2', '--top-score-metric2',
+            choices=['ic50','percentile'],
+            default='ic50',
+            help="Whether to use median/best IC50 or to use median/best percentile score."
+        )
         if tool == 'pvacseq' or tool == 'pvacsplice':
             parser.add_argument(
                 "--maximum-transcript-support-level", type=int,
@@ -97,6 +103,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         input_file,
         output_file, 
         top_score_metric="median",
+        top_score_metric2="ic50",
         binding_threshold=500,
         allele_specific_binding_thresholds=False,
         maximum_transcript_support_level=1,
@@ -106,6 +113,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.mt_top_score_metric = "Median"
             self.wt_top_score_metric = "Median"
@@ -248,18 +256,25 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 return True
             anchor_residue_pass = True
             if all(int(pos) in anchors for pos in positions):
-                if line["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
-                    anchor_residue_pass = False
-                elif float(line["{} WT IC50 Score".format(self.wt_top_score_metric)]) < binding_threshold:
-                    anchor_residue_pass = False
+                if self.top_score_metric2 == "ic50":
+                    if line["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
+                        anchor_residue_pass = False
+                    elif float(line["{} WT IC50 Score".format(self.wt_top_score_metric)]) < binding_threshold:
+                        anchor_residue_pass = False
+                else:
+                    if line["{} WT Percentile Score".format(self.wt_top_score_metric)] == "NA":
+                        anchor_residue_pass = False
+                    elif float(line["{} WT Percentile Score".format(self.wt_top_score_metric)]) < binding_threshold:
+                        anchor_residue_pass = False
             return anchor_residue_pass
 
 
 class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median"):
+    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = "ic50"):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.formatted_top_score_metric = "Median"
         else:
@@ -326,10 +341,11 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         return sorted_lines[0]
 
 class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median"):
+    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = "ic50"):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.formatted_top_score_metric = "Median"
         else:
@@ -368,10 +384,11 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         return sorted_lines[0]
 
 class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median", maximum_transcript_support_level=1):
+    def __init__(self, input_file, output_file, top_score_metric="median", maximum_transcript_support_level=1, top_score_metric2 = "ic50"):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.formatted_top_score_metric = "Median"
         else:

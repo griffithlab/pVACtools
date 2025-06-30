@@ -1,0 +1,70 @@
+additional_report_columns: null
+aggregate_inclusion_binding_threshold: 5000
+aggregate_inclusion_count_limit: 15
+allele:
+- HLA-G*01:09
+- HLA-E*01:01
+allele_specific_binding_thresholds: false
+anchor_types:
+- A
+- D
+- NDA
+annotated_vcf: /home/zmanjaroschool/pVACtools/tests/test_data/pvacsplice/inputs/annotated.expression_chr1.vcf.gz
+binding_threshold: 2000
+biotypes:
+- protein_coding
+blastp_db: refseq_select_prot
+blastp_path: null
+class_i_epitope_length:
+- 9
+- 10
+class_ii_epitope_length:
+- 12
+- 13
+- 14
+- 15
+- 16
+- 17
+- 18
+exclude_NAs: false
+expn_val: 1.0
+fasta_size: 200
+genes_of_interest_file: null
+gtf_file: /home/zmanjaroschool/pVACtools/tests/test_data/pvacsplice/inputs/Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz
+iedb_install_directory: null
+iedb_retries: 5
+input_file: /home/zmanjaroschool/pVACtools/tests/test_data/pvacsplice/inputs/splice_junctions_chr1.tsv
+junction_score: 10
+keep_tmp_files: true
+maximum_transcript_support_level: 3
+n_threads: 1
+net_chop_method: cterm
+net_chop_threshold: 0.5
+netmhc_stab: true
+netmhciipan_version: '4.1'
+normal_cov: 5
+normal_sample_name: HCC1395_NORMAL_DNA
+normal_vaf: 0.02
+output_dir: /home/zmanjaroschool/pVACtools/tests/test_data/pvacsplice/tmpri67ymi7
+pass_only: false
+peptide_fasta: /home/zmanjaroschool/pVACtools/tests/test_data/Homo_sapiens.GRCh38.pep.short.fa.gz
+percentile_threshold: null
+percentile_threshold_strategy: conservative
+prediction_algorithms:
+- NetMHC
+- PickPocket
+problematic_amino_acids:
+- C
+pvactools_version: 5.4.1
+ref_fasta: /tmp/tmpom5y6m7h.fa
+run_reference_proteome_similarity: true
+sample_name: HCC1395_TUMOR_DNA
+save_gtf: true
+tdna_cov: 10
+tdna_vaf: 0.25
+top_score_metric: median
+top_score_metric2: ic50
+trna_cov: 10
+trna_vaf: 0.25
+tumor_purity: null
+variant_distance: 100

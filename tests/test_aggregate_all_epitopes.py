@@ -201,7 +201,8 @@ class AggregateAllEpitopesTests(unittest.TestCase):
             PvacseqAggregateAllEpitopes(
                 os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'),
                 output_file.name,
-                top_score_metric="lowest"
+                top_score_metric="lowest",
+                top_score_metric2="ic50" # Temporary test
             ).execute()
         )
         self.assertTrue(cmp(
@@ -231,7 +232,8 @@ class AggregateAllEpitopesTests(unittest.TestCase):
             PvacbindAggregateAllEpitopes(
                 os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacbind.tsv'),
                 output_file.name,
-                top_score_metric="lowest"
+                top_score_metric="lowest",
+                top_score_metric2 = "ic50", # Temporary test
             ).execute()
         )
         self.assertTrue(cmp(

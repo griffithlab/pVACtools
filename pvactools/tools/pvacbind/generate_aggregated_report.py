@@ -63,7 +63,12 @@ def define_parser():
              + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
              + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
     )
-
+    parser.add_argument(
+        '-m2', '--top-score-metric2',
+        choices=['ic50','percentile'],
+        default='ic50',
+        help="Whether to use median/best IC50 or to use median/best percentile score."
+    )
     return parser
 
 def main(args_input = sys.argv[1:]):
