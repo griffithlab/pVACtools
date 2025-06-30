@@ -282,6 +282,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
+            top_score_metric2="ic50",
             allele_specific_anchors=False,
             anchor_contribution_threshold=0.8,
             aggregate_inclusion_binding_threshold=5000,
@@ -300,6 +301,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.trna_cov = trna_cov
         self.trna_vaf = trna_vaf
         self.maximum_transcript_support_level = maximum_transcript_support_level
+        self.top_score_metric2 = top_score_metric2
         if top_score_metric == 'median':
             self.mt_top_score_metric = "Median"
             self.wt_top_score_metric = "Median"
@@ -403,11 +405,18 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             anchor_residue_pass_df = prob_pos_df
 
         #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
-        anchor_residue_pass_df.sort_values(by=[
-            "{} MT IC50 Score".format(self.mt_top_score_metric),
-            "Transcript Support Level",
-            "Transcript Length",
-        ], inplace=True, ascending=[True, True, False])
+        if self.top_score_metric2 == "percentile":
+            anchor_residue_pass_df.sort_values(by=[
+                "{} MT Percentile".format(self.mt_top_score_metric),
+                "Transcript Support Level",
+                "Transcript Length",
+            ], inplace=True, ascending=[True,True,False])
+        else:
+            anchor_residue_pass_df.sort_values(by=[
+                "{} MT IC50 Score".format(self.mt_top_score_metric),
+                "Transcript Support Level",
+                "Transcript Length",
+            ], inplace=True, ascending=[True, True, False])
         return anchor_residue_pass_df.iloc[0]
 
     def is_anchor_residue_pass(self, mutation):
@@ -544,16 +553,28 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             df['problematic_positions_sort'] = df['Problematic Positions'].apply(lambda x: 1 if x == "None" else 2)
         df['anchor_residue_pass_sort'] = df.apply(lambda x: 1 if self.is_anchor_residue_pass(x) else 2, axis=1)
         if self.problematic_positions_exist():
-            sort_columns = [
-                "biotype_sort",
-                "tsl_sort",
-                "problematic_positions_sort",
-                "anchor_residue_pass_sort",
-                "{} MT IC50 Score".format(self.mt_top_score_metric),
-                "Transcript Length",
-                "{} MT Percentile".format(self.mt_top_score_metric),
-            ]
-            sort_order = [True, True, True, True, True, False, True]
+            if self.top_score_metric2 == "ic50":
+                sort_columns = [
+                    "biotype_sort",
+                    "tsl_sort",
+                    "problematic_positions_sort",
+                    "anchor_residue_pass_sort",
+                    "{} MT IC50 Score".format(self.mt_top_score_metric),
+                    "Transcript Length",
+                    "{} MT Percentile".format(self.mt_top_score_metric),
+                ]
+                sort_order = [True, True, True, True, True, False, True]
+            else:
+                sort_columns = [
+                    "biotype_sort",
+                    "tsl_sort",
+                    "problematic_positions_sort",
+                    "anchor_residue_pass_sort",
+                    "{} MT Percentile".format(self.mt_top_score_metric),
+                    "Transcript Length",
+                    "{} MT IC50 Score".format(self.mt_top_score_metric),
+                ]
+                sort_order = [True, True, True, True, True, False, True]
         else:
             sort_columns = [
                 "biotype_sort",
@@ -564,6 +585,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 "{} MT Percentile".format(self.mt_top_score_metric),
             ]
             sort_order = [True, True, True, True, False, True]
+        
         df.sort_values(by=sort_columns, inplace=True, ascending=sort_order)
         df.drop(columns = ['biotype_sort', 'tsl_sort', 'problematic_positions_sort', 'anchor_residue_pass_sort'], inplace=True, errors='ignore')
         return df
@@ -792,19 +814,22 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
     #sort the table in our preferred manner
     def sort_table(self, df):
+        score_type = "IC50"
+        if self.top_score_metric2 == "percentile":
+            score_type = "Percentile"
         #make sure the tiers sort in the expected order
         tier_sorter = ["Pass", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
-
-        df["rank_ic50"] = df["IC50 MT"].rank(ascending=True, method='dense')
+        
+        df[f"rank_{self.top_score_metric2}"] = df[f"{score_type} MT"].rank(ascending=True, method='dense')
         df["rank_expr"] = pd.to_numeric(df["Allele Expr"], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
-        df["rank"] = df["rank_ic50"] + df["rank_expr"]
+        df["rank"] = df[f"rank_{self.top_score_metric2}"] + df["rank_expr"]
 
         df.sort_values(by=["rank_tier", "rank", "Gene", "AA Change"], inplace=True, ascending=True)
 
         df.drop(labels='rank_tier', axis=1, inplace=True)
-        df.drop(labels='rank_ic50', axis=1, inplace=True)
+        df.drop(labels=f'rank_{self.top_score_metric2}', axis=1, inplace=True)
         df.drop(labels='rank_expr', axis=1, inplace=True)
         df.drop(labels='rank', axis=1, inplace=True)
 
@@ -831,6 +856,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
+            top_score_metric2='ic50',
             aggregate_inclusion_binding_threshold=5000,
             aggregate_inclusion_count_limit=15,
         ):
@@ -842,6 +868,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         self.aggregate_inclusion_count_limit = aggregate_inclusion_count_limit
+        self.top_score_metric2 = top_score_metric2
         if top_score_metric == 'median':
             self.top_score_metric = "Median"
         else:
@@ -878,7 +905,12 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
                 prob_pos_df = df
         else:
             prob_pos_df = df
-        prob_pos_df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
+            if self.top_score_metric2 == "percentile":
+                anchor_residue_pass_df.sort_values(by=[
+                    "{} MT Percentile".format(self.mt_top_score_metric)
+                ], inplace=True, ascending=True)
+            else:
+                prob_pos_df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
         return prob_pos_df.iloc[0]
 
     def get_included_df(self, df):
@@ -900,7 +932,12 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             return binding_df[binding_df["Epitope Seq"].isin(top_n_best_peptides)]
 
     def sort_included_df(self, df):
-        df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
+        if self.top_score_metric2 == "percentile":
+            anchor_residue_pass_df.sort_values(by=[
+                "{} MT Percentile".format(self.mt_top_score_metric),
+            ], inplace=True, ascending=True)
+        else:
+            df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
         return df
 
     def get_unique_peptide_hla_counts(self, included_df):
@@ -938,14 +975,18 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
     #sort the table in our preferred manner
     def sort_table(self, df):
-        df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
+        if self.top_score_metric2 == "ic50":
 
+            df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
+        else:
+            df.sort_values(by=["Percentile MT", "ID"], inplace=True, ascending=[True, True])
         tier_sorter = ["Pass", "Poor"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
-
-        df.sort_values(by=["rank_tier", "IC50 MT", "ID"], inplace=True, ascending=[True, True, True])
-
+        if self.top_score_metric2 == "ic50":
+            df.sort_values(by=["rank_tier", "IC50 MT", "ID"], inplace=True, ascending=[True, True, True])
+        else:
+            df.sort_values(by=["rank_tier", "Percentile MT", "ID"], inplace=True, ascending=[True, True, True])
         df.drop(labels='rank_tier', axis=1, inplace=True)
         return df
 
@@ -962,6 +1003,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         percentile_threshold_strategy='conservative',
         allele_specific_binding_thresholds=False,
         top_score_metric="median",
+        top_score_metric2='ic50',
         read_support=5,
         expn_val=0.1,
         aggregate_inclusion_binding_threshold=5000,
@@ -976,6 +1018,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             percentile_threshold_strategy = percentile_threshold_strategy,
             allele_specific_binding_thresholds=allele_specific_binding_thresholds,
             top_score_metric=top_score_metric,
+            top_score_metric2=top_score_metric2,
             aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
             aggregate_inclusion_count_limit=aggregate_inclusion_count_limit,
         )
@@ -1052,8 +1095,10 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         return "Poor"
 
     def sort_table(self, df):
-        df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
-
+        if self.top_score_metric2 == "ic50":
+            df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
+        else:
+            df.sort_values(by=["Percentile MT", "ID"], inplace=True, ascending=[True,True])
         tier_sorter = ["Pass", "LowReadSupport", "LowExpr", "Poor"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
@@ -1061,9 +1106,10 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         df["rank_ic50"] = df["IC50 MT"].rank(ascending=True, method='dense')
         df["rank_expr"] = pd.to_numeric(df["Expr"], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
         df["rank"] = df["rank_ic50"] + df["rank_expr"]
-
-        df.sort_values(by=["rank_tier", "rank", "IC50 MT", "ID"], inplace=True, ascending=True)
-
+        if self.top_score_metric2 == "ic50":
+            df.sort_values(by=["rank_tier", "rank", "IC50 MT", "ID"], inplace=True, ascending=True)
+        else:
+            df.sort_values(by=["rank_tier","rank","Percentile MT", "ID"], inplace=True, ascending=True)
         df.drop(labels='rank_tier', axis=1, inplace=True)
         df.drop(labels='rank_ic50', axis=1, inplace=True)
         df.drop(labels='rank_expr', axis=1, inplace=True)
@@ -1095,7 +1141,8 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
         else:
             binding_threshold = self.binding_threshold
-        
+        # This seems like it wouldn't need to be changed since it is doing both IC50 and Percentile already
+        # Maybe update it so percentile happens first?
         ic50_pass = mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold
         percentile_pass = (
             self.percentile_threshold is None or 
@@ -1126,6 +1173,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         aggregate_inclusion_binding_threshold=5000,
         aggregate_inclusion_count_limit=15,
         top_score_metric="median",
+        top_score_metric2="ic50",
         trna_vaf=0.25,
         trna_cov=10,
         expn_val=1,
@@ -1142,6 +1190,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
             aggregate_inclusion_count_limit=aggregate_inclusion_count_limit,
             top_score_metric=top_score_metric,
+            top_score_metric2=top_score_metric2,
         )
         self.tumor_purity = tumor_purity
         self.trna_vaf = trna_vaf
@@ -1239,18 +1288,21 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
 
     def sort_table(self, df):
         #make sure the tiers sort in the expected order
+        score_type = "IC50"
+        if self.top_score_metric2 == "percentile":
+            score_type = "Percentile"
         tier_sorter = ["Pass", "LowExpr", "Subclonal", "Poor", "NoExpr"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
 
-        df["rank_ic50"] = df["IC50 MT"].rank(ascending=True, method='dense')
+        df[f"rank_{self.top_score_metric2}"] = df[f"{score_type} MT"].rank(ascending=True, method='dense')
         df["rank_expr"] = pd.to_numeric(df["Allele Expr"], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
-        df["rank"] = df["rank_ic50"] + df["rank_expr"]
+        df["rank"] = df[f"rank_{self.top_score_metric2}"] + df["rank_expr"]
 
         df.sort_values(by=["rank_tier", "rank", "Gene", "Transcript", "AA Change"], inplace=True, ascending=True)
 
         df.drop(labels='rank_tier', axis=1, inplace=True)
-        df.drop(labels='rank_ic50', axis=1, inplace=True)
+        df.drop(labels=f'rank_{self.top_score_metric2}', axis=1, inplace=True)
         df.drop(labels='rank_expr', axis=1, inplace=True)
         df.drop(labels='rank', axis=1, inplace=True)
 

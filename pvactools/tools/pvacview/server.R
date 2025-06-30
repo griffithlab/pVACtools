@@ -463,7 +463,7 @@ server <- shinyServer(function(input, output, session) {
                   if (is.null(df$metricsData$percentile_threshold)) {"NULL"}else { df$metricsData$percentile_threshold},
                   df$metricsData$percentile_threshold_strategy,
                   df$metricsData$use_allele_specific_binding_thresholds,
-                  df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric,
+                  df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric, #I have no idea how to work with this piece of code
                   df$metricsData$allele_specific_anchors, df$metricsData$anchor_contribution_threshold)
     ), digits = 3
   )

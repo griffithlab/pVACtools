@@ -69,6 +69,12 @@ def define_parser():
              + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
     )
     parser.add_argument(
+        '-m2', '--top-score-metric2',
+        choices=['ic50','percentile'],
+        default='ic50',
+        help="Whether to use median/best IC50 or to use median/best percentile score."
+    )
+    parser.add_argument(
         '--trna-vaf', type=float_range(0.0, 1.0),
         help="Tumor RNA VAF Cutoff. Used to calculate the allele expression cutoff for tiering.",
         default=0.25
@@ -132,6 +138,7 @@ def main(args_input = sys.argv[1:]):
         expn_val=args.expn_val,
         maximum_transcript_support_level=args.maximum_transcript_support_level,
         top_score_metric=args.top_score_metric,
+        top_score_metric2=args.top_score_metric2,
         allele_specific_anchors=args.allele_specific_anchors,
         anchor_contribution_threshold=args.anchor_contribution_threshold,
         aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,

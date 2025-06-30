@@ -1,4 +1,4 @@
-def default_sort(rows, top_score_metric):
+def default_sort(rows, top_score_metric): # Adding a comment to make this file show up as edited
     if top_score_metric == 'median':
         sorted_rows = sorted(rows, key=lambda row: (float(row['Best MT IC50 Score'])))
         sorted_rows = sorted(sorted_rows, key=lambda row: (float(row['Corresponding Fold Change']) if str(row['Corresponding Fold Change']).isdigit() else float('inf')), reverse=True)
