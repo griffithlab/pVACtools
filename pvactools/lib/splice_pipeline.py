@@ -24,6 +24,7 @@ class JunctionPipeline:
         self.class_i_hla = kwargs['class_i_hla']
         self.class_ii_hla = kwargs['class_ii_hla']
         self.junction_score = kwargs['junction_score']
+        self.anchor_types = kwargs['anchor_types']
         self.variant_distance = kwargs['variant_distance']
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
         self.save_gtf = kwargs['save_gtf']
@@ -100,6 +101,7 @@ class JunctionPipeline:
                 'gtf_data': self.gtf_data,
                 'score': self.junction_score,
                 'distance': self.variant_distance,
+                'anchor_types': self.anchor_types,
             }
             filter_object = FilterRegtoolsResults(**filter_params)
             filter_df = filter_object.execute()
