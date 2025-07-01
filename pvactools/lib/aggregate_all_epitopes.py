@@ -907,16 +907,16 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
                 prob_pos_df = df
         else:
             prob_pos_df = df
-            if self.top_score_metric2 == "percentile":
-                prob_pos_df.sort_values(by=[
-                    "{} Percentile".format(self.top_score_metric)
-                ], inplace=True, ascending=True)
-            else:
-                prob_pos_df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
+            top_score_mod = "Percentile Method"
+            if self.top_score_metric2 == "ic50":
+                top_score_mod = "IC50 Score"
+            # raise Exception(prob_pos_df.keys())
+            prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, top_score_mod)], inplace=True, ascending=True)
         return prob_pos_df.iloc[0]
 
     def get_included_df(self, df):
         binding_df = df[df["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold]
+
         if binding_df.shape[0] == 0:
             return binding_df
         else:
@@ -981,14 +981,24 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
             df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
         else:
-            df.sort_values(by=["Percentile", "ID"], inplace=True, ascending=[True, True])
+            # raise Exception(df.keys())
+            # if "Percentile" in df.keys():
+            #     df.sort_values(by=["Percentile", "ID"], inplace=True, ascending=[True, True])
+            # else:
+            df.sort_values(by=["%ile MT", "ID"], inplace=True, ascending=[True, True])
+                
         tier_sorter = ["Pass", "Poor"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
         if self.top_score_metric2 == "ic50":
             df.sort_values(by=["rank_tier", "IC50 MT", "ID"], inplace=True, ascending=[True, True, True])
         else:
-            df.sort_values(by=["rank_tier", "Percentile", "ID"], inplace=True, ascending=[True, True, True])
+            # raise Exception(df.keys())
+            # if "Percentile" in df.keys():
+            #     df.sort_values(by=["rank_tier", "Percentile", "ID"], inplace=True, ascending=[True, True])
+            # else:
+            df.sort_values(by=["rank_tier", "%ile MT", "ID"], inplace=True, ascending=[True, True, True])
+            # df.sort_values(by=["rank_tier", "Percentile", "ID"], inplace=True, ascending=[True, True, True])
         df.drop(labels='rank_tier', axis=1, inplace=True)
         return df
 
@@ -1100,7 +1110,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         if self.top_score_metric2 == "ic50":
             df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
         else:
-            df.sort_values(by=["Percentile MT", "ID"], inplace=True, ascending=[True,True])
+            df.sort_values(by=["Percentile", "ID"], inplace=True, ascending=[True,True])
         tier_sorter = ["Pass", "LowReadSupport", "LowExpr", "Poor"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
@@ -1111,7 +1121,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         if self.top_score_metric2 == "ic50":
             df.sort_values(by=["rank_tier", "rank", "IC50 MT", "ID"], inplace=True, ascending=True)
         else:
-            df.sort_values(by=["rank_tier","rank","Percentile MT", "ID"], inplace=True, ascending=True)
+            df.sort_values(by=["rank_tier","rank","Percentile", "ID"], inplace=True, ascending=True)
         df.drop(labels='rank_tier', axis=1, inplace=True)
         df.drop(labels='rank_ic50', axis=1, inplace=True)
         df.drop(labels='rank_expr', axis=1, inplace=True)
