@@ -259,6 +259,8 @@ class AggregateAllEpitopes:
             data.append(best_mut_line)
             metrics[key_str] = metrics_for_key
         peptide_table = pd.DataFrame(data=data)
+        # raise Exception(peptide_table)
+        # print(peptide_table)
         peptide_table = self.sort_table(peptide_table)
 
         peptide_table.to_csv(self.output_file, sep='\t', na_rep='NA', index=False, float_format='%.3f')
@@ -814,7 +816,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
     #sort the table in our preferred manner
     def sort_table(self, df):
-        score_type = "IC50"
+        score_type = "IC50 MT"
         if self.top_score_metric2 == "percentile":
             score_type = "Percentile"
         #make sure the tiers sort in the expected order
@@ -822,7 +824,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
         
-        df[f"rank_{self.top_score_metric2}"] = df[f"{score_type} MT"].rank(ascending=True, method='dense')
+        df[f"rank_{self.top_score_metric2}"] = df[f"{score_type}"].rank(ascending=True, method='dense')
         df["rank_expr"] = pd.to_numeric(df["Allele Expr"], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
         df["rank"] = df[f"rank_{self.top_score_metric2}"] + df["rank_expr"]
 
@@ -906,8 +908,8 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         else:
             prob_pos_df = df
             if self.top_score_metric2 == "percentile":
-                anchor_residue_pass_df.sort_values(by=[
-                    "{} MT Percentile".format(self.mt_top_score_metric)
+                prob_pos_df.sort_values(by=[
+                    "{} Percentile".format(self.top_score_metric)
                 ], inplace=True, ascending=True)
             else:
                 prob_pos_df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
@@ -933,8 +935,8 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
     def sort_included_df(self, df):
         if self.top_score_metric2 == "percentile":
-            anchor_residue_pass_df.sort_values(by=[
-                "{} MT Percentile".format(self.mt_top_score_metric),
+            df.sort_values(by=[
+                "{} Percentile".format(self.top_score_metric),
             ], inplace=True, ascending=True)
         else:
             df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
@@ -979,14 +981,14 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
             df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
         else:
-            df.sort_values(by=["Percentile MT", "ID"], inplace=True, ascending=[True, True])
+            df.sort_values(by=["Percentile", "ID"], inplace=True, ascending=[True, True])
         tier_sorter = ["Pass", "Poor"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
         if self.top_score_metric2 == "ic50":
             df.sort_values(by=["rank_tier", "IC50 MT", "ID"], inplace=True, ascending=[True, True, True])
         else:
-            df.sort_values(by=["rank_tier", "Percentile MT", "ID"], inplace=True, ascending=[True, True, True])
+            df.sort_values(by=["rank_tier", "Percentile", "ID"], inplace=True, ascending=[True, True, True])
         df.drop(labels='rank_tier', axis=1, inplace=True)
         return df
 
