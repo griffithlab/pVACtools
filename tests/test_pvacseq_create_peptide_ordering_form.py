@@ -49,7 +49,6 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
                 cls.executable,
                 cls.input_vcf,
                 cls.mhc_class_i_tsv,
-                cls.mhc_class_i_tsv,
                 cls.mhc_class_ii_tsv,
                 cls.output_file_prefix,
                 cls.sample_name,
