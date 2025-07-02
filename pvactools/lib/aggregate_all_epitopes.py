@@ -818,7 +818,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def sort_table(self, df):
         score_type = "IC50 MT"
         if self.top_score_metric2 == "percentile":
-            score_type = "Percentile"
+            score_type = "%ile MT"
         #make sure the tiers sort in the expected order
         tier_sorter = ["Pass", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
@@ -907,9 +907,9 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
                 prob_pos_df = df
         else:
             prob_pos_df = df
-            top_score_mod = "Percentile"
-            if self.top_score_metric2 == "ic50":
-                top_score_mod = "IC50 Score"
+        top_score_mod = "Percentile"
+        if self.top_score_metric2 == "ic50":
+            top_score_mod = "IC50 Score"
             # raise Exception(prob_pos_df.keys())
         prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, top_score_mod)], inplace=True, ascending=True)
         return prob_pos_df.iloc[0]
@@ -1121,7 +1121,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         if self.top_score_metric2 == "ic50":
             df.sort_values(by=["rank_tier", "rank", "IC50 MT", "ID"], inplace=True, ascending=True)
         else:
-            df.sort_values(by=["rank_tier","rank","Percentile", "ID"], inplace=True, ascending=True)
+            df.sort_values(by=["rank_tier","rank","%ile MT", "ID"], inplace=True, ascending=True)
         df.drop(labels='rank_tier', axis=1, inplace=True)
         df.drop(labels='rank_ic50', axis=1, inplace=True)
         df.drop(labels='rank_expr', axis=1, inplace=True)
