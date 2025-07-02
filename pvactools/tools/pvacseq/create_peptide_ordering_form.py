@@ -19,12 +19,8 @@ def define_parser():
             +"The VCF may be gzipped (requires tabix index)."
     )
     parser.add_argument(
-        "input_tsv",
-        help = "A pVACseq all_epitopes, filtered, or aggregated TSV file with epitopes to use for subsetting the input VCF to peptides of interest. Only the peptide sequences for the epitopes in the TSV will be used when creating the FASTA."
-    )
-    parser.add_argument(
         'classI_tsv',
-        help='The path to the classI all_epitopes.aggregated.tsv'
+        help='The path to the classI all_epitopes.aggregated.tsv file with the Evaluation column filled in to mark candidates to process as Accepted'
     )
     parser.add_argument(
         'classII_tsv',
@@ -123,7 +119,7 @@ def main(args_input = sys.argv[1:]):
         input_vcf=args.input_vcf,
         flanking_sequence_length=flanking_sequence_length,
         output_file=os.path.join(output_path, args.output_file),
-        input_tsv=args.input_tsv,
+        input_tsv=args.classI_tsv,
         phased_proximal_variants_vcf=args.phased_proximal_variants_vcf,
         pass_only=args.pass_only,
         biotypes=args.biotypes,
