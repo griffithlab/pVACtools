@@ -97,6 +97,7 @@ class PvacfuseTests(unittest.TestCase):
                 output_dir.name,
                 '-e1', '9',
                 '--top-score-metric=lowest',
+                '--top-score-metric2=percentile',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,

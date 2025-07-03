@@ -238,6 +238,7 @@ class AggregateAllEpitopes:
                 'use_allele_specific_binding_thresholds': self.use_allele_specific_binding_thresholds,
                 'mt_top_score_metric': self.mt_top_score_metric,
                 'wt_top_score_metric': self.wt_top_score_metric,
+                'top_score_metric2': self.top_score_metric2,
                 'allele_specific_binding_thresholds': self.allele_specific_binding_thresholds,
                 'allele_specific_anchors': self.allele_specific_anchors,
                 'alleles': self.hla_types.tolist(),
@@ -578,15 +579,26 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 ]
                 sort_order = [True, True, True, True, True, False, True]
         else:
-            sort_columns = [
-                "biotype_sort",
-                "tsl_sort",
-                "anchor_residue_pass_sort",
-                "{} MT IC50 Score".format(self.mt_top_score_metric),
-                "Transcript Length",
-                "{} MT Percentile".format(self.mt_top_score_metric),
-            ]
-            sort_order = [True, True, True, True, False, True]
+            if self.top_score_metric2 == "ic50":
+                sort_columns = [
+                    "biotype_sort",
+                    "tsl_sort",
+                    "anchor_residue_pass_sort",
+                    "{} MT IC50 Score".format(self.mt_top_score_metric),
+                    "Transcript Length",
+                    "{} MT Percentile".format(self.mt_top_score_metric),
+                ]
+                sort_order = [True, True, True, True, False, True]
+            else:
+                sort_columns = [
+                    "biotype_sort",
+                    "tsl_sort",
+                    "anchor_residue_pass_sort",
+                    "{} MT Percentile".format(self.mt_top_score_metric),
+                    "Transcript Length",
+                    "{} MT IC50 Score".format(self.mt_top_score_metric),
+                ]
+                sort_order = [True, True, True, True, False, True]
         
         df.sort_values(by=sort_columns, inplace=True, ascending=sort_order)
         df.drop(columns = ['biotype_sort', 'tsl_sort', 'problematic_positions_sort', 'anchor_residue_pass_sort'], inplace=True, errors='ignore')
@@ -915,7 +927,10 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return prob_pos_df.iloc[0]
 
     def get_included_df(self, df):
-        binding_df = df[df["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold]
+        top_score_mod = "Percentile"
+        if self.top_score_metric2 == "ic50":
+            top_score_mod = "IC50 Score"
+        binding_df = df[df[f"{self.top_score_metric} {top_score_mod}"] < self.aggregate_inclusion_binding_threshold]
 
         if binding_df.shape[0] == 0:
             return binding_df
