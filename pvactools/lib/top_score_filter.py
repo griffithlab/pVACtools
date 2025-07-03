@@ -201,7 +201,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                             filtered_lines.append(duplicate_variant_line)
 
 
-            sorted_rows = pvactools.lib.sort.default_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.default_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
@@ -262,9 +262,9 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                     elif float(line["{} WT IC50 Score".format(self.wt_top_score_metric)]) < binding_threshold:
                         anchor_residue_pass = False
                 else:
-                    if line["{} WT Percentile Score".format(self.wt_top_score_metric)] == "NA":
+                    if line["{} WT Percentile".format(self.wt_top_score_metric)] == "NA":
                         anchor_residue_pass = False
-                    elif float(line["{} WT Percentile Score".format(self.wt_top_score_metric)]) < binding_threshold:
+                    elif float(line["{} WT Percentile".format(self.wt_top_score_metric)]) < binding_threshold:
                         anchor_residue_pass = False
             return anchor_residue_pass
 
@@ -318,7 +318,7 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                             duplicate_variant_line['Mutation'] = "{}.{}".format(variant, best_line_consequence)
                             filtered_lines.append(duplicate_variant_line)
 
-            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
@@ -367,7 +367,7 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 best_line = self.find_best_line(lines)
                 filtered_lines.append(best_line)
 
-            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
@@ -411,7 +411,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 best_line = self.find_best_line(lines)
                 filtered_lines.append(best_line)
 
-            sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
