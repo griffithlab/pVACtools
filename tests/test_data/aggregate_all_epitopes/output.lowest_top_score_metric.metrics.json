@@ -14,6 +14,7 @@
   "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Best",
   "wt_top_score_metric": "Corresponding",
+  "top_score_metric2": "ic50",
   "allele_specific_binding_thresholds": {
     "HLA-A*02:01": 255.0,
     "HLA-B*35:01": 348.0
