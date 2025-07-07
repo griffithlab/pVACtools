@@ -540,20 +540,41 @@ server <- shinyServer(function(input, output, session) {
   outputOptions(output, "filesUploaded", suspendWhenHidden = FALSE)
   ##############################PEPTIDE EXPLORATION TAB################################
   ##main table display with color/background/font/border configurations
+  render_na <- JS(
+    "function(data, type, row) {",
+    "  if(type === 'sort' && (data === null || data === 'NA' || data === '' || typeof data === 'undefined')) {",
+    "    return 999999;",
+    "  }",
+    "  return parseFloat(data);",
+    "}"
+  )
+
   output$mainTable <- DT::renderDataTable(
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Index") & !(colnames(df$mainTable) == "Comments")],
+      filtered_table <- df$mainTable[, !(colnames(df$mainTable) %in% c("ID", "Index", "Comments"))]
+      render_targets <- which(colnames(filtered_table) %in% c("IC50 WT", "%ile WT"))
+
+      # Add render_na to the specified columns (IC50 WT, %ile WT)
+      na_render_defs <- lapply(render_targets, function(i) {
+        list(targets = i, render = render_na)
+      })
+
+      datatable(filtered_table,
                 escape = FALSE,
                 callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)),
                 class = "stripe",
                 options = list(lengthChange = TRUE, pageLength = df$pageLength,
                                dom = "Bfrtilp",
-                               columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 6, (hla_count() + 11):(hla_count() + 18))),
-                                                 list(className = "dt-center", targets = c(0:hla_count() - 1)),
-                                                 list(visible = FALSE, targets = c(1:(hla_count()-2), (hla_count()+1), (hla_count()+3), -1:-12)),
-                                                 list(orderable = TRUE, targets = 0)
+                               columnDefs = append(
+                                list(
+                                  list(defaultContent = "NA", targets = c(hla_count() + 6, (hla_count() + 11):(hla_count() + 18))),
+                                  list(className = "dt-center", targets = c(0:hla_count() - 1)),
+                                  list(visible = FALSE, targets = c(1:(hla_count()-2), (hla_count()+1), (hla_count()+3), -1:-12)),
+                                  list(orderable = TRUE, targets = 0)
+                                ),
+                                na_render_defs
                                ),
                                buttons = list(I("colvis")),
                                drawCallback = htmlwidgets::JS(
