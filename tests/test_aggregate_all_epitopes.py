@@ -230,9 +230,8 @@ class AggregateAllEpitopesTests(unittest.TestCase):
         self.assertFalse(
             PvacseqAggregateAllEpitopes(
                 os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'),
-                os.path.join(self.test_data_dir, "output.percentile_top_score_metric2.tsv"),
-
-                # output_file.name,
+                # os.path.join(self.test_data_dir, "output.percentile_top_score_metric2.tsv"),
+                output_file.name,
                 top_score_metric="lowest",
                 top_score_metric2="percentile" # Temporary test
             ).execute()
