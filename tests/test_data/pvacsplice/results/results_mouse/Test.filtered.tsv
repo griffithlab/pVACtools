@@ -1,4 +1,0 @@
-junction_chrom	junction_start	junction_stop	name	score	strand	splice_site	acceptors_skipped	exons_skipped	donors_skipped	anchor	known_donor	known_acceptor	known_junction	transcript_id	variant_info	feature	cds_chrom	cds_start	cds_stop	transcript_biotype	transcript_version	transcript_support_level	gene_name	gene_id
-7	4796408	4797063	JUNC00000061	201	1	GT-AG	2	1	1	NDA	1	1	0	ENSMUST00000032597	7:4796311-4796312	transcript	7	4795873	4798065	protein_coding	12	1	Rpl28	ENSMUSG00000030432
-7	4796408	4797063	JUNC00000061	201	1	GT-AG	2	1	1	NDA	1	1	0	ENSMUST00000078432	7:4796311-4796312	transcript	7	4795989	4797525	protein_coding	5	2	Rpl28	ENSMUSG00000030432
-7	4796408	4797063	JUNC00000061	201	1	GT-AG	2	1	1	NDA	1	1	0	ENSMUST00000126794	7:4796311-4796312	transcript	7	4796592	4797561	protein_coding	2	2	Rpl28	ENSMUSG00000030432
