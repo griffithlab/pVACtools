@@ -277,8 +277,8 @@ class AggregateAllEpitopesTests(unittest.TestCase):
         self.assertFalse(
             PvacbindAggregateAllEpitopes(
                 os.path.join(self.test_data_dir, "Test.all_epitopes.pvacbind.tsv"),
-                # output_file.name,
-                os.path.join(self.test_data_dir, "output.pvacbind.top_score_metric2_percentile.tsv"),
+                output_file.name,
+                # os.path.join(self.test_data_dir, "output.pvacbind.top_score_metric2_percentile.tsv"),
                 top_score_metric="lowest",
                 top_score_metric2="percentile"
             ).execute()
