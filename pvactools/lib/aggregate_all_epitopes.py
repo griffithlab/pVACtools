@@ -93,10 +93,11 @@ class AggregateAllEpitopes:
 
     def get_best_mut_line(self, df, key, prediction_algorithms, el_algorithms, percentile_algorithms, vaf_clonal):
         #order by best median score and get best ic50 peptide
+        
         best = self.get_best_binder(df)
 
         #these are all lines meeting the aggregate inclusion binding threshold
-        included_df = self.get_included_df(df)
+        included_df = self.get_included_df(df)        
         best_df = pd.DataFrame.from_dict([best])
         if not best_df.index.isin(included_df.index).all():
             included_df = pd.concat([included_df, best_df])
@@ -104,6 +105,7 @@ class AggregateAllEpitopes:
         peptide_hla_counts = self.get_unique_peptide_hla_counts(included_df)
         hla_counts = Counter(peptide_hla_counts["HLA Allele"])
         hla = dict(map(lambda x : (x, hla_counts[x]) if x in hla_counts else (x, ""), self.hla_types))
+        
         #get a list of all unique gene/transcript/aa_change combinations
         #store a count of all unique peptides that passed
         (peptides, anno_count) = self.get_included_df_metrics(included_df, prediction_algorithms, el_algorithms, percentile_algorithms)
@@ -112,7 +114,6 @@ class AggregateAllEpitopes:
 
         #assemble the line
         out_dict = self.assemble_result_line(best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count)
-
         metric = self.get_metrics(peptides, best)
         return (out_dict, metric)
 
@@ -259,9 +260,8 @@ class AggregateAllEpitopes:
             (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, prediction_algorithms, el_algorithms, percentile_algorithms, vaf_clonal)
             data.append(best_mut_line)
             metrics[key_str] = metrics_for_key
+            
         peptide_table = pd.DataFrame(data=data)
-        # raise Exception(peptide_table)
-        # print(peptide_table)
         peptide_table = self.sort_table(peptide_table)
 
         peptide_table.to_csv(self.output_file, sep='\t', na_rep='NA', index=False, float_format='%.3f')
@@ -406,7 +406,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         anchor_residue_pass_df = prob_pos_df[prob_pos_df['anchor_residue_pass']]
         if anchor_residue_pass_df.shape[0] == 0:
             anchor_residue_pass_df = prob_pos_df
-
         #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
         if self.top_score_metric2 == "percentile":
             anchor_residue_pass_df.sort_values(by=[
@@ -532,7 +531,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return "Poor"
 
     def get_included_df(self, df):
-        binding_df = df[df["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold]
+        top_score_mod = "IC50 Score"
+        if self.top_score_metric2 == "percentile":
+            top_score_mod = "Percentile"
+        binding_df = df[df["{} MT {}".format(self.mt_top_score_metric, top_score_mod)] < self.aggregate_inclusion_binding_threshold]
         if binding_df.shape[0] == 0:
             return binding_df
         else:
@@ -920,10 +922,12 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         else:
             prob_pos_df = df
         top_score_mod = "Percentile"
+        other_score_mod = "IC50 Score"
         if self.top_score_metric2 == "ic50":
             top_score_mod = "IC50 Score"
-            # raise Exception(prob_pos_df.keys())
-        prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, top_score_mod)], inplace=True, ascending=True)
+            other_score_mod = "Percentile"
+        prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, top_score_mod), f"{self.top_score_metric} {other_score_mod}", "Epitope Seq"], inplace=True, ascending=[True, True, True])
+
         return prob_pos_df.iloc[0]
 
     def get_included_df(self, df):
@@ -931,11 +935,12 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         if self.top_score_metric2 == "ic50":
             top_score_mod = "IC50 Score"
         binding_df = df[df[f"{self.top_score_metric} {top_score_mod}"] < self.aggregate_inclusion_binding_threshold]
-
+        
         if binding_df.shape[0] == 0:
             return binding_df
         else:
             peptides = list(set(binding_df["Epitope Seq"]))
+            peptides.sort() # Remove nondeterminism
             if len(peptides) <= self.aggregate_inclusion_count_limit:
                 return binding_df
 
@@ -996,10 +1001,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
             df.sort_values(by=["IC50 MT", "ID"], inplace=True, ascending=[True, True])
         else:
-            # raise Exception(df.keys())
-            # if "Percentile" in df.keys():
-            #     df.sort_values(by=["Percentile", "ID"], inplace=True, ascending=[True, True])
-            # else:
             df.sort_values(by=["%ile MT", "ID"], inplace=True, ascending=[True, True])
                 
         tier_sorter = ["Pass", "Poor"]
@@ -1008,12 +1009,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         if self.top_score_metric2 == "ic50":
             df.sort_values(by=["rank_tier", "IC50 MT", "ID"], inplace=True, ascending=[True, True, True])
         else:
-            # raise Exception(df.keys())
-            # if "Percentile" in df.keys():
-            #     df.sort_values(by=["rank_tier", "Percentile", "ID"], inplace=True, ascending=[True, True])
-            # else:
             df.sort_values(by=["rank_tier", "%ile MT", "ID"], inplace=True, ascending=[True, True, True])
-            # df.sort_values(by=["rank_tier", "Percentile", "ID"], inplace=True, ascending=[True, True, True])
         df.drop(labels='rank_tier', axis=1, inplace=True)
         return df
 
@@ -1147,7 +1143,6 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
 class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metaclass=ABCMeta):
     def assemble_result_line(self, best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count):
         tier = self.get_tier(mutation=best, vaf_clonal=vaf_clonal)
-
         out_dict = { 'ID': key }
         out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
         problematic_positions = best['Problematic Positions'] if 'Problematic Positions' in best else 'None'
@@ -1168,8 +1163,6 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             binding_threshold = self.allele_specific_binding_thresholds[mutation['HLA Allele']]
         else:
             binding_threshold = self.binding_threshold
-        # This seems like it wouldn't need to be changed since it is doing both IC50 and Percentile already
-        # Maybe update it so percentile happens first?
         ic50_pass = mutation["{} IC50 Score".format(self.top_score_metric)] < binding_threshold
         percentile_pass = (
             self.percentile_threshold is None or 
@@ -1233,6 +1226,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
 
     # pvacbind w/ Index instead of Mutation
     def read_input_file(self, used_columns, dtypes):
+        print("Reading ")
         return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False,
                            na_values="NA", keep_default_na=False, dtype={"Index": str})
 

@@ -63,3 +63,13 @@ class TopScoreFilterTests(unittest.TestCase):
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice.tsv')
         self.assertTrue(cmp(output_file.name, expected_output_file))
+    def test_runs_and_creates_expected_file_pvacsplice_percentile(self):
+        input_file = os.path.join(self.test_data_dir, 'input_pvacsplice.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        output_file_name = output_file.name
+        # output_file_name = os.path.join(self.test_data_dir, 'output_pvacsplice_percentile.tsv')
+
+        PvacspliceTopScoreFilter(input_file, output_file_name, top_score_metric='median', top_score_metric2="percentile").execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice_percentile.tsv')
+        self.assertTrue(cmp(output_file_name, expected_output_file))
