@@ -282,7 +282,7 @@ class RunArgumentParser(metaclass=ABCMeta):
     def pvacfuse(self):
         self.parser.add_argument(
             '--starfusion-file',
-            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from. Only used when running with AGFusion data."
+            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from. When running with AGFusion data, both read support and expression data from this file will be used. When running with Arriba data, only expression data from this file is used while read support data will be parsed from the Arriba data directly."
         )
         self.parser.add_argument(
             '--read-support', type=int,
