@@ -37,6 +37,9 @@ def pvacbind_sort(rows, top_score_metric, top_score_metric2):
     return sorted_rows
 
 def pvacsplice_sort(rows, top_score_metric, top_score_metric2):
+    top_score_mod = "IC50 Score"
+    if top_score_metric2 == "percentile":
+        top_score_mod = "Percentile"
     if top_score_metric == 'median':
         sorted_rows = sorted(rows, key=lambda row: ( float(row[f'Median {top_score_mod}']), float(row[f'Best {top_score_mod}']), row['Index'] ) )
     elif top_score_metric == 'lowest':
