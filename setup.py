@@ -53,6 +53,10 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/iedb_allele
     for filename in filenames:
         if not (filename.endswith(".py") or filename.endswith(".pyc")):
             pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
+for dirpath, dirnames, filenames in os.walk("pvactools/supporting_files"):
+    for filename in filenames:
+        if not (filename.endswith(".py") or filename.endswith(".pyc")):
+            pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
 pvaccompare_data_files = []
 for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvaccompare/html_report"):
     for filename in filenames:
@@ -61,7 +65,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvaccompare/html_re
 
 setup(
     name="pvactools",
-    version="5.4.0",
+    version="5.4.2",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",

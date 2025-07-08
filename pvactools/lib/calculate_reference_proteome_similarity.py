@@ -17,6 +17,7 @@ from time import sleep
 import pymp
 from itertools import groupby
 import json
+import logging
 
 from pvactools.lib.run_utils import *
 
@@ -275,9 +276,14 @@ class CalculateReferenceProteomeSimilarity:
         ## Get epitope, peptide and full_peptide
         if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
             if self._input_tsv_type(line) == 'aggregated':
-                peptide = mt_records_dict[line['ID']]
+                identifier = line['ID']
             else:
-                peptide = mt_records_dict[line['Mutation']]
+                identifier = line['Mutation']
+            if identifier in mt_records_dict:
+                peptide = mt_records_dict[identifier]
+            else:
+                logging.warning("Record {} not found in input FASTA. Skipping.".format(identifier))
+                return None, None, None
             full_peptide = peptide
             wt_peptide = None
         elif self.file_type == 'pVACsplice':
@@ -285,8 +291,12 @@ class CalculateReferenceProteomeSimilarity:
                 identifier = line['ID']
             else:
                 identifier = line['Mutation']
-            wt_peptide = wt_records_dict[identifier]
-            mt_peptide = mt_records_dict[identifier]
+            if identifier in mt_records_dict and identifier in wt_records_dict:
+                wt_peptide = wt_records_dict[identifier]
+                mt_peptide = mt_records_dict[identifier]
+            else:
+                logging.warning("Record {} not found in input FASTA. Skipping.".format(identifier))
+                return None, None, None
             peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
             full_peptide = peptide
             wt_peptide = None
@@ -297,8 +307,13 @@ class CalculateReferenceProteomeSimilarity:
             else:
                 epitope = line['MT Epitope Seq']
                 variant_type = line['Variant Type']
-            full_peptide = mt_records_dict[line['Index']]
-            wt_peptide = wt_records_dict[line['Index']]
+            identifier = line['Index']
+            if identifier in mt_records_dict and identifier in wt_records_dict:
+                full_peptide = mt_records_dict[identifier]
+                wt_peptide = wt_records_dict[identifier]
+            else:
+                logging.warning("Record {} not found in input FASTA. Skipping.".format(identifier))
+                return None, None, None
 
             # get peptide
             subpeptide_position = full_peptide.index(epitope)
