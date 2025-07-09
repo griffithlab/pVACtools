@@ -136,7 +136,7 @@ server <- shinyServer(function(input, output, session) {
     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
     hla <- df$metricsData$alleles
-    converted_hla_names <- unlist(lapply(hla, function(x) {
+    df$converted_hla_names <- unlist(lapply(hla, function(x) {
       if (grepl("HLA-", x)) {
         strsplit(x, "HLA-")[[1]][2]
       } else {
@@ -146,7 +146,7 @@ server <- shinyServer(function(input, output, session) {
     if (!("Ref Match" %in% colnames(df$mainTable))) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
-    columns_needed <- c("ID", "Index", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+    columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                         "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
     if ("Comments" %in% colnames(df$mainTable)) {
@@ -228,7 +228,7 @@ server <- shinyServer(function(input, output, session) {
        df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
        hla <- df$metricsData$alleles
        incProgress(0.1)
-       converted_hla_names <- unlist(lapply(hla, function(x) {
+       df$converted_hla_names <- unlist(lapply(hla, function(x) {
          if (grepl("HLA-", x)) {
            strsplit(x, "HLA-")[[1]][2]
          } else {
@@ -238,7 +238,7 @@ server <- shinyServer(function(input, output, session) {
        if (!("Ref Match" %in% colnames(df$mainTable))) {
          df$mainTable$`Ref Match` <- "Not Run"
        }
-       columns_needed <- c("ID", "Index", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
+       columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                            "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                            "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
        if ("Comments" %in% colnames(df$mainTable)) {
@@ -438,7 +438,7 @@ server <- shinyServer(function(input, output, session) {
   })
   #determine hla allele count in order to generate column tooltip locations correctly
   hla_count <- reactive({
-    which(colnames(df$mainTable) == "Gene") - 1
+    which(colnames(df$mainTable) == "Gene") - 3
   })
   #class type of user-provided additional file
   type <- reactive({
@@ -555,6 +555,21 @@ server <- shinyServer(function(input, output, session) {
     }else {
       filtered_table <- df$mainTable[, !(colnames(df$mainTable) %in% c("ID", "Index", "Comments"))]
       render_targets <- which(colnames(filtered_table) %in% c("IC50 WT", "%ile WT"))
+      hla_columns <- which(colnames(filtered_table) %in% df$converted_hla_names)
+
+      # Columns where the default value should be 'NA'
+      default_na_targets <- which(colnames(filtered_table) %in% c("POS", "IC50 WT", "%ile MT", "%ile WT", "RNA Expr", "RNA VAF", "Allele Expr",
+                                                                  "RNA Depth", "DNA VAF"))
+
+      # Columns that should be hidden from the display
+      additional_hidden_columns <- which(colnames(filtered_table) %in% c("Num Passing Transcripts", "Best Transcript", "Has Prob Pos", "Percentile Fail",
+                                                                        "Col DNA VAF", "Col RNA Depth", "Col Allele Expr", "Col RNA VAF", "Col RNA Expr",
+                                                                        "Bad TSL", "Scaled percentile", "Scaled BA", "Gene of Interest", "Tier Count"))
+      hidden_targets <- c(hla_columns, additional_hidden_columns)
+      
+      # Applies a CSS class to the specified columns
+      additional_center_columns <- which(colnames(filtered_table) %in% c("Gene"))
+      center_align_targets <- c(hla_columns, additional_center_columns)
 
       # Add render_na to the specified columns (IC50 WT, %ile WT)
       na_render_defs <- lapply(render_targets, function(i) {
@@ -569,9 +584,9 @@ server <- shinyServer(function(input, output, session) {
                                dom = "Bfrtilp",
                                columnDefs = append(
                                 list(
-                                  list(defaultContent = "NA", targets = c(hla_count() + 6, (hla_count() + 11):(hla_count() + 18))),
-                                  list(className = "dt-center", targets = c(0:hla_count() - 1)),
-                                  list(visible = FALSE, targets = c(1:(hla_count()-2), (hla_count()+1), (hla_count()+3), -1:-12)),
+                                  list(defaultContent = "NA", targets = default_na_targets),
+                                  list(className = "dt-center", targets = center_align_targets),
+                                  list(visible = FALSE, targets = hidden_targets),
                                   list(orderable = TRUE, targets = 0)
                                 ),
                                 na_render_defs
@@ -912,6 +927,7 @@ server <- shinyServer(function(input, output, session) {
   })
   ##display peptide table with coloring
   output$peptideTable<- renderDT({
+    hla_columns <- which(colnames(df$mainTable) %in% df$converted_hla_names)
     withProgress(message = "Loading Peptide Table", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0 & !is.null(df$metricsData)) {
         peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
@@ -930,7 +946,7 @@ server <- shinyServer(function(input, output, session) {
         dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data)), options = list(
           pageLength = 10,
           columnDefs = list(list(defaultContent = "X",
-                                 targets = c(2:hla_count() + 1)),
+                                 targets = hla_columns),
                             list(orderable = TRUE, targets = 0),
                             list(visible = FALSE, targets = c(-1, -2))),
           rowCallback = JS("function(row, data, index, rowId) {",
