@@ -116,6 +116,8 @@ class PvacseqTests(unittest.TestCase):
                 output_dir.name,
                 '-e1', '9,10',
                 '--top-score-metric=lowest',
+                '--top-score-metric2=ic50',
+
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
                 '--netmhc-stab',
@@ -135,6 +137,7 @@ class PvacseqTests(unittest.TestCase):
                 output_dir.name,
                 '-e2', '15',
                 '--top-score-metric=lowest',
+                '--top-score-metric2=ic50',
                 '--keep-tmp-files',
                 '-d', 'full',
                 '--run-reference-proteome-similarity',
