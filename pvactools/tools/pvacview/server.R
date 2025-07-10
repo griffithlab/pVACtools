@@ -130,6 +130,7 @@ server <- shinyServer(function(input, output, session) {
     df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
     df$percentile_threshold <- df$metricsData$`percentile_threshold`
     df$percentile_threshold_strategy <- df$metricsData$`percentile_threshold_strategy`
+    df$scoring_candidate_metric <- df$metricsData$`top_score_metric2`
     df$dna_cutoff <- df$metricsData$vaf_clonal
     df$allele_expr <- df$metricsData$allele_expr_threshold
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
@@ -350,6 +351,15 @@ server <- shinyServer(function(input, output, session) {
       "Specify the candidate binding score and percentile inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default). The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
       c("conservative", "exploratory"),
       selected = current_percentile_threshold_strategy
+    )
+  })
+  output$scoring_candidate_metric_ui <- renderUI({
+    current_metric <- df$scoring_candidate_metric
+    radioButtons(
+      "scoring_candidate_metric",
+      "Specify which top score metric to use for scoring candidates. The 'ic50' option will set it to use IC50 MT, while the 'percentile' option will set it to use %ile MT",
+      c("ic50", "percentile"),
+      selected = current_metric
     )
   })
   output$dna_cutoff_ui <- renderUI({
