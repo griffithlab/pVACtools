@@ -117,7 +117,6 @@ class PvacseqTests(unittest.TestCase):
                 '-e1', '9,10',
                 '--top-score-metric=lowest',
                 '--top-score-metric2=ic50',
-
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
                 '--netmhc-stab',
