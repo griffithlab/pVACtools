@@ -405,7 +405,11 @@ server <- shinyServer(function(input, output, session) {
     tier_sorter <- c("Pass", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr")
     df$mainTable$`Rank_ic50` <- NA
     df$mainTable$`Rank_expr` <- NA
-    df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    } else {
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+    }
     df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
     df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
     df$mainTable <- df$mainTable %>%
@@ -440,7 +444,11 @@ server <- shinyServer(function(input, output, session) {
     tier_sorter <- c("Pass", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr")
     df$mainTable$`Rank_ic50` <- NA
     df$mainTable$`Rank_expr` <- NA
-    df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    } else {
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+    }
     df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
     df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
     df$mainTable <- df$mainTable %>%
