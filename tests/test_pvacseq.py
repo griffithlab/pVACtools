@@ -257,7 +257,7 @@ class PvacseqTests(unittest.TestCase):
                     output_dir.name,
                     '-e2', '15',
                     '--top-score-metric=lowest',
-                    '--top-score-metric2=percentile',
+                    '--top-score-metric2=ic50',
                     '--keep-tmp-files',
                     '--run-reference-proteome-similarity',
                     '--peptide-fasta', self.peptide_fasta,
@@ -289,7 +289,7 @@ class PvacseqTests(unittest.TestCase):
             '-a', 'sample_name',
             '-d', 'full',
             '--top-score-metric', 'lowest',
-            '--top-score-metric2', 'percentile',
+            '--top-score-metric2', 'ic50',
             '--biotypes', 'IG_V_gene,protein_coding',
         ]
         run.main(params)
@@ -354,7 +354,7 @@ class PvacseqTests(unittest.TestCase):
             '-e1', '9,10',
             '-e2', '15',
             '--top-score-metric=lowest',
-            '--top-score-metric2=percentile',
+            '--top-score-metric2=ic50',
             '--keep-tmp-files',
             '-d', 'full',
             '--biotypes', 'IG_V_gene,protein_coding',
