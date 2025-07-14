@@ -408,6 +408,7 @@ server <- shinyServer(function(input, output, session) {
     if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
       df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
     } else {
+      print("Using percentile")
       df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
     }
     df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
@@ -447,6 +448,7 @@ server <- shinyServer(function(input, output, session) {
     if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
       df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
     } else {
+      print("Using percentile reset params")
       df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
     }
     df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
