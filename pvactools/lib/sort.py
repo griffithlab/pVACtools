@@ -1,4 +1,4 @@
-def default_sort(rows, top_score_metric, top_score_metric2): # Adding a comment to make this file show up as edited
+def default_sort(rows, top_score_metric, top_score_metric2):
     top_score_mod = "IC50 Score"
     if top_score_metric2 == "percentile":
         top_score_mod = "Percentile"

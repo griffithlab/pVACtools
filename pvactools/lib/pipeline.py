@@ -429,8 +429,8 @@ class Pipeline(metaclass=ABCMeta):
             *split_parsed_output_files,
             self.combined_parsed_path(),
             '--top-score-metric', self.top_score_metric,
-            '--top-score-metric2', self.top_score_metric2, #Maybe this is what we needed to do
-        ] # Top score stuff here # This comment exists to make the file different for me later
+            '--top-score-metric2', self.top_score_metric2,
+        ]
         if self.input_file_type == 'fasta':
             params.extend(['--file-type', 'pVACbind'])
         elif self.input_file_type == 'junctions':

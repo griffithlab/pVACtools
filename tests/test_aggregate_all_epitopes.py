@@ -202,7 +202,7 @@ class AggregateAllEpitopesTests(unittest.TestCase):
                 os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'),
                 output_file.name,
                 top_score_metric="lowest",
-                top_score_metric2="ic50" # Temporary test
+                top_score_metric2="ic50"
             ).execute()
         )
         self.assertTrue(cmp(
@@ -224,6 +224,7 @@ class AggregateAllEpitopesTests(unittest.TestCase):
         for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
             os.remove(pvacview_file)
+
     def test_aggregate_all_epitopes_pvacseq_top_score_metric2_percentile_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
@@ -232,7 +233,7 @@ class AggregateAllEpitopesTests(unittest.TestCase):
                 os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'),
                 output_file.name,
                 top_score_metric="lowest",
-                top_score_metric2="percentile" # Temporary test
+                top_score_metric2="percentile"
             ).execute()
         )
         self.assertTrue(cmp(
@@ -254,6 +255,7 @@ class AggregateAllEpitopesTests(unittest.TestCase):
         for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
             os.remove(pvacview_file)
+
     def test_aggregate_all_epitopes_pvacbind_lowest_top_score_metric_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
@@ -270,6 +272,7 @@ class AggregateAllEpitopesTests(unittest.TestCase):
             output_file.name,
             os.path.join(self.test_data_dir, "output.pvacbind.lowest_top_score_metric.tsv"),
         ))
+
     def test_aggregate_all_epitopes_pvacbind_top_score_metric2_percentile(self):
         self.assertTrue(py_compile.compile(self.executable))
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')

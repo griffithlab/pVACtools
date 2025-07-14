@@ -256,16 +256,10 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 return True
             anchor_residue_pass = True
             if all(int(pos) in anchors for pos in positions):
-                if self.top_score_metric2 == "ic50":
-                    if line["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
-                        anchor_residue_pass = False
-                    elif float(line["{} WT IC50 Score".format(self.wt_top_score_metric)]) < binding_threshold:
-                        anchor_residue_pass = False
-                else:
-                    if line["{} WT Percentile".format(self.wt_top_score_metric)] == "NA":
-                        anchor_residue_pass = False
-                    elif float(line["{} WT Percentile".format(self.wt_top_score_metric)]) < binding_threshold:
-                        anchor_residue_pass = False
+                if line["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
+                    anchor_residue_pass = False
+                elif float(line["{} WT IC50 Score".format(self.wt_top_score_metric)]) < binding_threshold:
+                    anchor_residue_pass = False
             return anchor_residue_pass
 
 

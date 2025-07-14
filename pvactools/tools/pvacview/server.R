@@ -477,7 +477,7 @@ server <- shinyServer(function(input, output, session) {
       "Parameter" = c("Tumor Purity", "VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
                       "Binding Threshold", "Binding Threshold for Inclusion into Metrics File", "Maximum TSL",
                       "Percentile Threshold", "Percentile Threshold Strategy", "Allele Specific Binding Thresholds",
-                      "MT Top Score Metric", "WT Top Score Metric", "Scoring Candidate Metric",
+                      "MT Top Score Metric", "WT Top Score Metric", "Sorting Candidate Metric",
                       "Allele Specific Anchors Used", "Anchor Contribution Threshold"),
       "Value" = c(if (is.null(df$metricsData$tumor_purity)) {"NULL"}else {df$metricsData$tumor_purity},
                   df$metricsData$`vaf_clonal`, df$metricsData$`vaf_subclonal`, df$metricsData$`allele_expr_threshold`,
@@ -515,7 +515,7 @@ server <- shinyServer(function(input, output, session) {
       "Parameter" = c("VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
                       "Binding Threshold", "Binding Threshold for Inclusion into Metrics File", "Maximum TSL",
                       "Percentile Threshold", "Percentile Threshold Strategy", "Allele Specific Binding Thresholds",
-                      "MT Top Score Metric", "WT Top Score Metric", "Scoring Candidate Metric",
+                      "MT Top Score Metric", "WT Top Score Metric", "Sorting Candidate Metric",
                       "Allele Specific Anchors Used", "Anchor Contribution Threshold"),
       "Value" = c(
         df$dna_cutoff,
