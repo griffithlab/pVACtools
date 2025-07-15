@@ -62,11 +62,8 @@ New in Version |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Handle cases where the peptide sequence for a variant is missing from the fasta during reference proteome similarity matching. Instead of throwing in error, skip such entries and mark Ref Prot column as "Not Run". by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1253
-* Write a log message for the above cases. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1259
-* Fix bug in processing inframe deletions during aggregation causing the variant type to not be set correctly. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1255
-* Respect ``--anchor-types`` parameter in pVACsplice. Previously, even when specifying this parameter it would be ignored and a hard-coded list of anchors would be used. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1258
-* Update description of the ``--starfusion-file`` parameter to reflect that it can be used with Arriba data. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1263
+* Fixed IC50/%ile WT sorting to use numerical sorting instead of string sorting. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1265
+* Bugfixes for the pvacsplice generate_protein_fasta command to handle sequences shorter than the flanking sequence length and sequences with unsupported amino acids. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1268
 
 New in Version 5
 ----------------
