@@ -158,3 +158,61 @@ class GenerateFastaTests(unittest.TestCase):
 
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         os.unlink(unzipped_fasta_file)
+
+    def test_input_short_sequence_generates_expected_file(self):
+        generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "regtools.short_sequence.tsv")
+        generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "short_sequence.vcf.gz")
+        generate_protein_fasta_input_fasta = os.path.join(self.test_input_data_dir, "inputs", "Homo_sapiens.GRCh38.dna.chromosome.3.fa.gz")
+        unzipped_fasta_file = gunzip_file(generate_protein_fasta_input_fasta)
+        generate_protein_fasta_input_gtf   = os.path.join(self.test_input_data_dir, "inputs", "Homo_sapiens.GRCh38.105.chr3.gtf")
+        generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
+        generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            generate_protein_fasta_input_file,
+            '25',
+            generate_protein_fasta_output_file.name,
+            generate_protein_fasta_input_vcf,
+            unzipped_fasta_file,
+            generate_protein_fasta_input_gtf,
+            '-s', 'TumorDNA',
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_output_data_dir, 'output.short.fasta')
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
+        expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.short.tsv')
+        self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+        os.unlink(generate_protein_fasta_output_tsv)
+        os.unlink(unzipped_fasta_file)
+
+    def test_input_unsupported_amino_acid_generates_expected_file(self):
+        generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "regtools.unsupported_aa.tsv")
+        generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "unsupported_aa.vcf.gz")
+        generate_protein_fasta_input_fasta = os.path.join(self.test_input_data_dir, "inputs", "Homo_sapiens.GRCh38.dna.chromosome.2.fa.gz")
+        unzipped_fasta_file = gunzip_file(generate_protein_fasta_input_fasta)
+        generate_protein_fasta_input_gtf   = os.path.join(self.test_input_data_dir, "inputs", "Homo_sapiens.GRCh38.105.chr2.gtf.gz")
+        unzipped_gtf_file = gunzip_file(generate_protein_fasta_input_gtf)
+        generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
+        generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
+
+        self.assertFalse(call([
+            self.python,
+            self.executable,
+            generate_protein_fasta_input_file,
+            '25',
+            generate_protein_fasta_output_file.name,
+            generate_protein_fasta_input_vcf,
+            unzipped_fasta_file,
+            unzipped_gtf_file,
+            '-s', 'TumorDNA',
+        ], shell=False))
+        expected_output_file = os.path.join(self.test_output_data_dir, 'output.unsupported_aa.fasta')
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
+        expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.unsupported_aa.tsv')
+        self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+        os.unlink(generate_protein_fasta_output_tsv)
+        os.unlink(unzipped_fasta_file)
+        os.unlink(unzipped_gtf_file)
