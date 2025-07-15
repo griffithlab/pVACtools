@@ -950,7 +950,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
                 best_peptide_entries.append(self.get_best_binder(peptide_df))
             best_peptide_entries_df = pd.DataFrame(best_peptide_entries)
             top_n_best_peptide_entries_df = self.sort_included_df(best_peptide_entries_df).iloc[:self.aggregate_inclusion_count_limit]
-            top_n_best_peptides = list(set(top_n_best_peptide_entries_df["Epitope Seq"]))
+            top_n_best_peptides = sorted(list(set(top_n_best_peptide_entries_df["Epitope Seq"])))
             return binding_df[binding_df["Epitope Seq"].isin(top_n_best_peptides)]
 
     def sort_included_df(self, df):
