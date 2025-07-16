@@ -67,7 +67,7 @@ def define_parser():
         "--aggregate-report-evaluation",
         help="When running with an aggregate report input TSV, only include variants with this evaluation. Valid values for this field are Accept, Reject, Pending, and Review. Specifiy multiple values as a comma-separated list to include multiple evaluation states.",
         default='Accept',
-        type=lambda s:[e for e in s.split(',')],
+        type=aggregate_report_evaluations(),
     )
     parser.add_argument(
         "-d", "--downstream-sequence-length",
@@ -214,9 +214,6 @@ def run_generate_protein_fasta(
         downstream_sequence_length = int(downstream_sequence_length)
     else:
         sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
-
-    if not (set(aggregate_report_evaluation)).issubset(set(['Accept', 'Reject', 'Review', 'Pending'])):
-        sys.exit("Aggregate report evaluation ({}) contains invalid values.".format(aggregate_report_evaluation))
 
     temp_dir = tempfile.mkdtemp()
 

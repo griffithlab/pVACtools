@@ -75,41 +75,40 @@ def main(peptides_path, classI_path, classII_path, sample_name, all_epitopes_fla
     peptides['51mer ID'] = peptides['51mer ID'].apply(lambda x: '.'.join(x.split('.')[1:]))  # Removes the 'MT' from the beginning of ID column
     peptides['51mer ID'] = peptides['51mer ID'].apply(lambda x: '.'.join(x.split('.')[1:]))  # Remives the MT index from the ID column
     
-    def modify_id(x):
-        parts = x.split('.')
+    def modify_id(original_id):
+        match = re.match(r'(\w+)\.(ENS[0-9A-Z]+\d+(?:\.\d+)?)\.(\w+)\.(.+)$', original_id)
+        if not match:
+            print(f"Unrecognized ID format: {original_id}")
+            return original_id
         
-        def is_valid_char(char):
-            return char.isdigit() or char == '-' or (char in ['.', '/'] and parts[-1][parts[-1].index(char)+1].isdigit())
+        gene, transcript, variant_type, last_part = match.groups()
         
-        if not 'missense' in parts:
-            if 'FS' in parts:
-                # MT.239.KIF7.ENST00000394412.8.FS.405-410CGCGCACTCGGCGCCCAG/C
-                # KIF7.ENST00000394412.FS405-410
-                # If 'FS' is present, remove non-digit characters after the last period
-                last_part = ''.join(filter(is_valid_char, parts[-1]))
-                modified_id = '.'.join(parts[:-1]) + last_part
-            elif 'inframe_del' in parts:
-                # MT.328.DNAAF3.ENST00000391720.8.inframe_del.585-589KTGV*/R
-                # DNAAF3.ENST00000391720.8.KTGV*538-542R
-                last_part = parts[-1]
-                position = re.match(r'[^a-zA-Z]*', last_part).group()
-                aa = re.search(r'[^0-9-]+.*', last_part).group()
-                aa_parts = aa.split('/')
-                modified_id = '.'.join(parts[:3])
-                aa_change = aa_parts[0] + position + aa_parts[1]
-                modified_id = modified_id + "." + aa_change
-            elif 'inframe_ins' in parts:
-                # MT.249.ZCCHC14.ENST00000268616.9.inframe_ins.769H/HH
-                # ZCCHC14.ENST00000268616.9.H769HH
-                modified_id = '.'.join(parts[:3] + parts[4:])
-            else:
-                print("Non missense candidate not accounted for!")
-                print(parts)     
-        else:
-            # If 'missense' or other labels are present, remove them
+        if variant_type == "missense" or variant_type == "inframe_ins":
+            # Removes the variant type from the ID
             # MT.244.ZP2.ENST00000574002.1.missense.84D/Y
             # ZP2.ENST00000574002.1.84D/Y
-            modified_id = '.'.join(parts[:3] + parts[4:])
+            modified_id = f"{gene}.{transcript}.{last_part}"
+        
+        elif variant_type == "FS":
+            # MT.239.KIF7.ENST00000394412.8.FS.405-410CGCGCACTCGGCGCCCAG/C
+            # KIF7.ENST00000394412.8.FS405-410
+            fs_pos = re.sub(r'[^\d\-]', '', last_part)
+            modified_id = f"{gene}.{transcript}.FS{fs_pos}"
+        
+        elif variant_type == "inframe_del":
+            # MT.328.DNAAF3.ENST00000391720.8.inframe_del.585-589KTGV*/R
+            # DNAAF3.ENST00000391720.8.KTGV*538-542R
+            m = re.match(r'(\d+-\d+)([A-Z\*/]+)\/([A-Z\*/]+)', last_part)
+            if m:
+                pos, ref, alt = m.groups()
+                modified_id = f"{gene}.{transcript}.{ref}{pos}{alt}"
+            else:
+                print(f"Unrecognized inframe_del format: {original_id}")
+                modified_id = original_id
+        
+        else:
+            print(f"Non-missense variant not handled: {original_id}")
+            modified_id = original_id
         
         return modified_id
     
