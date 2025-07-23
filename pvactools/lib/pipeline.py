@@ -165,6 +165,7 @@ class Pipeline(metaclass=ABCMeta):
             'sample_name': self.sample_name,
             'pass_only': self.pass_only,
             'biotypes': self.biotypes,
+            'allow_incomplete_transcripts': self.allow_incomplete_transcripts
         }
         if self.normal_sample_name is not None:
             convert_params['normal_sample_name'] = self.normal_sample_name
