@@ -335,9 +335,14 @@ class VcfConverter(InputFileConverter):
                     transcript_name = transcript['Feature']
 
                     flags = transcript.get('FLAGS', '')
+                    flag_list = [f.strip().lower() for f in flags.split(',')] if flags else []
+
                     if not self.allow_incomplete_transcripts:
-                        if 'cds_start_NF' in flags or 'cds_end_NF' in flags:
+                        if 'cds_start_nf' in flag_list or 'cds_end_nf' in flag_list:
                             continue
+                        transcript_cds_flags = ''
+                    else:
+                        transcript_cds_flags = flags if flags else 'None'
 
                     consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
                     if consequence is None:
@@ -428,7 +433,7 @@ class VcfConverter(InputFileConverter):
                         'transcript_support_level'       : tsl,
                         'transcript_length'              : len(wildtype_amino_acid_sequence),
                         'biotype'                        : biotype,
-                        'transcript_cds_flags'           : flags if self.allow_incomplete_transcripts else '',
+                        'transcript_cds_flags'           : transcript_cds_flags,
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,
