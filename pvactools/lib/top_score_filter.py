@@ -113,7 +113,8 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
         maximum_transcript_support_level=1,
         allele_specific_anchors=False,
-        anchor_contribution_threshold=0.8
+        anchor_contribution_threshold=0.8,
+        allow_incomplete_transcripts=False,
     ):
         self.input_file = input_file
         self.output_file = output_file
@@ -126,6 +127,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.wt_top_score_metric = "Corresponding"
         self.binding_threshold = binding_threshold
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.allow_incomplete_transcripts= allow_incomplete_transcripts
         self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
         allele_specific_binding_thresholds = {}
         for hla_type in self.hla_types:
@@ -196,6 +198,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.maximum_transcript_support_level,
             self.anchor_calculator,
             self.mt_top_score_metric,
+            self.allow_incomplete_transcripts,
         ).get(df)
 
 
