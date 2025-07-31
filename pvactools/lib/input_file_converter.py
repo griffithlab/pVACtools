@@ -334,11 +334,9 @@ class VcfConverter(InputFileConverter):
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
 
-                    flags = transcript.get('FLAGS', '')
-                    flag_list = [f.strip().lower() for f in flags.split(',')] if flags else []
-
+                    flags = transcript.get('FLAGS', '').lower()
                     if not self.allow_incomplete_transcripts:
-                        if 'cds_start_nf' in flag_list or 'cds_end_nf' in flag_list:
+                        if 'cds_start_nf' in flags or 'cds_end_nf' in flags:
                             continue
                         transcript_cds_flags = ''
                     else:

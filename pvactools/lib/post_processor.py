@@ -106,6 +106,7 @@ class PostProcessor:
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
                 top_score_metric=self.top_score_metric,
                 allele_specific_anchors=self.allele_specific_anchors,
+                allow_incomplete_transcripts=self.allow_incomplete_transcripts,
                 anchor_contribution_threshold=self.anchor_contribution_threshold,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
                 aggregate_inclusion_count_limit=self.aggregate_inclusion_count_limit,
@@ -245,6 +246,7 @@ class PostProcessor:
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
                 allele_specific_anchors=self.allele_specific_anchors,
                 anchor_contribution_threshold=self.anchor_contribution_threshold,
+                allow_incomplete_transcripts=self.allow_incomplete_transcripts,
             ).execute()
         elif self.file_type == 'pVACfuse':
             PvacfuseTopScoreFilter(
