@@ -469,6 +469,7 @@ class Pipeline(metaclass=ABCMeta):
         post_processing_params['filtered_report_file'] = self.final_path()
         post_processing_params['fasta'] = self.fasta_file_path()
         post_processing_params['run_manufacturability_metrics'] = True
+        post_processing_params['allow_incomplete_transcripts'] = self.allow_incomplete_transcripts
         if self.input_file_type == 'vcf':
             post_processing_params['file_type'] = 'pVACseq'
             post_processing_params['run_coverage_filter'] = True
