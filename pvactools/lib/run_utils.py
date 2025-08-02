@@ -128,7 +128,16 @@ def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_
         if wt_epitope != mt_epitope:
             stop = len(mt_epitopes) - i + flanking_length
             break
-    return mt_peptide[start:stop]
+    mutant_subsequence = mt_peptide[start:stop]
+    supported_aas = supported_amino_acids()
+    if mutant_subsequence[0] not in supported_aas:
+        mutant_subsequence = mutant_subsequence[1:]
+    if mutant_subsequence[-1] not in supported_aas:
+        mutant_subsequence = mutant_subsequence[0:-1]
+    if not all([c in supported_aas for c in mutant_subsequence]):
+        print("Warning. Mutant sequence contains unsupported amino acid U. Skipping entry {}".format(line['index']))
+        return
+    return mutant_subsequence
 
 def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximum_transcript_support_level):
     if not isinstance(mutation, pd.Series):

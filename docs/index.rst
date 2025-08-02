@@ -60,16 +60,13 @@ Contents
 New in Version |release|
 ------------------------
 
-This is a minor feature release. It adds the following features:
+This is a bugfix release. It fixes the following problem(s):
 
-* Add functionality to add gene of interest identification. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1229
-
-  A new option ``--genes-of-interest-file`` has been added. This option allows
-  users to specify a file path containing genes name that are of particular
-  importance to their research. Neoantigens resulting from variants on one of
-  these genes will be marked in the all_epitopes.tsv and filtered.tsv files in
-  a new ``Gene of Interest`` column (``True``/``False``). If this option is
-  not specified, `a default list of common cancer genes <https://raw.githubusercontent.com/griffithlab/pVACtools/5eeb213deac828df5e4d2ad81971db26ae530500/pvactools/supporting_files/cancer_census_hotspot_gene_list.tsv>`_ is used.
+* Handle cases where the peptide sequence for a variant is missing from the fasta during reference proteome similarity matching. Instead of throwing in error, skip such entries and mark Ref Prot column as "Not Run". by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1253
+* Write a log message for the above cases. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1259
+* Fix bug in processing inframe deletions during aggregation causing the variant type to not be set correctly. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1255
+* Respect ``--anchor-types`` parameter in pVACsplice. Previously, even when specifying this parameter it would be ignored and a hard-coded list of anchors would be used. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1258
+* Update description of the ``--starfusion-file`` parameter to reflect that it can be used with Arriba data. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1263
 
 New in Version 5
 ----------------
