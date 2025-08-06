@@ -923,6 +923,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         expn_val=1,
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
         maximum_transcript_support_level=1,
+        allow_incomplete_transcripts=False,
     ):
         PvacbindAggregateAllEpitopes.__init__(
             self,
@@ -943,6 +944,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         self.allele_expr_threshold = trna_vaf * expn_val * 10
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
+        self.allow_incomplete_transcripts = allow_incomplete_transcripts
 
     # pvacbind w/ Index instead of Mutation
     def get_list_unique_mutation_keys(self, df):
@@ -1001,6 +1003,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             self.transcript_prioritization_strategy,
             self.maximum_transcript_support_level,
             self.top_score_metric,
+            self.allow_incomplete_transcripts,
         ).get(df)
 
     def tier_aggregated_report(self):
