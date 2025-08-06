@@ -303,7 +303,8 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         output_file,
         top_score_metric="median",
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
-        maximum_transcript_support_level=1
+        maximum_transcript_support_level=1,
+        allow_incomplete_transcripts=False,
     ):
         self.input_file = input_file
         self.output_file = output_file
@@ -314,6 +315,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.formatted_top_score_metric = "Best"
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
+        self.allow_incomplete_transcripts= allow_incomplete_transcripts
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -341,4 +343,5 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.transcript_prioritization_strategy,
             self.maximum_transcript_support_level,
             self.formatted_top_score_metric,
+            self.allow_incomplete_transcripts,
         ).get(df)

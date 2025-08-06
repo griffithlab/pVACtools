@@ -266,6 +266,7 @@ class PostProcessor:
                 self.top_score_filter_fh.name,
                 top_score_metric = self.top_score_metric,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
+                allow_incomplete_transcripts=self.allow_incomplete_transcripts,
             ).execute()
         print("Completed")
 
