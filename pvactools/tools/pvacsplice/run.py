@@ -198,14 +198,18 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_i_executable = None
 
+        class_i_arguments = junction_arguments.copy()
         for x in args.class_i_epitope_length:
-
             print(f'Executing MHC Class I predictions for {x}mers')
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
             os.makedirs(output_len_dir, exist_ok=True)
 
-            class_i_arguments = junction_arguments.copy()
-            class_i_arguments['input_file']              = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{x}.fa')
+            input_file  = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{x}.fa')
+            if not os.path.exists(input_file):
+                print(f'No {x}mer neoepitopes found')
+                continue
+
+            class_i_arguments['input_file']              = input_file
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
@@ -235,14 +239,18 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_ii_executable = None
 
+        class_ii_arguments = junction_arguments.copy()
         for y in args.class_ii_epitope_length:
-
             print(f'Executing MHC Class II predictions for {y}mers')
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
             os.makedirs(output_len_dir, exist_ok=True)
 
-            class_ii_arguments = junction_arguments.copy()
-            class_ii_arguments['input_file']              = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{y}.fa')
+            input_file  = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{x}.fa')
+            if not os.path.exists(input_file):
+                print(f'No {x}mer neoepitopes found')
+                continue
+
+            class_ii_arguments['input_file']              = input_file
             class_ii_arguments['alleles']                 = class_ii_alleles
             class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
             class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
