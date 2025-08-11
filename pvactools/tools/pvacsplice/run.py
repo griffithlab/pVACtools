@@ -60,7 +60,13 @@ def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
         mhc_dirs = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.startswith(f'MHC_Class_{mhc_class}')]
     if not mhc_dirs:
         print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
-    combined_files = [os.path.join(m, f'{params["sample_name"]}.all_epitopes.tsv') for m in mhc_dirs]
+    combined_files = []
+    for m in mhc_dirs:
+        file = os.path.join(m, f'{params["sample_name"]}.all_epitopes.tsv')
+        if os.path.exists(file):
+            combined_files.append(file)
+    if len(combined_files) == 0:
+        return
     combined_fn = os.path.join(output_dir, f'{params["sample_name"]}.all_epitopes.tsv')
     combine_epitope_len_reports(combined_files, combined_fn)
     filtered_fn = os.path.join(output_dir, f'{params["sample_name"]}.filtered.tsv')
