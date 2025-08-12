@@ -99,17 +99,28 @@ def determine_neoepitopes(sequence, length):
 def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length):
     wt_epitopes = determine_neoepitopes(wt_peptide, flanking_length+1)
     mt_epitopes = determine_neoepitopes(mt_peptide, flanking_length+1)
-    for i in range(1, len(wt_epitopes)):
+    print("wt_epitopes:", wt_epitopes)
+    print("mt_epitopes:", mt_epitopes)
+    start = None
+    for i in range(1, len(mt_epitopes)+1): # +1 to include the last epitope; use len(mt_epitopes) instead of len(wt_epitopes) to accomodate case where mt_epitopes is longer
+        print(f"Comparing i={i}: wt_epitope={wt_epitopes[i]}, mt_epitope={mt_epitopes[i]}")
         wt_epitope = wt_epitopes[i]
         mt_epitope = mt_epitopes[i]
         if wt_epitope != mt_epitope:
             start = i - 1
+            print("start set to:", start)
             break
+    if start is None:
+        print("ERROR: 'start' was never set!")
+        # Optionally, raise an error or return here
+        raise ValueError("Could not determine 'start' position. wt_epitopes and mt_epitopes may be identical.")
     for i, (wt_epitope, mt_epitope) in enumerate(zip(reversed(list(wt_epitopes.values())), reversed(list(mt_epitopes.values())))):
         if wt_epitope != mt_epitope:
             stop = len(mt_epitopes) - i + flanking_length
             break
+    print("start , stop: ",start,",'",stop)
     mutant_subsequence = mt_peptide[start:stop]
+    print("mutant_subsequence:", mutant_subsequence)
     supported_aas = supported_amino_acids()
     if mutant_subsequence[0] not in supported_aas:
         mutant_subsequence = mutant_subsequence[1:]
