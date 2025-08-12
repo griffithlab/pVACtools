@@ -53,6 +53,6 @@ class PvacbindBindingFilterTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.MHC_I.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(binding_filter.main([input_file, output_file.name]))
