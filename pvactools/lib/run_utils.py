@@ -99,11 +99,8 @@ def determine_neoepitopes(sequence, length):
 def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length):
     wt_epitopes = determine_neoepitopes(wt_peptide, flanking_length+1)
     mt_epitopes = determine_neoepitopes(mt_peptide, flanking_length+1)
-    for i in range(1, len(wt_epitopes)):
-        wt_epitope = wt_epitopes[i]
-        mt_epitope = mt_epitopes[i]
+    for start, (wt_epitope, mt_epitope) in enumerate(zip(list(wt_epitopes.values()), list(mt_epitopes.values()))):
         if wt_epitope != mt_epitope:
-            start = i - 1
             break
     for i, (wt_epitope, mt_epitope) in enumerate(zip(reversed(list(wt_epitopes.values())), reversed(list(mt_epitopes.values())))):
         if wt_epitope != mt_epitope:
@@ -134,5 +131,5 @@ def get_anchor_positions(hla_allele, epitope_length, allele_specific_anchors, an
             values = mouse_anchor_positions[epitope_length][hla_allele]
             positions = [pos for pos, val in values.items() if val]
             return positions
-                
+
         return [1, 2, epitope_length - 1 , epitope_length]
