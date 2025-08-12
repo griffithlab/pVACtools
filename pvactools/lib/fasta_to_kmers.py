@@ -3,6 +3,7 @@ import re
 import pandas as pd
 import numpy as np
 from pyfaidx import Fasta
+import logging
 
 from pvactools.lib.run_utils import *
 
