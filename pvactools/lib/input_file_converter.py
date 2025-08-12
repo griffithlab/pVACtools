@@ -338,7 +338,7 @@ class VcfConverter(InputFileConverter):
                     if not self.allow_incomplete_transcripts:
                         if 'cds_start_nf' in flags or 'cds_end_nf' in flags:
                             continue
-                        transcript_cds_flags = ''
+                        transcript_cds_flags = 'NA'
                     else:
                         transcript_cds_flags = flags if flags else 'None'
 
@@ -588,7 +588,7 @@ class PvacspliceVcfConverter(VcfConverter):
                     if not self.allow_incomplete_transcripts:
                         if 'cds_start_nf' in flags or 'cds_end_nf' in flags:
                             continue
-                        transcript_cds_flags = ''
+                        transcript_cds_flags = 'NA'
                     else:
                         transcript_cds_flags = flags if flags else 'None'
 
