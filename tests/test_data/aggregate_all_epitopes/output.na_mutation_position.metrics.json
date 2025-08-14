@@ -3556,6 +3556,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          NaN
+        ],
         "transcript_length": [
           645
         ],

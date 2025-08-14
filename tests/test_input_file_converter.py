@@ -594,6 +594,7 @@ class InputFileConverterTests(unittest.TestCase):
             'proximal_variants_vcf': convert_input_proximal_variants_file,
             'proximal_variants_tsv': convert_output_proximal_variants_file.name,
             'flanking_bases': 90,
+            'allow_incomplete_transcripts': True,
         }
         converter = VcfConverter(**convert_vcf_params)
 
