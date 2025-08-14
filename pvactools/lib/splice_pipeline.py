@@ -188,6 +188,12 @@ class JunctionPipeline:
                         print('No amino acid sequence was produced. Skipping.')
                         continue
                     # creates output transcript fasta
+                    if alt_fs == 'yes':
+                        updated_index = "{}.frameshift_splice_site".format(combined_df.loc[i, 'index'])
+                    else:
+                        updated_index = "{}.inframe_splice_site".format(combined_df.loc[i, 'index'])
+                    combined_df.loc[i, 'index'] = updated_index
+                    junctions.fasta_index = updated_index
                     junctions.create_sequence_fasta(wt_aa, alt_aa)
                     # df[row, col]
                     combined_df.loc[i, 'wt_protein_length'] = len(wt_aa)
