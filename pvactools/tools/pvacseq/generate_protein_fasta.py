@@ -58,6 +58,15 @@ def define_parser():
         default=['protein_coding']
     )
     parser.add_argument(
+        "--allow-incomplete-transcripts",
+        help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
+                + "are excluded from analysis, as they often produce invalid protein sequences. "
+                + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
+                + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
+        default=False,
+        action='store_true'
+    )
+    parser.add_argument(
         "--mutant-only",
         help="Only output mutant peptide sequences",
         default=False,
@@ -81,13 +90,14 @@ def define_parser():
     )
     return parser
 
-def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, flanking_sequence_length, pass_only, biotypes):
+def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, flanking_sequence_length, pass_only, biotypes, allow_incomplete_transcripts):
     print("Converting VCF to TSV")
     tsv_file = os.path.join(temp_dir, 'tmp.tsv')
     convert_params = {
         'input_file' : input_vcf,
         'output_file': tsv_file,
         'biotypes'   : biotypes,
+        'allow_incomplete_transcripts': allow_incomplete_transcripts
     }
     if sample_name is not None:
         convert_params['sample_name'] = sample_name
@@ -210,7 +220,7 @@ def main(args_input = sys.argv[1:]):
 
     temp_dir = tempfile.mkdtemp()
 
-    proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only, args.biotypes)
+    proximal_variants_tsv = convert_vcf(args.input_vcf, temp_dir, args.sample_name, args.phased_proximal_variants_vcf, args.flanking_sequence_length, args.pass_only, args.biotypes, args.allow_incomplete_transcripts)
     proximal_variants_file = "{}.proximal_variants.tsv".format(args.output_file)
     if proximal_variants_tsv is not None:	
         shutil.copy(proximal_variants_tsv, proximal_variants_file)
