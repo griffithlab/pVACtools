@@ -289,15 +289,25 @@ class CalculateReferenceProteomeSimilarity:
         elif self.file_type == 'pVACsplice':
             if self._input_tsv_type(line) == 'aggregated':
                 identifier = line['ID']
+                epitope = line['Best Peptide']
+                subpeptide_position = int(line['Pos'])
             else:
                 identifier = line['Mutation']
+                epitope = line['MT Epitope Seq']
+                subpeptide_position = int(line['Protein Position'])
             if identifier in mt_records_dict and identifier in wt_records_dict:
                 wt_peptide = wt_records_dict[identifier]
                 mt_peptide = mt_records_dict[identifier]
             else:
                 logging.warning("Record {} not found in input FASTA. Skipping.".format(identifier))
                 return None, None, None
-            peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+            _, frameshift_status = identifier.rsplit('.', 1)
+            if frameshift_status == 'inframe_splice_site':
+                peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+            elif frameshift_status == 'frameshift_splice_site':
+                peptide = get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+            else:
+                raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
             full_peptide = peptide
             wt_peptide = None
         else:
