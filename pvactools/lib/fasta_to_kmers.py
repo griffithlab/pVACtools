@@ -26,6 +26,8 @@ class FastaToKmers:
             final_seq_name = f'{seq_name};{i+1}'
             # grab kmer sequence
             k = sequence[i:self.epitope_length+i]
+            if len(k) < self.epitope_length:
+                continue
             #kmer contains unsupported amino acids
             if not all([c in supported_aas for c in k]):
                 logging.warning("Record {} contains unsupported amino acids. Skipping.".format(k))
