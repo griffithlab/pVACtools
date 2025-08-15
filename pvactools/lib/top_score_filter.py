@@ -405,7 +405,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             biotype_lines = lines
 
         #subset protein_coding dataset to only include entries with a TSL < maximum_transcript_support_level
-        tsl_lines = [x for x in biotype_lines if x['Transcript Support Level'] != 'NA' and x['Transcript Support Level'] != 'Not Supported' and int(x['Transcript Support Level']) < self.maximum_transcript_support_level]
+        tsl_lines = [x for x in biotype_lines if x['Transcript Support Level'] != 'NA' and x['Transcript Support Level'] != 'Not Supported' and int(float(x['Transcript Support Level'])) < self.maximum_transcript_support_level]
         #if this results in an empty dataset, reset to previous dataset
         if len(tsl_lines) == 0:
             tsl_lines = biotype_lines
