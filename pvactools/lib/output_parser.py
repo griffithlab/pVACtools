@@ -1121,10 +1121,10 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
         tmp_output_filehandle = open(tmp_output_file, 'w')
         tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
-        
+
         # added for pvacsplice - variant info
         tsv_entries = self.parse_input_tsv_file()
-        
+
         # get binding info from iedb files
         iedb_results = self.process_input_iedb_file()
 
