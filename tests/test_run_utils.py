@@ -73,7 +73,7 @@ class RunUtilsTests(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             checker("Test,A")
 
-        self.assertEqual("List element must be one of 'A', 'D', 'NDA', 'DA', 'N', not Test", str(context.exception))
+        self.assertEqual("List element must be one of 'A', 'D', 'NDA', not Test", str(context.exception))
 
     def test_float_range_checker(self):
         checker = float_range(0.0, 100.0)
