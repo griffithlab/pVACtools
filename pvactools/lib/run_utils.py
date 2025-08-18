@@ -72,7 +72,7 @@ def float_range(minimum, maximum):
 def pvacsplice_anchors():
     """Return function handle of an argument type function for
        ArgumentParser checking of the pVACsplice anchors
-       checking that the specified criteria are in the list of: ['A', 'D', 'NDA', 'DA', 'N']"""
+       checking that the specified criteria are in the list of: ['A', 'D', 'NDA']"""
 
     # Define the function with default arguments
     def pvacsplice_anchors_checker(arg):
@@ -80,8 +80,8 @@ def pvacsplice_anchors():
 
         arg_list = arg.split(",")
         for argument in arg_list:
-            if argument not in ['A', 'D', 'NDA', 'DA', 'N']:
-                raise argparse.ArgumentTypeError("List element must be one of 'A', 'D', 'NDA', 'DA', 'N', not {}".format(argument))
+            if argument not in ['A', 'D', 'NDA']:
+                raise argparse.ArgumentTypeError("List element must be one of 'A', 'D', 'NDA', not {}".format(argument))
         return arg_list
 
     # Return function handle to checking function
