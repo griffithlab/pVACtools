@@ -214,16 +214,16 @@ class CalculateReferenceProteomeSimilarity:
         #If we extract a larger region, we will get false-positive matches against the reference proteome
         #from the native wildtype portion of the peptide
         flanking_sequence_length = self.match_length - 1
+        first_mut_aa_pos = 0
         for i in range(len(mt_peptide)):
             if len(wt_peptide) < i:
-                first_mut_aa_pos = 0
                 break
             if wt_peptide[i] != mt_peptide[i]:
                 first_mut_aa_pos = i
                 break
+        last_mut_aa_pos = len(mt_peptide)
         for i in range(len(mt_peptide)):
             if len(wt_peptide) < i:
-                last_mut_aa_pos = len(mt_peptide)
                 break
             if wt_peptide[i * -1] != mt_peptide[i * -1]:
                 last_mut_aa_pos = len(mt_peptide) - i
