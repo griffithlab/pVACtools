@@ -251,9 +251,9 @@ def main(args_input = sys.argv[1:]):
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
             os.makedirs(output_len_dir, exist_ok=True)
 
-            input_file  = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{x}.fa')
+            input_file  = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{y}.fa')
             if not os.path.exists(input_file):
-                print(f'No {x}mer neoepitopes found')
+                print(f'No {y}mer neoepitopes found')
                 continue
 
             class_ii_arguments['input_file']              = input_file
