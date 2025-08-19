@@ -532,4 +532,13 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
                  + "lowest: Use the best MT Score (i.e. the lowest MT ic50 binding score of all chosen prediction methods). "
                  + "median: Use the median MT Score (i.e. the  median MT ic50 binding score of all chosen prediction methods)."
         )
+        self.parser.add_argument(
+            "--allow-incomplete-transcripts",
+            help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
+                 + "are excluded from analysis, as they often produce invalid protein sequences. "
+                 + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
+                 + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
+            default=False,
+            action='store_true'
+        )
         self.pvacvector()
