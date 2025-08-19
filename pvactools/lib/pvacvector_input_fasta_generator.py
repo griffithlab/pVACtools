@@ -10,13 +10,14 @@ from pvactools.lib.input_file_converter import VcfConverter
 from pvactools.lib.fasta_generator import FastaGenerator
 
 class PvacvectorInputFastaGenerator():
-    def __init__(self, pvacseq_tsv, input_vcf, output_dir, n_mer, sample_name):
+    def __init__(self, pvacseq_tsv, input_vcf, output_dir, n_mer, sample_name, allow_incomplete_transcripts):
         self.input_tsv = pvacseq_tsv
         self.input_vcf = input_vcf
         self.output_dir = output_dir
         self.output_file = os.path.join(self.output_dir, "vector_input.fa")
         self.n_mer = int(n_mer)
         self.sample_name = sample_name
+        self.allow_incomplete_transcripts = allow_incomplete_transcripts
 
     def parse_chosen_epitopes(self):
         epitopes = {}
@@ -42,7 +43,7 @@ class PvacvectorInputFastaGenerator():
     #get necessary data from initial pvacseq input vcf
     def parse_original_vcf(self):
         tsv_file = tempfile.NamedTemporaryFile()
-        VcfConverter(**{'input_file': self.input_vcf, 'output_file': tsv_file.name, 'sample_name': self.sample_name}).execute()
+        VcfConverter(**{'input_file': self.input_vcf, 'output_file': tsv_file.name, 'sample_name': self.sample_name, 'allow_incomplete_transcripts': self.allow_incomplete_transcripts}).execute()
         fasta_file = tempfile.NamedTemporaryFile()
         key_file = tempfile.NamedTemporaryFile()
         FastaGenerator(**{
