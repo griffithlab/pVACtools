@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 from pyfaidx import Fasta
 import logging
-from pathlib import Path
 
 from pvactools.lib.run_utils import *
 
@@ -111,6 +110,7 @@ class FastaToKmers:
 
     def execute(self):
         unique_kmers = self.loop_through_tscripts()
-        # key: peptide value: list of ids
-        fasta_df = self.create_index_file(unique_kmers)
-        self.create_epitope_fastas(fasta_df)
+        if len(unique_kmers) > 0:
+            # key: peptide value: list of ids
+            fasta_df = self.create_index_file(unique_kmers)
+            self.create_epitope_fastas(fasta_df)
