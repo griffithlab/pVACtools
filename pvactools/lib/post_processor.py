@@ -156,6 +156,7 @@ class PostProcessor:
                 expn_val=self.expn_val,
                 transcript_prioritization_strategy=self.transcript_prioritization_strategy,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
+                allow_incomplete_transcripts=self.allow_incomplete_transcripts,
             )
             aggregator.execute()
             self.vaf_clonal = aggregator.vaf_clonal
