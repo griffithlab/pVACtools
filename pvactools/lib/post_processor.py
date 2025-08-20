@@ -105,6 +105,7 @@ class PostProcessor:
                 expn_val=self.expn_val,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
                 top_score_metric=self.top_score_metric,
+                top_score_metric2=self.top_score_metric2,
                 allele_specific_anchors=self.allele_specific_anchors,
                 anchor_contribution_threshold=self.anchor_contribution_threshold,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
@@ -119,6 +120,7 @@ class PostProcessor:
                 percentile_threshold=self.percentile_threshold,
                 percentile_threshold_strategy=self.percentile_threshold_strategy,
                 top_score_metric=self.top_score_metric,
+                top_score_metric2=self.top_score_metric2,
                 read_support=self.read_support,
                 expn_val=self.expn_val,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
@@ -133,6 +135,7 @@ class PostProcessor:
                 percentile_threshold=self.percentile_threshold,
                 percentile_threshold_strategy=self.percentile_threshold_strategy,
                 top_score_metric=self.top_score_metric,
+                top_score_metric2=self.top_score_metric2,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
                 aggregate_inclusion_count_limit=self.aggregate_inclusion_count_limit,
             ).execute()
@@ -148,6 +151,7 @@ class PostProcessor:
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
                 aggregate_inclusion_count_limit=self.aggregate_inclusion_count_limit,
                 top_score_metric=self.top_score_metric,
+                top_score_metric2=self.top_score_metric2,
                 trna_vaf=self.trna_vaf,
                 trna_cov=self.trna_cov,
                 expn_val=self.expn_val,
@@ -173,6 +177,7 @@ class PostProcessor:
             self.binding_threshold,
             self.minimum_fold_change,
             self.top_score_metric,
+            self.top_score_metric2,
             self.exclude_NAs,
             self.allele_specific_binding_thresholds,
             self.percentile_threshold,
@@ -235,6 +240,7 @@ class PostProcessor:
                 self.transcript_support_level_filter_fh.name,
                 self.top_score_filter_fh.name,
                 top_score_metric=self.top_score_metric,
+                top_score_metric2=self.top_score_metric2,
                 binding_threshold=self.binding_threshold,
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
@@ -246,18 +252,21 @@ class PostProcessor:
                 self.transcript_support_level_filter_fh.name,
                 self.top_score_filter_fh.name,
                 top_score_metric = self.top_score_metric,
+                top_score_metric2 = self.top_score_metric2,
             ).execute()
         elif self.file_type == 'pVACbind':
             PvacbindTopScoreFilter(
                 self.transcript_support_level_filter_fh.name,
                 self.top_score_filter_fh.name,
                 top_score_metric = self.top_score_metric,
+                top_score_metric2 = self.top_score_metric2,
             ).execute()
         elif self.file_type == 'pVACsplice':
             PvacspliceTopScoreFilter(
                 self.transcript_support_level_filter_fh.name,
                 self.top_score_filter_fh.name,
                 top_score_metric = self.top_score_metric,
+                top_score_metric2 = self.top_score_metric2,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
             ).execute()
         print("Completed")
@@ -273,7 +282,7 @@ class PostProcessor:
     def call_netmhc_stab(self):
         if self.run_netmhc_stab:
             print("Running NetMHCStabPan")
-            NetMHCStab(self.net_chop_fh.name, self.netmhc_stab_fh.name, self.file_type, self.top_score_metric).execute()
+            NetMHCStab(self.net_chop_fh.name, self.netmhc_stab_fh.name, self.file_type, self.top_score_metric, self.top_score_metric2).execute()
             print("Completed")
         else:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)

@@ -129,12 +129,11 @@ def find_min_scores(parsed_output_files, current_output_dir, args, min_scores, m
             for row in reader:
                 index = row['Mutation']
                 processed_junctions.add(index)
-
                 if args.top_score_metric == 'lowest':
                     score = float(row['Best IC50 Score'])
                     percentile = float(row['Best Percentile'])
                 elif args.top_score_metric == 'median':
-                    score = float(row['Median IC50 Score'])
+                    score = float(row[f'Median IC50 Score'])
                     percentile = float(row['Median Percentile'])
                 if args.allele_specific_binding_thresholds:
                     allele = row['HLA Allele']
