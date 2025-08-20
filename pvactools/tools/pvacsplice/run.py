@@ -157,6 +157,7 @@ def main(args_input = sys.argv[1:]):
 
     additional_args = {
         'top_score_metric'          : args.top_score_metric,
+        'top_score_metric2'         : args.top_score_metric2,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
         'percentile_threshold_strategy': args.percentile_threshold_strategy,

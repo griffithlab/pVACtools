@@ -130,6 +130,7 @@ server <- shinyServer(function(input, output, session) {
     df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
     df$percentile_threshold <- df$metricsData$`percentile_threshold`
     df$percentile_threshold_strategy <- df$metricsData$`percentile_threshold_strategy`
+    df$scoring_candidate_metric <- df$metricsData$`top_score_metric2`
     df$dna_cutoff <- df$metricsData$vaf_clonal
     df$allele_expr <- df$metricsData$allele_expr_threshold
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
@@ -221,6 +222,7 @@ server <- shinyServer(function(input, output, session) {
        df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
        df$percentile_threshold <- df$metricsData$`percentile_threshold`
        df$percentile_threshold_strategy <- df$metricsData$`percentile_threshold_strategy`
+       df$scoring_candidate_metric <- df$metricsData$`top_score_metric2`
        df$dna_cutoff <- df$metricsData$vaf_clonal
        df$allele_expr <- df$metricsData$allele_expr_threshold
        df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
@@ -352,6 +354,15 @@ server <- shinyServer(function(input, output, session) {
       selected = current_percentile_threshold_strategy
     )
   })
+  output$scoring_candidate_metric_ui <- renderUI({
+    current_metric <- df$scoring_candidate_metric
+    radioButtons(
+      "scoring_candidate_metric",
+      "Specify which top score metric to use for scoring candidates. The 'ic50' option will set it to use IC50 MT, while the 'percentile' option will set it to use %ile MT",
+      c("ic50", "percentile"),
+      selected = current_metric
+    )
+  })
   output$dna_cutoff_ui <- renderUI({
     current_dna_cutoff <- df$dna_cutoff
     numericInput("dna_cutoff", "Clonal DNA VAF (Anything lower than 1/2 of chosen VAF level will be considered subclonal)", current_dna_cutoff, min = 0, max = 1, step = 0.01, width = 500)
@@ -371,6 +382,7 @@ server <- shinyServer(function(input, output, session) {
       df$percentile_threshold <- input$percentile_threshold
     }
     df$percentile_threshold_strategy <- input$percentile_threshold_strategy
+    df$scoring_candidate_metric <- input$scoring_candidate_metric
     df$dna_cutoff <- input$dna_cutoff
     df$allele_expr <- input$allele_expr
     df$allele_specific_anchors <- input$use_anchor
@@ -393,7 +405,12 @@ server <- shinyServer(function(input, output, session) {
     tier_sorter <- c("Pass", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr")
     df$mainTable$`Rank_ic50` <- NA
     df$mainTable$`Rank_expr` <- NA
-    df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    } else {
+      print("Using percentile")
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+    }
     df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
     df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
     df$mainTable <- df$mainTable %>%
@@ -410,6 +427,7 @@ server <- shinyServer(function(input, output, session) {
     df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
     df$percentile_threshold <- df$metricsData$`percentile_threshold`
     df$percentile_threshold_strategy <- df$metricsData$`percentile_threshold_strategy`
+    df$scoring_candidate_metric <- df$metricsData$`top_score_metric2`
     df$dna_cutoff <- df$metricsData$`vaf_clonal`
     df$allele_expr <- df$metricsData$`allele_expr`
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
@@ -427,7 +445,12 @@ server <- shinyServer(function(input, output, session) {
     tier_sorter <- c("Pass", "LowExpr", "Anchor", "Subclonal", "Poor", "NoExpr")
     df$mainTable$`Rank_ic50` <- NA
     df$mainTable$`Rank_expr` <- NA
-    df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    } else {
+      print("Using percentile reset params")
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+    }
     df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
     df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
     df$mainTable <- df$mainTable %>%
@@ -454,7 +477,7 @@ server <- shinyServer(function(input, output, session) {
       "Parameter" = c("Tumor Purity", "VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
                       "Binding Threshold", "Binding Threshold for Inclusion into Metrics File", "Maximum TSL",
                       "Percentile Threshold", "Percentile Threshold Strategy", "Allele Specific Binding Thresholds",
-                      "MT Top Score Metric", "WT Top Score Metric",
+                      "MT Top Score Metric", "WT Top Score Metric", "Sorting Candidate Metric",
                       "Allele Specific Anchors Used", "Anchor Contribution Threshold"),
       "Value" = c(if (is.null(df$metricsData$tumor_purity)) {"NULL"}else {df$metricsData$tumor_purity},
                   df$metricsData$`vaf_clonal`, df$metricsData$`vaf_subclonal`, df$metricsData$`allele_expr_threshold`,
@@ -463,7 +486,8 @@ server <- shinyServer(function(input, output, session) {
                   if (is.null(df$metricsData$percentile_threshold)) {"NULL"}else { df$metricsData$percentile_threshold},
                   df$metricsData$percentile_threshold_strategy,
                   df$metricsData$use_allele_specific_binding_thresholds,
-                  df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric,
+                  df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric, 
+                  if(is.null(df$metricsData$`top_score_metric2`) || is.na(df$metricsData$`top_score_metric2`)){"ic50"}else{df$metricsData$`top_score_metric2`},
                   df$metricsData$allele_specific_anchors, df$metricsData$anchor_contribution_threshold)
     ), digits = 3
   )
@@ -491,7 +515,7 @@ server <- shinyServer(function(input, output, session) {
       "Parameter" = c("VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
                       "Binding Threshold", "Binding Threshold for Inclusion into Metrics File", "Maximum TSL",
                       "Percentile Threshold", "Percentile Threshold Strategy", "Allele Specific Binding Thresholds",
-                      "MT Top Score Metric", "WT Top Score Metric",
+                      "MT Top Score Metric", "WT Top Score Metric", "Sorting Candidate Metric",
                       "Allele Specific Anchors Used", "Anchor Contribution Threshold"),
       "Value" = c(
         df$dna_cutoff,
@@ -505,6 +529,7 @@ server <- shinyServer(function(input, output, session) {
         df$use_allele_specific_binding_thresholds,
         df$metricsData$mt_top_score_metric,
         df$metricsData$wt_top_score_metric,
+        if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric)){"ic50"}else{df$scoring_candidate_metric}, #Defaulting to ic50 since that was what everything made prior to this implementation used. That way old metrics.json files will still work
         df$allele_specific_anchors, df$anchor_contribution)
     ), digits = 3
   )
