@@ -150,6 +150,8 @@ class Pipeline(metaclass=ABCMeta):
             params.extend(["-d", 'full'])
         if self.pass_only:
             params.extend(["--pass-only"])
+        if self.allow_incomplete_transcripts:
+            params.extend(["--allow-incomplete-transcripts"])
         generate_combined_fasta.main(params)
         os.unlink("{}.manufacturability.tsv".format(fasta_path))
 

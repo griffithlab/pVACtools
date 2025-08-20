@@ -116,7 +116,7 @@ class PvacspliceBestCandidate:
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.mt_top_score_metric = mt_top_score_metric
-        self.allow_incomplete_transcripts=allow_incomplete_transcripts,
+        self.allow_incomplete_transcripts=allow_incomplete_transcripts
 
     def get(self, df):
         #get all entries with Biotype 'protein_coding'
