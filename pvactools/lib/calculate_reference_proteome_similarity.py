@@ -214,16 +214,16 @@ class CalculateReferenceProteomeSimilarity:
         #If we extract a larger region, we will get false-positive matches against the reference proteome
         #from the native wildtype portion of the peptide
         flanking_sequence_length = self.match_length - 1
+        first_mut_aa_pos = 0
         for i in range(len(mt_peptide)):
             if len(wt_peptide) < i:
-                first_mut_aa_pos = 0
                 break
             if wt_peptide[i] != mt_peptide[i]:
                 first_mut_aa_pos = i
                 break
+        last_mut_aa_pos = len(mt_peptide)
         for i in range(len(mt_peptide)):
             if len(wt_peptide) < i:
-                last_mut_aa_pos = len(mt_peptide)
                 break
             if wt_peptide[i * -1] != mt_peptide[i * -1]:
                 last_mut_aa_pos = len(mt_peptide) - i
@@ -289,15 +289,25 @@ class CalculateReferenceProteomeSimilarity:
         elif self.file_type == 'pVACsplice':
             if self._input_tsv_type(line) == 'aggregated':
                 identifier = line['ID']
+                epitope = line['Best Peptide']
+                subpeptide_position = int(line['Pos'])
             else:
                 identifier = line['Mutation']
+                epitope = line['MT Epitope Seq']
+                subpeptide_position = int(line['Protein Position'])
             if identifier in mt_records_dict and identifier in wt_records_dict:
                 wt_peptide = wt_records_dict[identifier]
                 mt_peptide = mt_records_dict[identifier]
             else:
                 logging.warning("Record {} not found in input FASTA. Skipping.".format(identifier))
                 return None, None, None
-            peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+            _, frameshift_status = identifier.rsplit('.', 1)
+            if frameshift_status == 'inframe_splice_site':
+                peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+            elif frameshift_status == 'frameshift_splice_site':
+                peptide = get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+            else:
+                raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
             full_peptide = peptide
             wt_peptide = None
         else:

@@ -26,19 +26,16 @@ class FastaToKmersTests(unittest.TestCase):
         class_ii_epitope_length = [12,13,14,15,16]
         output_dir = tempfile.TemporaryDirectory()
         #output_file = os.path.join(output_dir.name, f'sample.{l}.kmers.tsv')
-        params = {
-            'fasta'           : tscript_fasta,
-            'output_dir'      : output_dir.name,
-            'class_i_epitope_length' : class_i_epitope_length,
-            'class_ii_epitope_length': class_ii_epitope_length,
-            'class_i_hla'     : 'HLA-A',
-            'class_ii_hla'    : 'DBP1',
-            'sample_name'     : 'sample',
-        }
-        fasta = FastaToKmers(**params)
-        fasta.execute()
-
         for x in class_i_epitope_length + class_ii_epitope_length:
+            params = {
+                'fasta'           : tscript_fasta,
+                'output_dir'      : output_dir.name,
+                'epitope_length'  : x,
+                'sample_name'     : 'sample',
+            }
+            fasta = FastaToKmers(**params)
+            fasta.execute()
+
             expected_file = os.path.join(self.test_data_dir, 'results', f'Test.{x}_kmers.fa')
             output_file = os.path.join(output_dir.name, f'sample.{x}.fa')
 
