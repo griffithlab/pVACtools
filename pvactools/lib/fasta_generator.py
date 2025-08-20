@@ -10,6 +10,7 @@ import itertools
 import logging
 
 from pvactools.lib.proximal_variant import ProximalVariant
+from pvactools.lib.run_utils import *
 
 csv.field_size_limit(sys.maxsize)
 
@@ -266,14 +267,20 @@ class FastaGenerator(metaclass=ABCMeta):
                 else:
                     mutant_subsequence = wildtype_subsequence_with_proximal_variants[:mutation_start_position] + mutant_amino_acid_with_proximal_variants + wildtype_subsequence_with_proximal_variants[mutation_end_position:]
 
-            if '*' in wildtype_subsequence or '*' in mutant_subsequence:
+            supported_aas = supported_amino_acids()
+            if wildtype_subsequence[0] not in supported_aas:
+                wildtype_subsequence = wildtype_subsequence[1:]
+            if wildtype_subsequence[-1] not in supported_aas:
+                wildtype_subsequence = wildtype_subsequence[0:-1]
+            if not all([c in supported_aas for c in wildtype_subsequence]):
+                print("Warning. Wildtype sequence contains unsupported amino acid U. Skipping entry {}".format(line['index']))
                 continue
-
-            if 'X' in wildtype_subsequence or 'X' in mutant_subsequence:
-                continue
-
-            if 'U' in wildtype_subsequence or 'U' in mutant_subsequence:
-                print("Warning. Sequence contains unsupported amino acid U. Skipping entry {}".format(line['index']))
+            if mutant_subsequence[0] not in supported_aas:
+                mutant_subsequence = mutant_subsequence[1:]
+            if mutant_subsequence[-1] not in supported_aas:
+                mutant_subsequence = mutant_subsequence[0:-1]
+            if not all([c in supported_aas for c in mutant_subsequence]):
+                print("Warning. Mutant sequence contains unsupported amino acid U. Skipping entry {}".format(line['index']))
                 continue
 
             if mutant_subsequence in wildtype_subsequence:
