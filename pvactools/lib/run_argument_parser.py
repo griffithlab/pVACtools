@@ -374,7 +374,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         self.parser.add_argument(
             "--anchor-types", type=pvacsplice_anchors(),
             help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list."
-            + "Choices: A, D, NDA, DA, N",
+            + "Choices: A, D, NDA",
             default=['A', 'D', 'NDA'],
         )
         # pvacsplice - filter on gene expression only (but keep txpn value in output)
