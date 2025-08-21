@@ -141,6 +141,7 @@ class PvacspliceBestCandidate:
         else:
             prob_pos_df = transcript_df
 
+        print(self.allow_incomplete_transcripts)
         # if allow_incomplete_transcripts is True, deprioritize certain flags
         if self.allow_incomplete_transcripts:
             prob_pos_df['Transcript CDS Flags Sort'] = prob_pos_df['Transcript CDS Flags'].apply(
@@ -153,7 +154,7 @@ class PvacspliceBestCandidate:
             sort_order = [True, True]
         else:
             sort_columns = [
-                f"{self.mt_top_score_metric} MT IC50 Score",
+                f"{self.mt_top_score_metric} IC50 Score",
             ]
             sort_order = [True]
 
