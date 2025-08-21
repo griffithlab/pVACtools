@@ -358,7 +358,7 @@ server <- shinyServer(function(input, output, session) {
     current_metric <- df$scoring_candidate_metric
     radioButtons(
       "scoring_candidate_metric",
-      "Specify which top score metric to use for scoring candidates. The 'ic50' option will set it to use IC50 MT, while the 'percentile' option will set it to use %ile MT",
+      "Specify which metric to prioritize for sorting candidates within each Tier. The 'ic50' option will prioritize sorting by IC50 MT, while the 'percentile' option will priritize sorting by %ile MT. Either choice will be considered in combination with the Allele Expr for final sort order.",
       c("ic50", "percentile"),
       selected = current_metric
     )
