@@ -60,10 +60,19 @@ Contents
 New in Version |release|
 ------------------------
 
-This is a bugfix release. It fixes the following problem(s):
+This is a minor feature release. It adds the following features:
 
-* Fixed IC50/%ile WT sorting to use numerical sorting instead of string sorting. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1265
-* Bugfixes for the pvacsplice generate_protein_fasta command to handle sequences shorter than the flanking sequence length and sequences with unsupported amino acids. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1268
+* Add a new parameter ``--top-score-metric2`` that allows users to set whether to prioritize ic50 or percentile scores when creating the filtered and aggregated reports. by @Jaz2021 in https://github.com/griffithlab/pVACtools/pull/1267
+* If an unsupported amino acid is the last/first amino acid in the peptide sequence, clip it so that the sequence can still be included in the run. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1266
+
+It also fixes the following pVACsplice bugs:
+
+* Remove option for DA and N anchors in pVACsplice. Splice sites with the DA anchor (known donor and acceptor) don't result in any novel epitopes (the splice site peptide sequence predicted by pVACsplice is identical to the WT sequence). For the N anchor, there isn't enough information to construct a splice site peptide sequence with our current approach since both the donor and acceptor are not observed in the reference. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1283
+* Add a missing import statement and fix an issue in get_mutated_peptide_with_flanking_sequence where, for certain variants, the mutated peptide was not being determined correctly. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1282
+* Fix an issue in the pVACsplice calculate reference proteome similarity step where, for certain variants, the start position of the peptide to query was not being determined correctly. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1278
+* Add better handling of pVACsplice frameshifts where the downstream sequence may not have been fully included in the query sequence for the calculate reference proteome similarity step. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1285
+* Handle cases in pVACsplice where no processable neoepitopes were found so that the run exits gracefully with better stdout messages. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1286
+* Fix documentation of the input fasta parameter in pvacsplice calculate_reference_proteome_similarity to point to the correct location. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1288
 
 New in Version 5
 ----------------
