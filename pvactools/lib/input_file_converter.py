@@ -338,9 +338,7 @@ class VcfConverter(InputFileConverter):
                     if not self.allow_incomplete_transcripts:
                         if 'cds_start_nf' in flags or 'cds_end_nf' in flags:
                             continue
-                        transcript_cds_flags = 'NA'
-                    else:
-                        transcript_cds_flags = flags if flags else 'None'
+                    transcript_cds_flags = flags if flags else 'None'
 
                     consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
                     if consequence is None:
@@ -588,9 +586,7 @@ class PvacspliceVcfConverter(VcfConverter):
                     if not self.allow_incomplete_transcripts:
                         if 'cds_start_nf' in flags or 'cds_end_nf' in flags:
                             continue
-                        transcript_cds_flags = 'NA'
-                    else:
-                        transcript_cds_flags = flags if flags else 'None'
+                    transcript_cds_flags = flags if flags else 'None'
 
                     ensembl_gene_id = transcript['Gene']
                     hgvsc = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSc']) if 'HGVSc' in transcript else 'NA'

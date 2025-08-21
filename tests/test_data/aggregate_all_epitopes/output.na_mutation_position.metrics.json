@@ -3557,7 +3557,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           645

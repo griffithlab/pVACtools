@@ -2593,7 +2593,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           325
@@ -3014,7 +3014,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           1443
@@ -4499,7 +4499,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           372
@@ -5832,7 +5832,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           1640
@@ -6949,7 +6949,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           905
@@ -7306,7 +7306,7 @@
           "IG_V_gene"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           148
@@ -8423,7 +8423,7 @@
           "IG_V_gene"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           148
@@ -8932,7 +8932,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           377
@@ -9137,7 +9137,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           1020
@@ -11270,7 +11270,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           820
@@ -11475,7 +11475,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           132
@@ -12440,7 +12440,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           639
@@ -12645,7 +12645,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           2365
@@ -14194,7 +14194,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           2223
@@ -15311,7 +15311,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           780
@@ -16580,7 +16580,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           780
@@ -19169,7 +19169,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           2253
@@ -19374,7 +19374,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           1211
@@ -21507,7 +21507,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           677
@@ -22992,7 +22992,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           1819
@@ -23501,7 +23501,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           933
@@ -24138,7 +24138,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           593
@@ -25839,7 +25839,7 @@
           "protein_coding"
         ],
         "transcript_cds_flags": [
-          NaN
+          "None"
         ],
         "transcript_length": [
           384
