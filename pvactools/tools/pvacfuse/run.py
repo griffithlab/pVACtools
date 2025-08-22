@@ -40,7 +40,6 @@ def create_net_class_report(files, all_epitopes_output_file, filtered_report_fil
         post_processing_params['fasta'] = run_params['fasta']
     post_processing_params['species'] = run_params['species']
     post_processing_params['file_type'] = 'pVACfuse'
-
     PostProcessor(**post_processing_params).execute()
 
 def create_combined_reports(files, all_epitopes_output_file, filtered_report_file, run_manufacturability_metrics, args):
@@ -144,6 +143,7 @@ def main(args_input = sys.argv[1:]):
         'input_file_type'           : 'fasta',
         'sample_name'               : args.sample_name,
         'top_score_metric'          : args.top_score_metric,
+        'top_score_metric2'         : args.top_score_metric2,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
         'percentile_threshold_strategy': args.percentile_threshold_strategy,

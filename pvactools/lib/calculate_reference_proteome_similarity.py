@@ -17,6 +17,7 @@ from time import sleep
 import pymp
 from itertools import groupby
 import json
+import logging
 
 from pvactools.lib.run_utils import *
 
@@ -213,16 +214,16 @@ class CalculateReferenceProteomeSimilarity:
         #If we extract a larger region, we will get false-positive matches against the reference proteome
         #from the native wildtype portion of the peptide
         flanking_sequence_length = self.match_length - 1
+        first_mut_aa_pos = 0
         for i in range(len(mt_peptide)):
             if len(wt_peptide) < i:
-                first_mut_aa_pos = 0
                 break
             if wt_peptide[i] != mt_peptide[i]:
                 first_mut_aa_pos = i
                 break
+        last_mut_aa_pos = len(mt_peptide)
         for i in range(len(mt_peptide)):
             if len(wt_peptide) < i:
-                last_mut_aa_pos = len(mt_peptide)
                 break
             if wt_peptide[i * -1] != mt_peptide[i * -1]:
                 last_mut_aa_pos = len(mt_peptide) - i
@@ -289,20 +290,39 @@ class CalculateReferenceProteomeSimilarity:
             wt_peptide = None
         elif self.file_type == 'pVACfuse':
             if self._input_tsv_type(line) == 'aggregated':
-                peptide = mt_records_dict[line['ID']]
+                identifier = line['ID']
             else:
-                peptide = mt_records_dict[line['Mutation']]
+                identifier = line['Mutation']
+            if identifier in mt_records_dict:
+                peptide = mt_records_dict[identifier]
+            else:
+                logging.warning("Record {} not found in input FASTA. Skipping.".format(identifier))
+                return None, None, None
             full_peptide = peptide
             wt_peptide = None
         elif self.file_type == 'pVACsplice':
             if self._input_tsv_type(line) == 'aggregated':
                 identifier = line['ID']
+                epitope = line['Best Peptide']
+                subpeptide_position = int(line['Pos'])
             else:
                 identifier = line['Mutation']
-            wt_peptide = wt_records_dict[identifier]
-            mt_peptide = mt_records_dict[identifier]
-            peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
-            full_peptide = mt_peptide
+                epitope = line['MT Epitope Seq']
+                subpeptide_position = int(line['Protein Position'])
+            if identifier in mt_records_dict and identifier in wt_records_dict:
+                wt_peptide = wt_records_dict[identifier]
+                mt_peptide = mt_records_dict[identifier]
+            else:
+                logging.warning("Record {} not found in input FASTA. Skipping.".format(identifier))
+                return None, None, None
+            _, frameshift_status = identifier.rsplit('.', 1)
+            if frameshift_status == 'inframe_splice_site':
+                peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+            elif frameshift_status == 'frameshift_splice_site':
+                peptide = get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+            else:
+                raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
+            full_peptide = peptide
             wt_peptide = None
         else:
             if self._input_tsv_type(line) == 'aggregated':
@@ -311,8 +331,13 @@ class CalculateReferenceProteomeSimilarity:
             else:
                 epitope = line['MT Epitope Seq']
                 variant_type = line['Variant Type']
-            full_peptide = mt_records_dict[line['Index']]
-            wt_peptide = wt_records_dict[line['Index']]
+            identifier = line['Index']
+            if identifier in mt_records_dict and identifier in wt_records_dict:
+                full_peptide = mt_records_dict[identifier]
+                wt_peptide = wt_records_dict[identifier]
+            else:
+                logging.warning("Record {} not found in input FASTA. Skipping.".format(identifier))
+                return None, None, None
 
             # get peptide
             subpeptide_position = full_peptide.index(epitope)
@@ -627,7 +652,8 @@ class CalculateReferenceProteomeSimilarity:
             'input_fasta',
             help="For pVACbind, the original input FASTA file. "
             + "For pVACseq, pVACfuse, and pVACsplice a FASTA file with mutant peptide sequences for each variant isoform. "
-            + "This file can be found in the same directory as the input filtered.tsv/all_epitopes.tsv file. "
+            + "For pVACseq and pVACfuse, this file can be found in the same directory as the input filtered.tsv/all_epitopes.tsv file. "
+            + "For pVACsplice, this file can be found in the main output directory. "
             + "Can also be generated by running `pvacseq|pvacfuse|pvacsplice generate_protein_fasta`.")
         parser.add_argument(
             'output_file',

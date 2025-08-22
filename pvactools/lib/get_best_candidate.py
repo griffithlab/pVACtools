@@ -8,11 +8,13 @@ class PvacseqBestCandidate:
         maximum_transcript_support_level,
         anchor_calculator,
         mt_top_score_metric,
+        top_score_mode,
     ):
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.anchor_calculator = anchor_calculator
         self.mt_top_score_metric = mt_top_score_metric
+        self.top_score_mode = top_score_mode
 
     def get(self, df):
         #get all entries with Biotype 'protein_coding'
@@ -45,14 +47,15 @@ class PvacseqBestCandidate:
 
         #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
         anchor_residue_pass_df.sort_values(by=[
-            "{} MT IC50 Score".format(self.mt_top_score_metric),
+            "{} MT {}".format(self.mt_top_score_metric, self.top_score_mode),
             "Transcript Length",
         ], inplace=True, ascending=[True, False])
         return anchor_residue_pass_df.iloc[0]
 
 class PvacfuseBestCandidate:
-    def __init__(self, top_score_metric):
+    def __init__(self, top_score_metric, top_score_mode):
         self.top_score_metric = top_score_metric
+        self.top_score_mode = top_score_mode
 
     def get(self, df):
         #subset dataframe to only include entries with no problematic positions
@@ -66,12 +69,13 @@ class PvacfuseBestCandidate:
         if 'Expression' in df:
             df['Expression Sort'] = df['Expression']
             df['Expression Sort'].replace({'NA': 0})
-        prob_pos_df.sort_values(by=["{} IC50 Score".format(self.top_score_metric), 'Expression Sort'], inplace=True, ascending=[True, False])
+        prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, self.top_score_mode), 'Expression Sort'], inplace=True, ascending=[True, False])
         return prob_pos_df.iloc[0]
 
 class PvacbindBestCandidate:
-    def __init__(self, top_score_metric):
+    def __init__(self, top_score_metric, top_score_mode):
         self.top_score_metric = top_score_metric
+        self.top_score_mode = top_score_mode
 
     def get(self, df):
         if 'Problematic Positions' in df:
@@ -81,7 +85,7 @@ class PvacbindBestCandidate:
                 prob_pos_df = df
         else:
             prob_pos_df = df
-        prob_pos_df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
+        prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, self.top_score_mode)], inplace=True, ascending=True)
         return prob_pos_df.iloc[0]
 
 class PvacspliceBestCandidate:
@@ -90,10 +94,12 @@ class PvacspliceBestCandidate:
         transcript_prioritization_strategy,
         maximum_transcript_support_level,
         mt_top_score_metric,
+        top_score_mode,
     ):
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.mt_top_score_metric = mt_top_score_metric
+        self.top_score_mode = top_score_mode
 
     def get(self, df):
         #get all entries with Biotype 'protein_coding'
@@ -120,6 +126,6 @@ class PvacspliceBestCandidate:
 
         #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
         prob_pos_df.sort_values(by=[
-            "{} IC50 Score".format(self.mt_top_score_metric),
+            "{} {}".format(self.mt_top_score_metric, self.top_score_mode),
         ], inplace=True, ascending=[True])
         return prob_pos_df.iloc[0]

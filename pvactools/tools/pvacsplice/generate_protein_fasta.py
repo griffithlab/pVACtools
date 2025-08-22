@@ -164,7 +164,15 @@ def main(args_input = sys.argv[1:]):
         wt_sequence = wt_sequences[index]
         if mt_sequence in wt_sequence:
             continue
-        final_sequences[index] = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, args.flanking_sequence_length)
+        _, frameshift_status = index.rsplit('.', 1)
+        if frameshift_status == 'inframe_splice_site':
+            final_sequence = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(args.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
+        elif frameshift_status == 'frameshift_splice_site':
+            final_sequence = get_mutated_frameshift_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(args.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
+        else:
+            raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
+        if final_sequence:
+            final_sequences[index] = final_sequence
 
     (tsv_indexes, tsv_file_type) = parse_input_tsv(args.input_tsv)
     output_records = []

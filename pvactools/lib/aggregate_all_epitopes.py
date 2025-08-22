@@ -251,6 +251,7 @@ class AggregateAllEpitopes:
                 'use_allele_specific_binding_thresholds': self.use_allele_specific_binding_thresholds,
                 'mt_top_score_metric': self.mt_top_score_metric,
                 'wt_top_score_metric': self.wt_top_score_metric,
+                'top_score_metric2': self.top_score_metric2,
                 'allele_specific_binding_thresholds': self.allele_specific_binding_thresholds,
                 'allele_specific_anchors': self.anchor_calculator.use_allele_specific_anchors,
                 'alleles': self.hla_types.tolist(),
@@ -297,6 +298,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
+            top_score_metric2="ic50",
             allele_specific_anchors=False,
             anchor_contribution_threshold=0.8,
             aggregate_inclusion_binding_threshold=5000,
@@ -323,6 +325,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         else:
             self.mt_top_score_metric = "Best"
             self.wt_top_score_metric = "Corresponding"
+        self.top_score_metric2 = top_score_metric2
+        if self.top_score_metric2 == "percentile":
+            self.top_score_mode = "Percentile"
+        else:
+            self.top_score_mode = "IC50 Score"
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         super().__init__()
         self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold, self.wt_top_score_metric)
@@ -367,6 +374,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             self.maximum_transcript_support_level,
             self.anchor_calculator,
             self.mt_top_score_metric,
+            self.top_score_mode,
         ).get(df)
 
     def get_included_df(self, df):
@@ -393,15 +401,21 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         if self.problematic_positions_exist():
             df['problematic_positions_sort'] = df['Problematic Positions'].apply(lambda x: 1 if x == "None" else 2)
         df['anchor_residue_pass_sort'] = df.apply(lambda x: 1 if self.anchor_calculator.is_anchor_residue_pass(x) else 2, axis=1)
+        if self.top_score_mode == 'IC50 Score':
+            primary = "{} MT IC50 Score".format(self.mt_top_score_metric)
+            secondary = "{} MT Percentile".format(self.mt_top_score_metric)
+        else:
+            primary = "{} MT Percentile".format(self.mt_top_score_metric)
+            secondary = "{} MT IC50 Score".format(self.mt_top_score_metric)
         if self.problematic_positions_exist():
             sort_columns = [
                 "biotype_sort",
                 "tsl_sort",
                 "problematic_positions_sort",
                 "anchor_residue_pass_sort",
-                "{} MT IC50 Score".format(self.mt_top_score_metric),
+                primary,
                 "Transcript Length",
-                "{} MT Percentile".format(self.mt_top_score_metric),
+                secondary,
             ]
             sort_order = [True, True, True, True, True, False, True]
         else:
@@ -409,9 +423,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                 "biotype_sort",
                 "tsl_sort",
                 "anchor_residue_pass_sort",
-                "{} MT IC50 Score".format(self.mt_top_score_metric),
+                primary,
                 "Transcript Length",
-                "{} MT Percentile".format(self.mt_top_score_metric),
+                secondary,
             ]
             sort_order = [True, True, True, True, False, True]
         df.sort_values(by=sort_columns, inplace=True, ascending=sort_order)
@@ -671,6 +685,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             allele_specific_binding_thresholds=self.use_allele_specific_binding_thresholds,
             allele_specific_anchors=self.anchor_calculator.use_allele_specific_anchors,
             anchor_contribution_threshold=self.anchor_calculator.anchor_contribution_threshold,
+            top_score_metric2=self.top_score_metric2,
         ).execute()
 
 
@@ -683,6 +698,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
+            top_score_metric2="ic50",
             aggregate_inclusion_binding_threshold=5000,
             aggregate_inclusion_count_limit=15,
         ):
@@ -698,6 +714,11 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             self.top_score_metric = "Median"
         else:
             self.top_score_metric = "Best"
+        self.top_score_metric2 = top_score_metric2
+        if self.top_score_metric2 == "percentile":
+            self.top_score_mode = "Percentile"
+        else:
+            self.top_score_mode = "IC50 Score"
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         super().__init__()
 
@@ -740,7 +761,13 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             return binding_df[binding_df["Epitope Seq"].isin(top_n_best_peptides)]
 
     def sort_included_df(self, df):
-        df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
+        if self.top_score_mode == 'IC50 Score':
+            primary = "{} IC50 Score".format(self.top_score_metric)
+            secondary = "{} Percentile".format(self.top_score_metric)
+        else:
+            primary = "{} Percentile".format(self.top_score_metric)
+            secondary = "{} IC50 Score".format(self.top_score_metric)
+        df.sort_values(by=[primary, secondary], inplace=True, ascending=[True,True])
         return df
 
     def get_unique_peptide_hla_counts(self, included_df):
@@ -792,6 +819,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         percentile_threshold_strategy='conservative',
         allele_specific_binding_thresholds=False,
         top_score_metric="median",
+        top_score_metric2="ic50",
         read_support=5,
         expn_val=0.1,
         aggregate_inclusion_binding_threshold=5000,
@@ -806,6 +834,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             percentile_threshold_strategy = percentile_threshold_strategy,
             allele_specific_binding_thresholds=allele_specific_binding_thresholds,
             top_score_metric=top_score_metric,
+            top_score_metric2=top_score_metric2,
             aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
             aggregate_inclusion_count_limit=aggregate_inclusion_count_limit,
         )
@@ -838,6 +867,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
     def get_best_binder(self, df):
         return PvacfuseBestCandidate(
             self.top_score_metric,
+            self.top_score_mode,
         ).get(df)
 
     def tier_aggregated_report(self):
@@ -848,7 +878,8 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             percentile_threshold=self.percentile_threshold,
             percentile_threshold_strategy=self.percentile_threshold_strategy,
             read_support=self.read_support,
-            expn_val=self.expn_val
+            expn_val=self.expn_val,
+            top_score_metric2=self.top_score_metric2,
         ).execute()
 
 
@@ -874,6 +905,7 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
     def get_best_binder(self, df):
         return PvacbindBestCandidate(
             self.top_score_metric,
+            self.top_score_mode,
         ).get(df)
 
     def tier_aggregated_report(self):
@@ -883,6 +915,7 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             allele_specific_binding_thresholds=self.use_allele_specific_binding_thresholds,
             percentile_threshold=self.percentile_threshold,
             percentile_threshold_strategy=self.percentile_threshold_strategy,
+            top_score_metric2=self.top_score_metric2,
         ).execute()
 
 
@@ -899,6 +932,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         aggregate_inclusion_binding_threshold=5000,
         aggregate_inclusion_count_limit=15,
         top_score_metric="median",
+        top_score_metric2="ic50",
         trna_vaf=0.25,
         trna_cov=10,
         expn_val=1,
@@ -916,6 +950,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
             aggregate_inclusion_count_limit=aggregate_inclusion_count_limit,
             top_score_metric=top_score_metric,
+            top_score_metric2=top_score_metric2,
         )
         self.tumor_purity = tumor_purity
         self.trna_vaf = trna_vaf
@@ -982,6 +1017,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             self.transcript_prioritization_strategy,
             self.maximum_transcript_support_level,
             self.top_score_metric,
+            self.top_score_mode,
         ).get(df)
 
     def tier_aggregated_report(self):
@@ -996,5 +1032,6 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             trna_cov=self.trna_cov,
             expn_val=self.expn_val,
             transcript_prioritization_strategy=self.transcript_prioritization_strategy,
-            maximum_transcript_support_level=self.maximum_transcript_support_level
+            maximum_transcript_support_level=self.maximum_transcript_support_level,
+            top_score_metric2=self.top_score_metric2,
         ).execute()

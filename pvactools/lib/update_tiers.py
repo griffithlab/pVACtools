@@ -20,6 +20,7 @@ class UpdateTiers:
             if threshold is not None:
                 allele_specific_binding_thresholds[hla_type] = float(threshold)
         self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        super().__init__()
 
     def execute(self):
         with open(self.input_file) as input_fh:
@@ -80,6 +81,12 @@ class UpdateTiers:
             help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default) in order to pass the binding criteria."
                  + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
             default="conservative",
+        )
+        parser.add_argument(
+            '-m2', '--top-score-metric2',
+            choices=['ic50','percentile'],
+            default='ic50',
+            help='Whether to use IC50 MT or to use %%ile MT score column when sorting candidates within a tier.'
         )
         if tool in ['pvacseq', 'pvacsplice']:
             parser.add_argument(
@@ -159,6 +166,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
             allele_specific_binding_thresholds=False,
             allele_specific_anchors=False,
             anchor_contribution_threshold=0.8,
+            top_score_metric2='ic50',
         ):
         self.input_file = input_file
         self.output_file = tempfile.NamedTemporaryFile()
@@ -172,6 +180,10 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.trna_vaf = trna_vaf
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
+        if top_score_metric2 == "percentile":
+            self.top_score_mode = "%ile MT"
+        else:
+            self.top_score_mode = "IC50 MT"
         super().__init__()
         self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold)
 
@@ -316,14 +328,14 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
 
-        df["rank_ic50"] = pd.to_numeric(df["IC50 MT"]).rank(ascending=True, method='dense')
+        df["rank_binding"] = pd.to_numeric(df[self.top_score_mode]).rank(ascending=True, method='dense')
         df["rank_expr"] = pd.to_numeric(df["Allele Expr"], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
-        df["rank"] = df["rank_ic50"] + df["rank_expr"]
+        df["rank"] = df["rank_binding"] + df["rank_expr"]
 
         df.sort_values(by=["rank_tier", "rank", "Gene", "AA Change"], inplace=True, ascending=True)
 
         df.drop(labels='rank_tier', axis=1, inplace=True)
-        df.drop(labels='rank_ic50', axis=1, inplace=True)
+        df.drop(labels='rank_binding', axis=1, inplace=True)
         df.drop(labels='rank_expr', axis=1, inplace=True)
         df.drop(labels='rank', axis=1, inplace=True)
 
@@ -339,6 +351,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         allele_specific_binding_thresholds=False,
         read_support=5,
         expn_val=0.1,
+        top_score_metric2="ic50"
     ):
         self.input_file = input_file
         self.output_file = tempfile.NamedTemporaryFile()
@@ -348,6 +361,10 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.percentile_threshold_strategy = percentile_threshold_strategy
         self.read_support = read_support
         self.expn_val = expn_val
+        if top_score_metric2 == "percentile":
+            self.top_score_mode = "%ile MT"
+        else:
+            self.top_score_mode = "IC50 MT"
         super().__init__()
 
     def get_tier(self, mutation):
@@ -438,16 +455,16 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
 
-        df['ic50_num'] = pd.to_numeric(df['IC50 MT'])
-        df["rank_ic50"] = df["ic50_num"].rank(ascending=True, method='dense')
+        df['binding_num'] = pd.to_numeric(df[self.top_score_mode])
+        df["rank_binding"] = df["binding_num"].rank(ascending=True, method='dense')
         df["rank_expr"] = pd.to_numeric(df["Expr"], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
-        df["rank"] = df["rank_ic50"] + df["rank_expr"]
+        df["rank"] = df["rank_binding"] + df["rank_expr"]
 
-        df.sort_values(by=["rank_tier", "rank", "ic50_num", "ID"], inplace=True, ascending=True)
+        df.sort_values(by=["rank_tier", "rank", "binding_num", "ID"], inplace=True, ascending=True)
 
         df.drop(labels='rank_tier', axis=1, inplace=True)
-        df.drop(labels='ic50_num', axis=1, inplace=True)
-        df.drop(labels='rank_ic50', axis=1, inplace=True)
+        df.drop(labels='binding_num', axis=1, inplace=True)
+        df.drop(labels='rank_binding', axis=1, inplace=True)
         df.drop(labels='rank_expr', axis=1, inplace=True)
         df.drop(labels='rank', axis=1, inplace=True)
         return df
@@ -466,6 +483,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         expn_val=1,
         transcript_prioritization_strategy=['mane_select', 'canonical', 'tsl'],
         maximum_transcript_support_level=1,
+        top_score_metric2="ic50"
     ):
         self.input_file = input_file
         self.output_file = tempfile.NamedTemporaryFile()
@@ -480,6 +498,10 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.expn_val = expn_val
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
+        if top_score_metric2 == "percentile":
+            self.top_score_mode = "%ile MT"
+        else:
+            self.top_score_mode = "IC50 MT"
         super().__init__()
 
     def get_tier(self, mutation):
@@ -606,14 +628,14 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
 
-        df["rank_ic50"] = pd.to_numeric(df["IC50 MT"]).rank(ascending=True, method='dense')
+        df["rank_binding"] = pd.to_numeric(df[self.top_score_mode]).rank(ascending=True, method='dense')
         df["rank_expr"] = pd.to_numeric(df["Allele Expr"], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
-        df["rank"] = df["rank_ic50"] + df["rank_expr"]
+        df["rank"] = df["rank_binding"] + df["rank_expr"]
 
         df.sort_values(by=["rank_tier", "rank", "Gene", "Transcript", "AA Change"], inplace=True, ascending=True)
 
         df.drop(labels='rank_tier', axis=1, inplace=True)
-        df.drop(labels='rank_ic50', axis=1, inplace=True)
+        df.drop(labels='rank_binding', axis=1, inplace=True)
         df.drop(labels='rank_expr', axis=1, inplace=True)
         df.drop(labels='rank', axis=1, inplace=True)
 
@@ -627,6 +649,7 @@ class PvacbindUpdateTiers(UpdateTiers, metaclass=ABCMeta):
             percentile_threshold=None,
             percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
+            top_score_metric2="ic50"
         ):
         self.input_file = input_file
         self.output_file = tempfile.NamedTemporaryFile()
@@ -634,6 +657,10 @@ class PvacbindUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.percentile_threshold = percentile_threshold
         self.percentile_threshold_strategy = percentile_threshold_strategy
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        if top_score_metric2 == "percentile":
+            self.top_score_mode = "%ile MT"
+        else:
+            self.top_score_mode = "IC50 MT"
         super().__init__()
 
     def get_tier(self, mutation):
@@ -693,10 +720,10 @@ class PvacbindUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         df["rank_tier"] = df['Tier'].map(sorter_index)
 
-        df['ic50_num'] = pd.to_numeric(df['IC50 MT'])
+        df['binding_num'] = pd.to_numeric(df[self.top_score_mode])
 
-        df.sort_values(by=["rank_tier", "ic50_num", "ID"], inplace=True, ascending=[True, True, True])
+        df.sort_values(by=["rank_tier", "binding_num", "ID"], inplace=True, ascending=[True, True, True])
 
         df.drop(labels='rank_tier', axis=1, inplace=True)
-        df.drop(labels='ic50_num', axis=1, inplace=True)
+        df.drop(labels='binding_num', axis=1, inplace=True)
         return df
