@@ -934,7 +934,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             return binding_df
         else:
             peptides = list(set(binding_df["Epitope Seq"]))
-            peptides.sort() # Remove nondeterminism
             if len(peptides) <= self.aggregate_inclusion_count_limit:
                 return binding_df
 
@@ -951,9 +950,13 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         if self.top_score_metric2 == "percentile":
             df.sort_values(by=[
                 "{} Percentile".format(self.top_score_metric),
-            ], inplace=True, ascending=True)
+                "{} IC50 Score".format(self.top_score_metric),
+            ], inplace=True, ascending=[True, True])
         else:
-            df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
+            df.sort_values(by=[
+                "{} IC50 Score".format(self.top_score_metric),
+                "{} Percentile".format(self.top_score_metric),
+            ], inplace=True, ascending=[True, True])
         return df
 
     def get_unique_peptide_hla_counts(self, included_df):
