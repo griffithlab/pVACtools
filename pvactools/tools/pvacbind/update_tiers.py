@@ -17,6 +17,7 @@ def main(args_input = sys.argv[1:]):
         percentile_threshold=args.percentile_threshold,
         percentile_threshold_strategy=args.percentile_threshold_strategy,
         allele_specific_binding_thresholds=args.allele_specific_binding_thresholds,
+        top_score_metric2=args.top_score_metric2,
     ).execute()
 
 if __name__ == "__main__":

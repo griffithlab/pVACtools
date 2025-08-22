@@ -23,6 +23,7 @@ def main(args_input = sys.argv[1:]):
         expn_val=args.expn_val,
         transcript_prioritization_strategy=args.transcript_prioritization_strategy,
         maximum_transcript_support_level=args.maximum_transcript_support_level,
+        top_score_metric2=args.top_score_metric2,
     ).execute()
 
 if __name__ == "__main__":

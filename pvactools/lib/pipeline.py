@@ -432,6 +432,7 @@ class Pipeline(metaclass=ABCMeta):
             *split_parsed_output_files,
             self.combined_parsed_path(),
             '--top-score-metric', self.top_score_metric,
+            '--top-score-metric2', self.top_score_metric2,
         ]
         if self.input_file_type == 'fasta':
             params.extend(['--file-type', 'pVACbind'])
@@ -749,7 +750,6 @@ class PvacbindPipeline(Pipeline):
 
         if not self.run_post_processor:
             return
-
         post_processing_params = copy.copy(vars(self))
         post_processing_params['input_file'] = self.combined_parsed_path()
         post_processing_params['file_type'] = 'pVACbind'

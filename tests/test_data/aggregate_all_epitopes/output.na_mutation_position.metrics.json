@@ -19,6 +19,7 @@
   "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Median",
   "wt_top_score_metric": "Median",
+  "top_score_metric2": "ic50",
   "allele_specific_binding_thresholds": {
     "HLA-A*26:01": 815.0,
     "HLA-A*31:01": 329.0,
