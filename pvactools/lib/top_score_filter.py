@@ -40,6 +40,12 @@ class TopScoreFilter(metaclass=ABCMeta):
                  + "lowest: Use the best MT Score (i.e. the lowest MT ic50 binding score of all chosen prediction methods). "
                  + "median: Use the median MT Score (i.e. the median MT ic50 binding score of all chosen prediction methods)."
         )
+        parser.add_argument(
+            '-m2', '--top-score-metric2',
+            choices=['ic50','percentile'],
+            default='ic50',
+            help="Whether to use median/best IC50 or to use median/best percentile score."
+        )
         if tool == 'pvacseq' or tool == 'pvacsplice':
             parser.add_argument(
                 "--transcript-prioritization-strategy", type=transcript_prioritization_strategy(),
@@ -108,6 +114,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         input_file,
         output_file, 
         top_score_metric="median",
+        top_score_metric2="ic50",
         binding_threshold=500,
         allele_specific_binding_thresholds=False,
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
@@ -118,12 +125,17 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.mt_top_score_metric = "Median"
             self.wt_top_score_metric = "Median"
         else:
             self.mt_top_score_metric = "Best"
             self.wt_top_score_metric = "Corresponding"
+        if self.top_score_metric2 == "percentile":
+            self.top_score_mode = "Percentile"
+        else:
+            self.top_score_mode = "IC50 Score"
         self.binding_threshold = binding_threshold
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
@@ -181,7 +193,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                             filtered_lines.append(duplicate_variant_line)
 
 
-            sorted_rows = pvactools.lib.sort.default_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.default_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
@@ -196,18 +208,24 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.maximum_transcript_support_level,
             self.anchor_calculator,
             self.mt_top_score_metric,
+            self.top_score_mode,
         ).get(df)
 
 
 class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median"):
+    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = "ic50"):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.formatted_top_score_metric = "Median"
         else:
             self.formatted_top_score_metric = "Best"
+        if self.top_score_metric2 == "percentile":
+            self.top_score_mode = "Percentile"
+        else:
+            self.top_score_mode = "IC50 Score"
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -247,7 +265,7 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                             duplicate_variant_line['Mutation'] = "{}.{}".format(variant, best_line_consequence)
                             filtered_lines.append(duplicate_variant_line)
 
-            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
@@ -255,17 +273,23 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
         return PvacfuseBestCandidate(
             self.formatted_top_score_metric,
+            self.top_score_mode,
         ).get(df)
 
 class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median"):
+    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = "ic50"):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.formatted_top_score_metric = "Median"
         else:
             self.formatted_top_score_metric = "Best"
+        if self.top_score_metric2 == "percentile":
+            self.top_score_mode = "Percentile"
+        else:
+            self.top_score_mode = "IC50 Score"
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -283,7 +307,7 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 best_line = self.find_best_line(lines)
                 filtered_lines.append(best_line)
 
-            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
@@ -291,6 +315,7 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
         return PvacbindBestCandidate(
             self.formatted_top_score_metric,
+            self.top_score_mode,
         ).get(df)
 
 class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
@@ -300,15 +325,21 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         output_file,
         top_score_metric="median",
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
-        maximum_transcript_support_level=1
+        maximum_transcript_support_level=1,
+        top_score_metric2="ic50",
     ):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.formatted_top_score_metric = "Median"
         else:
             self.formatted_top_score_metric = "Best"
+        if self.top_score_metric2 == "percentile":
+            self.top_score_mode = "Percentile"
+        else:
+            self.top_score_mode = "IC50 Score"
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
 
@@ -328,7 +359,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 best_line = self.find_best_line(lines)
                 filtered_lines.append(best_line)
 
-            sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
@@ -338,4 +369,5 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.transcript_prioritization_strategy,
             self.maximum_transcript_support_level,
             self.formatted_top_score_metric,
+            self.top_score_mode,
         ).get(df)

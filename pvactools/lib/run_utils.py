@@ -91,7 +91,7 @@ def transcript_prioritization_strategy():
 def pvacsplice_anchors():
     """Return function handle of an argument type function for
        ArgumentParser checking of the pVACsplice anchors
-       checking that the specified criteria are in the list of: ['A', 'D', 'NDA', 'DA', 'N']"""
+       checking that the specified criteria are in the list of: ['A', 'D', 'NDA']"""
 
     # Define the function with default arguments
     def pvacsplice_anchors_checker(arg):
@@ -99,8 +99,8 @@ def pvacsplice_anchors():
 
         arg_list = arg.split(",")
         for argument in arg_list:
-            if argument not in ['A', 'D', 'NDA', 'DA', 'N']:
-                raise argparse.ArgumentTypeError("List element must be one of 'A', 'D', 'NDA', 'DA', 'N', not {}".format(argument))
+            if argument not in ['A', 'D', 'NDA']:
+                raise argparse.ArgumentTypeError("List element must be one of 'A', 'D', 'NDA', not {}".format(argument))
         return arg_list
 
     # Return function handle to checking function
@@ -118,17 +118,40 @@ def determine_neoepitopes(sequence, length):
 def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length):
     wt_epitopes = determine_neoepitopes(wt_peptide, flanking_length+1)
     mt_epitopes = determine_neoepitopes(mt_peptide, flanking_length+1)
-    for i in range(1, len(wt_epitopes)):
-        wt_epitope = wt_epitopes[i]
-        mt_epitope = mt_epitopes[i]
+    for start, (wt_epitope, mt_epitope) in enumerate(zip(list(wt_epitopes.values()), list(mt_epitopes.values()))):
         if wt_epitope != mt_epitope:
-            start = i - 1
             break
     for i, (wt_epitope, mt_epitope) in enumerate(zip(reversed(list(wt_epitopes.values())), reversed(list(mt_epitopes.values())))):
         if wt_epitope != mt_epitope:
             stop = len(mt_epitopes) - i + flanking_length
             break
-    return mt_peptide[start:stop]
+    mutant_subsequence = mt_peptide[start:stop]
+    supported_aas = supported_amino_acids()
+    if mutant_subsequence[0] not in supported_aas:
+        mutant_subsequence = mutant_subsequence[1:]
+    if mutant_subsequence[-1] not in supported_aas:
+        mutant_subsequence = mutant_subsequence[0:-1]
+    if not all([c in supported_aas for c in mutant_subsequence]):
+        print("Warning. Mutant sequence contains unsupported amino acid. Skipping entry {}".format(line['index']))
+        return
+    return mutant_subsequence
+
+def get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length):
+    wt_epitopes = determine_neoepitopes(wt_peptide, flanking_length+1)
+    mt_epitopes = determine_neoepitopes(mt_peptide, flanking_length+1)
+    for start, (wt_epitope, mt_epitope) in enumerate(zip(list(wt_epitopes.values()), list(mt_epitopes.values()))):
+        if wt_epitope != mt_epitope:
+            break
+    mutant_subsequence = mt_peptide[start:]
+    supported_aas = supported_amino_acids()
+    if mutant_subsequence[0] not in supported_aas:
+        mutant_subsequence = mutant_subsequence[1:]
+    if mutant_subsequence[-1] not in supported_aas:
+        mutant_subsequence = mutant_subsequence[0:-1]
+    if not all([c in supported_aas for c in mutant_subsequence]):
+        print("Warning. Mutant sequence contains unsupported amino acid. Skipping entry {}".format(line['index']))
+        return
+    return mutant_subsequence
 
 def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximum_transcript_support_level):
     if not isinstance(mutation, pd.Series):
@@ -157,10 +180,4 @@ def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximu
             return True
         elif int(mutation[col]) <= maximum_transcript_support_level:
             return True
-    return False
-
-def problematic_positions_exist():
-    return False
-
-def is_anchor_residue_pass(mutation):
     return False

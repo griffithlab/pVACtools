@@ -24,7 +24,7 @@ options(shiny.port = 3333)
 server <- shinyServer(function(input, output, session) {
   ## pVACtools version
 
-  output$version <- renderText({"pVACtools version 5.4.0"})
+  output$version <- renderText({"pVACtools version 5.5.0"})
 
   ##############################DATA UPLOAD TAB###################################
   ## helper function defined for generating shinyInputs in mainTable (Evaluation dropdown menus)
@@ -130,6 +130,7 @@ server <- shinyServer(function(input, output, session) {
     df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
     df$percentile_threshold <- df$metricsData$`percentile_threshold`
     df$percentile_threshold_strategy <- df$metricsData$`percentile_threshold_strategy`
+    df$scoring_candidate_metric <- df$metricsData$`top_score_metric2`
     df$dna_cutoff <- df$metricsData$vaf_clonal
     df$allele_expr <- df$metricsData$allele_expr_threshold
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
@@ -138,7 +139,7 @@ server <- shinyServer(function(input, output, session) {
     df$maximum_transcript_support_level <- df$metricsData$maximum_transcript_support_level
     df$transcript_prioritization_strategy <- df$metricsData$`transcript_prioritization_strategy`
     hla <- df$metricsData$alleles
-    converted_hla_names <- unlist(lapply(hla, function(x) {
+    df$converted_hla_names <- unlist(lapply(hla, function(x) {
       if (grepl("HLA-", x)) {
         strsplit(x, "HLA-")[[1]][2]
       } else {
@@ -148,7 +149,7 @@ server <- shinyServer(function(input, output, session) {
     if (!("Ref Match" %in% colnames(df$mainTable))) {
       df$mainTable$`Ref Match` <- "Not Run"
     }
-    columns_needed <- c("ID", "Index", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "MANE Select", "Canonical", "TSL", "Allele",
+    columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "MANE Select", "Canonical", "TSL", "Allele",
                         "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT", "IC50 WT", "%ile MT", "%ile WT", "RNA Expr", "RNA VAF",
                         "Allele Expr", "RNA Depth", "DNA VAF", "Tier", "Ref Match", "Acpt", "Rej", "Rev")
     if ("Comments" %in% colnames(df$mainTable)) {
@@ -227,6 +228,7 @@ server <- shinyServer(function(input, output, session) {
        df$aggregate_inclusion_binding_threshold <- df$metricsData$`aggregate_inclusion_binding_threshold`
        df$percentile_threshold <- df$metricsData$`percentile_threshold`
        df$percentile_threshold_strategy <- df$metricsData$`percentile_threshold_strategy`
+       df$scoring_candidate_metric <- df$metricsData$`top_score_metric2`
        df$dna_cutoff <- df$metricsData$vaf_clonal
        df$allele_expr <- df$metricsData$allele_expr_threshold
        df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
@@ -236,7 +238,7 @@ server <- shinyServer(function(input, output, session) {
        df$transcript_prioritization_strategy <- df$metricsData$`transcript_prioritization_strategy`
        hla <- df$metricsData$alleles
        incProgress(0.1)
-       converted_hla_names <- unlist(lapply(hla, function(x) {
+       df$converted_hla_names <- unlist(lapply(hla, function(x) {
          if (grepl("HLA-", x)) {
            strsplit(x, "HLA-")[[1]][2]
          } else {
@@ -246,7 +248,7 @@ server <- shinyServer(function(input, output, session) {
        if (!("Ref Match" %in% colnames(df$mainTable))) {
          df$mainTable$`Ref Match` <- "Not Run"
        }
-       columns_needed <- c("ID", "Index", converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "MANE Select", "Canonical", "TSL", "Allele",
+       columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "MANE Select", "Canonical", "TSL", "Allele",
                            "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT", "IC50 WT", "%ile MT", "%ile WT", "RNA Expr", "RNA VAF",
                            "Allele Expr", "RNA Depth", "DNA VAF", "Tier", "Ref Match", "Acpt", "Rej", "Rev")
        if ("Comments" %in% colnames(df$mainTable)) {
@@ -360,6 +362,15 @@ server <- shinyServer(function(input, output, session) {
       selected = current_percentile_threshold_strategy
     )
   })
+  output$scoring_candidate_metric_ui <- renderUI({
+    current_metric <- df$scoring_candidate_metric
+    radioButtons(
+      "scoring_candidate_metric",
+      "Specify which metric to prioritize for sorting candidates within each Tier. The 'ic50' option will prioritize sorting by IC50 MT, while the 'percentile' option will priritize sorting by %ile MT. Either choice will be considered in combination with the Allele Expr for final sort order.",
+      c("ic50", "percentile"),
+      selected = current_metric
+    )
+  })
   output$dna_cutoff_ui <- renderUI({
     current_dna_cutoff <- df$dna_cutoff
     numericInput("dna_cutoff", "Clonal DNA VAF (Anything lower than 1/2 of chosen VAF level will be considered subclonal)", current_dna_cutoff, min = 0, max = 1, step = 0.01, width = 500)
@@ -399,6 +410,7 @@ server <- shinyServer(function(input, output, session) {
       df$percentile_threshold <- as.numeric(input$percentile_threshold)
     }
     df$percentile_threshold_strategy <- input$percentile_threshold_strategy
+    df$scoring_candidate_metric <- input$scoring_candidate_metric
     df$dna_cutoff <- as.numeric(input$dna_cutoff)
     df$allele_expr <- as.numeric(input$allele_expr)
     df$allele_specific_anchors <- input$use_anchor
@@ -428,7 +440,12 @@ server <- shinyServer(function(input, output, session) {
     tier_sorter <- c("Pass", "PoorBinder", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
     df$mainTable$`Rank_ic50` <- NA
     df$mainTable$`Rank_expr` <- NA
-    df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    } else {
+      print("Using percentile")
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+    }
     df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
     df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
     df$mainTable <- df$mainTable %>%
@@ -445,6 +462,7 @@ server <- shinyServer(function(input, output, session) {
     df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
     df$percentile_threshold <- df$metricsData$`percentile_threshold`
     df$percentile_threshold_strategy <- df$metricsData$`percentile_threshold_strategy`
+    df$scoring_candidate_metric <- df$metricsData$`top_score_metric2`
     df$dna_cutoff <- as.numeric(df$metricsData$`vaf_clonal`)
     df$allele_expr <- as.numeric(df$metricsData$`allele_expr`)
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
@@ -470,7 +488,12 @@ server <- shinyServer(function(input, output, session) {
     tier_sorter <- c("Pass", "PoorBinder", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
     df$mainTable$`Rank_ic50` <- NA
     df$mainTable$`Rank_expr` <- NA
-    df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+    } else {
+      print("Using percentile reset params")
+      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+    }
     df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
     df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
     df$mainTable <- df$mainTable %>%
@@ -481,7 +504,7 @@ server <- shinyServer(function(input, output, session) {
   })
   #determine hla allele count in order to generate column tooltip locations correctly
   hla_count <- reactive({
-    which(colnames(df$mainTable) == "Gene") - 1
+    which(colnames(df$mainTable) == "Gene") - 3
   })
   #class type of user-provided additional file
   type <- reactive({
@@ -497,7 +520,7 @@ server <- shinyServer(function(input, output, session) {
       "Parameter" = c("Tumor Purity", "VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
                       "Binding Threshold", "Binding Threshold for Inclusion into Metrics File", "Transcript Prioritization Strategy", "Maximum TSL",
                       "Percentile Threshold", "Percentile Threshold Strategy", "Allele Specific Binding Thresholds",
-                      "MT Top Score Metric", "WT Top Score Metric",
+                      "MT Top Score Metric", "WT Top Score Metric", "Sorting Candidate Metric",
                       "Allele Specific Anchors Used", "Anchor Contribution Threshold"),
       "Value" = c(if (is.null(df$metricsData$tumor_purity)) {"NULL"}else {df$metricsData$tumor_purity},
                   df$metricsData$`vaf_clonal`, df$metricsData$`vaf_subclonal`, df$metricsData$`allele_expr_threshold`,
@@ -507,7 +530,8 @@ server <- shinyServer(function(input, output, session) {
                   if (is.null(df$metricsData$percentile_threshold)) {"NULL"}else { df$metricsData$percentile_threshold},
                   df$metricsData$percentile_threshold_strategy,
                   df$metricsData$use_allele_specific_binding_thresholds,
-                  df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric,
+                  df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric, 
+                  if(is.null(df$metricsData$`top_score_metric2`) || is.na(df$metricsData$`top_score_metric2`)){"ic50"}else{df$metricsData$`top_score_metric2`},
                   df$metricsData$allele_specific_anchors, df$metricsData$anchor_contribution_threshold)
     ), digits = 3
   )
@@ -535,7 +559,7 @@ server <- shinyServer(function(input, output, session) {
       "Parameter" = c("VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
                       "Binding Threshold", "Binding Threshold for Inclusion into Metrics File", "Transcript Prioritization Strategy", "Maximum TSL",
                       "Percentile Threshold", "Percentile Threshold Strategy", "Allele Specific Binding Thresholds",
-                      "MT Top Score Metric", "WT Top Score Metric",
+                      "MT Top Score Metric", "WT Top Score Metric", "Sorting Candidate Metric",
                       "Allele Specific Anchors Used", "Anchor Contribution Threshold"),
       "Value" = c(
         df$dna_cutoff,
@@ -550,6 +574,7 @@ server <- shinyServer(function(input, output, session) {
         df$use_allele_specific_binding_thresholds,
         df$metricsData$mt_top_score_metric,
         df$metricsData$wt_top_score_metric,
+        if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric)){"ic50"}else{df$scoring_candidate_metric}, #Defaulting to ic50 since that was what everything made prior to this implementation used. That way old metrics.json files will still work
         df$allele_specific_anchors, df$anchor_contribution)
     ), digits = 3
   )
@@ -585,20 +610,56 @@ server <- shinyServer(function(input, output, session) {
   outputOptions(output, "filesUploaded", suspendWhenHidden = FALSE)
   ##############################PEPTIDE EXPLORATION TAB################################
   ##main table display with color/background/font/border configurations
+  render_na <- JS(
+    "function(data, type, row) {",
+    "  if(type === 'sort' && (data === null || data === 'NA' || data === '' || typeof data === 'undefined')) {",
+    "    return 999999;",
+    "  }",
+    "  return parseFloat(data);",
+    "}"
+  )
+
   output$mainTable <- DT::renderDataTable(
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
-      datatable(df$mainTable[, !(colnames(df$mainTable) == "ID") & !(colnames(df$mainTable) == "Index") & !(colnames(df$mainTable) == "Comments")],
+      filtered_table <- df$mainTable[, !(colnames(df$mainTable) %in% c("ID", "Index", "Comments"))]
+      render_targets <- which(colnames(filtered_table) %in% c("IC50 WT", "%ile WT"))
+      hla_columns <- which(colnames(filtered_table) %in% df$converted_hla_names)
+
+      # Columns where the default value should be 'NA'
+      default_na_targets <- which(colnames(filtered_table) %in% c("POS", "IC50 WT", "%ile MT", "%ile WT", "RNA Expr", "RNA VAF", "Allele Expr",
+                                                                  "RNA Depth", "DNA VAF"))
+
+      # Columns that should be hidden from the display
+      additional_hidden_columns <- which(colnames(filtered_table) %in% c("Num Passing Transcripts", "Best Transcript", "Has Prob Pos", "Percentile Fail",
+                                                                        "Col DNA VAF", "Col RNA Depth", "Col Allele Expr", "Col RNA VAF", "Col RNA Expr",
+                                                                        "Bad TSL", "Scaled percentile", "Scaled BA", "Gene of Interest", "Tier Count"))
+      hidden_targets <- c(hla_columns, additional_hidden_columns)
+      
+      # Applies a CSS class to the specified columns
+      additional_center_columns <- which(colnames(filtered_table) %in% c("Gene"))
+      center_align_targets <- c(hla_columns, additional_center_columns)
+
+      # Add render_na to the specified columns (IC50 WT, %ile WT)
+      na_render_defs <- lapply(render_targets, function(i) {
+        list(targets = i, render = render_na)
+      })
+
+      datatable(filtered_table,
                 escape = FALSE,
                 callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)),
                 class = "stripe",
                 options = list(lengthChange = TRUE, pageLength = df$pageLength,
                                dom = "Bfrtilp",
-                               columnDefs = list(list(defaultContent = "NA", targets = c(hla_count() + 6, (hla_count() + 11):(hla_count() + 18))),
-                                                 list(className = "dt-center", targets = c(0:hla_count() - 1)),
-                                                 list(visible = FALSE, targets = c(1:(hla_count()-2), (hla_count()+1), (hla_count()+3), -1:-20)),
-                                                 list(orderable = TRUE, targets = 0)
+                               columnDefs = append(
+                                list(
+                                  list(defaultContent = "NA", targets = default_na_targets),
+                                  list(className = "dt-center", targets = center_align_targets),
+                                  list(visible = FALSE, targets = hidden_targets),
+                                  list(orderable = TRUE, targets = 0)
+                                ),
+                                na_render_defs
                                ),
                                buttons = list(I("colvis")),
                                drawCallback = htmlwidgets::JS(
@@ -923,6 +984,7 @@ server <- shinyServer(function(input, output, session) {
   })
   ##display peptide table with coloring
   output$peptideTable<- renderDT({
+    hla_columns <- which(colnames(df$mainTable) %in% df$converted_hla_names)
     withProgress(message = "Loading Peptide Table", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0 & !is.null(df$metricsData)) {
         peptide_data <- df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`peptides`
@@ -941,7 +1003,7 @@ server <- shinyServer(function(input, output, session) {
         dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data)), options = list(
           pageLength = 10,
           columnDefs = list(list(defaultContent = "X",
-                                 targets = c(2:hla_count() + 1)),
+                                 targets = hla_columns),
                             list(orderable = TRUE, targets = 0),
                             list(visible = FALSE, targets = c(-1, -2))),
           rowCallback = JS("function(row, data, index, rowId) {",
