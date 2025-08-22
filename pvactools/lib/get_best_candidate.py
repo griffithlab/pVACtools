@@ -8,12 +8,14 @@ class PvacseqBestCandidate:
         maximum_transcript_support_level,
         anchor_calculator,
         mt_top_score_metric,
+        top_score_mode,
         allow_incomplete_transcripts,
     ):
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.anchor_calculator = anchor_calculator
         self.mt_top_score_metric = mt_top_score_metric
+        self.top_score_mode = top_score_mode
         self.allow_incomplete_transcripts = allow_incomplete_transcripts
 
     def get(self, df):
@@ -44,7 +46,7 @@ class PvacseqBestCandidate:
         anchor_residue_pass_df = prob_pos_df[prob_pos_df['anchor_residue_pass']]
         if anchor_residue_pass_df.shape[0] == 0:
             anchor_residue_pass_df = prob_pos_df
-        
+
         # if allow_incomplete_transcripts is True, deprioritize certain flags
         if self.allow_incomplete_transcripts:
             anchor_residue_pass_df['Transcript CDS Flags Sort'] = anchor_residue_pass_df['Transcript CDS Flags'].apply(
@@ -52,13 +54,13 @@ class PvacseqBestCandidate:
             )
             sort_columns = [
                 'Transcript CDS Flags Sort',
-                f"{self.mt_top_score_metric} MT IC50 Score",
+                f"{self.mt_top_score_metric} MT {self.top_score_mode}",
                 'Transcript Length',
             ]
             sort_order = [True, True, False]
         else:
             sort_columns = [
-                f"{self.mt_top_score_metric} MT IC50 Score",
+                f"{self.mt_top_score_metric} MT {self.top_score_mode}",
                 'Transcript Length',
             ]
             sort_order = [True, False]
@@ -72,8 +74,9 @@ class PvacseqBestCandidate:
         return anchor_residue_pass_df.iloc[0]
 
 class PvacfuseBestCandidate:
-    def __init__(self, top_score_metric):
+    def __init__(self, top_score_metric, top_score_mode):
         self.top_score_metric = top_score_metric
+        self.top_score_mode = top_score_mode
 
     def get(self, df):
         #subset dataframe to only include entries with no problematic positions
@@ -87,12 +90,13 @@ class PvacfuseBestCandidate:
         if 'Expression' in df:
             df['Expression Sort'] = df['Expression']
             df['Expression Sort'].replace({'NA': 0})
-        prob_pos_df.sort_values(by=["{} IC50 Score".format(self.top_score_metric), 'Expression Sort'], inplace=True, ascending=[True, False])
+        prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, self.top_score_mode), 'Expression Sort'], inplace=True, ascending=[True, False])
         return prob_pos_df.iloc[0]
 
 class PvacbindBestCandidate:
-    def __init__(self, top_score_metric):
+    def __init__(self, top_score_metric, top_score_mode):
         self.top_score_metric = top_score_metric
+        self.top_score_mode = top_score_mode
 
     def get(self, df):
         if 'Problematic Positions' in df:
@@ -102,7 +106,7 @@ class PvacbindBestCandidate:
                 prob_pos_df = df
         else:
             prob_pos_df = df
-        prob_pos_df.sort_values(by=["{} IC50 Score".format(self.top_score_metric)], inplace=True, ascending=True)
+        prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, self.top_score_mode)], inplace=True, ascending=True)
         return prob_pos_df.iloc[0]
 
 class PvacspliceBestCandidate:
@@ -111,11 +115,13 @@ class PvacspliceBestCandidate:
         transcript_prioritization_strategy,
         maximum_transcript_support_level,
         mt_top_score_metric,
+        top_score_mode,
         allow_incomplete_transcripts,
     ):
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.mt_top_score_metric = mt_top_score_metric
+        self.top_score_mode = top_score_mode
         self.allow_incomplete_transcripts=allow_incomplete_transcripts
 
     def get(self, df):
@@ -149,12 +155,12 @@ class PvacspliceBestCandidate:
             )
             sort_columns = [
                 'Transcript CDS Flags Sort',
-                f"{self.mt_top_score_metric} IC50 Score",
+                f"{self.mt_top_score_metric} {self.top_score_mode}",
             ]
             sort_order = [True, True]
         else:
             sort_columns = [
-                f"{self.mt_top_score_metric} IC50 Score",
+                f"{self.mt_top_score_metric} {self.top_score_mode}",
             ]
             sort_order = [True]
 

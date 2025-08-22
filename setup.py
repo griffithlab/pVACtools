@@ -60,7 +60,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/supporting_files"):
 
 setup(
     name="pvactools",
-    version="5.4.3",
+    version="5.5.0",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",

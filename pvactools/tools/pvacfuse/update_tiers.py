@@ -19,6 +19,7 @@ def main(args_input = sys.argv[1:]):
         percentile_threshold_strategy=args.percentile_threshold_strategy,
         read_support=args.read_support,
         expn_val=args.expn_val,
+        top_score_metric2=args.top_score_metric2,
     ).execute()
 
 if __name__ == "__main__":
