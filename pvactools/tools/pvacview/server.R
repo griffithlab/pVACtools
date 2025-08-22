@@ -116,6 +116,9 @@ server <- shinyServer(function(input, output, session) {
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
     mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
     mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+    mainData$Acpt_val <- ifelse(mainData$Evaluation == "Accept", 1, 0)
+    mainData$Rej_val <- ifelse(mainData$Evaluation == "Reject", 1, 0)
+    mainData$Rev_val <- ifelse(mainData$Evaluation == "Review", 1, 0)
     df$evaluations <- data.frame(data = mainData$Evaluation, row.names = mainData$ID)
     df$mainTable <- mainData
     df$metricsData <- NULL
@@ -209,6 +212,9 @@ server <- shinyServer(function(input, output, session) {
        mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
        mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
        mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+       mainData$Acpt_val <- ifelse(mainData$Evaluation == "Accept", 1, 0)
+       mainData$Rej_val <- ifelse(mainData$Evaluation == "Reject", 1, 0)
+       mainData$Rev_val <- ifelse(mainData$Evaluation == "Review", 1, 0)
        df$evaluations <- data.frame(data = mainData$Evaluation, row.names = mainData$ID)
        df$mainTable <- mainData
        incProgress(0.1)
@@ -242,7 +248,7 @@ server <- shinyServer(function(input, output, session) {
        }
        columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                            "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
-                           "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
+                           "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev", "Acpt_val", "Rej_val", "Rev_val")
        if ("Comments" %in% colnames(df$mainTable)) {
          columns_needed <- c(columns_needed, "Comments")
          df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
@@ -589,7 +595,8 @@ server <- shinyServer(function(input, output, session) {
       # Columns that should be hidden from the display
       additional_hidden_columns <- which(colnames(filtered_table) %in% c("Num Passing Transcripts", "Best Transcript", "Has Prob Pos", "Percentile Fail",
                                                                         "Col DNA VAF", "Col RNA Depth", "Col Allele Expr", "Col RNA VAF", "Col RNA Expr",
-                                                                        "Bad TSL", "Scaled percentile", "Scaled BA", "Gene of Interest", "Tier Count"))
+                                                                        "Bad TSL", "Scaled percentile", "Scaled BA", "Gene of Interest", "Tier Count",
+                                                                        "Acpt_val", "Rej_val", "Rev_val"))
       hidden_targets <- c(hla_columns, additional_hidden_columns)
       
       # Applies a CSS class to the specified columns
@@ -600,6 +607,13 @@ server <- shinyServer(function(input, output, session) {
       na_render_defs <- lapply(render_targets, function(i) {
         list(targets = i, render = render_na)
       })
+
+      # Modify default sort logic for 'Acpt', 'Rej', and 'Rev' columns
+      eval_sort_defs <- list(
+        list(targets = which(colnames(filtered_table) == "Acpt"), orderData = which(colnames(filtered_table) == "Acpt_val")),
+        list(targets = which(colnames(filtered_table) == "Rej"), orderData = which(colnames(filtered_table) == "Rej_val")),
+        list(targets = which(colnames(filtered_table) == "Rev"), orderData = which(colnames(filtered_table) == "Rev_val"))
+      )
 
       datatable(filtered_table,
                 escape = FALSE,
@@ -614,7 +628,7 @@ server <- shinyServer(function(input, output, session) {
                                   list(visible = FALSE, targets = hidden_targets),
                                   list(orderable = TRUE, targets = 0)
                                 ),
-                                na_render_defs
+                                c(eval_sort_defs, na_render_defs)
                                ),
                                buttons = list(I("colvis")),
                                drawCallback = htmlwidgets::JS(
@@ -723,6 +737,11 @@ server <- shinyServer(function(input, output, session) {
     }
     selectedID <- strsplit(input$accept_eval, "_")[[1]][2]
     df$evaluations[selectedID, 1] <- "Accept"
+
+    df$mainTable$Acpt_val[df$mainTable$ID == selectedID] <- 1
+    df$mainTable$Rej_val[df$mainTable$ID == selectedID] <- 0
+    df$mainTable$Rev_val[df$mainTable$ID == selectedID] <- 0
+
     html <- paste0("#button-acpt_", selectedID ," { color: green !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
     removeUI(selector = paste0("style:contains(#button-rej_", selectedID, ')'), multiple = TRUE)
@@ -734,6 +753,11 @@ server <- shinyServer(function(input, output, session) {
     }
     selectedID <- strsplit(input$reject_eval, "_")[[1]][2]
     df$evaluations[selectedID, 1] <- "Reject"
+
+    df$mainTable$Acpt_val[df$mainTable$ID == selectedID] <- 0
+    df$mainTable$Rej_val[df$mainTable$ID == selectedID] <- 1
+    df$mainTable$Rev_val[df$mainTable$ID == selectedID] <- 0
+
     html <- paste0("#button-rej_", selectedID ," { color: red !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
     removeUI(selector = paste0("style:contains(#button-acpt_", selectedID, ')'), multiple = TRUE)
@@ -745,6 +769,11 @@ server <- shinyServer(function(input, output, session) {
     }
     selectedID <- strsplit(input$review_eval, "_")[[1]][2]
     df$evaluations[selectedID, 1] <- "Review"
+
+    df$mainTable$Acpt_val[df$mainTable$ID == selectedID] <- 0
+    df$mainTable$Rej_val[df$mainTable$ID == selectedID] <- 0
+    df$mainTable$Rev_val[df$mainTable$ID == selectedID] <- 1
+
     html <- paste0("#button-rev_", selectedID ," { color: orange !important; }")
     insertUI("head", ui = tags$style(HTML(html)))
     removeUI(selector = paste0("style:contains(#button-acpt_", selectedID, ')'), multiple = TRUE)
