@@ -93,11 +93,11 @@ class AggregateAllEpitopes:
 
     def get_best_mut_line(self, df, key, prediction_algorithms, el_algorithms, percentile_algorithms, vaf_clonal):
         #order by best median score and get best ic50 peptide
-        
+
         best = self.get_best_binder(df)
 
         #these are all lines meeting the aggregate inclusion binding threshold
-        included_df = self.get_included_df(df)        
+        included_df = self.get_included_df(df)
         best_df = pd.DataFrame.from_dict([best])
         if not best_df.index.isin(included_df.index).all():
             included_df = pd.concat([included_df, best_df])
@@ -105,7 +105,7 @@ class AggregateAllEpitopes:
         peptide_hla_counts = self.get_unique_peptide_hla_counts(included_df)
         hla_counts = Counter(peptide_hla_counts["HLA Allele"])
         hla = dict(map(lambda x : (x, hla_counts[x]) if x in hla_counts else (x, ""), self.hla_types))
-        
+
         #get a list of all unique gene/transcript/aa_change combinations
         #store a count of all unique peptides that passed
         (peptides, anno_count) = self.get_included_df_metrics(included_df, prediction_algorithms, el_algorithms, percentile_algorithms)
@@ -531,10 +531,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return "Poor"
 
     def get_included_df(self, df):
-        top_score_mod = "IC50 Score"
-        if self.top_score_metric2 == "percentile":
-            top_score_mod = "Percentile"
-        binding_df = df[df["{} MT {}".format(self.mt_top_score_metric, top_score_mod)] < self.aggregate_inclusion_binding_threshold]
+        binding_df = df[df["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.aggregate_inclusion_binding_threshold]
         if binding_df.shape[0] == 0:
             return binding_df
         else:
@@ -931,11 +928,8 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return prob_pos_df.iloc[0]
 
     def get_included_df(self, df):
-        top_score_mod = "Percentile"
-        if self.top_score_metric2 == "ic50":
-            top_score_mod = "IC50 Score"
-        binding_df = df[df[f"{self.top_score_metric} {top_score_mod}"] < self.aggregate_inclusion_binding_threshold]
-        
+        binding_df = df[df[f"{self.top_score_metric} IC50 Score"] < self.aggregate_inclusion_binding_threshold]
+
         if binding_df.shape[0] == 0:
             return binding_df
         else:
