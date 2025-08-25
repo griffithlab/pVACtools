@@ -281,6 +281,7 @@ class TestPvacvector(unittest.TestCase):
                 '-e1', self.epitope_length,
                 '-n', self.input_n_mer,
                 '--allow-n-peptide-exclusion', '0',
+                '--allow-incomplete-transcripts',
                 '-k',
             ])
 

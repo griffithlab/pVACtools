@@ -2593,6 +2593,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           325
         ],
@@ -3010,6 +3013,9 @@
         ],
         "biotype": [
           "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           1443
@@ -4493,6 +4499,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           372
         ],
@@ -5823,6 +5832,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           1640
         ],
@@ -6937,6 +6949,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           905
         ],
@@ -7290,6 +7305,9 @@
         ],
         "biotype": [
           "IG_V_gene"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           148
@@ -8405,6 +8423,9 @@
         "biotype": [
           "IG_V_gene"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           148
         ],
@@ -8911,6 +8932,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           377
         ],
@@ -9112,6 +9136,9 @@
         ],
         "biotype": [
           "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           1020
@@ -11243,6 +11270,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           820
         ],
@@ -11444,6 +11474,9 @@
         ],
         "biotype": [
           "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           132
@@ -12407,6 +12440,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           639
         ],
@@ -12608,6 +12644,9 @@
         ],
         "biotype": [
           "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           2365
@@ -14155,6 +14194,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           2223
         ],
@@ -15268,6 +15310,9 @@
         ],
         "biotype": [
           "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           780
@@ -16534,6 +16579,9 @@
         ],
         "biotype": [
           "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           780
@@ -19121,6 +19169,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           2253
         ],
@@ -19322,6 +19373,9 @@
         ],
         "biotype": [
           "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           1211
@@ -21453,6 +21507,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           677
         ],
@@ -22935,6 +22992,9 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           1819
         ],
@@ -23440,6 +23500,9 @@
         ],
         "biotype": [
           "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           933
@@ -24074,6 +24137,9 @@
         ],
         "biotype": [
           "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           593
@@ -25772,6 +25838,9 @@
         ],
         "biotype": [
           "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
         ],
         "transcript_length": [
           384

@@ -10,8 +10,11 @@ class CombineInputs:
         self.output_dir   = kwargs['output_dir']
 
     def add_junction_coordinates_to_variants(self):
+        # Remove "None" from the list of values to be converted to NA
+        na_values = set(pd._libs.parsers.STR_NA_VALUES) - {"None"}
+
         # read in df
-        var_df = pd.read_csv(self.variants, sep='\t')
+        var_df = pd.read_csv(self.variants, sep='\t', na_values=na_values, keep_default_na=False)
 
         # remove version number in annotated to compare with filtered junctions file
         var_df[['transcript_id', 'transcript_version']] = var_df['transcript_name'].str.split('.', expand=True)

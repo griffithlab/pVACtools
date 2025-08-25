@@ -120,7 +120,8 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
         maximum_transcript_support_level=1,
         allele_specific_anchors=False,
-        anchor_contribution_threshold=0.8
+        anchor_contribution_threshold=0.8,
+        allow_incomplete_transcripts=False,
     ):
         self.input_file = input_file
         self.output_file = output_file
@@ -138,6 +139,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.top_score_mode = "IC50 Score"
         self.binding_threshold = binding_threshold
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.allow_incomplete_transcripts= allow_incomplete_transcripts
         self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
         allele_specific_binding_thresholds = {}
         for hla_type in self.hla_types:
@@ -209,6 +211,7 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.anchor_calculator,
             self.mt_top_score_metric,
             self.top_score_mode,
+            self.allow_incomplete_transcripts,
         ).get(df)
 
 
@@ -327,6 +330,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
         maximum_transcript_support_level=1,
         top_score_metric2="ic50",
+        allow_incomplete_transcripts=False,
     ):
         self.input_file = input_file
         self.output_file = output_file
@@ -342,6 +346,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.top_score_mode = "IC50 Score"
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
+        self.allow_incomplete_transcripts= allow_incomplete_transcripts
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -370,4 +375,5 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.maximum_transcript_support_level,
             self.formatted_top_score_metric,
             self.top_score_mode,
+            self.allow_incomplete_transcripts,
         ).get(df)

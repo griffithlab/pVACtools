@@ -72,7 +72,7 @@ class FilterRegtoolsResults:
                 'junction_chrom', 'junction_start', 'junction_stop', 'name', 'score', 'strand', 'splice_site',
                 'acceptors_skipped', 'exons_skipped', 'donors_skipped', 'anchor', 'known_donor', 'known_acceptor',
                 'known_junction', 'transcript_id', 'variant_info', 'feature', 'cds_chrom', 'cds_start', 'cds_stop',
-                'transcript_biotype', 'transcript_version', 'transcript_support_level', 'gene_name', 'gene_id'
+                'transcript_biotype', 'tag', 'transcript_version', 'transcript_support_level', 'gene_name', 'gene_id'
             ])
         else:
             merged_df = explode_junctions.merge(pc_junctions, on='transcript_id').drop_duplicates()
