@@ -137,6 +137,7 @@ class PvacbindTests(unittest.TestCase):
                 output_dir.name,
                 '-e1', '9,10',
                 '--top-score-metric=lowest',
+                '--top-score-metric2=ic50',
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
                 '--netmhc-stab',
@@ -152,6 +153,7 @@ class PvacbindTests(unittest.TestCase):
                 output_dir.name,
                 '-e2', '15',
                 '--top-score-metric=lowest',
+                '--top-score-metric2=ic50',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,
@@ -162,6 +164,7 @@ class PvacbindTests(unittest.TestCase):
                 'sample.name.all_epitopes.tsv',
                 'sample.name.filtered.tsv',
                 'sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.all_epitopes.aggregated.tsv.reference_matches',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -210,6 +213,7 @@ class PvacbindTests(unittest.TestCase):
                 'sample.name.all_epitopes.tsv',
                 'sample.name.filtered.tsv',
                 'sample.name.all_epitopes.aggregated.tsv',
+                'sample.name.all_epitopes.aggregated.tsv.reference_matches',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
@@ -222,6 +226,7 @@ class PvacbindTests(unittest.TestCase):
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', 'tmp', file_name.replace('sample.name', 'Test'))
+                
                 self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
@@ -294,7 +299,7 @@ class PvacbindTests(unittest.TestCase):
             l.check_present(('root', 'WARNING', S("Record 1 contains unsupported amino acids. Skipping.")))
 
     def test_pvacbind_combine_and_condense_steps(self):
-        #with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
+        with unittest.mock.patch('Bio.Blast.NCBIWWW.qblast', side_effect=mock_ncbiwww_qblast):
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
             for subdir in ['MHC_Class_I', 'MHC_Class_II']:
                 path = os.path.join(output_dir.name, subdir)

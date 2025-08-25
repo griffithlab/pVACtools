@@ -12,6 +12,8 @@ from abc import ABCMeta, abstractmethod
 from pvactools.lib.run_utils import *
 import pvactools.lib.sort
 from pvactools.lib.prediction_class import PredictionClass
+from pvactools.lib.anchor_residue_pass import AnchorResiduePass
+from pvactools.lib.get_best_candidate import PvacseqBestCandidate, PvacfuseBestCandidate, PvacbindBestCandidate, PvacspliceBestCandidate
 
 class TopScoreFilter(metaclass=ABCMeta):
     @classmethod
@@ -38,7 +40,22 @@ class TopScoreFilter(metaclass=ABCMeta):
                  + "lowest: Use the best MT Score (i.e. the lowest MT ic50 binding score of all chosen prediction methods). "
                  + "median: Use the median MT Score (i.e. the median MT ic50 binding score of all chosen prediction methods)."
         )
+        parser.add_argument(
+            '-m2', '--top-score-metric2',
+            choices=['ic50','percentile'],
+            default='ic50',
+            help="Whether to use median/best IC50 or to use median/best percentile score."
+        )
         if tool == 'pvacseq' or tool == 'pvacsplice':
+            parser.add_argument(
+                "--transcript-prioritization-strategy", type=transcript_prioritization_strategy(),
+                help="Specify the criteria to consider when filtering transcripts of the neoantigen candidates. "
+                     + "'canonical' will select candidates resulting from variants on a Ensembl canonical transcript. "
+                     + "'mane_select' will select candidates resulting from variants on a MANE select transcript. "
+                     + "'tsl' will select candidates where the transcript support level (TSL) matches the --maximum-transcript-support-level cutoff. "
+                     + "When selecting more than one criteria, a transcript meeting EITHER of the selected criteria will be selected.",
+                default=['canonical', 'mane_select', 'tsl']
+            )
             parser.add_argument(
                 "--maximum-transcript-support-level", type=int,
                 help="When determining the top peptide, only consider those entries that meet this threshold for the Ensembl transcript support level (TSL). "
@@ -97,8 +114,10 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         input_file,
         output_file, 
         top_score_metric="median",
+        top_score_metric2="ic50",
         binding_threshold=500,
         allele_specific_binding_thresholds=False,
+        transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
         maximum_transcript_support_level=1,
         allele_specific_anchors=False,
         anchor_contribution_threshold=0.8
@@ -106,12 +125,17 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.mt_top_score_metric = "Median"
             self.wt_top_score_metric = "Median"
         else:
             self.mt_top_score_metric = "Best"
             self.wt_top_score_metric = "Corresponding"
+        if self.top_score_metric2 == "percentile":
+            self.top_score_mode = "Percentile"
+        else:
+            self.top_score_mode = "IC50 Score"
         self.binding_threshold = binding_threshold
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
@@ -123,34 +147,10 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             else:
                 allele_specific_binding_thresholds[hla_type] = float(threshold)
         self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.allele_specific_anchors = allele_specific_anchors
-        self.anchor_contribution_threshold = anchor_contribution_threshold
-        anchor_probabilities = {}
-        for length in [8, 9, 10, 11]:
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "Normalized_anchor_predictions_{}_mer.tsv".format(length))
-            probs = {}
-            with open(file_name, 'r') as fh:
-                reader = csv.DictReader(fh, delimiter="\t")
-                for line in reader:
-                    hla = line.pop('HLA')
-                    probs[hla] = line
-            anchor_probabilities[length] = probs
-        self.anchor_probabilities = anchor_probabilities
-
-        mouse_anchor_positions = {}
-        for length in [8, 9, 10, 11]:
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-            file_name = os.path.join(base_dir, 'tools', 'pvacview', 'data', "mouse_anchor_predictions_{}_mer.tsv".format(length))
-            values = {}
-            with open(file_name, 'r') as fh:
-                reader = csv.DictReader(fh, delimiter="\t")
-                for line in reader:
-                    allele = line.pop('Allele')
-                    values[allele] = {int(k): ast.literal_eval(v) for k, v in line.items()}
-            mouse_anchor_positions[length] = values
-        self.mouse_anchor_positions = mouse_anchor_positions
+        self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold, self.wt_top_score_metric)
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -193,77 +193,39 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                             filtered_lines.append(duplicate_variant_line)
 
 
-            sorted_rows = pvactools.lib.sort.default_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.default_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
-        #get all entries with Biotype 'protein_coding'
-        biotype_lines = [x for x in lines if x['Biotype'] == 'protein_coding']
-        #if there are none, reset to previous dataset
-        if len(biotype_lines) == 0:
-            biotype_lines = lines
-
-        #subset protein_coding dataset to only include entries with a TSL < maximum_transcript_support_level
-        tsl_lines = [x for x in biotype_lines if x['Transcript Support Level'] != 'NA' and x['Transcript Support Level'] != 'Not Supported' and int(x['Transcript Support Level']) < self.maximum_transcript_support_level]
-        #if this results in an empty dataset, reset to previous dataset
-        if len(tsl_lines) == 0:
-            tsl_lines = biotype_lines
-
-        #subset tsl dataset to only include entries with no problematic positions
-        if 'Problematic Positions' in lines[0]:
-            prob_pos_lines = [x for x in tsl_lines if x['Problematic Positions'] == "None"]
-            #if this results in an empty dataset, reset to previous dataset
-            if len(prob_pos_lines) == 0:
-                prob_pos_lines = tsl_lines
-        else:
-            prob_pos_lines = tsl_lines
-
-        #subset prob_pos dataset to only include entries that pass the anchor position check
-        anchor_residue_pass_lines = [x for x in prob_pos_lines if self.is_anchor_residue_pass(x)]
-        if len(anchor_residue_pass_lines) == 0:
-            anchor_residue_pass_lines = prob_pos_lines
-
-        #determine the entry with the lowest IC50 Score, lowest TSL, and longest Transcript
-        tsl_sort_criteria = {'1': 1, '2': 2, '3': 3, '4': 4, '5': 5, 'NA': 6, 'Not Supported': 6}
-        for line in anchor_residue_pass_lines:
-            line['TSL Sort'] = tsl_sort_criteria[line['Transcript Support Level']]
-        sorted_anchor_residue_pass_lines = sorted(anchor_residue_pass_lines, key=lambda d: (float(d["{} MT IC50 Score".format(self.mt_top_score_metric)]), d['TSL Sort'], -int(d['Transcript Length'])))
-        return sorted_anchor_residue_pass_lines[0]
-
-    def is_anchor_residue_pass(self, line):
-        if self.use_allele_specific_binding_thresholds:
-            binding_threshold = self.allele_specific_binding_thresholds[line['HLA Allele']]
-        else:
-            binding_threshold = self.binding_threshold
-
-        anchor_residue_pass = True
-        anchors = get_anchor_positions(line['HLA Allele'], len(line['MT Epitope Seq']), self.allele_specific_anchors, self.anchor_probabilities, self.anchor_contribution_threshold, self.mouse_anchor_positions)
-        # parse out mutation position from str
-        position = line["Mutation Position"]
-        if position == 'NA':
-            return True
-        else:
-            positions = position.split(", ")
-            if len(positions) > 2:
-                return True
-            anchor_residue_pass = True
-            if all(int(pos) in anchors for pos in positions):
-                if line["{} WT IC50 Score".format(self.wt_top_score_metric)] == "NA":
-                    anchor_residue_pass = False
-                elif float(line["{} WT IC50 Score".format(self.wt_top_score_metric)]) < binding_threshold:
-                    anchor_residue_pass = False
-            return anchor_residue_pass
+        df = pd.DataFrame(lines)
+        df = df.astype({"{} MT IC50 Score".format(self.mt_top_score_metric):'float'})
+        if 'MANE Select' in lines[0]:
+            df['MANE Select'].map({'True': True, 'False': False})
+        if 'Canonical' in lines[0]:
+            df['Canonical'].map({'True': True, 'False': False})
+        return PvacseqBestCandidate(
+            self.transcript_prioritization_strategy,
+            self.maximum_transcript_support_level,
+            self.anchor_calculator,
+            self.mt_top_score_metric,
+            self.top_score_mode,
+        ).get(df)
 
 
 class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median"):
+    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = "ic50"):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.formatted_top_score_metric = "Median"
         else:
             self.formatted_top_score_metric = "Best"
+        if self.top_score_metric2 == "percentile":
+            self.top_score_mode = "Percentile"
+        else:
+            self.top_score_mode = "IC50 Score"
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -303,42 +265,36 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                             duplicate_variant_line['Mutation'] = "{}.{}".format(variant, best_line_consequence)
                             filtered_lines.append(duplicate_variant_line)
 
-            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
-        #subset dataset to only include entries with no problematic positions
-        if 'Problematic Positions' in lines[0]:
-            prob_pos_lines = [x for x in lines if x['Problematic Positions'] == "None"]
-            #if this results in an empty dataset, reset to previous dataset
-            if len(prob_pos_lines) == 0:
-                prob_pos_lines = lines
-        else:
-            prob_pos_lines = lines
-
-        for line in prob_pos_lines:
-            if line['Expression'] == 'NA':
-                line['Expression Sort'] = 0
-            else:
-                line['Expression Sort'] = float(line['Expression'])
-
-        sorted_lines = sorted(prob_pos_lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)]), -d['Expression Sort']))
-        return sorted_lines[0]
+        df = pd.DataFrame(lines)
+        df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
+        return PvacfuseBestCandidate(
+            self.formatted_top_score_metric,
+            self.top_score_mode,
+        ).get(df)
 
 class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median"):
+    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = "ic50"):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.formatted_top_score_metric = "Median"
         else:
             self.formatted_top_score_metric = "Best"
+        if self.top_score_metric2 == "percentile":
+            self.top_score_mode = "Percentile"
+        else:
+            self.top_score_mode = "IC50 Score"
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
             reader = csv.DictReader(input_fh, delimiter = "\t")
-            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames = reader.fieldnames)
+            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames = reader.fieldnames, extrasaction = 'ignore')
             writer.writeheader()
             lines_per_variant = defaultdict(list)
             for line in reader:
@@ -351,37 +307,46 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 best_line = self.find_best_line(lines)
                 filtered_lines.append(best_line)
 
-            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
-        #subset tsl dataset to only include entries with no problematic positions
-        if 'Problematic Positions' in lines[0]:
-            prob_pos_lines = [x for x in lines if x['Problematic Positions'] == "None"]
-            #if this results in an empty dataset, reset to previous dataset
-            if len(prob_pos_lines) == 0:
-                prob_pos_lines = lines
-        else:
-            prob_pos_lines = lines
-
-        sorted_lines = sorted(prob_pos_lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)])))
-        return sorted_lines[0]
+        df = pd.DataFrame(lines)
+        df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
+        return PvacbindBestCandidate(
+            self.formatted_top_score_metric,
+            self.top_score_mode,
+        ).get(df)
 
 class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median", maximum_transcript_support_level=1):
+    def __init__(
+        self,
+        input_file,
+        output_file,
+        top_score_metric="median",
+        transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
+        maximum_transcript_support_level=1,
+        top_score_metric2="ic50",
+    ):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
             self.formatted_top_score_metric = "Median"
         else:
             self.formatted_top_score_metric = "Best"
+        if self.top_score_metric2 == "percentile":
+            self.top_score_mode = "Percentile"
+        else:
+            self.top_score_mode = "IC50 Score"
+        self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
             reader = csv.DictReader(input_fh, delimiter = "\t")
-            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames = reader.fieldnames)
+            writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames = reader.fieldnames, extrasaction = 'ignore')
             writer.writeheader()
             lines_per_variant = defaultdict(list)
             for line in reader:
@@ -394,30 +359,15 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 best_line = self.find_best_line(lines)
                 filtered_lines.append(best_line)
 
-            sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric)
+            sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
-        #get all entries with Biotype 'protein_coding'
-        biotype_lines = [x for x in lines if x['Biotype'] == 'protein_coding']
-        #if there are none, reset to previous dataset
-        if len(biotype_lines) == 0:
-            biotype_lines = lines
-
-        #subset protein_coding dataset to only include entries with a TSL < maximum_transcript_support_level
-        tsl_lines = [x for x in biotype_lines if x['Transcript Support Level'] != 'NA' and x['Transcript Support Level'] != 'Not Supported' and int(x['Transcript Support Level']) < self.maximum_transcript_support_level]
-        #if this results in an empty dataset, reset to previous dataset
-        if len(tsl_lines) == 0:
-            tsl_lines = biotype_lines
-
-        #subset tsl dataset to only include entries with no problematic positions
-        if 'Problematic Positions' in tsl_lines[0]:
-            prob_pos_lines = [x for x in tsl_lines if x['Problematic Positions'] == "None"]
-            #if this results in an empty dataset, reset to previous dataset
-            if len(prob_pos_lines) == 0:
-                prob_pos_lines = tsl_lines
-        else:
-            prob_pos_lines = tsl_lines
-
-        sorted_lines = sorted(prob_pos_lines, key=lambda d: (float(d["{} IC50 Score".format(self.formatted_top_score_metric)])))
-        return sorted_lines[0]
+        df = pd.DataFrame(lines)
+        df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
+        return PvacspliceBestCandidate(
+            self.transcript_prioritization_strategy,
+            self.maximum_transcript_support_level,
+            self.formatted_top_score_metric,
+            self.top_score_mode,
+        ).get(df)

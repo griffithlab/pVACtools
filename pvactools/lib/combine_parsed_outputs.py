@@ -23,6 +23,12 @@ def main(args_input = sys.argv[1:]):
              + "median: Use the median MT Score and Median Fold Change (i.e. the median MT ic50 binding score and fold change of all chosen prediction methods).",
     )
     parser.add_argument(
+            '-m2', '--top-score-metric2',
+            choices=['ic50','percentile'],
+            default='ic50',
+            help="Whether to use median/best IC50 or to use median/best percentile score."
+        )
+    parser.add_argument(
         '--file-type',
         choices=['pVACseq', 'pVACfuse', 'pVACbind', 'pVACsplice'],
         default='pVACseq',

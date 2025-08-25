@@ -46,6 +46,7 @@ Contents
    :maxdepth: 1
 
    install
+   helper_tools
    courses
    tools
    frequently_asked_questions
@@ -60,16 +61,21 @@ Contents
 New in Version |release|
 ------------------------
 
-This is a minor feature release. It adds the following features:
+This is a bugfix release. It fixes the following problem(s):
 
-* Add functionality to add gene of interest identification. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1229
+* Fix a couple of issues with the new `--top-score-metric2` by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1291
 
-  A new option ``--genes-of-interest-file`` has been added. This option allows
-  users to specify a file path containing genes name that are of particular
-  importance to their research. Neoantigens resulting from variants on one of
-  these genes will be marked in the all_epitopes.tsv and filtered.tsv files in
-  a new ``Gene of Interest`` column (``True``/``False``). If this option is
-  not specified, `a default list of common cancer genes <https://raw.githubusercontent.com/griffithlab/pVACtools/5eeb213deac828df5e4d2ad81971db26ae530500/pvactools/supporting_files/cancer_census_hotspot_gene_list.tsv>`_ is used.
+  * When adding the ``--top-score-metric2`` option, the logic for determining
+    the included candidates during aggregate report creation was amended to
+    compare either the IC50 or percentile to the aggregate inclusion binding
+    threshold. This logic should not have been changed and instead only the
+    IC50 should be compared to the aggregate inclusion binding threshold, no
+    matter which ``--top-score-metric2`` was selected. This specific change
+    has been reverted
+  * In order to achieve deterministic results when using the percentile
+    ``--top-score-metric2`` option, a peptides.sort() call was used. This
+    release replaces this with a better way of finding the best peptide by
+    using the IC50 as a secondary sort criteria.
 
 New in Version 5
 ----------------

@@ -4,11 +4,12 @@ import pandas as pd
 
 class FilterRegtoolsResults:
     def __init__(self, **kwargs):
-        self.input_file  = kwargs['input_file']
-        self.output_file = kwargs['output_file']
-        self.gtf_data      = kwargs['gtf_data']
-        self.score       = kwargs['score'] #10 reads, 100, 500 -j (cohort stats combined junction tsv filters out junctions with <= 5 reads).  
-        self.distance    = kwargs['distance'] #50, 100 bp, 150 -v
+        self.input_file   = kwargs['input_file']
+        self.output_file  = kwargs['output_file']
+        self.gtf_data     = kwargs['gtf_data']
+        self.score        = kwargs['score'] #10 reads, 100, 500 -j (cohort stats combined junction tsv filters out junctions with <= 5 reads).  
+        self.anchor_types = kwargs['anchor_types']
+        self.distance     = kwargs['distance'] #50, 100 bp, 150 -v
 
     def split_string(self, df, col, delimiter):
         df[col] = df[col].str.split(delimiter)
@@ -20,7 +21,7 @@ class FilterRegtoolsResults:
         junctions = junctions.rename(columns={'chrom':'junction_chrom', 'start':'junction_start', 'end':'junction_stop'})
 
         # filter on score, strand, and anchor
-        filter_junctions = junctions[(junctions['score'] > self.score) & (junctions['strand'] != '?') & (junctions['anchor'].isin(['D', 'A', 'NDA']))].dropna()
+        filter_junctions = junctions[(junctions['score'] > self.score) & (junctions['strand'] != '?') & (junctions['anchor'].isin(self.anchor_types))].dropna()
 
         # create variant_start col
         filter_junctions['variant_start'] = filter_junctions['variant_info'].str.split(':|-').str[1].astype('int64')

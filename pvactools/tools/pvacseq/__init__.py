@@ -16,8 +16,9 @@ __all__ = [
     'netmhc_stab',
     'valid_netmhciipan_versions',
     'calculate_reference_proteome_similarity',
-    'transcript_support_level_filter',
+    'transcript_filter',
     'identify_problematic_amino_acids',
+    'update_tiers',
 ]
 
 from . import *
