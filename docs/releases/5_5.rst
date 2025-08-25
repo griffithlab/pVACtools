@@ -17,3 +17,22 @@ It also fixes the following pVACsplice bugs:
 * Add better handling of pVACsplice frameshifts where the downstream sequence may not have been fully included in the query sequence for the calculate reference proteome similarity step. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1285
 * Handle cases in pVACsplice where no processable neoepitopes were found so that the run exits gracefully with better stdout messages. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1286
 * Fix documentation of the input fasta parameter in pvacsplice calculate_reference_proteome_similarity to point to the correct location. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1288
+
+Version 5.5.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Fix a couple of issues with the new `--top-score-metric2` by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1291
+
+  * When adding the ``--top-score-metric2`` option, the logic for determining
+    the included candidates during aggregate report creation was amended to
+    compare either the IC50 or percentile to the aggregate inclusion binding
+    threshold. This logic should not have been changed and instead only the
+    IC50 should be compared to the aggregate inclusion binding threshold, no
+    matter which ``--top-score-metric2`` was selected. This specific change
+    has been reverted
+  * In order to achieve deterministic results when using the percentile
+    ``--top-score-metric2`` option, a peptides.sort() call was used. This
+    release replaces this with a better way of finding the best peptide by
+    using the IC50 as a secondary sort criteria.

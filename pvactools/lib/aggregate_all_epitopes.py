@@ -103,6 +103,7 @@ class AggregateAllEpitopes:
         peptide_hla_counts = self.get_unique_peptide_hla_counts(included_df)
         hla_counts = Counter(peptide_hla_counts["HLA Allele"])
         hla = dict(map(lambda x : (x, hla_counts[x]) if x in hla_counts else (x, ""), self.hla_types))
+
         #get a list of all unique gene/transcript/aa_change combinations
         #store a count of all unique peptides that passed
         (peptides, anno_count) = self.get_included_df_metrics(included_df, prediction_algorithms, el_algorithms, percentile_algorithms)
@@ -758,7 +759,8 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return (df, key)
 
     def get_included_df(self, df):
-        binding_df = df[df["{} IC50 Score".format(self.top_score_metric)] < self.aggregate_inclusion_binding_threshold]
+        binding_df = df[df[f"{self.top_score_metric} IC50 Score"] < self.aggregate_inclusion_binding_threshold]
+
         if binding_df.shape[0] == 0:
             return binding_df
         else:
@@ -776,13 +778,16 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             return binding_df[binding_df["Epitope Seq"].isin(top_n_best_peptides)]
 
     def sort_included_df(self, df):
-        if self.top_score_mode == 'IC50 Score':
-            primary = "{} IC50 Score".format(self.top_score_metric)
-            secondary = "{} Percentile".format(self.top_score_metric)
+        if self.top_score_metric2 == "percentile":
+            df.sort_values(by=[
+                "{} Percentile".format(self.top_score_metric),
+                "{} IC50 Score".format(self.top_score_metric),
+            ], inplace=True, ascending=[True, True])
         else:
-            primary = "{} Percentile".format(self.top_score_metric)
-            secondary = "{} IC50 Score".format(self.top_score_metric)
-        df.sort_values(by=[primary, secondary], inplace=True, ascending=[True,True])
+            df.sort_values(by=[
+                "{} IC50 Score".format(self.top_score_metric),
+                "{} Percentile".format(self.top_score_metric),
+            ], inplace=True, ascending=[True, True])
         return df
 
     def get_unique_peptide_hla_counts(self, included_df):
