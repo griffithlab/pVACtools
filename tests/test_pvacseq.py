@@ -145,6 +145,7 @@ class PvacseqTests(unittest.TestCase):
             ])
             close_mock_fhs()
 
+            #Class I output files
             for file_name in (
                 'sample.name.all_epitopes.tsv',
             ):
@@ -158,6 +159,7 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.fasta',
                 'sample.name.all_epitopes.aggregated.tsv',
                 'sample.name.all_epitopes.aggregated.metrics.json',
+                'sample.name.all_epitopes.aggregated.tsv.reference_matches',
                 'sample.name.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
@@ -190,7 +192,6 @@ class PvacseqTests(unittest.TestCase):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'log', file_name)
                 self.assertTrue(os.path.exists(output_file))
 
-            #Class I output files
             methods = self.methods
             for method in methods.keys():
                 for allele in methods[method].keys():
@@ -209,11 +210,13 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.fasta',
                 'sample.name.all_epitopes.aggregated.tsv',
                 'sample.name.all_epitopes.aggregated.metrics.json',
+                'sample.name.all_epitopes.aggregated.tsv.reference_matches',
                 'sample.name.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+
 
             for file_name in (
                 'sample.name.all_epitopes.tsv',

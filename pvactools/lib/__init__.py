@@ -26,6 +26,7 @@ __all__ = [
     'combine_inputs',
     'load_gtf_data',
     'splice_pipeline',
+    'anchor_residue_pass',
 ]
 
 from . import *
