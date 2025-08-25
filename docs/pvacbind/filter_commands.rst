@@ -40,6 +40,8 @@ ic50 score of all prediction algorithms that were picked during the previous pVA
 The ``median`` binding affinity score is recorded in the ``Median IC50 Score`` column and
 corresponds to the median ic50 score of all prediction algorithms used to create the report.
 Be default, the binding filter runs on the ``median`` binding affinity.
+An additional ``--top-score-metric2`` flag allows the user to choose whether to use IC50 or
+Percentile scores. By default, IC50 is used.
 
 When the ``--allele-specific-binding-thresholds`` flag is set, binding cutoffs specific to each
 prediction's HLA allele are used instead of the value set via the ``--binding-threshold`` parameters.

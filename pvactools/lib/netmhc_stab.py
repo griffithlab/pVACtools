@@ -20,7 +20,7 @@ from pvactools.lib.prediction_class import MHCI
 import pvactools.lib.sort
 
 class NetMHCStab:
-    def __init__(self, input_file, output_file, file_type='pVACseq', top_score_metric='median'):
+    def __init__(self, input_file, output_file, file_type='pVACseq', top_score_metric='median', top_score_metric2="ic50"):
         self.input_file = input_file
         self.output_file = output_file
         if file_type == 'pVACseq':
@@ -29,6 +29,7 @@ class NetMHCStab:
             self.epitope_seq_column_name = 'Epitope Seq'
         self.file_type = file_type
         self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
 
     def execute(self):
         mhci_alleles = MHCI.all_valid_allele_names()
@@ -141,11 +142,11 @@ class NetMHCStab:
                 output_lines.extend(df.to_dict('records'))
 
             if self.file_type == 'pVACseq':
-                sorted_lines = pvactools.lib.sort.default_sort_from_pd_dict(output_lines, self.top_score_metric)
+                sorted_lines = pvactools.lib.sort.default_sort_from_pd_dict(output_lines, self.top_score_metric, self.top_score_metric2)
             elif self.file_type == 'pVACsplice':
-                sorted_lines = pvactools.lib.sort.pvacsplice_sort(output_lines, self.top_score_metric)
+                sorted_lines = pvactools.lib.sort.pvacsplice_sort(output_lines, self.top_score_metric, self.top_score_metric2)
             else:
-                sorted_lines = pvactools.lib.sort.pvacbind_sort(output_lines, self.top_score_metric)
+                sorted_lines = pvactools.lib.sort.pvacbind_sort(output_lines, self.top_score_metric, self.top_score_metric2)
             writer.writerows(sorted_lines)
 
     def query_netmhcstabpan_server(self, staging_file, peptide_length, allele):
@@ -228,5 +229,11 @@ class NetMHCStab:
             help="The ic50 scoring metric to use when sorting epitopes. "
                  + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
                  + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
+        )
+        parser.add_argument(
+            '-m2', '--top-score-metric2',
+            choices=['ic50','percentile'],
+            default='ic50',
+            help="Whether to use median/best IC50 or to use median/best percentile score."
         )
         return parser

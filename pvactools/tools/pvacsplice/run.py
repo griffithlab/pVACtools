@@ -60,7 +60,13 @@ def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
         mhc_dirs = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.startswith(f'MHC_Class_{mhc_class}')]
     if not mhc_dirs:
         print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
-    combined_files = [os.path.join(m, f'{params["sample_name"]}.all_epitopes.tsv') for m in mhc_dirs]
+    combined_files = []
+    for m in mhc_dirs:
+        file = os.path.join(m, f'{params["sample_name"]}.all_epitopes.tsv')
+        if os.path.exists(file):
+            combined_files.append(file)
+    if len(combined_files) == 0:
+        return
     combined_fn = os.path.join(output_dir, f'{params["sample_name"]}.all_epitopes.tsv')
     combine_epitope_len_reports(combined_files, combined_fn)
     filtered_fn = os.path.join(output_dir, f'{params["sample_name"]}.filtered.tsv')
@@ -157,6 +163,7 @@ def main(args_input = sys.argv[1:]):
 
     additional_args = {
         'top_score_metric'          : args.top_score_metric,
+        'top_score_metric2'         : args.top_score_metric2,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
         'percentile_threshold_strategy': args.percentile_threshold_strategy,
@@ -183,6 +190,7 @@ def main(args_input = sys.argv[1:]):
         'trna_vaf'                  : args.trna_vaf,
         'expn_val'                  : args.expn_val,
         'tumor_purity'              : args.tumor_purity,
+        'transcript_prioritization_strategy': args.transcript_prioritization_strategy,
         'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'run_post_processor'        : True,
         'exclude_NAs'               : args.exclude_NAs,
@@ -198,14 +206,18 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_i_executable = None
 
+        class_i_arguments = junction_arguments.copy()
         for x in args.class_i_epitope_length:
-
             print(f'Executing MHC Class I predictions for {x}mers')
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
             os.makedirs(output_len_dir, exist_ok=True)
 
-            class_i_arguments = junction_arguments.copy()
-            class_i_arguments['input_file']              = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{x}.fa')
+            input_file  = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{x}.fa')
+            if not os.path.exists(input_file):
+                print(f'No {x}mer neoepitopes found')
+                continue
+
+            class_i_arguments['input_file']              = input_file
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
@@ -235,14 +247,18 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_ii_executable = None
 
+        class_ii_arguments = junction_arguments.copy()
         for y in args.class_ii_epitope_length:
-
             print(f'Executing MHC Class II predictions for {y}mers')
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
             os.makedirs(output_len_dir, exist_ok=True)
 
-            class_ii_arguments = junction_arguments.copy()
-            class_ii_arguments['input_file']              = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{y}.fa')
+            input_file  = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{y}.fa')
+            if not os.path.exists(input_file):
+                print(f'No {y}mer neoepitopes found')
+                continue
+
+            class_ii_arguments['input_file']              = input_file
             class_ii_arguments['alleles']                 = class_ii_alleles
             class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
             class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable

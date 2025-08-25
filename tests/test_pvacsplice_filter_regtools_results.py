@@ -35,6 +35,7 @@ class FilterRegtoolsResultsTests(unittest.TestCase):
                     'output_file' : output_file,
                     'gtf_data'    : gtf_df,
                     'score'       : score,
+                    'anchor_types': ['D', 'A', 'NDA'],
                     'distance'    : distance,
                 }
                 FilterRegtoolsResults(**params).execute()
@@ -55,6 +56,38 @@ class FilterRegtoolsResultsTests(unittest.TestCase):
 
         output_dir.cleanup()
 
+    def test_filter_regtools_results_anchor_types_runs_and_produces_expected_output(self):
+        input_file = os.path.join(self.test_data_dir, 'inputs', 'splice_junctions_chr1.tsv')
+        output_dir = tempfile.TemporaryDirectory()
+        gtf_df = pd.read_csv(os.path.join(self.test_data_dir, 'results', 'Test.gtf.tsv'), sep='\t', na_values="NA", dtype={'transcript_support_level': str})
+
+        output_file = os.path.join(output_dir.name, 'sample_5_25_D_filtered.tsv')
+        params = {
+            'input_file'  : input_file,
+            'output_file' : output_file,
+            'gtf_data'    : gtf_df,
+            'score'       : 5,
+            'anchor_types': ['D'],
+            'distance'    : 25,
+        }
+        FilterRegtoolsResults(**params).execute()
+
+        expected_file = os.path.join(
+            self.test_data_dir,
+            'results',
+            'Test.5_25_D_filtered.tsv'
+        )
+        # direct file comparison to existing
+        self.assertTrue(cmp(
+                output_file,
+                expected_file,
+                False
+            ),
+            "files don't match {} - {}".format(output_file, expected_file)
+        )
+
+        output_dir.cleanup()
+
     def test_filter_regtools_GENCODE_results_runs_and_produces_expected_output(self):
         input_file = os.path.join(self.test_data_dir, 'inputs', 'splice_junctions_chr6_chr9.GENCODE.tsv')
         output_dir = tempfile.TemporaryDirectory()
@@ -69,6 +102,7 @@ class FilterRegtoolsResultsTests(unittest.TestCase):
                     'output_file' : output_file,
                     'gtf_data'    : gtf_df,
                     'score'       : score,
+                    'anchor_types': ['D', 'A', 'NDA'],
                     'distance'    : distance,
                 }
                 FilterRegtoolsResults(**params).execute()

@@ -1,0 +1,2 @@
+chrom	start	end	name	score	strand	splice_site	acceptors_skipped	exons_skipped	donors_skipped	anchor	known_donor	known_acceptor	known_junction	gene_names	gene_ids	transcripts	variant_info
+chr3	52706703	52706804	JUNC00000303	218	+	GT-TT	1	0	0	D	1	0	0	SPCS1	ENSG00000114902	ENST00000233025,ENST00000423431,ENST00000448693,ENST00000474945,ENST00000619898	chr3:52706795-52706796

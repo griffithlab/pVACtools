@@ -529,6 +529,8 @@ class OutputParser(metaclass=ABCMeta):
             'Transcript',
             'Transcript Support Level',
             'Transcript Length',
+            'Canonical',
+            'MANE Select',
             'Biotype',
             'Ensembl Gene ID',
             'Variant Type',
@@ -696,6 +698,8 @@ class OutputParser(metaclass=ABCMeta):
                     'Transcript'          : tsv_entry['transcript_name'],
                     'Transcript Support Level': tsv_entry['transcript_support_level'],
                     'Transcript Length'   : tsv_entry['transcript_length'],
+                    'Canonical'           : tsv_entry['canonical'],
+                    'MANE Select'         : tsv_entry['mane_select'],
                     'Biotype'             : tsv_entry['biotype'],
                     'Ensembl Gene ID'     : tsv_entry['ensembl_gene_id'],
                     'HGVSc'               : tsv_entry['hgvsc'],
@@ -1084,6 +1088,8 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             'Junction Anchor',
             'Transcript',
             'Transcript Support Level',
+            'Canonical',
+            'MANE Select',
             'Biotype',
             'Ensembl Gene ID',
             'Variant Type',
@@ -1121,10 +1127,10 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
         tmp_output_filehandle = open(tmp_output_file, 'w')
         tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
-        
+
         # added for pvacsplice - variant info
         tsv_entries = self.parse_input_tsv_file()
-        
+
         # get binding info from iedb files
         iedb_results = self.process_input_iedb_file()
 
@@ -1154,6 +1160,8 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Variant'             : tsv_entry['variant'],
                 'Transcript'          : tsv_entry['transcript_name'],
                 'Transcript Support Level': tsv_entry['transcript_support_level'],
+                'Canonical'           : tsv_entry['canonical'],
+                'MANE Select'         : tsv_entry['mane_select'],
                 'Biotype'             : tsv_entry['biotype'],
                 ### junction info from RegTools
                 'Junction'            : tsv_entry['name'],
