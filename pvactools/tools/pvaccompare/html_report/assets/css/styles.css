@@ -1,0 +1,45 @@
+.confirm-access-msg {
+    opacity: 0.75;
+}
+
+.custom-border {
+    border: 1px solid darkgray;
+    width: 100%;
+}
+
+.navbar-brand:hover {
+    color: darkgray;
+}
+
+.navbar-nav .nav-item.active .nav-link {
+    color: white;
+}
+
+.thead-sticky {
+    position: sticky;
+    top: 0;
+    background: black;
+    color: white;
+    z-index: 1;
+}
+
+.thead-sticky th {
+    font-size: 1rem;
+}
+
+.summary-notes {
+    color: red;
+}
+
+.table-item {
+    background: rgb(50, 50, 50);
+    color: white;
+}
+
+.table-item td {
+    font-size: 1rem !important;
+}
+
+.identical-msg {
+    color: lime;
+}
