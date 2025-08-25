@@ -111,6 +111,7 @@ def main(args_input = sys.argv[1:]):
         'normal_sample_name'        : args.normal_sample_name,
         'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
         'n_threads'                 : args.n_threads,
+        'transcript_prioritization_strategy': args.transcript_prioritization_strategy,
         'maximum_transcript_support_level': args.maximum_transcript_support_level,
         'biotypes'                  : args.biotypes,
         'species'                   : species,

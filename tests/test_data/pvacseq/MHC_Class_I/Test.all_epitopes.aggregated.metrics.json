@@ -8,6 +8,11 @@
   "trna_vaf": 0.25,
   "trna_cov": 10,
   "allele_expr_threshold": 2.5,
+  "transcript_prioritization_strategy": [
+    "canonical",
+    "mane_select",
+    "tsl"
+  ],
   "maximum_transcript_support_level": 1,
   "percentile_threshold": null,
   "percentile_threshold_strategy": "conservative",
@@ -261,6 +266,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -449,6 +460,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -595,6 +612,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -743,6 +766,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -890,6 +919,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -1036,6 +1071,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -1399,6 +1440,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -1555,6 +1602,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -1701,6 +1754,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -1849,6 +1908,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -1995,6 +2060,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -2241,6 +2312,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -2387,6 +2464,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -2731,6 +2814,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -2975,6 +3064,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -3318,6 +3413,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -3956,6 +4057,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -4102,6 +4209,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -4348,6 +4461,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -4593,6 +4712,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -4740,6 +4865,12 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
@@ -4886,6 +5017,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
@@ -5061,6 +5198,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           "Not Supported"
