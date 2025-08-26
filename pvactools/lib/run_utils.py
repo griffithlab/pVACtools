@@ -70,6 +70,24 @@ def float_range(minimum, maximum):
     # Return function handle to checking function
     return float_range_checker
 
+def aggregate_report_evaluations():
+    """Return function handle of an argument type function for
+       ArgumentParser checking of the aggregate report evaluation values.
+       Valid values are: ['Accept', 'Reject', 'Pending', 'Review']"""
+
+    valid_values = ['Accept', 'Reject', 'Pending', 'Review']
+
+    def aggregate_report_evaluation_checker(arg):
+        arg_list = arg.split(",")
+        for argument in arg_list:
+            if argument not in valid_values:
+                raise argparse.ArgumentTypeError(
+                    "Invalid evaluation '{}'. Valid values are: {}".format(argument, ", ".join(valid_values))
+                )
+        return arg_list
+
+    return aggregate_report_evaluation_checker
+
 def transcript_prioritization_strategy():
     """Return function handle of an argument type function for
        ArgumentParser checking of the transcript prioritization strategy
