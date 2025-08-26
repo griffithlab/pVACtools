@@ -9,6 +9,7 @@ import itertools
 import csv
 import glob
 import ast
+import math
 
 from pvactools.lib.run_utils import is_preferred_transcript
 from pvactools.lib.prediction_class import PredictionClass
@@ -543,7 +544,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             peptides[set_name]['transcript_length'] = [int(l) for l in list(sorted_transcripts.Length)]
             peptides[set_name]['transcript_count'] = len(annotations)
             peptides[set_name]['peptide_count'] = len(peptide_set)
-            peptides[set_name]['total_expr'] = sum([0 if x == 'NA' else (float(x)) for x in peptides[set_name]['transcript_expr']])
+            peptides[set_name]['total_expr'] = math.fsum([0 if x == 'NA' else (float(x)) for x in peptides[set_name]['transcript_expr']])
             set_number += 1
         anno_count = len(included_transcripts)
 
