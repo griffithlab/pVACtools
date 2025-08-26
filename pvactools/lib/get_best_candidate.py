@@ -127,5 +127,6 @@ class PvacspliceBestCandidate:
         #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
         prob_pos_df.sort_values(by=[
             "{} {}".format(self.mt_top_score_metric, self.top_score_mode),
-        ], inplace=True, ascending=[True])
+            "WT Protein Length",
+        ], inplace=True, ascending=[True, False])
         return prob_pos_df.iloc[0]
