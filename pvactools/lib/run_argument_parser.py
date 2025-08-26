@@ -119,6 +119,12 @@ class RunArgumentParser(metaclass=ABCMeta):
                  + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
                  + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
         )
+        self.parser.add_argument(
+            '-m2', '--top-score-metric2',
+            choices=['ic50','percentile'],
+            default='ic50',
+            help="Whether to use median/best IC50 or to use median/best percentile score."
+        )
 
     def prediction_args(self):
         self.parser.add_argument(
@@ -247,6 +253,15 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used during aggregate report creation for a simple estimation of whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.",
         )
         self.parser.add_argument(
+            "--transcript-prioritization-strategy", type=transcript_prioritization_strategy(),
+            help="Specify the criteria to consider when prioritizing or filtering transcripts of the neoantigen candidates during aggregate report creation or TSL filtering. "
+                 + "'canonical' will prioritize/select candidates resulting from variants on a Ensembl canonical transcript. "
+                 + "'mane_select' will prioritize/select candidates resulting from variants on a MANE select transcript. "
+                 + "'tsl' will prioritize/select candidates where the transcript support level (TSL) matches the --maximum-transcript-support-level. "
+                 + "When selecting more than one criteria, a transcript meeting EITHER of the selected criteria will be prioritized/selected.",
+            default=['canonical', 'mane_select', 'tsl']
+        )
+        self.parser.add_argument(
             "--maximum-transcript-support-level", type=int,
             help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
                  + "Keep all epitopes with a transcript support level <= to this cutoff.",
@@ -257,6 +272,14 @@ class RunArgumentParser(metaclass=ABCMeta):
             "--biotypes", type=lambda s:[a for a in s.split(',')],
             help="A list of biotypes to use for pre-filtering transcripts for processing in the pipeline.",
             default=['protein_coding']
+        )
+
+    def genes_of_interest_args(self):
+        self.parser.add_argument(
+            '--genes-of-interest-file',
+            help="A genes of interest file. Predictions resulting from variants on genes in this list will be marked in the result files. "
+                 + "The file should be formatted to have each gene on a separate line without a header line. "
+                 + "If no file is specified, the Cancer Gene Census list of high-confidence genes is used as the default."
         )
 
     def aggregated_report_args(self):
@@ -274,7 +297,7 @@ class RunArgumentParser(metaclass=ABCMeta):
     def pvacfuse(self):
         self.parser.add_argument(
             '--starfusion-file',
-            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from. Only used when running with AGFusion data."
+            help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract read support and expression information from. When running with AGFusion data, both read support and expression data from this file will be used. When running with Arriba data, only expression data from this file is used while read support data will be parsed from the Arriba data directly."
         )
         self.parser.add_argument(
             '--read-support', type=int,
@@ -358,11 +381,10 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true'
         )
         self.parser.add_argument(
-            "--anchor-types", nargs="*",
+            "--anchor-types", type=pvacsplice_anchors(),
             help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list."
-            + "Choices: A, D, NDA, DA, N",
+            + "Choices: A, D, NDA",
             default=['A', 'D', 'NDA'],
-            choices=['A', 'D', 'NDA', 'DA', 'N']
         )
         # pvacsplice - filter on gene expression only (but keep txpn value in output)
         self.parser.add_argument(
@@ -415,6 +437,7 @@ class PvacfuseRunArgumentParser(RunArgumentParser):
         self.binding_args(tool_name)
         self.prediction_args()
         self.fasta_generation()
+        self.genes_of_interest_args()
         self.aggregated_report_args()
         self.pvacfuse()
 
@@ -428,6 +451,7 @@ class PvacspliceRunArgumentParser(RunArgumentParser):
         self.pass_only_args()
         self.expression_coverage_args()
         self.prediction_args()
+        self.genes_of_interest_args()
         self.aggregated_report_args()
         self.pvacsplice()
 
@@ -447,6 +471,7 @@ class PvacseqRunArgumentParser(RunArgumentParser):
         self.expression_coverage_args()
         self.prediction_args()
         self.fasta_generation()
+        self.genes_of_interest_args()
         self.aggregated_report_args()
         self.pvacseq()
 
@@ -503,5 +528,11 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
             help="The ic50 scoring metric to use when evaluating junctional epitopes by binding-threshold. "
                  + "lowest: Use the best MT Score (i.e. the lowest MT ic50 binding score of all chosen prediction methods). "
                  + "median: Use the median MT Score (i.e. the  median MT ic50 binding score of all chosen prediction methods)."
+        )
+        self.parser.add_argument(
+            '-m2', '--top-score-metric2',
+            choices=['ic50','percentile'],
+            default='ic50',
+            help="Whether to use median/best IC50 or to use median/best percentile score."
         )
         self.pvacvector()

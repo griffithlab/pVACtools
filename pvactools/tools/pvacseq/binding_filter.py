@@ -9,7 +9,7 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    BindingFilter(args.input_file, args.output_file, args.binding_threshold, args.minimum_fold_change, args.top_score_metric, args.exclude_NAs, args.allele_specific_binding_thresholds, args.percentile_threshold, args.percentile_threshold_strategy).execute()
+    BindingFilter(args.input_file, args.output_file, args.binding_threshold, args.minimum_fold_change, args.top_score_metric, args.top_score_metric2, args.exclude_NAs, args.allele_specific_binding_thresholds, args.percentile_threshold, args.percentile_threshold_strategy).execute()
 
 if __name__ == "__main__":
     main()

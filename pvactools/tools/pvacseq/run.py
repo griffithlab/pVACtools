@@ -87,6 +87,7 @@ def main(args_input = sys.argv[1:]):
         'input_file_type'           : input_file_type,
         'sample_name'               : args.sample_name,
         'top_score_metric'          : args.top_score_metric,
+        'top_score_metric2'         : args.top_score_metric2,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
         'percentile_threshold_strategy': args.percentile_threshold_strategy,
@@ -110,6 +111,7 @@ def main(args_input = sys.argv[1:]):
         'normal_sample_name'        : args.normal_sample_name,
         'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
         'n_threads'                 : args.n_threads,
+        'transcript_prioritization_strategy': args.transcript_prioritization_strategy,
         'maximum_transcript_support_level': args.maximum_transcript_support_level,
         'biotypes'                  : args.biotypes,
         'species'                   : species,
@@ -124,6 +126,7 @@ def main(args_input = sys.argv[1:]):
         'anchor_contribution_threshold' : args.anchor_contribution_threshold,
         'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
         'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,
+        'genes_of_interest_file': args.genes_of_interest_file,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:

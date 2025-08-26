@@ -5,6 +5,7 @@ import binascii
 import re
 from itertools import islice
 import argparse
+import pandas as pd
 
 def combine_reports(input_files, output_file):
     fieldnames = []
@@ -48,19 +49,6 @@ def split_file(reader, lines):
 def construct_index(count, gene, transcript, variant_type, position):
     return '{}.{}.{}.{}.{}'.format(count, gene, transcript, variant_type, position)
 
-def index_to_aggregate_report_aa_change(aa_change, variant_type):
-    regex = '^([0-9]+[\-]{0,1}[0-9]*)([A-Z|\-|\*]*)\/([A-Z|\-|\*]*)$'
-    p = re.compile(regex)
-    m = p.match(aa_change)
-    if m:
-        if variant_type == 'FS':
-            parsed_aa_change = "FS{}".format(m.group(1))
-        else:
-            parsed_aa_change = "{}{}{}".format(m.group(2), m.group(1), m.group(3))
-        return (parsed_aa_change, m.group(1), m.group(2), m.group(3))
-    else:
-        raise Exception("Unexpected amino acid format: {}".format(aa_change))
-
 def float_range(minimum, maximum):
     """Return function handle of an argument type function for
        ArgumentParser checking a float range: minimum <= arg <= maximum
@@ -82,6 +70,42 @@ def float_range(minimum, maximum):
     # Return function handle to checking function
     return float_range_checker
 
+def transcript_prioritization_strategy():
+    """Return function handle of an argument type function for
+       ArgumentParser checking of the transcript prioritization strategy
+       checking that the specified criteria are in the list of: ['canonical', 'mane_select', 'tsl']"""
+
+    # Define the function with default arguments
+    def transcript_prioritization_strategy_checker(arg):
+        """New Type function for argparse - a comma-separated list with predefined valid values."""
+
+        arg_list = arg.split(",")
+        for argument in arg_list:
+            if argument not in ['canonical', 'mane_select', 'tsl']:
+                raise argparse.ArgumentTypeError("List element must be one of 'canonical', 'mane_select', 'tsl', not {}".format(argument))
+        return arg_list
+
+    # Return function handle to checking function
+    return transcript_prioritization_strategy_checker
+
+def pvacsplice_anchors():
+    """Return function handle of an argument type function for
+       ArgumentParser checking of the pVACsplice anchors
+       checking that the specified criteria are in the list of: ['A', 'D', 'NDA']"""
+
+    # Define the function with default arguments
+    def pvacsplice_anchors_checker(arg):
+        """New Type function for argparse - a comma-separated list with predefined valid values."""
+
+        arg_list = arg.split(",")
+        for argument in arg_list:
+            if argument not in ['A', 'D', 'NDA']:
+                raise argparse.ArgumentTypeError("List element must be one of 'A', 'D', 'NDA', not {}".format(argument))
+        return arg_list
+
+    # Return function handle to checking function
+    return pvacsplice_anchors_checker
+
 def supported_amino_acids():
     return ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
 
@@ -94,31 +118,66 @@ def determine_neoepitopes(sequence, length):
 def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length):
     wt_epitopes = determine_neoepitopes(wt_peptide, flanking_length+1)
     mt_epitopes = determine_neoepitopes(mt_peptide, flanking_length+1)
-    for i in range(1, len(wt_epitopes)):
-        wt_epitope = wt_epitopes[i]
-        mt_epitope = mt_epitopes[i]
+    for start, (wt_epitope, mt_epitope) in enumerate(zip(list(wt_epitopes.values()), list(mt_epitopes.values()))):
         if wt_epitope != mt_epitope:
-            start = i - 1
             break
     for i, (wt_epitope, mt_epitope) in enumerate(zip(reversed(list(wt_epitopes.values())), reversed(list(mt_epitopes.values())))):
         if wt_epitope != mt_epitope:
             stop = len(mt_epitopes) - i + flanking_length
             break
-    return mt_peptide[start:stop]
+    mutant_subsequence = mt_peptide[start:stop]
+    supported_aas = supported_amino_acids()
+    if mutant_subsequence[0] not in supported_aas:
+        mutant_subsequence = mutant_subsequence[1:]
+    if mutant_subsequence[-1] not in supported_aas:
+        mutant_subsequence = mutant_subsequence[0:-1]
+    if not all([c in supported_aas for c in mutant_subsequence]):
+        print("Warning. Mutant sequence contains unsupported amino acid. Skipping entry {}".format(line['index']))
+        return
+    return mutant_subsequence
 
-def get_anchor_positions(hla_allele, epitope_length, allele_specific_anchors, anchor_probabilities, anchor_contribution_threshold, mouse_anchor_positions):
-        if allele_specific_anchors and epitope_length in anchor_probabilities and hla_allele in anchor_probabilities[epitope_length]:
-            probs = anchor_probabilities[epitope_length][hla_allele]
-            positions = []
-            total_prob = 0
-            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
-                total_prob += float(prob)
-                positions.append(int(pos))
-                if total_prob > anchor_contribution_threshold:
-                    return positions
-        elif allele_specific_anchors and epitope_length in mouse_anchor_positions and hla_allele in mouse_anchor_positions[epitope_length]:
-            values = mouse_anchor_positions[epitope_length][hla_allele]
-            positions = [pos for pos, val in values.items() if val]
-            return positions
-                
-        return [1, 2, epitope_length - 1 , epitope_length]
+def get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length):
+    wt_epitopes = determine_neoepitopes(wt_peptide, flanking_length+1)
+    mt_epitopes = determine_neoepitopes(mt_peptide, flanking_length+1)
+    for start, (wt_epitope, mt_epitope) in enumerate(zip(list(wt_epitopes.values()), list(mt_epitopes.values()))):
+        if wt_epitope != mt_epitope:
+            break
+    mutant_subsequence = mt_peptide[start:]
+    supported_aas = supported_amino_acids()
+    if mutant_subsequence[0] not in supported_aas:
+        mutant_subsequence = mutant_subsequence[1:]
+    if mutant_subsequence[-1] not in supported_aas:
+        mutant_subsequence = mutant_subsequence[0:-1]
+    if not all([c in supported_aas for c in mutant_subsequence]):
+        print("Warning. Mutant sequence contains unsupported amino acid. Skipping entry {}".format(line['index']))
+        return
+    return mutant_subsequence
+
+def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximum_transcript_support_level):
+    if not isinstance(mutation, pd.Series):
+        mutation = pd.Series(mutation)
+        if mutation['Canonical'] != 'Not Run':
+            mutation['Canonical'] = eval(mutation['Canonical'])
+        if mutation['MANE Select'] != 'Not Run':
+            mutation['MANE Select'] = eval(mutation['MANE Select'])
+    if 'mane_select' in transcript_prioritization_strategy:
+        if mutation['MANE Select'] == 'Not Run':
+            return True
+        elif mutation['MANE Select']:
+            return True
+    if 'canonical' in transcript_prioritization_strategy:
+        if mutation['Canonical'] == 'Not Run':
+            return True
+        elif mutation['Canonical']:
+            return True
+    if 'tsl' in transcript_prioritization_strategy:
+        col = 'TSL' if 'TSL' in mutation else 'Transcript Support Level'
+        if pd.isna(mutation[col]):
+            return False
+        elif mutation[col] == 'NA':
+            return False
+        elif mutation[col] == 'Not Supported':
+            return True
+        elif int(mutation[col]) <= maximum_transcript_support_level:
+            return True
+    return False

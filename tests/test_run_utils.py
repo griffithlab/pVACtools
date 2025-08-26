@@ -38,21 +38,32 @@ class RunUtilsTests(unittest.TestCase):
             sorted(combine_class_ii_alleles(["DRB9*01:02", "DRA*01:01"])),
             sorted(["DRB9*01:02", "DRA*01:01"])
         )
-    
-    def test_get_anchor_positions(self):
-        agg_obj = PvacseqAggregateAllEpitopes(input_file=os.path.join(self.test_data_dir, 'M_GC-OxParp_A-OxParp_A_FF_DNA.all_epitopes.tsv'), 
-                                                   output_file="",
-                                                   allele_specific_anchors=True
-                                                  )
 
-        # anchor positions are stored for the given valid mouse allele and epitope length
+    def test_pvacsplice_anchors_checker(self):
+        checker = pvacsplice_anchors()
         self.assertEqual(
-            get_anchor_positions("H-2-Db", 11, agg_obj.allele_specific_anchors, agg_obj.anchor_probabilities, agg_obj.anchor_contribution_threshold, agg_obj.mouse_anchor_positions),
-            [5, 11]
+            checker("A,D,NDA"),
+            ["A", "D", "NDA"]
         )
 
-        # valid mouse allele, but positions not stored for given epitope length
+        with self.assertRaises(Exception) as context:
+            checker("Test,A")
+
+        self.assertEqual("List element must be one of 'A', 'D', 'NDA', not Test", str(context.exception))
+
+    def test_float_range_checker(self):
+        checker = float_range(0.0, 100.0)
         self.assertEqual(
-            get_anchor_positions("H-2-Kb", 11, agg_obj.allele_specific_anchors, agg_obj.anchor_probabilities, agg_obj.anchor_contribution_threshold, agg_obj.mouse_anchor_positions),
-            [1, 2, 10, 11]
+            checker("0.5"),
+            0.5
         )
+
+        with self.assertRaises(Exception) as context:
+            checker("Test")
+
+        self.assertEqual("must be a floating point number", str(context.exception))
+
+        with self.assertRaises(Exception) as context:
+            checker("102.0")
+
+        self.assertEqual("must be in range [0.0 .. 100.0]", str(context.exception))

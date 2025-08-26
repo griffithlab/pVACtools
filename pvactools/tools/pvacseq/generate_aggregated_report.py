@@ -69,6 +69,12 @@ def define_parser():
              + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
     )
     parser.add_argument(
+        '-m2', '--top-score-metric2',
+        choices=['ic50','percentile'],
+        default='ic50',
+        help="Whether to use median/best IC50 or to use median/best percentile score."
+    )
+    parser.add_argument(
         '--trna-vaf', type=float_range(0.0, 1.0),
         help="Tumor RNA VAF Cutoff. Used to calculate the allele expression cutoff for tiering.",
         default=0.25
@@ -82,6 +88,15 @@ def define_parser():
         '--expn-val', type=float,
         default=1.0,
         help="Gene and Expression cutoff. Used to calculate the allele expression cutoff for tiering.",
+    )
+    parser.add_argument(
+        "--transcript-prioritization-strategy", type=transcript_prioritization_strategy(),
+        help="Specify the criteria to consider when prioritizing or filtering transcripts of the neoantigen candidates during aggregate report creation or TSL filtering. "
+             + "'canonical' will prioritize/select candidates resulting from variants on a Ensembl canonical transcript. "
+             + "'mane_select' will prioritize/select candidates resulting from variants on a MANE select transcript. "
+             + "'tsl' will prioritize/select candidates where the transcript support level (TSL) matches the --maximum-transcript-support-level. "
+             + "When selecting more than one criteria, a transcript meeting EITHER of the selected criteria will be prioritized/selected.",
+        default=['canonical', 'mane_select', 'tsl']
     )
     parser.add_argument(
         "--maximum-transcript-support-level", type=int,
@@ -130,8 +145,10 @@ def main(args_input = sys.argv[1:]):
         trna_vaf=args.trna_vaf,
         trna_cov=args.trna_cov,
         expn_val=args.expn_val,
+        transcript_prioritization_strategy=args.transcript_prioritization_strategy,
         maximum_transcript_support_level=args.maximum_transcript_support_level,
         top_score_metric=args.top_score_metric,
+        top_score_metric2=args.top_score_metric2,
         allele_specific_anchors=args.allele_specific_anchors,
         anchor_contribution_threshold=args.anchor_contribution_threshold,
         aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,
