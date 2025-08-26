@@ -650,3 +650,37 @@ class InputFileConverterTests(unittest.TestCase):
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_no_gene_name.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
+    
+    def test_allow_incomplete_transcripts(self):
+        convert_input_file  = os.path.join(self.test_data_dir, '..', 'pvacsplice', 'inputs', 'annotated.expression_chr1.vcf.gz')
+        convert_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'        : convert_input_file,
+            'output_file'       : convert_output_file.name,
+            'sample_name'       : 'HCC1395_TUMOR_DNA',
+            'normal_sample_name': 'HCC1395_NORMAL_DNA',
+            'biotypes'          : ['protein_coding'],
+            'allow_incomplete_transcripts': True
+        }
+        converter = PvacspliceVcfConverter(**convert_vcf_params)
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_with_incomplete_transcripts.tsv')
+        self.assertTrue(cmp(convert_output_file.name, expected_output_file))
+    
+    def test_exclude_incomplete_transcripts(self):
+        convert_input_file  = os.path.join(self.test_data_dir, '..', 'pvacsplice', 'inputs', 'annotated.expression_chr1.vcf.gz')
+        convert_output_file = tempfile.NamedTemporaryFile()
+
+        convert_vcf_params = {
+            'input_file'        : convert_input_file,
+            'output_file'       : convert_output_file.name,
+            'sample_name'       : 'HCC1395_TUMOR_DNA',
+            'normal_sample_name': 'HCC1395_NORMAL_DNA',
+            'biotypes'          : ['protein_coding'],
+            'allow_incomplete_transcripts': False
+        }
+        converter = PvacspliceVcfConverter(**convert_vcf_params)
+        self.assertFalse(converter.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_without_incomplete_transcripts.tsv')
+        self.assertTrue(cmp(convert_output_file.name, expected_output_file))
