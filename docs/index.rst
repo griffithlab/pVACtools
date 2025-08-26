@@ -46,6 +46,7 @@ Contents
    :maxdepth: 1
 
    install
+   helper_tools
    courses
    tools
    frequently_asked_questions
@@ -60,18 +61,21 @@ Contents
 New in Version |release|
 ------------------------
 
-This is a minor feature release. It adds the following features:
+This is a bugfix release. It fixes the following problem(s):
 
-* Identify junctions included in final vector design in the junctions.tsv. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1216
-* Prevent Excel export in pVACview from creating extra title header row. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1227
+* Fix a couple of issues with the new `--top-score-metric2` by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1291
 
-It also fixes the following problem(s):
-
-* Ensure export in pVACview maintains the Index column. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1213
-* Enable auto-combination of DP and DQ alpha and beta chains in pVACsplice. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1219
-* Handle pVACsplice generate_protein_fasta cases where mutant sequence contains no epitopes different from wildtype. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1226
-* Support pVACsplice regtools/gtf input data with missing transcript_version field. by @mhoang22 in https://github.com/griffithlab/pVACtools/pull/1224
-* Ensure that the directory names generated when removing peptides in pVACvector graph don't contain "/". by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1218
+  * When adding the ``--top-score-metric2`` option, the logic for determining
+    the included candidates during aggregate report creation was amended to
+    compare either the IC50 or percentile to the aggregate inclusion binding
+    threshold. This logic should not have been changed and instead only the
+    IC50 should be compared to the aggregate inclusion binding threshold, no
+    matter which ``--top-score-metric2`` was selected. This specific change
+    has been reverted
+  * In order to achieve deterministic results when using the percentile
+    ``--top-score-metric2`` option, a peptides.sort() call was used. This
+    release replaces this with a better way of finding the best peptide by
+    using the IC50 as a secondary sort criteria.
 
 New in Version 5
 ----------------

@@ -10,12 +10,14 @@ __all__ = [
     "generate_aggregated_report",
     'install_vep_plugin',
     'top_score_filter',
+    'mark_genes_of_interest',
     'net_chop',
     'netmhc_stab',
     'valid_netmhciipan_versions',
     'calculate_reference_proteome_similarity',
-    'transcript_support_level_filter',
+    'transcript_filter',
     'identify_problematic_amino_acids',
+    'update_tiers',
 ]
 
 from . import *

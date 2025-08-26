@@ -1,0 +1,2 @@
+chrom	start	end	name	score	strand	splice_site	acceptors_skipped	exons_skipped	donors_skipped	anchor	known_donor	known_acceptor	known_junction	gene_names	gene_ids	transcripts	variant_info
+chr2	231360883	231371513	JUNC00000285	26	+	GT-AG	1	1	2	NDA	1	1	0	ARMC9	ENSG00000135931	ENST00000488821,ENST00000611582,ENST00000684075	chr2:231369951-231369952

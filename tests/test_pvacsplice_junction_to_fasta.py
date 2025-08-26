@@ -33,7 +33,6 @@ class JunctionToFastaTests(unittest.TestCase):
         output_file = os.path.join(output_dir.name, 'sample_transcripts.fa')
 
         for i in combined_df.index.to_list():
-            print(i)
             junction = combined_df.loc[[i], :]
             for row in junction.itertuples():
                 junction_params = {
@@ -67,6 +66,12 @@ class JunctionToFastaTests(unittest.TestCase):
                     print('No amino acid sequence was produced. Skipping.')
                     continue
                 # creates output transcript fasta
+                if alt_fs == 'yes':
+                    updated_index = "{}.frameshift_splice_site".format(combined_df.loc[i, 'index'])
+                else:
+                    updated_index = "{}.inframe_splice_site".format(combined_df.loc[i, 'index'])
+                combined_df.loc[i, 'index'] = updated_index
+                junctions.fasta_index = updated_index
                 junctions.create_sequence_fasta(wt_aa, alt_aa)
 
         expected_file = os.path.join(self.test_data_dir, 'results', 'Test.transcripts.fa')

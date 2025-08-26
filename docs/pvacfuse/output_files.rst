@@ -154,6 +154,8 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - A list of positions in the ``Epitope Seq`` that match the
        problematic amino acids defined by the ``--problematic-amino-acids``
        parameter
+   * - ``Gene of Interest`` (T/F)
+     - Is either of the 5p or 3p genes in the ``Gene Name`` found in the genes of interest list?
    * - ``cterm_7mer_gravy_score``
      - Mean hydropathy of last 7 residues on the C-terminus of the peptide
    * - ``max_7mer_gravy_score``
@@ -303,34 +305,49 @@ into tiers as follows:
    * - Tier
      - Criteria
    * - ``Pass``
-     - Best Peptide passes the binding, read support, and expression criteria
+     - Best Peptide passes the binding, reference match, read support, expression, and problematic position criteria
+   * - ``PoorBinder``
+     - Best Peptide fails the binding criteria but passes the reference match, read support, expression, and problematic position criteria
+   * - ``RefMatch``
+     - Best Peptide fails the reference match criteria but passes the binding, read support, expression, and problematic position criteria
    * - ``LowReadSupport``
-     - Best Peptide fails the read support criteria but passes the binding and
-       expression criteria
+     - Best Peptide fails the read support criteria but passes the binding, reference match, expression, and problematic position criteria
    * - ``LowExpr``
-     - Best Peptide fails the expression criteria but passes the binding and
-       read support criteria
+     - Best Peptide fails the expression criteria but passes the binding, reference match, read support, and problematic position criteria
+   * - ``ProbPos``
+     - Best Peptide fails the problematic position criteria but passes the binding, reference match, read support, and expression
    * - ``Poor``
      - Best Peptide doesn't fit any of the above tiers, usually if it fails two
-       or more criteria or if it fails the binding criteria
+       or more criteria
 
 Criteria Details
 ****************
 
 .. list-table::
+   :header-rows: 1
 
+   * - Criteria
+     - Description
+     - Evaluation Logic
    * - Binding Criteria
      - Pass if Best Peptide is strong binder
      - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
        (if ``--percentile-threshold`` parameter is set and 'conservative' ``--percentile-threshold-strategy`` is used) or
        ``IC50 MT < binding_threshold`` or ``%ile MT < percentile_threshold``
        (if 'exploratory' ``--percentile-threshold-strategy`` is used)
+   * - Reference Match Criteria
+     - Pass if there are no reference protome matches
+     - ``Ref Match == True``
    * - Read Support Criteria
      - Pass if the variant has read support
      - ``Read Support < read_support``
    * - Expression Criteria
      - Pass if Best Transcript is expressed
      - ``Expr < expn_val``
+   * - Problematic Position Criteria
+     - Best Peptide contains a problematic amino acid as defined by the
+       ``--problematic-amino-acids`` parameters
+     - ``Prob Pos == None``
 
 
 .. _pvacfuse_reference_matches:

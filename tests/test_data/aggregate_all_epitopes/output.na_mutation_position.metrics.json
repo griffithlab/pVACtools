@@ -8,12 +8,18 @@
   "trna_vaf": 0.25,
   "trna_cov": 10,
   "allele_expr_threshold": 2.5,
+  "transcript_prioritization_strategy": [
+    "canonical",
+    "mane_select",
+    "tsl"
+  ],
   "maximum_transcript_support_level": 1,
   "percentile_threshold": null,
   "percentile_threshold_strategy": "conservative",
   "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Median",
   "wt_top_score_metric": "Median",
+  "top_score_metric2": "ic50",
   "allele_specific_binding_thresholds": {
     "HLA-A*26:01": 815.0,
     "HLA-A*31:01": 329.0,
@@ -3538,6 +3544,12 @@
         ],
         "transcript_expr": [
           "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
         ],
         "tsl": [
           1
