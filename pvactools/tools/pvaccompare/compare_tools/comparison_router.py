@@ -16,23 +16,30 @@ def find_file(results_folder, subfolder, pattern):
 
 
 def get_prefix(class_type, results_folder):
-    if class_type == "1":
-        if os.path.exists(os.path.join(results_folder, "MHC_Class_I")):
-            return "MHC_Class_I"
-    elif class_type == "2":
-        if os.path.exists(os.path.join(results_folder, "MHC_Class_II")):
-            return "MHC_Class_II"
+    results_folder = os.path.abspath(results_folder)
+    matches = []
 
-    if class_type == "1":
-        if os.path.exists(os.path.join(results_folder, "pVACseq/mhc_i")):
-            return "pVACseq/mhc_i"
-    elif class_type == "2":
-        if os.path.exists(os.path.join(results_folder, "pVACseq/mhc_ii")):
-            return "pVACseq/mhc_ii"
+    # Walk through all subdirectories recursively
+    for root, dirs, _ in os.walk(results_folder):
+        for d in dirs:
+            d_lower = d.lower()
+            if class_type == "1":
+                if "mhc" in d_lower and "i" in d_lower and "ii" not in d_lower:
+                    matches.append(os.path.join(root, d))
+            elif class_type == "2":
+                if "mhc" in d_lower and "ii" in d_lower:
+                    matches.append(os.path.join(root, d))
 
-    raise FileNotFoundError(
-        f"Could not locate result files for folder: {results_folder} and class {class_type}"
-    )
+    if not matches:
+        raise FileNotFoundError(
+            f"Could not locate result files for folder: {results_folder} and class {class_type}"
+        )
+    if len(matches) > 1:
+        raise RuntimeError(
+            f"Multiple matching directories found for class {class_type}: {matches}"
+        )
+
+    return matches[0]
 
 
 def run_comparison(
