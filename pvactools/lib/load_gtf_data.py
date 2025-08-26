@@ -40,11 +40,13 @@ class LoadGtfData:
             gtf_df['transcript_biotype'] = 'Not Supported'
         
         if 'tag' in gtf_df_all:
-            if self.allow_incomplete_transcripts:
-                gtf_df.loc[~gtf_df['tag'].str.lower().str.contains("cds_start_nf|cds_end_nf", na=False), 'tag'] = "None"
-            else:
-                gtf_df = gtf_df.loc[~gtf_df['tag'].str.lower().str.contains("cds_start_nf|cds_end_nf", na=False)].copy()
-                gtf_df['tag'] = "NA"
+            if not self.allow_incomplete_transcripts:
+                gtf_df = gtf_df.loc[
+                    ~gtf_df['tag'].str.lower().str.contains('cds_start_nf|cds_end_nf', na=False)
+                ].copy()
+            gtf_df['tag'] = gtf_df['tag'].replace('', 'None').fillna('None')
+        else:
+            gtf_df['tag'] = "None"
 
         gtf_df = gtf_df.rename(columns={'start': 'cds_start', 'end': 'cds_stop', 'seqname': 'cds_chrom'})
 
