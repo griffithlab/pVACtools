@@ -147,7 +147,6 @@ class PvacspliceBestCandidate:
         else:
             prob_pos_df = transcript_df
 
-        print(self.allow_incomplete_transcripts)
         # if allow_incomplete_transcripts is True, deprioritize certain flags
         if self.allow_incomplete_transcripts:
             prob_pos_df['Transcript CDS Flags Sort'] = prob_pos_df['Transcript CDS Flags'].apply(
@@ -156,15 +155,17 @@ class PvacspliceBestCandidate:
             sort_columns = [
                 'Transcript CDS Flags Sort',
                 f"{self.mt_top_score_metric} {self.top_score_mode}",
+                "WT Protein Length",
             ]
-            sort_order = [True, True]
+            sort_order = [True, True, False]
         else:
             sort_columns = [
                 f"{self.mt_top_score_metric} {self.top_score_mode}",
+                "WT Protein Length",
             ]
-            sort_order = [True]
+            sort_order = [True, False]
 
-        #determine the entry with the lowest IC50 Score and transcript prioritization status
+        #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
         prob_pos_df.sort_values(
             by=sort_columns,
             ascending=sort_order,

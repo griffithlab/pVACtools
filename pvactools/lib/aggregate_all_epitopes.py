@@ -985,7 +985,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
 
     # pvacbind w/ Index instead of Mutation
     def get_list_unique_mutation_keys(self, df):
-        keys = df["Index"].values.tolist()
+        keys = df["Junction"].values.tolist()
         return sorted(list(set(keys)))
 
     # pvacbind w/ Index instead of Mutation
@@ -995,12 +995,12 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
 
     # pvacbind w/ Index instead of Mutation
     def get_sub_df(self, all_epitopes_df, df_key):
-        df = (all_epitopes_df[lambda x: (x['Index'] == df_key)]).copy()
+        df = (all_epitopes_df[lambda x: (x['Junction'] == df_key)]).copy()
         return df, df_key
 
     # pvacbind w/ vaf and expression info included
     def assemble_result_line(self, best, key, hla, anno_count, included_peptide_count, good_binder_count):
-        out_dict = {'ID': key}
+        out_dict = {'ID': best['Index']}
         out_dict.update({k.replace('HLA-', ''): v for k, v in sorted(hla.items())})
 
         gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
