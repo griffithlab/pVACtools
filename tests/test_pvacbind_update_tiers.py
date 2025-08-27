@@ -52,5 +52,5 @@ class PvacbindUpdateTiersTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.aggregated.tsv')
+        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.tsv')
         self.assertFalse(update_tiers.main([input_file]))
