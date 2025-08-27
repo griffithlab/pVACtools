@@ -116,6 +116,7 @@ class PvacseqTests(unittest.TestCase):
                 output_dir.name,
                 '-e1', '9,10',
                 '--top-score-metric=lowest',
+                '--top-score-metric2=ic50',
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
                 '--netmhc-stab',
@@ -135,14 +136,17 @@ class PvacseqTests(unittest.TestCase):
                 output_dir.name,
                 '-e2', '15',
                 '--top-score-metric=lowest',
+                '--top-score-metric2=ic50',
                 '--keep-tmp-files',
                 '-d', 'full',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,
                 '--biotypes', 'IG_V_gene,protein_coding',
+                '--allow-incomplete-transcripts'
             ])
             close_mock_fhs()
 
+            #Class I output files
             for file_name in (
                 'sample.name.MHC_I.all_epitopes.tsv',
             ):
@@ -156,6 +160,7 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.fasta',
                 'sample.name.MHC_I.all_epitopes.aggregated.tsv',
                 'sample.name.MHC_I.all_epitopes.aggregated.metrics.json',
+                'sample.name.MHC_I.all_epitopes.aggregated.tsv.reference_matches',
                 'sample.name.MHC_I.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
@@ -188,7 +193,6 @@ class PvacseqTests(unittest.TestCase):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'log', file_name)
                 self.assertTrue(os.path.exists(output_file))
 
-            #Class I output files
             methods = self.methods
             for method in methods.keys():
                 for allele in methods[method].keys():
@@ -207,11 +211,13 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.fasta',
                 'sample.name.MHC_II.all_epitopes.aggregated.tsv',
                 'sample.name.MHC_II.all_epitopes.aggregated.metrics.json',
+                'sample.name.MHC_II.all_epitopes.aggregated.tsv.reference_matches',
                 'sample.name.MHC_II.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+
 
             for file_name in (
                 'sample.name.MHC_II.all_epitopes.tsv',
@@ -255,6 +261,7 @@ class PvacseqTests(unittest.TestCase):
                     output_dir.name,
                     '-e2', '15',
                     '--top-score-metric=lowest',
+                    '--top-score-metric2=ic50',
                     '--keep-tmp-files',
                     '--run-reference-proteome-similarity',
                     '--peptide-fasta', self.peptide_fasta,
@@ -286,6 +293,7 @@ class PvacseqTests(unittest.TestCase):
             '-a', 'sample_name',
             '-d', 'full',
             '--top-score-metric', 'lowest',
+            '--top-score-metric2', 'ic50',
             '--biotypes', 'IG_V_gene,protein_coding',
         ]
         run.main(params)
@@ -313,6 +321,7 @@ class PvacseqTests(unittest.TestCase):
             '-k',
             '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz'),
             '--biotypes', 'IG_V_gene,protein_coding',
+            '--allow-incomplete-transcripts',
         ]
         run.main(params)
 
@@ -350,6 +359,7 @@ class PvacseqTests(unittest.TestCase):
             '-e1', '9,10',
             '-e2', '15',
             '--top-score-metric=lowest',
+            '--top-score-metric2=ic50',
             '--keep-tmp-files',
             '-d', 'full',
             '--biotypes', 'IG_V_gene,protein_coding',
@@ -395,6 +405,7 @@ class PvacseqTests(unittest.TestCase):
                 '-e1', '9,10',
                 '--biotypes', 'IG_V_gene,protein_coding',
                 '--problematic-amino-acids', 'C',
+                '--allow-incomplete-transcripts'
             ])
 
         for file_name in (

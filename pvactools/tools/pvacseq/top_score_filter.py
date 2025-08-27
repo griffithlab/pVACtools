@@ -13,6 +13,7 @@ def main(args_input = sys.argv[1:]):
         args.input_file,
         args.output_file,
         top_score_metric=args.top_score_metric,
+        top_score_metric2=args.top_score_metric2,
         binding_threshold=args.binding_threshold,
         allele_specific_binding_thresholds=args.allele_specific_binding_thresholds,
         allele_specific_anchors=args.allele_specific_anchors,

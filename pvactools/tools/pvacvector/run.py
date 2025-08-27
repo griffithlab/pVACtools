@@ -41,6 +41,7 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         'iedb_retries'    : args.iedb_retries,
         'additional_report_columns' : None,
         'junctions_to_test': junctions_to_test,
+        'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
     }
 
     parsed_output_files = []
@@ -131,12 +132,11 @@ def find_min_scores(parsed_output_files, current_output_dir, args, min_scores, m
             for row in reader:
                 index = row['Mutation']
                 processed_junctions.add(index)
-
                 if args.top_score_metric == 'lowest':
                     score = float(row['Best IC50 Score'])
                     percentile = float(row['Best Percentile'])
                 elif args.top_score_metric == 'median':
-                    score = float(row['Median IC50 Score'])
+                    score = float(row[f'Median IC50 Score'])
                     percentile = float(row['Median Percentile'])
                 if args.allele_specific_binding_thresholds:
                     allele = row['HLA Allele']
@@ -447,7 +447,7 @@ def main(args_input=sys.argv[1:]):
     if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
         random.seed(0.5)
     if generate_input_fasta:
-        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, args.input_n_mer, args.sample_name)
+        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, args.input_n_mer, args.sample_name, args.allow_incomplete_transcripts)
         generator.execute()
         input_file = generator.output_file
 
