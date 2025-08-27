@@ -3,6 +3,8 @@ import sys
 import re
 import csv
 import textwrap
+import pandas as pd
+
 from pvactools.lib.run_utils import *
 
 
@@ -13,20 +15,44 @@ class IdentifyProblematicAminoAcids:
         self.problematic_amino_acids = [IdentifyProblematicAminoAcids.process_problematic_aa_entry(e) for e in problematic_amino_acids]
         self.file_type = file_type
         self.filter_type = filter_type
+        self.is_aggregated = self._is_aggregated()
+        self.prob_column_exists = self._prob_column_exists()
+
+    def _is_aggregated(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        return 'Best Peptide' in headers
+
+    def _prob_column_exists(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        if self.is_aggregated:
+            return 'Prob Pos' in headers
+        else:
+            return 'Problematic Positions' in headers
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
             reader = csv.DictReader(input_fh, delimiter = "\t")
             if self.filter_type == 'soft':
-                writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + ["Problematic Positions"], extrasaction='ignore', restval='NA')
+                if self.prob_column_exists:
+                    writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames, extrasaction='ignore', restval='NA')
+                else:
+                    if self.is_aggregated:
+                        writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + ["Prob Pos"], extrasaction='ignore', restval='NA')
+                    else:
+                        writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames + ["Problematic Positions"], extrasaction='ignore', restval='NA')
             else:
                 writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=reader.fieldnames, extrasaction='ignore', restval='NA')
             writer.writeheader()
             for line in reader:
-                if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse' or self.file_type == 'pVACsplice':
+                if self.is_aggregated:
+                    sequence = line['Best Peptide']
+                    output_header = 'Prob Pos'
+                elif self.file_type == 'pVACbind' or self.file_type == 'pVACfuse' or self.file_type == 'pVACsplice':
                     sequence = line['Epitope Seq']
+                    output_header = 'Problematic Positions'
                 else:
                     sequence = line['MT Epitope Seq']
+                    output_header = 'Problematic Positions'
                 problematic_positions = []
                 for (aa, position) in self.problematic_amino_acids:
                     if position is None and aa in sequence:
@@ -37,9 +63,9 @@ class IdentifyProblematicAminoAcids:
                     writer.writerow(line)
                 elif self.filter_type == 'soft':
                     if len(problematic_positions) == 0:
-                        line["Problematic Positions"] = 'None'
+                        line[output_header] = 'None'
                     else:
-                        line["Problematic Positions"] = ','.join(problematic_positions)
+                        line[output_header] = ','.join(problematic_positions)
                     writer.writerow(line)
 
     @classmethod
@@ -72,7 +98,7 @@ class IdentifyProblematicAminoAcids:
         )
         parser.add_argument(
             'input_file',
-            help="Input filtered or all_epitopes file with predicted epitopes."
+            help="Input filtered, all_epitopes, or aggregated file with predicted epitopes."
         )
         parser.add_argument(
             'output_file',
@@ -96,7 +122,8 @@ class IdentifyProblematicAminoAcids:
         )
         parser.add_argument(
             '--filter-type', '-f', choices=['soft', 'hard'], default="soft",
-            help="Set the type of filtering done. Choosing `soft` will add a new column \"Problematic Positions\" that lists positions in the epitope with problematic amino acids. "
+            help="Set the type of filtering done. Choosing `soft` will add a new column \"Problematic Positions\" (for filtered or all_epitopes input files) "
+               + "or \"Prob Pos\" (for aggregated input files) that lists positions in the epitope with problematic amino acids. "
                + "Choosing `hard` will remove epitope entries with problematic amino acids."
         )
         return parser

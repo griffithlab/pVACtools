@@ -17,7 +17,7 @@ The example data output can be reproduced by running the following command:
    HLA-A*29:02,HLA-B*45:01,DRB1*04:05 \
    all \
    <output_dir> \
-   -e1 8,9,10 \
+   -e1 8,9 \
    -e2 15 \
    --normal-sample-name HCC1395_NORMAL_DNA
 

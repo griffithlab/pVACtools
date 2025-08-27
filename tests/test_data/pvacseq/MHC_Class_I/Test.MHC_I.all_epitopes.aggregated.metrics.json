@@ -8,12 +8,18 @@
   "trna_vaf": 0.25,
   "trna_cov": 10,
   "allele_expr_threshold": 2.5,
+  "transcript_prioritization_strategy": [
+    "canonical",
+    "mane_select",
+    "tsl"
+  ],
   "maximum_transcript_support_level": 1,
   "percentile_threshold": null,
   "percentile_threshold_strategy": "conservative",
   "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Best",
   "wt_top_score_metric": "Corresponding",
+  "top_score_metric2": "ic50",
   "allele_specific_binding_thresholds": {},
   "allele_specific_anchors": false,
   "alleles": [
@@ -260,18 +266,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           325
         ],
         "transcript_count": 1,
         "peptide_count": 2,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -284,7 +299,7 @@
       2
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.891,
     "RNA VAF": "NA",
@@ -448,18 +463,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           1443
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -472,7 +496,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.071,
     "RNA VAF": "NA",
@@ -595,18 +619,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           372
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -619,7 +652,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.053,
     "RNA VAF": "NA",
@@ -742,18 +775,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           1640
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -766,7 +808,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.1,
     "RNA VAF": "NA",
@@ -889,18 +931,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           905
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -913,7 +964,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.5,
     "RNA VAF": "NA",
@@ -1036,18 +1087,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "IG_V_gene"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           148
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -1060,7 +1120,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 1.0,
     "RNA VAF": "NA",
@@ -1398,18 +1458,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "IG_V_gene"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           148
         ],
         "transcript_count": 1,
         "peptide_count": 3,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -1422,7 +1491,7 @@
       3
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.571,
     "RNA VAF": "NA",
@@ -1554,18 +1623,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           377
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -1578,7 +1656,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.179,
     "RNA VAF": "NA",
@@ -1701,18 +1779,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           1020
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -1725,7 +1812,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.038,
     "RNA VAF": "NA",
@@ -1848,18 +1935,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           820
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -1872,7 +1968,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.135,
     "RNA VAF": "NA",
@@ -1995,18 +2091,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           132
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -2019,7 +2124,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.496,
     "RNA VAF": "NA",
@@ -2240,18 +2345,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           639
         ],
         "transcript_count": 1,
         "peptide_count": 2,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -2264,7 +2378,7 @@
       2
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.486,
     "RNA VAF": "NA",
@@ -2387,18 +2501,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           2365
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -2411,7 +2534,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.768,
     "RNA VAF": "NA",
@@ -2730,18 +2853,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           2223
         ],
         "transcript_count": 1,
         "peptide_count": 3,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -2754,7 +2886,7 @@
       3
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.043,
     "RNA VAF": "NA",
@@ -2975,18 +3107,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           780
         ],
         "transcript_count": 1,
         "peptide_count": 2,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -2999,7 +3140,7 @@
       2
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.044,
     "RNA VAF": "NA",
@@ -3318,18 +3459,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           780
         ],
         "transcript_count": 1,
         "peptide_count": 3,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -3342,7 +3492,7 @@
       3
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.25,
     "RNA VAF": "NA",
@@ -3955,18 +4105,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           2253
         ],
         "transcript_count": 1,
         "peptide_count": 6,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -3979,7 +4138,7 @@
       6
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.233,
     "RNA VAF": "NA",
@@ -4102,18 +4261,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           1211
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -4126,7 +4294,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.042,
     "RNA VAF": "NA",
@@ -4347,18 +4515,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           677
         ],
         "transcript_count": 1,
         "peptide_count": 2,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -4371,7 +4548,7 @@
       2
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.959,
     "RNA VAF": "NA",
@@ -4592,18 +4769,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           1819
         ],
         "transcript_count": 1,
         "peptide_count": 2,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -4616,7 +4802,7 @@
       2
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.686,
     "RNA VAF": "NA",
@@ -4739,18 +4925,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           933
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -4763,7 +4958,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.043,
     "RNA VAF": "NA",
@@ -4886,18 +5081,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           593
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -4910,7 +5114,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.977,
     "RNA VAF": "NA",
@@ -5061,18 +5265,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           "Not Supported"
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           384
         ],
         "transcript_count": 1,
         "peptide_count": 1,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -5085,7 +5298,7 @@
       1
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.158,
     "RNA VAF": "NA",

@@ -62,6 +62,15 @@ def define_parser():
         default=['protein_coding']
     )
     parser.add_argument(
+        "--allow-incomplete-transcripts",
+        help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
+                + "are excluded from analysis, as they often produce invalid protein sequences. "
+                + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
+                + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
+        default=False,
+        action='store_true'
+    )
+    parser.add_argument(
         "-j", "--junction-score", type=int,
         help="Junction Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
         default=10
@@ -135,6 +144,7 @@ def main(args_input = sys.argv[1:]):
         'annotated_vcf'                    : args.annotated_vcf,
         'pass_only'                        : args.pass_only,
         'biotypes'                         : args.biotypes,
+        'allow_incomplete_transcripts'     : args.allow_incomplete_transcripts, 
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'anchor_types'                     : args.anchor_types,
@@ -164,7 +174,15 @@ def main(args_input = sys.argv[1:]):
         wt_sequence = wt_sequences[index]
         if mt_sequence in wt_sequence:
             continue
-        final_sequences[index] = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, args.flanking_sequence_length)
+        _, frameshift_status = index.rsplit('.', 1)
+        if frameshift_status == 'inframe_splice_site':
+            final_sequence = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(args.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
+        elif frameshift_status == 'frameshift_splice_site':
+            final_sequence = get_mutated_frameshift_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(args.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
+        else:
+            raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
+        if final_sequence:
+            final_sequences[index] = final_sequence
 
     (tsv_indexes, tsv_file_type) = parse_input_tsv(args.input_tsv)
     output_records = []

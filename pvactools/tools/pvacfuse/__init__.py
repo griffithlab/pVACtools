@@ -15,6 +15,7 @@ __all__ = [
     'generate_protein_fasta',
     "generate_aggregated_report",
     'identify_problematic_amino_acids',
+    'update_tiers',
 ]
 
 from . import *

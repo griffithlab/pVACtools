@@ -467,27 +467,36 @@ Given the thresholds provided above, the Best Peptide is evaluated and binned in
    * - Tier
      - Citeria
    * - ``Pass``
-     - Best Peptide passes the binding, expression, tsl, clonal, and anchor criteria
-   * - ``Anchor``
-     - Best Peptide fails the anchor criteria but passes the binding,
-       expression, tsl, and clonal criteria
-   * - ``Subclonal``
-     - Best Peptide fails the clonal criteria but passes the binding, tsl, and
-       anchor criteria
+     - Best Peptide passes the binding, reference match, expression, transcript, clonal, problematic position, and anchor criteria
+   * - ``PoorBinder``
+     - Best Peptide fails the binding criteria but passed the reference match, expression, transcript, clonal, problematic position, and anchor criteria
+   * - ``RefMatch``
+     - Best Peptide fails the reference match criteria but passes the binding, expression, transcript, clonal, problematic position, and anchor criteria
+   * - ``PoorTranscript``
+     - Best Peptide fails the transcript criteria but passes the binding, reference match, expression, clonal, problematic position, and anchor criteria
    * - ``LowExpr``
-     - Best Peptide meets the Low Expression Criteria and passes the binding, tsl,
-       clonal, and anchor criteria
-   * - ``NoExpr``
-     - Best Peptide is not expressed (RNA Expr == 0 or RNA VAF == 0)
+     - Best Peptide meets the low expression criteria and passes the binding, reference match, transcript, clonal, problematic position, and anchor criteria
+   * - ``Anchor``
+     - Best Peptide fails the anchor criteria but  passes the binding, reference match, expression, transcript, clonal, and problematic position criteria
+   * - ``Subclonal``
+     - Best Peptide fails the clonal criteria but passes the binding, reference match, expression, transcript, problematic position, and anchor criteria
+   * - ``ProbPos``
+     - Best Peptide fails the problematic position criteria but passes the binding, reference match, expression, transcript, clonal, and anchor criteria
    * - ``Poor``
      - Best Peptide doesn't fit in any of the above tiers, usually if it fails
-       two or more criteria or if it fails the binding criteria
+       two or more criteria
+   * - ``NoExpr``
+     - Best Peptide is not expressed (RNA Expr == 0 or RNA VAF == 0)
 
 Criteria Details
 ****************
 
 .. list-table::
+   :header-rows: 1
 
+   * - Criteria
+     - Description
+     - Evaluation Logic
    * - Binding Criteria
      - Pass if Best Peptide is strong binder
      - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
@@ -497,19 +506,31 @@ Criteria Details
    * - Expression Criteria
      - Pass if Best Transcript is expressed
      - ``Allele Expr > trna_vaf * expn_val``
+   * - Reference Match Criteria
+     - Pass if there are no reference protome matches
+     - ``Ref Match == True``
+   * - Transcript Criteria
+     - Pass if Best Transcript matches any of the user-specified ``--transcript-prioritization-strategy`` criteria
+     - ``TSL <= maximum_transcript_support_level`` (if
+       ``--transcript-prioritization-strategy`` includes ``tsl``)
+       ``MANE Select == True`` (if ``--transcript-prioritization-strategy
+       includes ``mane_select``)
+       ``Canonical == True`` (if ``--transcript-prioritization-strategy``
+       incluces ``canonical``)
    * - Low Expression Criteria
      - Peptide has low expression or no expression but RNA VAF and coverage
      - ``(0 < Allele Expr < trna_vaf * expn_val) OR (RNA Expr == 0 AND RNA
        Depth > trna_cov AND RNA VAF > trna_vaf)``
-   * - TSL Criteria
-     - Pass if Best Transcript has good transcript support level
-     - ``TSL <= maximum_transcript_support_level``
-   * - Clonal Criteria
-     - Best Peptide is likely in the founding clone of the tumor
-     - ``DNA VAF > tumor_purity / 4``
    * - Anchor Criteria
      - Fail if if there are <= 2 mutated amino acids and all mutated amino acids of the Best Peptide (``Pos``) are at an anchor position and the WT peptide has good binding ``(IC50 WT < binding_threshold)``
      -
+   * - Clonal Criteria
+     - Best Peptide is likely in the founding clone of the tumor
+     - ``DNA VAF > tumor_purity / 4``
+   * - Problematic Position Criteria
+     - Best Peptide contains a problematic amino acid as defined by the
+       ``--problematic-amino-acids`` parameters
+     - ``Prob Pos == None``
 
 .. _reference_matches:
 
