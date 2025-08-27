@@ -62,6 +62,15 @@ def define_parser():
         default=['protein_coding']
     )
     parser.add_argument(
+        "--allow-incomplete-transcripts",
+        help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
+                + "are excluded from analysis, as they often produce invalid protein sequences. "
+                + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
+                + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
+        default=False,
+        action='store_true'
+    )
+    parser.add_argument(
         "-j", "--junction-score", type=int,
         help="Junction Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
         default=10
@@ -135,6 +144,7 @@ def main(args_input = sys.argv[1:]):
         'annotated_vcf'                    : args.annotated_vcf,
         'pass_only'                        : args.pass_only,
         'biotypes'                         : args.biotypes,
+        'allow_incomplete_transcripts'     : args.allow_incomplete_transcripts, 
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'anchor_types'                     : args.anchor_types,

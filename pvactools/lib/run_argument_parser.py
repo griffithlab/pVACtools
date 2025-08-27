@@ -273,6 +273,15 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="A list of biotypes to use for pre-filtering transcripts for processing in the pipeline.",
             default=['protein_coding']
         )
+        self.parser.add_argument(
+            "--allow-incomplete-transcripts",
+            help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
+                 + "are excluded from analysis, as they often produce invalid protein sequences. "
+                 + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
+                 + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
+            default=False,
+            action='store_true'
+        )
 
     def genes_of_interest_args(self):
         self.parser.add_argument(
@@ -534,5 +543,14 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
             choices=['ic50','percentile'],
             default='ic50',
             help="Whether to use median/best IC50 or to use median/best percentile score."
+        )
+        self.parser.add_argument(
+            "--allow-incomplete-transcripts",
+            help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
+                 + "are excluded from analysis, as they often produce invalid protein sequences. "
+                 + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
+                 + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
+            default=False,
+            action='store_true'
         )
         self.pvacvector()

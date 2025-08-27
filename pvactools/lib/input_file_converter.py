@@ -29,6 +29,7 @@ class VcfConverter(InputFileConverter):
         self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
         self.flanking_bases = kwargs.pop('flanking_bases', None)
         self.biotypes = kwargs.pop('biotypes', ['protein_coding'])
+        self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
         if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.flanking_bases):
             sys.exit("A proximal variants TSV output path and number of flanking bases need to be specified if a proximal variants input VCF is provided.")
         if self.proximal_variants_vcf and not pvactools.lib.run_utils.is_gz_file(self.input_file):
@@ -89,6 +90,7 @@ class VcfConverter(InputFileConverter):
             'mane_select',
             'transcript_length',
             'biotype',
+            'transcript_cds_flags',
             'amino_acid_change',
             'codon_change',
             'ensembl_gene_id',
@@ -331,6 +333,13 @@ class VcfConverter(InputFileConverter):
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
+
+                    flags = transcript.get('FLAGS', '').lower()
+                    if not self.allow_incomplete_transcripts:
+                        if 'cds_start_nf' in flags or 'cds_end_nf' in flags:
+                            continue
+                    transcript_cds_flags = flags if flags else 'None'
+
                     consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
                     if consequence is None:
                         continue
@@ -420,6 +429,7 @@ class VcfConverter(InputFileConverter):
                         'transcript_support_level'       : tsl,
                         'transcript_length'              : len(wildtype_amino_acid_sequence),
                         'biotype'                        : biotype,
+                        'transcript_cds_flags'           : transcript_cds_flags,
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,
@@ -495,6 +505,7 @@ class PvacspliceVcfConverter(VcfConverter):
             'canonical',
             'mane_select',
             'biotype',
+            'transcript_cds_flags',
             'amino_acid_change',
             'codon_change',
             'ensembl_gene_id',
@@ -571,6 +582,12 @@ class PvacspliceVcfConverter(VcfConverter):
                     consequence = transcript['Consequence']
                     gene_name = transcript['SYMBOL']
 
+                    flags = transcript.get('FLAGS', '').lower()
+                    if not self.allow_incomplete_transcripts:
+                        if 'cds_start_nf' in flags or 'cds_end_nf' in flags:
+                            continue
+                    transcript_cds_flags = flags if flags else 'None'
+
                     ensembl_gene_id = transcript['Gene']
                     hgvsc = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSc']) if 'HGVSc' in transcript else 'NA'
                     hgvsp = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSp']) if 'HGVSp' in transcript else 'NA'
@@ -600,6 +617,7 @@ class PvacspliceVcfConverter(VcfConverter):
                         'transcript_name'                : transcript_name,
                         'transcript_support_level'       : tsl,
                         'biotype'                        : biotype,
+                        'transcript_cds_flags'           : transcript_cds_flags,
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,

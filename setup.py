@@ -115,6 +115,8 @@ setup(
         'packaging',
         'pyarrow',
         'polars==0.16.18',
+        'XlsxWriter',
+        'openpyxl',
         'deepdiff',
     ],
     package_data={

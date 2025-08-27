@@ -142,6 +142,7 @@ class PvacseqTests(unittest.TestCase):
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,
                 '--biotypes', 'IG_V_gene,protein_coding',
+                '--allow-incomplete-transcripts'
             ])
             close_mock_fhs()
 
@@ -320,6 +321,7 @@ class PvacseqTests(unittest.TestCase):
             '-k',
             '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz'),
             '--biotypes', 'IG_V_gene,protein_coding',
+            '--allow-incomplete-transcripts',
         ]
         run.main(params)
 
@@ -403,6 +405,7 @@ class PvacseqTests(unittest.TestCase):
                 '-e1', '9,10',
                 '--biotypes', 'IG_V_gene,protein_coding',
                 '--problematic-amino-acids', 'C',
+                '--allow-incomplete-transcripts'
             ])
 
         for file_name in (
