@@ -9,12 +9,14 @@ class PvacseqBestCandidate:
         anchor_calculator,
         mt_top_score_metric,
         top_score_mode,
+        allow_incomplete_transcripts,
     ):
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.anchor_calculator = anchor_calculator
         self.mt_top_score_metric = mt_top_score_metric
         self.top_score_mode = top_score_mode
+        self.allow_incomplete_transcripts = allow_incomplete_transcripts
 
     def get(self, df):
         #get all entries with Biotype 'protein_coding'
@@ -45,11 +47,30 @@ class PvacseqBestCandidate:
         if anchor_residue_pass_df.shape[0] == 0:
             anchor_residue_pass_df = prob_pos_df
 
+        # if allow_incomplete_transcripts is True, deprioritize certain flags
+        if self.allow_incomplete_transcripts:
+            anchor_residue_pass_df['Transcript CDS Flags Sort'] = anchor_residue_pass_df['Transcript CDS Flags'].apply(
+                lambda x: 1 if x == "None" else (2 if any(flag in str(x) for flag in ["cds_start_nf", "cds_end_nf"]) else 1)
+            )
+            sort_columns = [
+                'Transcript CDS Flags Sort',
+                f"{self.mt_top_score_metric} MT {self.top_score_mode}",
+                'Transcript Length',
+            ]
+            sort_order = [True, True, False]
+        else:
+            sort_columns = [
+                f"{self.mt_top_score_metric} MT {self.top_score_mode}",
+                'Transcript Length',
+            ]
+            sort_order = [True, False]
+
         #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
-        anchor_residue_pass_df.sort_values(by=[
-            "{} MT {}".format(self.mt_top_score_metric, self.top_score_mode),
-            "Transcript Length",
-        ], inplace=True, ascending=[True, False])
+        anchor_residue_pass_df.sort_values(
+            by=sort_columns,
+            ascending=sort_order,
+            inplace=True
+        )
         return anchor_residue_pass_df.iloc[0]
 
 class PvacfuseBestCandidate:
@@ -95,11 +116,13 @@ class PvacspliceBestCandidate:
         maximum_transcript_support_level,
         mt_top_score_metric,
         top_score_mode,
+        allow_incomplete_transcripts,
     ):
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.mt_top_score_metric = mt_top_score_metric
         self.top_score_mode = top_score_mode
+        self.allow_incomplete_transcripts=allow_incomplete_transcripts
 
     def get(self, df):
         #get all entries with Biotype 'protein_coding'
@@ -124,9 +147,28 @@ class PvacspliceBestCandidate:
         else:
             prob_pos_df = transcript_df
 
+        # if allow_incomplete_transcripts is True, deprioritize certain flags
+        if self.allow_incomplete_transcripts:
+            prob_pos_df['Transcript CDS Flags Sort'] = prob_pos_df['Transcript CDS Flags'].apply(
+                lambda x: 1 if x == "None" else (2 if any(flag in str(x) for flag in ["cds_start_nf", "cds_end_nf"]) else 1)
+            )
+            sort_columns = [
+                'Transcript CDS Flags Sort',
+                f"{self.mt_top_score_metric} {self.top_score_mode}",
+                "WT Protein Length",
+            ]
+            sort_order = [True, True, False]
+        else:
+            sort_columns = [
+                f"{self.mt_top_score_metric} {self.top_score_mode}",
+                "WT Protein Length",
+            ]
+            sort_order = [True, False]
+
         #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
-        prob_pos_df.sort_values(by=[
-            "{} {}".format(self.mt_top_score_metric, self.top_score_mode),
-            "WT Protein Length",
-        ], inplace=True, ascending=[True, False])
+        prob_pos_df.sort_values(
+            by=sort_columns,
+            ascending=sort_order,
+            inplace=True
+        )
         return prob_pos_df.iloc[0]
