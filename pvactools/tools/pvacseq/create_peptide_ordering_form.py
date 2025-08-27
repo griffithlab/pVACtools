@@ -54,6 +54,15 @@ def define_parser():
         default=['protein_coding']
     )
     parser.add_argument(
+        "--allow-incomplete-transcripts",
+        help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
+                + "are excluded from analysis, as they often produce invalid protein sequences. "
+                + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
+                + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
+        default=False,
+        action='store_true'
+    )
+    parser.add_argument(
         "-d", "--downstream-sequence-length",
         default="1000",
         help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
@@ -123,6 +132,7 @@ def main(args_input = sys.argv[1:]):
         phased_proximal_variants_vcf=args.phased_proximal_variants_vcf,
         pass_only=args.pass_only,
         biotypes=args.biotypes,
+        allow_incomplete_transcripts=args.allow_incomplete_transcripts,
         mutant_only=True,
         aggregate_report_evaluation=['Accept', 'Review'] if args.include_review_candidates else ['Accept'],
         downstream_sequence_length=args.downstream_sequence_length,

@@ -107,6 +107,7 @@ class PostProcessor:
                 top_score_metric=self.top_score_metric,
                 top_score_metric2=self.top_score_metric2,
                 allele_specific_anchors=self.allele_specific_anchors,
+                allow_incomplete_transcripts=self.allow_incomplete_transcripts,
                 anchor_contribution_threshold=self.anchor_contribution_threshold,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
                 aggregate_inclusion_count_limit=self.aggregate_inclusion_count_limit,
@@ -159,6 +160,7 @@ class PostProcessor:
                 expn_val=self.expn_val,
                 transcript_prioritization_strategy=self.transcript_prioritization_strategy,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
+                allow_incomplete_transcripts=self.allow_incomplete_transcripts,
             )
             aggregator.execute()
             self.vaf_clonal = aggregator.vaf_clonal
@@ -251,6 +253,7 @@ class PostProcessor:
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
                 allele_specific_anchors=self.allele_specific_anchors,
                 anchor_contribution_threshold=self.anchor_contribution_threshold,
+                allow_incomplete_transcripts=self.allow_incomplete_transcripts,
             ).execute()
         elif self.file_type == 'pVACfuse':
             PvacfuseTopScoreFilter(
@@ -273,6 +276,7 @@ class PostProcessor:
                 top_score_metric = self.top_score_metric,
                 top_score_metric2 = self.top_score_metric2,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
+                allow_incomplete_transcripts=self.allow_incomplete_transcripts,
             ).execute()
         print("Completed")
 
