@@ -53,6 +53,6 @@ class PvacspliceTranscriptFilterTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'HCC1395_TUMOR_DNA.all_epitopes.tsv')
+        input_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv')
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(transcript_filter.main([input_file, output_file.name]))

@@ -64,6 +64,7 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         class_i_arguments['epitope_lengths']         = args.class_i_epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
+        class_i_arguments['filename_addition']         = "MHC_I"
         pipeline_i = Pipeline(**class_i_arguments)
         pipeline_i.generate_fasta([[1, 1]])
         pipeline_i.call_iedb([[1, 1]])
@@ -89,6 +90,7 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
         class_ii_arguments['output_dir']              = output_dir
         class_ii_arguments['netmhc_stab']             = False
+        class_ii_arguments['filename_addition']         = "MHC_II"
         pipeline_ii = Pipeline(**class_ii_arguments)
         pipeline_ii.generate_fasta([[1, 1]])
         pipeline_ii.call_iedb([[1, 1]])
