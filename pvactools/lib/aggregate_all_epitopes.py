@@ -9,6 +9,7 @@ import itertools
 import csv
 import glob
 import ast
+import math
 
 from pvactools.lib.run_utils import is_preferred_transcript
 from pvactools.lib.prediction_class import PredictionClass
@@ -176,7 +177,7 @@ class AggregateAllEpitopes:
     def determine_columns_used_for_aggregation(self, prediction_algorithms, el_algorithms):
         used_columns = [
             "Index", "Chromosome", "Start", "Stop", "Reference", "Variant",
-            "Transcript", "Transcript Support Level", "MANE Select", "Canonical", "Biotype", "Transcript Length", "Variant Type", "Mutation",
+            "Transcript", "Transcript Support Level", "MANE Select", "Canonical", "Biotype", "Transcript CDS Flags", "Transcript Length", "Variant Type", "Mutation",
             "Protein Position", "Gene Name", "HLA Allele",
             "Mutation Position", "MT Epitope Seq", "WT Epitope Seq",
             "Tumor DNA VAF", "Tumor RNA Depth",
@@ -301,6 +302,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             top_score_metric="median",
             top_score_metric2="ic50",
             allele_specific_anchors=False,
+            allow_incomplete_transcripts=False,
             anchor_contribution_threshold=0.8,
             aggregate_inclusion_binding_threshold=5000,
             aggregate_inclusion_count_limit=15,
@@ -320,6 +322,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.trna_vaf = trna_vaf
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
+        self.allow_incomplete_transcripts = allow_incomplete_transcripts
         if top_score_metric == 'median':
             self.mt_top_score_metric = "Median"
             self.wt_top_score_metric = "Median"
@@ -376,6 +379,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             self.anchor_calculator,
             self.mt_top_score_metric,
             self.top_score_mode,
+            self.allow_incomplete_transcripts,
         ).get(df)
 
     def get_included_df(self, df):
@@ -399,38 +403,38 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def sort_included_df(self, df):
         df['biotype_sort'] = df['Biotype'].apply(lambda x: 1 if x == 'protein_coding' else 2)
         df['tsl_sort'] = df['Transcript Support Level'].apply(lambda x: 6 if pd.isnull(x) or x == 'Not Supported' else int(x))
+        df['anchor_residue_pass_sort'] = df.apply(lambda x: 1 if self.anchor_calculator.is_anchor_residue_pass(x) else 2, axis=1)
+
+        sort_columns = ["biotype_sort", "tsl_sort", "anchor_residue_pass_sort"]
+        sort_order = [True, True, True]
+
+        if self.allow_incomplete_transcripts:
+            df['transcript_cds_flags_sort'] = df['Transcript CDS Flags'].apply(lambda x: 1 if x == "None" else (2 if any(flag in str(x) for flag in ["cds_start_nf", "cds_end_nf"]) else 1))
+            sort_columns.append('transcript_cds_flags_sort')
+            sort_order.append(True)
+
         if self.problematic_positions_exist():
             df['problematic_positions_sort'] = df['Problematic Positions'].apply(lambda x: 1 if x == "None" else 2)
-        df['anchor_residue_pass_sort'] = df.apply(lambda x: 1 if self.anchor_calculator.is_anchor_residue_pass(x) else 2, axis=1)
+            sort_columns.append('problematic_positions_sort')
+            sort_order.append(True)
+
         if self.top_score_mode == 'IC50 Score':
             primary = "{} MT IC50 Score".format(self.mt_top_score_metric)
             secondary = "{} MT Percentile".format(self.mt_top_score_metric)
         else:
             primary = "{} MT Percentile".format(self.mt_top_score_metric)
             secondary = "{} MT IC50 Score".format(self.mt_top_score_metric)
-        if self.problematic_positions_exist():
-            sort_columns = [
-                "biotype_sort",
-                "tsl_sort",
-                "problematic_positions_sort",
-                "anchor_residue_pass_sort",
-                primary,
-                "Transcript Length",
-                secondary,
-            ]
-            sort_order = [True, True, True, True, True, False, True]
-        else:
-            sort_columns = [
-                "biotype_sort",
-                "tsl_sort",
-                "anchor_residue_pass_sort",
-                primary,
-                "Transcript Length",
-                secondary,
-            ]
-            sort_order = [True, True, True, True, False, True]
+        sort_columns.extend([primary, "Transcript Length", secondary])
+        sort_order.extend([True, False, True])
+
         df.sort_values(by=sort_columns, inplace=True, ascending=sort_order)
-        df.drop(columns = ['biotype_sort', 'tsl_sort', 'problematic_positions_sort', 'anchor_residue_pass_sort'], inplace=True, errors='ignore')
+        df.drop(columns=[
+            'biotype_sort',
+            'tsl_sort',
+            'anchor_residue_pass_sort',
+            'transcript_cds_flags_sort',
+            'problematic_positions_sort'
+        ], inplace=True, errors='ignore')
         return df
 
     def get_unique_peptide_hla_counts(self, included_df):
@@ -536,10 +540,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             peptides[set_name]['canonical'] = list(sorted_transcripts.Canonical)
             peptides[set_name]['tsl'] = self.replace_nas(self.round_to_ints(list(sorted_transcripts['Transcript Support Level'])))
             peptides[set_name]['biotype'] = list(sorted_transcripts.Biotype)
+            peptides[set_name]['transcript_cds_flags'] = list(sorted_transcripts['Transcript CDS Flags'])
             peptides[set_name]['transcript_length'] = [int(l) for l in list(sorted_transcripts.Length)]
             peptides[set_name]['transcript_count'] = len(annotations)
             peptides[set_name]['peptide_count'] = len(peptide_set)
-            peptides[set_name]['total_expr'] = sum([0 if x == 'NA' else (float(x)) for x in peptides[set_name]['transcript_expr']])
+            peptides[set_name]['total_expr'] = math.fsum([0 if x == 'NA' else (float(x)) for x in peptides[set_name]['transcript_expr']])
             set_number += 1
         anno_count = len(included_transcripts)
 
@@ -558,22 +563,33 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return sorted_results
 
     def sort_transcripts(self, annotations, included_df):
-        transcript_table = pd.DataFrame()
+        records = []
         for annotation in annotations:
             line = included_df[included_df['annotation'] == annotation].iloc[0]
-            data = {
+            records.append({
                 'Annotation': line['annotation'],
                 'Biotype': line['Biotype'],
+                'Transcript CDS Flags': line['Transcript CDS Flags'],
                 'MANE Select': line['MANE Select'],
                 'Canonical': line['Canonical'],
                 'Transcript Support Level': line['Transcript Support Level'],
                 'Length': line['Transcript Length'],
                 'Expr': line['Transcript Expression'],
-            }
-            transcript_table = pd.concat([transcript_table, pd.DataFrame.from_records(data, index=[0])], ignore_index=True)
+            })
+        transcript_table = pd.DataFrame.from_records(records)
+
         transcript_table['Biotype Sort'] = transcript_table.Biotype.map(lambda x: 1 if x == 'protein_coding' else 2)
         transcript_table['TSL Sort'] = transcript_table.apply(lambda x: 1 if is_preferred_transcript(x, self.transcript_prioritization_strategy, self.maximum_transcript_support_level) else 2, axis=1)
-        transcript_table.sort_values(by=["Biotype Sort", "TSL Sort", "Length"], inplace=True, ascending=[True, True, False])
+
+        if self.allow_incomplete_transcripts:
+            transcript_table['Transcript CDS Flags Sort'] = transcript_table['Transcript CDS Flags'].apply(lambda x: 1 if x == "None" else (2 if any(flag in str(x) for flag in ["cds_start_nf", "cds_end_nf"]) else 1))
+            sort_columns = ["Biotype Sort", "Transcript CDS Flags Sort", "TSL Sort", "Length"]
+            sort_order = [True, True, True, False]
+        else:
+            sort_columns = ["Biotype Sort", "TSL Sort", "Length"]
+            sort_order = [True, True, False]
+
+        transcript_table.sort_values(by=sort_columns, ascending=sort_order, inplace=True)
         return transcript_table
 
     def calculate_unique_peptide_count(self, included_df):
@@ -943,6 +959,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         expn_val=1,
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
         maximum_transcript_support_level=1,
+        allow_incomplete_transcripts=False,
     ):
         PvacbindAggregateAllEpitopes.__init__(
             self,
@@ -964,6 +981,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         self.allele_expr_threshold = trna_vaf * expn_val * 10
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
+        self.allow_incomplete_transcripts = allow_incomplete_transcripts
 
     # pvacbind w/ Index instead of Mutation
     def get_list_unique_mutation_keys(self, df):
@@ -1023,6 +1041,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             self.maximum_transcript_support_level,
             self.top_score_metric,
             self.top_score_mode,
+            self.allow_incomplete_transcripts,
         ).get(df)
 
     def tier_aggregated_report(self):

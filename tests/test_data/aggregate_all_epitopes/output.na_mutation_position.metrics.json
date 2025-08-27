@@ -3557,12 +3557,15 @@
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           645
         ],
         "transcript_count": 1,
         "peptide_count": 15,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -3575,7 +3578,7 @@
       15
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.18,
     "RNA VAF": 0.0,
