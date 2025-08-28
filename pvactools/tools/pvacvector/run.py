@@ -41,6 +41,7 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         'iedb_retries'    : args.iedb_retries,
         'additional_report_columns' : None,
         'junctions_to_test': junctions_to_test,
+        'biotypes'        : args.biotypes,
     }
 
     parsed_output_files = []
