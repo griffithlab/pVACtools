@@ -528,7 +528,7 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
         )
         self.parser.add_argument(
             "--biotypes", type=lambda s:[a for a in s.split(',')],
-            help="A list of biotypes to use for pre-filtering transcripts for processing in the pipeline.",
+            help="A list of biotypes to use for pre-filtering transcripts when running with an input VCF.",
             default=['protein_coding']
         )
         self.pvacvector()
