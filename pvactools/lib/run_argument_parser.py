@@ -545,6 +545,11 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
             help="Whether to use median/best IC50 or to use median/best percentile score."
         )
         self.parser.add_argument(
+            "--biotypes", type=lambda s:[a for a in s.split(',')],
+            help="A list of biotypes to use for pre-filtering transcripts for processing in the pipeline.",
+            default=['protein_coding']
+        )
+        self.parser.add_argument(
             "--allow-incomplete-transcripts",
             help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
                  + "are excluded from analysis, as they often produce invalid protein sequences. "
