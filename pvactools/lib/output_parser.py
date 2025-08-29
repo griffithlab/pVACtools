@@ -475,49 +475,10 @@ class OutputParser(metaclass=ABCMeta):
 
         return iedb_results_with_metrics
 
-    def flatten_iedb_results(self, iedb_results):
-        #transform the iedb_results dictionary into a two-dimensional list
-        flattened_iedb_results = []
-        for value in iedb_results.values():
-            row = []
-            for key in (
-                'gene_name',
-                'amino_acid_change',
-                'position',
-                'mutation_position',
-                'mt_scores',
-                'wt_scores',
-                'mt_percentiles',
-                'wt_percentiles',
-                'wt_epitope_seq',
-                'mt_epitope_seq',
-                'tsv_index',
-                'allele',
-                'peptide_length',
-                'best_mt_score',
-                'corresponding_wt_score',
-                'best_mt_score_method',
-                'median_mt_score',
-                'median_wt_score',
-                'best_mt_percentile',
-                'corresponding_wt_percentile',
-                'best_mt_percentile_method',
-                'median_mt_percentile',
-                'median_wt_percentile',
-            ):
-                if key in value.keys():
-                    row.append(value[key])
-                else:
-                    row.append('NA')
-            flattened_iedb_results.append(row)
-        return flattened_iedb_results
-
     def process_input_iedb_file(self, tsv_entries):
         iedb_results = self.parse_iedb_file(tsv_entries)
         iedb_results_with_metrics = self.add_summary_metrics(iedb_results)
-        flattened_iedb_results = self.flatten_iedb_results(iedb_results_with_metrics)
-
-        return flattened_iedb_results
+        return iedb_results_with_metrics
 
     def base_headers(self):
         headers = [
@@ -646,50 +607,22 @@ class OutputParser(metaclass=ABCMeta):
         tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
 
-        for (
-            gene_name,
-            variant_aa,
-            position,
-            mutation_position,
-            mt_scores,
-            wt_scores,
-            mt_percentiles,
-            wt_percentiles,
-            wt_epitope_seq,
-            mt_epitope_seq,
-            tsv_index,
-            allele,
-            peptide_length,
-            best_mt_score,
-            corresponding_wt_score,
-            best_mt_score_method,
-            median_mt_score,
-            median_wt_score,
-            best_mt_percentile,
-            corresponding_wt_percentile,
-            best_mt_percentile_method,
-            median_mt_percentile,
-            median_wt_percentile,
-        ) in iedb_results:
-            tsv_entry = tsv_entries[tsv_index]
-            if mt_epitope_seq != wt_epitope_seq:
-                if corresponding_wt_score == 'NA':
+        for result in iedb_results.values():
+            tsv_entry = tsv_entries[result['tsv_index']]
+            if result['mt_epitope_seq'] != result['wt_epitope_seq']:
+                if result['corresponding_wt_score'] == 'NA':
                     corresponding_fold_change = 'NA'
-                elif best_mt_score == 0:
+                elif result['best_mt_score'] == 0:
                     corresponding_fold_change = inf
-                    corresponding_wt_score = round(corresponding_wt_score, 3)
                 else:
-                    corresponding_fold_change = round((corresponding_wt_score/best_mt_score), 3)
-                    corresponding_wt_score = round(corresponding_wt_score, 3)
+                    corresponding_fold_change = round((result['corresponding_wt_score']/result['best_mt_score']), 3)
 
-                if median_wt_score == 'NA':
+                if result['median_wt_score'] == 'NA':
                     median_fold_change = 'NA'
-                elif median_mt_score == 0:
+                elif result['median_mt_score'] == 0:
                     median_fold_change = inf
-                    median_wt_score = round(median_wt_score, 3)
                 else:
-                    median_fold_change = round((median_wt_score/median_mt_score), 3)
-                    median_wt_score = round(median_wt_score, 3)
+                    median_fold_change = round((result['median_wt_score']/result['median_mt_score']), 3)
                 row = {
                     'Chromosome'          : tsv_entry['chromosome_name'],
                     'Start'               : tsv_entry['start'],
@@ -707,36 +640,36 @@ class OutputParser(metaclass=ABCMeta):
                     'HGVSc'               : tsv_entry['hgvsc'],
                     'HGVSp'               : tsv_entry['hgvsp'],
                     'Variant Type'        : tsv_entry['variant_type'],
-                    'Mutation'            : variant_aa,
+                    'Mutation'            : result['amino_acid_change'],
                     'Protein Position'    : tsv_entry['protein_position'],
-                    'Gene Name'           : gene_name,
-                    'HLA Allele'          : allele,
-                    'Peptide Length'      : peptide_length,
-                    'Sub-peptide Position': position,
-                    'Mutation Position'   : mutation_position,
-                    'MT Epitope Seq'      : mt_epitope_seq,
-                    'WT Epitope Seq'      : wt_epitope_seq,
-                    'Corresponding WT IC50 Score': corresponding_wt_score,
+                    'Gene Name'           : result['gene_name'],
+                    'HLA Allele'          : result['allele'],
+                    'Peptide Length'      : result['peptide_length'],
+                    'Sub-peptide Position': result['position'],
+                    'Mutation Position'   : result['mutation_position'] if 'mutation_position' in result else 'NA',
+                    'MT Epitope Seq'      : result['mt_epitope_seq'],
+                    'WT Epitope Seq'      : result['wt_epitope_seq'],
                     'Corresponding Fold Change' : corresponding_fold_change,
-                    'Median WT IC50 Score'     : median_wt_score,
                     'Median Fold Change'  : median_fold_change,
-                    'Index'               : tsv_index,
+                    'Index'               : result['tsv_index'],
                 }
-                row['Best MT IC50 Score Method'] = 'NA' if best_mt_score_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method)
-                row['Best MT Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
-                row['Best MT IC50 Score'] = 'NA' if best_mt_score == 'NA' else round(best_mt_score, 3)
-                row['Best MT Percentile'] = 'NA' if best_mt_percentile == 'NA' else round(best_mt_percentile, 3)
-                row['Corresponding WT Percentile'] = 'NA' if corresponding_wt_percentile == 'NA' else round(corresponding_wt_percentile, 3)
-                row['Median MT IC50 Score'] = 'NA' if median_mt_score == 'NA' else round(median_mt_score, 3)
-                row['Median MT Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
-                row['Median WT Percentile'] = 'NA' if median_wt_percentile == 'NA' else round(median_wt_percentile, 3)
+                row['Best MT IC50 Score Method'] = 'NA' if result['best_mt_score_method'] == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(result['best_mt_score_method'])
+                row['Best MT IC50 Score'] = 'NA' if result['best_mt_score'] == 'NA' else round(result['best_mt_score'], 3)
+                row['Corresponding WT IC50 Score'] = 'NA' if result['corresponding_wt_score'] == 'NA' else round(result['corresponding_wt_score'], 3)
+                row['Median MT IC50 Score'] = 'NA' if result['median_mt_score'] == 'NA' else round(result['median_mt_score'], 3)
+                row['Median WT IC50 Score'] = 'NA' if result['median_wt_score'] == 'NA' else round(result['median_wt_score'], 3)
+                row['Best MT Percentile Method'] = 'NA' if result['best_mt_percentile_method'] == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(result['best_mt_percentile_method'])
+                row['Best MT Percentile'] = 'NA' if result['best_mt_percentile'] == 'NA' else round(result['best_mt_percentile'], 3)
+                row['Corresponding WT Percentile'] = 'NA' if result['corresponding_wt_percentile'] == 'NA' else round(result['corresponding_wt_percentile'], 3)
+                row['Median MT Percentile'] = 'NA' if result['median_mt_percentile'] == 'NA' else round(result['median_mt_percentile'], 3)
+                row['Median WT Percentile'] = 'NA' if result['median_wt_percentile'] == 'NA' else round(result['median_wt_percentile'], 3)
                 for method in self.prediction_methods():
                     pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-                    self.add_pretty_row(row, wt_scores, method, pretty_method, 'WT IC50 Score')
-                    self.add_pretty_row(row, mt_scores, method, pretty_method, 'MT IC50 Score')
+                    self.add_pretty_row(row, result['wt_scores'], method, pretty_method, 'WT IC50 Score')
+                    self.add_pretty_row(row, result['mt_scores'], method, pretty_method, 'MT IC50 Score')
                     if pretty_method not in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
-                        self.add_pretty_row(row, wt_percentiles, method, pretty_method, 'WT Percentile')
-                        self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'MT Percentile')
+                        self.add_pretty_row(row, result['wt_percentiles'], method, pretty_method, 'WT Percentile')
+                        self.add_pretty_row(row, result['mt_percentiles'], method, pretty_method, 'MT Percentile')
 
                 for (tsv_key, row_key) in zip(['gene_expression', 'transcript_expression', 'normal_vaf', 'tdna_vaf', 'trna_vaf'], ['Gene Expression', 'Transcript Expression', 'Normal VAF', 'Tumor DNA VAF', 'Tumor RNA VAF']):
                     if tsv_key in tsv_entry:
@@ -898,29 +831,10 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 iedb_results_with_metrics[key]  = result
         return iedb_results_with_metrics
 
-    def flatten_iedb_results(self, iedb_results):
-        #transform the iedb_results dictionary into a two-dimensional list
-        flattened_iedb_results = list((
-            value['position'],
-            value['mt_scores'],
-            value['mt_percentiles'],
-            value['mt_epitope_seq'],
-            value['tsv_index'],
-            value['allele'],
-            value['best_mt_score'],
-            value['best_mt_score_method'],
-            value['median_mt_score'],
-            value['best_mt_percentile'],
-            value['best_mt_percentile_method'],
-            value['median_mt_percentile'],
-        ) for value in iedb_results.values())
-        return flattened_iedb_results
-
     def process_input_iedb_file(self):
         iedb_results              = self.parse_iedb_file()
         iedb_results_with_metrics = self.add_summary_metrics(iedb_results)
-        flattened_iedb_results    = self.flatten_iedb_results(iedb_results_with_metrics)
-        return flattened_iedb_results
+        return iedb_results_with_metrics
 
     def base_headers(self):
         return[
@@ -971,37 +885,24 @@ class UnmatchedSequencesOutputParser(OutputParser):
         tsv_writer.writeheader()
 
         iedb_results = self.process_input_iedb_file()
-        for (
-            position,
-            mt_scores,
-            mt_percentiles,
-            mt_epitope_seq,
-            tsv_index,
-            allele,
-            best_mt_score,
-            best_mt_score_method,
-            median_mt_score,
-            best_mt_percentile,
-            best_mt_percentile_method,
-            median_mt_percentile,
-        ) in iedb_results:
+        for result in iedb_results.values():
             row = {
-                'HLA Allele'          : allele,
-                'Sub-peptide Position': position,
-                'Epitope Seq'         : mt_epitope_seq,
-                'Best IC50 Score'     : best_mt_score,
-                'Best Percentile'     : best_mt_percentile,
-                'Mutation'            : tsv_index,
+                'HLA Allele'          : result['allele'],
+                'Sub-peptide Position': result['position'],
+                'Epitope Seq'         : result['mt_epitope_seq'],
+                'Best IC50 Score'     : result['best_mt_score'],
+                'Best Percentile'     : result['best_mt_percentile'],
+                'Mutation'            : result['tsv_index'],
             }
-            row['Best IC50 Score Method'] = 'NA' if best_mt_score_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method)
-            row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
-            row['Median IC50 Score'] = 'NA' if median_mt_score == 'NA' else round(median_mt_score, 3)
-            row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
+            row['Best IC50 Score Method'] = 'NA' if result['best_mt_score_method'] == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(result['best_mt_score_method'])
+            row['Best Percentile Method'] = 'NA' if result['best_mt_percentile_method'] == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(result['best_mt_percentile_method'])
+            row['Median IC50 Score'] = 'NA' if result['median_mt_score'] == 'NA' else round(result['median_mt_score'], 3)
+            row['Median Percentile'] = 'NA' if result['median_mt_percentile'] == 'NA' else round(result['median_mt_percentile'], 3)
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-                self.add_pretty_row(row, mt_scores, method, pretty_method, 'IC50 Score')
+                self.add_pretty_row(row, result['mt_scores'], method, pretty_method, 'IC50 Score')
                 if pretty_method not in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
-                    self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
+                    self.add_pretty_row(row, result['mt_percentiles'], method, pretty_method, 'Percentile')
             if self.add_sample_name:
                 row['Sample Name'] = self.sample_name
             tsv_writer.writerow(row)
@@ -1022,7 +923,6 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             with open(input_iedb_file, 'r') as reader:
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 filename = os.path.basename(input_iedb_file)
-        
                 pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
                 match = pattern.match(filename)
                 method = match.group(1)
@@ -1057,24 +957,6 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                             iedb_results[key]['mt_percentiles'][method] = percentiles
 
         return iedb_results
-
-    def flatten_iedb_results(self, iedb_results):
-        #transform the iedb_results dictionary into a two-dimensional list
-        flattened_iedb_results = list((
-            value['fasta_id'],
-            value['mt_scores'],
-            value['mt_percentiles'],
-            value['mt_epitope_seq'],
-            value['tsv_index'],
-            value['allele'],
-            value['best_mt_score'],
-            value['best_mt_score_method'],
-            value['median_mt_score'],
-            value['best_mt_percentile'],
-            value['best_mt_percentile_method'],
-            value['median_mt_percentile'],
-        ) for value in iedb_results.values())
-        return flattened_iedb_results
 
     def base_headers(self):
         return[
@@ -1138,22 +1020,9 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
         iedb_results = self.process_input_iedb_file()
 
         # from input iedb files
-        for (
-            fasta_id,
-            mt_scores,
-            mt_percentiles,
-            mt_epitope_seq,
-            tsv_index,
-            allele,
-            best_mt_score,
-            best_mt_score_method,
-            median_mt_score,
-            best_mt_percentile,
-            best_mt_percentile_method,
-            median_mt_percentile,
-        ) in iedb_results:
+        for result in iedb_results.values():
             # get unique index
-            (final_index, protein_position) = tsv_index.rsplit('.', 1)
+            (final_index, protein_position) = result['tsv_index'].rsplit('.', 1)
             tsv_entry = tsv_entries[final_index]
             row = {
                 'Chromosome'          : tsv_entry['chromosome_name'],
@@ -1182,28 +1051,27 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'HGVSc'               : tsv_entry['hgvsc'],
                 'HGVSp'               : tsv_entry['hgvsp'],
                 'Index'               : final_index,
-                'Fasta Key'           : fasta_id,
+                'Fasta Key'           : result['fasta_id'],
                 'WT Protein Length' : tsv_entry['wt_protein_length'],
                 'ALT Protein Length': tsv_entry['alt_protein_length'],
                 'Frameshift Event'     : tsv_entry['frameshift_event'],
                 ### pvacbind info
-                'HLA Allele'          : allele,
-                'Peptide Length'      : len(mt_epitope_seq),
-                'Epitope Seq'         : mt_epitope_seq,
-                'Best IC50 Score'     : best_mt_score,
-                'Best Percentile'     : best_mt_percentile,
+                'HLA Allele'          : result['allele'],
+                'Peptide Length'      : len(result['mt_epitope_seq']),
+                'Epitope Seq'         : result['mt_epitope_seq'],
+                'Best IC50 Score'     : result['best_mt_ic50'],
+                'Best Percentile'     : result['best_mt_percentile'],
                 ###
             }
-            row['Median IC50 Score'] = 'NA' if median_mt_score == 'NA' else round(median_mt_score, 3)
-            row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
-            row['Best IC50 Score Method'] = 'NA' if best_mt_score_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method)
-            row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
-
+            row['Median IC50 Score'] = 'NA' if result['median_mt_ic50'] == 'NA' else round(result['median_mt_ic50'], 3)
+            row['Median Percentile'] = 'NA' if result['median_mt_percentile'] == 'NA' else round(result['median_mt_percentile'], 3)
+            row['Best IC50 Score Method'] = 'NA' if result['best_mt_score_method'] == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(result['best_mt_score_method'])
+            row['Best Percentile Method'] = 'NA' if result['best_mt_percentile_method'] == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(result['best_mt_percentile_method'])
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-                self.add_pretty_row(row, mt_scores, method, pretty_method, 'IC50 Score')
+                self.add_pretty_row(row, result['wt_scores'], method, pretty_method, 'IC50 Score')
                 if pretty_method not in ['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
-                    self.add_pretty_row(row, mt_percentiles, method, pretty_method, 'Percentile')
+                    self.add_pretty_row(row, result['wt_percentiles'], method, pretty_method, 'Percentile')
 
             for (tsv_key, row_key) in zip(['gene_expression', 'transcript_expression', 'normal_vaf', 'tdna_vaf', 'trna_vaf'], ['Gene Expression', 'Transcript Expression', 'Normal VAF', 'Tumor DNA VAF', 'Tumor RNA VAF']):
                 if tsv_key in tsv_entry:
