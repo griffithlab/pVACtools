@@ -62,6 +62,12 @@ def run_comparison(
 
     yml1_path = find_file(results_folder1, os.path.join(folder1_prefix, "log"), "inputs.yml")
     yml2_path = find_file(results_folder2, os.path.join(folder2_prefix, "log"), "inputs.yml")
+    if not yml1_path:
+        file_name = "inputs_class_I.yml" if class_type == 1 else "inputs_class_II.yml"
+        yml1_path = find_file(results_folder1, os.path.dirname(folder1_prefix), file_name)
+    if not yml2_path:
+        file_name = "inputs_class_I.yml" if class_type == 1 else "inputs_class_II.yml"
+        yml2_path = find_file(results_folder2, os.path.dirname(folder2_prefix), file_name)
     if yml1_path and yml2_path:
         logging.info("Running the input YML comparison tool...")
         run_compare_yml(yml1_path, yml2_path, output_path, class_type)
