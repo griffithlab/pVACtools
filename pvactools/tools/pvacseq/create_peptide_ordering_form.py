@@ -27,7 +27,7 @@ def define_parser():
         help='The path to the classII all_epitopes.aggregated.tsv'
     )
     parser.add_argument(
-        "output_file",
+        "output_file_prefix",
         help="The prefix for the output files' names"
     )
     parser.add_argument(
@@ -41,6 +41,10 @@ def define_parser():
     parser.add_argument(
         "-p", "--phased-proximal-variants-vcf",
         help="A VCF with phased proximal variant information to incorporate into the predicted fasta sequences. Must be gzipped and tabix indexed."
+    )
+    parser.add_argument(
+        '--external-vcf',
+        help='A VCF file from an external provider to check variants against'
     )
     parser.add_argument(
         '--pass-only',
@@ -97,9 +101,9 @@ def define_parser():
     )
     parser.add_argument(
         '--prob-pos',
-        nargs='*', 
-        help='Problematic position to make large',
-        default=''
+        type=lambda s: [item.strip() for item in s.split(',')],
+        help='Comma-separated list of problematic positions to make large',
+        default=[]
     )
     return parser
 
@@ -108,17 +112,17 @@ def main(args_input = sys.argv[1:]):
     args = parser.parse_args(args_input)
     flanking_sequence_length = 25
 
-    if not args.output_path:
-        output_dir = f"{args.output_file}_results"
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = output_dir
+    output_path = args.output_path if args.output_path else f"{args.output_file_prefix}_results"
+    if os.path.exists(output_path):
+        if not os.path.isdir(output_path):
+            sys.exit(f"Error: {output_path} must specify a directory.")
     else:
-        output_path = args.output_path
+        os.makedirs(output_path)
 
     run_generate_protein_fasta(
         input_vcf=args.input_vcf,
         flanking_sequence_length=flanking_sequence_length,
-        output_file=os.path.join(output_path, args.output_file),
+        output_file=os.path.join(output_path, args.output_file_prefix),
         input_tsv=args.classI_tsv,
         phased_proximal_variants_vcf=args.phased_proximal_variants_vcf,
         pass_only=args.pass_only,
@@ -130,8 +134,8 @@ def main(args_input = sys.argv[1:]):
         peptide_ordering_form=True
     )
 
-    file_path = os.path.join(output_path, args.output_file)
-    file_prefix = os.path.join(output_path, f"{args.output_file}_{args.sample_name}")
+    file_path = os.path.join(output_path, args.output_file_prefix)
+    file_prefix = os.path.join(output_path, f"{args.output_file_prefix}_{args.sample_name}")
 
     os.rename(file_path, f"{file_prefix}.fa")
     os.rename(f"{file_path}_combined", f"{file_prefix}_combined.fa")
@@ -143,8 +147,13 @@ def main(args_input = sys.argv[1:]):
         peptides_path=peptide_manufacture_path,
         classI_path=args.classI_tsv,
         classII_path=args.classII_tsv,
+        input_vcf=args.input_vcf,
+        external_vcf=args.external_vcf,
         sample_name=args.sample_name,
-        all_epitopes_flag=args.all_epitopes
+        all_epitopes_flag=args.all_epitopes,
+        allowed_evaluations=['Accept', 'Review'] if args.include_review_candidates else ['Accept'],
+        output_file_prefix=args.output_file_prefix,
+        output_path=output_path
     )
 
     run_color_peptides(
@@ -156,7 +165,7 @@ def main(args_input = sys.argv[1:]):
         classII_ic50_score_max=args.classII_IC50,
         classI_ic50_percentile_max=args.classII_percent,
         problematic_position=args.prob_pos,
-        output_file=args.output_file,
+        output_file_prefix=args.output_file_prefix,
         output_path=output_path
     )
 
