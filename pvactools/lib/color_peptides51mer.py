@@ -179,12 +179,11 @@ def generate_formatted_excel(peptides_df, output_path, output_file_prefix, sampl
                 for aa in peptide_sequence:
                     fmt = get_format(aa)
                     if fmt:
-                        segments.extend([fmt, aa.nucleotide])
-                    else:
-                        segments.append(aa.nucleotide)
+                        segments.append(fmt)
+                    segments.append(aa.nucleotide)
 
                 if segments and not isinstance(segments[0], str):
-                    segments.insert(0, "")
+                    segments.insert(0, " ")
 
                 worksheet.write_rich_string(row_idx + 1, col_idx, *segments)
             else:
