@@ -10,7 +10,7 @@ from pvactools.lib.run_utils import aggregate_report_evaluations
 def define_parser():
     parser = argparse.ArgumentParser(
         "pvacseq create_peptide_ordering_form",
-        description="Generate a peptide ordering form with coloring.",
+        description="Generate peptide ordering files (FASTA, manufacturability, and annotated Excel) to streamline preparation of 51-mer peptides for synthesis and review.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
