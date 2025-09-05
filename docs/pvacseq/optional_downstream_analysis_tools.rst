@@ -159,11 +159,10 @@ Create Peptide Ordering Form
 .. program-output:: pvacseq create_peptide_ordering_form -h
 
 This tool generates a comprehensive peptide ordering package from pVACseq results in a single step. 
-It streamlines the preparation of long peptides (typically 51-mers) for synthesis by combining 
-protein sequence extraction, manufacturability assessment, peptide annotation, and visualization 
-into one workflow. The output includes peptide FASTA files, manufacturability reports, and 
-color-coded Excel summaries that highlight binding strength, sequence properties, and variant 
-context.
+It streamlines the preparation of long peptides for synthesis by combining protein sequence extraction, 
+manufacturability assessment, peptide annotation, and visualization into one workflow. The output includes 
+peptide FASTA files, manufacturability reports, and color-coded Excel summaries that highlight binding strength, 
+sequence properties, and variant context.
 
 This command replaces the need to run the ``generate_protein_fasta``, ``generate_reviews_files``,
 and ``color_peptides51mer`` scripts separately. The output includes the following files:
@@ -171,9 +170,9 @@ and ``color_peptides51mer`` scripts separately. The output includes the followin
 .. list-table::
 
  * - ``<output_file>_<sample_name>.fa``
-   - Contains the generated 51mer peptides in FASTA format for peptide synthesis.
+   - Contains the generated peptides in FASTA format for peptide synthesis.
  * - ``<output_file>_<sample_name>.manufacturability.tsv``
-   - Manufacturability assessments for the 51mer peptides, including metrics such as cysteine
+   - Manufacturability assessments for the peptides, including metrics such as cysteine
      content, hydrophobicity, and sequence complexity.
  * - ``<output_file>_<sample_name>.Colored_Peptides.xlsx``
    - A color-coded Excel file summarizing peptides, annotations, manufacturability metrics,
