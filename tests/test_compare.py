@@ -6,6 +6,7 @@ import py_compile
 import argparse
 import os
 import tempfile
+import shutil
 import argparse
 from unittest.mock import MagicMock
 import pvactools.tools.compare as compare
@@ -120,12 +121,10 @@ class TestRunCompare(unittest.TestCase):
             for file_name, test_data_path in test_data_files.items():
                 for folder in [input1_mhc_class_i, input2_mhc_class_i]:
                     file_path = os.path.join(folder, file_name)
-                    with open(test_data_path, "r") as test_file, open(file_path, "w") as temp_file:
-                        temp_file.write(test_file.read())
+                    shutil.copy(test_data_path, file_path)
             
             extra_all_epitopes_file = os.path.join(input2_mhc_class_i, "additional_all_epitopes.tsv")
-            with open(test_data_files["all_epitopes.tsv"], "r") as src, open(extra_all_epitopes_file, "w") as dst:
-                dst.write(src.read())
+            shutil.copy(test_data_files["all_epitopes.tsv"], extra_all_epitopes_file)
 
             args_list = [
                 input1,
