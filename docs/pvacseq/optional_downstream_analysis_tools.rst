@@ -182,11 +182,12 @@ and ``color_peptides51mer`` scripts separately. The output includes the followin
    - A spreadsheet intended for downstream manual review of selected variants, including
      visualization in tools such as IGV.
 
-Optional flags can further tailor the output. For example, use ``--aggregate-report-evaluation``
-to restrict the report to epitopes with specific evaluation states (e.g. ``Accept``, ``Reject``,
-``Pending``, or ``Review``; multiple values may be provided as a comma-separated list). The
-``--biotypes`` option can be used to pre-filter transcripts when generating peptide sequences
-from the input VCF, limiting the analysis to specific transcript biotypes (default: ``protein_coding``).
+Several options are available for tailoring the output. The ``flanking_sequence_length`` determines the number of flanking amino acids around the mutation of interest when creating the peptide sequence for the ordering spreadsheet. The ``--biotypes`` option can be used to pre-filter transcripts when generating peptide sequences
+from the input VCF, limiting the analysis to specific transcript biotypes (default: ``protein_coding``) and the ``--pass-only`` flag can be used to narrow down the input VCF to PASS variants only. The two latter options should match the options selected for the original pVACseq run so that variants will match correctly between the peptide sequences created by this tool and the variants in the classI_tsv aggregated report.
+
+Additionally, the ``--aggregate-report-evaluation`` parameter can be used
+to restrict the output reports to candidates with specific evaluation states in the classI_tsv (e.g. ``Accept``, ``Reject``,
+``Pending``, or ``Review``; multiple values may be provided as a comma-separated list). 
 
 For custom peptide prioritization thresholds, the IC50 and percentile cutoffs for class I and II
 can be adjusted using the appropriate flags.
