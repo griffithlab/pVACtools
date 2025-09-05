@@ -5,6 +5,7 @@ import os
 from pvactools.tools.pvacseq.generate_protein_fasta import run_generate_protein_fasta
 from pvactools.lib.generate_reviews_files import main as run_generate_reviews_files
 from pvactools.lib.color_peptides51mer import main as run_color_peptides
+from pvactools.lib.run_utils import aggregate_report_evaluations
 
 def define_parser():
     parser = argparse.ArgumentParser(
@@ -79,11 +80,12 @@ def define_parser():
             + "Use 'full' to include the full downstream sequence."
     )
     parser.add_argument(
-        '--include-review-candidates',
-        help="In addition to candidates marked as Accept in the classI_tsv's Evaluation column, also "
-            +"process candidates marked as Review.",
-        default=False,
-        action='store_true'
+        "--aggregate-report-evaluation",
+        help="Only include variants where the Evaluation column in the classI_tsv matches this evaluation. "
+            +"Valid values for this field are Accept, Reject, Pending, and Review. Specify multiple values as "
+            +"a comma-separated list to include multiple evaluation states.",
+        default='Accept',
+        type=aggregate_report_evaluations(),
     )
     parser.add_argument(
         '--classI-IC50',
@@ -141,7 +143,7 @@ def main(args_input = sys.argv[1:]):
         pass_only=args.pass_only,
         biotypes=args.biotypes,
         mutant_only=True,
-        aggregate_report_evaluation=['Accept', 'Review'] if args.include_review_candidates else ['Accept'],
+        aggregate_report_evaluation=args.aggregate_report_evaluation,
         downstream_sequence_length=args.downstream_sequence_length,
         sample_name=args.sample_name,
         peptide_ordering_form=True
@@ -163,7 +165,7 @@ def main(args_input = sys.argv[1:]):
         input_vcf=args.input_vcf,
         external_vcf=args.external_vcf,
         sample_name=args.sample_name,
-        allowed_evaluations=['Accept', 'Review'] if args.include_review_candidates else ['Accept'],
+        allowed_evaluations=args.aggregate_report_evaluation,
         output_file_prefix=args.output_file_prefix,
         output_path=output_path
     )
