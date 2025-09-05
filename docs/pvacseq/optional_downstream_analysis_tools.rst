@@ -158,16 +158,15 @@ Create Peptide Ordering Form
 
 .. program-output:: pvacseq create_peptide_ordering_form -h
 
-This tool combines several downstream steps to streamline the process of generating
-a final peptide ordering form with color-coded annotations. It incorporates protein
-sequence extraction, manufacturability assessments, 51mer peptide creation, and
-visual peptide annotation into a single command. This command is especially useful
-after candidate selection has been performed in pVACview and exported to an aggregated
-TSV file. It is designed to assist in preparing long peptides (typically 51-mers) for
-synthesis based on strong binding short epitopes.
+This tool generates a comprehensive peptide ordering package from pVACseq results in a single step. 
+It streamlines the preparation of long peptides (typically 51-mers) for synthesis by combining 
+protein sequence extraction, manufacturability assessment, peptide annotation, and visualization 
+into one workflow. The output includes peptide FASTA files, manufacturability reports, and 
+color-coded Excel summaries that highlight binding strength, sequence properties, and variant 
+context.
 
 This command replaces the need to run the ``generate_protein_fasta``, ``generate_reviews_files``,
-and ``color_peptides51mer`` scripts separately. The output includes the following three files:
+and ``color_peptides51mer`` scripts separately. The output includes the following files:
 
 .. list-table::
 
@@ -179,10 +178,15 @@ and ``color_peptides51mer`` scripts separately. The output includes the followin
  * - ``<output_file>_<sample_name>.Colored_Peptides.xlsx``
    - A color-coded Excel file summarizing peptides, annotations, manufacturability metrics,
      and peptide positions, ready for ordering.
+ * - ``<output_file>_<sample_name>.Annotated.Neoantigen_Candidates.xlsx``
+   - A spreadsheet intended for downstream manual review of selected variants, including
+     visualization in tools such as IGV.
 
-Optional flags can further tailor the output, such as ``--include-review-candidates`` to include
-manually flagged Review epitopes, or ``--all-epitopes`` to process all available epitopes in the
-TSV, not just best hits.
+Optional flags can further tailor the output. For example, use ``--aggregate-report-evaluation``
+to restrict the report to epitopes with specific evaluation states (e.g. ``Accept``, ``Reject``,
+``Pending``, or ``Review``; multiple values may be provided as a comma-separated list). The
+``--biotypes`` option can be used to pre-filter transcripts when generating peptide sequences
+from the input VCF, limiting the analysis to specific transcript biotypes (default: ``protein_coding``).
 
 For custom peptide prioritization thresholds, the IC50 and percentile cutoffs for class I and II
 can be adjusted using the appropriate flags.
