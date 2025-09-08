@@ -129,8 +129,8 @@ def set_underline(peptide_sequence, mutant_positions):
         peptide_sequence[pos].underline = True
 
 
-def generate_formatted_excel(peptides_df, output_path, output_file, sample_name):
-    file_name = f"{output_file}_{sample_name}.Colored_Peptides.xlsx"
+def generate_formatted_excel(peptides_df, output_path, output_file_prefix, sample_name):
+    file_name = f"{output_file_prefix}_{sample_name}.Colored_Peptides.xlsx"
     file_path = os.path.join(output_path, file_name)
     workbook = xlsxwriter.Workbook(file_path)
     worksheet = workbook.add_worksheet()
@@ -179,12 +179,11 @@ def generate_formatted_excel(peptides_df, output_path, output_file, sample_name)
                 for aa in peptide_sequence:
                     fmt = get_format(aa)
                     if fmt:
-                        segments.extend([fmt, aa.nucleotide])
-                    else:
-                        segments.append(aa.nucleotide)
+                        segments.append(fmt)
+                    segments.append(aa.nucleotide)
 
                 if segments and not isinstance(segments[0], str):
-                    segments.insert(0, "")
+                    segments.insert(0, " ")
 
                 worksheet.write_rich_string(row_idx + 1, col_idx, *segments)
             else:
@@ -202,7 +201,7 @@ def main(
     classII_ic50_score_max,
     classII_ic50_percentile_max,
     problematic_position,
-    output_file,
+    output_file_prefix,
     output_path,
 ):
     peptides_df = pd.read_excel(peptides_path)
@@ -262,7 +261,7 @@ def main(
         set_underline(peptide_sequence, mutant_positions)
         peptides_df.at[index, "Stylized Sequence"] = peptide_sequence
 
-    generate_formatted_excel(peptides_df, output_path, output_file, sample_name)
+    generate_formatted_excel(peptides_df, output_path, output_file_prefix, sample_name)
 
 
 if __name__ == "__main__":
