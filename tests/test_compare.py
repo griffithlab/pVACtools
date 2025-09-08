@@ -6,6 +6,7 @@ import py_compile
 import argparse
 import os
 import tempfile
+import shutil
 import argparse
 from unittest.mock import MagicMock
 import pvactools.tools.compare as compare
@@ -120,8 +121,10 @@ class TestRunCompare(unittest.TestCase):
             for file_name, test_data_path in test_data_files.items():
                 for folder in [input1_mhc_class_i, input2_mhc_class_i]:
                     file_path = os.path.join(folder, file_name)
-                    with open(test_data_path, "r") as test_file, open(file_path, "w") as temp_file:
-                        temp_file.write(test_file.read())
+                    shutil.copy(test_data_path, file_path)
+            
+            extra_all_epitopes_file = os.path.join(input2_mhc_class_i, "additional_all_epitopes.tsv")
+            shutil.copy(test_data_files["all_epitopes.tsv"], extra_all_epitopes_file)
 
             args_list = [
                 input1,
@@ -137,8 +140,9 @@ class TestRunCompare(unittest.TestCase):
             with self.assertLogs(level="INFO") as log:
                 compare.main(args_list)
 
-            self.assertIn("ERROR:root:ERROR: Could not locate the input YML file in either results folder for MHC Class I.", log.output)
+            self.assertIn("ERROR:root:ERROR: Could not locate the input YML file in results folder 1 for MHC Class I.", log.output)
+            self.assertIn("ERROR:root:ERROR: Could not locate the input YML file in results folder 2 for MHC Class I.", log.output)
             self.assertIn("INFO:root:The JSON metric inputs are identical.", log.output)
-            self.assertIn("INFO:root:The Unaggregated TSV files are identical.", log.output)
+            self.assertIn("ERROR:root:ERROR: Located multiple unaggregated TSV files in results folder 2 for MHC Class I:", log.output)
             self.assertIn("INFO:root:The Aggregated TSV files are identical.", log.output)
             self.assertIn("INFO:root:Successfully generated MHC Class I comparison report.", log.output)

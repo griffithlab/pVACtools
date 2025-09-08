@@ -215,7 +215,7 @@ def main(args_input=sys.argv[1:]):
     output_dir = prepare_results_folder(classes, args.output_dir)
 
     for class_type in classes:
-        comparison_router.run_comparison(
+        comparison_router.main(
             class_type,
             args.results_folder1,
             args.results_folder2,
