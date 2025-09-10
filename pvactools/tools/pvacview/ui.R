@@ -210,6 +210,7 @@ explore_tab <- tabItem(
                     span("RNA VAF", verbatimTextOutput("metricsTextRNA")),
                     span("Gene Expression", verbatimTextOutput("metricsTextGene")),
                     span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput("metricsTextGenomicCoord")),
+                    span("ML Prediction", verbatimTextOutput("ml_prediction_score")),
                     h5("Additional variant information:"),
                     uiOutput("url"), style = "overflow-x: scroll;font-size:100%"),
                 box(width = 2, solidHeader = TRUE, title = "Peptide Evaluation Overview",

@@ -108,6 +108,10 @@ server <- shinyServer(function(input, output, session) {
     colnames(mainData) <- mainData[1, ]
     mainData <- mainData[-1, ]
     row.names(mainData) <- NULL
+    
+    # Check if ML Prediction column exists and handle accordingly
+    has_ml_prediction <- "ML Prediction (score)" %in% colnames(mainData)
+    
     setButtonStyling(mainData$Evaluation, mainData$ID)
     mainData$Acpt <- shinyInputSelect(actionButton, mainData["ID"], "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
     mainData$Rej <- shinyInputSelect(actionButton, mainData["ID"], "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
@@ -116,6 +120,10 @@ server <- shinyServer(function(input, output, session) {
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
     mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
     mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+    
+    # Store ML prediction status for later use
+    df$has_ml_prediction <- has_ml_prediction
+    
     df$evaluations <- data.frame(data = mainData$Evaluation, row.names = mainData$ID)
     df$mainTable <- mainData
     df$metricsData <- NULL
@@ -149,6 +157,12 @@ server <- shinyServer(function(input, output, session) {
     columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                         "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                         "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
+    
+    # Add ML Prediction column if it exists
+    if (df$has_ml_prediction && "ML Prediction (score)" %in% colnames(df$mainTable)) {
+      columns_needed <- c(columns_needed, "ML Prediction (score)")
+    }
+    
     if ("Comments" %in% colnames(df$mainTable)) {
       columns_needed <- c(columns_needed, "Comments")
       df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
@@ -200,6 +214,11 @@ server <- shinyServer(function(input, output, session) {
        colnames(mainData) <- mainData[1, ]
        mainData <- mainData[-1, ]
        row.names(mainData) <- NULL
+       
+       # Check if ML Prediction column exists and handle accordingly
+       has_ml_prediction <- "ML Prediction (score)" %in% colnames(mainData)
+       df$has_ml_prediction <- has_ml_prediction
+       
        setButtonStyling(mainData$Evaluation, mainData$ID)
        mainData$Acpt <- shinyInputSelect(actionButton, mainData["ID"], "button-acpt_", icon = icon("thumbs-up"), label = "", onclick = 'Shiny.onInputChange(\"accept_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
        mainData$Rej <- shinyInputSelect(actionButton, mainData["ID"], "button-rej_", icon = icon("thumbs-down"), label = "", onclick = 'Shiny.onInputChange(\"reject_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
@@ -241,6 +260,12 @@ server <- shinyServer(function(input, output, session) {
        columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "TSL",	"Allele",
                            "Pos", "Prob Pos", "Num Included Peptides", "Num Passing Peptides", "IC50 MT",	"IC50 WT", "%ile MT",	"%ile WT", "RNA Expr", "RNA VAF",
                            "Allele Expr", "RNA Depth", "DNA VAF",	"Tier",	"Ref Match", "Acpt", "Rej", "Rev")
+       
+       # Add ML Prediction column if it exists
+       if (df$has_ml_prediction && "ML Prediction (score)" %in% colnames(df$mainTable)) {
+         columns_needed <- c(columns_needed, "ML Prediction (score)")
+       }
+       
        if ("Comments" %in% colnames(df$mainTable)) {
          columns_needed <- c(columns_needed, "Comments")
          df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
@@ -565,6 +590,12 @@ server <- shinyServer(function(input, output, session) {
       additional_hidden_columns <- which(colnames(filtered_table) %in% c("Num Passing Transcripts", "Best Transcript", "Has Prob Pos", "Percentile Fail",
                                                                         "Col DNA VAF", "Col RNA Depth", "Col Allele Expr", "Col RNA VAF", "Col RNA Expr",
                                                                         "Bad TSL", "Scaled percentile", "Scaled BA", "Gene of Interest", "Tier Count"))
+      
+      # Hide ML Prediction column if it exists (it will be shown in a separate section)
+      if (df$has_ml_prediction && "ML Prediction (score)" %in% colnames(filtered_table)) {
+        ml_prediction_column <- which(colnames(filtered_table) == "ML Prediction (score)")
+        additional_hidden_columns <- c(additional_hidden_columns, ml_prediction_column)
+      }
       hidden_targets <- c(hla_columns, additional_hidden_columns)
       
       # Applies a CSS class to the specified columns
@@ -689,6 +720,12 @@ server <- shinyServer(function(input, output, session) {
          " Anchor: Mutation is at an anchor residue in the shown peptide, and the WT allele has good binding (WT IC50 < binding threshold)", br(),
          " Poor: Fails two or more of the above criteria", br(),
          " Pass: Passes the above criteria, has strong MT binding (IC50 < 500) and strong expression (Allele Expr > allele expression threshold)"
+      ),
+      h4(" ML Prediction (score):", style = "font-weight: bold"),
+      h5(" If available, shows the machine learning prediction score for each variant.", br(),
+         " Format: 'Prediction (probability)' where Prediction can be Accept, Reject, or Review", br(),
+         " Probability ranges from 0.0 to 1.0, indicating confidence in the prediction", br(),
+         " This column is automatically hidden from the main table but visible in the Variant & Gene Info panel"
       ),
     ))
   })
@@ -837,6 +874,23 @@ server <- shinyServer(function(input, output, session) {
   ##display of Best Transcript from additional data file
   output$addData_transcript <- renderText({
     df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Transcript`
+  })
+  
+  ##display of ML Prediction score if available
+  output$ml_prediction_score <- renderText({
+    if (is.null(df$mainTable) || !df$has_ml_prediction) {
+      return("ML Prediction not available")
+    }
+    selected_row <- if (is.null(input$mainTable_rows_selected)) {
+      df$lastSelectedRow
+    } else {
+      input$mainTable_rows_selected
+    }
+    ml_score <- df$mainTable[selected_row, "ML Prediction (score)"]
+    if (is.na(ml_score) || ml_score == "") {
+      return("No ML prediction available for this variant")
+    }
+    return(ml_score)
   })
   ##transcript sets table displaying sets of transcripts with the same consequence
   output$transcriptSetsTable <- renderDT({
@@ -1503,6 +1557,11 @@ server <- shinyServer(function(input, output, session) {
     colsToDrop <- colnames(df$mainTable) %in% c("Evaluation", "Eval", "Select", "Scaled BA", "Scaled percentile", "Tier Count", "Bad TSL",
                                                 "Comments", "Gene of Interest", "Bad TSL", "Col RNA Expr", "Col RNA VAF", "Col Allele Expr",
                                                 "Col RNA Depth", "Col DNA VAF", "Percentile Fail", "Has Prob Pos", "Acpt", "Rej", "Rev")
+    
+    # Keep ML Prediction column in export if it exists
+    if (df$has_ml_prediction && "ML Prediction (score)" %in% colnames(df$mainTable)) {
+      colsToDrop <- colsToDrop & colnames(df$mainTable) != "ML Prediction (score)"
+    }
     data <- df$mainTable[, !(colsToDrop)]
     col_names <- colnames(data)
     evaluations <- data.frame("ID" = row.names(df$evaluations), Evaluation = df$evaluations[, 1])
@@ -1709,8 +1768,6 @@ server <- shinyServer(function(input, output, session) {
 
     df_neofox$default_neofox_columns <- c("patientIdentifier", "gene", "mutatedXmer", "wildTypeXmer", "position", map(columns_to_star, function(x) { paste0("*", x) }), "Acpt", "Rej", "Rev")
     df_neofox$hidden_columns <- setdiff(colnames(df_neofox$mainTable_neofox), df_neofox$default_neofox_columns)
-
-    updateTabItems(session, "neofox_tabs", "neofox_explore")
   })
   
   ##Clear file inputs if demo data load button is clicked
