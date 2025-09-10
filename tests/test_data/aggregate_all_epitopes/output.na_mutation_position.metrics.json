@@ -8,6 +8,11 @@
   "trna_vaf": 0.25,
   "trna_cov": 10,
   "allele_expr_threshold": 2.5,
+  "transcript_prioritization_strategy": [
+    "canonical",
+    "mane_select",
+    "tsl"
+  ],
   "maximum_transcript_support_level": 1,
   "percentile_threshold": null,
   "percentile_threshold_strategy": "conservative",
@@ -3540,18 +3545,27 @@
         "transcript_expr": [
           "NA"
         ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
         "tsl": [
           1
         ],
         "biotype": [
           "protein_coding"
         ],
+        "transcript_cds_flags": [
+          "None"
+        ],
         "transcript_length": [
           645
         ],
         "transcript_count": 1,
         "peptide_count": 15,
-        "total_expr": 0
+        "total_expr": 0.0
       }
     },
     "sets": [
@@ -3564,7 +3578,7 @@
       15
     ],
     "set_expr": [
-      0
+      0.0
     ],
     "DNA VAF": 0.18,
     "RNA VAF": 0.0,

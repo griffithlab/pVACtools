@@ -149,6 +149,44 @@ This tool may be used with any filtered.tsv or all_epitopes.tsv pVACseq report
 file.
 
 Mark Genes of Interest
---------------------------------
+----------------------
 
 .. program-output:: pvacseq mark_genes_of_interest -h
+
+Create Peptide Ordering Form
+----------------------------
+
+.. program-output:: pvacseq create_peptide_ordering_form -h
+
+This tool generates a comprehensive peptide ordering package from pVACseq results in a single step. 
+It streamlines the preparation of long peptides for synthesis by combining protein sequence extraction, 
+manufacturability assessment, peptide annotation, and visualization into one workflow. The output includes 
+peptide FASTA files, manufacturability reports, and color-coded Excel summaries that highlight binding strength, 
+sequence properties, and variant context.
+
+This command replaces the need to run the ``generate_protein_fasta``, ``generate_reviews_files``,
+and ``color_peptides51mer`` scripts separately. The output includes the following files:
+
+.. list-table::
+
+ * - ``<output_file>_<sample_name>.fa``
+   - Contains the generated peptides in FASTA format for peptide synthesis.
+ * - ``<output_file>_<sample_name>.manufacturability.tsv``
+   - Manufacturability assessments for the peptides, including metrics such as cysteine
+     content, hydrophobicity, and sequence complexity.
+ * - ``<output_file>_<sample_name>.Colored_Peptides.xlsx``
+   - A color-coded Excel file summarizing peptides, annotations, manufacturability metrics,
+     and peptide positions, ready for ordering.
+ * - ``<output_file>_<sample_name>.Annotated.Neoantigen_Candidates.xlsx``
+   - A spreadsheet intended for downstream manual review of selected variants, including
+     visualization in tools such as IGV.
+
+Several options are available for tailoring the output. The ``flanking_sequence_length`` determines the number of flanking amino acids around the mutation of interest when creating the peptide sequence for the ordering spreadsheet. The ``--biotypes`` option can be used to pre-filter transcripts when generating peptide sequences
+from the input VCF, limiting the analysis to specific transcript biotypes (default: ``protein_coding``) and the ``--pass-only`` flag can be used to narrow down the input VCF to PASS variants only. The two latter options should match the options selected for the original pVACseq run so that variants will match correctly between the peptide sequences created by this tool and the variants in the classI_tsv aggregated report.
+
+Additionally, the ``--aggregate-report-evaluation`` parameter can be used
+to restrict the output reports to candidates with specific evaluation states in the classI_tsv (e.g. ``Accept``, ``Reject``,
+``Pending``, or ``Review``; multiple values may be provided as a comma-separated list). 
+
+For custom peptide prioritization thresholds, the IC50 and percentile cutoffs for class I and II
+can be adjusted using the appropriate flags.

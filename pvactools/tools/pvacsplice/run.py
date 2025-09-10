@@ -26,8 +26,8 @@ def create_full_combined_reports(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
 
-    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
-    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.tsv".format(args.sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.MHC_II.all_epitopes.tsv".format(args.sample_name))
     if not os.path.exists(file1):
         print("File {} doesn't exist. Aborting.".format(file1))
         return
@@ -35,9 +35,9 @@ def create_full_combined_reports(base_output_dir, args):
         print("File {} doesn't exist. Aborting.".format(file2))
         return
 
-    combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+    combined_output_file = os.path.join(output_dir, "{}.Combined.all_epitopes.tsv".format(args.sample_name))
     combine_reports([file1, file2], combined_output_file)
-    filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+    filtered_report_file = os.path.join(output_dir, "{}.Combined.filtered.tsv".format(args.sample_name))
 
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_output_file
@@ -50,6 +50,7 @@ def create_full_combined_reports(base_output_dir, args):
     post_processing_params['run_manufacturability_metrics'] = False
     post_processing_params['run_reference_proteome_similarity'] = False
     post_processing_params['file_type'] = 'pVACsplice'
+    post_processing_params['filename_addition'] = "Combined"
 
     PostProcessor(**post_processing_params).execute()
 
@@ -62,14 +63,14 @@ def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
         print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
     combined_files = []
     for m in mhc_dirs:
-        file = os.path.join(m, f'{params["sample_name"]}.all_epitopes.tsv')
+        file = os.path.join(m, f'{params["sample_name"]}.MHC_{mhc_class}.all_epitopes.tsv')
         if os.path.exists(file):
             combined_files.append(file)
     if len(combined_files) == 0:
         return
-    combined_fn = os.path.join(output_dir, f'{params["sample_name"]}.all_epitopes.tsv')
+    combined_fn = os.path.join(output_dir, f'{params["sample_name"]}.MHC_{mhc_class}.all_epitopes.tsv')
     combine_epitope_len_reports(combined_files, combined_fn)
-    filtered_fn = os.path.join(output_dir, f'{params["sample_name"]}.filtered.tsv')
+    filtered_fn = os.path.join(output_dir, f'{params["sample_name"]}.MHC_{mhc_class}.filtered.tsv')
 
     post_processing_params = params.copy()
     post_processing_params['file_type'] = 'pVACsplice'
@@ -148,6 +149,7 @@ def main(args_input = sys.argv[1:]):
         'class_i_epitope_length'           : args.class_i_epitope_length,
         'class_ii_epitope_length'          : args.class_ii_epitope_length,
         'biotypes'                         : args.biotypes,
+        'allow_incomplete_transcripts'     : args.allow_incomplete_transcripts,
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'anchor_types'                     : args.anchor_types,
@@ -190,6 +192,7 @@ def main(args_input = sys.argv[1:]):
         'trna_vaf'                  : args.trna_vaf,
         'expn_val'                  : args.expn_val,
         'tumor_purity'              : args.tumor_purity,
+        'transcript_prioritization_strategy': args.transcript_prioritization_strategy,
         'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'run_post_processor'        : True,
         'exclude_NAs'               : args.exclude_NAs,
@@ -223,7 +226,7 @@ def main(args_input = sys.argv[1:]):
             class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
             class_i_arguments['output_dir']              = output_len_dir
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
-
+            class_i_arguments['filename_addition']         = "MHC_I"
             pipeline = PvacsplicePipeline(**class_i_arguments)
             pipeline.execute()
 
@@ -264,7 +267,7 @@ def main(args_input = sys.argv[1:]):
             class_ii_arguments['epitope_lengths']         = y
             class_ii_arguments['output_dir']              = output_len_dir
             class_ii_arguments['netmhc_stab']             = False
-
+            class_ii_arguments['filename_addition']         = "MHC_II"
             pipeline = PvacsplicePipeline(**class_ii_arguments)
             pipeline.execute()
 

@@ -253,6 +253,15 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used during aggregate report creation for a simple estimation of whether variants are subclonal or clonal based on VAF. If not provided, purity is estimated directly from the VAFs.",
         )
         self.parser.add_argument(
+            "--transcript-prioritization-strategy", type=transcript_prioritization_strategy(),
+            help="Specify the criteria to consider when prioritizing or filtering transcripts of the neoantigen candidates during aggregate report creation or TSL filtering. "
+                 + "'canonical' will prioritize/select candidates resulting from variants on a Ensembl canonical transcript. "
+                 + "'mane_select' will prioritize/select candidates resulting from variants on a MANE select transcript. "
+                 + "'tsl' will prioritize/select candidates where the transcript support level (TSL) matches the --maximum-transcript-support-level. "
+                 + "When selecting more than one criteria, a transcript meeting EITHER of the selected criteria will be prioritized/selected.",
+            default=['canonical', 'mane_select', 'tsl']
+        )
+        self.parser.add_argument(
             "--maximum-transcript-support-level", type=int,
             help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
                  + "Keep all epitopes with a transcript support level <= to this cutoff.",
@@ -263,6 +272,15 @@ class RunArgumentParser(metaclass=ABCMeta):
             "--biotypes", type=lambda s:[a for a in s.split(',')],
             help="A list of biotypes to use for pre-filtering transcripts for processing in the pipeline.",
             default=['protein_coding']
+        )
+        self.parser.add_argument(
+            "--allow-incomplete-transcripts",
+            help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
+                 + "are excluded from analysis, as they often produce invalid protein sequences. "
+                 + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
+                 + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
+            default=False,
+            action='store_true'
         )
 
     def genes_of_interest_args(self):
@@ -542,5 +560,14 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
             choices=['ic50','percentile'],
             default='ic50',
             help="Whether to use median/best IC50 or to use median/best percentile score."
+        )
+        self.parser.add_argument(
+            "--allow-incomplete-transcripts",
+            help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
+                 + "are excluded from analysis, as they often produce invalid protein sequences. "
+                 + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
+                 + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
+            default=False,
+            action='store_true'
         )
         self.pvacvector()

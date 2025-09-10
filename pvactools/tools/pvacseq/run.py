@@ -19,8 +19,8 @@ def create_combined_reports(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
 
-    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
-    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.tsv".format(args.sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.MHC_II.all_epitopes.tsv".format(args.sample_name))
     if not os.path.exists(file1):
         print("File {} doesn't exist. Aborting.".format(file1))
         return
@@ -28,9 +28,9 @@ def create_combined_reports(base_output_dir, args):
         print("File {} doesn't exist. Aborting.".format(file2))
         return
 
-    combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+    combined_output_file = os.path.join(output_dir, "{}.Combined.all_epitopes.tsv".format(args.sample_name))
     combine_reports([file1, file2], combined_output_file)
-    filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+    filtered_report_file = os.path.join(output_dir, "{}.Combined.filtered.tsv".format(args.sample_name))
 
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_output_file
@@ -42,6 +42,7 @@ def create_combined_reports(base_output_dir, args):
     post_processing_params['run_manufacturability_metrics'] = False
     post_processing_params['run_reference_proteome_similarity'] = False
     post_processing_params['file_type'] = 'pVACseq'
+    post_processing_params['filename_addition'] = "Combined"
 
     PostProcessor(**post_processing_params).execute()
 
@@ -174,8 +175,10 @@ def main(args_input = sys.argv[1:]):
         'normal_sample_name'        : args.normal_sample_name,
         'phased_proximal_variants_vcf' : args.phased_proximal_variants_vcf,
         'n_threads'                 : args.n_threads,
+        'transcript_prioritization_strategy': args.transcript_prioritization_strategy,
         'maximum_transcript_support_level': args.maximum_transcript_support_level,
         'biotypes'                  : args.biotypes,
+        'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,
@@ -214,6 +217,7 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
+        class_i_arguments['filename_addition']         = "MHC_I"
         pipeline = Pipeline(**class_i_arguments)
         pipeline.execute()
     elif len(class_i_prediction_algorithms) == 0:
@@ -241,6 +245,8 @@ def main(args_input = sys.argv[1:]):
         class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
         class_ii_arguments['output_dir']              = output_dir
         class_ii_arguments['netmhc_stab']             = False
+        class_ii_arguments['filename_addition']         = "MHC_II"
+
         pipeline = Pipeline(**class_ii_arguments)
         pipeline.execute()
     elif len(class_ii_prediction_algorithms) == 0:

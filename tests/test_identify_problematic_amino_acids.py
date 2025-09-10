@@ -101,3 +101,21 @@ class IdentifyProblematicAminoAcidsTests(unittest.TestCase):
             os.path.join(self.test_data_path, "Test.all_epitopes.problematic.hard.tsv"),
             False
         ))
+
+    def test_identify_problematic_amino_acids_aggregated_runs_and_produces_expected_output(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(IdentifyProblematicAminoAcids(
+            os.path.join(
+                self.test_data_path,
+                'Test.all_epitopes.aggregated.tsv'
+            ),
+            output_file.name,
+            ["C", "P:1", "G:-3"],
+            file_type = 'pVACseq',
+            filter_type = 'soft',
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_path, "Test.all_epitopes.aggregated.problematic.tsv"),
+            False
+        ))

@@ -156,6 +156,7 @@ class GenerateFastaTests(unittest.TestCase):
             generate_protein_fasta_output_file.name,
             '-d', 'full',
             '--phased-proximal-variants-vcf', generate_protein_fasta_phased_proximal_variants_vcf,
+            '--allow-incomplete-transcripts',
         ], shell=False))
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         proximal_output_file = "{}.proximal_variants.tsv".format(generate_protein_fasta_output_file.name)

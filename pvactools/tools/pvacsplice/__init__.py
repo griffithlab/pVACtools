@@ -13,8 +13,9 @@ __all__ = [
     'valid_netmhciipan_versions',
     'run',
     'top_score_filter',
-    'transcript_support_level_filter',
+    'transcript_filter',
     'valid_alleles',
+    'update_tiers',
     'valid_algorithms',
 ]
 

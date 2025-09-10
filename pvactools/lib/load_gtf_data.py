@@ -8,13 +8,14 @@ class LoadGtfData:
         self.output_file = kwargs['output_file']
         self.save_gtf    = kwargs['save_gtf']  # default false
         self.biotypes    = kwargs.pop('biotypes', ['protein_coding'])
+        self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
 
     def execute(self):
 
         # make sure running pandas not polars
         gtf_df_all = gtfparse.read_gtf(self.gtf_file, usecols=[
             'feature', 'seqname', 'start', 'end', 'transcript_id',
-            'transcript_biotype', 'transcript_version', 'transcript_support_level', 'exon_number', 'gene_name',
+            'transcript_biotype', 'tag', 'transcript_version', 'transcript_support_level', 'exon_number', 'gene_name',
             'gene_id'], result_type='pandas')
 
         if 'transcript_version' not in gtf_df_all.columns:
@@ -37,6 +38,15 @@ class LoadGtfData:
                 (gtf_df_all['feature'].isin(['CDS', 'transcript']))
                 ].replace(["^\s*$"], 'NA', regex=True)
             gtf_df['transcript_biotype'] = 'Not Supported'
+        
+        if 'tag' in gtf_df_all:
+            if not self.allow_incomplete_transcripts:
+                gtf_df = gtf_df.loc[
+                    ~gtf_df['tag'].str.lower().str.contains('cds_start_nf|cds_end_nf', na=False)
+                ].copy()
+            gtf_df['tag'] = gtf_df['tag'].replace('', 'None').fillna('None')
+        else:
+            gtf_df['tag'] = "None"
 
         gtf_df = gtf_df.rename(columns={'start': 'cds_start', 'end': 'cds_stop', 'seqname': 'cds_chrom'})
 

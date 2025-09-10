@@ -30,6 +30,7 @@ class JunctionPipeline:
         self.save_gtf = kwargs['save_gtf']
         self.keep_tmp_files = kwargs['keep_tmp_files']
         self.biotypes = kwargs['biotypes']
+        self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
         self.gtf_data = self.load_gtf_data()
         self.tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(self.tmp_dir, exist_ok=True)
@@ -69,6 +70,7 @@ class JunctionPipeline:
                 'save_gtf': self.save_gtf,
                 # default no but option to save for running cohorts processed with the same reference data
                 'biotypes': self.biotypes,
+                'allow_incomplete_transcripts': self.allow_incomplete_transcripts
             }
             gtf_data = LoadGtfData(**gtf_params)
             gtf_df = gtf_data.execute()
@@ -118,6 +120,7 @@ class JunctionPipeline:
                 'pass_only': self.pass_only,
                 'output_file': self.create_file_path('annotated', temp=True),
                 'sample_name': self.sample_name,
+                'allow_incomplete_transcripts': self.allow_incomplete_transcripts,
             }
             if self.normal_sample_name:
                 convert_params['normal_sample_name'] = self.normal_sample_name
