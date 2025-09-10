@@ -30,7 +30,7 @@ def define_parser():
         'classI_aggregated_tsv',
         help="The path to the classI all_epitopes.aggregated.tsv file with the Evaluation column filled in to mark candidates "
             +"to process as 'Accept'. Only candidates marked as Accept in this file will be included in the ordering "
-            +"spreadsheet. This file is commonly created by importing the aggregated class I report form pVACseq into pVACview, "
+            +"spreadsheet. This file is commonly created by importing the aggregated class I report from pVACseq into pVACview, "
             +"investigating candidates, selecting appropriate evaluations, and exporting the results in TSV format."
     )
     parser.add_argument(
