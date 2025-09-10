@@ -188,6 +188,12 @@ class JunctionPipeline:
                         print('No amino acid sequence was produced. Skipping.')
                         continue
                     # creates output transcript fasta
+                    if alt_fs == 'yes':
+                        updated_index = "{}.frameshift_splice_site".format(combined_df.loc[i, 'index'])
+                    else:
+                        updated_index = "{}.inframe_splice_site".format(combined_df.loc[i, 'index'])
+                    combined_df.loc[i, 'index'] = updated_index
+                    junctions.fasta_index = updated_index
                     junctions.create_sequence_fasta(wt_aa, alt_aa)
                     # df[row, col]
                     combined_df.loc[i, 'wt_protein_length'] = len(wt_aa)
@@ -201,7 +207,7 @@ class JunctionPipeline:
             print('Completed')
 
     def fasta_to_kmers(self):
-        for el in self.class_i_epitope_length + self.class_ii_epitope_length:
+        for el in self.choose_final_lengths():
             fasta_file = f'{self.output_dir}.{self.sample_name}.{el}.fa'
             if os.path.exists(fasta_file):
                 print(f'{el}mer fasta already exists. Skipping.')
@@ -211,12 +217,18 @@ class JunctionPipeline:
                 kmer_params = {
                     'fasta': self.create_file_path('fasta'),
                     'output_dir': self.tmp_dir,
-                    'class_i_epitope_length': self.class_i_epitope_length,
-                    'class_ii_epitope_length': self.class_ii_epitope_length,
-                    'class_i_hla': self.class_i_hla,
-                    'class_ii_hla': self.class_ii_hla,
+                    'epitope_length': el,
                     'sample_name': self.sample_name,
                 }
                 fasta = FastaToKmers(**kmer_params)
                 fasta.execute()
                 print('Completed')
+
+    def choose_final_lengths(self):
+        if not self.class_i_hla:
+            lengths = self.class_ii_epitope_length
+        elif not self.class_ii_hla:
+            lengths = self.class_i_epitope_length
+        else:
+            lengths = self.class_i_epitope_length + self.class_ii_epitope_length
+        return lengths

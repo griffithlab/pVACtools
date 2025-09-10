@@ -119,6 +119,12 @@ class RunArgumentParser(metaclass=ABCMeta):
                  + "lowest: Use the best MT Score and Corresponding Fold Change (i.e. the lowest MT ic50 binding score and corresponding fold change of all chosen prediction methods). "
                  + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
         )
+        self.parser.add_argument(
+            '-m2', '--top-score-metric2',
+            choices=['ic50','percentile'],
+            default='ic50',
+            help="Whether to use median/best IC50 or to use median/best percentile score."
+        )
 
     def prediction_args(self):
         self.parser.add_argument(
@@ -385,7 +391,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         self.parser.add_argument(
             "--anchor-types", type=pvacsplice_anchors(),
             help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list."
-            + "Choices: A, D, NDA, DA, N",
+            + "Choices: A, D, NDA",
             default=['A', 'D', 'NDA'],
         )
         # pvacsplice - filter on gene expression only (but keep txpn value in output)
@@ -530,5 +536,11 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
             help="The ic50 scoring metric to use when evaluating junctional epitopes by binding-threshold. "
                  + "lowest: Use the best MT Score (i.e. the lowest MT ic50 binding score of all chosen prediction methods). "
                  + "median: Use the median MT Score (i.e. the  median MT ic50 binding score of all chosen prediction methods)."
+        )
+        self.parser.add_argument(
+            '-m2', '--top-score-metric2',
+            choices=['ic50','percentile'],
+            default='ic50',
+            help="Whether to use median/best IC50 or to use median/best percentile score."
         )
         self.pvacvector()
