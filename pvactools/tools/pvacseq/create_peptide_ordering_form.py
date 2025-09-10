@@ -27,14 +27,14 @@ def define_parser():
         type=int,
     )
     parser.add_argument(
-        'classI_tsv',
-        help="The path to the classI all_epitopes.aggregated.tsv file with the Evaluation column filled "
-            +"in to mark candidates to process as 'Accept'. Only candidates marked as Accept in this "
-            +"file will be included in the ordering spreadsheet. Use the --include-review-candidates "
-            +"flag to also include Review candidates."
+        'classI_aggregated_tsv',
+        help="The path to the classI all_epitopes.aggregated.tsv file with the Evaluation column filled in to mark candidates "
+            +"to process as 'Accept'. Only candidates marked as Accept in this file will be included in the ordering "
+            +"spreadsheet. This file is commonly created by importing the aggregated class I report form pVACseq into pVACview, "
+            +"investigating candidates, selecting appropriate evaluations, and exporting the results in TSV format."
     )
     parser.add_argument(
-        'classII_tsv',
+        'classII_aggregated_tsv',
         help='The path to the classII all_epitopes.aggregated.tsv'
     )
     parser.add_argument(
@@ -81,7 +81,7 @@ def define_parser():
     )
     parser.add_argument(
         "--aggregate-report-evaluation",
-        help="Only include variants where the Evaluation column in the classI_tsv matches this evaluation. "
+        help="Only include variants where the Evaluation column in the classI_aggregated_tsv matches this evaluation. "
             +"Valid values for this field are Accept, Reject, Pending, and Review. Specify multiple values as "
             +"a comma-separated list to include multiple evaluation states.",
         default='Accept',
@@ -89,28 +89,28 @@ def define_parser():
     )
     parser.add_argument(
         '--classI-IC50',
-        help="Bold the Best Peptide from the classI_tsv file in the 'CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES' "
+        help="Bold the Best Peptide from the classI_aggregated_tsv file in the 'CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES' "
             +"column of the ordering spreadsheet only if the IC50 score is less than this cutoff or the --classI-percent cutoff is met.",
         default=1000,
         type=float
     )
     parser.add_argument(
         '--classI-percent',
-        help="Color the Best Peptide from the classI_tsv file in the 'CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES' "
+        help="Color the Best Peptide from the classI_aggregated_tsv file in the 'CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES' "
             +"column of the ordering spreadsheet only if this percentile cutoff is met or the IC50 score is below the specified --classI-IC50 maximum.",
         default=2,
         type=float
     )
     parser.add_argument(
         '--classII-IC50',
-        help="Bold the Best Peptide from the classII_tsv file in the 'CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES' "
+        help="Bold the Best Peptide from the classII_aggregated_tsv file in the 'CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES' "
             +"column of the ordering spreadsheet only if the IC50 score is less than this cutoff or the --classII-percent cutoff is met.",
         default=500,
         type=float
     )
     parser.add_argument(
         '--classII-percent',
-        help="Bold the Best Peptide from the classII_tsv file in the 'CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES' "
+        help="Bold the Best Peptide from the classII_aggregated_tsv file in the 'CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES' "
             +"column of the ordering spreadsheet only if this percentile cutoff is met or the IC50 score is below the specified --classII-IC50 maximum.",
         default=2,
         type=float
@@ -138,7 +138,7 @@ def main(args_input = sys.argv[1:]):
         input_vcf=args.input_vcf,
         flanking_sequence_length=args.flanking_sequence_length,
         output_file=os.path.join(output_path, args.output_file_prefix),
-        input_tsv=args.classI_tsv,
+        input_tsv=args.classI_aggregated_tsv,
         phased_proximal_variants_vcf=args.phased_proximal_variants_vcf,
         pass_only=args.pass_only,
         biotypes=args.biotypes,
@@ -160,8 +160,8 @@ def main(args_input = sys.argv[1:]):
 
     peptide_51mer_path = run_generate_reviews_files(
         peptides_path=peptide_manufacture_path,
-        classI_path=args.classI_tsv,
-        classII_path=args.classII_tsv,
+        classI_path=args.classI_aggregated_tsv,
+        classII_path=args.classII_aggregated_tsv,
         input_vcf=args.input_vcf,
         external_vcf=args.external_vcf,
         sample_name=args.sample_name,
