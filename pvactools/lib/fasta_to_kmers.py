@@ -3,37 +3,36 @@ import re
 import pandas as pd
 import numpy as np
 from pyfaidx import Fasta
+import logging
 
+from pvactools.lib.run_utils import *
 
 class FastaToKmers:
     def __init__(self, **kwargs):
         self.tscript_fasta = Fasta(kwargs['fasta'])
         self.fasta_path    = kwargs['fasta']
         self.output_dir    = kwargs['output_dir']
-        self.class_i_epitope_length  = kwargs['class_i_epitope_length']
-        self.class_ii_epitope_length = kwargs['class_ii_epitope_length']
-        self.class_i_hla   = kwargs['class_i_hla']
-        self.class_ii_hla  = kwargs['class_ii_hla']
+        self.epitope_length = kwargs['epitope_length']
         self.sample_name   = kwargs['sample_name']
-        self.final_lengths = self.choose_final_lengths()
 
     def create_kmers(self, seq_name):
+        supported_aas = supported_amino_acids()
         kmer_dict = {}
         # using personalized fasta
         sequence = str(self.tscript_fasta[seq_name])
         # loop over entire sequence (doing this for WT and ALT) i == position in peptide
         for i in range(len(sequence)):
-            # loop over lengths
-            for x in self.final_lengths:
-                final_seq_name = f'{seq_name};{i+1}'
-                # grab kmer sequence
-                k = sequence[i:x+i]
-                # if kmer matches target len
-                # if k seq does not include X (any aa); continue
-                match = re.search('X', k)
-                if not match and len(k) == x:
-                    # add entry to dictionary
-                    kmer_dict[k] = final_seq_name
+            final_seq_name = f'{seq_name};{i+1}'
+            # grab kmer sequence
+            k = sequence[i:self.epitope_length+i]
+            if len(k) < self.epitope_length:
+                continue
+            #kmer contains unsupported amino acids
+            if not all([c in supported_aas for c in k]):
+                logging.warning("Record {} contains unsupported amino acids. Skipping.".format(k))
+                continue
+            # add entry to dictionary
+            kmer_dict[k] = final_seq_name
 
         return kmer_dict
 
@@ -89,39 +88,29 @@ class FastaToKmers:
 
         return fasta_df
 
-    def choose_final_lengths(self):
-        if not self.class_i_hla:
-            lengths = self.class_ii_epitope_length
-        elif not self.class_ii_hla:
-            lengths = self.class_i_epitope_length
-        else:
-            lengths = self.class_i_epitope_length + self.class_ii_epitope_length
-        return lengths
-
     def create_epitope_fastas(self, fasta_df):
         fasta_df['name'] = fasta_df['name'].str.replace(';', '.')
         # sort the names
-        # for only 1 length at a time
-        for x in self.final_lengths:
-            len_subset = fasta_df[fasta_df['peptide'].str.len() == x].sort_values(by=['name'])
-            # 1 file per kmer length
-            output_file = f'{self.output_dir}/{self.sample_name}.{x}.fa'
-            # loop over rows in subset df
-            for row in len_subset.itertuples():
-                # fasta entry
-                write_str = f'>{row.name}\n{row.peptide}\n'
-                # don't duplicate entries
-                if os.path.exists(output_file):
-                    with open(output_file, "r+") as f:
-                        dup_content = re.search(row.peptide, f.read())
-                        if not dup_content:
-                            f.write(write_str)
-                else:
-                    with open(output_file, "w") as e:
-                        e.write(write_str)
-    
+        len_subset = fasta_df.sort_values(by=['name'])
+        # 1 file per kmer length
+        output_file = f'{self.output_dir}/{self.sample_name}.{self.epitope_length}.fa'
+        # loop over rows in subset df
+        for row in len_subset.itertuples():
+            # fasta entry
+            write_str = f'>{row.name}\n{row.peptide}\n'
+            # don't duplicate entries
+            if os.path.exists(output_file):
+                with open(output_file, "r+") as f:
+                    dup_content = re.search(row.peptide, f.read())
+                    if not dup_content:
+                        f.write(write_str)
+            else:
+                with open(output_file, "w") as e:
+                    e.write(write_str)
+
     def execute(self):
         unique_kmers = self.loop_through_tscripts()
-        # key: peptide value: list of ids
-        fasta_df = self.create_index_file(unique_kmers)
-        self.create_epitope_fastas(fasta_df)
+        if len(unique_kmers) > 0:
+            # key: peptide value: list of ids
+            fasta_df = self.create_index_file(unique_kmers)
+            self.create_epitope_fastas(fasta_df)

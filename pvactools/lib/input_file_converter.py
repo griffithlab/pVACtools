@@ -18,42 +18,6 @@ class InputFileConverter(metaclass=ABCMeta):
         self.input_file  = kwargs['input_file']
         self.output_file = kwargs['output_file']
 
-    def output_headers(self):
-        return[
-            'chromosome_name',
-            'start',
-            'stop',
-            'reference',
-            'variant',
-            'gene_name',
-            'transcript_name',
-            'transcript_support_level',
-            'transcript_length',
-            'biotype',
-            'amino_acid_change',
-            'codon_change',
-            'ensembl_gene_id',
-            'hgvsc',
-            'hgvsp',
-            'wildtype_amino_acid_sequence',
-            'frameshift_amino_acid_sequence',
-            'fusion_amino_acid_sequence',
-            'variant_type',
-            'protein_position',
-            'transcript_expression',
-            'gene_expression',
-            'normal_depth',
-            'normal_vaf',
-            'tdna_depth',
-            'tdna_vaf',
-            'trna_depth',
-            'trna_vaf',
-            'index',
-            'protein_length_change',
-            'fusion_read_support',
-            'fusion_expression',
-        ]
-
 class VcfConverter(InputFileConverter):
     def __init__(self, pipeline_type='pVACseq', **kwargs):
         InputFileConverter.__init__(self, **kwargs)
@@ -65,6 +29,7 @@ class VcfConverter(InputFileConverter):
         self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
         self.flanking_bases = kwargs.pop('flanking_bases', None)
         self.biotypes = kwargs.pop('biotypes', ['protein_coding'])
+        self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
         if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.flanking_bases):
             sys.exit("A proximal variants TSV output path and number of flanking bases need to be specified if a proximal variants input VCF is provided.")
         if self.proximal_variants_vcf and not pvactools.lib.run_utils.is_gz_file(self.input_file):
@@ -110,6 +75,43 @@ class VcfConverter(InputFileConverter):
             sys.exit("VCF {} doesn't contain VEP TSL annotations. Please re-annotate the VCF with VEP and the --tsl option enabled.".format(self.input_file))
         if 'BIOTYPE' not in self.csq_parser.csq_format:
             sys.exit("VCF doesn't contain VEP BIOTYPE annotations. Please re-annotate the VCF with VEP and the --biotype option enabled.")
+
+    def output_headers(self):
+        return[
+            'chromosome_name',
+            'start',
+            'stop',
+            'reference',
+            'variant',
+            'gene_name',
+            'transcript_name',
+            'transcript_support_level',
+            'canonical',
+            'mane_select',
+            'transcript_length',
+            'biotype',
+            'transcript_cds_flags',
+            'amino_acid_change',
+            'codon_change',
+            'ensembl_gene_id',
+            'hgvsc',
+            'hgvsp',
+            'wildtype_amino_acid_sequence',
+            'frameshift_amino_acid_sequence',
+            'variant_type',
+            'protein_position',
+            'transcript_expression',
+            'gene_expression',
+            'normal_depth',
+            'normal_vaf',
+            'tdna_depth',
+            'tdna_vaf',
+            'trna_depth',
+            'trna_vaf',
+            'index',
+            'protein_length_change',
+        ]
+
 
     def is_insertion(self, ref, alt):
         return len(alt) > len(ref)
@@ -331,6 +333,13 @@ class VcfConverter(InputFileConverter):
 
                 for transcript in transcripts:
                     transcript_name = transcript['Feature']
+
+                    flags = transcript.get('FLAGS', '').lower()
+                    if not self.allow_incomplete_transcripts:
+                        if 'cds_start_nf' in flags or 'cds_end_nf' in flags:
+                            continue
+                    transcript_cds_flags = flags if flags else 'None'
+
                     consequence = self.resolve_consequence(transcript['Consequence'], reference, alt)
                     if consequence is None:
                         continue
@@ -420,12 +429,12 @@ class VcfConverter(InputFileConverter):
                         'transcript_support_level'       : tsl,
                         'transcript_length'              : len(wildtype_amino_acid_sequence),
                         'biotype'                        : biotype,
+                        'transcript_cds_flags'           : transcript_cds_flags,
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,
                         'wildtype_amino_acid_sequence'   : wildtype_amino_acid_sequence,
                         'frameshift_amino_acid_sequence' : transcript['FrameshiftSequence'],
-                        'fusion_amino_acid_sequence'     : '',
                         'variant_type'                   : consequence,
                         'protein_position'               : protein_position,
                         'index'                          : index,
@@ -440,6 +449,22 @@ class VcfConverter(InputFileConverter):
                         output_row['codon_change'] =  transcript['Codons']
                     else:
                         output_row['codon_change'] = 'NA'
+
+                    if 'CANONICAL' in transcript:
+                        if transcript['CANONICAL'] == 'YES':
+                            output_row['canonical'] = 'True'
+                        else:
+                            output_row['canonical'] = 'False'
+                    else:
+                        output_row['canonical'] = 'Not Run'
+
+                    if 'MANE_SELECT' in transcript:
+                        if transcript['MANE_SELECT'] == '':
+                            output_row['mane_select'] = 'False'
+                        else:
+                            output_row['mane_select'] = 'True'
+                    else:
+                        output_row['mane_select'] = 'Not Run'
 
                     for (tag, key, comparison_fields) in zip(['TX', 'GX'], ['transcript_expression', 'gene_expression'], [[transcript_name], [ensembl_gene_id, gene_name]]):
                         if tag in self.vcf_reader.header.format_ids():
@@ -477,7 +502,10 @@ class PvacspliceVcfConverter(VcfConverter):
             'gene_name',
             'transcript_name',
             'transcript_support_level',
+            'canonical',
+            'mane_select',
             'biotype',
+            'transcript_cds_flags',
             'amino_acid_change',
             'codon_change',
             'ensembl_gene_id',
@@ -554,6 +582,12 @@ class PvacspliceVcfConverter(VcfConverter):
                     consequence = transcript['Consequence']
                     gene_name = transcript['SYMBOL']
 
+                    flags = transcript.get('FLAGS', '').lower()
+                    if not self.allow_incomplete_transcripts:
+                        if 'cds_start_nf' in flags or 'cds_end_nf' in flags:
+                            continue
+                    transcript_cds_flags = flags if flags else 'None'
+
                     ensembl_gene_id = transcript['Gene']
                     hgvsc = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSc']) if 'HGVSc' in transcript else 'NA'
                     hgvsp = re.sub(r'%[0-9|A-F][0-9|A-F]', self.decode_hex, transcript['HGVSp']) if 'HGVSp' in transcript else 'NA'
@@ -583,6 +617,7 @@ class PvacspliceVcfConverter(VcfConverter):
                         'transcript_name'                : transcript_name,
                         'transcript_support_level'       : tsl,
                         'biotype'                        : biotype,
+                        'transcript_cds_flags'           : transcript_cds_flags,
                         'ensembl_gene_id'                : ensembl_gene_id,
                         'hgvsc'                          : hgvsc,
                         'hgvsp'                          : hgvsp,
@@ -596,6 +631,22 @@ class PvacspliceVcfConverter(VcfConverter):
                         output_row['codon_change'] =  transcript['Codons']
                     else:
                         output_row['codon_change'] = 'NA'
+
+                    if 'CANONICAL' in transcript:
+                        if transcript['CANONICAL'] == 'YES':
+                            output_row['canonical'] = 'True'
+                        else:
+                            output_row['canonical'] = 'False'
+                    else:
+                        output_row['canonical'] = 'Not Run'
+
+                    if 'MANE_SELECT' in transcript:
+                        if transcript['MANE_SELECT'] == '':
+                            output_row['mane_select'] = 'False'
+                        else:
+                            output_row['mane_select'] = 'True'
+                    else:
+                        output_row['mane_select'] = 'Not Supported'
 
                     for (tag, key, comparison_fields) in zip(['TX', 'GX'], ['transcript_expression', 'gene_expression'], [[transcript_name], [ensembl_gene_id, gene_name]]):
                         if tag in self.vcf_reader.header.format_ids():
@@ -623,6 +674,23 @@ class FusionInputConverter(InputFileConverter):
     def __init__(self, **kwargs):
         InputFileConverter.__init__(self, **kwargs)
         self.starfusion_file = kwargs.pop('starfusion_file', None)
+
+    def output_headers(self):
+        return[
+            'chromosome_name',
+            'start',
+            'stop',
+            'reference',
+            'variant',
+            'gene_name',
+            'transcript_name',
+            'fusion_amino_acid_sequence',
+            'variant_type',
+            'protein_position',
+            'fusion_read_support',
+            'fusion_expression',
+            'index',
+        ]
 
     def determine_fusion_sequence(self, full_sequence, separator):
         if separator not in full_sequence:
@@ -709,27 +777,12 @@ class FusionInputConverter(InputFileConverter):
                     'reference'                  : 'fusion',
                     'variant'                    : 'fusion',
                     'gene_name'                  : gene_name,
-                    'wildtype_amino_acid_sequence'   : '',
-                    'frameshift_amino_acid_sequence' : '',
-                    'protein_length_change'      : '',
-                    'amino_acid_change'          : 'NA',
-                    'codon_change'               : 'NA',
-                    'ensembl_gene_id'            : 'NA',
-                    'amino_acid_change'          : 'NA',
-                    'transcript_expression'      : 'NA',
-                    'gene_expression'            : 'NA',
-                    'normal_depth'               : 'NA',
-                    'normal_vaf'                 : 'NA',
-                    'tdna_depth'                 : 'NA',
-                    'tdna_vaf'                   : 'NA',
-                    'trna_depth'                 : 'NA',
-                    'trna_vaf'                   : 'NA',
+                    'transcript_name'            : transcript_name,
+                    'fusion_amino_acid_sequence' : fusion_amino_acid_sequence.replace("*", "").upper(),
                     'variant_type'               : variant_type,
                     'protein_position'           : fusion_position,
-                    'fusion_amino_acid_sequence' : fusion_amino_acid_sequence.replace("*", "").upper(),
-                    'transcript_name'            : transcript_name,
-                    'index'                      : pvactools.lib.run_utils.construct_index(count, gene_name, transcript_name, variant_type, fusion_position),
                     'fusion_read_support'        : int(record['split_reads1']) + int(record['split_reads2']) + int(record['discordant_mates']),
+                    'index'                      : pvactools.lib.run_utils.construct_index(count, gene_name, transcript_name, variant_type, fusion_position),
                 }
                 if starfusion_entry is not None:
                     output_row['fusion_expression']   = starfusion_entry['FFPM']
@@ -798,25 +851,10 @@ class FusionInputConverter(InputFileConverter):
                     'reference'                  : 'fusion',
                     'variant'                    : 'fusion',
                     'gene_name'                  : record_info['genes'],
-                    'wildtype_amino_acid_sequence'   : '',
-                    'frameshift_amino_acid_sequence' : '',
-                    'protein_length_change'      : '',
-                    'amino_acid_change'          : 'NA',
-                    'codon_change'               : 'NA',
-                    'ensembl_gene_id'            : 'NA',
-                    'amino_acid_change'          : 'NA',
-                    'transcript_expression'      : 'NA',
-                    'gene_expression'            : 'NA',
-                    'normal_depth'               : 'NA',
-                    'normal_vaf'                 : 'NA',
-                    'tdna_depth'                 : 'NA',
-                    'tdna_vaf'                   : 'NA',
-                    'trna_depth'                 : 'NA',
-                    'trna_vaf'                   : 'NA',
+                    'transcript_name'            : transcripts,
+                    'fusion_amino_acid_sequence' : fusion_amino_acid_sequence,
                     'variant_type'               : variant_type,
                     'protein_position'           : fusion_position,
-                    'fusion_amino_acid_sequence' : fusion_amino_acid_sequence,
-                    'transcript_name'            : transcripts,
                     'index'                      : pvactools.lib.run_utils.construct_index(count, record_info['genes'], record_info['transcripts'], variant_type, fusion_position),
                 }
                 if starfusion_entry is not None:

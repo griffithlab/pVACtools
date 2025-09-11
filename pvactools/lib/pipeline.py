@@ -150,6 +150,8 @@ class Pipeline(metaclass=ABCMeta):
             params.extend(["-d", 'full'])
         if self.pass_only:
             params.extend(["--pass-only"])
+        if self.allow_incomplete_transcripts:
+            params.extend(["--allow-incomplete-transcripts"])
         generate_combined_fasta.main(params)
         os.unlink("{}.manufacturability.tsv".format(fasta_path))
 
@@ -165,6 +167,7 @@ class Pipeline(metaclass=ABCMeta):
             'sample_name': self.sample_name,
             'pass_only': self.pass_only,
             'biotypes': self.biotypes,
+            'allow_incomplete_transcripts': self.allow_incomplete_transcripts
         }
         if self.normal_sample_name is not None:
             convert_params['normal_sample_name'] = self.normal_sample_name
@@ -421,6 +424,9 @@ class Pipeline(metaclass=ABCMeta):
 
     def combined_parsed_path(self):
         combined_parsed = "%s.all_epitopes.tsv" % self.sample_name
+        if hasattr(self, "filename_addition"):
+            if self.filename_addition != None:
+                combined_parsed = "{}.{}.all_epitopes.tsv".format(self.sample_name, self.filename_addition)
         return os.path.join(self.output_dir, combined_parsed)
 
     def combined_parsed_outputs(self, split_parsed_output_files):
@@ -429,6 +435,7 @@ class Pipeline(metaclass=ABCMeta):
             *split_parsed_output_files,
             self.combined_parsed_path(),
             '--top-score-metric', self.top_score_metric,
+            '--top-score-metric2', self.top_score_metric2,
         ]
         if self.input_file_type == 'fasta':
             params.extend(['--file-type', 'pVACbind'])
@@ -438,7 +445,11 @@ class Pipeline(metaclass=ABCMeta):
         status_message("Completed")
 
     def final_path(self):
-        return os.path.join(self.output_dir, self.sample_name+".filtered.tsv")
+        output_str = self.sample_name + ".filtered.tsv"
+        if hasattr(self, "filename_addition"):
+            if self.filename_addition != None:
+                output_str = "{}.{}.filtered.tsv".format(self.sample_name, self.filename_addition)
+        return os.path.join(self.output_dir, output_str)
 
     def execute(self):
         self.print_log()
@@ -468,6 +479,7 @@ class Pipeline(metaclass=ABCMeta):
         post_processing_params['filtered_report_file'] = self.final_path()
         post_processing_params['fasta'] = self.fasta_file_path()
         post_processing_params['run_manufacturability_metrics'] = True
+        post_processing_params['allow_incomplete_transcripts'] = self.allow_incomplete_transcripts
         if self.input_file_type == 'vcf':
             post_processing_params['file_type'] = 'pVACseq'
             post_processing_params['run_coverage_filter'] = True
@@ -745,7 +757,6 @@ class PvacbindPipeline(Pipeline):
 
         if not self.run_post_processor:
             return
-
         post_processing_params = copy.copy(vars(self))
         post_processing_params['input_file'] = self.combined_parsed_path()
         post_processing_params['file_type'] = 'pVACbind'

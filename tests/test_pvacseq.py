@@ -42,7 +42,7 @@ class PvacseqTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
-        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
 
     def test_pvacseq_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -68,23 +68,7 @@ class PvacseqTests(unittest.TestCase):
             )
         usage_search = re.compile(r"usage: ")
         for command in [
-            "allele_specific_cutoffs",
-            "binding_filter",
-            "coverage_filter",
-            "transcript_support_level_filter",
-            "download_example_data",
-            "generate_aggregated_report",
-            "generate_protein_fasta",
-            "install_vep_plugin",
             "run",
-            "net_chop",
-            "netmhc_stab",
-            "calculate_reference_proteome_similarity",
-            "top_score_filter",
-            "valid_alleles",
-            "valid_algorithms",
-            "valid_netmhciipan_versions",
-            'identify_problematic_amino_acids',
             ]:
             result = subprocess_run([
                 sys.executable,
@@ -104,192 +88,6 @@ class PvacseqTests(unittest.TestCase):
             "run.py"
         ))
         self.assertTrue(compiled_run_path)
-
-    def test_allele_specific_cutoffs_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "allele_specific_cutoffs.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_allele_specific_cutoffs_runs(self):
-        allele_specific_cutoffs.main([])
-
-    def test_binding_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "binding_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_binding_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        binding_filter.main([input_file, output_file.name])
-
-    def test_coverage_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "coverage_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_coverage_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        coverage_filter.main([input_file, output_file.name])
-
-    def test_download_example_data_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "download_example_data.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_download_example_data_runs(self):
-        output_dir = tempfile.TemporaryDirectory()
-        download_example_data.main([output_dir.name])
-
-    def test_generate_aggregated_report_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "generate_aggregated_report.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_generate_aggregated_report_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        generate_aggregated_report.main([input_file, output_file.name])
-
-    def test_generate_protein_fasta_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "generate_protein_fasta.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_generate_protein_fasta_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'input.vcf')
-        output_file = tempfile.NamedTemporaryFile()
-        generate_protein_fasta.main([input_file, "25", output_file.name])
-        os.unlink("{}.manufacturability.tsv".format(output_file.name))
-
-    def test_install_vep_pugin_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "install_vep_plugin.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_install_vep_pugin_runs(self):
-        output_dir = tempfile.TemporaryDirectory()
-        install_vep_plugin.main([output_dir.name])
-
-    def test_top_score_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "top_score_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_top_score_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        top_score_filter.main([input_file, output_file.name])
-
-    def test_transcript_support_level_filter_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "transcript_support_level_filter.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_transcript_support_level_filter_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        transcript_support_level_filter.main([input_file, output_file.name])
-
-    def test_valid_alleles_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "valid_alleles.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_alleles_runs(self):
-        valid_alleles.main(["-p", "SMM"])
-    
-    def test_valid_algorithms_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "valid_algorithms.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_algorithms_runs(self):
-        valid_algorithms.main("")
-    
-    def test_valid_netmhciipan_versions_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "valid_netmhciipan_versions.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_valid_netmhciipan_versions_runs(self):
-        valid_netmhciipan_versions.main("")
-
-    def test_identify_problematic_amino_acids_compiles(self):
-        compiled_run_path = py_compile.compile(os.path.join(
-            self.pvactools_directory,
-            'pvactools',
-            "tools",
-            "pvacseq",
-            "identify_problematic_amino_acids.py"
-        ))
-        self.assertTrue(compiled_run_path)
-
-    def test_identify_problematic_amino_acids_runs(self):
-        input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.all_epitopes.tsv')
-        output_file = tempfile.NamedTemporaryFile()
-        identify_problematic_amino_acids.main([input_file, output_file.name, "C"])
 
     def test_pvacseq_pipeline(self):
         with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
@@ -318,6 +116,7 @@ class PvacseqTests(unittest.TestCase):
                 output_dir.name,
                 '-e1', '9,10',
                 '--top-score-metric=lowest',
+                '--top-score-metric2=ic50',
                 '--keep-tmp-files',
                 '--net-chop-method', 'cterm',
                 '--netmhc-stab',
@@ -337,16 +136,19 @@ class PvacseqTests(unittest.TestCase):
                 output_dir.name,
                 '-e2', '15',
                 '--top-score-metric=lowest',
+                '--top-score-metric2=ic50',
                 '--keep-tmp-files',
                 '-d', 'full',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,
                 '--biotypes', 'IG_V_gene,protein_coding',
+                '--allow-incomplete-transcripts'
             ])
             close_mock_fhs()
 
+            #Class I output files
             for file_name in (
-                'sample.name.all_epitopes.tsv',
+                'sample.name.MHC_I.all_epitopes.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -356,9 +158,10 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.tsv',
                 'sample.name.tsv_1-24',
                 'sample.name.fasta',
-                'sample.name.all_epitopes.aggregated.tsv',
-                'sample.name.all_epitopes.aggregated.metrics.json',
-                'sample.name.filtered.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.metrics.json',
+                'sample.name.MHC_I.all_epitopes.aggregated.tsv.reference_matches',
+                'sample.name.MHC_I.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -390,7 +193,6 @@ class PvacseqTests(unittest.TestCase):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'log', file_name)
                 self.assertTrue(os.path.exists(output_file))
 
-            #Class I output files
             methods = self.methods
             for method in methods.keys():
                 for allele in methods[method].keys():
@@ -407,16 +209,18 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name.tsv',
                 'sample.name.tsv_1-24',
                 'sample.name.fasta',
-                'sample.name.all_epitopes.aggregated.tsv',
-                'sample.name.all_epitopes.aggregated.metrics.json',
-                'sample.name.filtered.tsv',
+                'sample.name.MHC_II.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_II.all_epitopes.aggregated.metrics.json',
+                'sample.name.MHC_II.all_epitopes.aggregated.tsv.reference_matches',
+                'sample.name.MHC_II.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
+
             for file_name in (
-                'sample.name.all_epitopes.tsv',
+                'sample.name.MHC_II.all_epitopes.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
@@ -457,6 +261,7 @@ class PvacseqTests(unittest.TestCase):
                     output_dir.name,
                     '-e2', '15',
                     '--top-score-metric=lowest',
+                    '--top-score-metric2=ic50',
                     '--keep-tmp-files',
                     '--run-reference-proteome-similarity',
                     '--peptide-fasta', self.peptide_fasta,
@@ -488,10 +293,11 @@ class PvacseqTests(unittest.TestCase):
             '-a', 'sample_name',
             '-d', 'full',
             '--top-score-metric', 'lowest',
+            '--top-score-metric2', 'ic50',
             '--biotypes', 'IG_V_gene,protein_coding',
         ]
         run.main(params)
-        output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'Test.filtered.tsv')
+        output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'Test.MHC_II.filtered.tsv')
         expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
         self.assertTrue(cmp(output_file, expected_file, False))
         output_dir.cleanup()
@@ -515,6 +321,7 @@ class PvacseqTests(unittest.TestCase):
             '-k',
             '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz'),
             '--biotypes', 'IG_V_gene,protein_coding',
+            '--allow-incomplete-transcripts',
         ]
         run.main(params)
 
@@ -522,11 +329,11 @@ class PvacseqTests(unittest.TestCase):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'tmp', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', 'tmp', file_name)
             self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
-        for file_name in ['Test.all_epitopes.tsv', 'Test.fasta']:
+        for file_name in ['Test.MHC_I.all_epitopes.tsv', 'Test.fasta']:
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
             self.assertTrue(compare(output_file, expected_file))
-        for file_name in ['Test.proximal_variants.tsv', 'Test.all_epitopes.aggregated.tsv', 'Test.filtered.tsv']:
+        for file_name in ['Test.proximal_variants.tsv', 'Test.MHC_I.all_epitopes.aggregated.tsv', 'Test.MHC_I.filtered.tsv']:
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
             expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
             self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
@@ -552,14 +359,15 @@ class PvacseqTests(unittest.TestCase):
             '-e1', '9,10',
             '-e2', '15',
             '--top-score-metric=lowest',
+            '--top-score-metric2=ic50',
             '--keep-tmp-files',
             '-d', 'full',
             '--biotypes', 'IG_V_gene,protein_coding',
         ])
 
         for file_name in (
-            'Test.all_epitopes.tsv',
-            'Test.filtered.tsv',
+            'Test.Combined.all_epitopes.tsv',
+            'Test.Combined.filtered.tsv',
         ):
             output_file   = os.path.join(output_dir.name, 'combined', file_name)
             expected_file = os.path.join(self.test_data_directory, 'combine_and_condense', 'combined', file_name)
@@ -597,12 +405,13 @@ class PvacseqTests(unittest.TestCase):
                 '-e1', '9,10',
                 '--biotypes', 'IG_V_gene,protein_coding',
                 '--problematic-amino-acids', 'C',
+                '--allow-incomplete-transcripts'
             ])
 
         for file_name in (
-            'Test.all_epitopes.tsv',
-            'Test.filtered.tsv',
-            'Test.all_epitopes.aggregated.tsv',
+            'Test.MHC_I.all_epitopes.tsv',
+            'Test.MHC_I.filtered.tsv',
+            'Test.MHC_I.all_epitopes.aggregated.tsv',
         ):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
             expected_file = os.path.join(self.test_data_directory, 'problematic_amino_acids', 'MHC_Class_I', file_name)

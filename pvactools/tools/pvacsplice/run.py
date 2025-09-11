@@ -26,8 +26,8 @@ def create_full_combined_reports(base_output_dir, args):
     output_dir = os.path.join(base_output_dir, 'combined')
     os.makedirs(output_dir, exist_ok=True)
 
-    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.all_epitopes.tsv".format(args.sample_name))
-    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.all_epitopes.tsv".format(args.sample_name))
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.tsv".format(args.sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.MHC_II.all_epitopes.tsv".format(args.sample_name))
     if not os.path.exists(file1):
         print("File {} doesn't exist. Aborting.".format(file1))
         return
@@ -35,9 +35,9 @@ def create_full_combined_reports(base_output_dir, args):
         print("File {} doesn't exist. Aborting.".format(file2))
         return
 
-    combined_output_file = os.path.join(output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+    combined_output_file = os.path.join(output_dir, "{}.Combined.all_epitopes.tsv".format(args.sample_name))
     combine_reports([file1, file2], combined_output_file)
-    filtered_report_file = os.path.join(output_dir, "{}.filtered.tsv".format(args.sample_name))
+    filtered_report_file = os.path.join(output_dir, "{}.Combined.filtered.tsv".format(args.sample_name))
 
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_output_file
@@ -50,6 +50,7 @@ def create_full_combined_reports(base_output_dir, args):
     post_processing_params['run_manufacturability_metrics'] = False
     post_processing_params['run_reference_proteome_similarity'] = False
     post_processing_params['file_type'] = 'pVACsplice'
+    post_processing_params['filename_addition'] = "Combined"
 
     PostProcessor(**post_processing_params).execute()
 
@@ -60,10 +61,16 @@ def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
         mhc_dirs = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.startswith(f'MHC_Class_{mhc_class}')]
     if not mhc_dirs:
         print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
-    combined_files = [os.path.join(m, f'{params["sample_name"]}.all_epitopes.tsv') for m in mhc_dirs]
-    combined_fn = os.path.join(output_dir, f'{params["sample_name"]}.all_epitopes.tsv')
+    combined_files = []
+    for m in mhc_dirs:
+        file = os.path.join(m, f'{params["sample_name"]}.MHC_{mhc_class}.all_epitopes.tsv')
+        if os.path.exists(file):
+            combined_files.append(file)
+    if len(combined_files) == 0:
+        return
+    combined_fn = os.path.join(output_dir, f'{params["sample_name"]}.MHC_{mhc_class}.all_epitopes.tsv')
     combine_epitope_len_reports(combined_files, combined_fn)
-    filtered_fn = os.path.join(output_dir, f'{params["sample_name"]}.filtered.tsv')
+    filtered_fn = os.path.join(output_dir, f'{params["sample_name"]}.MHC_{mhc_class}.filtered.tsv')
 
     post_processing_params = params.copy()
     post_processing_params['file_type'] = 'pVACsplice'
@@ -122,7 +129,9 @@ def main(args_input = sys.argv[1:]):
     NetMHCIIVersion.netmhciipan_version = args.netmhciipan_version
 
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
-    (class_i_alleles, class_ii_alleles, species) = split_alleles(args.allele)
+
+    alleles = combine_class_ii_alleles(args.allele)
+    (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)
 
     # all input file check
     print_log(os.path.join(junctions_dir, 'log'), vars(args), 'inputs')
@@ -140,6 +149,7 @@ def main(args_input = sys.argv[1:]):
         'class_i_epitope_length'           : args.class_i_epitope_length,
         'class_ii_epitope_length'          : args.class_ii_epitope_length,
         'biotypes'                         : args.biotypes,
+        'allow_incomplete_transcripts'     : args.allow_incomplete_transcripts,
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'anchor_types'                     : args.anchor_types,
@@ -155,6 +165,7 @@ def main(args_input = sys.argv[1:]):
 
     additional_args = {
         'top_score_metric'          : args.top_score_metric,
+        'top_score_metric2'         : args.top_score_metric2,
         'binding_threshold'         : args.binding_threshold,
         'percentile_threshold'      : args.percentile_threshold,
         'percentile_threshold_strategy': args.percentile_threshold_strategy,
@@ -181,9 +192,11 @@ def main(args_input = sys.argv[1:]):
         'trna_vaf'                  : args.trna_vaf,
         'expn_val'                  : args.expn_val,
         'tumor_purity'              : args.tumor_purity,
+        'transcript_prioritization_strategy': args.transcript_prioritization_strategy,
         'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'run_post_processor'        : True,
         'exclude_NAs'               : args.exclude_NAs,
+        'genes_of_interest_file': args.genes_of_interest_file,
     }
     junction_arguments.update(additional_args)
 
@@ -195,21 +208,25 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_i_executable = None
 
+        class_i_arguments = junction_arguments.copy()
         for x in args.class_i_epitope_length:
-
             print(f'Executing MHC Class I predictions for {x}mers')
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
             os.makedirs(output_len_dir, exist_ok=True)
 
-            class_i_arguments = junction_arguments.copy()
-            class_i_arguments['input_file']              = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{x}.fa')
+            input_file  = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{x}.fa')
+            if not os.path.exists(input_file):
+                print(f'No {x}mer neoepitopes found')
+                continue
+
+            class_i_arguments['input_file']              = input_file
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
             class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
             class_i_arguments['output_dir']              = output_len_dir
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
-
+            class_i_arguments['filename_addition']         = "MHC_I"
             pipeline = PvacsplicePipeline(**class_i_arguments)
             pipeline.execute()
 
@@ -232,21 +249,25 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_ii_executable = None
 
+        class_ii_arguments = junction_arguments.copy()
         for y in args.class_ii_epitope_length:
-
             print(f'Executing MHC Class II predictions for {y}mers')
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
             os.makedirs(output_len_dir, exist_ok=True)
 
-            class_ii_arguments = junction_arguments.copy()
-            class_ii_arguments['input_file']              = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{y}.fa')
+            input_file  = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{y}.fa')
+            if not os.path.exists(input_file):
+                print(f'No {y}mer neoepitopes found')
+                continue
+
+            class_ii_arguments['input_file']              = input_file
             class_ii_arguments['alleles']                 = class_ii_alleles
             class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
             class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
             class_ii_arguments['epitope_lengths']         = y
             class_ii_arguments['output_dir']              = output_len_dir
             class_ii_arguments['netmhc_stab']             = False
-
+            class_ii_arguments['filename_addition']         = "MHC_II"
             pipeline = PvacsplicePipeline(**class_ii_arguments)
             pipeline.execute()
 

@@ -32,22 +32,22 @@ created):
        processable variant-transcript combinations.
    * - ``<sample_name>.net_chop.fa``
      - A fasta file with mutant and wildtype peptide subsequences specific for use in running the net_chop tool.
-   * - ``<sample_name>.all_epitopes.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``. Only
        epitopes resulting from supported variants (missense, inframe indels, and frameshifts)
        are included. If the ``--pass-only`` flag is
        set, variants that have a FILTER set in the VCF are excluded.
-   * - ``<sample_name>.filtered.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.filtered.tsv``
      - The above file after applying all filters, with (optionally) cleavage site, stability
        predictions, and reference proteome similarity metrics added.
-   * - ``<sample_name>.all_epitopes.aggregated.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format. Not
        generated when running with elution algorithms only.
-   * - ``<sample_name>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
-   * - ``<sample_name>.all_epitopes.aggregated.metrics.json``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.metrics.json``
      - A JSON file with detailed information about the predicted epitopes,
        formatted for pVACview. This file, in combination with the
        aggregated.tsv file, is required to visualize your results
@@ -229,6 +229,8 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - A list of positions in the ``MT Epitope Seq`` that match the
        problematic amino acids defined by the ``--problematic-amino-acids``
        parameter
+   * - ``Gene of Interest`` (T/F)
+     - Is the ``Gene Name`` found in the genes of interest list?
    * - ``cterm_7mer_gravy_score``
      - Mean hydropathy of last 7 residues on the C-terminus of the peptide
    * - ``max_7mer_gravy_score``
@@ -465,27 +467,36 @@ Given the thresholds provided above, the Best Peptide is evaluated and binned in
    * - Tier
      - Citeria
    * - ``Pass``
-     - Best Peptide passes the binding, expression, tsl, clonal, and anchor criteria
-   * - ``Anchor``
-     - Best Peptide fails the anchor criteria but passes the binding,
-       expression, tsl, and clonal criteria
-   * - ``Subclonal``
-     - Best Peptide fails the clonal criteria but passes the binding, tsl, and
-       anchor criteria
+     - Best Peptide passes the binding, reference match, expression, transcript, clonal, problematic position, and anchor criteria
+   * - ``PoorBinder``
+     - Best Peptide fails the binding criteria but passed the reference match, expression, transcript, clonal, problematic position, and anchor criteria
+   * - ``RefMatch``
+     - Best Peptide fails the reference match criteria but passes the binding, expression, transcript, clonal, problematic position, and anchor criteria
+   * - ``PoorTranscript``
+     - Best Peptide fails the transcript criteria but passes the binding, reference match, expression, clonal, problematic position, and anchor criteria
    * - ``LowExpr``
-     - Best Peptide meets the Low Expression Criteria and passes the binding, tsl,
-       clonal, and anchor criteria
-   * - ``NoExpr``
-     - Best Peptide is not expressed (RNA Expr == 0 or RNA VAF == 0)
+     - Best Peptide meets the low expression criteria and passes the binding, reference match, transcript, clonal, problematic position, and anchor criteria
+   * - ``Anchor``
+     - Best Peptide fails the anchor criteria but  passes the binding, reference match, expression, transcript, clonal, and problematic position criteria
+   * - ``Subclonal``
+     - Best Peptide fails the clonal criteria but passes the binding, reference match, expression, transcript, problematic position, and anchor criteria
+   * - ``ProbPos``
+     - Best Peptide fails the problematic position criteria but passes the binding, reference match, expression, transcript, clonal, and anchor criteria
    * - ``Poor``
      - Best Peptide doesn't fit in any of the above tiers, usually if it fails
-       two or more criteria or if it fails the binding criteria
+       two or more criteria
+   * - ``NoExpr``
+     - Best Peptide is not expressed (RNA Expr == 0 or RNA VAF == 0)
 
 Criteria Details
 ****************
 
 .. list-table::
+   :header-rows: 1
 
+   * - Criteria
+     - Description
+     - Evaluation Logic
    * - Binding Criteria
      - Pass if Best Peptide is strong binder
      - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
@@ -495,19 +506,31 @@ Criteria Details
    * - Expression Criteria
      - Pass if Best Transcript is expressed
      - ``Allele Expr > trna_vaf * expn_val``
+   * - Reference Match Criteria
+     - Pass if there are no reference protome matches
+     - ``Ref Match == True``
+   * - Transcript Criteria
+     - Pass if Best Transcript matches any of the user-specified ``--transcript-prioritization-strategy`` criteria
+     - ``TSL <= maximum_transcript_support_level`` (if
+       ``--transcript-prioritization-strategy`` includes ``tsl``)
+       ``MANE Select == True`` (if ``--transcript-prioritization-strategy
+       includes ``mane_select``)
+       ``Canonical == True`` (if ``--transcript-prioritization-strategy``
+       incluces ``canonical``)
    * - Low Expression Criteria
      - Peptide has low expression or no expression but RNA VAF and coverage
      - ``(0 < Allele Expr < trna_vaf * expn_val) OR (RNA Expr == 0 AND RNA
        Depth > trna_cov AND RNA VAF > trna_vaf)``
-   * - TSL Criteria
-     - Pass if Best Transcript has good transcript support level
-     - ``TSL <= maximum_transcript_support_level``
-   * - Clonal Criteria
-     - Best Peptide is likely in the founding clone of the tumor
-     - ``DNA VAF > tumor_purity / 4``
    * - Anchor Criteria
      - Fail if if there are <= 2 mutated amino acids and all mutated amino acids of the Best Peptide (``Pos``) are at an anchor position and the WT peptide has good binding ``(IC50 WT < binding_threshold)``
      -
+   * - Clonal Criteria
+     - Best Peptide is likely in the founding clone of the tumor
+     - ``DNA VAF > tumor_purity / 4``
+   * - Problematic Position Criteria
+     - Best Peptide contains a problematic amino acid as defined by the
+       ``--problematic-amino-acids`` parameters
+     - ``Prob Pos == None``
 
 .. _reference_matches:
 

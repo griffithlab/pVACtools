@@ -9,6 +9,8 @@ from Bio.Blast import NCBIWWW
 from urllib.request import urlopen
 from shutil import copyfileobj
 from tempfile import NamedTemporaryFile
+import logging
+from testfixtures import LogCapture, StringComparison as S
 
 from pvactools.lib.calculate_reference_proteome_similarity import CalculateReferenceProteomeSimilarity
 from tests.utils import *
@@ -20,7 +22,7 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         cls.python        = sys.executable
         cls.executable    = os.path.join(pvactools_directory(), "pvactools", "lib", "calculate_reference_proteome_similarity.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "calculate_reference_proteome_similarity")
-        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.all.fa.gz")
+        cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
 
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
@@ -89,6 +91,30 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "output.aggregated.peptide_fasta.tsv.metrics.json"),
         ))
         os.remove(metric_file)
+
+    def test_calculate_self_similarity_with_aggregated_tsv_and_peptide_fasta_missing_sequence_in_fasta(self):
+        logging.disable(logging.NOTSET)
+        with LogCapture() as l:
+            input_file = os.path.join(self.test_data_dir, 'Test.all_epitopes.aggregated.tsv')
+            input_fasta = os.path.join(self.test_data_dir, 'Test.missing_sequence.fasta')
+            output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
+            metric_file = "{}.reference_matches".format(output_file.name)
+            self.assertFalse(CalculateReferenceProteomeSimilarity(
+                input_file,
+                input_fasta,
+                output_file.name,
+                peptide_fasta=self.peptide_fasta,
+            ).execute())
+            self.assertTrue(cmp(
+                output_file.name,
+                os.path.join(self.test_data_dir, "output.missing_sequence.aggregated.tsv"),
+            ))
+            self.assertTrue(cmp(
+                metric_file,
+                os.path.join(self.test_data_dir, "output.missing_sequence.aggregated.tsv.reference_matches"),
+            ))
+            os.remove(metric_file)
+            l.check_present(('root', 'WARNING', S("Record 19.ACO2.ENST00000216254.4.missense.510E/Q not found in input FASTA. Skipping.")))
 
     def test_calculate_self_similarity_with_aggregated_tsv_and_peptide_fasta_pvasplice(self):
         input_file = os.path.join(self.test_data_dir, 'Test.pvacsplice.all_epitopes.aggregated.tsv')
@@ -165,3 +191,19 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
             output_file = tempfile.NamedTemporaryFile()
             CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, blastp_db='refseq_select_prot', species='bonobo').execute()
             self.assertTrue("refseq_select_prot blastp database is only compatible with human and mouse species." in str(context.exception))
+
+    def test_calculate_self_similarity_with_peptide_fasta_pvacbind(self):
+        input_file = os.path.join(self.test_data_dir, 'Test.pvacbind.all_epitopes.tsv')
+        input_fasta = os.path.join(self.test_data_dir, 'Test.pvacbind.fasta')
+        output_file = tempfile.NamedTemporaryFile()
+        metric_file = "{}.reference_matches".format(output_file.name)
+        self.assertFalse(CalculateReferenceProteomeSimilarity(input_file, input_fasta, output_file.name, peptide_fasta=self.peptide_fasta, file_type="pVACbind").execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output.pvacbind.all_epitopes.tsv"),
+        ))
+        self.assertTrue(cmp(
+            metric_file,
+            os.path.join(self.test_data_dir, "output.pvacbind.all_epitopes.tsv.reference_matches"),
+        ))
+        os.remove(metric_file)

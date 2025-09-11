@@ -30,12 +30,12 @@ def define_parser():
     )
     coverage_filter_parser.set_defaults(func=coverage_filter)
 
-    transcript_support_level_filter_parser = subparsers.add_parser(
-        "transcript_support_level_filter",
-        help="Filter variants processed by IEDB by transcript support level.",
+    transcript_filter_parser = subparsers.add_parser(
+        "transcript_filter",
+        help="Filter variant transcripts processed by IEDB.",
         add_help=False
     )
-    transcript_support_level_filter_parser.set_defaults(func=transcript_support_level_filter)
+    transcript_filter_parser.set_defaults(func=transcript_filter)
 
     top_score_filter_parser = subparsers.add_parser(
         "top_score_filter",
@@ -72,6 +72,13 @@ def define_parser():
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
 
+    create_peptide_ordering_form_parser = subparsers.add_parser(
+        "create_peptide_ordering_form",
+        help="Generate a peptide ordering form with coloring.",
+        add_help=False
+    )
+    create_peptide_ordering_form_parser.set_defaults(func=create_peptide_ordering_form)
+
     generate_aggregated_report_parser = subparsers.add_parser(
         "generate_aggregated_report",
         help="Generate an aggregated report from a pVACseq .all_epitopes.tsv report file.",
@@ -85,6 +92,20 @@ def define_parser():
         add_help = False
         )
     identify_problematic_amino_acids_parser.set_defaults(func=identify_problematic_amino_acids)
+
+    mark_genes_of_interest_parser = subparsers.add_parser(
+        "mark_genes_of_interest",
+        help="Mark predictions resulting from variants on a genes of interest list.",
+        add_help = False
+        )
+    mark_genes_of_interest_parser.set_defaults(func=mark_genes_of_interest)
+
+    update_tiers_parser = subparsers.add_parser(
+        "update_tiers",
+        help="Update tiers in an aggregated report in order to, for example, use different thresholds or account for problematic position or reference match information if run after initial pipeline run.",
+        add_help = False
+        )
+    update_tiers_parser.set_defaults(func=update_tiers)
 
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",

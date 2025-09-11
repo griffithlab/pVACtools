@@ -1,0 +1,4 @@
+id	peptide_sequence	cterm_7mer_gravy_score	max_7mer_gravy_score	difficult_n_terminal_residue	c_terminal_cysteine	c_terminal_proline	cysteine_count	n_terminal_asparagine	asparagine_proline_bond_count
+SPCS1.ENST00000233025.JUNC00000303.chr3:52706795-52706796.D.frameshift_splice_site	LPTQMDYKGQKLAEQMFQGIILFSAYLRVRG	-0.1285714285714286	2.314285714285714	False	False	False	0	False	0
+SPCS1.ENST00000423431.JUNC00000303.chr3:52706795-52706796.D.frameshift_splice_site	MFQGIILFSAYLRVRG	-0.1285714285714286	2.314285714285714	False	False	False	0	False	0
+SPCS1.ENST00000619898.JUNC00000303.chr3:52706795-52706796.D.frameshift_splice_site	LPTQMDYKGQKLAEQMFQGIILFSAYLRVRG	-0.1285714285714286	2.314285714285714	False	False	False	0	False	0

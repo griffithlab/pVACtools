@@ -20,16 +20,16 @@ created):
 
    * - File Name
      - Description
-   * - ``<sample_name>.all_epitopes.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
        additional variant information from the ``<sample_name>.tsv``.
-   * - ``<sample_name>.filtered.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.filtered.tsv``
      - The above file after applying all filters, with cleavage site and stability
        predictions added.
-   * - ``<sample_name>.all_epitopes.aggregated.tsv``
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format. Not generated when running with elution algorithms only.
-   * - ``<sample_name>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
+   * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
 
 Filters applied to the filtered.tsv file
@@ -252,22 +252,42 @@ into tiers as follows:
    * - Tier
      - Criteria
    * - ``Pass``
-     - Best Peptide passes the binding criteria
+     - Best Peptide passes the binding, reference match, and problematic
+       position criteria
+   * - ``PoorBinder``
+     - Best Peptide fails the binding criteria but passes the, reference match and problematic
+       position criteria
+   * - ``RefMatch``
+     - Best Peptide fails the reference match criteria but passes the binding and problematic
+       position criteria
+   * - ``ProbPros``
+     - Best Peptide fails the problematic position criteria but passes the binding and reference match criteria
    * - ``Poor``
-     - Best Peptide fails the binding criteria
+     - Best Peptide doesn't fit in any of the above tiers, usually if it fails
+       two or more criteria
 
 Criteria Details
 ****************
 
 .. list-table::
+   :header-rows: 1
 
+   * - Criteria
+     - Description
+     - Evaluation Logic
    * - Binding Criteria
      - Pass if Best Peptide is strong binder
      - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
        (if ``--percentile-threshold`` parameter is set and 'conservative' ``--percentile-threshold-strategy`` is used) or
        ``IC50 MT < binding_threshold`` or ``%ile MT < percentile_threshold``
        (if 'exploratory' ``--percentile-threshold-strategy`` is used)
-
+   * - Reference Match Criteria
+     - Pass if there are no reference protome matches
+     - ``Ref Match == True``
+   * - Problematic Position Criteria
+     - Best Peptide contains a problematic amino acid as defined by the
+       ``--problematic-amino-acids`` parameters
+     - ``Prob Pos == None``
 
 .. _pvacbind_reference_matches:
 
