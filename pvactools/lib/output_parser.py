@@ -529,7 +529,10 @@ class OutputParser(metaclass=ABCMeta):
             'Transcript',
             'Transcript Support Level',
             'Transcript Length',
+            'Canonical',
+            'MANE Select',
             'Biotype',
+            'Transcript CDS Flags',
             'Ensembl Gene ID',
             'Variant Type',
             'Mutation',
@@ -696,7 +699,10 @@ class OutputParser(metaclass=ABCMeta):
                     'Transcript'          : tsv_entry['transcript_name'],
                     'Transcript Support Level': tsv_entry['transcript_support_level'],
                     'Transcript Length'   : tsv_entry['transcript_length'],
+                    'Canonical'           : tsv_entry['canonical'],
+                    'MANE Select'         : tsv_entry['mane_select'],
                     'Biotype'             : tsv_entry['biotype'],
+                    'Transcript CDS Flags': tsv_entry['transcript_cds_flags'],
                     'Ensembl Gene ID'     : tsv_entry['ensembl_gene_id'],
                     'HGVSc'               : tsv_entry['hgvsc'],
                     'HGVSp'               : tsv_entry['hgvsp'],
@@ -1084,7 +1090,10 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             'Junction Anchor',
             'Transcript',
             'Transcript Support Level',
+            'Canonical',
+            'MANE Select',
             'Biotype',
+            'Transcript CDS Flags',
             'Ensembl Gene ID',
             'Variant Type',
             'Amino Acid Change',
@@ -1121,10 +1130,10 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
         tmp_output_filehandle = open(tmp_output_file, 'w')
         tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
         tsv_writer.writeheader()
-        
+
         # added for pvacsplice - variant info
         tsv_entries = self.parse_input_tsv_file()
-        
+
         # get binding info from iedb files
         iedb_results = self.process_input_iedb_file()
 
@@ -1154,7 +1163,10 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'Variant'             : tsv_entry['variant'],
                 'Transcript'          : tsv_entry['transcript_name'],
                 'Transcript Support Level': tsv_entry['transcript_support_level'],
+                'Canonical'           : tsv_entry['canonical'],
+                'MANE Select'         : tsv_entry['mane_select'],
                 'Biotype'             : tsv_entry['biotype'],
+                'Transcript CDS Flags': tsv_entry['transcript_cds_flags'],
                 ### junction info from RegTools
                 'Junction'            : tsv_entry['name'],
                 'Junction Start'      : tsv_entry['junction_start'],
@@ -1178,14 +1190,14 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'HLA Allele'          : allele,
                 'Peptide Length'      : len(mt_epitope_seq),
                 'Epitope Seq'         : mt_epitope_seq,
-                'Median IC50 Score'   : round(median_mt_score, 3),
                 'Best IC50 Score'     : best_mt_score,
-                'Best IC50 Score Method' : PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method),
                 'Best Percentile'     : best_mt_percentile,
                 ###
             }
-            row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
+            row['Median IC50 Score'] = 'NA' if median_mt_score == 'NA' else round(median_mt_score, 3)
             row['Median Percentile'] = 'NA' if median_mt_percentile == 'NA' else round(median_mt_percentile, 3)
+            row['Best IC50 Score Method'] = 'NA' if best_mt_score_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_score_method)
+            row['Best Percentile Method'] = 'NA' if best_mt_percentile_method == 'NA' else PredictionClass.prediction_class_name_for_iedb_prediction_method(best_mt_percentile_method)
 
             for method in self.prediction_methods():
                 pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)

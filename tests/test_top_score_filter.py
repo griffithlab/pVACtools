@@ -19,11 +19,20 @@ class TopScoreFilterTests(unittest.TestCase):
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
+    def test_HCC1395_runs_and_creates_expected_file(self):
+        input_file = os.path.join(self.test_data_dir, 'HCC1395_TUMOR_DNA.all_epitopes.short.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+
+        PvacseqTopScoreFilter(input_file, output_file.name).execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_HCC1395.tsv')
+        self.assertTrue(cmp(output_file.name, expected_output_file))
+
     def test_runs_and_creates_expected_file_median(self):
         input_file = os.path.join(self.test_data_dir, 'input.tsv')
         output_file = tempfile.NamedTemporaryFile()
 
-        PvacseqTopScoreFilter(input_file, output_file.name).execute()
+        PvacseqTopScoreFilter(input_file, output_file.name, transcript_prioritization_strategy=['tsl']).execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_median.tsv')
         self.assertTrue(cmp(output_file.name, expected_output_file))
@@ -32,7 +41,7 @@ class TopScoreFilterTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_dir, 'input.tsv')
         output_file = tempfile.NamedTemporaryFile()
 
-        PvacseqTopScoreFilter(input_file, output_file.name, top_score_metric='lowest').execute()
+        PvacseqTopScoreFilter(input_file, output_file.name, top_score_metric='lowest', transcript_prioritization_strategy=['tsl']).execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_lowest.tsv')
         self.assertTrue(cmp(output_file.name, expected_output_file))
@@ -59,7 +68,17 @@ class TopScoreFilterTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_dir, 'input_pvacsplice.tsv')
         output_file = tempfile.NamedTemporaryFile()
 
-        PvacspliceTopScoreFilter(input_file, output_file.name, top_score_metric='median').execute()
+        PvacspliceTopScoreFilter(input_file, output_file.name, top_score_metric='median', transcript_prioritization_strategy=['tsl']).execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice.tsv')
         self.assertTrue(cmp(output_file.name, expected_output_file))
+
+    def test_runs_and_creates_expected_file_pvacsplice_percentile(self):
+        input_file = os.path.join(self.test_data_dir, 'input_pvacsplice.tsv')
+        output_file = tempfile.NamedTemporaryFile()
+        output_file_name = output_file.name
+
+        PvacspliceTopScoreFilter(input_file, output_file_name, top_score_metric='median', transcript_prioritization_strategy=['tsl'], top_score_metric2="percentile", allow_incomplete_transcripts=True).execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice_percentile.tsv')
+        self.assertTrue(cmp(output_file_name, expected_output_file))

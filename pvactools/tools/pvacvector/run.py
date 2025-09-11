@@ -41,6 +41,7 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         'iedb_retries'    : args.iedb_retries,
         'additional_report_columns' : None,
         'junctions_to_test': junctions_to_test,
+        'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
     }
 
     parsed_output_files = []
@@ -63,6 +64,7 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         class_i_arguments['epitope_lengths']         = args.class_i_epitope_length
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
+        class_i_arguments['filename_addition']         = "MHC_I"
         pipeline_i = Pipeline(**class_i_arguments)
         pipeline_i.generate_fasta([[1, 1]])
         pipeline_i.call_iedb([[1, 1]])
@@ -88,6 +90,7 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
         class_ii_arguments['output_dir']              = output_dir
         class_ii_arguments['netmhc_stab']             = False
+        class_ii_arguments['filename_addition']         = "MHC_II"
         pipeline_ii = Pipeline(**class_ii_arguments)
         pipeline_ii.generate_fasta([[1, 1]])
         pipeline_ii.call_iedb([[1, 1]])
@@ -112,6 +115,7 @@ def write_junctions_file(graph, current_output_dir):
                 'percentile': edge_data['percentile'],
             }
             writer.writerow(row)
+    return junctions_file
 
 def find_min_scores(parsed_output_files, current_output_dir, args, min_scores, min_percentiles):
     #min_scores_rows = {}
@@ -128,12 +132,11 @@ def find_min_scores(parsed_output_files, current_output_dir, args, min_scores, m
             for row in reader:
                 index = row['Mutation']
                 processed_junctions.add(index)
-
                 if args.top_score_metric == 'lowest':
                     score = float(row['Best IC50 Score'])
                     percentile = float(row['Best Percentile'])
                 elif args.top_score_metric == 'median':
-                    score = float(row['Median IC50 Score'])
+                    score = float(row[f'Median IC50 Score'])
                     percentile = float(row['Median Percentile'])
                 if args.allele_specific_binding_thresholds:
                     allele = row['HLA Allele']
@@ -253,7 +256,7 @@ def create_distance_matrix(Paths):
             distance_matrix[ID_1][ID_2] = Paths[ID_1][ID_2]['weight']
     return distance_matrix
 
-def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, args):
+def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, junctions_file, args):
     init_state = sorted(graph.nodes())
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
@@ -284,6 +287,27 @@ def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, args):
     names.append(state[-1])
     if len(problematic_junctions) > 0:
         return (None, "No valid junction between peptides: {}".format(", ".join(problematic_junctions)))
+
+    junctions = []
+    fieldnames = None
+    with open(junctions_file, 'r') as read_fh:
+        reader = csv.DictReader(read_fh, delimiter="\t")
+        fieldnames = reader.fieldnames
+        for line in reader:
+            line['selected'] = 'False'
+            junctions.append(line)
+    for i in range(0, (len(state) - 1)):
+        left_peptide = state[i]
+        right_peptide = state[i + 1]
+        selected_junction_idx = next((index for (index, d) in enumerate(junctions) if d['left_peptide'] == left_peptide and d['right_peptide'] == right_peptide), None)
+        selected_junction = junctions[selected_junction_idx]
+        selected_junction['selected'] = 'True'
+        junctions[selected_junction_idx] = selected_junction
+    with open(junctions_file, 'w') as write_fh:
+        fieldnames.append('selected')
+        writer = csv.DictWriter(write_fh, delimiter="\t", fieldnames = fieldnames)
+        writer.writeheader()
+        writer.writerows(junctions)
 
     print("%i distance :" % e)
     for id in state:
@@ -423,7 +447,7 @@ def main(args_input=sys.argv[1:]):
     if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
         random.seed(0.5)
     if generate_input_fasta:
-        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, args.input_n_mer, args.sample_name)
+        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, args.input_n_mer, args.sample_name, args.allow_incomplete_transcripts)
         generator.execute()
         input_file = generator.output_file
 
@@ -460,21 +484,20 @@ def main(args_input=sys.argv[1:]):
             )
             min_scores, min_percentiles = find_min_scores(parsed_output_files, current_output_dir, args, min_scores, min_percentiles)
             add_valid_junctions_to_graph(graph, min_scores, min_percentiles)
-            write_junctions_file(graph, current_output_dir)
+            junctions_file = write_junctions_file(graph, current_output_dir)
             (valid, error) = check_graph_valid(graph, seq_dict)
             if not valid:
                 junctions_to_process = identify_problematic_junctions(graph, seq_tuples)
                 print("No valid path found. {}".format(error))
                 continue
             distance_matrix = create_distance_matrix(graph)
-            (results_file, error) = find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, args)
+            (results_file, error) = find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, junctions_file, args)
             if results_file is None:
                 print("No valid path found. {}".format(error))
                 junctions_to_process = identify_problematic_junctions(graph, seq_tuples)
             else:
                 break
         tries += 1
-    junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
     shutil.copy(junctions_file, base_output_dir)
 
     if results_file is not None:
@@ -494,7 +517,8 @@ def main(args_input=sys.argv[1:]):
             for node_set in node_sets_to_remove:
                 print("Removing nodes: {}".format(', '.join(node_set)))
                 #Creating output directory
-                current_output_dir = os.path.join(base_output_dir, "without_{}".format('_'.join(node_set)))
+                renamed_node_set = [n.replace('/', '-') for n in node_set]
+                current_output_dir = os.path.join(base_output_dir, "without_{}".format('_'.join(renamed_node_set)))
                 os.makedirs(current_output_dir, exist_ok=True)
                 #Creating junctions file with node_set removed
                 junctions_file = os.path.join(base_output_dir, 'junctions.tsv')
@@ -519,7 +543,7 @@ def main(args_input=sys.argv[1:]):
                     print("No valid path found after removing nodes: {}".format(', '.join(node_set)))
                     continue
                 distance_matrix = create_distance_matrix(modified_graph)
-                (results_file, error) = find_optimal_path(modified_graph, distance_matrix, modified_seq_dict, current_output_dir, args)
+                (results_file, error) = find_optimal_path(modified_graph, distance_matrix, modified_seq_dict, current_output_dir, modified_junctions_file, args)
                 if results_file is None:
                     print("No valid path found after removing nodes: {}".format(', '.join(node_set)))
                     continue

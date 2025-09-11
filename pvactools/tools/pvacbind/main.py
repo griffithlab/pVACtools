@@ -4,7 +4,7 @@ from subprocess import call
 import os
 from pvactools.tools.pvacbind import *
 
-def main():
+def define_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subparsers = parser.add_subparsers()
 
@@ -66,6 +66,13 @@ def main():
         )
     identify_problematic_amino_acids_parser.set_defaults(func=identify_problematic_amino_acids)
 
+    update_tiers_parser = subparsers.add_parser(
+        "update_tiers",
+        help="Update tiers in an aggregated report in order to, for example, use different thresholds or account for problematic position or reference match information if run after initial pipeline run.",
+        add_help = False
+        )
+    update_tiers_parser.set_defaults(func=update_tiers)
+
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
         help="Download example input and output files",
@@ -101,6 +108,11 @@ def main():
     )
     allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
 
+    return parser
+
+
+def main():
+    parser = define_parser()
     args = parser.parse_known_args()
     try:
         args[0].func.main(args[1])

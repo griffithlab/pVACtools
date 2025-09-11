@@ -73,6 +73,12 @@ def define_parser():
         help="Expression Cutoff. Expression is meassured as FFPM (fusion fragments per million total reads). When failing this cutoff sites will be binned in the \"LowExpr\" tier.",
         default=0.1
     )
+    parser.add_argument(
+        '-m2', '--top-score-metric2',
+        choices=['ic50','percentile'],
+        default='ic50',
+        help="Whether to use median/best IC50 or to use median/best percentile score."
+    )
 
     return parser
 
@@ -91,6 +97,7 @@ def main(args_input = sys.argv[1:]):
         percentile_threshold=args.percentile_threshold,
         percentile_threshold_strategy=args.percentile_threshold_strategy,
         top_score_metric=args.top_score_metric,
+        top_score_metric2=args.top_score_metric2,
         read_support=args.read_support,
         expn_val=args.expn_val,
         aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,

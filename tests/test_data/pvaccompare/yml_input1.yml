@@ -1,0 +1,56 @@
+additional_report_columns: null
+aggregate_inclusion_binding_threshold: 1000
+allele_specific_anchors: true
+allele_specific_binding_thresholds: false
+alleles:
+- HLA-A*29:02
+- HLA-B*45:01
+- HLA-B*82:02
+- HLA-C*06:02
+anchor_contribution_threshold: 0.8
+binding_threshold: 500
+downstream_sequence_length: 100
+epitope_lengths:
+- 8
+- 10
+- 11
+exclude_NAs: false
+expn_val: 1.0
+fasta_size: 200
+flurry_state: both
+iedb_retries: 5
+input_file_type: vcf
+keep_tmp_files: true
+maximum_transcript_support_level: 1
+minimum_fold_change: 0.0
+n_threads: 8
+net_chop_method: null
+net_chop_threshold: 0.5
+netmhc_stab: false
+normal_cov: 20
+normal_sample_name: HCC1395_NORMAL_DNA
+normal_vaf: 0.01
+pass_only: true
+percentile_threshold: null
+prediction_algorithms:
+- MHCflurry
+- MHCnuggetsI
+- NetMHC
+- NetMHCcons
+- NetMHCpan
+- NetMHCpanEL
+- PickPocket
+- SMM
+- SMMPMBEC
+problematic_amino_acids:
+- C
+proximal_variants_file: null
+pvactools_version: 4.0.6
+run_reference_proteome_similarity: true
+starfusion_file: null
+tdna_cov: 20
+tdna_vaf: 0.1
+top_score_metric: median
+trna_cov: 10
+trna_vaf: 0.1
+tumor_purity: null

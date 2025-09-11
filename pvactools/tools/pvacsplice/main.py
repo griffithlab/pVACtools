@@ -30,12 +30,12 @@ def define_parser():
     )
     coverage_filter_parser.set_defaults(func=coverage_filter)
 
-    transcript_support_level_filter_parser = subparsers.add_parser(
-        "transcript_support_level_filter",
-        help="Filter variants processed by IEDB by transcript support level.",
+    transcript_filter_parser = subparsers.add_parser(
+        "transcript_filter",
+        help="Filter variants transcripts processed by IEDB.",
         add_help=False
     )
-    transcript_support_level_filter_parser.set_defaults(func=transcript_support_level_filter)
+    transcript_filter_parser.set_defaults(func=transcript_filter)
 
     top_score_filter_parser = subparsers.add_parser(
         "top_score_filter",
@@ -86,6 +86,20 @@ def define_parser():
         )
     identify_problematic_amino_acids_parser.set_defaults(func=identify_problematic_amino_acids)
 
+    mark_genes_of_interest_parser = subparsers.add_parser(
+        "mark_genes_of_interest",
+        help="Mark predictions resulting from variants on a genes of interest list.",
+        add_help = False
+        )
+    mark_genes_of_interest_parser.set_defaults(func=mark_genes_of_interest)
+
+    update_tiers_parser = subparsers.add_parser(
+        "update_tiers",
+        help="Update tiers in an aggregated report in order to, for example, use different thresholds or account for problematic position or reference match information if run after initial pipeline run.",
+        add_help = False
+        )
+    update_tiers_parser.set_defaults(func=update_tiers)
+
     download_example_data_parser = subparsers.add_parser(
         "download_example_data",
         help="Download example input and output files.",
@@ -99,6 +113,13 @@ def define_parser():
         add_help=False
     )
     valid_alleles_parser.set_defaults(func=valid_alleles)
+
+    valid_algorithms_parser = subparsers.add_parser(
+        "valid_algorithms",
+        help="Show a list of algorithms supported given the specified species and/or allele",
+        add_help=False
+    )
+    valid_algorithms_parser.set_defaults(func=valid_algorithms)
 
     valid_netmhciipan_versions_parser = subparsers.add_parser(
         "valid_netmhciipan_versions",
