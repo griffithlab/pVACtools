@@ -521,9 +521,8 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
                  + "median: Use the median MT Score (i.e. the  median MT ic50 binding score of all chosen prediction methods)."
         )
         self.parser.add_argument(
-            '-m2', '--top-score-metric2',
-            choices=['ic50','percentile'],
-            default='ic50',
-            help="Whether to use median/best IC50 or to use median/best percentile score."
+            "--biotypes", type=lambda s:[a for a in s.split(',')],
+            help="A list of biotypes to use for pre-filtering transcripts when running with an input VCF.",
+            default=['protein_coding']
         )
         self.pvacvector()

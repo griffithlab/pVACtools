@@ -444,7 +444,7 @@ def main(args_input=sys.argv[1:]):
     if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
         random.seed(0.5)
     if generate_input_fasta:
-        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, args.input_n_mer, args.sample_name)
+        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, args.input_n_mer, args.sample_name, args.biotypes)
         generator.execute()
         input_file = generator.output_file
 
