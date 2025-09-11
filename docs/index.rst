@@ -63,19 +63,9 @@ New in Version |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Fix a couple of issues with the new `--top-score-metric2` by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1291
-
-  * When adding the ``--top-score-metric2`` option, the logic for determining
-    the included candidates during aggregate report creation was amended to
-    compare either the IC50 or percentile to the aggregate inclusion binding
-    threshold. This logic should not have been changed and instead only the
-    IC50 should be compared to the aggregate inclusion binding threshold, no
-    matter which ``--top-score-metric2`` was selected. This specific change
-    has been reverted
-  * In order to achieve deterministic results when using the percentile
-    ``--top-score-metric2`` option, a peptides.sort() call was used. This
-    release replaces this with a better way of finding the best peptide by
-    using the IC50 as a secondary sort criteria.
+* Remove unused --top-score-metric2 parameter from pVACvector. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1304
+* Speedup processing of AGFusion exon files. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1301
+* Added biotype parameter to pVACvector when running with an input VCF. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1297
 
 New in Version 5
 ----------------
