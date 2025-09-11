@@ -19,7 +19,6 @@ def rearrange_string(s):
         letters_before = match.group(1)
         numbers = match.group(2)
         letters_after = match.group(3)
-                
         return f"{numbers}{letters_before}/{letters_after}"
     else:
         return s
@@ -102,7 +101,7 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
 
     if external_vcf:
         fill_variant_called_column(reviewed_candidates, input_vcf, external_vcf)
-    
+
     # create sorting ID that is gene and transcript to sort in the same order as peptide
     reviewed_candidates['sorting id'] = reviewed_candidates['Gene']  + '.' + reviewed_candidates['Best Transcript']
     # make sure the sorting id column is unique
@@ -123,35 +122,35 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
 
     peptides = peptides[["ID", "CANDIDATE NEOANTIGEN", "CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES", 
                            "RESTRICTING HLA ALLELE", "CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE MW (CLIENT)", "Comments"]]
-    
+
     # Add the Restricting HLA Alles from Class I and Class II
     # create a dataframe that contains the classI and classII pepetide sequence
     # Create a universal ID by editing the peptide 51mer ID
     peptides.rename(columns={'ID': 'full ID'}, inplace=True)
     peptides['51mer ID'] = peptides['full ID']
-    peptides['51mer ID'] = peptides['51mer ID'].apply(lambda x: '.'.join(x.split('.')[1:]))  # Removes the 'MT' from the beginning of ID column
-    peptides['51mer ID'] = peptides['51mer ID'].apply(lambda x: '.'.join(x.split('.')[1:]))  # Remives the MT index from the ID column
-    
+    peptides['51mer ID'] = peptides['51mer ID'].apply(lambda x: x.split('.', 1)[1])  # Removes the 'MT' from the beginning of ID column
+    peptides['51mer ID'] = peptides['51mer ID'].apply(lambda x: x.split('.', 1)[1])  # Remives the MT index from the ID column
+
     def modify_id(original_id):
-        match = re.match(r'(\w+)\.(ENS[0-9A-Z]+\d+(?:\.\d+)?)\.(\w+)\.(.+)$', original_id)
+        match = re.match(r'([\w\-]+)\.(ENS[0-9A-Z]+\d+(?:\.\d+)?)\.(\w+)\.(.+)$', original_id)
         if not match:
-            print(f"Unrecognized ID format: {original_id}")
+            raise Exception(f"Unrecognized ID format: {original_id}")
             return original_id
-        
+
         gene, transcript, variant_type, last_part = match.groups()
-        
+
         if variant_type == "missense" or variant_type == "inframe_ins":
             # Removes the variant type from the ID
             # MT.244.ZP2.ENST00000574002.1.missense.84D/Y
             # ZP2.ENST00000574002.1.84D/Y
             modified_id = f"{gene}.{transcript}.{last_part}"
-        
+
         elif variant_type == "FS":
             # MT.239.KIF7.ENST00000394412.8.FS.405-410CGCGCACTCGGCGCCCAG/C
             # KIF7.ENST00000394412.8.FS405-410
             fs_pos = re.sub(r'[^\d\-]', '', last_part)
             modified_id = f"{gene}.{transcript}.FS{fs_pos}"
-        
+
         elif variant_type == "inframe_del":
             # MT.328.DNAAF3.ENST00000391720.8.inframe_del.585-589KTGV*/R
             # DNAAF3.ENST00000391720.8.KTGV*538-542R
@@ -162,14 +161,13 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
             else:
                 print(f"Unrecognized inframe_del format: {original_id}")
                 modified_id = original_id
-        
+
         else:
             print(f"Non-missense variant not handled: {original_id}")
             modified_id = original_id
-        
+
         return modified_id
-    
-    
+
 
     #peptides['51mer ID'] = peptides['51mer ID'].apply(lambda x: '.'.join(x.split('.')[:3]) + '.' + '.'.join(x.split('.')[4:])) # removes the variant label
     peptides['51mer ID'] = peptides['51mer ID'].apply(modify_id)
@@ -177,11 +175,11 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
     classI = pd.read_csv(classI_path, sep="\t")
     classII = pd.read_csv(classII_path, sep="\t")
 
-    classI.rename(columns = {"Best Peptide":"Best Peptide Class I", "Allele":"Class I Allele", 
-                                "IC50 MT":"Class I IC50 MT", "%ile MT":"Class I %ile MT", 
+    classI.rename(columns = {"Best Peptide":"Best Peptide Class I", "Allele":"Class I Allele",
+                                "IC50 MT":"Class I IC50 MT", "%ile MT":"Class I %ile MT",
                                 "Best Transcript":"Class I Best Transcript"}, inplace=True)
-    classII.rename(columns = {"Best Peptide":"Best Peptide Class II", "Allele":"Class II Allele", 
-                                "IC50 MT":"Class II IC50 MT", "%ile MT":"Class II %ile MT", 
+    classII.rename(columns = {"Best Peptide":"Best Peptide Class II", "Allele":"Class II Allele",
+                                "IC50 MT":"Class II IC50 MT", "%ile MT":"Class II %ile MT",
                                 "Best Transcript":"Class II Best Transcript"}, inplace=True)
 
     def rearrange_string(s):
@@ -202,7 +200,7 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
 
         # Return unchanged if no pattern matched
         return s
-    
+
 
     classI['position AA Change'] = classI['AA Change'].apply(rearrange_string)
     classI['51mer ID'] = classI['Gene'] + '.' + classI['Class I Best Transcript'] + '.' + classI['position AA Change'] 
@@ -211,7 +209,7 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
     class_sequences = class_sequences.drop(columns=['ID'])
 
     merged_peptide_51mer = pd.merge(peptides, class_sequences, on='51mer ID', how='left')
-    
+
     merged_peptide_51mer['sorting id'] = merged_peptide_51mer['full ID'].apply(extract_info) # creating a ID to sort reviewed canidates by the order of the 51mer
     merged_peptide_51mer = make_column_unique(merged_peptide_51mer, 'sorting id') # make sure every sorting id is unique
 
@@ -231,7 +229,7 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
     reviewed_candidates_file_name = f"{output_file_prefix}_{sample_name}.Annotated.Neoantigen_Candidates.xlsx"
     reviewed_candidates_file_path = os.path.join(output_path, reviewed_candidates_file_name)
     reviewed_candidates.to_excel(reviewed_candidates_file_path, index=False)
-    
+
     return Peptide_file_name
 
 
