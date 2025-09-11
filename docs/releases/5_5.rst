@@ -36,3 +36,12 @@ This is a bugfix release. It fixes the following problem(s):
     ``--top-score-metric2`` option, a peptides.sort() call was used. This
     release replaces this with a better way of finding the best peptide by
     using the IC50 as a secondary sort criteria.
+
+Version 5.5.2
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Remove unused --top-score-metric2 parameter from pVACvector. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1304
+* Speedup processing of AGFusion exon files. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1301
+* Added biotype parameter to pVACvector when running with an input VCF. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1297

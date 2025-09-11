@@ -12,6 +12,7 @@ import re
 import glob
 from Bio import SeqIO
 import logging
+from collections import defaultdict
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -700,28 +701,33 @@ class FusionInputConverter(InputFileConverter):
             sequence = full_sequence.replace(separator, '')
             return (fusion_position, sequence)
 
-    def parse_exon_file(self, input_file, transcripts):
-        (five_prime_transcript, three_prime_transcript) = transcripts.split('-')
-
+    def parse_exon_file(self,input_file):
         exon_file = input_file.replace('_protein.fa', '.exons.txt')
         if not os.path.exists(exon_file):
             exon_file = exon_file.replace('.txt', '.csv')
-        five_prime_positions, three_prime_positions = [], []
         with open(exon_file, 'r') as fh:
             dialect = csv.Sniffer().sniff(fh.read())
             fh.seek(0)
             reader = csv.DictReader(fh, delimiter=dialect.delimiter)
+            records = defaultdict(list)
             for record in reader:
-                exon_start = int(record['exon_start'])
-                exon_end = int(record['exon_end'])
-                if record['exon_gene_source'] == "'5 gene" and record["5'_transcript"] == five_prime_transcript and record["3'_transcript"] == three_prime_transcript:
-                    five_prime_chr = record['exon_chr']
-                    five_prime_positions.append(exon_start)
-                    five_prime_positions.append(exon_end)
-                elif record['exon_gene_source'] == "'3 gene" and record["5'_transcript"] == five_prime_transcript and record["3'_transcript"] == three_prime_transcript:
-                    three_prime_chr = record['exon_chr']
-                    three_prime_positions.append(exon_start)
-                    three_prime_positions.append(exon_end)
+                transcripts = "{}-{}".format(record["5'_transcript"], record["3'_transcript"])
+                records[transcripts].append(record)
+        return records
+
+    def get_exon_info(self, exons):
+        five_prime_positions, three_prime_positions = [], []
+        for record in exons:
+            exon_start = int(record['exon_start'])
+            exon_end = int(record['exon_end'])
+            if record['exon_gene_source'] == "'5 gene":
+                five_prime_chr = record['exon_chr']
+                five_prime_positions.append(exon_start)
+                five_prime_positions.append(exon_end)
+            elif record['exon_gene_source'] == "'3 gene":
+                three_prime_chr = record['exon_chr']
+                three_prime_positions.append(exon_start)
+                three_prime_positions.append(exon_end)
         five_prime_start = min(five_prime_positions)
         five_prime_end = max(five_prime_positions)
         three_prime_start = min(three_prime_positions)
@@ -824,12 +830,13 @@ class FusionInputConverter(InputFileConverter):
         output_rows = []
         count = 1
         for input_file in sorted(glob.glob(os.path.join(self.input_file, '*', '*_protein.fa'))):
+            exons = self.parse_exon_file(input_file)
             for record in SeqIO.parse(input_file, "fasta"):
                 record_info = dict(map(lambda x: x.split(': '), record.description.split(', ')[1:]))
 
                 transcripts = record_info['transcripts'].replace('_', '-')
 
-                (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end) = self.parse_exon_file(input_file, transcripts)
+                (five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end) = self.get_exon_info(exons[transcripts])
 
                 if starfusion_entries is not None:
                     starfusion_entry = self.find_matching_starfusion_entry_for_agfusion(starfusion_entries, five_prime_chr, five_prime_start, five_prime_end, three_prime_chr, three_prime_start, three_prime_end)
