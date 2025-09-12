@@ -16,7 +16,7 @@ from pvactools.lib.prediction_class import PredictionClass, IEDB, NetMHCIIpan, N
 from tests.utils import *
 
 def test_data_directory():
-    return os.path.join(pvactools_directory(), 'tests', 'test_data', 'call_iedb')
+    return os.path.join(pvactools_directory(), 'predictor_tests', 'test_data')
 
 class CallIEDBTests(unittest.TestCase):
     @classmethod

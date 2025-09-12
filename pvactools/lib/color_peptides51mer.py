@@ -170,6 +170,8 @@ def generate_formatted_excel(peptides_df, output_path, output_file_prefix, sampl
     for row_idx, row in peptides_df.iterrows():
         for col_idx, header in enumerate(visible_columns):
             value = row[header]
+            if pd.isna(value):
+                value = 'NA'
             if (
                 header
                 == "CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE WITH FLANKING RESIDUES"
