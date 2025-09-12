@@ -17,13 +17,6 @@ jobs:
         python-version: ['3.9', '3.10', '3.11']
 
     steps:
-      - name: Maximize build space
-        uses: AdityaGarg8/remove-unwanted-software@v2
-        with:
-          remove-android: 'true'
-          remove-dotnet: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -44,7 +37,6 @@ jobs:
           pip install pypandoc==1.7.2
           pip install "tensorflow<2.16"
           pip install -e .
-          mhcflurry-downloads fetch
       - name: List installed packages
         run: |
           pip list
