@@ -9,7 +9,7 @@ on:
 
 jobs:
   run_tests:
-    name: "Test pVACtools in various Python versions"
+    name: "Test prediction algorithms used by pVACtools in various Python versions"
 
     runs-on: ubuntu-22.04
     strategy:
@@ -43,6 +43,8 @@ jobs:
           pip install polars==0.16.18
           pip install pypandoc==1.7.2
           pip install "tensorflow<2.16"
+          pip install git+https://github.com/griffithlab/bigmhc.git#egg=bigmhc
+          pip install git+https://github.com/griffithlab/deepimmuno.git#egg=deepimmuno
           pip install -e .
           mhcflurry-downloads fetch
       - name: List installed packages
@@ -51,8 +53,4 @@ jobs:
       - name: Run tests
         env:
           TEST_FLAG: 1
-        run: coverage run --source=pvactools.lib,pvactools.tools -m unittest discover -v -s tests
-      - name: Coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: coveralls --service=github
+        run: python -m unittest predictor_tests/test_call_iedb.py
