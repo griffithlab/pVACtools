@@ -321,7 +321,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
         mutant_positions = get_mutant_positions_from_fasta(fasta_file, full_id)
         set_underline(peptide_sequence, mutant_positions)
 
-        expected_underlined_positions = {9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26}
+        expected_underlined_positions = {9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29}
 
         # Assert all mutant AAs are underlined
         self.assertSetEqual(
@@ -354,7 +354,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
         mutant_positions = get_mutant_positions_from_fasta(fasta_file, full_id)
         set_underline(peptide_sequence, mutant_positions)
 
-        expected_underlined_positions = {2, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26}
+        expected_underlined_positions = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29}
 
         # Assert all mutant AAs are underlined
         self.assertSetEqual(
