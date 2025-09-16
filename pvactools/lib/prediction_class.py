@@ -604,6 +604,7 @@ class MixMHCpred(MHCI):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 peptide = str(record.seq)
+                epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
                 for start, epitope in epitopes.items():
                     epitope_df = df[df['peptide'] == epitope]
                     epitope_df['seq_num'] = seq_num
@@ -665,6 +666,7 @@ class PRIME(MHCI):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 peptide = str(record.seq)
+                epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
                 for start, epitope in epitopes.items():
                     epitope_df = df[df['peptide'] == epitope]
                     epitope_df['seq_num'] = seq_num
