@@ -64,6 +64,13 @@ def define_parser():
              + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
     )
     parser.add_argument(
+        '-m2', '--top-score-metric2',
+        choices=['ic50','percentile'],
+        default='ic50',
+        help="Whether to use median/best IC50 or to use median/best percentile score when determining the best peptide in the aggregated report. "
+             + "This parameter is also used to influence the primary sorting criteria in the aggregated report for the candidates within each tier."
+    )
+    parser.add_argument(
         '--read-support', type=int,
         help="Read Support Cutoff. When failing this cutoff, sites will be binned in a \"LowReadSupport\" tier.",
         default=5
@@ -72,12 +79,6 @@ def define_parser():
         '--expn-val', type=float,
         help="Expression Cutoff. Expression is meassured as FFPM (fusion fragments per million total reads). When failing this cutoff sites will be binned in the \"LowExpr\" tier.",
         default=0.1
-    )
-    parser.add_argument(
-        '-m2', '--top-score-metric2',
-        choices=['ic50','percentile'],
-        default='ic50',
-        help="Whether to use median/best IC50 or to use median/best percentile score."
     )
 
     return parser
