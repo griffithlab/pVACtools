@@ -62,7 +62,7 @@ def load_pass_variants(vcf_path):
         ref = record.REF
         for alt in record.ALT:
             alt_str = alt.value
-            start = record.affected_start
+            start = record.affected_start + 1 if len(ref) > len(alt_str) else record.affected_start
             end = record.affected_end
             variants.add((chrom, start, end, ref, alt_str))
     return variants
