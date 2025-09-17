@@ -72,7 +72,8 @@ def define_parser():
         '-m2', '--top-score-metric2',
         choices=['ic50','percentile'],
         default='ic50',
-        help="Whether to use median/best IC50 or to use median/best percentile score."
+        help="Whether to use median/best IC50 or to use median/best percentile score when determining the best peptide in the aggregated report. "
+             + "This parameter is also used to influence the primary sorting criteria in the aggregated report for the candidates within each tier."
     )
     parser.add_argument(
         '--trna-vaf', type=float_range(0.0, 1.0),
