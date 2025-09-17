@@ -47,6 +47,7 @@ def get_mutant_positions_from_fasta(fasta_path, full_id):
 
     mutant_positions = set()
     mt_index = 0
+    first_mut_index = None
 
     for i in range(len(wt_aligned)):
         wt_residue = wt_aligned[i]
@@ -60,8 +61,14 @@ def get_mutant_positions_from_fasta(fasta_path, full_id):
                     mutant_positions.add(mt_index)
         else:
             if wt_residue != mt_residue:
-                mutant_positions.add(mt_index)
+                if frameshift and first_mut_index is None:
+                    first_mut_index = mt_index
+                if not frameshift:
+                    mutant_positions.add(mt_index)
             mt_index += 1
+    
+    if frameshift and first_mut_index is not None:
+        mutant_positions.update(range(first_mut_index, len(mt_seq)))
 
     return mutant_positions
 
@@ -185,7 +192,7 @@ def generate_formatted_excel(peptides_df, output_path, output_file_prefix, sampl
                     segments.append(aa.nucleotide)
 
                 if segments and not isinstance(segments[0], str):
-                    segments.insert(0, " ")
+                    segments.insert(0, "\u200b")
 
                 worksheet.write_rich_string(row_idx + 1, col_idx, *segments)
             else:
