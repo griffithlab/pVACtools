@@ -87,10 +87,12 @@ class PvacfuseBestCandidate:
                 prob_pos_df = df
         else:
             prob_pos_df = df
-        if 'Expression' in df:
-            df['Expression Sort'] = df['Expression']
-            df['Expression Sort'].replace({'NA': 0})
-        prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, self.top_score_mode), 'Expression Sort'], inplace=True, ascending=[True, False])
+        if 'Expression' in prob_pos_df:
+            prob_pos_df['Expression Sort'] = prob_pos_df['Expression']
+            prob_pos_df['Expression Sort'].replace({'NA': 0})
+            prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, self.top_score_mode), 'Expression Sort'], inplace=True, ascending=[True, False])
+        else:
+            prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, self.top_score_mode)], inplace=True, ascending=[True])
         return prob_pos_df.iloc[0]
 
 class PvacbindBestCandidate:
