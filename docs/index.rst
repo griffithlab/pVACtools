@@ -63,9 +63,8 @@ New in Version |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Remove unused --top-score-metric2 parameter from pVACvector. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1304
-* Speedup processing of AGFusion exon files. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1301
-* Added biotype parameter to pVACvector when running with an input VCF. by @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1297
+* Fix a bug in the reference proteome similarity step that may result in an ``IndexError: string index out of range`` error. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1313
+* Improve handling of inframe indels in repetitive region to upstream filter out variants that don't result in novel neoantigen candidates and to better find a matched wildtype epitope. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1314
 
 New in Version 5
 ----------------
