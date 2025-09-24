@@ -311,12 +311,26 @@ class OutputParser(metaclass=ABCMeta):
         #For an inframe insertion the MT sequence is longer than the WT sequence
         #In this case not all MT epitopes might have a baseline match
         if baseline_best_match_position not in wt_results:
-            result['wt_epitope_seq'] = 'NA'
-            result['wt_scores']      = self.format_match_na(result, 'score')
-            result['wt_percentiles'] = self.format_match_na(result, 'percentile')
-            result['mutation_position'] = 'NA'
-            #We then infer the match direction from the previous MT epitope
-            result['match_direction'] = previous_result['match_direction']
+            insertion_length = len(iedb_results_for_wt_iedb_result_key.keys()) - len(wt_results.keys())
+            best_match_position = int(baseline_best_match_position) - insertion_length
+            best_match_wt_result = wt_results[str(best_match_position)]
+            result['match_direction'] = 'right'
+            result['wt_epitope_position'] = best_match_position
+            total_matches = self.determine_total_matches(mt_epitope_seq, best_match_wt_result['wt_epitope_seq'])
+            if total_matches and total_matches >= self.min_match_count(int(result['peptide_length'])):
+                #The minimum amino acid match count is met
+                result['wt_epitope_seq'] = best_match_wt_result['wt_epitope_seq']
+                result['wt_scores']      = best_match_wt_result['wt_scores']
+                result['wt_percentiles'] = best_match_wt_result['wt_percentiles']
+                result['mutation_position'] = self.find_mutation_positions(best_match_wt_result['wt_epitope_seq'], mt_epitope_seq)
+            else:
+                #The minimum amino acid match count is not met
+                #Even though there is a matching WT epitope there are not enough overlapping amino acids
+                #We don't include the matching WT epitope in the output
+                result['wt_epitope_seq'] = 'NA'
+                result['wt_scores']      = self.format_match_na(result, 'score')
+                result['wt_percentiles'] = self.format_match_na(result, 'percentile')
+                result['mutation_position'] = 'NA'
             return
 
         baseline_best_match_wt_result      = wt_results[baseline_best_match_position]
