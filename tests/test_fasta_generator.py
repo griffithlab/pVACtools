@@ -240,7 +240,7 @@ class FastaGeneratorTests(unittest.TestCase):
 
         generate_fasta_params = {
             'input_file'                : generate_fasta_input_file,
-            'epitope_length'            : self.epitope_length,
+            'epitope_length'            : 9,
             'flanking_sequence_length'  : self.flanking_sequence_length,
             'output_file'               : generate_fasta_output_file.name,
             'output_key_file'           : generate_fasta_key_output_file.name,
@@ -301,7 +301,7 @@ class FastaGeneratorTests(unittest.TestCase):
 
         generate_fasta_params = {
             'input_file'                : generate_fasta_input_file,
-            'epitope_length'            : self.epitope_length,
+            'epitope_length'            : 9,
             'flanking_sequence_length'  : self.flanking_sequence_length,
             'output_file'               : generate_fasta_output_file.name,
             'output_key_file'           : generate_fasta_key_output_file.name,
