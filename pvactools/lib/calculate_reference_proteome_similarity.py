@@ -216,14 +216,14 @@ class CalculateReferenceProteomeSimilarity:
         flanking_sequence_length = self.match_length - 1
         first_mut_aa_pos = 0
         for i in range(len(mt_peptide)):
-            if len(wt_peptide) < i:
+            if len(wt_peptide) <= i:
                 break
             if wt_peptide[i] != mt_peptide[i]:
                 first_mut_aa_pos = i
                 break
         last_mut_aa_pos = len(mt_peptide)
         for i in range(len(mt_peptide)):
-            if len(wt_peptide) < i:
+            if len(wt_peptide) <= i:
                 break
             if wt_peptide[i * -1] != mt_peptide[i * -1]:
                 last_mut_aa_pos = len(mt_peptide) - i
