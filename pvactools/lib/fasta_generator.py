@@ -283,9 +283,14 @@ class FastaGenerator(metaclass=ABCMeta):
                 print("Warning. Mutant sequence contains unsupported amino acid U. Skipping entry {}".format(line['index']))
                 continue
 
-            if mutant_subsequence in wildtype_subsequence:
-                #This is not a novel peptide
-                continue
+            if self.epitope_length > 0:
+                neoepitopes = determine_neoepitopes(mutant_subsequence, self.epitope_length).values()
+                if all([neoepitope in wildtype_subsequence for neoepitope in neoepitopes]):
+                    #This variant does not result in any novel epitopes
+                    continue
+            else:
+                if mutant_subsequence in wildtype_subsequence:
+                    continue
 
             if len(wildtype_subsequence) < self.epitope_length or len(mutant_subsequence) < self.epitope_length:
                 continue
