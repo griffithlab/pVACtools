@@ -221,21 +221,23 @@ class OutputParser(metaclass=ABCMeta):
             }
         elif 'netmhciipan_el' in method.lower():
             if 'score' in line:
-                return {
-                    'NetMHCIIpanEL': {
-                        'presentation': float(line['score']),
-                        'percentile': self.transform_empty_percentiles(line['rank'])
-                    }
-                }
+                presentation = float(line['score'])
             elif 'ic50' in line:
-                return {
-                    'NetMHCIIpanEL': {
-                        'presentation': float(line['ic50']),
-                        'percentile': self.transform_empty_percentiles(line['rank'])
-                    }
-                }
+                presentation = float(line['ic50'])
             else:
                  raise Exception("Missing expected columns: 'score' or 'ic50' in NetMHCIIpanEL output")
+            if 'percentile_rank' in line:
+                percentile = self.transform_empty_percentiles(line['percentile_rank'])
+            elif 'rank' in line:
+                percentile = self.transform_empty_percentiles(line['rank'])
+            else:
+                 raise Exception("Missing expected columns: 'rank' or 'percentile_rank' in NetMHCIIpanEL output")
+            return {
+                'NetMHCIIpanEL': {
+                    'presentation': presentation,
+                    'percentile': percentile,
+                }
+            }
         elif method == 'MixMHCpred':
             return {
                 method: {
@@ -611,7 +613,7 @@ class OutputParser(metaclass=ABCMeta):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if method in ['BigMHC_EL', 'netmhcpanii_el', 'netmhcpan_el', 'MixMHCpred']:
+            if method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHCpred']:
                 headers.append("%s WT Presentation Score" % pretty_method)
                 headers.append("%s MT Presentation Score" % pretty_method)
                 if method in ['netmhcpan_el', 'netmhciipan_el', 'MixMHCpred']:
@@ -982,7 +984,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if method in ['BigMHC_EL', 'netmhcpanii_el', 'netmhcpan_el', 'MixMHCpred']:
+            if method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHCpred']:
                 headers.append("%s Presentation Score" % pretty_method)
                 if method in ['netmhcpan_el', 'netmhciipan_el', 'MixMHCpred']:
                     headers.append("%s Percentile" % pretty_method)

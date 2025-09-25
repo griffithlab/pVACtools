@@ -67,6 +67,32 @@ class OutputParserTests(unittest.TestCase):
         expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.tsv")
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
 
+    def test_parse_output_runs_and_produces_expected_output_with_all_class_ii_files(self):
+        parse_output_input_iedb_files = [
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.MHCnuggetsII.DRB1*04:05.12.tsv_1-200"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.netmhciipan_ba.DRB1*04:05.12.tsv_1-200"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.netmhciipan_el.DRB1*04:05.12.tsv_1-200"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.nn_align.DRB1*04:05.12.tsv_1-200"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.smm_align.DRB1*04:05.12.tsv_1-200"),
+        ]
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.tsv_1-100")
+        parse_output_key_file = os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.12.fa.split_1-200.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'input_iedb_files'       : parse_output_input_iedb_files,
+            'input_tsv_file'         : parse_output_input_tsv_file,
+            'key_file'               : parse_output_key_file,
+            'output_file'            : parse_output_output_file.name,
+            'sample_name'            : 'HCC1395_TUMOR_DNA',
+            'flurry_state'           : 'both',
+        }
+        parser = DefaultOutputParser(**parse_output_params)
+
+        self.assertFalse(parser.execute())
+        expected_output_file  = os.path.join(self.test_data_dir, "output_class_ii.parsed.tsv")
+        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+
     def test_parse_output_runs_and_produces_expected_output_for_repetitive_deletion_at_beginning_of_sequence(self):
         parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "pat27_4.ann.HLA-A*02:01.9.tsv")]
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "pat27_4.tsv")
