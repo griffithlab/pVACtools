@@ -241,7 +241,7 @@ class OutputParser(metaclass=ABCMeta):
         elif method == 'MixMHCpred':
             return {
                 method: {
-                    'presentation': float(line['score']),
+                    'binding_score': float(line['score']), #this is a peptide binding predictor but the output is a score, not IC50
                     'percentile': self.transform_empty_percentiles(line['percentile'])
                 }
             }
@@ -484,8 +484,12 @@ class OutputParser(metaclass=ABCMeta):
                 if not metric_values[method]:
                     del metric_values[method]
         else:
-            field = metric.replace("_percentile", "")
-            result_subset = {method: scores for method, scores in result['{}_scores'.format(epitope_type)].items() if field in scores}
+            if metric == 'ic50_percentile':
+                #also include MixMHCpred percentile in ic50_percentile
+                result_subset = {method: scores for method, scores in result['{}_scores'.format(epitope_type)].items() if 'ic50' in scores or 'binding_score' in scores}
+            else:
+                field = metric.replace("_percentile", "")
+                result_subset = {method: scores for method, scores in result['{}_scores'.format(epitope_type)].items() if field in scores}
             for (method, values) in result_subset.items():
                 metric_values[method] = {field: score for field, score in values.items() if field == 'percentile' and score != 'NA'}
                 if not metric_values[method]:
@@ -613,10 +617,15 @@ class OutputParser(metaclass=ABCMeta):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHCpred']:
+            if method == 'MixMHCpred':
+                headers.append("%s WT Binding Score" % pretty_method)
+                headers.append("%s MT Binding Score" % pretty_method)
+                headers.append("%s WT Percentile" % pretty_method)
+                headers.append("%s MT Percentile" % pretty_method)
+            elif method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el']:
                 headers.append("%s WT Presentation Score" % pretty_method)
                 headers.append("%s MT Presentation Score" % pretty_method)
-                if method in ['netmhcpan_el', 'netmhciipan_el', 'MixMHCpred']:
+                if method in ['netmhcpan_el', 'netmhciipan_el']:
                     headers.append("%s WT Percentile" % pretty_method)
                     headers.append("%s MT Percentile" % pretty_method)
             elif method in ['BigMHC_IM', 'DeepImmuno', 'PRIME']:
@@ -672,6 +681,11 @@ class OutputParser(metaclass=ABCMeta):
                     row['MHCflurry MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
                     row['MHCflurry WT IC50 Score'] = self.score_or_na(wt_scores, 'MHCflurry', 'ic50')
                     row['MHCflurry WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurry', 'percentile')
+            elif pretty_method == 'MixMHCpred':
+                row[f'{pretty_method} MT Binding Score'] = self.score_or_na(mt_scores, pretty_method, 'binding_score')
+                row[f'{pretty_method} WT Binding Score'] = self.score_or_na(wt_scores, pretty_method, 'binding_score')
+                row[f'{pretty_method} MT Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
+                row[f'{pretty_method} WT Percentile'] = self.score_or_na(wt_scores, pretty_method, 'percentile')
             elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
                 row[f'{pretty_method} MT Presentation Score'] = self.score_or_na(mt_scores, pretty_method, 'presentation')
                 row[f'{pretty_method} WT Presentation Score'] = self.score_or_na(wt_scores, pretty_method, 'presentation')
@@ -984,9 +998,12 @@ class UnmatchedSequencesOutputParser(OutputParser):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHCpred']:
+            if method == 'MixMHCpred':
+                headers.append("%s Binding Score" % pretty_method)
+                headers.append("%s Percentile" % pretty_method)
+            elif method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el']:
                 headers.append("%s Presentation Score" % pretty_method)
-                if method in ['netmhcpan_el', 'netmhciipan_el', 'MixMHCpred']:
+                if method in ['netmhcpan_el', 'netmhciipan_el']:
                     headers.append("%s Percentile" % pretty_method)
             elif method in ['BigMHC_IM', 'DeepImmuno', 'PRIME']:
                 headers.append("%s Immunogenicity Score" % pretty_method)
@@ -1015,6 +1032,9 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 if self.flurry_state in ['both', 'BA_only', None]:
                     row['MHCflurry IC50 Score'] = self.score_or_na(mt_scores, 'MHCflurry', 'ic50')
                     row['MHCflurry Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
+            elif pretty_method == 'MixMHCpred':
+                row[f'{pretty_method} Binding Score'] = self.score_or_na(mt_scores, pretty_method, 'binding_score')
+                row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
             elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
                 row[f'{pretty_method} Presentation Score'] = self.score_or_na(mt_scores, pretty_method, 'presentation')
                 if method in ['NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
