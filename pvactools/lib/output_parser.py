@@ -667,7 +667,7 @@ class OutputParser(metaclass=ABCMeta):
                     row['MHCflurryEL Presentation MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'percentile')
                     row['MHCflurryEL Presentation WT Score'] = self.score_or_na(wt_scores, 'MHCflurryEL Presentation', 'presentation')
                     row['MHCflurryEL Presentation WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurryEL Presentation', 'percentile')
-                if self.flurry_state == 'both' or self.flurry_state is None:
+                if self.flurry_state in ['both', 'BA_only', None]:
                     row['MHCflurry MT IC50 Score'] = self.score_or_na(mt_scores, 'MHCflurry', 'ic50')
                     row['MHCflurry MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
                     row['MHCflurry WT IC50 Score'] = self.score_or_na(wt_scores, 'MHCflurry', 'ic50')
@@ -1012,7 +1012,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
                     row['MHCflurryEL Processing Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'presentation')
                     row['MHCflurryEL Presentation Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'presentation')
                     row['MHCflurryEL Presentation Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'percentile')
-                if self.flurry_state == 'both' or self.flurry_state is None:
+                if self.flurry_state in ['both', 'BA_only', None]:
                     row['MHCflurry IC50 Score'] = self.score_or_na(mt_scores, 'MHCflurry', 'ic50')
                     row['MHCflurry Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
             elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
