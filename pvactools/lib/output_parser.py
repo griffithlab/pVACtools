@@ -22,6 +22,7 @@ class OutputParser(metaclass=ABCMeta):
         self.sample_name             = kwargs['sample_name']
         self.add_sample_name         = kwargs.get('add_sample_name_column')
         self.flurry_state            = kwargs.get('flurry_state')
+        self.use_normalized_percentiles = kwargs.get('use_normalized_percentiles')
 
     def parse_input_tsv_file(self):
         with open(self.input_tsv_file, 'r') as reader:
@@ -160,112 +161,122 @@ class OutputParser(metaclass=ABCMeta):
 
     def transform_empty_percentiles(self,p):
         return float(p) if p != 'None' and p is not None and p != "" else 'NA'
+    
+    def calculate_normalized_percentile(self, line, method):
+        pass
 
     def get_scores(self, line, method):
-        if method.lower() == 'mhcflurry':
-            if self.flurry_state == 'both':
+        if self.use_normalized_percentiles:
+            self.calculate_normalized_percentile(line, method)
+        else:
+            if method.lower() == 'mhcflurry':
+                if self.flurry_state == 'both':
+                    return {
+                        'MHCflurry': {
+                            'ic50': float(line['ic50']),
+                            'percentile': self.transform_empty_percentiles(line['percentile']),
+                        },
+                        'MHCflurryEL Processing': {
+                            'presentation': float(line['mhcflurry_processing_score']),
+                            'percentile': 'NA'
+                        },
+                        'MHCflurryEL Presentation': {
+                            'presentation': float(line['mhcflurry_presentation_score']),
+                            'percentile': self.transform_empty_percentiles(line['mhcflurry_presentation_percentile']),
+                        }
+                    }
+                elif self.flurry_state == 'EL_only':
+                    return {
+                        'MHCflurryEL Processing': {
+                            'presentation': float(line['mhcflurry_processing_score']),
+                        },
+                        'MHCflurryEL Presentation': {
+                            'presentation': float(line['mhcflurry_presentation_score']),
+                            'percentile': self.transform_empty_percentiles(line['mhcflurry_presentation_percentile']),
+                        }
+                    }
+                else:
+                    return {
+                        'MHCflurry': {
+                            'ic50': float(line['ic50']),
+                            'percentile': self.transform_empty_percentiles(line['percentile']),
+                        }
+                    }
+            elif method.lower() == 'deepimmuno':
                 return {
-                   'MHCflurry': {
-                       'ic50': float(line['ic50']),
-                       'percentile': self.transform_empty_percentiles(line['percentile']),
-                   },
-                   'MHCflurryEL Processing': {
-                       'presentation': float(line['mhcflurry_processing_score']),
-                   },
-                   'MHCflurryEL Presentation': {
-                       'presentation': float(line['mhcflurry_presentation_score']),
-                       'percentile': self.transform_empty_percentiles(line['mhcflurry_presentation_percentile']),
-                   }
+                    'DeepImmuno': {
+                        'immunogenicity': float(line['immunogenicity']),
+                        'percentile': 'NA'
+                    }
                 }
-            elif self.flurry_state == 'EL_only':
+            elif method.lower() == 'bigmhc_el':
                 return {
-                   'MHCflurryEL Processing': {
-                       'presentation': float(line['mhcflurry_processing_score']),
-                   },
-                   'MHCflurryEL Presentation': {
-                       'presentation': float(line['mhcflurry_presentation_score']),
-                       'percentile': self.transform_empty_percentiles(line['mhcflurry_presentation_percentile']),
-                   }
-               }
-            else:
+                    'BigMHC_EL': {
+                        'presentation': float(line['BigMHC_EL']),
+                        'percentile': 'NA'
+                    }
+                }
+            elif method.lower() == 'bigmhc_im':
                 return {
-                   'MHCflurry': {
-                       'ic50': float(line['ic50']),
-                       'percentile': self.transform_empty_percentiles(line['percentile']),
-                   }
-               }
-        elif method.lower() == 'deepimmuno':
-            return {
-                'DeepImmuno': {
-                    'immunogenicity': float(line['immunogenicity']),
+                    'BigMHC_IM': {
+                        'immunogenicity': float(line['BigMHC_IM']),
+                        'percentile': 'NA'
+                    }
                 }
-            }
-        elif method.lower() == 'bigmhc_el':
-            return {
-                'BigMHC_EL': {
-                    'presentation': float(line['BigMHC_EL']),
-                }
-            }
-        elif method.lower() == 'bigmhc_im':
-            return {
-                'BigMHC_IM': {
-                    'immunogenicity': float(line['BigMHC_IM']),
-                }
-            }
-        elif method.lower() == 'netmhcpan_el':
-            return {
-                'NetMHCpanEL': {
-                    'presentation': float(line['score']),
-                    'percentile': self.transform_empty_percentiles(line['rank'])
-                }
-            }
-        elif 'netmhciipan_el' in method.lower():
-            if 'score' in line:
+            elif method.lower() == 'netmhcpan_el':
                 return {
-                    'NetMHCIIpanEL': {
+                    'NetMHCpanEL': {
                         'presentation': float(line['score']),
                         'percentile': self.transform_empty_percentiles(line['rank'])
                     }
                 }
-            elif 'ic50' in line:
+            elif 'netmhciipan_el' in method.lower():
+                if 'score' in line:
+                    return {
+                        'NetMHCIIpanEL': {
+                            'presentation': float(line['score']),
+                            'percentile': self.transform_empty_percentiles(line['rank'])
+                        }
+                    }
+                elif 'ic50' in line:
+                    return {
+                        'NetMHCIIpanEL': {
+                            'presentation': float(line['ic50']),
+                            'percentile': self.transform_empty_percentiles(line['rank'])
+                        }
+                    }
+                else:
+                    raise Exception("Missing expected columns: 'score' or 'ic50' in NetMHCIIpanEL output")
+            elif method == 'MixMHCpred':
                 return {
-                    'NetMHCIIpanEL': {
-                        'presentation': float(line['ic50']),
-                        'percentile': self.transform_empty_percentiles(line['rank'])
+                    method: {
+                        'presentation': float(line['score']),
+                        'percentile': self.transform_empty_percentiles(line['percentile'])
+                    }
+                }
+            elif method == 'PRIME':
+                return {
+                    method: {
+                        'immunogenicity': float(line['score']),
+                        'percentile': self.transform_empty_percentiles(line['percentile'])
                     }
                 }
             else:
-                 raise Exception("Missing expected columns: 'score' or 'ic50' in NetMHCIIpanEL output")
-        elif method == 'MixMHCpred':
-            return {
-                method: {
-                    'presentation': float(line['score']),
-                    'percentile': self.transform_empty_percentiles(line['percentile'])
+                pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
+                if 'percentile' in line:
+                    percentile = line['percentile']
+                elif 'percentile_rank' in line:
+                    percentile = line['percentile_rank']
+                elif 'rank' in line:
+                    percentile = line['rank']
+                else:
+                    percentile = ''
+                return {
+                    pretty_method: {
+                        'ic50': float(line['ic50']),
+                        'percentile': self.transform_empty_percentiles(percentile)
+                    }
                 }
-            }
-        elif method == 'PRIME':
-            return {
-                method: {
-                    'immunogenicity': float(line['score']),
-                    'percentile': self.transform_empty_percentiles(line['percentile'])
-                }
-            }
-        else:
-            pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if 'percentile' in line:
-                percentile = line['percentile']
-            elif 'percentile_rank' in line:
-                percentile = line['percentile_rank']
-            elif 'rank' in line:
-                percentile = line['rank']
-            else:
-                percentile = ''
-            return {
-                pretty_method: {
-                    'ic50': float(line['ic50']),
-                    'percentile': self.transform_empty_percentiles(percentile)
-                }
-            }
 
     def format_match_na(self, result, metric):
         return {method: {field: 'NA' for field in fields.keys()} for method, fields in result[f'mt_{metric}s'].items()}
@@ -598,23 +609,17 @@ class OutputParser(metaclass=ABCMeta):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if method in ['BigMHC_EL', 'netmhcpanii_el', 'netmhcpan_el', 'MixMHCpred']:
+            if method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHCpred']:
                 headers.append("%s WT Presentation Score" % pretty_method)
                 headers.append("%s MT Presentation Score" % pretty_method)
-                if method in ['netmhcpan_el', 'netmhciipan_el', 'MixMHCpred']:
-                    headers.append("%s WT Percentile" % pretty_method)
-                    headers.append("%s MT Percentile" % pretty_method)
             elif method in ['BigMHC_IM', 'DeepImmuno', 'PRIME']:
                 headers.append("%s WT Immunogenicity Score" % pretty_method)
                 headers.append("%s MT Immunogenicity Score" % pretty_method)
-                if method in ['PRIME']:
-                    headers.append("%s WT Percentile" % pretty_method)
-                    headers.append("%s MT Percentile" % pretty_method)
             else:
                 headers.append("%s WT IC50 Score" % pretty_method)
                 headers.append("%s MT IC50 Score" % pretty_method)
-                headers.append("%s WT Percentile" % pretty_method)
-                headers.append("%s MT Percentile" % pretty_method)
+            headers.append("%s WT Percentile" % pretty_method)
+            headers.append("%s MT Percentile" % pretty_method)
         if self.add_sample_name:
             headers.append("Sample Name")
         headers.append("Index")
@@ -652,7 +657,7 @@ class OutputParser(metaclass=ABCMeta):
                     row['MHCflurryEL Presentation MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'percentile')
                     row['MHCflurryEL Presentation WT Score'] = self.score_or_na(wt_scores, 'MHCflurryEL Presentation', 'presentation')
                     row['MHCflurryEL Presentation WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurryEL Presentation', 'percentile')
-                if self.flurry_state == 'both' or self.flurry_state is None:
+                if self.flurry_state in ['both', 'BA_only', None]:
                     row['MHCflurry MT IC50 Score'] = self.score_or_na(mt_scores, 'MHCflurry', 'ic50')
                     row['MHCflurry MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
                     row['MHCflurry WT IC50 Score'] = self.score_or_na(wt_scores, 'MHCflurry', 'ic50')
@@ -969,17 +974,13 @@ class UnmatchedSequencesOutputParser(OutputParser):
                     self.flurry_headers(headers)
 
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if method in ['BigMHC_EL', 'netmhcpanii_el', 'netmhcpan_el', 'MixMHCpred']:
+            if method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHCpred']:
                 headers.append("%s Presentation Score" % pretty_method)
-                if method in ['netmhcpan_el', 'netmhciipan_el', 'MixMHCpred']:
-                    headers.append("%s Percentile" % pretty_method)
             elif method in ['BigMHC_IM', 'DeepImmuno', 'PRIME']:
                 headers.append("%s Immunogenicity Score" % pretty_method)
-                if method in ['PRIME']:
-                    headers.append("%s Percentile" % pretty_method)
             else:
                 headers.append("%s IC50 Score" % pretty_method)
-                headers.append("%s Percentile" % pretty_method)
+            headers.append("%s Percentile" % pretty_method)
         if self.add_sample_name:
             headers.append("Sample Name")
         return headers

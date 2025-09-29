@@ -410,6 +410,7 @@ class Pipeline(metaclass=ABCMeta):
                             'input_tsv_file'         : split_tsv_file_path,
                             'key_file'               : split_fasta_key_file_path,
                             'output_file'            : split_parsed_file_path,
+                            'use_normalized_percentiles': self.use_normalized_percentiles
                         }
                         params['sample_name'] = self.sample_name
                         params['flurry_state'] = self.flurry_state

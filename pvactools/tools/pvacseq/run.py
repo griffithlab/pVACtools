@@ -116,6 +116,7 @@ def main(args_input = sys.argv[1:]):
         'maximum_transcript_support_level': args.maximum_transcript_support_level,
         'biotypes'                  : args.biotypes,
         'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
+        'use_normalized_percentiles'  : args.use_normalized_percentiles,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,
