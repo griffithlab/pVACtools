@@ -26,6 +26,16 @@ class AggregateAllEpitopes:
             if threshold is not None:
                 thresholds[hla_type] = float(threshold)
         self.allele_specific_binding_thresholds = thresholds
+        self.ic50_algorithms = self.determine_used_ic50_algorithms()
+        self.binding_score_algorithms = self.determine_used_binding_score_algorithms()
+        self.binding_algorithms = self.ic50_algorithms + self.binding_score_algorithms
+        self.binding_percentile_algorithms = self.determine_used_binding_percentile_algorithms()
+        self.immunogenicity_score_algorithms = self.determine_used_immunogenicity_score_algorithms()
+        self.immunogenicity_percentile_algorithms = self.determine_used_immunogenicity_percentile_algorithms()
+        self.presentation_score_algorithms = self.determine_used_presentation_score_algorithms()
+        self.mhcflurry_presentation_score_algorithms = self.determine_used_mhcflurry_presentation_score_algorithms()
+        self.presentation_percentile_algorithms = self.determine_used_presentation_percentile_algorithms()
+        self.percentile_algorithms = self.binding_percentile_algorithms + self.immunogenicity_percentile_algorithms + self.presentation_percentile_algorithms
 
     @abstractmethod
     def get_list_unique_mutation_keys(self):
@@ -117,6 +127,78 @@ class AggregateAllEpitopes:
         metric = self.get_metrics(peptides, best)
         return (out_dict, metric)
 
+    def determine_used_ic50_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = ["NetMHCpan", "NetMHC", "NetMHCcons", "PickPocket", "SMM", "SMMPMBEC", "MHCflurry", "MHCnuggetsI", "NetMHCIIpan", "SMMalign", "NNalign", "MHCnuggetsII"]
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT IC50 Score".format(algorithm) in headers or "{} IC50 Score".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
+
+    def determine_used_binding_score_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = ["MixMHCpred"]
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Binding Score".format(algorithm) in headers or "{} Binding Score".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
+
+    def determine_used_binding_percentile_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = ["NetMHCpan", "NetMHC", "NetMHCcons", "PickPocket", "SMM", "SMMPMBEC", "MHCflurry", "MHCnuggetsI", "NetMHCIIpan", "SMMalign", "NNalign", "MHCnuggetsII", "MixMHCpred"]
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
+
+    def determine_used_immunogenicity_score_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = ["BigMHC_IM", "DeepImmuno", "PRIME"]
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Immunogenicity Score".format(algorithm) in headers or "{} Immunogenicity Score".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
+
+    def determine_used_immunogenicity_percentile_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = ["PRIME"]
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
+
+    def determine_used_mhcflurry_presentation_score_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = ["MHCflurryEL Presentation", "MHCflurryEL Processing"]
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
+
+    def determine_used_presentation_score_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = ["NetMHCpanEL", "NetMHCIIpanEL", "BigMHC_EL"]
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Presentation Score".format(algorithm) in headers or "{} Presentation Score".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
+
+    def determine_used_presentation_percentile_algorithms(self):
+        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
+        potential_algorithms = ["NetMHCpanEL", "MHCflurryEL Presentation", "NetMHCIIpanEL"]
+        prediction_algorithms = []
+        for algorithm in potential_algorithms:
+            if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
+                prediction_algorithms.append(algorithm)
+        return prediction_algorithms
+
     def determine_used_prediction_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
         potential_algorithms = PredictionClass.prediction_methods()
@@ -174,7 +256,7 @@ class AggregateAllEpitopes:
                 percentile_algorithms.append(algorithm)
         return percentile_algorithms
 
-    def determine_columns_used_for_aggregation(self, prediction_algorithms, el_algorithms):
+    def determine_columns_used_for_aggregation(self):
         used_columns = [
             "Index", "Chromosome", "Start", "Stop", "Reference", "Variant",
             "Transcript", "Transcript Support Level", "MANE Select", "Canonical", "Biotype", "Transcript CDS Flags", "Transcript Length", "Variant Type", "Mutation",
@@ -191,18 +273,23 @@ class AggregateAllEpitopes:
             "Best MT Immunogenicity Percentile", "Corresponding WT Immunogenicity Percentile",
             "Best MT Presentation Percentile", "Corresponding WT Presentation Percentile",
         ]
-        for algorithm in prediction_algorithms:
+        for algorithm in self.ic50_algorithms:
             used_columns.extend(["{} WT IC50 Score".format(algorithm), "{} MT IC50 Score".format(algorithm)])
-            used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
-        for algorithm in el_algorithms:
+        for algorithm in self.binding_score_algorithms:
+            used_columns.extend(["{} WT Binding Score".format(algorithm), "{} MT Binding Score".format(algorithm)])
+        for algorithm in self.immunogenicity_score_algorithms:
+            used_columns.extend(["{} WT Immunogenicity Score".format(algorithm), "{} MT Immunogenicity Score".format(algorithm)])
+        for algorithm in self.presentation_score_algorithms:
+            used_columns.extend(["{} WT Presentation Score".format(algorithm), "{} MT Presentation Score".format(algorithm)])
+        for algorithm in self.mhcflurry_presentation_score_algorithms:
             used_columns.extend(["{} WT Score".format(algorithm), "{} MT Score".format(algorithm)])
-            if algorithm not in ["MHCflurryEL Processing", "BigMHC_EL", "BigMHC_IM", 'DeepImmuno']:
-                used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
+        for algorithm in self.percentile_algorithms:
+            used_columns.extend(["{} WT Percentile".format(algorithm), "{} MT Percentile".format(algorithm)])
         if self.problematic_positions_exist():
             used_columns.append("Problematic Positions")
         return used_columns
 
-    def set_column_types(self, prediction_algorithms):
+    def set_column_types(self):
         dtypes = {
             'Chromosome': "string",
             "Start": "int32",
@@ -226,10 +313,17 @@ class AggregateAllEpitopes:
                 dtypes['MANE Select'] = 'boolean'
             if self.canonical_run():
                 dtypes['Canonical'] = 'boolean'
-        for algorithm in prediction_algorithms:
-            if algorithm == 'SMM' or algorithm == 'SMMPMBEC':
-                continue
+        for algorithm in self.ic50_algorithms:
+            dtypes["{} MT IC50 Score".format(algorithm)] = "float32"
+        for algorithm in self.binding_score_algorithms:
+            dtypes["{} MT Binding Score".format(algorithm)] = "float32"
+        for algorithm in self.immunogenicity_score_algorithms:
+            dtypes["{} MT Immunogenicity Score".format(algorithm)] = "float32"
+        for algorithm in self.presentation_score_algorithms:
+            dtypes["{} MT Presentation Score".format(algorithm)] = "float32"
+        for algorithm in self.mhcflurry_presentation_score_algorithms:
             dtypes["{} MT Score".format(algorithm)] = "float32"
+        for algorithm in self.percentile_algorithms:
             dtypes["{} MT Percentile".format(algorithm)] = "float32"
         return dtypes
 
@@ -238,8 +332,8 @@ class AggregateAllEpitopes:
         epitope_lengths = self.determine_used_epitope_lengths()
         el_algorithms = self.determine_used_el_algorithms()
         percentile_algorithms = self.determine_used_percentile_algorithms(prediction_algorithms, el_algorithms)
-        used_columns = self.determine_columns_used_for_aggregation(prediction_algorithms, el_algorithms)
-        dtypes = self.set_column_types(prediction_algorithms)
+        used_columns = self.determine_columns_used_for_aggregation()
+        dtypes = self.set_column_types()
 
         ##do a crude estimate of clonal vaf/purity
         self.calculate_clonal_vaf()
@@ -449,11 +543,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def get_unique_peptide_hla_counts(self, included_df):
         return pd.DataFrame(included_df.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
 
+    def replace_nas_and_round(self, items, precision=3):
+        return ["NA" if pd.isna(x) else x if x == 'X' else round(float(x), precision) for x in items]
+
     def replace_nas(self, items):
         return ["NA" if pd.isna(x) else x for x in items]
-
-    def round_to_ints(self, items):
-        return [round(x) if (type(x) == float and not pd.isna(x)) else x for x in items]
 
     def get_included_df_metrics(self, included_df, prediction_algorithms, el_algorithms, percentile_algorithms):
         peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
@@ -477,48 +571,58 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             for peptide in list(peptide_set):
                 included_df_peptide_annotation = included_df_annotation[included_df_annotation['MT Epitope Seq'] == peptide]
                 if len(included_df_peptide_annotation) > 0:
-                    individual_ic50_calls = { 'algorithms': prediction_algorithms }
-                    individual_ic50_percentile_calls = { 'algorithms': prediction_algorithms }
-                    individual_el_calls = { 'algorithms': el_algorithms }
-                    individual_el_percentile_calls = { 'algorithms': el_algorithms }
-                    individual_percentile_calls = { 'algorithms': percentile_algorithms }
+                    individual_ic50_calls = { 'algorithms': self.ic50_algorithms }
+                    individual_binding_score_calls = { 'algorithms': self.binding_score_algorithms }
+                    individual_binding_percentile_calls = { 'algorithms': self.binding_percentile_algorithms }
+                    individual_immunogenicity_calls = { 'algorithms': self.immunogenicity_score_algorithms }
+                    individual_immunogenicity_percentile_calls = { 'algorithms': self.immunogenicity_percentile_algorithms }
+                    individual_presentation_calls = { 'algorithms': self.presentation_score_algorithms + self.mhcflurry_presentation_score_algorithms}
+                    individual_presentation_percentile_calls = { 'algorithms': self.presentation_percentile_algorithms }
                     anchor_fails = []
                     for peptide_type, top_score_metric in zip(['MT', 'WT'], [self.mt_top_score_metric, self.wt_top_score_metric]):
-                        ic50s = {}
-                        percentiles = {}
-                        ic50_calls = {}
-                        percentile_calls = {}
-                        el_calls = {}
-                        el_percentile_calls = {}
-                        all_percentile_calls = {}
+                        summary_ic50s = {}
+                        summary_percentiles = {}
+                        ic50_scores = {}
+                        binding_scores = {}
+                        binding_percentiles = {}
+                        immunogenicity_scores = {}
+                        immunogenicity_percentiles = {}
+                        all_presentation_scores = {}
+                        presentation_percentiles = {}
                         for index, line in included_df_peptide_annotation.to_dict(orient='index').items():
-                            ic50s[line['HLA Allele']] = line['{} {} IC50 Score'.format(top_score_metric, peptide_type)]
-                            percentiles[line['HLA Allele']] = line['{} {} Percentile'.format(top_score_metric, peptide_type)]
-                            ic50_calls[line['HLA Allele']] = self.replace_nas([line["{} {} IC50 Score".format(algorithm, peptide_type)] for algorithm in prediction_algorithms])
-                            percentile_calls[line['HLA Allele']] = self.replace_nas([line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in prediction_algorithms])
-                            el_calls[line['HLA Allele']] = self.replace_nas([line["{} {} Score".format(algorithm, peptide_type)] for algorithm in el_algorithms])
-                            el_percentile_calls[line['HLA Allele']] = self.replace_nas(['NA' if algorithm in ['MHCflurryEL Processing', 'BigMHC_EL', 'BigMHC_IM', 'DeepImmuno'] else line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in el_algorithms])
-                            all_percentile_calls[line['HLA Allele']] = self.replace_nas([line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in percentile_algorithms])
+                            summary_ic50s[line['HLA Allele']] = line['{} {} IC50 Score'.format(top_score_metric, peptide_type)]
+                            summary_percentiles[line['HLA Allele']] = line['{} {} Percentile'.format(top_score_metric, peptide_type)]
+                            ic50_scores[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} IC50 Score".format(algorithm, peptide_type)] for algorithm in self.ic50_algorithms])
+                            binding_scores[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} Binding Score".format(algorithm, peptide_type)] for algorithm in self.binding_score_algorithms])
+                            binding_percentiles[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in self.binding_percentile_algorithms])
+                            immunogenicity_scores[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} Immunogenicity Score".format(algorithm, peptide_type)] for algorithm in self.immunogenicity_score_algorithms])
+                            immunogenicity_percentiles[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in self.immunogenicity_percentile_algorithms])
+                            presentation_scores = self.replace_nas_and_round([line["{} {} Presentation Score".format(algorithm, peptide_type)] for algorithm in self.presentation_score_algorithms])
+                            mhcflurry_presentation_scores = self.replace_nas_and_round([line["{} {} Score".format(algorithm, peptide_type)] for algorithm in self.mhcflurry_presentation_score_algorithms])
+                            all_presentation_scores[line['HLA Allele']] = presentation_scores + mhcflurry_presentation_scores
+                            presentation_percentiles[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in self.presentation_percentile_algorithms])
                             if peptide_type == 'MT' and not self.anchor_calculator.is_anchor_residue_pass(line):
                                 anchor_fails.append(line['HLA Allele'])
-                        sorted_ic50s = []
-                        sorted_percentiles = []
+                        sorted_summary_ic50s = []
+                        sorted_summary_percentiles = []
                         for hla_type in sorted(self.hla_types):
-                            if hla_type in ic50s:
-                                sorted_ic50s.append(ic50s[hla_type])
+                            if hla_type in summary_ic50s:
+                                sorted_summary_ic50s.append(summary_ic50s[hla_type])
                             else:
-                                sorted_ic50s.append('X')
-                            if hla_type in percentiles:
-                                sorted_percentiles.append(percentiles[hla_type])
+                                sorted_summary_ic50s.append('X')
+                            if hla_type in summary_percentiles:
+                                sorted_summary_percentiles.append(summary_percentiles[hla_type])
                             else:
-                                sorted_percentiles.append('X')
-                        results[peptide]['ic50s_{}'.format(peptide_type)] = self.replace_nas(sorted_ic50s)
-                        results[peptide]['percentiles_{}'.format(peptide_type)] = self.replace_nas(sorted_percentiles)
-                        individual_ic50_calls[peptide_type] = ic50_calls
-                        individual_ic50_percentile_calls[peptide_type] = percentile_calls
-                        individual_el_calls[peptide_type] = el_calls
-                        individual_el_percentile_calls[peptide_type] = el_percentile_calls
-                        individual_percentile_calls[peptide_type] = all_percentile_calls
+                                sorted_summary_percentiles.append('X')
+                        results[peptide]['ic50s_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_ic50s)
+                        results[peptide]['percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_percentiles)
+                        individual_ic50_calls[peptide_type] = ic50_scores
+                        individual_binding_score_calls[peptide_type] = binding_scores
+                        individual_binding_percentile_calls[peptide_type] = binding_percentiles
+                        individual_immunogenicity_calls[peptide_type] = immunogenicity_scores
+                        individual_immunogenicity_percentile_calls[peptide_type] = immunogenicity_percentiles
+                        individual_presentation_calls[peptide_type] = all_presentation_scores
+                        individual_presentation_percentile_calls[peptide_type] = presentation_percentiles
                     results[peptide]['hla_types'] = sorted(self.hla_types)
                     results[peptide]['mutation_position'] = "NA" if pd.isna(included_df_peptide_annotation.iloc[0]['Mutation Position']) else str(included_df_peptide_annotation.iloc[0]['Mutation Position'])
                     results[peptide]['problematic_positions'] = str(included_df_peptide_annotation.iloc[0]['Problematic Positions']) if 'Problematic Positions' in included_df_peptide_annotation.iloc[0] else 'None'
@@ -527,10 +631,12 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     else:
                         results[peptide]['anchor_fails'] = 'None'
                     results[peptide]['individual_ic50_calls'] = individual_ic50_calls
-                    results[peptide]['individual_ic50_percentile_calls'] = individual_ic50_percentile_calls
-                    results[peptide]['individual_el_calls'] = individual_el_calls
-                    results[peptide]['individual_el_percentile_calls'] = individual_el_percentile_calls
-                    results[peptide]['individual_percentile_calls'] = individual_percentile_calls
+                    results[peptide]['individual_binding_score_calls'] = individual_binding_score_calls
+                    results[peptide]['individual_binding_percentile_calls'] = individual_binding_percentile_calls
+                    results[peptide]['individual_immunogenicity_calls'] = individual_immunogenicity_calls
+                    results[peptide]['individual_immunogenicity_percentile_calls'] = individual_immunogenicity_percentile_calls
+                    results[peptide]['individual_presentation_calls'] = individual_presentation_calls
+                    results[peptide]['individual_presentation_percentile_calls'] = individual_presentation_percentile_calls
                     wt_peptide = included_df_peptide_annotation.iloc[0]['WT Epitope Seq']
                     if pd.isna(wt_peptide):
                         variant_type = included_df_peptide_annotation.iloc[0]['Variant Type']
@@ -544,11 +650,11 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             peptides[set_name]['peptides'] = self.sort_peptides(results)
             sorted_transcripts = self.sort_transcripts(annotations, included_df)
             peptides[set_name]['transcripts'] = list(sorted_transcripts.Annotation)
-            peptides[set_name]['transcript_expr'] = self.replace_nas(list(sorted_transcripts.Expr))
+            peptides[set_name]['transcript_expr'] = self.replace_nas_and_round(list(sorted_transcripts.Expr))
             peptides[set_name]['mane_select'] = list(sorted_transcripts['MANE Select'])
             peptides[set_name]['canonical'] = list(sorted_transcripts.Canonical)
-            peptides[set_name]['tsl'] = self.replace_nas(self.round_to_ints(list(sorted_transcripts['Transcript Support Level'])))
-            peptides[set_name]['biotype'] = list(sorted_transcripts.Biotype)
+            peptides[set_name]['tsl'] = self.replace_nas(list(sorted_transcripts['Transcript Support Level']))
+            peptides[set_name]['biotype'] = self.replace_nas(list(sorted_transcripts.Biotype))
             peptides[set_name]['transcript_cds_flags'] = list(sorted_transcripts['Transcript CDS Flags'])
             peptides[set_name]['transcript_length'] = [int(l) for l in list(sorted_transcripts.Length)]
             peptides[set_name]['transcript_count'] = len(annotations)
