@@ -5,7 +5,8 @@ on:
     branches: [ master, staging, hotfix ]
   pull_request:
     types: [opened, synchronize, edited, reopened]
-    branches: [ master, staging, hotfix]
+    branches:
+      - '**'
 
 jobs:
   run_tests:
