@@ -83,7 +83,7 @@ setup(
         ]
     },
     install_requires=[
-        'vcfpy',
+        'vcfpy==0.13.8',
         'requests',
         'PyYAML>=5.1',
         'biopython==1.77',
