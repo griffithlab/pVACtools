@@ -19,7 +19,7 @@ class BindingFilterTests(unittest.TestCase):
     def module_compiles(self):
         self.assertTrue(py_compile.compile(self.binding_filter_path))
 
-    def test_binding_filter_runs_and_produces_expected_output(self):
+    def test_binding_filter_runs_and_produces_expected_output_top_score_metric_median_percentile_strategy_conservative(self):
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(AlleleSpecificBindingFilter(
             os.path.join(
@@ -27,11 +27,6 @@ class BindingFilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            5000,
-            0,
-            'median',
-            False,
-            None,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
@@ -39,7 +34,7 @@ class BindingFilterTests(unittest.TestCase):
             False
         ))
 
-    def test_binding_filter_with_percentile_runs_and_produces_expected_output(self):
+    def test_binding_filter_runs_and_produces_expected_output_top_score_metric_lowest_percentile_strategy_conservative(self):
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(AlleleSpecificBindingFilter(
             os.path.join(
@@ -47,14 +42,43 @@ class BindingFilterTests(unittest.TestCase):
                 'Test.combined.parsed.tsv'
             ),
             output_file.name,
-            10000,
-            0,
-            'median',
-            False,
-            1,
+            top_score_metric='lowest',
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
-            os.path.join(self.test_data_path, "Test.filtered.binding.percentile.tsv"),
+            os.path.join(self.test_data_path, "Test.filtered.binding.tsv"),
+            False
+        ))
+
+    def test_binding_filter_runs_and_produces_expected_output_top_score_metric_median_percentile_strategy_exploratory(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(AlleleSpecificBindingFilter(
+            os.path.join(
+                self.test_data_path,
+                'Test.combined.parsed.tsv'
+            ),
+            output_file.name,
+            percentile_threshold_strategy='exploratory',
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_path, "Test.filtered.binding.exploratory.tsv"),
+            False
+        ))
+
+    def test_binding_filter_runs_and_produces_expected_output_top_score_metric_lowest_percentile_strategy_explorative(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(AlleleSpecificBindingFilter(
+            os.path.join(
+                self.test_data_path,
+                'Test.combined.parsed.tsv'
+            ),
+            output_file.name,
+            top_score_metric='lowest',
+            percentile_threshold_strategy='exploratory',
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_path, "Test.filtered.binding.exploratory.tsv"),
             False
         ))
