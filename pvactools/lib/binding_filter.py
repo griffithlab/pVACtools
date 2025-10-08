@@ -105,12 +105,6 @@ class BindingFilter:
             default='median',
         )
         parser.add_argument(
-            '-m2', '--top-score-metric2',
-            choices=['ic50','percentile'],
-            default='ic50',
-            help="Whether to use median/best IC50 or to use median/best percentile score."
-        )
-        parser.add_argument(
             '--exclude-NAs',
             help="Exclude NA values from the filtered output.",
             default=False,
