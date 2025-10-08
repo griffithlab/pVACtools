@@ -186,7 +186,10 @@ class PostProcessor:
             self.top_score_metric,
             self.exclude_NAs,
             self.allele_specific_binding_thresholds,
-            self.percentile_threshold,
+            self.combined_percentile_threshold,
+            self.binding_percentile_threshold,
+            self.immunogenicity_percentile_threshold,
+            self.presentation_percentile_threshold,
             self.percentile_threshold_strategy,
             self.file_type,
         ).execute()

@@ -70,7 +70,7 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def get_included_df_metrics(self, included_df, prediction_algorithms, el_algorithms, percentile_algorithms):
+    def get_included_df_metrics(self, included_df):
         raise Exception("Must implement method in child class")
 
     @abstractmethod
@@ -105,7 +105,7 @@ class AggregateAllEpitopes:
     def tier_aggregated_report(self):
         raise Exception("Must implement method in child class")
 
-    def get_best_mut_line(self, df, key, prediction_algorithms, el_algorithms, percentile_algorithms):
+    def get_best_mut_line(self, df, key):
         #order by best median score and get best ic50 peptide
         best = self.get_best_binder(df)
 
@@ -122,7 +122,7 @@ class AggregateAllEpitopes:
 
         #get a list of all unique gene/transcript/aa_change combinations
         #store a count of all unique peptides that passed
-        (peptides, anno_count) = self.get_included_df_metrics(included_df, prediction_algorithms, el_algorithms, percentile_algorithms)
+        (peptides, anno_count) = self.get_included_df_metrics(included_df)
         included_peptide_count = self.calculate_unique_peptide_count(included_df)
         good_binder_count = self.calculate_good_binder_count(good_binders_df)
 
@@ -244,23 +244,6 @@ class AggregateAllEpitopes:
         else:
             return round(float(line['Gene Expression']) * float(line['Tumor RNA VAF']), 3)
 
-    def determine_used_el_algorithms(self):
-        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["MHCflurryEL Processing", "MHCflurryEL Presentation", "NetMHCpanEL", "NetMHCIIpanEL", "BigMHC_EL", 'BigMHC_IM', 'DeepImmuno']
-        prediction_algorithms = []
-        for algorithm in potential_algorithms:
-            if "{} MT Score".format(algorithm) in headers or "{} Score".format(algorithm) in headers:
-                prediction_algorithms.append(algorithm)
-        return prediction_algorithms
-
-    def determine_used_percentile_algorithms(self, prediction_algorithms, el_algorithms):
-        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        percentile_algorithms = []
-        for algorithm in prediction_algorithms + el_algorithms:
-            if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
-                percentile_algorithms.append(algorithm)
-        return percentile_algorithms
-
     def determine_columns_used_for_aggregation(self):
         used_columns = [
             "Index", "Chromosome", "Start", "Stop", "Reference", "Variant",
@@ -335,8 +318,6 @@ class AggregateAllEpitopes:
     def execute(self):
         prediction_algorithms = self.determine_used_prediction_algorithms()
         epitope_lengths = self.determine_used_epitope_lengths()
-        el_algorithms = self.determine_used_el_algorithms()
-        percentile_algorithms = self.determine_used_percentile_algorithms(prediction_algorithms, el_algorithms)
         used_columns = self.determine_columns_used_for_aggregation()
         dtypes = self.set_column_types()
 
@@ -356,7 +337,9 @@ class AggregateAllEpitopes:
                 'allele_expr_threshold': self.allele_expr_threshold,
                 'transcript_prioritization_strategy': self.transcript_prioritization_strategy,
                 'maximum_transcript_support_level': self.maximum_transcript_support_level,
-                'percentile_threshold': self.percentile_threshold,
+                'binding_percentile_threshold': self.binding_percentile_threshold,
+                'immunogenicity_percentile_threshold': self.immunogenicity_percentile_threshold,
+                'presentation_percentile_threshold': self.presentation_percentile_threshold,
                 'percentile_threshold_strategy': self.percentile_threshold_strategy,
                 'use_allele_specific_binding_thresholds': self.use_allele_specific_binding_thresholds,
                 'mt_top_score_metric': self.mt_top_score_metric,
@@ -379,7 +362,7 @@ class AggregateAllEpitopes:
 
         for key in keys:
             (df, key_str) = self.get_sub_df(all_epitopes_df, key)
-            (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str, prediction_algorithms, el_algorithms, percentile_algorithms)
+            (best_mut_line, metrics_for_key) = self.get_best_mut_line(df, key_str)
             data.append(best_mut_line)
             metrics[key_str] = metrics_for_key
         peptide_table = pd.DataFrame(data=data)
@@ -404,7 +387,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             expn_val=1,
             transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
             maximum_transcript_support_level=1,
-            percentile_threshold=None,
+            binding_percentile_threshold=2.0,
+            immunogenicity_percentile_threshold=2.0,
+            presentation_percentile_threshold=2.0,
             percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
@@ -420,7 +405,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.tumor_purity = tumor_purity
         self.binding_threshold = binding_threshold
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
-        self.percentile_threshold = percentile_threshold
+        self.binding_percentile_threshold = binding_percentile_threshold
+        self.immunogenicity_percentile_threshold = immunogenicity_percentile_threshold
+        self.presentation_percentile_threshold = presentation_percentile_threshold
         self.percentile_threshold_strategy = percentile_threshold_strategy
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         self.aggregate_inclusion_count_limit = aggregate_inclusion_count_limit
@@ -568,7 +555,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def replace_nas(self, items):
         return ["NA" if pd.isna(x) else x for x in items]
 
-    def get_included_df_metrics(self, included_df, prediction_algorithms, el_algorithms, percentile_algorithms):
+    def get_included_df_metrics(self, included_df):
         peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
         included_peptides = included_df["MT Epitope Seq"].unique()
         included_transcripts = included_df['annotation'].unique()
@@ -825,7 +812,9 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             expn_val=self.expn_val,
             transcript_prioritization_strategy=self.transcript_prioritization_strategy,
             maximum_transcript_support_level=self.maximum_transcript_support_level,
-            percentile_threshold=self.percentile_threshold,
+            binding_percentile_threshold=self.binding_percentile_threshold,
+            immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+            presentation_percentile_threshold=self.presentation_percentile_threshold,
             percentile_threshold_strategy=self.percentile_threshold_strategy,
             allele_specific_binding_thresholds=self.use_allele_specific_binding_thresholds,
             allele_specific_anchors=self.anchor_calculator.use_allele_specific_anchors,
@@ -839,7 +828,9 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             input_file,
             output_file,
             binding_threshold=500,
-            percentile_threshold=None,
+            binding_percentile_threshold=2.0,
+            immunogenicity_percentile_threshold=2.0,
+            presentation_percentile_threshold=2.0,
             percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
@@ -851,7 +842,9 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         self.output_file = output_file
         self.binding_threshold = binding_threshold
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
-        self.percentile_threshold = percentile_threshold
+        self.binding_percentile_threshold = binding_percentile_threshold
+        self.immunogenicity_percentile_threshold = immunogenicity_percentile_threshold
+        self.presentation_percentile_threshold = presentation_percentile_threshold
         self.percentile_threshold_strategy = percentile_threshold_strategy
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         self.aggregate_inclusion_count_limit = aggregate_inclusion_count_limit
@@ -937,7 +930,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     def get_unique_peptide_hla_counts(self, good_binders_df):
         return pd.DataFrame(good_binders_df.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
 
-    def get_included_df_metrics(self, included_df, prediction_algorithms, el_algorithms, percentile_algorithms):
+    def get_included_df_metrics(self, included_df):
         return (None, "NA")
 
     def calculate_unique_peptide_count(self, included_df):
@@ -967,7 +960,9 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         input_file,
         output_file,
         binding_threshold=500,
-        percentile_threshold=None,
+        binding_percentile_threshold=2.0,
+        immunogenicity_percentile_threshold=2.0,
+        presentation_percentile_threshold=2.0,
         percentile_threshold_strategy='conservative',
         allele_specific_binding_thresholds=False,
         top_score_metric="median",
@@ -982,7 +977,9 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             input_file,
             output_file,
             binding_threshold=binding_threshold,
-            percentile_threshold=percentile_threshold,
+            binding_percentile_threshold=binding_percentile_threshold,
+            immunogenicity_percentile_threshold=immunogenicity_percentile_threshold,
+            presentation_percentile_threshold=presentation_percentile_threshold,
             percentile_threshold_strategy = percentile_threshold_strategy,
             allele_specific_binding_thresholds=allele_specific_binding_thresholds,
             top_score_metric=top_score_metric,
@@ -1030,7 +1027,9 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             self.output_file,
             binding_threshold=self.binding_threshold,
             allele_specific_binding_thresholds=self.use_allele_specific_binding_thresholds,
-            percentile_threshold=self.percentile_threshold,
+            binding_percentile_threshold=self.binding_percentile_threshold,
+            immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+            presentation_percentile_threshold=self.presentation_percentile_threshold,
             percentile_threshold_strategy=self.percentile_threshold_strategy,
             read_support=self.read_support,
             expn_val=self.expn_val,
@@ -1071,7 +1070,9 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             self.output_file,
             binding_threshold=self.binding_threshold,
             allele_specific_binding_thresholds=self.use_allele_specific_binding_thresholds,
-            percentile_threshold=self.percentile_threshold,
+            binding_percentile_threshold=self.binding_percentile_threshold,
+            immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+            presentation_percentile_threshold=self.presentation_percentile_threshold,
             percentile_threshold_strategy=self.percentile_threshold_strategy,
             top_score_metric2=self.top_score_metric2,
         ).execute()
@@ -1084,7 +1085,9 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         output_file,
         tumor_purity=None,
         binding_threshold=500,
-        percentile_threshold=None,
+        binding_percentile_threshold=2.0,
+        immunogenicity_percentile_threshold=2.0,
+        presentation_percentile_threshold=2.0,
         percentile_threshold_strategy='conservative',
         allele_specific_binding_thresholds=False,
         aggregate_inclusion_binding_threshold=5000,
@@ -1103,7 +1106,9 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             input_file,
             output_file,
             binding_threshold=binding_threshold,
-            percentile_threshold=percentile_threshold,
+            binding_percentile_threshold=binding_percentile_threshold,
+            immunogenicity_percentile_threshold=immunogenicity_percentile_threshold,
+            presentation_percentile_threshold=presentation_percentile_threshold,
             percentile_threshold_strategy = percentile_threshold_strategy,
             allele_specific_binding_thresholds=allele_specific_binding_thresholds,
             aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
@@ -1190,7 +1195,9 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             self.vaf_clonal,
             binding_threshold=self.binding_threshold,
             allele_specific_binding_thresholds=self.use_allele_specific_binding_thresholds,
-            percentile_threshold=self.percentile_threshold,
+            binding_percentile_threshold=self.binding_percentile_threshold,
+            immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+            presentation_percentile_threshold=self.presentation_percentile_threshold,
             percentile_threshold_strategy=self.percentile_threshold_strategy,
             trna_vaf=self.trna_vaf,
             trna_cov=self.trna_cov,
