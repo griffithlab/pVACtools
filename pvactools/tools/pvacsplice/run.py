@@ -2,6 +2,8 @@ import sys
 import os
 import pandas as pd
 import shutil
+import copy
+
 from pathlib import Path
 from pvactools.lib.splice_pipeline import *
 from pvactools.lib.prediction_class import *
@@ -205,8 +207,8 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_i_executable = None
 
-        class_i_arguments = junction_arguments.copy()
         for x in args.class_i_epitope_length:
+            class_i_arguments = copy.deepcopy(junction_arguments)
             print(f'Executing MHC Class I predictions for {x}mers')
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
             os.makedirs(output_len_dir, exist_ok=True)
@@ -220,7 +222,7 @@ def main(args_input = sys.argv[1:]):
             class_i_arguments['alleles']                 = class_i_alleles
             class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
             class_i_arguments['epitope_lengths']         = x
-            class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
+            class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms.copy()
             class_i_arguments['output_dir']              = output_len_dir
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
 
@@ -246,8 +248,8 @@ def main(args_input = sys.argv[1:]):
         else:
             iedb_mhc_ii_executable = None
 
-        class_ii_arguments = junction_arguments.copy()
         for y in args.class_ii_epitope_length:
+            class_ii_arguments = copy.deepcopy(junction_arguments)
             print(f'Executing MHC Class II predictions for {y}mers')
             output_len_dir = os.path.join(junctions_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
             os.makedirs(output_len_dir, exist_ok=True)
@@ -259,7 +261,7 @@ def main(args_input = sys.argv[1:]):
 
             class_ii_arguments['input_file']              = input_file
             class_ii_arguments['alleles']                 = class_ii_alleles
-            class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
+            class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms.copy()
             class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
             class_ii_arguments['epitope_lengths']         = y
             class_ii_arguments['output_dir']              = output_len_dir
