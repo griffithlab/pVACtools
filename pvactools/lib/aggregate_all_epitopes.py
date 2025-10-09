@@ -52,6 +52,10 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
+    def get_good_binders_df(self, included_df):
+        raise Exception("Must implement method in child class")
+
+    @abstractmethod
     def get_unique_peptide_hla_counts(self, included_df):
         raise Exception("Must implement method in child class")
 
@@ -64,7 +68,7 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def calculate_good_binder_count(self, included_df):
+    def calculate_good_binder_count(self, good_binders_df):
         raise Exception("Must implement method in child class")
 
     @abstractmethod
@@ -102,7 +106,8 @@ class AggregateAllEpitopes:
         if not best_df.index.isin(included_df.index).all():
             included_df = pd.concat([included_df, best_df])
         best_df = best_df.to_dict()
-        peptide_hla_counts = self.get_unique_peptide_hla_counts(included_df)
+        good_binders_df = self.get_good_binders_df(included_df)
+        peptide_hla_counts = self.get_unique_peptide_hla_counts(good_binders_df)
         hla_counts = Counter(peptide_hla_counts["HLA Allele"])
         hla = dict(map(lambda x : (x, hla_counts[x]) if x in hla_counts else (x, ""), self.hla_types))
 
@@ -110,7 +115,7 @@ class AggregateAllEpitopes:
         #store a count of all unique peptides that passed
         (peptides, anno_count) = self.get_included_df_metrics(included_df, prediction_algorithms, el_algorithms, percentile_algorithms)
         included_peptide_count = self.calculate_unique_peptide_count(included_df)
-        good_binder_count = self.calculate_good_binder_count(included_df)
+        good_binder_count = self.calculate_good_binder_count(good_binders_df)
 
         #assemble the line
         out_dict = self.assemble_result_line(best, key, vaf_clonal, hla, anno_count, included_peptide_count, good_binder_count)
@@ -548,6 +553,21 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             top_n_best_peptides = list(set(top_n_best_peptide_entries_df["MT Epitope Seq"]))
             return binding_df[binding_df["MT Epitope Seq"].isin(top_n_best_peptides)]
 
+    def get_good_binders_df(self, included_df):
+        if self.use_allele_specific_binding_thresholds:
+            selection = []
+            for index, row in included_df.iterrows():
+                if row['HLA Allele'] in self.allele_specific_binding_thresholds:
+                    binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
+                else:
+                    binding_threshold = self.binding_threshold
+                if row["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold:
+                    selection.append(index)
+            good_binders = included_df[included_df.index.isin(selection)]
+        else:
+            good_binders = included_df[included_df["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.binding_threshold]
+        return good_binders
+
     def sort_included_df(self, df):
         df['biotype_sort'] = df['Biotype'].apply(lambda x: 1 if x == 'protein_coding' else 2)
         df['tsl_sort'] = df['Transcript Support Level'].apply(lambda x: 6 if pd.isnull(x) or x == 'Not Supported' else int(x))
@@ -598,13 +618,12 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     "{} MT IC50 Score".format(self.mt_top_score_metric),
                 ]
                 sort_order = [True, True, True, True, False, True]
-        
         df.sort_values(by=sort_columns, inplace=True, ascending=sort_order)
         df.drop(columns = ['biotype_sort', 'tsl_sort', 'problematic_positions_sort', 'anchor_residue_pass_sort'], inplace=True, errors='ignore')
         return df
 
-    def get_unique_peptide_hla_counts(self, included_df):
-        return pd.DataFrame(included_df.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
+    def get_unique_peptide_hla_counts(self, good_binders_df):
+        return pd.DataFrame(good_binders_df.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
 
     def replace_nas(self, items):
         return ["NA" if pd.isna(x) else x for x in items]
@@ -746,20 +765,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def calculate_unique_peptide_count(self, included_df):
         return len(included_df["MT Epitope Seq"].unique())
 
-    def calculate_good_binder_count(self, included_df):
-        if self.use_allele_specific_binding_thresholds:
-            selection = []
-            for index, row in included_df.iterrows():
-                if row['HLA Allele'] in self.allele_specific_binding_thresholds:
-                    binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
-                else:
-                    binding_threshold = self.binding_threshold
-                if row["{} MT IC50 Score".format(self.mt_top_score_metric)] < binding_threshold:
-                    selection.append(index)
-            good_binders = included_df[included_df.index.isin(selection)]
-        else:
-            good_binders = included_df[included_df["{} MT IC50 Score".format(self.mt_top_score_metric)] < self.binding_threshold]
-        return len(good_binders["MT Epitope Seq"].unique())
+    def calculate_good_binder_count(self, good_binders_df):
+        return len(good_binders_df["MT Epitope Seq"].unique())
 
     def get_default_annotation_count(self):
         return 0
@@ -946,6 +953,21 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             top_n_best_peptides = list(set(top_n_best_peptide_entries_df["Epitope Seq"]))
             return binding_df[binding_df["Epitope Seq"].isin(top_n_best_peptides)]
 
+    def get_good_binders_df(self, included_df):
+        if self.use_allele_specific_binding_thresholds:
+            selection = []
+            for index, row in included_df.iterrows():
+                if row['HLA Allele'] in self.allele_specific_binding_thresholds:
+                    binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
+                else:
+                    binding_threshold = self.binding_threshold
+                if row["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
+                    selection.append(index)
+            good_binders = included_df[included_df.index.isin(selection)]
+        else:
+            good_binders = included_df[included_df["{} IC50 Score".format(self.top_score_metric)] < self.binding_threshold]
+        return good_binders
+
     def sort_included_df(self, df):
         if self.top_score_metric2 == "percentile":
             df.sort_values(by=[
@@ -959,8 +981,8 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             ], inplace=True, ascending=[True, True])
         return df
 
-    def get_unique_peptide_hla_counts(self, included_df):
-        return pd.DataFrame(included_df.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
+    def get_unique_peptide_hla_counts(self, good_binders_df):
+        return pd.DataFrame(good_binders_df.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
 
     def get_included_df_metrics(self, included_df, prediction_algorithms, el_algorithms, percentile_algorithms):
         return (None, "NA")
@@ -968,20 +990,8 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     def calculate_unique_peptide_count(self, included_df):
         return len(included_df["Epitope Seq"].unique())
 
-    def calculate_good_binder_count(self, included_df):
-        if self.use_allele_specific_binding_thresholds:
-            selection = []
-            for index, row in included_df.iterrows():
-                if row['HLA Allele'] in self.allele_specific_binding_thresholds:
-                    binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
-                else:
-                    binding_threshold = self.binding_threshold
-                if row["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
-                    selection.append(index)
-            good_binders = included_df[included_df.index.isin(selection)]
-        else:
-            good_binders = included_df[included_df["{} IC50 Score".format(self.top_score_metric)] < self.binding_threshold]
-        return len(good_binders["Epitope Seq"].unique())
+    def calculate_good_binder_count(self, good_binders_df):
+        return len(good_binders_df["Epitope Seq"].unique())
 
     def get_default_annotation_count(self):
         return "NA"
