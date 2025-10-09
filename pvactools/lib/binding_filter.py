@@ -7,7 +7,7 @@ from pvactools.lib.allele_specific_binding_filter import AlleleSpecificBindingFi
 from pvactools.lib.run_utils import *
 
 class BindingFilter:
-    def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, top_score_metric2, exclude_nas, allele_specific_cutoffs, percentile_threshold, percentile_threshold_strategy='conservative', file_type='pVACseq'):
+    def __init__(self, input_file, output_file, binding_threshold, minimum_fold_change, top_score_metric, exclude_nas, allele_specific_cutoffs, percentile_threshold, percentile_threshold_strategy='conservative', file_type='pVACseq'):
         self.input_file = input_file
         self.output_file = output_file
         self.binding_threshold = binding_threshold
@@ -15,7 +15,6 @@ class BindingFilter:
         self.percentile_threshold_strategy = percentile_threshold_strategy
         self.minimum_fold_change = minimum_fold_change
         self.top_score_metric = top_score_metric
-        self.top_score_metric2 = top_score_metric2
         self.exclude_nas = exclude_nas
         self.allele_specific_cutoffs = allele_specific_cutoffs
         self.file_type = file_type
@@ -104,12 +103,6 @@ class BindingFilter:
                  + "median: Use the Median MT IC50 Score, Median Fold Change, and Median MT Percentile "
                  + "i.e. use the median MT ic50 binding score, fold change, and MT percentile of all chosen prediction methods).",
             default='median',
-        )
-        parser.add_argument(
-            '-m2', '--top-score-metric2',
-            choices=['ic50','percentile'],
-            default='ic50',
-            help="Whether to use median/best IC50 or to use median/best percentile score."
         )
         parser.add_argument(
             '--exclude-NAs',
