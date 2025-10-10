@@ -62,8 +62,10 @@ New in Version |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Fix a bug in the reference proteome similarity step that may result in an ``IndexError: string index out of range`` error. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1313
-* Improve handling of inframe indels in repetitive region to upstream filter out variants that don't result in novel neoantigen candidates and to better find a matched wildtype epitope. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1314
+* Fix an issue where the output parsing of MHCflurryEL in pVACfuse and pVACsplice where only the smallest epitope length would have results. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1320
+* Fix per-allele counts in the aggregated report. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1316
+* Fix a few bugs where standalone commands weren't working with all_epitopes/filtered TSVs. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1324
+* Update ``--top-score-metric2`` parameter help text for clarity and remove unnecessary usage. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1321
 
 New in Version 5
 ----------------
