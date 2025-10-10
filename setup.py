@@ -60,7 +60,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/supporting_files"):
 
 setup(
     name="pvactools",
-    version="5.5.3",
+    version="5.5.4",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",
@@ -83,7 +83,7 @@ setup(
         ]
     },
     install_requires=[
-        'vcfpy',
+        'vcfpy==0.13.8',
         'requests',
         'PyYAML>=5.1',
         'biopython==1.77',

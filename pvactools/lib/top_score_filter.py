@@ -42,7 +42,8 @@ class TopScoreFilter(metaclass=ABCMeta):
             '-m2', '--top-score-metric2',
             choices=['ic50','percentile'],
             default='ic50',
-            help="Whether to use median/best IC50 or to use median/best percentile score."
+            help="Whether to use median/best IC50 or to use median/best percentile score when determining the top scoring peptide. "
+                 + "This parameter is also used to influence the primary sorting criteria for the variants in the output report."
         )
         if tool == 'pvacseq' or tool == 'pvacsplice':
             parser.add_argument(
