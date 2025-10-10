@@ -89,9 +89,9 @@ def parse_input_tsv(input_tsv):
     indexes = []
     with open(input_tsv, 'r') as fh:
         reader = csv.DictReader(fh, delimiter = "\t")
-        if 'Index' in reader.fieldnames:
+        if 'Mutation' in reader.fieldnames:
             for line in reader:
-                indexes.append(line[Index])
+                indexes.append(line['Mutation'])
             file_type = 'full'
         else:
             for line in reader:
