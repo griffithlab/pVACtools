@@ -101,8 +101,7 @@ explore_tab <- tabItem(
                     uiOutput("percentile_threshold_strategy_ui"),
                     uiOutput("dna_cutoff_ui"),
                     uiOutput("allele_expr_ui"),
-                    uiOutput("transcript_prioritization_strategy_ui"),
-                    uiOutput("maximum_transcript_support_level_ui"),
+                    uiOutput("scoring_candidate_metric_ui"),
                     h5("For further explanations on these inputs, please refer to the ", tags$a(href = "https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_upload.html#visualize-and-explore", "pVACview documentation.", target = "_blank")),
                     actionButton("submit", "Recalculate Tiering with new parameters"),
                     style = "overflow-x: scroll;font-size:100%"),
@@ -606,6 +605,7 @@ tutorial_tab <- tabItem("tutorial",
                 than half of the clonal VAF cutoff will be considered subclonal (e.g. setting a 0.6 clonal VAF cutoff means anything under 0.3 VAF is subclonal)."), br(),
                                                         code("Allele Expr"), p("Allele expression cutoff for a peptide to be considered expressed. Note for each variant, the allele expression
                 is calculated by multiplying gene expression and RNA VAF."), br(),
+                                                        code("Scoring Cnadidates Ranking"), p("Whether to use IC50 or Percentile scores as a top score metric for scoring candidates"), br(),
                                                         code("Default Anchors vs Allele-specific Anchors"), br(),
                                                         "By default, pVACtools considers positions 1, 2, n-1, and n to be anchors for an n-mer allele. However, a recent study has shown that anchors should be
                 considered on an allele-specific basis and different anchor patterns exist among HLA alleles.",

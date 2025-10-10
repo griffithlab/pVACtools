@@ -61,6 +61,28 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         ))
         os.remove(metric_file)
 
+    def test_calculate_self_similarity_with_peptide_fasta_pvacsplice(self):
+        input_file = os.path.join(self.test_data_dir, 'input.pvacsplice.tsv')
+        input_fasta = os.path.join(self.test_data_dir, 'input.pvacsplice.fasta')
+        output_file = tempfile.NamedTemporaryFile()
+        metric_file = "{}.reference_matches".format(output_file.name)
+        self.assertFalse(CalculateReferenceProteomeSimilarity(
+            input_file,
+            input_fasta,
+            output_file.name,
+            file_type="pVACsplice",
+            peptide_fasta=self.peptide_fasta
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output.peptide_fasta.pvacsplice.tsv"),
+        ))
+        self.assertTrue(cmp(
+            metric_file,
+            os.path.join(self.test_data_dir, "output.peptide_fasta.pvacsplice.tsv.reference_matches"),
+        ))
+        os.remove(metric_file)
+
     def test_calculate_self_similarity_with_aggregated_tsv_and_peptide_fasta(self):
         input_file = os.path.join(self.test_data_dir, 'Test.all_epitopes.aggregated.tsv')
         input_aggregated_metrics_file = os.path.join(self.test_data_dir, 'Test.all_epitopes.aggregated.tsv.metrics.json')
