@@ -123,7 +123,8 @@ class RunArgumentParser(metaclass=ABCMeta):
             '-m2', '--top-score-metric2',
             choices=['ic50','percentile'],
             default='ic50',
-            help="Whether to use median/best IC50 or to use median/best percentile score."
+            help="Whether to use median/best IC50 or to use median/best percentile score when determining the best peptide in the aggregated report and the top score filter (filtered report). "
+                 + "This parameter is also used to influence the primary sorting criteria in the aggregated report for the candidates within each tier as well as in the filtered report."
         )
 
     def prediction_args(self):

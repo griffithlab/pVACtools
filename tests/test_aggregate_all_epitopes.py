@@ -267,7 +267,6 @@ class AggregateAllEpitopesTests(unittest.TestCase):
                 top_score_metric2 = "ic50", 
             ).execute()
         )
-        
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "output.pvacbind.lowest_top_score_metric.tsv"),
