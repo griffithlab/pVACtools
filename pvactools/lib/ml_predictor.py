@@ -190,15 +190,15 @@ def _resolve_artifact_paths(model_artifacts_path):
     """
     Resolve standard artifact file paths inside the provided artifacts directory.
 
-    Expected filenames:
-      - rf_downsample_model.pkl
-      - trained_imputer.joblib
-      - label_encoders.pkl
+    Expected filenames (numpy126 versions):
+      - rf_downsample_model_numpy126.pkl
+      - trained_imputer_numpy126.joblib
+      - label_encoders_numpy126.pkl
     """
     artifacts_dir = Path(model_artifacts_path)
-    model_path = artifacts_dir / 'rf_downsample_model.pkl'
-    imputer_path = artifacts_dir / 'trained_imputer.joblib'
-    encoders_path = artifacts_dir / 'label_encoders.pkl'
+    model_path = artifacts_dir / 'rf_downsample_model_numpy126.pkl'
+    imputer_path = artifacts_dir / 'trained_imputer_numpy126.joblib'
+    encoders_path = artifacts_dir / 'label_encoders_numpy126.pkl'
     return str(model_path), str(imputer_path), str(encoders_path)
 
 def clean_and_impute_data(merged_all, model_artifacts_path):
