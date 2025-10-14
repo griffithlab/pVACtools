@@ -184,7 +184,6 @@ class PostProcessor:
             self.binding_threshold,
             self.minimum_fold_change,
             self.top_score_metric,
-            self.top_score_metric2,
             self.exclude_NAs,
             self.allele_specific_binding_thresholds,
             self.percentile_threshold,

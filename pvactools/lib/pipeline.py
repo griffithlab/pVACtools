@@ -28,9 +28,14 @@ class Pipeline(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         for (k,v) in kwargs.items():
            setattr(self, k, v)
-        self.flurry_state                = self.get_flurry_state()
-        self.starfusion_file             = kwargs.pop('starfusion_file', None)
-        self.proximal_variants_file      = None
+        #We need to make a copy of prediction_algorithms here because get_flurry_state
+        #potentially modifies this list.
+        #If prediction_algorithms gets passed in as a variable, modifying it in here will also
+        #modify the variable that was passed in. Using a copy will prevent this.
+        self.prediction_algorithms  = kwargs['prediction_algorithms'].copy()
+        self.flurry_state           = self.get_flurry_state()
+        self.starfusion_file        = kwargs.pop('starfusion_file', None)
+        self.proximal_variants_file = None
         self.tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(self.tmp_dir, exist_ok=True)
 
