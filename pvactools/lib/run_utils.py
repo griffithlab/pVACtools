@@ -70,42 +70,6 @@ def float_range(minimum, maximum):
     # Return function handle to checking function
     return float_range_checker
 
-def aggregate_report_evaluations():
-    """Return function handle of an argument type function for
-       ArgumentParser checking of the aggregate report evaluation values.
-       Valid values are: ['Accept', 'Reject', 'Pending', 'Review']"""
-
-    valid_values = ['Accept', 'Reject', 'Pending', 'Review']
-
-    def aggregate_report_evaluation_checker(arg):
-        arg_list = arg.split(",")
-        for argument in arg_list:
-            if argument not in valid_values:
-                raise argparse.ArgumentTypeError(
-                    "Invalid evaluation '{}'. Valid values are: {}".format(argument, ", ".join(valid_values))
-                )
-        return arg_list
-
-    return aggregate_report_evaluation_checker
-
-def transcript_prioritization_strategy():
-    """Return function handle of an argument type function for
-       ArgumentParser checking of the transcript prioritization strategy
-       checking that the specified criteria are in the list of: ['canonical', 'mane_select', 'tsl']"""
-
-    # Define the function with default arguments
-    def transcript_prioritization_strategy_checker(arg):
-        """New Type function for argparse - a comma-separated list with predefined valid values."""
-
-        arg_list = arg.split(",")
-        for argument in arg_list:
-            if argument not in ['canonical', 'mane_select', 'tsl']:
-                raise argparse.ArgumentTypeError("List element must be one of 'canonical', 'mane_select', 'tsl', not {}".format(argument))
-        return arg_list
-
-    # Return function handle to checking function
-    return transcript_prioritization_strategy_checker
-
 def pvacsplice_anchors():
     """Return function handle of an argument type function for
        ArgumentParser checking of the pVACsplice anchors
@@ -171,31 +135,42 @@ def get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide
         return
     return mutant_subsequence
 
+def get_anchor_positions(hla_allele, epitope_length, allele_specific_anchors, anchor_probabilities, anchor_contribution_threshold, mouse_anchor_positions):
+        if allele_specific_anchors and epitope_length in anchor_probabilities and hla_allele in anchor_probabilities[epitope_length]:
+            probs = anchor_probabilities[epitope_length][hla_allele]
+            positions = []
+            total_prob = 0
+            for (pos, prob) in sorted(probs.items(), key=lambda x: x[1], reverse=True):
+                total_prob += float(prob)
+                positions.append(int(pos))
+                if total_prob > anchor_contribution_threshold:
+                    return positions
+        elif allele_specific_anchors and epitope_length in mouse_anchor_positions and hla_allele in mouse_anchor_positions[epitope_length]:
+            values = mouse_anchor_positions[epitope_length][hla_allele]
+            positions = [pos for pos, val in values.items() if val]
+            return positions
+
+        return [1, 2, epitope_length - 1 , epitope_length]
+
 def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximum_transcript_support_level):
-    if not isinstance(mutation, pd.Series):
-        mutation = pd.Series(mutation)
-        if mutation['Canonical'] != 'Not Run':
-            mutation['Canonical'] = eval(mutation['Canonical'])
-        if mutation['MANE Select'] != 'Not Run':
-            mutation['MANE Select'] = eval(mutation['MANE Select'])
-    if 'mane_select' in transcript_prioritization_strategy:
-        if mutation['MANE Select'] == 'Not Run':
-            return True
-        elif mutation['MANE Select']:
-            return True
-    if 'canonical' in transcript_prioritization_strategy:
-        if mutation['Canonical'] == 'Not Run':
-            return True
-        elif mutation['Canonical']:
-            return True
-    if 'tsl' in transcript_prioritization_strategy:
-        col = 'TSL' if 'TSL' in mutation else 'Transcript Support Level'
-        if pd.isna(mutation[col]):
+    """
+    Determine if a transcript is preferred based on the prioritization strategy.
+    """
+    # Check if transcript support level is valid
+    tsl = mutation.get('Transcript Support Level')
+    if tsl == "Not Supported":
+        return True  # Allow "Not Supported" to pass through
+    elif pd.isna(tsl):
+        return False
+    else:
+        try:
+            tsl_int = int(tsl)
+            return tsl_int <= maximum_transcript_support_level
+        except (ValueError, TypeError):
             return False
-        elif mutation[col] == 'NA':
-            return False
-        elif mutation[col] == 'Not Supported':
-            return True
-        elif int(mutation[col]) <= maximum_transcript_support_level:
-            return True
-    return False
+
+def transcript_prioritization_strategy(mutation, transcript_prioritization_strategy, maximum_transcript_support_level):
+    """
+    Determine transcript prioritization strategy.
+    """
+    return is_preferred_transcript(mutation, transcript_prioritization_strategy, maximum_transcript_support_level)
