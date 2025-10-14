@@ -3,6 +3,7 @@ import argparse
 import os
 import shutil
 import platform
+import copy
 
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import PvacbindPipeline
@@ -214,22 +215,23 @@ def main(args_input = sys.argv[1:]):
             os.makedirs(output_dir, exist_ok=True)
 
             output_files = []
-            run_arguments = shared_arguments.copy()
+            run_arguments = copy.deepcopy(shared_arguments)
             run_arguments['alleles']               = alleles
             run_arguments['iedb_executable']       = iedb_executable
             run_arguments['prediction_algorithms'] = prediction_algorithms
             run_arguments['netmhc_stab']           = netmhc_stab
 
             for epitope_length in epitope_lengths:
+                per_length_run_arguments = copy.deepcopy(run_arguments)
                 (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, epitope_length)
                 if os.path.getsize(input_file) == 0:
                     print("The intermediate FASTA file for epitope length {} is empty. No processable fusions found.")
                     continue
 
-                run_arguments['input_file']              = input_file
-                run_arguments['epitope_lengths']         = [epitope_length]
-                run_arguments['output_dir']              = per_epitope_output_dir
-                pipeline = PvacbindPipeline(**run_arguments)
+                per_length_run_arguments['input_file']      = input_file
+                per_length_run_arguments['epitope_lengths'] = [epitope_length]
+                per_length_run_arguments['output_dir']      = per_epitope_output_dir
+                pipeline = PvacbindPipeline(**per_length_run_arguments)
                 pipeline.execute()
                 intermediate_output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
                 if os.path.exists(intermediate_output_file):
