@@ -194,9 +194,9 @@ server <- shinyServer(function(input, output, session) {
      ## Class I demo aggregate report
      #session$sendCustomMessage("unbind-DT", "mainTable")
      withProgress(message = "Loading Demo Data", value = 0, {
-       load(url("https://github.com/griffithlab/pVACtools/raw/a13e094b00238bf3afbe82e05b2f5759193e143f/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
+       load(url("https://github.com/griffithlab/pVACtools/raw/3bcc0530f5deecae5a241edb2e16b9886bab25e7/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
        incProgress(0.3)
-       #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
+       #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/3bcc0530f5deecae5a241edb2e16b9886bab25e7/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
        #mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(mainData) <- mainData[1, ]
        mainData <- mainData[-1, ]
@@ -213,7 +213,7 @@ server <- shinyServer(function(input, output, session) {
        df$mainTable <- mainData
        incProgress(0.1)
        ## Class I demo metrics file
-       #metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
+       #metricsdata <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/3bcc0530f5deecae5a241edb2e16b9886bab25e7/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.metrics.json")
        #df$metricsData <- fromJSON(txt = metricsdata)
        df$metricsData <- metricsData
        df$binding_threshold <- df$metricsData$`binding_threshold`
@@ -260,7 +260,7 @@ server <- shinyServer(function(input, output, session) {
        rownames(df$comments) <- df$mainTable$ID
        incProgress(0.2)
        ## Class II additional demo aggregate report
-       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/a13e094b00238bf3afbe82e05b2f5759193e143f/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/3bcc0530f5deecae5a241edb2e16b9886bab25e7/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
        addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(addData) <- addData[1, ]
        addData <- addData[-1, ]
