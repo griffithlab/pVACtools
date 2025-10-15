@@ -30,11 +30,11 @@ class BindingFilter:
         if self.allele_specific_cutoffs:
             AlleleSpecificBindingFilter(
                 self.input_file, self.output_file,
-                binding_threshold=self.binding_threshold,
-                fold_change=self.minimum_fold_change,
+                default_threshold=self.binding_threshold,
+                minimum_fold_change=self.minimum_fold_change,
                 top_score_metric=self.top_score_metric,
                 exclude_nas=self.exclude_nas,
-                binding_precentile_threshold=self.binding_precentile_threshold,
+                binding_percentile_threshold=self.binding_percentile_threshold,
                 immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
                 presentation_percentile_threshold=self.presentation_percentile_threshold,
                 percentile_threshold_strategy=self.percentile_threshold_strategy,

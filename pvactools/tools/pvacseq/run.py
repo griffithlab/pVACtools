@@ -90,7 +90,6 @@ def main(args_input = sys.argv[1:]):
         'top_score_metric'          : args.top_score_metric,
         'top_score_metric2'         : args.top_score_metric2,
         'binding_threshold'         : args.binding_threshold,
-        'combined_percentile_threshold': args.combined_percentile_threshold,
         'binding_percentile_threshold': args.binding_percentile_threshold,
         'immunogenicity_percentile_threshold': args.immunogenicity_percentile_threshold,
         'presentation_percentile_threshold': args.presentation_percentile_threshold,
