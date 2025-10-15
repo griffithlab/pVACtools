@@ -61,11 +61,11 @@ class UpdateTiers:
         parser.add_argument(
             "-b","--binding-threshold", type=int,
             default=500,
-            help="IC50 Binding Threshold to consider when evaluting the binding criteria. Candidates  where the mutant allele has ic50 binding scores below this value will be considered good binders.",
+            help="IC50 binding threshold to consider when evaluting the binding criteria. Candidates where the mutant allele has ic50 binding scores below this value will be considered good binders.",
         )
         parser.add_argument(
             '--allele-specific-binding-thresholds',
-            help="Use allele-specific binding thresholds when evaluatng the binding criteria for tiering. To print the allele-specific binding thresholds run `%s allele_specific_cutoffs`. " % tool
+            help="Use allele-specific binding thresholds when evaluating the binding criteria for tiering. To print the allele-specific binding thresholds run `%s allele_specific_cutoffs`. " % tool
                  + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
             default=False,
             action='store_true',
@@ -76,10 +76,28 @@ class UpdateTiers:
                  +"percentile rank must be below this value."
         )
         parser.add_argument(
+            '--binding-percentile-threshold', type=float_range(0.0,100.0),
+            default=2.0,
+            help="Tier epitopes in the \"Pass\" tier when the mutant allele "
+                 + "has a binding percentile below this value.",
+        )
+        parser.add_argument(
+            '--immunogenicity-percentile-threshold', type=float_range(0.0,100.0),
+            default=2.0,
+            help="Tier epitopes in the \"Pass\" tier when the mutant allele "
+                 + "has a immunogenicity percentile below this value.",
+        )
+        parser.add_argument(
+            '--presentation-percentile-threshold', type=float_range(0.0,100.0),
+            default=2.0,
+            help="Tier epitopes in the \"Pass\" tier when the mutant allele "
+                 + "has a presentation percentile below this value.",
+        )
+        parser.add_argument(
             '--percentile-threshold-strategy',
             choices=['conservative', 'exploratory'],
-            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default) in order to pass the binding criteria."
-                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
+            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass the binding threshold and all percentile thresholds (default)."
+                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or one of the percentile thresholds.",
             default="conservative",
         )
         parser.add_argument(
@@ -201,12 +219,24 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         binding_percentile_pass = True if mutation["IC50 %ile MT"] == 'NA' else float(mutation["IC50 %ile MT"]) < self.binding_percentile_threshold
         immunogenicity_percentile_pass = True if mutation["IM %ile MT"] == 'NA' else float(mutation["IM %ile MT"]) < self.immunogenicity_percentile_threshold
         presentation_percentile_pass = True if mutation["Pres %ile MT"] == 'NA' else float(mutation["Pres %ile MT"]) < self.presentation_percentile_threshold
+        all_scores = []
+        binding_scores = []
+        if mutation["IC50 MT"] != 'NA':
+            all_scores.append(ic50_pass)
+            binding_scores.append(ic50_pass)
+        if mutation["IC50 %ile MT"] != 'NA':
+            all_scores.append(binding_percentile_pass)
+            binding_scores.append(binding_percentile_pass)
+        if mutation["IM %ile MT"] != 'NA':
+            all_scores.append(immunogenicity_percentile_pass)
+        if mutation["Pres %ile MT"] != 'NA':
+            all_scores.append(presentation_percentile_pass)
         if self.percentile_threshold_strategy == 'conservative':
-            scores_pass = all([ic50_pass, binding_percentile_pass, immunogenicity_percentile_pass, presentation_percentile_pass])
-            binding_pass = all([ic50_pass, binding_percentile_pass])
+            scores_pass = all(all_scores)
+            binding_pass = all(binding_scores)
         elif self.percentile_threshold_strategy == 'exploratory':
-            scores_pass = any([ic50_pass, binding_percentile_pass, immunogenicity_percentile_pass, presentation_percentile_pass])
-            binding_pass = any([ic50_pass, binding_percentile_pass])
+            scores_pass = any(all_scores)
+            binding_pass = any(binding_scores)
 
         anchor_residue_pass = self.anchor_calculator.is_anchor_residue_pass(mutation)
 
@@ -405,12 +435,24 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         binding_percentile_pass = True if mutation["IC50 %ile MT"] == 'NA' else float(mutation["IC50 %ile MT"]) < self.binding_percentile_threshold
         immunogenicity_percentile_pass = True if mutation["IM %ile MT"] == 'NA' else float(mutation["IM %ile MT"]) < self.immunogenicity_percentile_threshold
         presentation_percentile_pass = True if mutation["Pres %ile MT"] == 'NA' else float(mutation["Pres %ile MT"]) < self.presentation_percentile_threshold
+        all_scores = []
+        binding_scores = []
+        if mutation["IC50 MT"] != 'NA':
+            all_scores.append(ic50_pass)
+            binding_scores.append(ic50_pass)
+        if mutation["IC50 %ile MT"] != 'NA':
+            all_scores.append(binding_percentile_pass)
+            binding_scores.append(binding_percentile_pass)
+        if mutation["IM %ile MT"] != 'NA':
+            all_scores.append(immunogenicity_percentile_pass)
+        if mutation["Pres %ile MT"] != 'NA':
+            all_scores.append(presentation_percentile_pass)
         if self.percentile_threshold_strategy == 'conservative':
-            scores_pass = all([ic50_pass, binding_percentile_pass, immunogenicity_percentile_pass, presentation_percentile_pass])
-            binding_pass = all([ic50_pass, binding_percentile_pass])
+            scores_pass = all(all_scores)
+            binding_pass = all(binding_scores)
         elif self.percentile_threshold_strategy == 'exploratory':
-            scores_pass = any([ic50_pass, binding_percentile_pass, immunogenicity_percentile_pass, presentation_percentile_pass])
-            binding_pass = any([ic50_pass, binding_percentile_pass])
+            scores_pass = any(all_scores)
+            binding_pass = any(binding_scores)
 
         low_read_support = False
         if mutation['Read Support'] != 'NA' and float(mutation['Read Support']) < self.read_support:
@@ -562,12 +604,24 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         binding_percentile_pass = True if mutation["IC50 %ile MT"] == 'NA' else float(mutation["IC50 %ile MT"]) < self.binding_percentile_threshold
         immunogenicity_percentile_pass = True if mutation["IM %ile MT"] == 'NA' else float(mutation["IM %ile MT"]) < self.immunogenicity_percentile_threshold
         presentation_percentile_pass = True if mutation["Pres %ile MT"] == 'NA' else float(mutation["Pres %ile MT"]) < self.presentation_percentile_threshold
+        all_scores = []
+        binding_scores = []
+        if mutation["IC50 MT"] != 'NA':
+            all_scores.append(ic50_pass)
+            binding_scores.append(ic50_pass)
+        if mutation["IC50 %ile MT"] != 'NA':
+            all_scores.append(binding_percentile_pass)
+            binding_scores.append(binding_percentile_pass)
+        if mutation["IM %ile MT"] != 'NA':
+            all_scores.append(immunogenicity_percentile_pass)
+        if mutation["Pres %ile MT"] != 'NA':
+            all_scores.append(presentation_percentile_pass)
         if self.percentile_threshold_strategy == 'conservative':
-            scores_pass = all([ic50_pass, binding_percentile_pass, immunogenicity_percentile_pass, presentation_percentile_pass])
-            binding_pass = all([ic50_pass, binding_percentile_pass])
+            scores_pass = all(all_scores)
+            binding_pass = all(binding_scores)
         elif self.percentile_threshold_strategy == 'exploratory':
-            scores_pass = any([ic50_pass, binding_percentile_pass, immunogenicity_percentile_pass, presentation_percentile_pass])
-            binding_pass = any([ic50_pass, binding_percentile_pass])
+            scores_pass = any(all_scores)
+            binding_pass = any(binding_scores)
 
         transcript_pass = is_preferred_transcript(mutation, self.transcript_prioritization_strategy, self.maximum_transcript_support_level)
 
@@ -743,12 +797,24 @@ class PvacbindUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         binding_percentile_pass = True if mutation["IC50 %ile MT"] == 'NA' else float(mutation["IC50 %ile MT"]) < self.binding_percentile_threshold
         immunogenicity_percentile_pass = True if mutation["IM %ile MT"] == 'NA' else float(mutation["IM %ile MT"]) < self.immunogenicity_percentile_threshold
         presentation_percentile_pass = True if mutation["Pres %ile MT"] == 'NA' else float(mutation["Pres %ile MT"]) < self.presentation_percentile_threshold
+        all_scores = []
+        binding_scores = []
+        if mutation["IC50 MT"] != 'NA':
+            all_scores.append(ic50_pass)
+            binding_scores.append(ic50_pass)
+        if mutation["IC50 %ile MT"] != 'NA':
+            all_scores.append(binding_percentile_pass)
+            binding_scores.append(binding_percentile_pass)
+        if mutation["IM %ile MT"] != 'NA':
+            all_scores.append(immunogenicity_percentile_pass)
+        if mutation["Pres %ile MT"] != 'NA':
+            all_scores.append(presentation_percentile_pass)
         if self.percentile_threshold_strategy == 'conservative':
-            scores_pass = all([ic50_pass, binding_percentile_pass, immunogenicity_percentile_pass, presentation_percentile_pass])
-            binding_pass = all([ic50_pass, binding_percentile_pass])
+            scores_pass = all(all_scores)
+            binding_pass = all(binding_scores)
         elif self.percentile_threshold_strategy == 'exploratory':
-            scores_pass = any([ic50_pass, binding_percentile_pass, immunogenicity_percentile_pass, presentation_percentile_pass])
-            binding_pass = any([ic50_pass, binding_percentile_pass])
+            scores_pass = any(all_scores)
+            binding_pass = any(binding_scores)
 
         refmatch_pass = True
         if 'Ref Match' in mutation:
