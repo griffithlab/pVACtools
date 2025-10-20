@@ -109,7 +109,13 @@ class UpdateTiers:
                 help="Tumor RNA Coverage Cutoff to consider when evaluating the expression criteria. Only sites above this read depth cutoff will be considered.",
                 default=10
             )
-        if tool in ['pvacseq', 'pvacfuse', 'pvacsplice']:
+        if tool in ['pvacseq', 'pvacsplice']:
+            parser.add_argument(
+                '--expn-val', type=float,
+                help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered.",
+                default=1.0
+            )
+        if tool in ['pvacfuse']:
             parser.add_argument(
                 '--expn-val', type=float,
                 help="Expression Cutoff to consider when evaluating the expression criteria. Expression is meassured as FFPM (fusion fragments per million total reads). Sites above this cutoff will be considered.",
