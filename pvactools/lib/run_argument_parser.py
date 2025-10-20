@@ -204,12 +204,6 @@ class RunArgumentParser(metaclass=ABCMeta):
                  + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
                  + "Needs to be an even number.",
         )
-        self.parser.add_argument(
-            '--exclude-NAs',
-            help="Exclude NA values from the filtered output.",
-            default=False,
-            action='store_true'
-        )
 
     def pass_only_args(self):
         self.parser.add_argument(

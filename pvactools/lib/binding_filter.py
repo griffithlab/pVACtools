@@ -8,7 +8,7 @@ from pvactools.lib.run_utils import *
 
 class BindingFilter:
     def __init__(
-            self, input_file, output_file, binding_threshold=500, minimum_fold_change=None, top_score_metric='median', exclude_nas=False, allele_specific_binding_thresholds=False,
+            self, input_file, output_file, binding_threshold=500, minimum_fold_change=None, top_score_metric='median', allele_specific_binding_thresholds=False,
             binding_percentile_threshold=2.0, immunogenicity_percentile_threshold=2.0, presentation_percentile_threshold=2.0, percentile_threshold_strategy='conservative', file_type='pVACseq'
         ):
         self.input_file = input_file
@@ -20,7 +20,6 @@ class BindingFilter:
         self.percentile_threshold_strategy = percentile_threshold_strategy
         self.minimum_fold_change = minimum_fold_change
         self.top_score_metric = top_score_metric
-        self.exclude_nas = exclude_nas
         self.allele_specific_cutoffs = allele_specific_binding_thresholds
         self.file_type = file_type
 
@@ -33,7 +32,6 @@ class BindingFilter:
                 default_threshold=self.binding_threshold,
                 minimum_fold_change=self.minimum_fold_change,
                 top_score_metric=self.top_score_metric,
-                exclude_nas=self.exclude_nas,
                 binding_percentile_threshold=self.binding_percentile_threshold,
                 immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
                 presentation_percentile_threshold=self.presentation_percentile_threshold,
@@ -63,17 +61,17 @@ class BindingFilter:
                     binding_percentile_column = 'Best MT IC50 Percentile'
                     immunogenicity_percentile_column = 'Best MT Immunogenicity Percentile'
                     presentation_percentile_column = 'Best MT Presentation Percentile'
-            filter_criteria.append(FilterCriterion(ic50_column, '<=', self.binding_threshold, exclude_nas=self.exclude_nas))
-            filter_criteria.append(FilterCriterion(binding_percentile_column, '<=', self.binding_percentile_threshold, exclude_nas=False))
-            filter_criteria.append(FilterCriterion(immunogenicity_percentile_column, '<=', self.immunogenicity_percentile_threshold, exclude_nas=False))
-            filter_criteria.append(FilterCriterion(presentation_percentile_column, '<=', self.presentation_percentile_threshold, exclude_nas=False))
+            filter_criteria.append(FilterCriterion(ic50_column, '<=', self.binding_threshold))
+            filter_criteria.append(FilterCriterion(binding_percentile_column, '<=', self.binding_percentile_threshold))
+            filter_criteria.append(FilterCriterion(immunogenicity_percentile_column, '<=', self.immunogenicity_percentile_threshold))
+            filter_criteria.append(FilterCriterion(presentation_percentile_column, '<=', self.presentation_percentile_threshold))
 
             if self.minimum_fold_change is not None:
                 if self.top_score_metric == 'median':
                     column = 'Median Fold Change'
                 elif self.top_score_metric == 'lowest':
                     column = 'Corresponding Fold Change'
-                filter_criteria.append(FilterCriterion(column, '>=', self.minimum_fold_change, exclude_nas=self.exclude_nas))
+                filter_criteria.append(FilterCriterion(column, '>=', self.minimum_fold_change))
             Filter(self.input_file, self.output_file, filter_criteria, [], "AND" if self.percentile_threshold_strategy == 'conservative' else "OR").execute()
 
     @classmethod
@@ -141,12 +139,6 @@ class BindingFilter:
                  + "median: Use the Median MT IC50 Score, Median Fold Change, and Median MT Percentile "
                  + "i.e. use the median MT ic50 binding score, fold change, and MT percentile of all chosen prediction methods).",
             default='median',
-        )
-        parser.add_argument(
-            '--exclude-NAs',
-            help="Exclude NA values from the filtered output.",
-            default=False,
-            action='store_true'
         )
         parser.add_argument(
             '-a', '--allele-specific-binding-thresholds',

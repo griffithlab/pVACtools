@@ -28,7 +28,6 @@ class FilterTests(unittest.TestCase):
                 "Median MT IC50 Score",
                 "<",
                 "500",
-                exclude_nas=False
             )],
         ).execute())
         self.assertTrue(cmp(
@@ -49,7 +48,6 @@ class FilterTests(unittest.TestCase):
                 "Median MT IC50 Score",
                 "<=",
                 "500",
-                exclude_nas=False
             )],
         ).execute())
         self.assertTrue(cmp(
@@ -70,7 +68,6 @@ class FilterTests(unittest.TestCase):
                 "Median MT IC50 Score",
                 "==",
                 "500",
-                exclude_nas=False
             )],
         ).execute())
         self.assertTrue(cmp(
@@ -91,7 +88,6 @@ class FilterTests(unittest.TestCase):
                 "Median MT IC50 Score",
                 ">=",
                 "500",
-                exclude_nas=False
             )],
         ).execute())
         self.assertTrue(cmp(
@@ -112,7 +108,6 @@ class FilterTests(unittest.TestCase):
                 "Median MT IC50 Score",
                 ">",
                 "500",
-                exclude_nas=False
             )],
         ).execute())
         self.assertTrue(cmp(
@@ -133,33 +128,11 @@ class FilterTests(unittest.TestCase):
                 "Tumor RNA Depth",
                 ">",
                 "100",
-                exclude_nas=False
             )],
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_path, "Test.filtered.NA.tsv"),
-            False
-        ))
-
-    def test_exclude_NA(self):
-        output_file = tempfile.NamedTemporaryFile()
-        self.assertFalse(Filter(
-            os.path.join(
-                self.test_data_path,
-                'Test.combined.parsed.tsv'
-            ),
-            output_file.name,
-            [FilterCriterion(
-                "Tumor RNA Depth",
-                ">",
-                "100",
-                exclude_nas=True
-            )],
-        ).execute())
-        self.assertTrue(cmp(
-            output_file.name,
-            os.path.join(self.test_data_path, "Test.filtered.exclude_NA.tsv"),
             False
         ))
 
@@ -175,7 +148,6 @@ class FilterTests(unittest.TestCase):
                 "Corresponding Fold Change",
                 ">",
                 "100",
-                exclude_nas=True
             )],
         ).execute())
         self.assertTrue(cmp(
@@ -183,7 +155,7 @@ class FilterTests(unittest.TestCase):
             os.path.join(self.test_data_path, "output.inf.tsv"),
             False
         ))
-    
+
     def test_conservative(self):
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(Filter(
@@ -196,12 +168,10 @@ class FilterTests(unittest.TestCase):
                 "Median MT IC50 Score",
                 "<",
                 "500",
-                exclude_nas=False
             ), FilterCriterion(
                 "Corresponding Fold Change",
                 "<",
                 "16000",
-                exclude_nas=False
             )],
             [],
             "AND"
@@ -211,7 +181,7 @@ class FilterTests(unittest.TestCase):
             os.path.join(self.test_data_path, "Test.filtered.lt.tsv"),
             False
         ))
-    
+
     def test_exploratory(self):
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(Filter(
@@ -224,12 +194,10 @@ class FilterTests(unittest.TestCase):
                 "Median MT IC50 Score",
                 "<",
                 "500",
-                exclude_nas=False
             ), FilterCriterion(
                 "Corresponding Fold Change",
                 ">",
                 "16000",
-                exclude_nas=False
             )],
             [],
             "OR"
