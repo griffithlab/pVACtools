@@ -53,4 +53,5 @@ class PvacseqUpdateTiersTests(unittest.TestCase):
 
     def test_runs(self):
         input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.tsv')
-        self.assertFalse(update_tiers.main([input_file, "0.5"]))
+        input_metrics_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.metrics.json')
+        self.assertFalse(update_tiers.main([input_file, input_metrics_file, "0.5"]))
