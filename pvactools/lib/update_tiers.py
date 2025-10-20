@@ -426,7 +426,9 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
                 metrics['allele_expr_threshold'] = self.allele_expr_threshold
                 metrics['transcript_prioritization_strategy'] = sorted(self.transcript_prioritization_strategy)
                 metrics['maximum_transcript_support_level'] = self.maximum_transcript_support_level
-                metrics['percentile_threshold'] = self.percentile_threshold
+                metrics['binding_percentile_threshold'] = self.binding_percentile_threshold
+                metrics['immunogenicity_percentile_threshold'] = self.immunogenicity_percentile_threshold
+                metrics['presentation_percentile_threshold'] = self.presentation_percentile_threshold
                 metrics['percentile_threshold_strategy'] = self.percentile_threshold_strategy
                 metrics['use_allele_specific_binding_thresholds'] = self.use_allele_specific_binding_thresholds
                 metrics['top_score_metric2'] = 'ic50' if self.top_score_mode == "IC50 MT" else 'percentile'
